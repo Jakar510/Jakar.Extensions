@@ -6,16 +6,7 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          in ReadOnlySpan<T> oldValue,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          in ReadOnlySpan<T> newValue
-    )
+    public static Span<T> Replace<T>( this ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue )
         where T : unmanaged, IEquatable<T>
     {
         var buffer = new Buffer<T>( value.Length );
@@ -33,24 +24,7 @@ public static partial class Spans
     }
 
 
-    public static void Replace<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> source,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> oldValue,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> newValue,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            ref Buffer<T> buffer
-    )
+    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped ref Buffer<T> buffer )
         where T : unmanaged, IEquatable<T>
     {
         if ( source.Contains( oldValue ) is false )
@@ -80,25 +54,7 @@ public static partial class Spans
     }
 
 
-    public static void Replace<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> source,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> oldValue,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> newValue,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            ref Span<T> buffer,
-        out int length
-    )
+    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped ref Span<T> buffer, out int length )
         where T : unmanaged, IEquatable<T>
     {
         if ( source.Contains( oldValue ) is false )
@@ -145,18 +101,7 @@ public static partial class Spans
     }
 
 
-    public static Span<T> Replace<T>( this ReadOnlySpan<T> value,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          ref ReadOnlySpan<T> oldValue,
-                                  #if NET6_0_OR_GREATER
-                                      scoped
-                                      #endif
-                                          ref ReadOnlySpan<T> newValue,
-                                      T startValue,
-                                      T endValue
-    )
+    public static Span<T> Replace<T>( this ReadOnlySpan<T> value, scoped ref ReadOnlySpan<T> oldValue, scoped ref ReadOnlySpan<T> newValue, T startValue, T endValue )
         where T : unmanaged, IEquatable<T>
     {
         Span<T> buffer = stackalloc T[value.Length + newValue.Length + 1];
@@ -165,36 +110,7 @@ public static partial class Spans
     }
 
 
-    public static void Replace<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> source,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> oldValue,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> newValue,
-
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in T startValue,
-
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in T endValue,
-
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            ref Span<T> buffer,
-        out int length
-    )
+    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped in T startValue, scoped in T endValue, scoped ref Span<T> buffer, out int length )
         where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( source.Length + newValue.Length - 1, buffer, nameof(buffer) );
@@ -239,12 +155,7 @@ public static partial class Spans
     }
 
 
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value,
-                                            #if NET6_0_OR_GREATER
-                                                scoped
-                                                #endif
-                                                    in ReadOnlySpan<T> removed
-    )
+    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> removed )
         where T : unmanaged, IEquatable<T>
     {
         Span<T>         buffer = stackalloc T[value.Length];
@@ -254,12 +165,7 @@ public static partial class Spans
     }
 
 
-    public static Span<T> RemoveAll<T>( this Span<T> value,
-                                    #if NET6_0_OR_GREATER
-                                        scoped
-                                        #endif
-                                            in ReadOnlySpan<T> removed
-    )
+    public static Span<T> RemoveAll<T>( this Span<T> value, scoped in ReadOnlySpan<T> removed )
         where T : unmanaged, IEquatable<T>
     {
         T[]             array  = AsyncLinq.GetArray<T>( value.Length );
@@ -271,22 +177,7 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> value,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in T c,
-
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in Span<T> buffer,
-        out int length
-    )
+    public static void RemoveAll<T>( scoped in ReadOnlySpan<T> value, scoped in T c, scoped in Span<T> buffer, out int length )
         where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
@@ -307,21 +198,7 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> value,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> removed,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in Span<T> buffer,
-        out int length
-    )
+    public static void RemoveAll<T>( scoped in ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> removed, scoped in Span<T> buffer, out int length )
         where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
@@ -375,20 +252,7 @@ public static partial class Spans
 
         // return MemoryMarshal.CreateReadOnlySpan( in result.GetPinnableReference(), result.Length );
     }
-    public static void Slice<T>(
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            in ReadOnlySpan<T> value,
-        T    startValue,
-        T    endValue,
-        bool includeEnds,
-    #if NET6_0_OR_GREATER
-        scoped
-        #endif
-            ref Span<T> buffer,
-        out int length
-    )
+    public static void Slice<T>( scoped in ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, scoped ref Span<T> buffer, out int length )
         where T : unmanaged, IEquatable<T>
     {
         int start = value.IndexOf( startValue );

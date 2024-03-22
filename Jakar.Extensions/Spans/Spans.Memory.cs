@@ -25,25 +25,21 @@ public static partial class Spans
 
 
     [Pure]
-    public static string? ConvertToString( this Memory<char> value ) =>
-        MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
-            ? result
-            : default;
+    public static string? ConvertToString( this Memory<char> value ) => MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
+                                                                            ? result
+                                                                            : default;
     [Pure]
-    public static string? ConvertToString( this ReadOnlyMemory<char> value ) =>
-        MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
-            ? result
-            : default;
+    public static string? ConvertToString( this ReadOnlyMemory<char> value ) => MemoryMarshal.TryGetString( value, out string? result, out _, out _ )
+                                                                                    ? result
+                                                                                    : default;
     [Pure]
-    public static string? ConvertToString( this Memory<char> value, out int start, out int length ) =>
-        MemoryMarshal.TryGetString( value, out string? result, out start, out length )
-            ? result
-            : default;
+    public static string? ConvertToString( this Memory<char> value, out int start, out int length ) => MemoryMarshal.TryGetString( value, out string? result, out start, out length )
+                                                                                                           ? result
+                                                                                                           : default;
     [Pure]
-    public static string? ConvertToString( this ReadOnlyMemory<char> value, out int start, out int length ) =>
-        MemoryMarshal.TryGetString( value, out string? result, out start, out length )
-            ? result
-            : default;
+    public static string? ConvertToString( this ReadOnlyMemory<char> value, out int start, out int length ) => MemoryMarshal.TryGetString( value, out string? result, out start, out length )
+                                                                                                                   ? result
+                                                                                                                   : default;
 
 
     public static void CopyTo<T>( this ReadOnlyMemory<T> value, ref Span<T> buffer )

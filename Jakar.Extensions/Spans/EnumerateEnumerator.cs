@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct EnumerateEnumerator<T>( ReadOnlySpan<T> span, int index = 0 )
+public ref struct EnumerateEnumerator<T>( scoped in ReadOnlySpan<T> span, int index = 0 )
 {
     private readonly ReadOnlySpan<T> _span  = span;
     private          int             _index = index;
@@ -21,7 +21,7 @@ public ref struct EnumerateEnumerator<T>( ReadOnlySpan<T> span, int index = 0 )
     public bool MoveNext()
     {
         int index = _index;
-        if ( index + 1 >= _span.Length ) { return false; }
+        if ( index >= _span.Length ) { return false; }
 
         Current = new ValueTuple<int, T>( index, _span[index] );
         _index  = index + 1;
@@ -33,7 +33,7 @@ public ref struct EnumerateEnumerator<T>( ReadOnlySpan<T> span, int index = 0 )
 
 #if NET7_0_OR_GREATER
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct EnumerateEnumerator<T, TNumber>( ReadOnlySpan<T> span, TNumber start )
+public ref struct EnumerateEnumerator<T, TNumber>( scoped in ReadOnlySpan<T> span, TNumber start )
     where TNumber : struct, INumber<TNumber>
 {
     private readonly ReadOnlySpan<T> _span   = span;
@@ -53,14 +53,14 @@ public ref struct EnumerateEnumerator<T, TNumber>( ReadOnlySpan<T> span, TNumber
     {
         int index = _index;
 
-        if ( index + 1 >= _span.Length )
+        if ( index >= _span.Length )
         {
             _number = _start;
             _index  = 0;
             return false;
         }
 
-        Current = new ValueTuple<TNumber, T>( _number, _span[index] );
+        Current = (_number, _span[index]);
         _index  = index + 1;
         _number++;
         return true;

@@ -13,21 +13,15 @@ public ref struct ValueStringBuilder
     private Buffer<char> _chars;
 
 
-    public readonly bool               IsEmpty  => _chars.Length == 0;
-    public readonly int                Capacity => _chars.Capacity;
-    public readonly Span<char>         Next     => _chars.Next;
-    public readonly ReadOnlySpan<char> Span     => _chars.Span;
-    public readonly Span<char> this[ Range range ]
-    {
-        get
-        {
-            Span<char> span = _chars[range];
-            return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-        }
-    }
-    public ref char this[ int index ] => ref _chars[index];
-    public readonly ReadOnlySpan<char> Result => MemoryMarshal.CreateReadOnlySpan( ref _chars.GetPinnableReference(), _chars.Length );
-    public          int                Length { readonly get => _chars.Index; set => _chars.Index = value; }
+    public readonly bool       IsEmpty  { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Length == 0; }
+    public readonly int        Capacity { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Capacity; }
+    public readonly Span<char> Next     { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Next; }
+    public readonly Span<char> Span     { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Span; }
+    public readonly Span<char> this[ Range range ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _chars[range]; }
+    public ref char this[ Index            index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _chars[index]; }
+    public ref char this[ int              index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _chars[index]; }
+    public readonly ReadOnlySpan<char> Result { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => _chars.Span; }
+    public          int                Length { [MethodImpl(      MethodImplOptions.AggressiveInlining )] readonly get => _chars.Index; set => _chars.Index = value; }
 
 
     public ValueStringBuilder() : this( 64 ) { }
@@ -58,13 +52,15 @@ public ref struct ValueStringBuilder
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public ref char GetPinnableReference() => ref _chars.GetPinnableReference();
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public readonly ref char GetPinnableReference() => ref _chars.GetPinnableReference();
 
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref char GetPinnableReference( bool terminate )
     {
         if ( terminate ) { return ref GetPinnableReference( '\0' ); }
@@ -75,7 +71,8 @@ public ref struct ValueStringBuilder
 
     /// <summary> Get a pinnable reference to the builder. </summary>
     /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref char GetPinnableReference( char terminate )
     {
         EnsureCapacity( Length + 1 );
@@ -94,20 +91,10 @@ public ref struct ValueStringBuilder
     }
 
 
-    /// <summary> Returns the underlying storage of the builder. </summary>
-    /// <summary> Returns a span around the contents of the builder. </summary>
-    /// <param name="terminate"> Ensures that the builder has a null char after <see cref="Length"/> </param>
-    [Pure]
-    public ReadOnlySpan<char> AsSpan( bool terminate ) => _chars.AsSpan( terminate
-                                                                             ? '\0'
-                                                                             : default );
-    [Pure]
-    public readonly ReadOnlySpan<char> Slice( int start )
-    {
-        Span<char> span = _chars[start..];
-        return MemoryMarshal.CreateSpan( ref MemoryMarshal.GetReference( span ), span.Length );
-    }
-    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Slice( start, length );
+    [Pure] public readonly ReadOnlySpan<char> AsSpan()                         => _chars.Span;
+    [Pure] public          ReadOnlySpan<char> AsSpan( char terminate )         => _chars.AsSpan( terminate );
+    [Pure] public readonly ReadOnlySpan<char> Slice( int   start )             => _chars[start..];
+    [Pure] public readonly ReadOnlySpan<char> Slice( int   start, int length ) => _chars.Slice( start, length );
     public ValueStringBuilder Reset()
     {
         _chars.Reset( '\0' );
@@ -661,6 +648,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -904,6 +892,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

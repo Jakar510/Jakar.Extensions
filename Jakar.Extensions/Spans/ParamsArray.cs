@@ -25,16 +25,20 @@ public readonly ref struct ParamsArray
     // After construction, the first three elements of this array will never be accessed because the indexer will retrieve those values from arg0, arg1, and arg2.
     private readonly ReadOnlySpan<object?> _args;
 
-    public int  Length  => _args.Length;
-    public bool IsEmpty => _args.IsEmpty;
+    public int  Length  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _args.Length; }
+    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _args.IsEmpty; }
 
-    public object? this[ int index ] => index switch
-                                        {
-                                            0 => _arg0,
-                                            1 => _arg1,
-                                            2 => _arg2,
-                                            _ => _args[index]
-                                        };
+    public object? this[ int index ]
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        get => index switch
+               {
+                   0 => _arg0,
+                   1 => _arg1,
+                   2 => _arg2,
+                   _ => _args[index]
+               };
+    }
 
 
     public ParamsArray( object? arg0 )
@@ -64,7 +68,7 @@ public readonly ref struct ParamsArray
         // Always assign this.args to make use of its "Length" property
         _args = _threeArgArray;
     }
-    public ParamsArray( ReadOnlySpan<object?> args )
+    public ParamsArray( scoped in ReadOnlySpan<object?> args )
     {
         int len = args.Length;
 
@@ -84,9 +88,10 @@ public readonly ref struct ParamsArray
     }
 
 
+    public static implicit operator ParamsArray( Span<object?>         args ) => new(args);
     public static implicit operator ParamsArray( ReadOnlySpan<object?> args ) => new(args);
     public static implicit operator ReadOnlySpan<object?>( ParamsArray args ) => args._args;
-    public static implicit operator ParamsArray( object?[]             args ) => new(args.AsSpan());
+    public static implicit operator ParamsArray( object?[]             args ) => Create( args );
 
 
     public override string ToString() => $"{nameof(ParamsArray)}<{nameof(Length)}: {Length}>";
@@ -94,12 +99,7 @@ public readonly ref struct ParamsArray
 
     [Pure] public ReadOnlySpan<object?>.Enumerator GetEnumerator() => _args.GetEnumerator();
 
-    [Pure]
-    public static ParamsArray Create( params object?[] args )
-    {
-        ReadOnlySpan<object?> span = args;
-        return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
-    }
+    [Pure] public static ParamsArray Create( params object?[] args ) => new ReadOnlySpan<object?>( args );
 
 #if NET6_0_OR_GREATER
     public static implicit operator ParamsArray( List<object?> args ) => new(args);
@@ -120,24 +120,21 @@ public readonly ref struct ParamsArray
 public readonly ref struct ParamsArray<T>
     where T : IEquatable<T>
 {
-    public ReadOnlySpan<T> Span    { get; }
-    public int             Length  => Span.Length;
-    public bool            IsEmpty => Span.IsEmpty;
+    public ReadOnlySpan<T> Span    { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get; }
+    public int             Length  { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Span.Length; }
+    public bool            IsEmpty { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Span.IsEmpty; }
+    public ref readonly T this[ int index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
+    public int this[ T              value ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.IndexOf( value ); }
 
 
-    public T this[ int index ] => Span[index];
-    public int this[ T value ] => Span.IndexOf( value );
-
-
-    public ParamsArray( T[]             args ) => Span = args;
-    public ParamsArray( Span<T>         args ) => Span = args;
-    public ParamsArray( ReadOnlySpan<T> args ) => Span = args;
+    public ParamsArray( T[]                       args ) => Span = args;
+    public ParamsArray( scoped in ReadOnlySpan<T> args ) => Span = args;
 
 
     public static implicit operator ParamsArray<T>( Span<T>         args ) => new(args);
     public static implicit operator ParamsArray<T>( ReadOnlySpan<T> args ) => new(args);
     public static implicit operator ParamsArray<T>( T               args ) => Create( args );
-    public static implicit operator ParamsArray<T>( T[]             args ) => new(args);
+    public static implicit operator ParamsArray<T>( T[]             args ) => Create( args );
     public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.Span;
 
 
@@ -150,46 +147,19 @@ public readonly ref struct ParamsArray<T>
     [Pure]
     public static ParamsArray<T> Create( T arg0 )
     {
-    #if NET6_0_OR_GREATER
         Span<T> span = [arg0];
-    #else
-        Span<T> span = new T[1]
-                       {
-                           arg0
-                       };
-    #endif
-
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
     [Pure]
     public static ParamsArray<T> Create( T arg0, T arg1 )
     {
-    #if NET6_0_OR_GREATER
         Span<T> span = [arg0, arg1];
-    #else
-        Span<T> span = new T[2]
-                       {
-                           arg0,
-                           arg1
-                       };
-    #endif
-
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
     [Pure]
     public static ParamsArray<T> Create( T arg0, T arg1, T arg2 )
     {
-    #if NET6_0_OR_GREATER
         Span<T> span = [arg0, arg1, arg2];
-    #else
-        Span<T> span = new T[3]
-                       {
-                           arg0,
-                           arg1,
-                           arg2
-                       };
-    #endif
-
         return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
     }
     [Pure] public static ParamsArray<T> Create( params T[] args ) => new(args);

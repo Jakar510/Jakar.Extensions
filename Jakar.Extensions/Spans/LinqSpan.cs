@@ -4,13 +4,13 @@
 namespace Jakar.Extensions;
 
 
-public readonly ref struct SpanLinq<T>( ReadOnlySpan<T> span )
+public readonly ref struct SpanLinq<T>( scoped in ReadOnlySpan<T> span )
 {
     private readonly ReadOnlySpan<T> _span = span;
 
 
     [Pure]
-    public ReadOnlySpan<T> Where( Func<T, bool> selector )
+    public ReadOnlySpan<T> Where( Predicate<T> selector )
     {
         if ( _span.Length == 0 ) { return default; }
 
