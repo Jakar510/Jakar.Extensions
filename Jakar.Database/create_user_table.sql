@@ -27,16 +27,16 @@ CREATE TABLE "public"."Users" (
 	, "LastBadAttempt" timestamptz
 	, "LockDate" timestamptz
 	, "LockoutEnd" timestamptz
-	, "RefreshToken" VARCHAR(256000)
+	, "RefreshToken" NVARCHAR(256000)
 	, "RefreshTokenExpiryTime" timestamptz
 	, "AuthenticatorKey" NVARCHAR(256000)
 	, "IsEmailConfirmed" boolean NOT NULL
 	, "IsPhoneNumberConfirmed" boolean NOT NULL
 	, "IsTwoFactorEnabled" boolean NOT NULL
-	, "SecurityStamp" VARCHAR(256000) NOT NULL
+	, "SecurityStamp" NVARCHAR(256000) NOT NULL
 	, "ConcurrencyStamp" TEXT(MAX) NOT NULL
 	, "AdditionalData" JSON
-	, "PasswordHash" VARCHAR(256000) NOT NULL
-	, "Rights" VARCHAR(256000) NOT NULL
+	, "PasswordHash" NVARCHAR(256000) NOT NULL
+	, "Rights" NVARCHAR(256000) NOT NULL
 	, CONSTRAINT "PK_Users" PRIMARY KEY ("ID")
 	);

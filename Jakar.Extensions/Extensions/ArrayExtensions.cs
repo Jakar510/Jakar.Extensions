@@ -13,14 +13,24 @@ public static class ArrayExtensions
                                                                                                                 TElement[] array                   => array,
                                                                                                                 List<TElement> list                => list.GetInternalArray(),
                                                                                                                 Collection<TElement> collection    => collection.GetInternalArray(),
-                                                                                                                IReadOnlyList<TElement> collection => collection.ToArray(),
+                                                                                                                IList<TElement> collection         => collection.ToArray( collection.Count ),
+                                                                                                                IReadOnlyList<TElement> collection => collection.ToArray( collection.Count ),
+                                                                                                                ICollection<TElement> collection   => collection.ToArray( collection.Count ),
                                                                                                                 _                                  => values.ToArray()
                                                                                                             };
 
 #if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetInternalArray) )]
 #endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => new(ArrayAccessor<TElement>.Getter( list ), 0, list.Count);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list )
+    {
+    #if NET6_0_OR_GREATER
+        return CollectionsMarshal.AsSpan( list );
+    #else
+        return new ReadOnlySpan<TElement>( ArrayAccessor<TElement>.Getter( list ), 0, list.Count );
+    #endif
+    }
 
 
 #if NET7_0_OR_GREATER

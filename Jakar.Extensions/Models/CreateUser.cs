@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/5/2024  21:5
 
+
 namespace Jakar.Extensions;
 
 
@@ -16,8 +17,7 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
 
 
     [Required]
-    [MinLength( PasswordRequirements.MIN_LENGTH )]
-    [MaxLength( PasswordRequirements.MAX_LENGTH )]
+    [StringLength( PasswordRequirements.MAX_LENGTH, MinimumLength = PasswordRequirements.MIN_LENGTH )]
     public string ConfirmPassword
     {
         get => _confirmPassword;
@@ -37,18 +37,15 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
         {
             if ( SetProperty( ref _data, value ) is false ) { return; }
 
-            OnPropertyChanged( nameof(IsValidData) );
+            OnPropertyChanged( nameof(IsValid) );
             OnPropertyChanged( nameof(UserName) );
         }
     }
-    public bool IsValid         => !string.IsNullOrWhiteSpace( UserName )                               && IsValidData                                 && IsValidPassword;
-    public bool IsValidData     => !string.IsNullOrWhiteSpace( Data.FirstName )                         && !string.IsNullOrWhiteSpace( Data.LastName ) && !string.IsNullOrWhiteSpace( Data.PhoneNumber );
-    public bool IsValidPassword => string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password, PasswordRequirements );
-
+    public bool IsValid         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( UserName )                               && Data.IsValid && IsValidPassword; }
+    public bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password, PasswordRequirements ); }
 
     [Required]
-    [MinLength( PasswordRequirements.MIN_LENGTH )]
-    [MaxLength( PasswordRequirements.MAX_LENGTH )]
+    [StringLength( PasswordRequirements.MAX_LENGTH, MinimumLength = PasswordRequirements.MIN_LENGTH )]
     [Compare( nameof(ConfirmPassword) )]
     public string Password
     {
@@ -62,6 +59,7 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
         }
     }
 
+    [Required]
     public string UserName
     {
         get => _userName ??= Data.Email;
@@ -78,5 +76,12 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
     {
         Data.WithUserData( value );
         return this;
+    }
+
+    public static bool Validate<T>( T user )
+        where T : CreateUser
+    {
+        // ValidationContext context = new(this);
+        return user.IsValid;
     }
 }

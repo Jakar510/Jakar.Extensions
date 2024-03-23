@@ -6,9 +6,9 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table( TABLE_NAME )]
-public sealed record UserLoginInfoRecord( [property: MaxLength(                                   int.MaxValue )] string  LoginProvider,
-                                          [property: MaxLength(                                   int.MaxValue )] string? ProviderDisplayName,
-                                          [property: ProtectedPersonalData] [property: MaxLength( int.MaxValue )] string  ProviderKey,
+public sealed record UserLoginInfoRecord( [property: StringLength(                                   int.MaxValue )] string  LoginProvider,
+                                          [property: StringLength(                                   int.MaxValue )] string? ProviderDisplayName,
+                                          [property: ProtectedPersonalData] [property: StringLength( int.MaxValue )] string  ProviderKey,
                                           [property: ProtectedPersonalData]                                       string? Value,
                                           RecordID<UserLoginInfoRecord>                                                   ID,
                                           RecordID<UserRecord>?                                                           CreatedBy,

@@ -251,7 +251,7 @@ public static partial class Migrations
         }
 
 
-        if ( propertyType.IsEqualType( typeof(string) ) ) { return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()?.Length ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) ); }
+        if ( propertyType.IsEqualType( typeof(string) ) ) { return col.AsString( propInfo.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) ); }
 
 
         if ( propertyType.IsOneOfType( [typeof(bool), typeof(bool?)] ) ) { return col.AsBoolean(); }

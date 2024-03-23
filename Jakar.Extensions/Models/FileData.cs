@@ -6,18 +6,18 @@ namespace Jakar.Extensions;
 
 public interface IFileMetaData : IUniqueID<Guid>
 {
-    public const int DESCRIPTION_SIZE_LIMIT = 2048;
+    public const int DESCRIPTION_SIZE_LIMIT = Sizes.UNICODE_STRING_CAPACITY;
     public const int NAME_SIZE_LIMIT        = 256;
-    public const int TYPE_SIZE_LIMIT        = 2048;
+    public const int TYPE_SIZE_LIMIT        = Sizes.UNICODE_STRING_CAPACITY;
 
-    [property: MaxLength( DESCRIPTION_SIZE_LIMIT )] string? FileDescription { get; }
-    [property: MaxLength( NAME_SIZE_LIMIT )]        string? FileName        { get; }
-    [property: MaxLength( TYPE_SIZE_LIMIT )]        string? FileType        { get; }
+    string? FileDescription { get; }
+    string? FileName        { get; }
+    string? FileType        { get; }
 }
 
 
 
-public sealed record FileMetaData( [property: MaxLength( IFileMetaData.NAME_SIZE_LIMIT )] string? FileName, [property: MaxLength( IFileMetaData.TYPE_SIZE_LIMIT )] string? FileType, [property: MaxLength( IFileMetaData.DESCRIPTION_SIZE_LIMIT )] string? FileDescription = null, Guid ID = default ) : IFileMetaData
+public sealed record FileMetaData( [property: StringLength( IFileMetaData.NAME_SIZE_LIMIT )] string? FileName, [property: StringLength( IFileMetaData.TYPE_SIZE_LIMIT )] string? FileType, [property: StringLength( IFileMetaData.DESCRIPTION_SIZE_LIMIT )] string? FileDescription = null, Guid ID = default ) : IFileMetaData
 {
     public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription, value.ID ) { }
     public FileMetaData( LocalFile     value ) : this( value.Name, value.ContentType ) { }
@@ -31,10 +31,10 @@ public interface IFileData
     public const int HASH_SIZE_LIMIT = 4096;
     long             FileSize { get; }
 
-    [property: MaxLength( HASH_SIZE_LIMIT )] string Hash     { get; }
-    IFileMetaData?                                  MetaData { get; }
-    MimeType                                        MimeType { get; }
-    [property: MaxLength( FILE_SIZE_LIMIT )] string Payload  { get; }
+    string         Hash     { get; }
+    IFileMetaData? MetaData { get; }
+    MimeType       MimeType { get; }
+    string         Payload  { get; }
 
 
     public static OneOf<byte[], string> GetData( string data )
@@ -79,7 +79,7 @@ public interface IFileData
 
 
 [Serializable]
-public record FileData<TFileMetaData>( long FileSize, MimeType MimeType, [property: MaxLength( IFileData.HASH_SIZE_LIMIT )] string Hash, [property: MaxLength( IFileData.FILE_SIZE_LIMIT )] string Payload, TFileMetaData? FileMetaData ) : IFileData
+public record FileData<TFileMetaData>( long FileSize, MimeType MimeType, [property: StringLength( IFileData.HASH_SIZE_LIMIT )] string Hash, [property: StringLength( IFileData.FILE_SIZE_LIMIT )] string Payload, TFileMetaData? FileMetaData ) : IFileData
     where TFileMetaData : IFileMetaData
 {
     IFileMetaData? IFileData.MetaData => FileMetaData;

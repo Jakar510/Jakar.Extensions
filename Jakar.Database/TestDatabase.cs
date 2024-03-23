@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
+using Jakar.Database.DbMigrations;
 using Npgsql;
 
 
@@ -21,6 +22,19 @@ internal sealed class TestDatabase : Database
     public static async void TestAsync<T>()
         where T : IAppName
     {
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create( DbInstance.Postgres )
+                                                       .WithColumn( nameof(GroupRecord.CustomerID),  DbType.String,            true,  size: GroupRecord.MAX_SIZE )
+                                                       .WithColumn( nameof(GroupRecord.NameOfGroup), DbType.String,            false, GroupRecord.MAX_SIZE,               $"{nameof(GroupRecord.NameOfGroup)} > 0" )
+                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.NameOfGroup)} > 0" )
+                                                       .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
+                                                       .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) )
+                                                       .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
+                                                       .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
+                                                       .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
+                                                       .Build() );
+
+        Console.WriteLine();
+
         try { await InternalTestAsync<T>(); }
         catch ( Exception e ) { Console.WriteLine( e ); }
 

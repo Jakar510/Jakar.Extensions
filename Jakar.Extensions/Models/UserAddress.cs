@@ -37,11 +37,8 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
 
 
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
-
-
-    public string? Address { get => _address ??= ToString(); set => SetProperty( ref _address, value ); }
-
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
+    public                     string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
 
     public string City
     {
@@ -51,7 +48,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
             if ( SetProperty( ref _city, value ) ) { Address = null; }
         }
     }
-
 
     public string Country
     {
@@ -84,7 +80,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-
     public string Line1
     {
         get => _line1;
@@ -93,7 +88,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
             if ( SetProperty( ref _line1, value ) ) { Address = null; }
         }
     }
-
 
     public string Line2
     {
@@ -113,7 +107,6 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
             if ( SetProperty( ref _postalCode, value ) ) { Address = null; }
         }
     }
-
 
     public string StateOrProvince
     {
@@ -140,6 +133,8 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         IsPrimary       = address.IsPrimary;
         UserID          = address.UserID;
     }
+    public static UserAddress Create( IAddress address ) => new(address);
+
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"

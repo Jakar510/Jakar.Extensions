@@ -339,7 +339,7 @@ public static partial class Spans
     }
 
 
-    public static bool Where<T>( in ReadOnlySpan<T> values, scoped ref Span<T> span, Predicate<T> selector, out int length )
+    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Span<T> span, Predicate<T> selector, out int length )
     {
         if ( values.IsEmpty )
         {
@@ -358,7 +358,7 @@ public static partial class Spans
 
         return length > 0;
     }
-    public static bool Where<T, TNext>( in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Func<T, TNext> func, out int length )
+    public static bool Where<T, TNext>( scoped in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Func<T, TNext> func, out int length )
     {
         if ( values.IsEmpty )
         {
@@ -376,7 +376,7 @@ public static partial class Spans
     }
 
 
-    public static bool Where<T, TNext>( in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Predicate<T> selector, Func<T, TNext> func, out int length )
+    public static bool Where<T, TNext>( scoped in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Predicate<T> selector, Func<T, TNext> func, out int length )
     {
         if ( values.IsEmpty )
         {
@@ -440,7 +440,7 @@ public static partial class Spans
         return new Span<T>( array, 0, length );
     }
     [Pure]
-    public static bool Join<T>( in ReadOnlySpan<T> first, in ReadOnlySpan<T> last, scoped ref Span<T> buffer, out int length )
+    public static bool Join<T>( scoped in ReadOnlySpan<T> first, scoped in ReadOnlySpan<T> last, scoped ref Span<T> buffer, out int length )
     {
         int size = first.Length;
         length = size + last.Length;

@@ -11,8 +11,8 @@ public readonly record struct Right<TEnum>( TEnum Index, bool Value )
 
 public interface IRights
 {
-    public const                   int    MAX_SIZE = TokenValidationParameters.DefaultMaximumTokenSizeInBytes;
-    [MaxLength( MAX_SIZE )] public string Rights { get; }
+    public const                      int    MAX_SIZE = SQL.ANSI_STRING_CAPACITY;
+    [StringLength( MAX_SIZE )] public string Rights { get; }
 }
 
 

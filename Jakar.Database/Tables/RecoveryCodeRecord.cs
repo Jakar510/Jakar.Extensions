@@ -43,10 +43,14 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     }
 
 
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create( user, recoveryCodes.GetInternalArray() );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, List<string>                     recoveryCodes ) => Create( user, CollectionsMarshal.AsSpan( recoveryCodes ) );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create( user, recoveryCodes.Span );
+
     [Pure]
-    public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string> recoveryCodes )
+    public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
     {
-        var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
+        RecoveryCodeMapping codes = new(recoveryCodes.Length);
 
         foreach ( string recoveryCode in recoveryCodes )
         {
@@ -54,25 +58,25 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             codes[code]                              = record;
         }
 
-        return codes;
+        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
     }
     [Pure]
-    public static async ValueTask<IReadOnlyDictionary<string, RecoveryCodeRecord>> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes )
+    public static async ValueTask<ReadOnlyDictionary<string, RecoveryCodeRecord>> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        var codes = new Dictionary<string, RecoveryCodeRecord>( StringComparer.Ordinal );
+        RecoveryCodeMapping codes = new(10);
 
-        await foreach ( string recoveryCode in recoveryCodes )
+        await foreach ( string recoveryCode in recoveryCodes.WithCancellation( token ) )
         {
             (string code, RecoveryCodeRecord record) = Create( user, recoveryCode );
             codes[code]                              = record;
         }
 
-        return codes;
+        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
     }
     [Pure]
-    public static IReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, int count )
+    public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, int count )
     {
-        var codes = new Dictionary<string, RecoveryCodeRecord>( count, StringComparer.Ordinal );
+        RecoveryCodeMapping codes = new(count);
 
         for ( int i = 0; i < count; i++ )
         {
@@ -80,7 +84,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             codes[code]                              = record;
         }
 
-        return codes;
+        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
     }
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create( user, Guid.NewGuid() );
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
@@ -102,6 +106,10 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             default: throw new ArgumentOutOfRangeException();
         }
     }
+
+
+
+    public sealed class RecoveryCodeMapping( int count ) : Dictionary<string, RecoveryCodeRecord>( count, StringComparer.Ordinal );
 }
 
 

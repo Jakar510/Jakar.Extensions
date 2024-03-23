@@ -36,22 +36,18 @@ public interface IUserDevice<TID> : IEquatable<IUserDevice<TID>>, IUniqueID<TID>
 public class UserDevice<TID> : ObservableClass, IUserDevice<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>
 {
-    private string?    _ip;
-    public  Guid       DeviceID   { get; init; }
-    public  string     DeviceName { get; init; } = string.Empty;
-    public  DeviceType DeviceType { get; init; }
-
-
-    public TID         ID    { get; init; }
-    public DeviceIdiom Idiom { get; init; }
-
-
-    public string?        IP           { get => _ip; set => SetProperty( ref _ip, value ); }
-    public string         Manufacturer { get;        init; } = string.Empty;
-    public string         Model        { get;        init; } = string.Empty;
-    public string         OsVersion    { get;        init; } = string.Empty;
-    public DevicePlatform Platform     { get;        init; }
-    public DateTime       TimeStamp    { get;        init; }
+    private string?        _ip;
+    public  Guid           DeviceID     { get;        init; }
+    public  string         DeviceName   { get;        init; } = string.Empty;
+    public  DeviceType     DeviceType   { get;        init; }
+    public  TID            ID           { get;        init; }
+    public  DeviceIdiom    Idiom        { get;        init; }
+    public  string?        IP           { get => _ip; set => SetProperty( ref _ip, value ); }
+    public  string         Manufacturer { get;        init; } = string.Empty;
+    public  string         Model        { get;        init; } = string.Empty;
+    public  string         OsVersion    { get;        init; } = string.Empty;
+    public  DevicePlatform Platform     { get;        init; }
+    public  DateTime       TimeStamp    { get;        init; }
 
 
     public UserDevice() { }

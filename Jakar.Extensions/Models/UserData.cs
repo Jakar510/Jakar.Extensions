@@ -23,6 +23,32 @@ public interface IUserData : IEquatable<IUserData>, IComparable<IUserData>
     [Required] public     SupportedLanguage PreferredLanguage { get; }
     public                string            Title             { get; }
     [Url] public          string            Website           { get; }
+
+
+    public static string GetFullName( IUserData    data ) => $"{data.FirstName} {data.LastName}".Trim();
+    public static string GetDescription( IUserData data ) => GetDescription( data.Department, data.Title, data.Company );
+    public static string GetDescription( scoped in ReadOnlySpan<char> department, scoped in ReadOnlySpan<char> title, scoped in ReadOnlySpan<char> company )
+    {
+        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return string.Empty; }
+
+    #if NET6_0_OR_GREATER
+        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
+
+        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() is false ) { return $"{department} at {company}"; }
+
+        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() is false ) { return $"{title} at {company}"; }
+
+        return $"{department}, {title} at {company}";
+    #else
+        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() ) { return $"{department.ToString()}, {title.ToString()}"; }
+
+        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() is false ) { return $"{department.ToString()} at {company.ToString()}"; }
+
+        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() is false ) { return $"{title.ToString()} at {company.ToString()}"; }
+
+        return $"{department.ToString()}, {title.ToString()} at {company.ToString()}";
+    #endif
+    }
 }
 
 
@@ -36,7 +62,7 @@ public interface IUserData<out T> : IUserData
 
 
 [Serializable]
-public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonModel
+public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonModel, IValidator
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
@@ -50,14 +76,13 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     private      string                        _phoneNumber = string.Empty;
     private      string                        _title       = string.Empty;
     private      string                        _website     = string.Empty;
-    private      string?                       _description;
-    private      string?                       _fullName;
+    protected    string?                       _description;
+    protected    string?                       _fullName;
     private      SupportedLanguage             _preferredLanguage = SupportedLanguage.English;
 
 
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
-
-    public ObservableCollection<UserAddress> Addresses { get; init; } = new();
+    [JsonExtensionData] public IDictionary<string, JToken?>?     AdditionalData { get => _additionalData; set => SetProperty( ref _additionalData, value ); }
+    public                     ObservableCollection<UserAddress> Addresses      { get;                    init; } = [];
 
 
     public string Company
@@ -72,7 +97,6 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
         }
     }
 
-
     public string Department
     {
         get => _department;
@@ -86,12 +110,9 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     }
 
 
-    public string Description { get => _description ??= $"{Department}, {Title} at {Company}"; set => SetProperty( ref _description, value ); }
-
-    [EmailAddress] public string Email { get => _email; set => SetProperty( ref _email, value ); }
-
-
-    public string Ext { get => _ext; set => SetProperty( ref _ext, value ); }
+    public                string Description { get => _description ??= GetDescription(); set => SetProperty( ref _description, value ); }
+    [EmailAddress] public string Email       { get => _email;                            set => SetProperty( ref _email,       value ); }
+    public                string Ext         { get => _ext;                              set => SetProperty( ref _ext,         value ); }
 
     [Required]
     public string FirstName
@@ -106,16 +127,13 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
         }
     }
 
-
-    public string FullName { get => _fullName ??= $"{FirstName} {LastName}"; set => SetProperty( ref _fullName, value ); }
-
-
-    public string Gender { get => _gender; set => SetProperty( ref _gender, value ); }
-
-    [JsonIgnore] public bool IsValidEmail       => !string.IsNullOrEmpty( Email );
-    [JsonIgnore] public bool IsValidName        => !string.IsNullOrEmpty( FullName );
-    [JsonIgnore] public bool IsValidPhoneNumber => !string.IsNullOrEmpty( PhoneNumber );
-    [JsonIgnore] public bool IsValidWebsite     => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ );
+    public                      string FullName           { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
+    public                      string Gender             { get => _gender;                     set => SetProperty( ref _gender,   value ); }
+    [JsonIgnore] public virtual bool   IsValid            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsValidEmail && IsValidName; }
+    [JsonIgnore] public         bool   IsValidEmail       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrEmpty( Email ); }
+    [JsonIgnore] public         bool   IsValidName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrEmpty( FullName ); }
+    [JsonIgnore] public         bool   IsValidPhoneNumber { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrEmpty( PhoneNumber ); }
+    [JsonIgnore] public         bool   IsValidWebsite     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
 
     [Required]
     public string LastName
@@ -130,10 +148,8 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
         }
     }
 
-    [Phone] public string PhoneNumber { get => _phoneNumber; set => SetProperty( ref _phoneNumber, value ); }
-
+    [Phone]    public string            PhoneNumber       { get => _phoneNumber;       set => SetProperty( ref _phoneNumber,       value ); }
     [Required] public SupportedLanguage PreferredLanguage { get => _preferredLanguage; set => SetProperty( ref _preferredLanguage, value ); }
-
 
     public string Title
     {
@@ -161,8 +177,18 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     }
 
 
-    public UserData WithAddresses( IEnumerable<IAddress> addresses ) => WithAddresses( addresses.Select( static x => new UserAddress( x ) ) );
+    public virtual string GetFullName()    => IUserData.GetFullName( this );
+    public virtual string GetDescription() => IUserData.GetDescription( this );
+
+
+    public UserData WithAddresses( IEnumerable<IAddress>            addresses ) => WithAddresses( addresses.Select( UserAddress.Create ) );
+    public UserData WithAddresses( scoped in ReadOnlySpan<IAddress> addresses ) => WithAddresses( addresses.Select( UserAddress.Create ) );
     public UserData WithAddresses( IEnumerable<UserAddress> addresses )
+    {
+        Addresses.Add( addresses );
+        return this;
+    }
+    public UserData WithAddresses( scoped in ReadOnlySpan<UserAddress> addresses )
     {
         Addresses.Add( addresses );
         return this;

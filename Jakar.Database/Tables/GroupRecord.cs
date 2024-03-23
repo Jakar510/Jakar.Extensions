@@ -3,16 +3,17 @@
 
 [Serializable]
 [Table( TABLE_NAME )]
-public sealed record GroupRecord( string?                                CustomerID,
-                                  string                                 NameOfGroup,
-                                  RecordID<UserRecord>                   OwnerID,
-                                  [MaxLength( IRights.MAX_SIZE )] string Rights,
-                                  RecordID<GroupRecord>                  ID,
-                                  RecordID<UserRecord>?                  CreatedBy,
-                                  Guid?                                  OwnerUserID,
-                                  DateTimeOffset                         DateCreated,
-                                  DateTimeOffset?                        LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IRights
+public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID,
+                                  [property: StringLength( GroupRecord.MAX_SIZE )] string  NameOfGroup,
+                                  RecordID<UserRecord>                                  OwnerID,
+                                  [property: StringLength( IRights.MAX_SIZE )] string      Rights,
+                                  RecordID<GroupRecord>                                 ID,
+                                  RecordID<UserRecord>?                                 CreatedBy,
+                                  Guid?                                                 OwnerUserID,
+                                  DateTimeOffset                                        DateCreated,
+                                  DateTimeOffset?                                       LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IRights
 {
+    public const  int    MAX_SIZE   = 1024;
     public const  string TABLE_NAME = "Groups";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 

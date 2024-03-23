@@ -549,7 +549,7 @@ namespace TestAppIos.Droid
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.cornerSizeTopLeft = global::TestAppIos.Droid.Resource.Attribute.cornerSizeTopLeft;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.cornerSizeTopRight = global::TestAppIos.Droid.Resource.Attribute.cornerSizeTopRight;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterEnabled = global::TestAppIos.Droid.Resource.Attribute.counterEnabled;
-			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterMaxLength = global::TestAppIos.Droid.Resource.Attribute.counterMaxLength;
+			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterStringLength = global::TestAppIos.Droid.Resource.Attribute.counterStringLength;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterOverflowTextAppearance = global::TestAppIos.Droid.Resource.Attribute.counterOverflowTextAppearance;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterOverflowTextColor = global::TestAppIos.Droid.Resource.Attribute.counterOverflowTextColor;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.counterTextAppearance = global::TestAppIos.Droid.Resource.Attribute.counterTextAppearance;
@@ -5273,7 +5273,7 @@ namespace TestAppIos.Droid
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_boxStrokeWidth = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_boxStrokeWidth;
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_boxStrokeWidthFocused = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_boxStrokeWidthFocused;
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterEnabled = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterEnabled;
-			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterMaxLength = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterMaxLength;
+			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterStringLength = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterStringLength;
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterOverflowTextAppearance = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterOverflowTextAppearance;
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterOverflowTextColor = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterOverflowTextColor;
 			global::Xamarin.Forms.Platform.Android.Resource.Styleable.TextInputLayout_counterTextAppearance = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterTextAppearance;
@@ -5760,7 +5760,7 @@ namespace TestAppIos.Droid
 			global::Xamarin.Forms.Platform.Resource.Attribute.cornerSizeTopLeft = global::TestAppIos.Droid.Resource.Attribute.cornerSizeTopLeft;
 			global::Xamarin.Forms.Platform.Resource.Attribute.cornerSizeTopRight = global::TestAppIos.Droid.Resource.Attribute.cornerSizeTopRight;
 			global::Xamarin.Forms.Platform.Resource.Attribute.counterEnabled = global::TestAppIos.Droid.Resource.Attribute.counterEnabled;
-			global::Xamarin.Forms.Platform.Resource.Attribute.counterMaxLength = global::TestAppIos.Droid.Resource.Attribute.counterMaxLength;
+			global::Xamarin.Forms.Platform.Resource.Attribute.counterStringLength = global::TestAppIos.Droid.Resource.Attribute.counterStringLength;
 			global::Xamarin.Forms.Platform.Resource.Attribute.counterOverflowTextAppearance = global::TestAppIos.Droid.Resource.Attribute.counterOverflowTextAppearance;
 			global::Xamarin.Forms.Platform.Resource.Attribute.counterOverflowTextColor = global::TestAppIos.Droid.Resource.Attribute.counterOverflowTextColor;
 			global::Xamarin.Forms.Platform.Resource.Attribute.counterTextAppearance = global::TestAppIos.Droid.Resource.Attribute.counterTextAppearance;
@@ -10484,7 +10484,7 @@ namespace TestAppIos.Droid
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_boxStrokeWidth = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_boxStrokeWidth;
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_boxStrokeWidthFocused = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_boxStrokeWidthFocused;
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterEnabled = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterEnabled;
-			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterMaxLength = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterMaxLength;
+			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterStringLength = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterStringLength;
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterOverflowTextAppearance = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterOverflowTextAppearance;
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterOverflowTextColor = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterOverflowTextColor;
 			global::Xamarin.Forms.Platform.Resource.Styleable.TextInputLayout_counterTextAppearance = global::TestAppIos.Droid.Resource.Styleable.TextInputLayout_counterTextAppearance;
@@ -11699,7 +11699,7 @@ namespace TestAppIos.Droid
 			public const int counterEnabled = 2130903314;
 			
 			// aapt resource value: 0x7F030113
-			public const int counterMaxLength = 2130903315;
+			public const int counterStringLength = 2130903315;
 			
 			// aapt resource value: 0x7F030114
 			public const int counterOverflowTextAppearance = 2130903316;
@@ -28968,7 +28968,7 @@ namespace TestAppIos.Droid
 			public const int TextInputLayout_counterEnabled = 16;
 			
 			// aapt resource value: 17
-			public const int TextInputLayout_counterMaxLength = 17;
+			public const int TextInputLayout_counterStringLength = 17;
 			
 			// aapt resource value: 18
 			public const int TextInputLayout_counterOverflowTextAppearance = 18;

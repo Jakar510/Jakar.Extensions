@@ -3,10 +3,10 @@
 
 [Serializable]
 [Table( TABLE_NAME )]
-public sealed record RoleRecord( [property: MaxLength( 1024 )]             string Name,
-                                 [property: MaxLength( 1024 )]             string NormalizedName,
-                                 [property: MaxLength( 4096 )]             string ConcurrencyStamp,
-                                 [property: MaxLength( IRights.MAX_SIZE )] string Rights,
+public sealed record RoleRecord( [property: StringLength( 1024 )]             string Name,
+                                 [property: StringLength( 1024 )]             string NormalizedName,
+                                 [property: StringLength( 4096 )]             string ConcurrencyStamp,
+                                 [property: StringLength( IRights.MAX_SIZE )] string Rights,
                                  RecordID<RoleRecord>                             ID,
                                  RecordID<UserRecord>?                            CreatedBy,
                                  Guid?                                            OwnerUserID,

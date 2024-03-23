@@ -114,7 +114,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
     public static Requirements         Default                  => PasswordRequirements.Current;
     public        ReadOnlySpan<string> BlockedPasswords         { get; } = blockedPasswords;
     public        int                  MinLength                { get; } = minLength;
-    public        int                  MaxLength                { get; } = maxLength;
+    public        int                  StringLength                { get; } = maxLength;
     public        bool                 RequireLowerCase         { get; } = requireLowerCase;
     public        ReadOnlySpan<char>   LowerCase                { get; } = lowerCase;
     public        bool                 MustBeTrimmed            { get; } = mustBeTrimmed;
@@ -130,7 +130,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
 
     public static implicit operator Requirements( PasswordRequirements data ) => new(data.BlockedPasswords.ToArray(),
                                                                                      data.MinLength,
-                                                                                     data.MaxLength,
+                                                                                     data.StringLength,
                                                                                      data.MustBeTrimmed,
                                                                                      data.RequireLowerCase,
                                                                                      data.LowerCase,
@@ -162,7 +162,7 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     public bool                                         CantStartWithNumber      { get;               set; }  = true;
     public bool                                         CantStartWithSpecialChar { get;               set; }  = true;
     public string                                       LowerCase                { get;               set; }  = Randoms.LOWER_CASE;
-    public int                                          MaxLength                { get => _maxLength; set => _maxLength = Math.Min( MAX_LENGTH, value ); }
+    public int                                          StringLength                { get => _maxLength; set => _maxLength = Math.Min( MAX_LENGTH, value ); }
     public int                                          MinLength                { get => _minLength; set => _minLength = Math.Max( MIN_LENGTH, value ); }
     public bool                                         MustBeTrimmed            { get;               set; } = true;
     public string                                       Numbers                  { get;               set; } = Randoms.NUMERIC;
