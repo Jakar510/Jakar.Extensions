@@ -138,8 +138,8 @@ public ref struct SqlTableBuilder<TRecord>
         string dataType = GetDataType( _instance, column );
 
         _query.Append( _query.Span.EndsWith( '(' )
-                           ? " "
-                           : ", " );
+                           ? "\n    "
+                           : ",\n    " );
 
         _query.Append( column.Name );
         _query.Append( " " );
@@ -150,8 +150,8 @@ public ref struct SqlTableBuilder<TRecord>
         if ( column.IsUnique ) { _query.Append( " UNIQUE" ); }
 
         _query.Append( column.IsNullable
-                           ? " NOT NULL"
-                           : " NULL" );
+                           ? " NULL"
+                           : " NOT NULL" );
 
         if ( column.Identity.HasValue )
         {
@@ -165,7 +165,6 @@ public ref struct SqlTableBuilder<TRecord>
 
         if ( column.IsPrimaryKey ) { _query.Append( " PRIMARY KEY" ); }
 
-        _query.Append( COMMA_NEW_LINE );
         return this;
     }
 
@@ -347,7 +346,7 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    private static string GetDataType( in DbInstance instance, in ColumnMetaData column ) =>
+    private static string GetDataType( scoped in DbInstance instance, scoped in ColumnMetaData column ) =>
         instance switch
         {
             DbInstance.MsSql    => GetDataTypeSqlServer( column ),
@@ -375,7 +374,9 @@ public ref struct SqlTableBuilder<TRecord>
                             DbType.AnsiString => column.Size.HasValue
                                                      ? $"varchar({column.Size})"
                                                      : "varchar(MAX)",
-                            DbType.String                => "text",
+                            DbType.String => column.Size.HasValue
+                                                 ? $"varchar({column.Size})"
+                                                 : "text",
                             DbType.AnsiStringFixedLength => $"char({column.Size})",
                             DbType.StringFixedLength     => $"char({column.Size})",
                             DbType.Guid                  => "uuid",
@@ -460,7 +461,7 @@ public ref struct SqlTableBuilder<TRecord>
         span = span.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' );
         using ValueStringBuilder sb = new(span.Length + 3);
         sb.Append( span );
-        sb.Append( " );" );
+        sb.Append( "\n );" );
         Dispose();
         return sb.ToString();
     }

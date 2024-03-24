@@ -25,7 +25,7 @@ internal sealed class TestDatabase : Database
         Console.WriteLine( SqlTableBuilder<GroupRecord>.Create( DbInstance.Postgres )
                                                        .WithColumn( nameof(GroupRecord.CustomerID),  DbType.String,            true,  size: GroupRecord.MAX_SIZE )
                                                        .WithColumn( nameof(GroupRecord.NameOfGroup), DbType.String,            false, GroupRecord.MAX_SIZE,               $"{nameof(GroupRecord.NameOfGroup)} > 0" )
-                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.NameOfGroup)} > 0" )
+                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" )
                                                        .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
                                                        .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) )
                                                        .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
@@ -35,8 +35,21 @@ internal sealed class TestDatabase : Database
 
         Console.WriteLine();
 
-        try { await InternalTestAsync<T>(); }
-        catch ( Exception e ) { Console.WriteLine( e ); }
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create( DbInstance.MsSql )
+                                                       .WithColumn( nameof(GroupRecord.CustomerID),  DbType.String,            true,  size: GroupRecord.MAX_SIZE )
+                                                       .WithColumn( nameof(GroupRecord.NameOfGroup), DbType.String,            false, GroupRecord.MAX_SIZE,               $"{nameof(GroupRecord.NameOfGroup)} > 0" )
+                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" )
+                                                       .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
+                                                       .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) )
+                                                       .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
+                                                       .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
+                                                       .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
+                                                       .Build() );
+
+        Console.WriteLine();
+
+        // try { await InternalTestAsync<T>(); }
+        // catch ( Exception e ) { Console.WriteLine( e ); }
 
         Console.ReadKey();
     }
