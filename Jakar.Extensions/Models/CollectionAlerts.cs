@@ -40,7 +40,26 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     }
 
 
-    protected virtual bool           Filter( T? value ) => true;
-    public abstract   IEnumerator<T> GetEnumerator();
-    IEnumerator IEnumerable.         GetEnumerator() => GetEnumerator();
+    protected virtual bool                        Filter( T? value ) => true;
+    public virtual    IEnumerator<T>              GetEnumerator()    => new Enumerator( this );
+    IEnumerator IEnumerable.                      GetEnumerator()    => GetEnumerator();
+    protected internal abstract ReadOnlyMemory<T> FilteredValues();
+
+
+
+    public struct Enumerator( CollectionAlerts<T> enumerator ) : IEnumerator<T>, IEnumerable<T>
+    {
+        private          int               _index;
+        private readonly ReadOnlyMemory<T> _collection = enumerator.FilteredValues();
+
+
+        public readonly T                   Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _collection.Span[_index]; }
+        readonly        object? IEnumerator.Current => Current;
+
+        readonly IEnumerator<T> IEnumerable<T>.GetEnumerator() => this;
+        readonly IEnumerator IEnumerable.      GetEnumerator() => this;
+        public   void                          Dispose()       => this = default;
+        public   bool                          MoveNext()      => ++_index < _collection.Length;
+        public   void                          Reset()         => _index = -1;
+    }
 }

@@ -19,6 +19,7 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
 
     public ValueTask DisposeAsync()
     {
+        GC.SuppressFinalize( this );
         _isDisposed = true;
         _cache      = default;
         return default;

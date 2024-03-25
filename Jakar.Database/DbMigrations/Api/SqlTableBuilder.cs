@@ -135,7 +135,7 @@ public ref struct SqlTableBuilder<TRecord>
     }
     public SqlTableBuilder<TRecord> WithColumn( scoped in ColumnMetaData column )
     {
-        _columns.Add( column );
+        _columns.Append( column );
         return this;
     }
 

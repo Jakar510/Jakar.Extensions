@@ -11,28 +11,18 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
+public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValue>, ILockedCollection<TValue>, IAsyncEnumerable<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
-    protected readonly List<TValue>      _values;
-    protected readonly Locker            _lock = Locker.Default;
-    protected          IComparer<TValue> _comparer;
+    protected internal readonly Locker locker = Locker.Default;
 
 
-    public AsyncLockerEnumerator AsyncValues => new(this);
-
-    public sealed override int Count
-    {
-        get
-        {
-            using ( AcquireLock() ) { return _values.Count; }
-        }
-    }
+    public AsyncLockerEnumerator AsyncValues { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
     bool IList.IsFixedSize
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values).IsFixedSize; }
+            using ( AcquireLock() ) { return ((IList)list).IsFixedSize; }
         }
     }
 
@@ -40,7 +30,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values).IsReadOnly; }
+            using ( AcquireLock() ) { return ((IList)list).IsReadOnly; }
         }
     }
 
@@ -48,7 +38,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values).IsReadOnly; }
+            using ( AcquireLock() ) { return ((IList)list).IsReadOnly; }
         }
     }
 
@@ -56,7 +46,7 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values).IsSynchronized; }
+            using ( AcquireLock() ) { return ((IList)list).IsSynchronized; }
         }
     }
 
@@ -64,755 +54,519 @@ public class ConcurrentObservableCollection<TValue> : CollectionAlerts<TValue>, 
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values)[index]; }
+            using ( AcquireLock() ) { return ((IList)list)[index]; }
         }
         set
         {
-            using ( AcquireLock() ) { ((IList)_values)[index] = value; }
+            using ( AcquireLock() ) { ((IList)list)[index] = value; }
         }
     }
 
-    public TValue this[ int index ]
+    public override TValue this[ int index ]
     {
         get
         {
-            using ( AcquireLock() ) { return _values[index]; }
+            using ( AcquireLock() ) { return list[index]; }
         }
         set
         {
             using ( AcquireLock() )
             {
-                TValue old = _values[index];
-                _values[index] = value;
+                TValue old = list[index];
+                list[index] = value;
                 Replaced( old, value, index );
             }
         }
     }
 
-    public Locker Lock { get => _lock; init => _lock = value; }
+    public Locker Lock { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
 
     object ICollection.SyncRoot
     {
         get
         {
-            using ( AcquireLock() ) { return ((IList)_values).SyncRoot; }
+            using ( AcquireLock() ) { return ((IList)list).SyncRoot; }
         }
     }
 
-    public LockerEnumerator<TValue> Values => new(this);
+    public LockerEnumerator<TValue> Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
     public ConcurrentObservableCollection() : this( Comparer<TValue>.Default ) { }
-    public ConcurrentObservableCollection( IComparer<TValue>   comparer ) : this( [], comparer ) { }
-    public ConcurrentObservableCollection( int                 capacity ) : this( capacity, Comparer<TValue>.Default ) { }
-    public ConcurrentObservableCollection( int                 capacity, IComparer<TValue> comparer ) : this( new List<TValue>( capacity ), comparer ) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue> values, IComparer<TValue> comparer ) : this( [..values], comparer ) { }
-    private ConcurrentObservableCollection( List<TValue>       values ) : this( values, Comparer<TValue>.Default ) { }
-    protected ConcurrentObservableCollection( List<TValue> values, IComparer<TValue> comparer )
-    {
-        _comparer = comparer;
-        _values   = values;
-    }
+    public ConcurrentObservableCollection( IComparer<TValue>    comparer ) : this( 64, comparer ) { }
+    public ConcurrentObservableCollection( int                  capacity ) : this( capacity, Comparer<TValue>.Default ) { }
+    public ConcurrentObservableCollection( int                  capacity, IComparer<TValue> comparer ) : this( new List<TValue>( capacity ), comparer ) { }
+    public ConcurrentObservableCollection( ReadOnlySpan<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
+    public ConcurrentObservableCollection( ReadOnlySpan<TValue> values, IComparer<TValue> comparer ) : this( values.Length, comparer ) => base.Add( values );
+    public ConcurrentObservableCollection( IEnumerable<TValue>  values ) : this( values, Comparer<TValue>.Default ) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue>  values, IComparer<TValue> comparer ) : this( new List<TValue>( values ), comparer ) { }
+    private ConcurrentObservableCollection( List<TValue>        values ) : this( values, Comparer<TValue>.Default ) { }
+    protected ConcurrentObservableCollection( List<TValue>      values, IComparer<TValue> comparer ) : base( values, comparer ) { }
 
 
-    public virtual void Dispose()
+    public override void Dispose()
     {
-        _lock.Dispose();
+        locker.Dispose();
         GC.SuppressFinalize( this );
     }
 
-    public static implicit operator ConcurrentObservableCollection<TValue>( List<TValue> values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( List<TValue>                                                values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( HashSet<TValue>                                             values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ConcurrentBag<TValue>                                       values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( Collection<TValue>                                          values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( TValue[]                                                    values ) => new(new ReadOnlySpan<TValue>( values ));
+    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(values.Span);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
 
-    public static implicit operator ConcurrentObservableCollection<TValue>( HashSet<TValue> values ) => new(values);
 
-    public static implicit operator ConcurrentObservableCollection<TValue>( ConcurrentBag<TValue> values ) => new(values);
-
-    public static implicit operator ConcurrentObservableCollection<TValue>( ObservableCollection<TValue> values ) => new(values);
-
-    public static implicit operator ConcurrentObservableCollection<TValue>( Collection<TValue> values ) => new(values);
-
-    public static implicit operator ConcurrentObservableCollection<TValue>( TValue[] values ) => new(values);
-
-    public bool Exists( Predicate<TValue> match )
+#if NET6_0_OR_GREATER
+    protected internal ReadOnlySpan<TValue> AsSpan( ref bool lockTaken )
     {
-        using ( AcquireLock() ) { return _values.Exists( match ); }
+        using ( AcquireLock( ref lockTaken ) ) { return CollectionsMarshal.AsSpan( list ); }
     }
+#endif
 
+
+    public override bool Exists( Predicate<TValue> match )
+    {
+        using ( AcquireLock() ) { return base.Exists( match ); }
+    }
     public async ValueTask<bool> ExistsAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.Exists( match ); }
+        using ( await AcquireLockAsync( token ) ) { return list.Exists( match ); }
     }
 
-    public int FindIndex( int start, int count, Predicate<TValue> match )
+
+    public override int FindIndex( int start, int count, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( AcquireLock() ) { return _values.FindIndex( start, count, match ); }
+        using ( AcquireLock() ) { return base.FindIndex( start, count, match ); }
     }
-
-    public int FindIndex( int start, Predicate<TValue> match )
+    public override int FindIndex( int start, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( AcquireLock() ) { return _values.FindIndex( start, match ); }
+        using ( AcquireLock() ) { return base.FindIndex( start, match ); }
     }
-
-    public int FindIndex( Predicate<TValue> match )
+    public override int FindIndex( Predicate<TValue> match )
     {
-        using ( AcquireLock() ) { return _values.FindIndex( match ); }
+        using ( AcquireLock() ) { return base.FindIndex( match ); }
     }
-
     public async ValueTask<int> FindIndexAsync( int start, int count, Predicate<TValue> match, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( await AcquireLockAsync( token ) ) { return _values.FindIndex( start, count, match ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        Guard.IsInRangeFor( count, (ICollection<TValue>)list, nameof(count) );
+        using ( await AcquireLockAsync( token ) ) { return list.FindIndex( start, count, match ); }
     }
-
     public async ValueTask<int> FindIndexAsync( int start, Predicate<TValue> match, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return _values.FindIndex( start, match ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        using ( await AcquireLockAsync( token ) ) { return list.FindIndex( start, match ); }
     }
-
     public async ValueTask<int> FindIndexAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.FindIndex( match ); }
+        using ( await AcquireLockAsync( token ) ) { return list.FindIndex( match ); }
     }
 
-    public int FindLastIndex( int start, int count, Predicate<TValue> match )
+
+    public override int FindLastIndex( int start, int count, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( AcquireLock() ) { return _values.FindLastIndex( start, count, match ); }
+        using ( AcquireLock() ) { return base.FindLastIndex( start, count, match ); }
     }
-
-    public int FindLastIndex( int start, Predicate<TValue> match )
+    public override int FindLastIndex( int start, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( AcquireLock() ) { return _values.FindLastIndex( start, match ); }
+        using ( AcquireLock() ) { return base.FindLastIndex( start, match ); }
     }
-
-    public int FindLastIndex( Predicate<TValue> match )
+    public override int FindLastIndex( Predicate<TValue> match )
     {
-        using ( AcquireLock() ) { return _values.FindLastIndex( match ); }
+        using ( AcquireLock() ) { return base.FindLastIndex( match ); }
     }
-
     public async ValueTask<int> FindLastIndexAsync( int start, int count, Predicate<TValue> match, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( await AcquireLockAsync( token ) ) { return _values.FindLastIndex( start, count, match ); }
+        using ( await AcquireLockAsync( token ) ) { return base.FindLastIndex( start, count, match ); }
     }
-
     public async ValueTask<int> FindLastIndexAsync( int start, Predicate<TValue> match, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return _values.FindLastIndex( start, match ); }
+        using ( await AcquireLockAsync( token ) ) { return base.FindLastIndex( start, match ); }
     }
-
     public async ValueTask<int> FindLastIndexAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.FindLastIndex( match ); }
+        using ( await AcquireLockAsync( token ) ) { return base.FindLastIndex( match ); }
     }
 
-    public int IndexOf( TValue value )
+
+    public override int IndexOf( TValue value )
     {
-        using ( AcquireLock() ) { return _values.IndexOf( value ); }
+        using ( AcquireLock() ) { return base.IndexOf( value ); }
     }
-
-    public int IndexOf( TValue value, int start )
+    public override int IndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( AcquireLock() ) { return _values.IndexOf( value, start ); }
+        using ( AcquireLock() ) { return base.IndexOf( value, start ); }
     }
-
-    public int IndexOf( TValue value, int start, int count )
+    public override int IndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( AcquireLock() ) { return _values.IndexOf( value, start, count ); }
+        using ( AcquireLock() ) { return base.IndexOf( value, start, count ); }
     }
-
     public async ValueTask<int> IndexOfAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.IndexOf( value ); }
+        using ( await AcquireLockAsync( token ) ) { return list.IndexOf( value ); }
     }
-
     public async ValueTask<int> IndexOfAsync( TValue value, int start, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return _values.IndexOf( value, start ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        using ( await AcquireLockAsync( token ) ) { return list.IndexOf( value, start ); }
     }
-
     public async ValueTask<int> IndexOfAsync( TValue value, int start, int count, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return _values.IndexOf( value, start, count ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        using ( await AcquireLockAsync( token ) ) { return list.IndexOf( value, start, count ); }
     }
 
-    public int LastIndexOf( TValue value )
+
+    public override int LastIndexOf( TValue value )
     {
-        using ( AcquireLock() ) { return _values.LastIndexOf( value ); }
+        using ( AcquireLock() ) { return base.LastIndexOf( value ); }
     }
-
-    public int LastIndexOf( TValue value, int start )
+    public override int LastIndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( AcquireLock() ) { return _values.LastIndexOf( value, start ); }
+        using ( AcquireLock() ) { return base.LastIndexOf( value, start ); }
     }
-
-    public int LastIndexOf( TValue value, int start, int count )
+    public override int LastIndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( AcquireLock() ) { return _values.LastIndexOf( value, start, count ); }
+        using ( AcquireLock() ) { return base.LastIndexOf( value, start, count ); }
     }
-
     public async ValueTask<int> LastIndexOfAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.LastIndexOf( value ); }
+        using ( await AcquireLockAsync( token ) ) { return list.LastIndexOf( value ); }
     }
-
     public async ValueTask<int> LastIndexOfAsync( TValue value, int start, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return _values.LastIndexOf( value, start ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        using ( await AcquireLockAsync( token ) ) { return list.LastIndexOf( value, start ); }
     }
-
     public async ValueTask<int> LastIndexOfAsync( TValue value, int start, int count, CancellationToken token = default )
     {
-        Guard.IsInRangeFor( start, (ICollection<TValue>)_values, nameof(start) );
-        Guard.IsInRangeFor( count, (ICollection<TValue>)_values, nameof(count) );
-        using ( await AcquireLockAsync( token ) ) { return _values.LastIndexOf( value, start, count ); }
+        Guard.IsInRangeFor( start, (ICollection<TValue>)list, nameof(start) );
+        Guard.IsInRangeFor( count, (ICollection<TValue>)list, nameof(count) );
+        using ( await AcquireLockAsync( token ) ) { return list.LastIndexOf( value, start, count ); }
     }
 
-    public List<TValue> FindAll( Predicate<TValue> match )
+
+    public override List<TValue> FindAll( Predicate<TValue> match )
     {
-        using ( AcquireLock() ) { return _values.FindAll( match ); }
+        using ( AcquireLock() ) { return base.FindAll( match ); }
     }
-
     public async ValueTask<List<TValue>> FindAllAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.FindAll( match ); }
+        using ( await AcquireLockAsync( token ) ) { return list.FindAll( match ); }
     }
-
-    public TValue? Find( Predicate<TValue> match )
+    public override TValue? Find( Predicate<TValue> match )
     {
-        using ( AcquireLock() ) { return _values.Find( match ); }
+        using ( AcquireLock() ) { return base.Find( match ); }
     }
-
     public async ValueTask<TValue?> FindAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.Find( match ); }
+        using ( await AcquireLockAsync( token ) ) { return list.Find( match ); }
     }
-
-    public TValue? FindLast( Predicate<TValue> match )
+    public override TValue? FindLast( Predicate<TValue> match )
     {
-        using ( AcquireLock() ) { return _values.FindLast( match ); }
+        using ( AcquireLock() ) { return base.FindLast( match ); }
     }
-
     public async ValueTask<TValue?> FindLastAsync( Predicate<TValue> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.FindLast( match ); }
+        using ( await AcquireLockAsync( token ) ) { return list.FindLast( match ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected bool InternalTryAdd( in TValue value )
+
+    public override bool TryAdd( TValue value )
     {
-        if ( _values.Contains( value ) ) { return false; }
-
-        InternalAdd( value );
-        return true;
+        using ( AcquireLock() ) { return base.TryAdd( value ); }
     }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalAdd( in TValue value )
-    {
-        _values.Add( value );
-        Added( value );
-    }
-
-    protected void InternalAdd( in ReadOnlySpan<TValue> values )
-    {
-        foreach ( TValue value in values ) { InternalAdd( value ); }
-    }
-
-    public virtual bool TryAdd( TValue value )
-    {
-        using ( AcquireLock() ) { return InternalTryAdd( value ); }
-    }
-
-    public virtual void Add( params TValue[] values ) => Add( new ReadOnlySpan<TValue>( values ) );
-
-    public virtual void Add( IEnumerable<TValue> values )
+    public override void Add( params TValue[] values ) => Add( new ReadOnlySpan<TValue>( values ) );
+    public override void Add( IEnumerable<TValue> values )
     {
         using ( AcquireLock() )
         {
-            foreach ( TValue value in values ) { InternalAdd( value ); }
+            foreach ( TValue value in values ) { base.Add( value ); }
         }
     }
-
-    public void Add( ReadOnlySpan<TValue> values )
+    public override void Add( scoped in ReadOnlySpan<TValue> values )
     {
-        using ( AcquireLock() ) { InternalAdd( values ); }
+        using ( AcquireLock() ) { base.Add( values ); }
     }
-
-    public void Add( ReadOnlyMemory<TValue> values )
+    public override void Add( scoped in ReadOnlyMemory<TValue> values )
     {
-        using ( AcquireLock() ) { InternalAdd( values.Span ); }
+        using ( AcquireLock() ) { base.Add( values.Span ); }
     }
-
-    public void Add( ImmutableArray<TValue> values )
+    public override void Add( scoped in ImmutableArray<TValue> values )
     {
-        using ( AcquireLock() ) { InternalAdd( values.AsSpan() ); }
+        using ( AcquireLock() ) { base.Add( values.AsSpan() ); }
     }
 
     public virtual async ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default )
     {
         using ( await AcquireLockAsync( token ) )
         {
-            if ( _values.Contains( value ) ) { return false; }
+            if ( list.Contains( value ) ) { return false; }
 
-            _values.Add( value );
+            list.Add( value );
             Added( value );
             return true;
         }
     }
-
     public virtual async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.Span ); }
+        using ( await AcquireLockAsync( token ) ) { base.Add( values.Span ); }
     }
-
     public virtual async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.AsSpan() ); }
+        using ( await AcquireLockAsync( token ) ) { base.Add( values.AsSpan() ); }
     }
-
     public virtual async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
         using ( await AcquireLockAsync( token ) )
         {
             foreach ( TValue value in values )
             {
-                _values.Add( value );
+                this.list.Add( value );
                 Added( value );
             }
         }
     }
 
-    public void CopyTo( TValue[] array )
-    {
-        using ( AcquireLock() ) { _values.CopyTo( array ); }
-    }
 
-    public void CopyTo( TValue[] array, int arrayIndex )
+    public override void CopyTo( TValue[] array )
     {
-        using ( AcquireLock() ) { _values.CopyTo( array, arrayIndex ); }
+        using ( AcquireLock() ) { base.CopyTo( array ); }
     }
-
-    public void CopyTo( int index, TValue[] array, int arrayIndex, int count )
+    public override void CopyTo( TValue[] array, int arrayIndex )
     {
-        using ( AcquireLock() ) { _values.CopyTo( index, array, arrayIndex, count ); }
+        using ( AcquireLock() ) { base.CopyTo( array, arrayIndex ); }
     }
-
+    public override void CopyTo( int index, TValue[] array, int arrayIndex, int count )
+    {
+        using ( AcquireLock() ) { base.CopyTo( index, array, arrayIndex, count ); }
+    }
     public async ValueTask CopyToAsync( TValue[] array, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { _values.CopyTo( array ); }
+        using ( await AcquireLockAsync( token ) ) { list.CopyTo( array ); }
     }
-
     public async ValueTask CopyToAsync( TValue[] array, int arrayIndex, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { _values.CopyTo( array, arrayIndex ); }
+        using ( await AcquireLockAsync( token ) ) { list.CopyTo( array, arrayIndex ); }
     }
-
     public async ValueTask CopyToAsync( int index, TValue[] array, int arrayIndex, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { _values.CopyTo( index, array, arrayIndex, count ); }
+        using ( await AcquireLockAsync( token ) ) { list.CopyTo( index, array, arrayIndex, count ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalInsertRange( int i, TValue value )
+
+    public override void InsertRange( int index, IEnumerable<TValue> collection )
     {
-        _values.Insert( i, value );
-        Added( value, i );
+        using ( AcquireLock() ) { base.InsertRange( index, collection ); }
     }
-
-    protected void InternalInsertRange( int index, IEnumerable<TValue> collection )
+    public override void InsertRange( int index, scoped in ReadOnlySpan<TValue> collection )
     {
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsertRange( i, value ); }
+        using ( AcquireLock() ) { base.InsertRange( index, collection ); }
     }
-
-    protected void InternalInsertRange( int index, in ReadOnlySpan<TValue> collection )
-    {
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsertRange( i, value ); }
-    }
-
-    public void InsertRange( int index, IEnumerable<TValue> collection )
-    {
-        using ( AcquireLock() ) { InternalInsertRange( index, collection ); }
-    }
-
-    public void InsertRange( int index, ReadOnlySpan<TValue> collection )
-    {
-        using ( AcquireLock() ) { InternalInsertRange( index, collection ); }
-    }
-
-    public void InsertRange( int index, ReadOnlyMemory<TValue> collection ) => InsertRange( index, collection.Span );
-
-    public void InsertRange( int index, ImmutableArray<TValue> collection ) => InsertRange( index, collection.AsSpan() );
-
+    public override void InsertRange( int index, scoped in ReadOnlyMemory<TValue> collection ) => InsertRange( index, collection.Span );
+    public override void InsertRange( int index, scoped in ImmutableArray<TValue> collection ) => InsertRange( index, collection.AsSpan() );
     public async ValueTask InsertRangeAsync( int index, IEnumerable<TValue> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection ); }
+        using ( await AcquireLockAsync( token ) ) { base.InsertRange( index, collection ); }
     }
-
     public async ValueTask InsertRangeAsync( int index, ImmutableArray<TValue> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection.AsSpan() ); }
+        using ( await AcquireLockAsync( token ) ) { base.InsertRange( index, collection.AsSpan() ); }
     }
-
     public async ValueTask InsertRangeAsync( int index, ReadOnlyMemory<TValue> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsertRange( index, collection.Span ); }
+        using ( await AcquireLockAsync( token ) ) { base.InsertRange( index, collection.Span ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalRemoveRange( int start, int count )
+
+    public override void RemoveRange( int start, int count )
     {
-        Guard.IsInRangeFor( start, _values, nameof(start) );
-        Guard.IsInRangeFor( count, _values, nameof(count) );
-
-        for ( int x = start; x < start + count; x++ )
-        {
-            _values.RemoveAt( x );
-            Removed( x );
-        }
+        using ( AcquireLock() ) { base.RemoveRange( start, count ); }
     }
-
-    public void RemoveRange( int start, int count )
-    {
-        using ( AcquireLock() ) { InternalRemoveRange( start, count ); }
-    }
-
     public async ValueTask RemoveRangeAsync( int start, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalRemoveRange( start, count ); }
+        using ( await AcquireLockAsync( token ) ) { base.RemoveRange( start, count ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected bool InternalRemove( TValue value )
+
+    public override int Remove( Func<TValue, bool> match ) => Remove( list.Where( match ) );
+    public override int Remove( IEnumerable<TValue> values )
     {
-        bool result = _values.Remove( value );
-        if ( result ) { Removed( value ); }
-
-        return result;
+        using ( AcquireLock() ) { return base.Remove( values ); }
     }
-
-    protected int InternalRemove( IEnumerable<TValue> values )
+    public override bool Remove( TValue value )
     {
-        int results = 0;
-
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TValue value in values )
-        {
-            if ( InternalRemove( value ) is false ) { continue; }
-
-            results++;
-        }
-
-        return results;
+        using ( AcquireLock() ) { return base.Remove( value ); }
     }
 
-    protected int InternalRemove( in ReadOnlySpan<TValue> values )
-    {
-        int results = 0;
-
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TValue value in values )
-        {
-            if ( InternalRemove( value ) is false ) { continue; }
-
-            results++;
-        }
-
-        return results;
-    }
-
-    public virtual int Remove( Func<TValue, bool> match ) => Remove( _values.Where( match ) );
-
-    public virtual int Remove( IEnumerable<TValue> values )
-    {
-        using ( AcquireLock() ) { return InternalRemove( values ); }
-    }
-
-    public virtual bool Remove( TValue value )
-    {
-        using ( AcquireLock() ) { return InternalRemove( value ); }
-    }
 
     public virtual async ValueTask<bool> RemoveAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( value ); }
+        using ( await AcquireLockAsync( token ) ) { return base.Remove( value ); }
     }
-
-    public virtual ValueTask<int> RemoveAsync( Func<TValue, bool> match, CancellationToken token = default ) => RemoveAsync( _values.Where( match ), token );
-
+    public virtual ValueTask<int> RemoveAsync( Func<TValue, bool> match, CancellationToken token = default ) => RemoveAsync( list.Where( match ), token );
     public virtual async ValueTask<int> RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values ); }
+        using ( await AcquireLockAsync( token ) ) { return base.Remove( values ); }
     }
-
     public virtual async ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.Span ); }
+        using ( await AcquireLockAsync( token ) ) { return base.Remove( values.Span ); }
     }
-
     public virtual async ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.AsSpan() ); }
+        using ( await AcquireLockAsync( token ) ) { return base.Remove( values.AsSpan() ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected bool InternalRemoveAt( int index, [NotNullWhen( true )] out TValue? value )
+
+    public override void RemoveAt( int index )
     {
-        if ( index < 0 || index >= _values.Count )
-        {
-            value = default;
-            return false;
-        }
-
-        value = _values[index];
-        _values.RemoveAt( index );
-        Removed( value, index );
-        return value is not null;
+        using ( AcquireLock() ) { base.RemoveAt( index, out _ ); }
     }
-
-    public void RemoveAt( int index )
+    public override bool RemoveAt( int index, [NotNullWhen( true )] out TValue? value )
     {
-        using ( AcquireLock() ) { InternalRemoveAt( index, out _ ); }
+        using ( AcquireLock() ) { return base.RemoveAt( index, out value ); }
     }
-
-    public void RemoveAt( int index, [NotNullWhen( true )] out TValue? value )
-    {
-        using ( AcquireLock() ) { InternalRemoveAt( index, out value ); }
-    }
-
     public async ValueTask<TValue?> RemoveAtAsync( int index, CancellationToken token = default )
     {
         using ( await AcquireLockAsync( token ) )
         {
-            return InternalRemoveAt( index, out TValue? value )
+            return base.RemoveAt( index, out TValue? value )
                        ? value
                        : default;
         }
     }
 
-    public void Reverse()
-    {
-        using ( AcquireLock() )
-        {
-            _values.Reverse();
-            Reset();
-        }
-    }
 
-    public void Reverse( int start, int count )
+    public override void Reverse()
     {
-        using ( AcquireLock() )
-        {
-            _values.Reverse( start, count );
-            Reset();
-        }
+        using ( AcquireLock() ) { base.Reverse(); }
     }
-
+    public override void Reverse( int start, int count )
+    {
+        using ( AcquireLock() ) { base.Reverse( start, count ); }
+    }
     public async ValueTask ReverseAsync( CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            _values.Reverse();
-            Reset();
-        }
+        using ( await AcquireLockAsync( token ) ) { base.Reverse(); }
     }
-
     public async ValueTask ReverseAsync( int start, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            _values.Reverse( start, count );
-            Reset();
-        }
+        using ( await AcquireLockAsync( token ) ) { base.Reverse( start, count ); }
     }
 
-    public virtual void Sort() => Sort( _comparer );
 
-    public virtual void Sort( IComparer<TValue> comparer ) => Sort( comparer.Compare );
-
-    public virtual void Sort( Comparison<TValue> compare )
+    public override void Sort()                             => Sort( _comparer );
+    public override void Sort( IComparer<TValue> comparer ) => Sort( comparer.Compare );
+    public override void Sort( Comparison<TValue> compare )
     {
-        using ( AcquireLock() )
-        {
-            if ( _values.Count == 0 ) { return; }
-
-            _values.Sort( compare );
-            Reset();
-        }
+        using ( AcquireLock() ) { base.Sort( compare ); }
     }
-
-    public virtual void Sort( int start, int count ) => Sort( start, count, _comparer );
-
-    public virtual void Sort( int start, int count, IComparer<TValue> comparer )
+    public override void Sort( int start, int count ) => Sort( start, count, _comparer );
+    public override void Sort( int start, int count, IComparer<TValue> comparer )
     {
-        using ( AcquireLock() )
-        {
-            if ( _values.Count == 0 ) { return; }
-
-            _values.Sort( start, count, comparer );
-            Reset();
-        }
+        using ( AcquireLock() ) { base.Sort( start, count, comparer ); }
     }
-
-    public virtual ValueTask SortAsync( CancellationToken token = default ) => SortAsync( _comparer, token );
-
+    public virtual ValueTask SortAsync( CancellationToken token                             = default ) => SortAsync( _comparer,        token );
     public virtual ValueTask SortAsync( IComparer<TValue> comparer, CancellationToken token = default ) => SortAsync( comparer.Compare, token );
-
     public virtual async ValueTask SortAsync( Comparison<TValue> compare, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            if ( _values.Count == 0 ) { return; }
-
-            _values.Sort( compare );
-            Reset();
-        }
+        using ( await AcquireLockAsync( token ) ) { Reset(); }
     }
-
     public virtual ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync( start, count, _comparer, token );
-
     public virtual async ValueTask SortAsync( int start, int count, IComparer<TValue> comparer, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            if ( _values.Count == 0 ) { return; }
-
-            _values.Sort( start, count, comparer );
-            Reset();
-        }
+        using ( await AcquireLockAsync( token ) ) { base.Sort( start, count, comparer ); }
     }
+
 
     void ICollection.CopyTo( Array array, int start )
     {
-        using ( AcquireLock() ) { ((IList)_values).CopyTo( array, start ); }
+        using ( AcquireLock() ) { ((IList)list).CopyTo( array, start ); }
     }
-
     void IList.Remove( object? value )
     {
-        using ( AcquireLock() ) { ((IList)_values).Remove( value ); }
+        using ( AcquireLock() ) { ((IList)list).Remove( value ); }
     }
-
     int IList.Add( object? value )
     {
-        using ( AcquireLock() ) { return ((IList)_values).Add( value ); }
+        using ( AcquireLock() ) { return ((IList)list).Add( value ); }
     }
-
     bool IList.Contains( object? value )
     {
-        using ( AcquireLock() ) { return ((IList)_values).Contains( value ); }
+        using ( AcquireLock() ) { return ((IList)list).Contains( value ); }
     }
-
     int IList.IndexOf( object? value )
     {
-        using ( AcquireLock() ) { return ((IList)_values).IndexOf( value ); }
+        using ( AcquireLock() ) { return ((IList)list).IndexOf( value ); }
     }
-
     void IList.Insert( int index, object? value )
     {
-        using ( AcquireLock() ) { ((IList)_values).Insert( index, value ); }
+        using ( AcquireLock() ) { ((IList)list).Insert( index, value ); }
     }
 
-    public virtual bool Contains( TValue value )
+
+    public override bool Contains( TValue value )
     {
-        using ( AcquireLock() ) { return _values.Contains( value ); }
+        using ( AcquireLock() ) { return list.Contains( value ); }
     }
-
     public virtual async ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return _values.Contains( value ); }
+        using ( await AcquireLockAsync( token ) ) { return list.Contains( value ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalAdd( TValue value )
+
+    public override void Add( TValue value )
     {
-        _values.Add( value );
-        Added( value );
+        using ( AcquireLock() ) { base.Add( value ); }
     }
-
-    public virtual void Add( TValue value )
-    {
-        using ( AcquireLock() ) { InternalAdd( value ); }
-    }
-
     public virtual async ValueTask AddAsync( TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( value ); }
+        using ( await AcquireLockAsync( token ) ) { base.Add( value ); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalClear()
+
+    public override void Clear()
     {
-        _values.Clear();
-        Reset();
+        using ( AcquireLock() ) { base.Clear(); }
     }
-
-    public virtual void Clear()
-    {
-        using ( AcquireLock() ) { InternalClear(); }
-    }
-
     public virtual async ValueTask ClearAsync( CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalClear(); }
+        using ( await AcquireLockAsync( token ) ) { base.Clear(); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected void InternalInsert( int index, TValue value )
+
+    public override void Insert( int index, TValue value )
     {
-        _values.Insert( index, value );
-        Added( value );
+        using ( AcquireLock() ) { base.Insert( index, value ); }
     }
-
-    public void Insert( int index, TValue value )
-    {
-        using ( AcquireLock() ) { InternalInsert( index, value ); }
-    }
-
     public async ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, value ); }
+        using ( await AcquireLockAsync( token ) ) { base.Insert( index, value ); }
     }
 
-    public IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
 
-    public override IEnumerator<TValue> GetEnumerator() => Values;
-
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock()                               => _lock.Enter();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( in CancellationToken   token ) => _lock.Enter( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken token ) => _lock.EnterAsync( token );
+    public          IAsyncEnumerator<TValue> GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
+    public override IEnumerator<TValue>      GetEnumerator()                               => Values;
+    IEnumerator IEnumerable.                 GetEnumerator()                               => GetEnumerator();
 
 
-    protected ReadOnlyMemory<TValue>                 FilteredValues() => _values.Where( Filter ).ToArray();
-    ReadOnlyMemory<TValue> ILockedCollection<TValue>.Copy()           => Copy();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock()                                                                                     => locker.Enter();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( scoped in CancellationToken token )                                                  => locker.Enter( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( ref       bool              lockTaken, scoped in CancellationToken token = default ) => locker.Enter( ref lockTaken, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken      token ) => locker.EnterAsync( token );
 
+
+    ReadOnlyMemory<TValue> ILockedCollection<TValue>.Copy() => FilteredValues();
     protected ReadOnlyMemory<TValue> Copy()
     {
         using ( AcquireLock() ) { return FilteredValues(); }
     }
-
     ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
-
     protected async ValueTask<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token )
     {
         using ( await AcquireLockAsync( token ) ) { return FilteredValues(); }

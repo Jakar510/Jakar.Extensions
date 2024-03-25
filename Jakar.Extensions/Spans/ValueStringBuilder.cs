@@ -325,15 +325,13 @@ public ref struct ValueStringBuilder
     }
 
 
+#if NET7_0_OR_GREATER
+    [RequiresDynamicCode( nameof(ArrayExtensions.GetInternalArray) )]
+#endif
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
-        ReadOnlySpan<string> span = enumerable.ToArray();
-
-        return AppendJoin( separator,
-                       #if NET7_0_OR_GREATER
-                           ref
-                       #endif
-                           span );
+        ReadOnlySpan<string> span = enumerable.GetInternalArray();
+        return AppendJoin( separator, span );
     }
     public ValueStringBuilder AppendJoin( scoped in ReadOnlySpan<char> separator, IEnumerable<string> enumerable )
     {
@@ -684,6 +682,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -927,6 +926,7 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
+
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

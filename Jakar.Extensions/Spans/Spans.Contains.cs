@@ -15,11 +15,36 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
-    // SearchValues<char> values = SearchValues.Create( "" );
+#if NET8_0_OR_GREATER
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.ContainsAny( value );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static bool ContainsAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.ContainsAnyExcept( value );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int IndexOfAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.IndexOfAnyExcept( value );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int IndexOfAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.IndexOfAny( value );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int LastIndexOfAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.LastIndexOfAny( value );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int LastIndexOfAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+        where T : IEquatable<T> => span.LastIndexOfAnyExcept( value );
+#endif
 
 
-    public static bool Contains( this Span<char>         span, in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
-    public static bool Contains( this ReadOnlySpan<char> span, in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
+    public static bool Contains( this Span<char>         span, scoped in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    public static bool Contains( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
     public static bool Contains<T>(
@@ -65,7 +90,7 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
@@ -81,7 +106,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -92,7 +117,7 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -103,7 +128,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAny( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
+    public static bool ContainsAny( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -113,7 +138,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> values )
+    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -124,7 +149,7 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsNone( this ReadOnlySpan<char> span, in ReadOnlySpan<char> values )
+    public static bool ContainsNone( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -166,13 +191,13 @@ public static partial class Spans
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
     public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
-    public static bool StartsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
+    public static bool StartsWith<T>( this Span<T> span, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         ReadOnlySpan<T> temp = span;
         return temp.StartsWith( value );
     }
-    public static bool StartsWith<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+    public static bool StartsWith<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( span.IsEmpty ) { return false; }

@@ -17,12 +17,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         get => _dictionary[key];
         set
         {
-            bool exists = ContainsKey( key );
-
-            TValue? old = exists
-                              ? _dictionary[key]
-                              : default;
-
+            bool exists = TryGetValue( key, out TValue? old );
             _dictionary[key] = value;
 
             // ReSharper disable once NullableWarningSuppressionIsUsed
@@ -38,15 +33,17 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _dictionary.Values;
 
 
-    public ObservableConcurrentDictionary() : this( new ConcurrentDictionary<TKey, TValue>() ) { }
+    public ObservableConcurrentDictionary() : this( 16 ) { }
+    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary ) : this( dictionary, EqualityComparer<TKey>.Default ) { }
+    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) : this( dictionary.Count, comparer ) => Add( dictionary );
+    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) : this( EqualityComparer<TKey>.Default ) => Add( collection );
+    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) : this( comparer ) => Add( collection );
+    public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( Environment.ProcessorCount, 16, comparer ) { }
+    public ObservableConcurrentDictionary( int                                     capacity ) : this( capacity, EqualityComparer<TKey>.Default ) { }
+    public ObservableConcurrentDictionary( int                                     capacity,         IEqualityComparer<TKey> comparer ) : this( Environment.ProcessorCount, capacity, comparer ) { }
+    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int                     capacity ) : this( concurrencyLevel, capacity, EqualityComparer<TKey>.Default ) { }
+    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int                     capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
     protected ObservableConcurrentDictionary( ConcurrentDictionary<TKey, TValue>   dictionary ) => _dictionary = dictionary;
-    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary ) : this( new ConcurrentDictionary<TKey, TValue>( dictionary ) ) { }
-    public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( dictionary, comparer ) ) { }
-    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) : this( new ConcurrentDictionary<TKey, TValue>( collection ) ) { }
-    public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( collection, comparer ) ) { }
-    public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( new ConcurrentDictionary<TKey, TValue>( comparer ) ) { }
-    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int capacity ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel,                                   capacity ) ) { }
-    public ObservableConcurrentDictionary( int                                     concurrencyLevel, int capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
 
 
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
@@ -117,8 +114,17 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
             array[index] = pair;
         }
     }
+    public void CopyTo( Span<KeyValuePair<TKey, TValue>> array, int startIndex )
+    {
+        foreach ( (int index, KeyValuePair<TKey, TValue> pair) in this.EnumeratePairs( 0 ) )
+        {
+            if ( index < startIndex ) { continue; }
+
+            array[index] = pair;
+        }
+    }
 
 
-    public override IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => _dictionary.Where( Filter ).GetEnumerator();
-    IEnumerator IEnumerable.                                GetEnumerator() => GetEnumerator();
+    protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => _dictionary.Where( Filter ).ToArray();
+    IEnumerator IEnumerable.                                               GetEnumerator()  => GetEnumerator();
 }

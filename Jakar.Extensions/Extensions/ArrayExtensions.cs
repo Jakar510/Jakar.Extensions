@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
 public static class ArrayExtensions
 {
 #if NET7_0_OR_GREATER
@@ -10,18 +11,16 @@ public static class ArrayExtensions
     [SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
                                                                                                             {
-                                                                                                                TElement[] array                   => array,
-                                                                                                                List<TElement> list                => list.GetInternalArray(),
-                                                                                                                Collection<TElement> collection    => collection.GetInternalArray(),
-                                                                                                                IList<TElement> collection         => collection.ToArray( collection.Count ),
-                                                                                                                IReadOnlyList<TElement> collection => collection.ToArray( collection.Count ),
-                                                                                                                ICollection<TElement> collection   => collection.ToArray( collection.Count ),
-                                                                                                                _                                  => values.ToArray()
+                                                                                                                TElement[] array                                    => array,
+                                                                                                                List<TElement> list                                 => GetInternalArray( list ),
+                                                                                                                ConcurrentObservableCollection<TElement> collection => GetInternalArray( collection ),
+                                                                                                                Collection<TElement> collection                     => GetInternalArray( collection ),
+                                                                                                                IList<TElement> collection                          => collection.ToArray( collection.Count ),
+                                                                                                                IReadOnlyList<TElement> collection                  => collection.ToArray( collection.Count ),
+                                                                                                                ICollection<TElement> collection                    => collection.ToArray( collection.Count ),
+                                                                                                                _                                                   => values.ToArray()
                                                                                                             };
 
-#if NET7_0_OR_GREATER
-    [RequiresDynamicCode( nameof(GetInternalArray) )]
-#endif
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list )
     {
@@ -36,7 +35,8 @@ public static class ArrayExtensions
 #if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetInternalArray) )]
 #endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
 
 
 
