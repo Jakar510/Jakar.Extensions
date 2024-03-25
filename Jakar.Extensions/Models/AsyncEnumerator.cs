@@ -11,8 +11,8 @@ public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToke
     private readonly TList             _list       = list;
     private          CancellationToken _token      = token;
     private          int               _index      = START_INDEX;
-    public           TValue            Current        => _list[_index];
-    internal         bool              ShouldContinue => _token.ShouldContinue() && _index < _list.Count;
+    public           TValue            Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _list[_index]; }
+    internal         bool              ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && _index < _list.Count; }
 
 
     public ValueTask DisposeAsync() => default;
