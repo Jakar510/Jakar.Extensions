@@ -1,10 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/12/2022  10:15 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
 public ref struct Buffer<T>
+    where T : IEquatable<T>
 {
     private          T[]?                  _arrayToReturnToPool = default;
     private          Span<T>               _span                = default;
@@ -103,6 +108,50 @@ public ref struct Buffer<T>
     {
         Length = 0;
         _span.Fill( value );
+        return this;
+    }
+
+
+    public Buffer<T> Trim( T value )
+    {
+        ReadOnlySpan<T> span = _span.Trim( value );
+        Length = span.Length;
+        span.CopyTo( _span );
+        return this;
+    }
+    public Buffer<T> Trim( scoped in ReadOnlySpan<T> value )
+    {
+        ReadOnlySpan<T> span = _span.Trim( value );
+        Length = span.Length;
+        span.CopyTo( _span );
+        return this;
+    }
+    public Buffer<T> TrimEnd( T value )
+    {
+        ReadOnlySpan<T> span = _span.TrimEnd( value );
+        Length = span.Length;
+        span.CopyTo( _span );
+        return this;
+    }
+    public Buffer<T> TrimEnd( scoped in ReadOnlySpan<T> value )
+    {
+        ReadOnlySpan<T> span = _span.TrimEnd( value );
+        Length = span.Length;
+        span.CopyTo( _span );
+        return this;
+    }
+    public Buffer<T> TrimStart( T value )
+    {
+        ReadOnlySpan<T> span = _span.TrimStart( value );
+        Length = span.Length;
+        span.CopyTo( _span );
+        return this;
+    }
+    public Buffer<T> TrimStart( scoped in ReadOnlySpan<T> value )
+    {
+        ReadOnlySpan<T> span = _span.TrimStart( value );
+        Length = span.Length;
+        span.CopyTo( _span );
         return this;
     }
 

@@ -12,7 +12,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
     public const int    UNICODE_TEXT_CAPACITY   = 1_073_741_823;
     public const int    BINARY_CAPACITY         = ANSI_TEXT_CAPACITY;
     public const int    DECIMAL_MAX_PRECISION   = 38;
-    public const int    DECIMAL_MAX_SCALE       = 28;
+    public const int    DECIMAL_MAX_SCALE       = 29;
     public const string AND                     = " AND ";
     public const string COUNT                   = "count";
     public const string CREATED_BY              = nameof(IOwnedTableRecord.CreatedBy);

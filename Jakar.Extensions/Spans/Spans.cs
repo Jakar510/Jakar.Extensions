@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
+
 [SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public static partial class Spans
 {

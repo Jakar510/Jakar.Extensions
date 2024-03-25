@@ -2,6 +2,10 @@
 // 06/07/2022  3:25 PM
 
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -112,6 +116,38 @@ public ref struct ValueStringBuilder
 
         Dispose();
         return false;
+    }
+
+
+    public ValueStringBuilder Trim( char value )
+    {
+        _chars.Trim( value );
+        return this;
+    }
+    public ValueStringBuilder Trim( scoped in ReadOnlySpan<char> value )
+    {
+        _chars.Trim( value );
+        return this;
+    }
+    public ValueStringBuilder TrimEnd( char value )
+    {
+        _chars.TrimEnd( value );
+        return this;
+    }
+    public ValueStringBuilder TrimEnd( scoped in ReadOnlySpan<char> value )
+    {
+        _chars.TrimEnd( value );
+        return this;
+    }
+    public ValueStringBuilder TrimStart( char value )
+    {
+        _chars.TrimStart( value );
+        return this;
+    }
+    public ValueStringBuilder TrimStart( scoped in ReadOnlySpan<char> value )
+    {
+        _chars.TrimStart( value );
+        return this;
     }
 
 
@@ -648,7 +684,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -892,7 +927,6 @@ public ref struct ValueStringBuilder
             if ( s == null )
             {
             #if NET6_0_OR_GREATER
-
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {

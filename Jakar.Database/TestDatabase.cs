@@ -22,29 +22,29 @@ internal sealed class TestDatabase : Database
     public static async void TestAsync<T>()
         where T : IAppName
     {
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create( DbInstance.Postgres )
-                                                       .WithColumn( nameof(GroupRecord.CustomerID),  DbType.String,            true,  size: GroupRecord.MAX_SIZE )
-                                                       .WithColumn( nameof(GroupRecord.NameOfGroup), DbType.String,            false, GroupRecord.MAX_SIZE,               $"{nameof(GroupRecord.NameOfGroup)} > 0" )
-                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" )
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create()
+                                                       .WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) )
+                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String,            GroupRecord.MAX_SIZE,                     $"{nameof(GroupRecord.NameOfGroup)} > 0" ) )
+                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights),      DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) )
                                                        .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
                                                        .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) )
                                                        .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
                                                        .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
                                                        .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build() );
+                                                       .Build( DbInstance.Postgres ) );
 
         Console.WriteLine();
 
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create( DbInstance.MsSql )
-                                                       .WithColumn( nameof(GroupRecord.CustomerID),  DbType.String,            true,  size: GroupRecord.MAX_SIZE )
-                                                       .WithColumn( nameof(GroupRecord.NameOfGroup), DbType.String,            false, GroupRecord.MAX_SIZE,               $"{nameof(GroupRecord.NameOfGroup)} > 0" )
-                                                       .WithColumn( nameof(GroupRecord.Rights),      DbType.StringFixedLength, false, Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" )
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create()
+                                                       .WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) )
+                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String,            GroupRecord.MAX_SIZE,                     $"{nameof(GroupRecord.NameOfGroup)} > 0" ) )
+                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights),      DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) )
                                                        .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
                                                        .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) )
                                                        .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
                                                        .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
                                                        .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build() );
+                                                       .Build( DbInstance.MsSql ) );
 
         Console.WriteLine();
 

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -39,7 +43,6 @@ public static partial class Spans
         return span.Contains( value );
     #endif
     }
-
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
@@ -130,7 +133,6 @@ public static partial class Spans
 
         return true;
     }
-
 
     public static bool EndsWith<T>( this Span<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
