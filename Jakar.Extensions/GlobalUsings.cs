@@ -29,6 +29,8 @@ global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Serialization;
 global using System.Drawing;
 global using System.IO.Compression;
+global using System.IO.Hashing;
+global using System.Linq.Expressions;
 global using System.Net.Http;
 global using System.Net.Http.Headers;
 global using System.Net.Security;
@@ -37,13 +39,20 @@ global using System.Reflection.Emit;
 global using System.Runtime.InteropServices;
 global using System.Security;
 global using System.Threading.Tasks.Dataflow;
+global using System.Web;
 global using System.Windows.Input;
 global using Nito.Collections;
 global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
+global using Microsoft.Extensions.Options;
+global using NoAlloq;
+global using NoAlloq.Producers;
 global using OneOf;
+global using OneOf.Types;
+global using static Jakar.Extensions.WebRequester;
+global using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
 /*

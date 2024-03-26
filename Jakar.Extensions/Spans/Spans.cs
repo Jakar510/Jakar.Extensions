@@ -1,7 +1,6 @@
 ﻿namespace Jakar.Extensions;
 
 
-
 [SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public static partial class Spans
 {
@@ -170,10 +169,7 @@ public static partial class Spans
     public static Span<T> Create<T>( T arg0 )
     {
     #if NETSTANDARD2_1
-        Span<T> span = new T[1]
-                       {
-                           arg0
-                       };
+        Span<T> span = new T[1] { arg0 };
     #else
         Span<T> span = [arg0];
 
@@ -183,11 +179,7 @@ public static partial class Spans
     public static Span<T> Create<T>( T arg0, T arg1 )
     {
     #if NETSTANDARD2_1
-        Span<T> span = new T[2]
-                       {
-                           arg0,
-                           arg1
-                       };
+        Span<T> span = new T[2] { arg0, arg1 };
     #else
         Span<T> span = [arg0, arg1];
 
@@ -197,12 +189,7 @@ public static partial class Spans
     public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
     {
     #if NETSTANDARD2_1
-        Span<T> span = new T[3]
-                       {
-                           arg0,
-                           arg1,
-                           arg2
-                       };
+        Span<T> span = new T[3] { arg0, arg1, arg2 };
     #else
         Span<T> span = [arg0, arg1, arg2];
 
@@ -212,13 +199,7 @@ public static partial class Spans
     public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
     {
     #if NETSTANDARD2_1
-        Span<T> span = new T[4]
-                       {
-                           arg0,
-                           arg1,
-                           arg2,
-                           arg3
-                       };
+        Span<T> span = new T[4] { arg0, arg1, arg2, arg3 };
     #else
         Span<T> span = [arg0, arg1, arg2, arg3];
 
@@ -228,14 +209,7 @@ public static partial class Spans
     public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
     {
     #if NETSTANDARD2_1
-        Span<T> span = new T[5]
-                       {
-                           arg0,
-                           arg1,
-                           arg2,
-                           arg3,
-                           arg4
-                       };
+        Span<T> span = new T[5] { arg0, arg1, arg2, arg3, arg4 };
     #else
         Span<T> span = [arg0, arg1, arg2, arg3, arg4];
 
@@ -252,4 +226,45 @@ public static partial class Spans
     public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span, TNumber index )
         where TNumber : struct, INumber<TNumber> => new(span, index);
 #endif
+
+
+#if NETSTANDARD2_1
+    public static void Sort<T>( this Span<T> span, Comparison<T> comparison ) => QuickSort( ref span, comparison );
+#endif
+
+    public static void QuickSort<T>( scoped ref Span<T> span, Comparison<T> comparison )
+    {
+        if ( span.Length <= 1 ) { return; }
+
+        QuickSort( ref span, 0, span.Length - 1, comparison );
+    }
+    public static void QuickSort<T>( scoped ref Span<T> span, int left, int right, Comparison<T> comparison )
+    {
+        if ( left >= right ) { return; }
+
+        int pivotIndex = Partition( ref span, left, right, comparison );
+        QuickSort( ref span, left, pivotIndex - 1, comparison );
+        QuickSort( ref span, pivotIndex       + 1, right, comparison );
+
+        return;
+
+        static int Partition( scoped ref Span<T> span, int left, int right, Comparison<T> comparison )
+        {
+            T   pivot = span[right];
+            int i     = left - 1;
+
+            for ( int j = left; j < right; j++ )
+            {
+                if ( comparison( span[j], pivot ) >= 0 ) { continue; }
+
+                i++;
+                Swap( ref span[i], ref span[j] );
+            }
+
+            Swap( ref span[i + 1], ref span[right] );
+            return i + 1;
+        }
+
+        static void Swap( ref T left, ref T right ) => (left, right) = (right, left);
+    }
 }

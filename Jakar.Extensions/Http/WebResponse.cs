@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using OneOf.Types;
-using static Jakar.Extensions.WebRequester;
-
-
-
 namespace Jakar.Extensions;
 
 

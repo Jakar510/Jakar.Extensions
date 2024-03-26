@@ -181,8 +181,20 @@ public class UserData : ObservableClass, IUserData<UserData>, JsonModels.IJsonMo
     public virtual string GetDescription() => IUserData.GetDescription( this );
 
 
-    public UserData WithAddresses( IEnumerable<IAddress>            addresses ) => WithAddresses( addresses.Select( UserAddress.Create ) );
+    public UserData WithAddresses( IEnumerable<IAddress>            addresses ) => WithAddresses( addresses.ToSpanEnumerable().Select( UserAddress.Create ) );
     public UserData WithAddresses( scoped in ReadOnlySpan<IAddress> addresses ) => WithAddresses( addresses.Select( UserAddress.Create ) );
+    public UserData WithAddresses( scoped in SpanEnumerable<IAddress, UserAddress, SelectDelegateProducer<IAddress, UserAddress>> span )
+    {
+        foreach ( UserAddress address in span ) { Addresses.Add( address ); }
+
+        return this;
+    }
+    private UserData WithAddresses( scoped in SpanEnumerable<UserAddress, SecondarySelectDelegateProducer<IAddress, UserAddress, EnumerableProducer<IAddress>>> span )
+    {
+        foreach ( UserAddress address in span ) { Addresses.Add( address ); }
+
+        return this;
+    }
     public UserData WithAddresses( IEnumerable<UserAddress> addresses )
     {
         Addresses.Add( addresses );

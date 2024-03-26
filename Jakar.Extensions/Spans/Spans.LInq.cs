@@ -42,158 +42,6 @@ public static partial class Spans
 
 
     [Pure]
-    public static Span<TNext> Select<T, TNext>( this Span<T> values, Func<T, TNext> func )
-    {
-        if ( values.IsEmpty ) { return default; }
-
-        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-        Span<TNext> span   = buffer;
-        Where( values, ref span, func, out int length );
-
-        return new Span<TNext>( buffer, 0, length );
-    }
-    [Pure]
-    public static ReadOnlySpan<TNext> Select<T, TNext>( this ReadOnlySpan<T> values, Func<T, TNext> func )
-    {
-        if ( values.IsEmpty ) { return default; }
-
-        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-        Span<TNext> span   = buffer;
-        Where( values, ref span, func, out int length );
-
-        return new ReadOnlySpan<TNext>( buffer, 0, length );
-    }
-    [Pure]
-    public static Span<TNext> SelectValues<T, TNext>( this Span<T> values, Func<T, TNext> func )
-        where TNext : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, func, out int length );
-
-                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-            }
-
-            default:
-            {
-                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-                Span<TNext> span   = buffer;
-                Where( values, ref span, func, out int length );
-
-                return new Span<TNext>( buffer, 0, length );
-            }
-        }
-    }
-    [Pure]
-    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( this ReadOnlySpan<T> values, Func<T, TNext> func )
-        where TNext : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, func, out int length );
-
-                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-            }
-
-            default:
-            {
-                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-                Span<TNext> span   = buffer;
-                Where( values, ref span, func, out int length );
-
-                return new ReadOnlySpan<TNext>( buffer, 0, length );
-            }
-        }
-    }
-
-
-    [Pure]
-    public static Span<TNext> Select<T, TNext>( this Span<T> values, Predicate<T> selector, Func<T, TNext> func )
-    {
-        if ( values.IsEmpty ) { return default; }
-
-        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-        Span<TNext> span   = buffer;
-        Where( values, ref span, selector, func, out int length );
-
-        return new Span<TNext>( buffer, 0, length );
-    }
-    [Pure]
-    public static ReadOnlySpan<TNext> Select<T, TNext>( this ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
-    {
-        if ( values.IsEmpty ) { return default; }
-
-        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-        Span<TNext> span   = buffer;
-        Where( values, ref span, selector, func, out int length );
-
-        return new ReadOnlySpan<TNext>( buffer, 0, length );
-    }
-    [Pure]
-    public static Span<TNext> SelectValues<T, TNext>( this Span<T> values, Predicate<T> selector, Func<T, TNext> func )
-        where TNext : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, selector, func, out int length );
-
-                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-            }
-
-            default:
-            {
-                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-                Span<TNext> span   = buffer;
-                Where( values, ref span, selector, func, out int length );
-
-                return new Span<TNext>( buffer, 0, length );
-            }
-        }
-    }
-    [Pure]
-    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( this ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
-        where TNext : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, selector, func, out int length );
-
-                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-            }
-
-            default:
-            {
-                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
-                Span<TNext> span   = buffer;
-                Where( values, ref span, selector, func, out int length );
-
-                return new ReadOnlySpan<TNext>( buffer, 0, length );
-            }
-        }
-    }
-
-
-    [Pure]
     public static bool All<T>( this Span<T> values, Predicate<T> selector )
     {
         ReadOnlySpan<T> span = values;
@@ -279,11 +127,14 @@ public static partial class Spans
     {
         if ( values.IsEmpty ) { return default; }
 
-        T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
-        Span<T> span   = buffer;
-        Where( values, ref span, selector, out int length );
+        Buffer<T> buffer = new(values.Length);
 
-        return new ReadOnlySpan<T>( buffer, 0, length );
+        try
+        {
+            Where( values, ref buffer, selector );
+            return buffer.ToArray();
+        }
+        finally { buffer.Dispose(); }
     }
     [Pure]
     public static ReadOnlySpan<T> WhereValues<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
@@ -303,11 +154,14 @@ public static partial class Spans
 
             default:
             {
-                T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
-                Span<T> span   = buffer;
-                Where( values, ref span, selector, out int length );
+                Buffer<T> buffer = new(values.Length);
 
-                return new ReadOnlySpan<T>( buffer, 0, length );
+                try
+                {
+                    Where( values, ref buffer, selector );
+                    return buffer.ToArray();
+                }
+                finally { buffer.Dispose(); }
             }
         }
     }
@@ -329,16 +183,30 @@ public static partial class Spans
 
             default:
             {
-                T[]     buffer = AsyncLinq.GetArray<T>( values.Length );
-                Span<T> span   = buffer;
-                Where( values, ref span, selector, out int length );
+                Buffer<T> buffer = new(values.Length);
 
-                return new Span<T>( buffer, 0, length );
+                try
+                {
+                    Where( values, ref buffer, selector );
+                    return buffer.ToArray();
+                }
+                finally { buffer.Dispose(); }
             }
         }
     }
 
 
+    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Buffer<T> span, Predicate<T> selector )
+    {
+        if ( values.IsEmpty ) { return false; }
+
+        foreach ( T value in values )
+        {
+            if ( selector( value ) ) { span.Add( value ); }
+        }
+
+        return span.Length > 0;
+    }
     public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Span<T> span, Predicate<T> selector, out int length )
     {
         if ( values.IsEmpty )
@@ -374,8 +242,6 @@ public static partial class Spans
 
         return length > 0;
     }
-
-
     public static bool Where<T, TNext>( scoped in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Predicate<T> selector, Func<T, TNext> func, out int length )
     {
         if ( values.IsEmpty )
@@ -394,6 +260,158 @@ public static partial class Spans
         }
 
         return length > 0;
+    }
+
+
+    [Pure]
+    public static Span<TNext> Select<T, TNext>( scoped in Span<T> values, Func<T, TNext> func )
+    {
+        if ( values.IsEmpty ) { return default; }
+
+        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+        Span<TNext> span   = buffer;
+        Where( values, ref span, func, out int length );
+
+        return new Span<TNext>( buffer, 0, length );
+    }
+    [Pure]
+    public static ReadOnlySpan<TNext> Select<T, TNext>( scoped in ReadOnlySpan<T> values, Func<T, TNext> func )
+    {
+        if ( values.IsEmpty ) { return default; }
+
+        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+        Span<TNext> span   = buffer;
+        Where( values, ref span, func, out int length );
+
+        return new ReadOnlySpan<TNext>( buffer, 0, length );
+    }
+    [Pure]
+    public static Span<TNext> SelectValues<T, TNext>( scoped in Span<T> values, Func<T, TNext> func )
+        where TNext : unmanaged, IEquatable<T>
+    {
+        switch ( values.Length )
+        {
+            case 0: return default;
+
+            case <= 256:
+            {
+                Span<TNext> buffer = stackalloc TNext[values.Length];
+                Where( values, ref buffer, func, out int length );
+
+                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
+            }
+
+            default:
+            {
+                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+                Span<TNext> span   = buffer;
+                Where( values, ref span, func, out int length );
+
+                return new Span<TNext>( buffer, 0, length );
+            }
+        }
+    }
+    [Pure]
+    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( scoped in ReadOnlySpan<T> values, Func<T, TNext> func )
+        where TNext : unmanaged, IEquatable<T>
+    {
+        switch ( values.Length )
+        {
+            case 0: return default;
+
+            case <= 256:
+            {
+                Span<TNext> buffer = stackalloc TNext[values.Length];
+                Where( values, ref buffer, func, out int length );
+
+                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
+            }
+
+            default:
+            {
+                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+                Span<TNext> span   = buffer;
+                Where( values, ref span, func, out int length );
+
+                return new ReadOnlySpan<TNext>( buffer, 0, length );
+            }
+        }
+    }
+
+
+    [Pure]
+    public static Span<TNext> Select<T, TNext>( scoped in Span<T> values, Predicate<T> selector, Func<T, TNext> func )
+    {
+        if ( values.IsEmpty ) { return default; }
+
+        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+        Span<TNext> span   = buffer;
+        Where( values, ref span, selector, func, out int length );
+
+        return new Span<TNext>( buffer, 0, length );
+    }
+    [Pure]
+    public static ReadOnlySpan<TNext> Select<T, TNext>( scoped in ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
+    {
+        if ( values.IsEmpty ) { return default; }
+
+        TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+        Span<TNext> span   = buffer;
+        Where( values, ref span, selector, func, out int length );
+
+        return new ReadOnlySpan<TNext>( buffer, 0, length );
+    }
+    [Pure]
+    public static Span<TNext> SelectValues<T, TNext>( scoped in Span<T> values, Predicate<T> selector, Func<T, TNext> func )
+        where TNext : unmanaged, IEquatable<T>
+    {
+        switch ( values.Length )
+        {
+            case 0: return default;
+
+            case <= 256:
+            {
+                Span<TNext> buffer = stackalloc TNext[values.Length];
+                Where( values, ref buffer, selector, func, out int length );
+
+                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
+            }
+
+            default:
+            {
+                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+                Span<TNext> span   = buffer;
+                Where( values, ref span, selector, func, out int length );
+
+                return new Span<TNext>( buffer, 0, length );
+            }
+        }
+    }
+    [Pure]
+    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( scoped in ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
+        where TNext : unmanaged, IEquatable<T>
+    {
+        switch ( values.Length )
+        {
+            case 0: return default;
+
+            case <= 256:
+            {
+                Span<TNext> buffer = stackalloc TNext[values.Length];
+                Where( values, ref buffer, selector, func, out int length );
+
+                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
+            }
+
+            default:
+            {
+                TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
+                Span<TNext> span   = buffer;
+                Where( values, ref span, selector, func, out int length );
+
+                return new ReadOnlySpan<TNext>( buffer, 0, length );
+            }
+        }
     }
 
 
@@ -446,6 +464,13 @@ public static partial class Spans
         length = size + last.Length;
         first.CopyTo( buffer[..size] );
         last.CopyTo( buffer[size..] );
+        return true;
+    }
+    [Pure]
+    public static bool Join<T>( scoped in ReadOnlySpan<T> first, scoped in ReadOnlySpan<T> last, scoped ref Buffer<T> buffer )
+    {
+        buffer.Add( first );
+        buffer.Add( last );
         return true;
     }
 }

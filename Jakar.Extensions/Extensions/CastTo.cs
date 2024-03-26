@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/05/2023  11:48 PM
 
-using System.Linq.Expressions;
-
-
-
 namespace Jakar.Extensions;
 
 

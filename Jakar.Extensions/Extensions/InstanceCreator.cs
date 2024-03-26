@@ -1,8 +1,4 @@
-﻿using System.Linq.Expressions;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 internal static class InstanceCreator
