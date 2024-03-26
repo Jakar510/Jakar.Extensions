@@ -528,11 +528,11 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken      token ) => locker.EnterAsync( token );
 
 
-    ReadOnlyMemory<TValue> ILockedCollection<TValue>.Copy() => FilteredValues();
-    protected ReadOnlyMemory<TValue> Copy()
+    protected internal ReadOnlyMemory<TValue> Copy()
     {
         using ( AcquireLock() ) { return FilteredValues(); }
     }
+    ReadOnlyMemory<TValue> ILockedCollection<TValue>.                              Copy()                               => Copy();
     ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
     protected async ValueTask<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token )
     {

@@ -1,17 +1,21 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  21:3
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
-public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer ) : ICollection<T>
+public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer ) : ICollection<T>
 {
     private readonly IEqualityComparer<T> _comparer            = comparer;
-    private          IMemoryOwner<T>      _arrayToReturnToPool = MemoryPool<T>.Shared.Rent( initialCapacity );
+    protected        T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
     private          int                  _length;
 
 
-    public int         Capacity   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Memory.Length; }
+    public int         Capacity   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool.Length; }
     int ICollection<T>.Count      => Length;
     public bool        IsEmpty    { [MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length == 0; }
     public bool        IsNotEmpty { [MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length > 0; }
@@ -20,11 +24,11 @@ public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> c
     public ref T this[ Index   index ] { [MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Raw[index]; }
     public Span<T> this[ Range range ] { [MethodImpl(             MethodImplOptions.AggressiveInlining )] get => Raw[range]; }
     public Span<T> this[ int   start, int length ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw.Slice( start, length ); }
-    public   int       Length { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
-    public   Memory<T> Memory { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool.Memory; }
-    public   Span<T>   Next   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[Length..]; }
-    internal Span<T>   Raw    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Memory.Span; }
-    public   Span<T>   Span   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[..Length]; }
+    public             int       Length { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
+    protected internal Memory<T> Memory { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
+    public             Span<T>   Next   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[Length..]; }
+    protected internal Span<T>   Raw    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
+    public             Span<T>   Span   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[..Length]; }
 
 
     public MemoryBuffer() : this( 64 ) { }
@@ -32,7 +36,7 @@ public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> c
     public MemoryBuffer( IEnumerable<T>            span ) : this( 64, EqualityComparer<T>.Default ) => Add( span );
     public MemoryBuffer( scoped in ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) => Add( span );
     public MemoryBuffer( scoped in ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( span.Length, comparer ) => Add( span );
-    public void Dispose() => _arrayToReturnToPool.Dispose();
+    public void Dispose() => ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
 
 
     public static implicit operator Span<T>( MemoryBuffer<T> values ) => values.Span;
@@ -51,27 +55,26 @@ public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> c
     }
 
 
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="Length"/> whichever is greater. </summary>
-    /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
-    private void Grow( in int additionalCapacityBeyondPos )
-    {
-        ThrowIfReadOnly();
-        Debug.Assert( additionalCapacityBeyondPos          > 0 );
-        Debug.Assert( Length + additionalCapacityBeyondPos >= Capacity, "Grow called incorrectly, no resize is needed." );
-
-        IMemoryOwner<T> poolArray = MemoryPool<T>.Shared.Rent( Math.Max( Length + additionalCapacityBeyondPos, Capacity * 2 ) );
-        _arrayToReturnToPool.Memory.Span.CopyTo( poolArray.Memory.Span );
-        _arrayToReturnToPool.Dispose();
-        _arrayToReturnToPool = poolArray;
-    }
-    private void GrowAndAppend( T c )
-    {
-        Grow( Length * 2 );
-        Add( c );
-    }
-    public void EnsureCapacity( in int capacity )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in int capacity ) => EnsureCapacity( (uint)capacity );
+    public void EnsureCapacity( in uint capacity )
     {
         if ( Length + capacity > Capacity ) { Grow( capacity ); }
+    }
+
+    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="Length"/> whichever is greater. </summary>
+    /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
+    private void Grow( in uint additionalCapacityBeyondPos ) => Grow( (uint)Capacity, (uint)_length + additionalCapacityBeyondPos );
+    private void Grow( in uint capacity, in uint requestedCapacity )
+    {
+        ThrowIfReadOnly();
+        Debug.Assert( requestedCapacity > 0 );
+        Debug.Assert( requestedCapacity >= capacity, "Grow called incorrectly, no resize is needed." );
+
+        int minimumLength = checked ((int)Math.Min( Math.Max( requestedCapacity, capacity * 2 ), int.MaxValue ));
+        T[] poolArray     = ArrayPool<T>.Shared.Rent( minimumLength );
+        _arrayToReturnToPool.AsSpan().CopyTo( poolArray );
+        ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
+        _arrayToReturnToPool = poolArray;
     }
 
 
@@ -288,72 +291,59 @@ public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> c
     {
         if ( index < 0 || index >= Length ) { return false; }
 
-        Span[(index + 1)..].CopyTo( Span[index..] );
-        Length--;
+        Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
         return true;
     }
-    public bool Remove( T item )
-    {
-        int index = IndexOf( item );
-        return index >= 0 && RemoveAt( index );
-    }
+    public bool Remove( T item ) => RemoveAt( IndexOf( item ) );
 
 
     public void Replace( int index, T value, int count = 1 )
     {
         ThrowIfReadOnly();
-        if ( Length + count > Raw.Length ) { Grow( count ); }
+        EnsureCapacity( count );
 
         Raw.Slice( index, count ).Fill( value );
     }
     public void Replace( int index, scoped in ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
-        if ( Length + span.Length > Raw.Length ) { Grow( span.Length ); }
-
+        EnsureCapacity( span.Length );
         span.CopyTo( Raw.Slice( index, span.Length ) );
     }
 
 
     public void Insert( int index, T value, int count = 1 )
     {
-        ThrowIfReadOnly();
-        if ( Length + count > Raw.Length ) { Grow( count ); }
-
-        int remaining = Length - index;
-
-        Raw.Slice( index, remaining ).CopyTo( Raw[(index + count)..] );
-
-        Raw.Slice( index, count ).Fill( value );
-
-        Length += count;
+        T       x    = value;
+        Span<T> span = MemoryMarshal.CreateSpan( ref x, count );
+        span.Fill( value );
+        Insert( index, span );
     }
-    public void Insert( int index, scoped in ReadOnlySpan<T> span )
+    public void Insert( int index, scoped in ReadOnlySpan<T> values )
     {
         ThrowIfReadOnly();
-        if ( Length + span.Length > Raw.Length ) { Grow( span.Length ); }
+        EnsureCapacity( values.Length );
 
-        int remaining = Length - index;
+        if ( values.IsEmpty ) { return; }
 
-        Raw.Slice( index, remaining ).CopyTo( Raw[(index + span.Length)..] );
+        T[] array = _arrayToReturnToPool;
+        if ( index < Capacity ) { Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
 
-        span.CopyTo( Raw[index..] );
-
-        Length += span.Length;
+        values.CopyTo( array.AsSpan()[index..] );
+        Length += values.Length;
     }
 
 
     public void Add( T value )
     {
         ThrowIfReadOnly();
-
-        if ( (uint)Length < (uint)Raw.Length ) { Raw[Length++] = value; }
-        else { GrowAndAppend( value ); }
+        EnsureCapacity( 1 );
+        Raw[Length++] = value;
     }
     public void Add( T c, int count )
     {
         ThrowIfReadOnly();
-        if ( Length + count >= Capacity ) { Grow( count ); }
+        EnsureCapacity( count );
 
         for ( int i = Length; i < Length + count; i++ ) { Raw[i] = c; }
 
@@ -381,7 +371,7 @@ public sealed class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> c
 
             default:
             {
-                if ( Length + span.Length >= Capacity ) { Grow( span.Length ); }
+                EnsureCapacity( span.Length );
 
                 span.CopyTo( Next );
                 Length += span.Length;

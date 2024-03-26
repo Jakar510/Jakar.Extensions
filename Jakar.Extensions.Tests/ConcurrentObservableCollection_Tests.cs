@@ -7,8 +7,8 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
 {
-    private readonly ConcurrentObservableCollection<int>    _integers = new();
-    private readonly ConcurrentObservableCollection<string> _strings  = new();
+    private readonly ConcurrentObservableCollection<int>    _integers = [];
+    private readonly ConcurrentObservableCollection<string> _strings  = [];
 
 
     [Test]

@@ -391,5 +391,11 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     public virtual void Insert( int index, TValue value ) => InternalInsert( index, value );
 
 
-    protected internal override ReadOnlyMemory<TValue> FilteredValues() => list.Where( Filter ).ToArray();
+    protected internal override ReadOnlyMemory<TValue> FilteredValues()
+    {
+        using Buffer<TValue> buffer = new(Count);
+        foreach ( TValue value in list.Span.Where( Filter ) ) { buffer.Add( value ); }
+
+        return buffer.ToArray();
+    }
 }

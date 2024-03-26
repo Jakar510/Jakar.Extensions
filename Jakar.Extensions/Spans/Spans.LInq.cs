@@ -112,7 +112,7 @@ public static partial class Spans
 
 
     [Pure]
-    public static Span<T> Where<T>( this Span<T> values, Predicate<T> selector )
+    public static Span<T> Where<T>( scoped in Span<T> values, Predicate<T> selector )
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -123,7 +123,7 @@ public static partial class Spans
         return new Span<T>( buffer, 0, length );
     }
     [Pure]
-    public static ReadOnlySpan<T> Where<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static ReadOnlySpan<T> Where<T>( scoped in ReadOnlySpan<T> values, Predicate<T> selector )
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -137,20 +137,12 @@ public static partial class Spans
         finally { buffer.Dispose(); }
     }
     [Pure]
-    public static ReadOnlySpan<T> WhereValues<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static ReadOnlySpan<T> WhereValues<T>( scoped in ReadOnlySpan<T> values, Predicate<T> selector )
         where T : unmanaged, IEquatable<T>
     {
         switch ( values.Length )
         {
             case 0: return default;
-
-            case <= 256:
-            {
-                Span<T> buffer = stackalloc T[values.Length];
-                Where( values, ref buffer, selector, out int length );
-
-                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-            }
 
             default:
             {
@@ -166,20 +158,12 @@ public static partial class Spans
         }
     }
     [Pure]
-    public static Span<T> WhereValues<T>( this Span<T> values, Predicate<T> selector )
+    public static Span<T> WhereValues<T>( scoped in Span<T> values, Predicate<T> selector )
         where T : unmanaged, IEquatable<T>
     {
         switch ( values.Length )
         {
             case 0: return default;
-
-            case <= 256:
-            {
-                Span<T> buffer = stackalloc T[values.Length];
-                Where( values, ref buffer, selector, out int length );
-
-                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-            }
 
             default:
             {
@@ -293,14 +277,6 @@ public static partial class Spans
         {
             case 0: return default;
 
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, func, out int length );
-
-                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-            }
-
             default:
             {
                 TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
@@ -318,14 +294,6 @@ public static partial class Spans
         switch ( values.Length )
         {
             case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, func, out int length );
-
-                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-            }
 
             default:
             {
@@ -368,15 +336,7 @@ public static partial class Spans
         switch ( values.Length )
         {
             case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, selector, func, out int length );
-
-                return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-            }
-
+                
             default:
             {
                 TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );
@@ -394,14 +354,6 @@ public static partial class Spans
         switch ( values.Length )
         {
             case 0: return default;
-
-            case <= 256:
-            {
-                Span<TNext> buffer = stackalloc TNext[values.Length];
-                Where( values, ref buffer, selector, func, out int length );
-
-                return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-            }
 
             default:
             {
