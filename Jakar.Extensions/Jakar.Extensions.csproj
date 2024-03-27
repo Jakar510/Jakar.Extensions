@@ -4,7 +4,7 @@
 		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591;IDE0079;CS1658</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>

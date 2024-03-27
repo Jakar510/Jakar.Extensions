@@ -8,11 +8,11 @@ namespace Jakar.Extensions;
 public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
 {
     private readonly       HashSet<T> _values = values;
-    public sealed override int        Count      => _values.Count;
-    bool ICollection<T>.              IsReadOnly => ((ICollection<T>)_values).IsReadOnly;
+    public sealed override int        Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.Count; }
+    bool ICollection<T>.              IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)_values).IsReadOnly; }
 
 
-    public ObservableHashSet() : this( [] ) { }
+    public ObservableHashSet() : this( DEFAULT_CAPACITY ) { }
     public ObservableHashSet( int            capacity ) : this( new HashSet<T>( capacity ) ) { }
     public ObservableHashSet( IEnumerable<T> enumerable ) : this( [..enumerable] ) { }
 

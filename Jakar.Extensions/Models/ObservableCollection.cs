@@ -16,42 +16,32 @@ namespace Jakar.Extensions;
 [Serializable]
 public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList, IDisposable
 {
-    protected internal readonly MemoryBuffer<TValue> list;
-    protected internal readonly IComparer<TValue>    _comparer;
+    protected internal readonly IComparer<TValue>    comparer;
+    protected internal readonly MemoryBuffer<TValue> buffer;
 
 
-    public sealed override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => list.Length; }
-    bool IList.                IsFixedSize    => list.IsReadOnly;
-    bool IList.                IsReadOnly     => list.IsReadOnly;
-    bool ICollection<TValue>.  IsReadOnly     => list.IsReadOnly;
-    bool ICollection.          IsSynchronized => false;
-    object? IList.this[ int index ] { get => list[index]; set => list[index] = (TValue)value!; }
-    object ICollection.SyncRoot => list;
-
-    public virtual TValue this[ int index ]
-    {
-        get => list[index];
-        set
-        {
-            TValue old = list[index];
-            list[index] = value;
-            Replaced( old, value, index );
-        }
-    }
+    public sealed override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
+    bool IList.                IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool IList.                IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection<TValue>.  IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection.          IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
+    object? IList.this[ int index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (TValue)value!; }
+    public TValue this[ int index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
+    object ICollection.SyncRoot { [MethodImpl(                     MethodImplOptions.AggressiveInlining )] get => buffer; }
 
 
-    public ObservableCollection() : this( Comparer<TValue>.Default ) { }
-    public ObservableCollection( IComparer<TValue>              comparer ) : this( 16, comparer ) { }
-    public ObservableCollection( int                            capacity ) : this( capacity, Comparer<TValue>.Default ) { }
-    public ObservableCollection( int                            capacity, IComparer<TValue> comparer ) : this( new MemoryBuffer<TValue>( capacity ), comparer ) { }
-    public ObservableCollection( scoped in ReadOnlySpan<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
-    public ObservableCollection( scoped in ReadOnlySpan<TValue> values, IComparer<TValue> comparer ) : this( new MemoryBuffer<TValue>( values ), comparer ) { }
-    public ObservableCollection( IEnumerable<TValue>            values ) : this( values, Comparer<TValue>.Default ) { }
-    public ObservableCollection( IEnumerable<TValue>            values, IComparer<TValue> comparer ) : this( new MemoryBuffer<TValue>( values ), comparer ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection() : this( Comparer<TValue>.Default ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<TValue> values, IComparer<TValue> comparer ) : this( values.Length, comparer ) => InternalAdd( values );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<TValue>            values ) : this( values, Comparer<TValue>.Default ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<TValue>            values, IComparer<TValue> comparer ) : this( comparer ) => Add( values );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IComparer<TValue>              comparer ) : this( DEFAULT_CAPACITY, comparer ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity ) : this( capacity, Comparer<TValue>.Default ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity, IComparer<TValue> comparer ) : this( new MemoryBuffer<TValue>( capacity ), comparer ) { }
     protected internal ObservableCollection( MemoryBuffer<TValue> values, IComparer<TValue> comparer )
     {
-        _comparer = comparer;
-        list      = values;
+        this.comparer = comparer;
+        buffer        = values;
     }
 
 
@@ -70,19 +60,27 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
 
 
 #if NET6_0_OR_GREATER
-    protected internal ReadOnlySpan<TValue> AsSpan() => list.Span;
+    protected internal ReadOnlySpan<TValue> AsSpan() => buffer.Span;
 #endif
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal void InternalInsert( int index, in TValue value )
+    {
+        buffer.Insert( index, value );
+        Added( value );
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalRemoveRange( int start, int count )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        Guard.IsInRangeFor( count, list, nameof(count) );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        Guard.IsInRangeFor( count, buffer, nameof(count) );
 
         for ( int x = start; x < start + count; x++ )
         {
-            list.RemoveAt( x );
+            buffer.RemoveAt( x );
             Removed( x );
         }
     }
@@ -91,7 +89,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal bool InternalRemove( in TValue value )
     {
-        bool result = list.Remove( value );
+        bool result = buffer.Remove( value );
         if ( result ) { Removed( value ); }
 
         return result;
@@ -101,7 +99,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalClear()
     {
-        list.Clear();
+        buffer.Clear();
         Reset();
     }
 
@@ -109,14 +107,14 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal bool InternalRemoveAt( int index, [NotNullWhen( true )] out TValue? value )
     {
-        if ( index < 0 || index >= list.Length )
+        if ( index < 0 || index >= buffer.Length )
         {
             value = default;
             return false;
         }
 
-        value = list[index];
-        if ( list.RemoveAt( index ) ) { Removed( value, index ); }
+        value = buffer[index];
+        if ( buffer.RemoveAt( index ) ) { Removed( value, index ); }
 
         return value is not null;
     }
@@ -125,7 +123,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalInsertRange( int i, in TValue value )
     {
-        list.Insert( i, value );
+        buffer.Insert( i, value );
         Added( value, i );
     }
 
@@ -133,7 +131,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal bool InternalTryAdd( in TValue value )
     {
-        if ( list.Contains( value ) ) { return false; }
+        if ( buffer.Contains( value ) ) { return false; }
 
         InternalAdd( value );
         return true;
@@ -143,7 +141,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalAdd( in TValue value )
     {
-        list.Add( value );
+        buffer.Add( value );
         Added( value );
     }
 
@@ -155,11 +153,20 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     }
 
 
-    public virtual bool Exists( Predicate<TValue> match ) => list.IndexOf( match ) >= 0;
+    public virtual ref TValue Get( int index ) => ref buffer[index];
+    public virtual void Set( int index, TValue value )
+    {
+        TValue old = buffer[index];
+        buffer[index] = value;
+        Replaced( old, value, index );
+    }
+
+
+    public virtual bool Exists( Predicate<TValue> match ) => buffer.IndexOf( match ) >= 0;
     public virtual int FindCount( Predicate<TValue> match )
     {
         int length = 0;
-        foreach ( TValue _ in WhereExtensions.Where( list.Span, match ) ) { length++; }
+        foreach ( TValue _ in buffer.Span.Where( match ) ) { length++; }
 
         return length;
     }
@@ -167,62 +174,62 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
 
     public virtual int FindIndex( int start, int count, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        Guard.IsInRangeFor( count, list, nameof(count) );
-        return list.IndexOf( match, start, count );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        Guard.IsInRangeFor( count, buffer, nameof(count) );
+        return buffer.IndexOf( match, start, count );
     }
     public virtual int FindIndex( int start, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        return list.IndexOf( match, start );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        return buffer.IndexOf( match, start );
     }
-    public virtual int FindIndex( Predicate<TValue> match ) => list.IndexOf( match );
+    public virtual int FindIndex( Predicate<TValue> match ) => buffer.IndexOf( match );
 
 
     public virtual int FindLastIndex( int start, int count, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        Guard.IsInRangeFor( count, list, nameof(count) );
-        return list.LastIndexOf( match, start, count );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        Guard.IsInRangeFor( count, buffer, nameof(count) );
+        return buffer.LastIndexOf( match, start, count );
     }
     public virtual int FindLastIndex( int start, Predicate<TValue> match )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        return list.LastIndexOf( match, start );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        return buffer.LastIndexOf( match, start );
     }
-    public virtual int FindLastIndex( Predicate<TValue> match ) => list.LastIndexOf( match );
+    public virtual int FindLastIndex( Predicate<TValue> match ) => buffer.LastIndexOf( match );
 
 
-    public virtual int IndexOf( TValue value ) => list.IndexOf( value );
+    public virtual int IndexOf( TValue value ) => buffer.IndexOf( value );
     public virtual int IndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        return list.IndexOf( value, start );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        return buffer.IndexOf( value, start );
     }
     public virtual int IndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        return list.IndexOf( value, start, count );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        return buffer.IndexOf( value, start, count );
     }
 
 
-    public virtual int LastIndexOf( TValue value ) => list.LastIndexOf( value );
+    public virtual int LastIndexOf( TValue value ) => buffer.LastIndexOf( value );
     public virtual int LastIndexOf( TValue value, int start )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        return list.LastIndexOf( value, start );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        return buffer.LastIndexOf( value, start );
     }
     public virtual int LastIndexOf( TValue value, int start, int count )
     {
-        Guard.IsInRangeFor( start, list, nameof(start) );
-        Guard.IsInRangeFor( count, list, nameof(count) );
-        return list.LastIndexOf( value, start, count );
+        Guard.IsInRangeFor( start, buffer, nameof(start) );
+        Guard.IsInRangeFor( count, buffer, nameof(count) );
+        return buffer.LastIndexOf( value, start, count );
     }
 
 
-    public virtual List<TValue> FindAll( Predicate<TValue>  match ) => list.FindAll( match );
-    public virtual TValue?      Find( Predicate<TValue>     match ) => list.Find( match );
-    public virtual TValue?      FindLast( Predicate<TValue> match ) => list.FindLast( match );
+    public virtual List<TValue> FindAll( Predicate<TValue>  match ) => buffer.FindAll( match );
+    public virtual TValue?      Find( Predicate<TValue>     match ) => buffer.Find( match );
+    public virtual TValue?      FindLast( Predicate<TValue> match ) => buffer.FindLast( match );
 
 
     public virtual bool TryAdd( TValue       value )  => InternalTryAdd( value );
@@ -240,9 +247,9 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     public         void Add( scoped in ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 
 
-    public virtual void CopyTo( TValue[] array )                            => list.CopyTo( array );
-    public virtual void CopyTo( TValue[] array, int arrayIndex )            => list.CopyTo( array, arrayIndex );
-    public virtual void CopyTo( TValue[] array, int arrayIndex, int count ) => list.CopyTo( array, arrayIndex, count );
+    public virtual void CopyTo( TValue[] array )                            => buffer.CopyTo( array );
+    public virtual void CopyTo( TValue[] array, int arrayIndex )            => buffer.CopyTo( array, arrayIndex );
+    public virtual void CopyTo( TValue[] array, int arrayIndex, int count ) => buffer.CopyTo( array, arrayIndex, count );
 
 
     protected internal void InternalInsertRange( int index, IEnumerable<TValue> collection )
@@ -297,7 +304,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     {
         int count = 0;
 
-        foreach ( TValue value in WhereExtensions.Where( list.Span, match ) )
+        foreach ( TValue value in buffer.Span.Where( match ) )
         {
             if ( Remove( value ) ) { count++; }
         }
@@ -317,84 +324,86 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
 
     public virtual void Reverse()
     {
-        list.Reverse();
+        buffer.Reverse();
         Reset();
     }
     public virtual void Reverse( int start, int count )
     {
-        list.Reverse( start, count );
+        buffer.Reverse( start, count );
         Reset();
     }
 
 
-    public virtual void Sort()                             => Sort( _comparer );
-    public virtual void Sort( IComparer<TValue> comparer ) => Sort( comparer.Compare );
+    public void Sort() => Sort( comparer );
+    public virtual void Sort( IComparer<TValue> compare )
+    {
+    #if NET6_0_OR_GREATER
+        if ( buffer.Length is 0 ) { return; }
+
+        buffer.Span.Sort( compare );
+        Reset();
+    #else
+        Sort( compare.Compare );
+    #endif
+    }
     public virtual void Sort( Comparison<TValue> compare )
     {
-        if ( list.Length is 0 ) { return; }
+        if ( buffer.Length is 0 ) { return; }
 
-        list.Span.Sort( compare );
+        buffer.Span.Sort( compare );
         Reset();
     }
-    public virtual void Sort( int start, int count ) => Sort( start, count, _comparer );
-    public virtual void Sort( int start, int count, IComparer<TValue> comparer )
+    public virtual void Sort( int start, int count ) => Sort( start, count, comparer );
+    public virtual void Sort( int start, int count, IComparer<TValue> compare )
     {
-        if ( list.Length is 0 ) { return; }
+        if ( buffer.Length is 0 ) { return; }
 
-        list.Span.Slice( start, count ).Sort( comparer.Compare );
+    #if NET6_0_OR_GREATER
+        buffer.Span.Slice( start, count ).Sort( compare );
+    #else
+        buffer.Span.Slice( start, count ).Sort( compare.Compare );
+    #endif
+
         Reset();
     }
 
 
     void ICollection.CopyTo( Array array, int start )
     {
-        if ( array is TValue[] values ) { list.CopyTo( values, start ); }
+        if ( array is TValue[] values ) { buffer.CopyTo( values, start ); }
     }
     void IList.Remove( object? value )
     {
-        if ( value is TValue x ) { list.Remove( x ); }
+        if ( value is TValue x ) { buffer.Remove( x ); }
     }
     int IList.Add( object? value )
     {
         if ( value is not TValue x ) { return -1; }
 
-        list.Add( x );
-        return list.Length;
+        buffer.Add( x );
+        return buffer.Length;
     }
-    bool IList.Contains( object? value ) => value is TValue x && list.Contains( x );
-    int IList.IndexOf( object? value ) => value is TValue x
-                                              ? list.IndexOf( x )
-                                              : -1;
+    bool IList.Contains( object? value ) => value is TValue x && buffer.Contains( x );
+    int IList.IndexOf( object? value ) =>
+        value is TValue x
+            ? buffer.IndexOf( x )
+            : -1;
     void IList.Insert( int index, object? value )
     {
-        if ( value is TValue x ) { list[index] = x; }
+        if ( value is TValue x ) { buffer[index] = x; }
     }
 
 
-    public virtual bool Contains( TValue value ) => list.Contains( value );
-
-
-    public virtual void Add( TValue value ) => InternalAdd( value );
-
-
+    public virtual bool Contains( TValue value )               => buffer.Contains( value );
+    public virtual void Add( TValue      value )               => InternalAdd( value );
+    public virtual void Insert( int      index, TValue value ) => InternalInsert( index, value );
     public virtual void Clear() => InternalClear();
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal void InternalInsert( int index, TValue value )
-    {
-        list.Insert( index, value );
-        Added( value );
-    }
-
-
-    public virtual void Insert( int index, TValue value ) => InternalInsert( index, value );
 
 
     protected internal override ReadOnlyMemory<TValue> FilteredValues()
     {
         using Buffer<TValue> buffer = new(Count);
-        foreach ( TValue value in list.Span.Where( Filter ) ) { buffer.Add( value ); }
+        foreach ( TValue value in this.buffer.Span.Where( Filter ) ) { buffer.Add( value ); }
 
         return buffer.ToArray();
     }

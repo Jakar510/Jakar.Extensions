@@ -10,6 +10,7 @@ public interface ICollectionAlerts : INotifyCollectionChanged, INotifyPropertyCh
 
 public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, IReadOnlyCollection<T>
 {
+    public const int DEFAULT_CAPACITY = 16;
     public abstract int Count { get; }
 
 

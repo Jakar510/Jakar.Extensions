@@ -338,43 +338,42 @@ public static class BufferExtensions
     public static void Trim<T>( this Buffer<T> buffer, scoped in T value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.Trim( trimElement: value );
+        ReadOnlySpan<T> span = buffer.buffer.Trim( value );
         buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
     public static void Trim<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.Trim( trimElements: value );
+        ReadOnlySpan<T> span = buffer.buffer.Trim(  value );
         buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
     public static void TrimStart<T>( this Buffer<T> buffer, scoped in T value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.TrimStart( trimElement: value );
+        ReadOnlySpan<T> span = buffer.buffer.TrimStart( value );
         buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
     public static void TrimStart<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.TrimStart( trimElements: value );
+        ReadOnlySpan<T> span = buffer.buffer.TrimStart(  value );
         buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
     public static void TrimEnd<T>( this Buffer<T> buffer, scoped in T value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.TrimEnd( trimElement: value );
+        ReadOnlySpan<T> span = buffer.buffer.TrimEnd( value );
         buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
     public static void TrimEnd<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
-        ReadOnlySpan<T> span = buffer.buffer.TrimEnd( trimElements: value );
-        buffer.Length = span.Length;
+        ReadOnlySpan<T> span = buffer.buffer.TrimEnd(  value ); buffer.Length = span.Length;
         span.CopyTo( destination: buffer.buffer );
     }
 }

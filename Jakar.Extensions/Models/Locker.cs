@@ -10,7 +10,7 @@
 namespace Jakar.Extensions;
 
 
-public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
+public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
 {
     IDisposable            AcquireLock();
     IDisposable            AcquireLock( in CancellationToken   token );
@@ -19,6 +19,16 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>
 
     ReadOnlyMemory<TValue>                               Copy();
     ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token );
+}
+
+
+
+public interface ILockedCollection<TValue, out TAsyncLockerEnumerator, out TLockerEnumerator> : ILockedCollection<TValue>
+    where TAsyncLockerEnumerator : IAsyncDisposable
+    where TLockerEnumerator : IDisposable
+{
+    TAsyncLockerEnumerator AsyncValues { get; }
+    TLockerEnumerator      Values      { get; }
 }
 
 

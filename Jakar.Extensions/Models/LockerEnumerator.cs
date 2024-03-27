@@ -4,51 +4,43 @@
 namespace Jakar.Extensions;
 
 
-public struct LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
+public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
 {
     private const    int                       START_INDEX = -1;
     private readonly ILockedCollection<TValue> _collection = collection;
     private          int                       _index      = START_INDEX;
-    private          TValue?                   _current    = default;
-    private          ReadOnlyMemory<TValue>    _cache      = default;
-    public readonly  TValue                    Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-    readonly         object IEnumerator.       Current        => Current  ?? throw new NullReferenceException( nameof(_current) );
-    internal         bool                      ShouldContinue => ++_index < _cache.Length;
+    private          ReadOnlyMemory<TValue>    _cache;
 
 
-    public   void                                    Dispose()       => this = default;
-    readonly IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
-    readonly IEnumerator IEnumerable.                GetEnumerator() => this;
+    public              int                  Length          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _cache.Length; }
+    public              ReadOnlySpan<TValue> Span            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _cache.Span; }
+    public ref readonly TValue               Current         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[_index]; }
+    TValue IEnumerator<TValue>.              Current         { get => Current; }
+    object? IEnumerator.                     Current         => Current;
+    private bool                             _ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ++_index < Length; }
+
+
+    public void Dispose()
+    {
+        _cache = default;
+        GC.SuppressFinalize( this );
+    }
+    IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
+    IEnumerator IEnumerable.                GetEnumerator() => this;
 
 
     public bool MoveNext()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue>) ); }
+        if ( _cache.IsEmpty ) { Reset(); }
 
-        // ReSharper disable once InvertIf
-        if ( _cache.IsEmpty )
-        {
-            _index = START_INDEX;
-            _cache = _collection.Copy();
-        }
-
-        _index += 1;
-
-        _current = _index < _cache.Span.Length
-                       ? _cache.Span[_index]
-                       : default;
-
-        bool result = _index < _cache.Span.Length;
+        bool result = _ShouldContinue;
         if ( result is false ) { Reset(); }
 
         return result;
     }
     public void Reset()
     {
-        if ( _collection is null ) { throw new ObjectDisposedException( nameof(LockerEnumerator<TValue>) ); }
-
-        _cache   = default;
-        _current = default;
-        _index   = START_INDEX;
+        _cache = _collection.Copy();
+        _index = START_INDEX;
     }
 }

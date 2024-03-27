@@ -7,14 +7,15 @@ namespace Jakar.Extensions;
 public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
-    protected readonly     ConcurrentDictionary<TKey, TValue> _dictionary;
-    public sealed override int                                Count      => _dictionary.Count;
-    public                 bool                               IsReadOnly => ((IDictionary)_dictionary).IsReadOnly;
+    protected readonly ConcurrentDictionary<TKey, TValue> _dictionary;
 
+
+    public sealed override int  Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count; }
+    public                 bool IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((IDictionary)_dictionary).IsReadOnly; }
 
     public TValue this[ TKey key ]
     {
-        get => _dictionary[key];
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[key];
         set
         {
             bool exists = TryGetValue( key, out TValue? old );
@@ -26,19 +27,18 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         }
     }
 
+    public ICollection<TKey>                              Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
+    public ICollection<TValue>                            Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
 
-    public ICollection<TKey>                              Keys   => _dictionary.Keys;
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   => _dictionary.Keys;
-    public ICollection<TValue>                            Values => _dictionary.Values;
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _dictionary.Values;
 
-
-    public ObservableConcurrentDictionary() : this( 16 ) { }
+    public ObservableConcurrentDictionary() : this( DEFAULT_CAPACITY ) { }
     public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary ) : this( dictionary, EqualityComparer<TKey>.Default ) { }
     public ObservableConcurrentDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) : this( dictionary.Count, comparer ) => Add( dictionary );
     public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) : this( EqualityComparer<TKey>.Default ) => Add( collection );
     public ObservableConcurrentDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) : this( comparer ) => Add( collection );
-    public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( Environment.ProcessorCount, 16, comparer ) { }
+    public ObservableConcurrentDictionary( IEqualityComparer<TKey>                 comparer ) : this( Environment.ProcessorCount, DEFAULT_CAPACITY, comparer ) { }
     public ObservableConcurrentDictionary( int                                     capacity ) : this( capacity, EqualityComparer<TKey>.Default ) { }
     public ObservableConcurrentDictionary( int                                     capacity,         IEqualityComparer<TKey> comparer ) : this( Environment.ProcessorCount, capacity, comparer ) { }
     public ObservableConcurrentDictionary( int                                     concurrencyLevel, int                     capacity ) : this( concurrencyLevel, capacity, EqualityComparer<TKey>.Default ) { }

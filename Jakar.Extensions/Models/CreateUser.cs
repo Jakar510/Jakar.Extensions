@@ -44,6 +44,7 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
     public bool IsValid         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( UserName )                               && Data.IsValid && IsValidPassword; }
     public bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password, PasswordRequirements ); }
 
+#pragma warning disable IL2026
     [Required]
     [StringLength( PasswordRequirements.MAX_LENGTH, MinimumLength = PasswordRequirements.MIN_LENGTH )]
     [Compare( nameof(ConfirmPassword) )]
@@ -58,6 +59,7 @@ public class CreateUser : ObservableClass, IValidator, IVerifyRequestProvider
             OnPropertyChanged( nameof(IsValidPassword) );
         }
     }
+#pragma warning restore IL2026
 
     [Required]
     public string UserName

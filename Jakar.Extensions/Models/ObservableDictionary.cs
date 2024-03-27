@@ -5,14 +5,15 @@
 public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
-    protected readonly     Dictionary<TKey, TValue> _dictionary;
-    public sealed override int                      Count      => _dictionary.Count;
-    public                 bool                     IsReadOnly => ((IDictionary)_dictionary).IsReadOnly;
+    protected readonly Dictionary<TKey, TValue> _dictionary;
 
+
+    public sealed override int  Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count; }
+    public                 bool IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((IDictionary)_dictionary).IsReadOnly; }
 
     public TValue this[ TKey key ]
     {
-        get => _dictionary[key];
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[key];
         set
         {
             bool exists = ContainsKey( key );
@@ -29,19 +30,19 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
         }
     }
 
-    public ICollection<TKey>                              Keys   => _dictionary.Keys;
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   => _dictionary.Keys;
-    public ICollection<TValue>                            Values => _dictionary.Values;
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => _dictionary.Values;
+    public ICollection<TKey>                              Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
+    public ICollection<TValue>                            Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
 
 
-    public ObservableDictionary() : this( new Dictionary<TKey, TValue>() ) { }
+    public ObservableDictionary() : this( DEFAULT_CAPACITY ) { }
     protected ObservableDictionary( Dictionary<TKey, TValue>             dictionary ) => _dictionary = dictionary;
     public ObservableDictionary( IDictionary<TKey, TValue>               dictionary ) : this( new Dictionary<TKey, TValue>( dictionary ) ) { }
     public ObservableDictionary( IDictionary<TKey, TValue>               dictionary, IEqualityComparer<TKey> comparer ) : this( new Dictionary<TKey, TValue>( dictionary, comparer ) ) { }
     public ObservableDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection ) : this( new Dictionary<TKey, TValue>( collection ) ) { }
     public ObservableDictionary( IEnumerable<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer ) : this( new Dictionary<TKey, TValue>( collection, comparer ) ) { }
-    public ObservableDictionary( IEqualityComparer<TKey>                 comparer ) : this( new Dictionary<TKey, TValue>( comparer ) ) { }
+    public ObservableDictionary( IEqualityComparer<TKey>                 comparer ) : this( DEFAULT_CAPACITY, comparer ) { }
     public ObservableDictionary( int                                     capacity ) : this( new Dictionary<TKey, TValue>( capacity ) ) { }
     public ObservableDictionary( int                                     capacity, IEqualityComparer<TKey> comparer ) : this( new Dictionary<TKey, TValue>( capacity, comparer ) ) { }
 
