@@ -12,9 +12,11 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     private          CancellationToken         _token = token;
     private          int                       _index = START_INDEX;
     private          ReadOnlyMemory<TValue>    _cache;
-    private          TValue?                   _current;
-    public           TValue                    Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-    internal         bool                      ShouldContinue => _token.ShouldContinue() && _index < _cache.Length;
+
+
+    public ref readonly TValue      Current        => ref _cache.Span[_index];
+    TValue IAsyncEnumerator<TValue>.Current        => Current;
+    internal bool                   ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && ++_index < _cache.Length; }
 
 
     public ValueTask DisposeAsync()
@@ -28,22 +30,10 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
 
     public async ValueTask<bool> MoveNextAsync()
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
+        ThrowIfDisposed();
+        if ( _cache.IsEmpty ) { _cache = await _collection.CopyAsync( _token ); }
 
-        // ReSharper disable once InvertIf
-        if ( _cache.IsEmpty )
-        {
-            _index = START_INDEX;
-            _cache = await _collection.CopyAsync( _token );
-        }
-
-        _index += 1;
-
-        _current = _index < _cache.Span.Length
-                       ? _cache.Span[_index]
-                       : default;
-
-        bool result = _index < _cache.Span.Length;
+        bool result = ShouldContinue;
         if ( result is false ) { Reset(); }
 
         return result;
@@ -57,11 +47,20 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     }
     public void Reset()
     {
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
+        ThrowIfDisposed();
+        _cache = default;
+        _index = START_INDEX;
+    }
 
-        _cache   = default;
-        _current = default;
-        _index   = START_INDEX;
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    private void ThrowIfDisposed()
+    {
+    #if NET7_0_OR_GREATER
+        ObjectDisposedException.ThrowIf( _isDisposed, this );
+    #else
+        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
+    #endif
     }
 
 

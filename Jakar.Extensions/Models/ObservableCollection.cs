@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -32,12 +36,13 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection() : this( Comparer<TValue>.Default ) { }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<TValue> values ) : this( values, Comparer<TValue>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<TValue> values, IComparer<TValue> comparer ) : this( values.Length, comparer ) => InternalAdd( values );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<TValue>            values ) : this( values, Comparer<TValue>.Default ) { }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<TValue>            values, IComparer<TValue> comparer ) : this( comparer ) => Add( values );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IComparer<TValue>              comparer ) : this( DEFAULT_CAPACITY, comparer ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity ) : this( capacity, Comparer<TValue>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity, IComparer<TValue> comparer ) : this( new MemoryBuffer<TValue>( capacity ), comparer ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( TValue[]                       values ) : this( values, Comparer<TValue>.Default ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( TValue[]                       values, IComparer<TValue> comparer ) : this( values.AsSpan(), comparer ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity ) : this( Comparer<TValue>.Default, capacity ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IComparer<TValue>              comparer, int capacity = DEFAULT_CAPACITY ) : this( new MemoryBuffer<TValue>( capacity ), comparer ) { }
     protected internal ObservableCollection( MemoryBuffer<TValue> values, IComparer<TValue> comparer )
     {
         this.comparer = comparer;
@@ -58,6 +63,7 @@ public class ObservableCollection<TValue> : CollectionAlerts<TValue>, IList<TVal
     public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
     public static implicit operator ObservableCollection<TValue>( MemoryBuffer<TValue>                                        values ) => new(values, Comparer<TValue>.Default);
 
+    public TValue[] ToArray() => buffer.ToArray();
 
 #if NET6_0_OR_GREATER
     protected internal ReadOnlySpan<TValue> AsSpan() => buffer.Span;

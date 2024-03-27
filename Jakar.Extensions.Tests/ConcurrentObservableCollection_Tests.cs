@@ -7,10 +7,6 @@ namespace Jakar.Extensions.Tests;
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
 {
-    private readonly ConcurrentObservableCollection<int>    _integers = [];
-    private readonly ConcurrentObservableCollection<string> _strings  = [];
-
-
     [Test]
     [TestCase( 1 )]
     [TestCase( 2 )]
@@ -18,10 +14,11 @@ public class ConcurrentObservableCollection_Tests : Assert
     [TestCase( 4 )]
     public void Run( int value )
     {
-        this.True( _integers.TryAdd( value ) );
-        this.True( _integers.Contains( value ) );
-        this.True( _integers.Remove( value ) );
-        this.False( _integers.Contains( value ) );
+        ConcurrentObservableCollection<int> collection = [];
+        this.True( collection.TryAdd( value ) );
+        this.True( collection.Contains( value ) );
+        this.True( collection.Remove( value ) );
+        this.False( collection.Contains( value ) );
     }
 
 
@@ -32,9 +29,10 @@ public class ConcurrentObservableCollection_Tests : Assert
     [TestCase( "4" )]
     public void Run( string value )
     {
-        this.True( _strings.TryAdd( value ) );
-        this.True( _strings.Contains( value ) );
-        this.True( _strings.Remove( value ) );
-        this.False( _strings.Contains( value ) );
+        ConcurrentObservableCollection<string> collection = [];
+        this.True( collection.TryAdd( value ) );
+        this.True( collection.Contains( value ) );
+        this.True( collection.Remove( value ) );
+        this.False( collection.Contains( value ) );
     }
 }

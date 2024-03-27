@@ -481,7 +481,8 @@ public ref struct SqlTableBuilder<TRecord>
             if ( column.Options.HasFlag( ColumnOptions.PrimaryKey ) ) { query.Append( " PRIMARY KEY" ); }
         }
 
-        return query.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' ).Append( "\n );" ).ToString();
+        // return query.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' ).Append( "\n );" ).ToString();
+        return query.ToString();
     }
 
 
