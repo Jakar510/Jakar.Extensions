@@ -12,9 +12,9 @@ namespace Jakar.Extensions;
 
 public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
 {
-    IDisposable            AcquireLock();
-    IDisposable            AcquireLock( in CancellationToken   token );
-    ValueTask<IDisposable> AcquireLockAsync( CancellationToken token );
+    Closer            AcquireLock();
+    Closer            AcquireLock( in CancellationToken   token );
+    ValueTask<Closer> AcquireLockAsync( CancellationToken token );
 
 
     ReadOnlyMemory<TValue>                               Copy();
@@ -35,11 +35,18 @@ public interface ILockedCollection<TValue, out TAsyncLockerEnumerator, out TLock
 
 public interface ILocker
 {
-    bool                   IsTaken { get; }
-    TimeSpan?              TimeOut { get; }
-    IDisposable            Enter( CancellationToken      token = default );
-    ValueTask<IDisposable> EnterAsync( CancellationToken token = default );
-    void                   Exit();
+    bool              IsTaken { get; }
+    TimeSpan?         TimeOut { get; }
+    Closer            Enter( CancellationToken      token = default );
+    ValueTask<Closer> EnterAsync( CancellationToken token = default );
+    void              Exit();
+}
+
+
+
+public readonly record struct Closer( ILocker Locker ) : IDisposable
+{
+    public void Dispose() => Locker.Exit();
 }
 
 
@@ -63,66 +70,23 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
 
 
     public static Locker    Default { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
-    public        bool      IsTaken { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get => _isTaken; }
-    public        TimeSpan? TimeOut { [MethodImpl(        MethodImplOptions.AggressiveInlining )] get; init; }
+    public        bool      IsTaken { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
+    public        TimeSpan? TimeOut { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
 
 
-    public Locker() => _index = Type.Object;
-    public Locker( SemaphoreSlim value )
-    {
-        _index         = Type.SemaphoreSlim;
-        _semaphoreSlim = value;
-    }
-    public Locker( Semaphore value )
-    {
-        _index     = Type.Semaphore;
-        _semaphore = value;
-    }
-    public Locker( ReaderWriterLockSlim value )
-    {
-        _index                = Type.ReaderWriterLockSlim;
-        _readerWriterLockSlim = value;
-    }
-    public Locker( Mutex value )
-    {
-        _index = Type.Mutex;
-        _mutex = value;
-    }
-    public Locker( SpinLock value )
-    {
-        _index    = Type.SpinLock;
-        _spinLock = value;
-    }
-    public Locker( EventWaitHandle value )
-    {
-        _index           = Type.EventWaitHandle;
-        _eventWaitHandle = value;
-    }
-    public Locker( AutoResetEvent value )
-    {
-        _index          = Type.AutoResetEvent;
-        _autoResetEvent = value;
-    }
-    public Locker( ManualResetEvent value )
-    {
-        _index            = Type.ManualResetEvent;
-        _manualResetEvent = value;
-    }
-    public Locker( ManualResetEventSlim value )
-    {
-        _index                = Type.ManualResetEventSlim;
-        _manualResetEventSlim = value;
-    }
-    public Locker( Barrier value )
-    {
-        _index   = Type.Barrier;
-        _barrier = value;
-    }
-    public Locker( CountdownEvent value )
-    {
-        _index          = Type.CountdownEvent;
-        _countdownEvent = value;
-    }
+    public Locker() : this( Type.Object ) { }
+    private Locker( Type                type ) => _index = type;
+    public Locker( SemaphoreSlim        value ) : this( Type.SemaphoreSlim ) => _semaphoreSlim = value;
+    public Locker( Semaphore            value ) : this( Type.Semaphore ) => _semaphore = value;
+    public Locker( ReaderWriterLockSlim value ) : this( Type.ReaderWriterLockSlim ) => _readerWriterLockSlim = value;
+    public Locker( Mutex                value ) : this( Type.Mutex ) => _mutex = value;
+    public Locker( SpinLock             value ) : this( Type.SpinLock ) => _spinLock = value;
+    public Locker( EventWaitHandle      value ) : this( Type.EventWaitHandle ) => _eventWaitHandle = value;
+    public Locker( AutoResetEvent       value ) : this( Type.AutoResetEvent ) => _autoResetEvent = value;
+    public Locker( ManualResetEvent     value ) : this( Type.ManualResetEvent ) => _manualResetEvent = value;
+    public Locker( ManualResetEventSlim value ) : this( Type.ManualResetEventSlim ) => _manualResetEventSlim = value;
+    public Locker( Barrier              value ) : this( Type.Barrier ) => _barrier = value;
+    public Locker( CountdownEvent       value ) : this( Type.CountdownEvent ) => _countdownEvent = value;
 
 
     public static implicit operator Locker( SemaphoreSlim        value ) => new(value);
@@ -137,21 +101,59 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     public static implicit operator Locker( Barrier              value ) => new(value);
     public static implicit operator Locker( CountdownEvent       value ) => new(value);
 
-    public void Dispose() => Exit();
-    public ValueTask DisposeAsync()
+    public void Dispose()
     {
         Exit();
-        return default;
+        _autoResetEvent?.Dispose();
+        _barrier?.Dispose();
+        _countdownEvent?.Dispose();
+        _eventWaitHandle?.Dispose();
+        _manualResetEvent?.Dispose();
+        _manualResetEventSlim?.Dispose();
+        _mutex?.Dispose();
+        _readerWriterLockSlim?.Dispose();
+        _semaphore?.Dispose();
+        _semaphoreSlim?.Dispose();
+    }
+    public async ValueTask DisposeAsync()
+    {
+        Exit();
+        if ( _autoResetEvent != null ) { await CastAndDispose( _autoResetEvent ); }
+
+        if ( _barrier != null ) { await CastAndDispose( _barrier ); }
+
+        if ( _countdownEvent != null ) { await CastAndDispose( _countdownEvent ); }
+
+        if ( _eventWaitHandle != null ) { await CastAndDispose( _eventWaitHandle ); }
+
+        if ( _manualResetEvent != null ) { await CastAndDispose( _manualResetEvent ); }
+
+        if ( _manualResetEventSlim != null ) { await CastAndDispose( _manualResetEventSlim ); }
+
+        if ( _mutex != null ) { await CastAndDispose( _mutex ); }
+
+        if ( _readerWriterLockSlim != null ) { await CastAndDispose( _readerWriterLockSlim ); }
+
+        if ( _semaphore != null ) { await CastAndDispose( _semaphore ); }
+
+        if ( _semaphoreSlim != null ) { await CastAndDispose( _semaphoreSlim ); }
+
+        return;
+
+        static async ValueTask CastAndDispose( IDisposable resource )
+        {
+            if ( resource is IAsyncDisposable resourceAsyncDisposable ) { await resourceAsyncDisposable.DisposeAsync(); }
+            else { resource.Dispose(); }
+        }
     }
 
 
-    public IDisposable Enter( CancellationToken token = default ) => Enter( ref _isTaken, token );
-    public IDisposable Enter( ref bool lockTaken, CancellationToken token = default )
+    public Closer Enter( CancellationToken token = default ) => Enter( ref _isTaken, token );
+    public Closer Enter( ref bool lockTaken, CancellationToken token = default )
     {
         switch ( _index )
         {
             case Type.Object:
-                lockTaken = false;
                 Monitor.Enter( this, ref lockTaken );
                 break;
 
@@ -271,14 +273,13 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         _isTaken = lockTaken;
         return new Closer( this );
     }
-    public async ValueTask<IDisposable> EnterAsync( CancellationToken token = default )
+    public async ValueTask<Closer> EnterAsync( CancellationToken token = default )
     {
         bool lockTaken = false;
 
         switch ( _index )
         {
             case Type.Object:
-                lockTaken = false;
                 Monitor.Enter( this, ref lockTaken );
                 break;
 
@@ -467,6 +468,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert( _countdownEvent is not null, nameof(_countdownEvent) + " is not null" );
                 _countdownEvent.Reset();
                 return;
+
+            default: throw new OutOfRangeException( nameof(_index), _index );
         }
     }
 
@@ -611,13 +614,6 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         flag1 = flag2;
 
         return flag1;
-    }
-
-
-
-    public readonly record struct Closer( Locker Locker ) : IDisposable
-    {
-        public void Dispose() => Locker.Exit();
     }
 
 

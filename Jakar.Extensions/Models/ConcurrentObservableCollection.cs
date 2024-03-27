@@ -524,10 +524,10 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     IEnumerator IEnumerable.                 GetEnumerator()                               => GetEnumerator();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock()                                                                                     => locker.Enter();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( scoped in CancellationToken token )                                                  => locker.Enter( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public IDisposable            AcquireLock( ref       bool              lockTaken, scoped in CancellationToken token = default ) => locker.Enter( ref lockTaken, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<IDisposable> AcquireLockAsync( CancellationToken      token ) => locker.EnterAsync( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock()                                                                                     => locker.Enter();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock( scoped in CancellationToken token )                                                  => locker.Enter( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock( ref       bool              lockTaken, scoped in CancellationToken token = default ) => locker.Enter( ref lockTaken, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<Closer> AcquireLockAsync( CancellationToken      token ) => locker.EnterAsync( token );
 
 
     protected internal ReadOnlyMemory<TValue> Copy()
