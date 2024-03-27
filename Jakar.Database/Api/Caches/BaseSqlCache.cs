@@ -22,8 +22,8 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new(StringComparer.InvariantCulture);
 
 
-    protected IEnumerable<string>                  _KeyValuePairs { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Properties.Values.Select( x => x.KeyValuePair ); }
-    protected FrozenDictionary<string, Descriptor> _Properties    { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => SqlProperties[Instance]; }
+    protected IEnumerable<string>                  _KeyValuePairs { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Properties.Values.Select( x => x.KeyValuePair ); }
+    protected FrozenDictionary<string, Descriptor> _Properties    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => SqlProperties[Instance]; }
 
 
     public          string     CreatedBy    { get; init; }
@@ -46,9 +46,9 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     }
 
 
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => _Properties[name].KeyValuePair );
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
-    [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetDescriptors( DynamicParameters   parameters ) => parameters.ParameterNames.Select( name => _Properties[name].KeyValuePair );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] protected IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select( KeyValuePair );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] protected string              KeyValuePair( string                columnName ) => _Properties[columnName].KeyValuePair;
 
     public virtual void Reset()
     {

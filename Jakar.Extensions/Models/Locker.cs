@@ -69,9 +69,9 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private          bool                  _isTaken;
 
 
-    public static Locker    Default { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
-    public        bool      IsTaken { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
-    public        TimeSpan? TimeOut { [Pure] [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
+    public        bool      IsTaken { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
+    public        TimeSpan? TimeOut { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
 
 
     public Locker() : this( Type.Object ) { }
