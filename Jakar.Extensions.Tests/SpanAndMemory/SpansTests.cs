@@ -122,7 +122,7 @@ public class SpansTests : Assert
     public void AsBytes( string value )
     {
         ReadOnlySpan<byte> results = Spans.AsBytes( value );
-        this.AreEquals( Encoding.Unicode.GetBytes( value ), results );
+        this.AreEqual( Encoding.Unicode.GetBytes( value ), results );
     }
 
 
@@ -133,7 +133,7 @@ public class SpansTests : Assert
     {
         ReadOnlyMemory<byte> array = Encoding.UTF8.GetBytes( value );
         this.True( array.TryAsSegment( out ArraySegment<byte> segment ) );
-        this.AreEquals( array.Span, segment.Array );
+        this.AreEqual( array.Span, segment.Array );
     }
 
 
@@ -146,7 +146,7 @@ public class SpansTests : Assert
         string               result = array.ConvertToString( Encoding.Unicode );
         Console.WriteLine( value );
         Console.WriteLine( result );
-        this.AreEquals<char>( value, result );
+        this.AreEqual<char>( value, result );
     }
 
 
@@ -158,7 +158,7 @@ public class SpansTests : Assert
         Span<char> span = stackalloc char[expected.Length];
         this.True( Spans.TryCopyTo( value, ref span, c ) );
         string result = span.ToString();
-        this.AreEquals<char>( expected, result );
+        this.AreEqual<char>( expected, result );
     }
 
 
@@ -358,7 +358,7 @@ public class SpansTests : Assert
     public void Where( params double[] values )
     {
         Span<double> results = Spans.Where<double>( values, IsDevisableByTwo );
-        this.AreEquals<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
+        this.AreEqual<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
 
@@ -371,7 +371,7 @@ public class SpansTests : Assert
     public void WhereValues( params double[] values )
     {
         Span<double> results = Spans.WhereValues<double>( values, IsDevisableByTwo );
-        this.AreEquals<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
+        this.AreEqual<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
 

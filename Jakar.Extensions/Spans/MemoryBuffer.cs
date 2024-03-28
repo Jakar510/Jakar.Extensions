@@ -27,9 +27,9 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     public Span<T> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.Slice( start, length ); }
     public             int       Length { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
     protected internal Memory<T> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
-    public             Span<T>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[Length..]; }
-    protected internal Span<T>   Raw    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
-    public             Span<T>   Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Raw[..Length]; }
+    public             Span<T>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Array[Length..]; }
+    protected internal Span<T>   Array  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
+    public             Span<T>   Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Array[..Length]; }
 
 
     public MemoryBuffer() : this( DEFAULT_CAPACITY ) { }
@@ -67,12 +67,15 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalCapacityBeyondPos"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalCapacityBeyondPos"> Number of chars requested beyond current position. </param>
-    private void Grow( in uint additionalCapacityBeyondPos ) => Grow( (uint)Capacity, (uint)_length + additionalCapacityBeyondPos );
+    private void Grow( in uint additionalCapacityBeyondPos )
+    {
+        Guard.IsGreaterThan( additionalCapacityBeyondPos, 0 );
+        Grow( (uint)Capacity, (uint)_length + additionalCapacityBeyondPos );
+    }
     private void Grow( in uint capacity, in uint requestedCapacity )
     {
         ThrowIfReadOnly();
-        Debug.Assert( requestedCapacity > 0 );
-        Debug.Assert( requestedCapacity >= capacity, "Grow called incorrectly, no resize is needed." );
+        Guard.IsGreaterThan( requestedCapacity, capacity );
 
         int minimumLength = checked ((int)Math.Min( Math.Max( requestedCapacity, capacity * 2 ), int.MaxValue ));
         T[] poolArray     = ArrayPool<T>.Shared.Rent( minimumLength );
@@ -82,7 +85,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ref T GetPinnableReference() => ref Raw.GetPinnableReference();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ref T GetPinnableReference() => ref Array.GetPinnableReference();
     public ref T GetPinnableReference( T terminate )
     {
         Add( terminate );
@@ -96,12 +99,12 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     public void Clear()
     {
         Length = 0;
-        Raw.Clear();
+        Array.Clear();
     }
     public void Reset( T value )
     {
         Length = 0;
-        Raw.Fill( value );
+        Array.Fill( value );
     }
 
 
@@ -116,13 +119,13 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
         length = 0;
         return false;
     }
-    public void CopyTo( T[] array )                            => CopyTo( array, 0 );
-    public void CopyTo( T[] array, int arrayIndex )            => CopyTo( array, 0, Length );
-    public void CopyTo( T[] array, int arrayIndex, int count ) => Span.CopyTo( new Span<T>( array, arrayIndex, count ) );
+    public void CopyTo( T[] array )                             => CopyTo( array, 0 );
+    public void CopyTo( T[] array, int arrayIndex )             => CopyTo( array, 0, Length );
+    public void CopyTo( T[] array, int arrayIndex, int length ) => Span.CopyTo( new Span<T>( array, arrayIndex, length ) );
 
 
-    public void Reverse( int start, int count ) => Raw.Slice( start, count ).Reverse();
-    public void Reverse() => Raw.Reverse();
+    public void Reverse( int start, int length ) => Array.Slice( start, length ).Reverse();
+    public void Reverse() => Array.Reverse();
 
 
     public ReadOnlySpan<T> AsSpan( T? terminate )
@@ -136,112 +139,123 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<T> Slice( int start, int length ) => Span.Slice( start, length );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T value, in int start = 0 ) => IndexOf( value, start, Length );
-    public int IndexOf( T value, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T value, in int start = 0 ) => IndexOf( value, start, Length - 1 );
+    public int IndexOf( T value, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( end >= start );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( endInclusive, start );
+        Span<T> span = Span;
 
-        for ( int i = start; i < end; i++ )
+        for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( _comparer.Equals( Raw[i], value ) ) { return i; }
+            if ( _comparer.Equals( span[i], value ) ) { return i; }
         }
 
         return -1;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( Predicate<T> match, in int start = 0 ) => IndexOf( match, start, Length );
-    public int IndexOf( Predicate<T> match, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( Predicate<T> match, in int start = 0 ) => IndexOf( match, start, Length - 1 );
+    public int IndexOf( Predicate<T> match, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( end >= start );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
-        for ( int i = start; i < end; i++ )
+        Span<T> span = Span;
+
+        for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( match( Raw[i] ) ) { return i; }
+            if ( match( span[i] ) ) { return i; }
         }
 
         return -1;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( T value, in int end = 0 ) => LastIndexOf( value, Length, end );
-    public int LastIndexOf( T value, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( T value, in int endInclusive = 0 ) => LastIndexOf( value, Length - 1, endInclusive );
+    public int LastIndexOf( T value, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( start >= end );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( start, endInclusive );
+        Span<T> span = Span;
 
-        for ( int i = start; i < end; i-- )
+        for ( int i = start; i >= endInclusive; i-- )
         {
-            if ( _comparer.Equals( Raw[i], value ) ) { return i; }
+            if ( _comparer.Equals( span[i], value ) ) { return i; }
         }
 
         return -1;
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( Predicate<T> match, in int end = 0 ) => LastIndexOf( match, Length, end );
-    public int LastIndexOf( Predicate<T> match, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( Predicate<T> match, in int endInclusive = 0 ) => LastIndexOf( match, Length - 1, endInclusive );
+    public int LastIndexOf( Predicate<T> match, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( start >= end );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
-        for ( int i = start; i < end; i-- )
+        Span<T> span = Span;
+
+        for ( int i = start; i >= endInclusive; i-- )
         {
-            if ( match( Raw[i] ) ) { return i; }
+            if ( match( span[i] ) ) { return i; }
         }
 
         return -1;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match, in int end = 0 ) => FindLast( match, Length, end );
-    public T? FindLast( Predicate<T> match, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match, in int endInclusive = 0 ) => FindLast( match, Length - 1, endInclusive );
+    public T? FindLast( Predicate<T> match, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( start >= end );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
-        for ( int i = start; i < end; i-- )
+        Span<T> span = Span;
+
+        for ( int i = start; i >= endInclusive; i-- )
         {
-            if ( match( Raw[i] ) ) { return Raw[i]; }
+            if ( match( span[i] ) ) { return span[i]; }
         }
 
         return default;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, in int start = 0 ) => Find( match, start, Length );
-    public T? Find( Predicate<T> match, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, in int start = 0 ) => Find( match, start, Length - 1 );
+    public T? Find( Predicate<T> match, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( start >= end );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
-        for ( int i = start; i < end; i++ )
+        Span<T> span = Span;
+
+        for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( match( Raw[i] ) ) { return Raw[i]; }
+            if ( match( span[i] ) ) { return span[i]; }
         }
 
         return default;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public List<T> FindAll( Predicate<T> match, in int start = 0 ) => FindAll( match, start, Length );
-    public List<T> FindAll( Predicate<T> match, in int start, in int end )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public List<T> FindAll( Predicate<T> match, in int start = 0 ) => FindAll( match, start, Length - 1 );
+    public List<T> FindAll( Predicate<T> match, in int start, in int endInclusive )
     {
-        Trace.Assert( start >= 0 && start <= Length );
-        Trace.Assert( end   >= 0 && end   <= Length );
-        Trace.Assert( start >= end );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsGreaterThanOrEqualTo( endInclusive, start );
         List<T> list = new(Length);
+        Span<T> span = Span;
 
-        for ( int i = start; i < end; i++ )
+        for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( match( Raw[i] ) ) { list.Add( Raw[i] ); }
+            if ( match( span[i] ) ) { list.Add( span[i] ); }
         }
 
         return list;
@@ -256,7 +270,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     {
         if ( index < 0 || index >= Length ) { return false; }
 
-        Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
+        System.Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
         return true;
     }
     public bool Remove( T item ) => RemoveAt( IndexOf( item ) );
@@ -264,6 +278,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
 
     public void Replace( int index, T value, int count = 1 )
     {
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
         EnsureCapacity( count );
 
@@ -279,6 +294,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
 
     public void Insert( int index, T value, int count = 1 )
     {
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
         T       x    = value;
         Span<T> span = MemoryMarshal.CreateSpan( ref x, count );
         span.Fill( value );
@@ -292,7 +308,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
         if ( values.IsEmpty ) { return; }
 
         T[] array = _arrayToReturnToPool;
-        if ( index < Capacity ) { Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
+        if ( index < Capacity ) { System.Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
 
         values.CopyTo( array.AsSpan()[index..] );
         Length += values.Length;
@@ -303,43 +319,46 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     {
         ThrowIfReadOnly();
         EnsureCapacity( 1 );
-        Raw[Length++] = value;
+        Array[Length++] = value;
     }
     public void Add( T c, int count )
     {
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
         EnsureCapacity( count );
 
-        for ( int i = Length; i < Length + count; i++ ) { Raw[i] = c; }
+        Span<T> span = Array;
+        for ( int i = Length; i < Length + count; i++ ) { span[i] = c; }
 
         Length += count;
     }
-    public void Add( scoped in ReadOnlySpan<T> span )
+    public void Add( scoped in ReadOnlySpan<T> values )
     {
         ThrowIfReadOnly();
+        Span<T> span = Array;
 
-        switch ( span.Length )
+        switch ( values.Length )
         {
             // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
             case 1 when Length + 1 < Capacity:
             {
-                Raw[Length++] = span[0];
+                span[Length++] = values[0];
                 return;
             }
 
             case 2 when Length + 2 < Capacity:
             {
-                Raw[Length++] = span[0];
-                Raw[Length++] = span[1];
+                span[Length++] = values[0];
+                span[Length++] = values[1];
                 return;
             }
 
             default:
             {
-                EnsureCapacity( span.Length );
+                EnsureCapacity( values.Length );
 
-                span.CopyTo( Next );
-                Length += span.Length;
+                values.CopyTo( Next );
+                Length += values.Length;
                 return;
             }
         }

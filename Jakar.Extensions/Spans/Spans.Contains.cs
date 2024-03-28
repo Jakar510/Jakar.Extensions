@@ -135,7 +135,7 @@ public static partial class Spans
         #else
             for ( int j = 0; j < raw.Length; j++ )
             {
-                if ( _comparer.Equals( raw[j], value[j] ) ) { return true; }
+                if ( comparer.Equals( raw[j], value[j] ) ) { return true; }
             }
         #endif
         }

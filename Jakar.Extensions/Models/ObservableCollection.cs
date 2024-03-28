@@ -27,10 +27,10 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public sealed override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
     bool IList.                IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
     bool IList.                IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool ICollection<T>.  IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection<T>.       IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
     bool ICollection.          IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
     object? IList.this[ int index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
-    public T this[ int index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
+    public T this[ int      index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
     object ICollection.SyncRoot { [MethodImpl(                     MethodImplOptions.AggressiveInlining )] get => buffer; }
 
 
@@ -41,7 +41,7 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<T>            values, IComparer<T> comparer ) : this( comparer ) => Add( values );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( T[]                       values ) : this( values, Comparer<T>.Default ) { }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( T[]                       values, IComparer<T> comparer ) : this( values.AsSpan(), comparer ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                            capacity ) : this( Comparer<T>.Default, capacity ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                       capacity ) : this( Comparer<T>.Default, capacity ) { }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IComparer<T>              comparer, int capacity = DEFAULT_CAPACITY ) : this( new MemoryBuffer<T>( capacity ), comparer ) { }
     protected internal ObservableCollection( MemoryBuffer<T> values, IComparer<T> comparer )
     {
@@ -132,8 +132,13 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal bool InternalTryAdd( in T value ) => 
-        buffer.Contains( value ) is false && InternalAdd( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal bool InternalTryAdd( in T value )
+    {
+        if ( buffer.Contains( value ) ) { return false; }
+
+        return InternalAdd( value );
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -317,7 +322,7 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public         int  Remove( scoped in ImmutableArray<T> values ) => Remove( values.AsSpan() );
 
 
-    public virtual void RemoveAt( int index )                                          => InternalRemoveAt( index, out _ );
+    public virtual void RemoveAt( int index )                                     => InternalRemoveAt( index, out _ );
     public virtual bool RemoveAt( int index, [NotNullWhen( true )] out T? value ) => InternalRemoveAt( index, out value );
 
 
@@ -393,9 +398,9 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    public virtual bool Contains( T value )               => buffer.Contains( value );
-    public virtual void Add( T      value )               => InternalAdd( value );
-    public virtual void Insert( int      index, T value ) => InternalInsert( index, value );
+    public virtual bool Contains( T value )          => buffer.Contains( value );
+    public virtual void Add( T      value )          => InternalAdd( value );
+    public virtual void Insert( int index, T value ) => InternalInsert( index, value );
     public virtual void Clear() => InternalClear();
 
 
