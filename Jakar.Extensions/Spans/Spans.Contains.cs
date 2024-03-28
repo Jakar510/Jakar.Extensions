@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -83,6 +87,60 @@ public static partial class Spans
     #else
         return span.Contains( value );
     #endif
+    }
+
+
+    public static bool Contains<T>( this Span<T> span, scoped in T value, IEqualityComparer<T> comparer )
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.Contains( value, comparer );
+    }
+    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in T value, IEqualityComparer<T> comparer )
+    {
+        if ( span.IsEmpty ) { return false; }
+
+        foreach ( T x in span )
+        {
+            if ( comparer.Equals( x, value ) ) { return true; }
+        }
+
+        return false;
+    }
+
+
+    public static bool Contains<T>( this Span<T> span, scoped in ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    {
+        ReadOnlySpan<T> temp = span;
+        return temp.Contains( value, comparer );
+    }
+    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    {
+        Debug.Assert( comparer is not null );
+        if ( span.IsEmpty ) { return false; }
+
+        if ( value.IsEmpty ) { return false; }
+
+        if ( value.Length > span.Length ) { return false; }
+
+    #if NET6_0_OR_GREATER
+        if ( value.Length == span.Length ) { return span.SequenceEqual( value, comparer ); }
+    #endif
+
+        for ( int i = 0; i < span.Length || i + value.Length < span.Length; i++ )
+        {
+            ReadOnlySpan<T> raw = span.Slice( i, value.Length );
+
+        #if NET6_0_OR_GREATER
+            if ( raw.SequenceEqual( value, comparer ) ) { return true; }
+        #else
+            for ( int j = 0; j < raw.Length; j++ )
+            {
+                if ( _comparer.Equals( raw[j], value[j] ) ) { return true; }
+            }
+        #endif
+        }
+
+        return false;
     }
 
 
@@ -213,36 +271,36 @@ public static partial class Spans
 
     // TODO: prep for DotNet 7
     // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
-    // public static bool Contains<TValue>( this ReadOnlySpan<TValue> span, TValue value ) where TValue : struct
+    // public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : struct
     // {
-    //     if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+    //     if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
     //     {
-    //         ref TValue current = ref MemoryMarshal.GetReference(span);
+    //         ref T current = ref MemoryMarshal.GetReference(span);
     //
-    //         if ( Vector256.IsHardwareAccelerated && span.Length >= Vector256<TValue>.Count )
+    //         if ( Vector256.IsHardwareAccelerated && span.Length >= Vector256<T>.Count )
     //         {
-    //             Vector256<TValue> target = Vector256.Create(value);
-    //             ref TValue        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector256<TValue>.Count);
+    //             Vector256<T> target = Vector256.Create(value);
+    //             ref T        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector256<T>.Count);
     //
     //             do
     //             {
     //                 if ( Vector.EqualsAny(target, Vector256.LoadUnsafe(ref current)) ) { return true; }
     //
-    //                 current = ref Unsafe.Add(ref current, Vector256<TValue>.Count);
+    //                 current = ref Unsafe.Add(ref current, Vector256<T>.Count);
     //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
     //
     //             if ( Vector256.EqualsAny(target, Vector256.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
     //         }
     //         else
     //         {
-    //             Vector128<TValue> target            = new Vector<TValue>(value).AsVector128();
-    //             ref TValue        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector128<TValue>.Count);
+    //             Vector128<T> target            = new Vector<T>(value).AsVector128();
+    //             ref T        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector128<T>.Count);
     //
     //             do
     //             {
     //                 if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref current)) ) { return true; }
     //
-    //                 current = ref Unsafe.Add(ref current, Vector128<TValue>.Count);
+    //                 current = ref Unsafe.Add(ref current, Vector128<T>.Count);
     //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
     //
     //             if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
@@ -250,7 +308,7 @@ public static partial class Spans
     //     }
     //
     //
-    //     foreach ( TValue item in span )
+    //     foreach ( T item in span )
     //     {
     //         if ( value.Equals(item) ) { return true; }
     //     }

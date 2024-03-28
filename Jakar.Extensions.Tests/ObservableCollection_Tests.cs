@@ -58,27 +58,20 @@ public class ObservableCollection_Tests : Assert
     [TestCase( 2 )]
     [TestCase( 3 )]
     [TestCase( 4 )]
-    public void Run( int value )
-    {
-        ObservableCollection<int> collection = [];
-        this.True( collection.TryAdd( value ) );
-        this.True( collection.Contains( value ) );
-        this.True( collection.Remove( value ) );
-        this.False( collection.Contains( value ) );
-    }
-
-
-    [Test]
     [TestCase( "1" )]
     [TestCase( "2" )]
     [TestCase( "3" )]
     [TestCase( "4" )]
-    public void Run( string value )
+    public void Run<T>( T value )
     {
-        ObservableCollection<string> collection = [];
+        ObservableCollection<T> collection = [];
         this.True( collection.TryAdd( value ) );
         this.True( collection.Contains( value ) );
         this.True( collection.Remove( value ) );
         this.False( collection.Contains( value ) );
+        collection.Add( value );
+        this.False( collection.TryAdd( value ) );
+        collection.Clear();
+        this.AreEqual( collection.Count, 0 );
     }
 }
