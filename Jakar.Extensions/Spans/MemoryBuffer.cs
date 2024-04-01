@@ -25,7 +25,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     public ref T this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
     public Span<T> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => Span[range]; }
     public Span<T> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.Slice( start, length ); }
-    public             int       Length { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
+    public             int       Length { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Clamp( value, 0, Capacity ); }
     protected internal Memory<T> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
     public             Span<T>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Array[Length..]; }
     protected internal Span<T>   Array  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
@@ -244,21 +244,21 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public List<T> FindAll( Predicate<T> match, in int start = 0 ) => FindAll( match, start, Length - 1 );
-    public List<T> FindAll( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( Predicate<T> match, in int start = 0 ) => FindAll( match, start, Length - 1 );
+    public T[] FindAll( Predicate<T> match, in int start, in int endInclusive )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
-        List<T> list = new(Length);
-        Span<T> span = Span;
+        using Buffer<T> buffer = new(Length);
+        ReadOnlySpan<T> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( match( span[i] ) ) { list.Add( span[i] ); }
+            if ( match( span[i] ) ) { buffer.Add( span[i] ); }
         }
 
-        return list;
+        return buffer.ToArray();
     }
 
 
@@ -271,6 +271,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
         if ( index < 0 || index >= Length ) { return false; }
 
         System.Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
+        Length--;
         return true;
     }
     public bool Remove( T item ) => RemoveAt( IndexOf( item ) );

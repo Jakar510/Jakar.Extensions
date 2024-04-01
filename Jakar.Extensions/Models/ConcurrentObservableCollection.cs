@@ -192,13 +192,13 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
 
 
-    public override List<T> FindAll( Predicate<T> match )
+    public override T[] FindAll( Predicate<T> match )
     {
         using ( AcquireLock() ) { return base.FindAll( match ); }
     }
-    public async ValueTask<List<T>> FindAllAsync( Predicate<T> match, CancellationToken token = default )
+    public async ValueTask<T[]> FindAllAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.FindAll( match ); }
+        using ( await AcquireLockAsync( token ) ) { return base.FindAll( match ); }
     }
     public override T? Find( Predicate<T> match )
     {

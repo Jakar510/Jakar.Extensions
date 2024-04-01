@@ -10,8 +10,6 @@ namespace Jakar.Extensions.Tests;
 
 [TestFixture]
 [TestOf( typeof(ObservableCollection<>) )]
-
-// ReSharper disable once InconsistentNaming
 public class ObservableCollection_Tests : Assert
 {
     [Test]
@@ -27,7 +25,7 @@ public class ObservableCollection_Tests : Assert
         this.AreEqual( value, collection.FindIndex( Match ) );
         this.AreEqual( value, collection.Find( Match ) );
         this.AreEqual( value, collection.FindLast( Match ) );
-        this.AreEqual( 1,     collection.FindAll( Match ).Count );
+        this.AreEqual( 1,     collection.FindAll( Match ).Length );
         this.AreEqual( value, collection.FindAll( Match )[0] );
         return;
 

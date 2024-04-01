@@ -116,9 +116,7 @@ public static partial class Spans
     public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
     {
         Debug.Assert( comparer is not null );
-        if ( span.IsEmpty ) { return false; }
-
-        if ( value.IsEmpty ) { return false; }
+        if ( span.IsEmpty || value.IsEmpty ) { return false; }
 
         if ( value.Length > span.Length ) { return false; }
 

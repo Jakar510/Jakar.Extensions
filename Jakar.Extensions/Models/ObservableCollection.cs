@@ -231,9 +231,9 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    public virtual List<T> FindAll( Predicate<T>  match ) => buffer.FindAll( match );
-    public virtual T?      Find( Predicate<T>     match ) => buffer.Find( match );
-    public virtual T?      FindLast( Predicate<T> match ) => buffer.FindLast( match );
+    public virtual T[] FindAll( Predicate<T>  match ) => buffer.FindAll( match );
+    public virtual T?  Find( Predicate<T>     match ) => buffer.Find( match );
+    public virtual T?  FindLast( Predicate<T> match ) => buffer.FindLast( match );
 
 
     public virtual bool TryAdd( T       value )  => InternalTryAdd( value );
