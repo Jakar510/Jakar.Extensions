@@ -204,9 +204,10 @@ public static class StringExtensions
     public static string ToScreamingCase( this string value ) => value.ToSnakeCase().ToUpper().Replace( "__", "_" );
 
 
-    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+    /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
     public static string ToSnakeCase( this string value ) => value.ToSnakeCase( CultureInfo.InvariantCulture );
-    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+
+    /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
     public static string ToSnakeCase( this string value, CultureInfo cultureInfo )
     {
         if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
@@ -239,7 +240,7 @@ public static class StringExtensions
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory.HasValue && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;
@@ -247,6 +248,11 @@ public static class StringExtensions
                 case UnicodeCategory.LowercaseLetter:
                     if ( previousCategory is UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
 
+                    break;
+
+                case UnicodeCategory.DecimalDigitNumber:
+                case UnicodeCategory.LetterNumber:
+                case UnicodeCategory.OtherNumber:
                     break;
 
                 default:

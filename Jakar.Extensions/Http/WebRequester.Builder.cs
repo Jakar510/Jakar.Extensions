@@ -19,10 +19,9 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
-// ReSharper disable once ClassWithMembersNeverInherited.Global
     public ref struct Builder( IHostInfo value )
     {
-        private readonly WebHeaders                 _headers                      = new();
+        private readonly WebHeaders                 _headers                      = [];
         private readonly IHostInfo                  _hostInfo                     = value;
         private          Encoding                   _encoding                     = Encoding.Default;
         private          bool?                      _useProxy                     = default;
@@ -71,7 +70,7 @@ public partial class WebRequester
 
         private readonly HttpClient GetClient()
         {
-            var client = new HttpClient( GetHandler() );
+            HttpClient client = new(GetHandler());
             foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
 
             client.DefaultRequestHeaders.Authorization = _authenticationHeader;
@@ -149,7 +148,7 @@ public partial class WebRequester
 
             return handler;
         }
-        public readonly WebRequester Build() => new(_logger, GetClient(), _hostInfo, _retryPolicy, _encoding);
+        public readonly WebRequester Build() => new(GetClient(), _hostInfo, _encoding, _logger, _retryPolicy);
 
 
         public Builder With_Logger( ILogger logger )
