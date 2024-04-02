@@ -5,7 +5,8 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
-public interface IAddress
+public interface IAddress<out TID> : IUniqueID<TID>
+    where TID : IComparable<TID>, IEquatable<TID>, IFormattable
 {
     public            string? Address         { get; }
     public            string  City            { get; }
@@ -15,15 +16,14 @@ public interface IAddress
     public            string  Line2           { get; }
     [Required] public string  PostalCode      { get; }
     public            string  StateOrProvince { get; }
-    public            Guid?   UserID          { get; }
 }
 
 
 
-public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>, IComparable, JsonModels.IJsonModel
+public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<UserAddress<TID>>, IComparable, JsonModels.IJsonModel
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     private bool                          _isPrimary;
-    private Guid?                         _userID;
     private IDictionary<string, JToken?>? _additionalData;
     private string                        _city            = string.Empty;
     private string                        _country         = string.Empty;
@@ -34,12 +34,13 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
     private string?                       _address;
 
 
-    public static Sorter<UserAddress> Sorter => Sorter<UserAddress>.Default;
+    public static Sorter<UserAddress<TID>> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<UserAddress<TID>>.Default; }
 
 
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
-    public                     string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
+    [JsonExtensionData]                       public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
+    [StringLength( UNICODE_STRING_CAPACITY )] public string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
 
+    [StringLength( UNICODE_STRING_CAPACITY )]
     public string City
     {
         get => _city;
@@ -49,6 +50,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
+    [StringLength( UNICODE_STRING_CAPACITY )]
     public string Country
     {
         get => _country;
@@ -58,16 +60,16 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
+    public TID  ID        { get;               init; }
     public bool IsPrimary { get => _isPrimary; set => SetProperty( ref _isPrimary, value ); }
 
     [JsonIgnore]
     public bool IsValidAddress
     {
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         get
         {
-            Span<char> span = stackalloc char[Address?.Length ?? 0];
-
-            Address.AsSpan().CopyTo( span );
+            Span<char> span = [..Address];
 
             for ( int i = 0; i < span.Length; i++ )
             {
@@ -80,6 +82,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
+    [StringLength( UNICODE_STRING_CAPACITY )]
     public string Line1
     {
         get => _line1;
@@ -89,6 +92,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
+    [StringLength( UNICODE_STRING_CAPACITY )]
     public string Line2
     {
         get => _line2;
@@ -98,7 +102,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    [Required]
+    [Required, StringLength( UNICODE_STRING_CAPACITY )]
     public string PostalCode
     {
         get => _postalCode;
@@ -108,6 +112,7 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
+    [StringLength( UNICODE_STRING_CAPACITY )]
     public string StateOrProvince
     {
         get => _stateOrProvince;
@@ -117,11 +122,9 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         }
     }
 
-    public Guid? UserID { get => _userID; set => SetProperty( ref _userID, value ); }
-
 
     public UserAddress() { }
-    public UserAddress( IAddress address )
+    public UserAddress( IAddress<TID> address )
     {
         Address         = address.Address;
         Line1           = address.Line1;
@@ -131,23 +134,20 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
         Country         = address.Country;
         PostalCode      = address.PostalCode;
         IsPrimary       = address.IsPrimary;
-        UserID          = address.UserID;
+        ID              = address.ID;
     }
-    public static UserAddress Create( IAddress address ) => new(address);
+    public static UserAddress<TID> Create( IAddress<TID> address ) => new(address);
 
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
-    public int CompareTo( UserAddress? other )
+    public int CompareTo( UserAddress<TID>? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        int userIDCompare = Nullable.Compare( UserID, other.UserID );
-        if ( userIDCompare != 0 ) { return userIDCompare; }
 
         int addressComparison = string.Compare( _address, other._address, StringComparison.Ordinal );
         if ( addressComparison != 0 ) { return addressComparison; }
@@ -175,14 +175,8 @@ public record UserAddress : ObservableRecord, IAddress, IComparable<UserAddress>
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is UserAddress address
+        return other is UserAddress<TID> address
                    ? CompareTo( address )
-                   : throw new ArgumentException( $"Object must be of type {nameof(UserAddress)}" );
+                   : throw new ArgumentException( $"Object must be of type {nameof(UserAddress<TID>)}" );
     }
-
-
-    public static bool operator <( UserAddress?  left, UserAddress? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator >( UserAddress?  left, UserAddress? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator <=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) <= 0;
-    public static bool operator >=( UserAddress? left, UserAddress? right ) => Sorter.Compare( left, right ) >= 0;
 }

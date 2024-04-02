@@ -34,16 +34,17 @@ public static partial class AsyncLinq
     public static List<T>    ToList<T>( this IReadOnlyCollection<T> sequence ) => ToList( sequence, sequence.Count );
     public static List<T> ToList<T>( this IEnumerable<T> sequence, int count )
     {
-        var array = new List<T>( count );
+        List<T> array = new(count);
         foreach ( (int i, T item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
 
         return array;
     }
 
 
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static T[] GetArray<T>( int count )
     {
-        Debug.Assert( count >= 0, nameof(count) );
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
 
     #if NET6_0_OR_GREATER
         return GC.AllocateUninitializedArray<T>( count );

@@ -5,12 +5,10 @@
 public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
     public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
+
 #if NET6_0_OR_GREATER
-    public static DateOnly SQLMinDateOnly { get; } = new(SQLMinDate.Date.Year, SQLMinDate.Date.Month, SQLMinDate.Date.Day);
+    public static DateOnly SQLMinDateOnly { get; } = SQLMinDate.AsDateOnly();
 #endif
-
-
-    public ObservableRecord() { }
 
 
     /// <summary>
@@ -291,14 +289,13 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable
     where TRecord : ObservableRecord<TRecord>
 {
-    protected ObservableRecord() { }
+    public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }
+    public static Sorter<TRecord>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TRecord>.Default; }
 
 
-    public static TRecord? FromJson( [NotNullIfNotNull( "json" )] string? json ) => json?.FromJson<TRecord>();
-
-
-    public string ToJson()       => JsonNet.ToJson( this );
-    public string ToPrettyJson() => this.ToJson( Formatting.Indented );
+    public static TRecord? FromJson( [NotNullIfNotNull( nameof( json ) )] string? json ) => json?.FromJson<TRecord>();
+    public        string   ToJson()                                              => this.ToJson( Formatting.None );
+    public        string   ToPrettyJson()                                        => this.ToJson( Formatting.Indented );
 
 
     public int CompareTo( object? other )
@@ -307,8 +304,8 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is TRecord value
-                   ? CompareTo( value )
+        return other is TRecord t
+                   ? CompareTo( t )
                    : throw new ExpectedValueTypeException( nameof(other), other, typeof(TRecord) );
     }
     public abstract int  CompareTo( TRecord? other );
@@ -319,7 +316,7 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
 
 public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID>
     where TRecord : ObservableRecord<TRecord, TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     private TID _id;
 

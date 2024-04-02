@@ -2,7 +2,7 @@
 
 
 public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>>
-    where TID : struct, IComparable<TID>, IEquatable<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     double?           Accuracy                { get; }
     double?           Altitude                { get; }
@@ -21,7 +21,7 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 [Serializable]
 public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore
-    where TID : struct, IComparable<TID>, IEquatable<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     public       double?           Accuracy                { get; init; }
     public       double?           Altitude                { get; init; }

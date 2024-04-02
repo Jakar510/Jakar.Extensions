@@ -230,3 +230,36 @@ public abstract class ObservableClass : BaseClass, INotifyPropertyChanged, INoti
         onChanged( value );
     }
 }
+
+
+
+[Serializable]
+public abstract class ObservableClass<TClass> : ObservableClass, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : ObservableClass<TClass>
+{
+    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
+    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+
+
+    public static TClass? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TClass>();
+    public        string  ToJson()                                                    => this.ToJson( Formatting.None );
+    public        string  ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
+
+
+    public abstract bool Equals( TClass?    other );
+    public abstract int  CompareTo( TClass? other );
+
+
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return other is TClass t
+                   ? CompareTo( t )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
+    }
+    public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass file && Equals( file );
+    public override        int  GetHashCode()           => RuntimeHelpers.GetHashCode( this );
+}

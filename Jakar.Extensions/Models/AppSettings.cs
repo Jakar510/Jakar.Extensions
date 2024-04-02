@@ -22,11 +22,11 @@ public interface IAppSettings<TViewPage> : IAppSettings
 [Serializable]
 public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel( hostInfo, defaultHostInfo ), IAppSettings
 {
-    private        Guid       _deviceID;
-    private        LocalFile? _screenShotAddress;
-    public virtual string     AppName { get; } = appName;
+    private Guid       _deviceID;
+    private LocalFile? _screenShotAddress;
 
 
+    public virtual string     AppName           { get; } = appName;
     public         AppVersion AppVersion        { get; } = version;
     public virtual Guid       DeviceID          { get => _deviceID; set => SetProperty( ref _deviceID, value ); }
     public virtual string     DeviceVersion     { get; } = deviceVersion;

@@ -1,17 +1,14 @@
-﻿#if DEBUG
-    namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 // TODO: asp.net authorization dapper
 public static partial class DbExtensions
 {
-    public static WebApplicationBuilder AddAuth( this WebApplicationBuilder builder )
+    public static IServiceCollection AddAuth<T>( this IServiceCollection services )
+        where T : class, IAuthenticatorService
     {
-        builder.Services.AddHttpContextAccessor();
-        builder.Services.AddTransient<IAuthorizationService, AuthorizationService>();
-        return builder;
+        services.AddHttpContextAccessor();
+        services.AddTransient<IAuthenticatorService, T>();
+        return services;
     }
 }
-
-
-#endif

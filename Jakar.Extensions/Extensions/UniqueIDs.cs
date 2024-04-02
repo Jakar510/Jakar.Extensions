@@ -136,5 +136,5 @@ public static class UniqueIDs
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this IUniqueID<Guid>  value ) => value.ID.IsValidID();
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsValidID<TID>( this IUniqueID<TID> value )
-        where TID : struct, IComparable<TID>, IEquatable<TID> => value.ID.CompareTo( default ) > 0;
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable => value.ID.CompareTo( default ) > 0;
 }

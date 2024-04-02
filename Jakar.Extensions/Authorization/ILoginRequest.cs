@@ -4,8 +4,21 @@
 namespace Jakar.Extensions;
 
 
-public interface ILoginRequest : IValidator
+public interface IUserName
+{
+    public string UserName { get; }
+}
+
+
+
+public interface ILoginRequest : IValidator, IUserName
 {
     public string Password { get; }
-    public string UserName { get; }
+}
+
+
+
+public interface IChangePassword : ILoginRequest
+{
+    public string ConfirmPassword { get; }
 }

@@ -2,7 +2,7 @@
 
 
 public interface IUniqueID<out TID>
-    where TID : IComparable<TID>, IEquatable<TID>
+    where TID : IComparable<TID>, IEquatable<TID>, IFormattable
 {
     public TID ID { get; }
 }
