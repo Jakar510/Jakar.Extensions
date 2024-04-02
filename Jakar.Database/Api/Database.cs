@@ -172,9 +172,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserData> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
+    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
         this.TryCall( Register, request, rights, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserData> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return new Error( Status.BadRequest, request ); }

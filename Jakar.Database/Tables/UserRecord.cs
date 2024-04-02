@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database;
+﻿using System.Collections.ObjectModel;
+
+
+
+namespace Jakar.Database;
 
 
 [Serializable]
@@ -8,8 +12,8 @@ public sealed record UserRecord( Guid                                           
                                  string                                                                    FirstName,
                                  string                                                                    LastName,
                                  string                                                                    FullName,
-                                 [property: StringLength( IUserRights.MAX_SIZE )] string                       Rights,
-                                 [property: StringLength( 256 )]              string                       Gender,
+                                 string                                                                    Rights,
+                                 string                                                                    Gender,
                                  string                                                                    Company,
                                  string                                                                    Description,
                                  string                                                                    Department,
@@ -22,6 +26,7 @@ public sealed record UserRecord( Guid                                           
                                  string                                                                    Ext,
                                  bool                                                                      IsPhoneNumberConfirmed,
                                  bool                                                                      IsTwoFactorEnabled,
+                                 DateTimeOffset?                                                           SubscriptionExpires,
                                  DateTimeOffset?                                                           LastBadAttempt,
                                  DateTimeOffset?                                                           LastLogin,
                                  int                                                                       BadLogins,
@@ -39,22 +44,26 @@ public sealed record UserRecord( Guid                                           
                                  [property: StringLength( UserRecord.MAX_SIZE )] string                    ConcurrencyStamp,
                                  [property: StringLength( 256 )]                 RecordID<UserRecord>?     EscalateTo,
                                  IDictionary<string, JToken?>?                                             AdditionalData,
+                                 RecordID<FileRecord>?                                                     ImageID,
                                  RecordID<UserRecord>                                                      ID,
                                  RecordID<UserRecord>?                                                     CreatedBy,
                                  Guid?                                                                     OwnerUserID,
                                  DateTimeOffset                                                            DateCreated,
-                                 DateTimeOffset?                                                           LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, IUserRights
+                                 DateTimeOffset?                                                           LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<Guid>, IRefreshToken, IUserID, IUserDataRecord, IUserRights
 {
-    public const           int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
-    public const           int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
-    public const           int                           MAX_PASSWORD_SIZE                   = 250;
-    public const           int                           MAX_SIZE                            = SQL.ANSI_STRING_CAPACITY;
-    public const           string                        TABLE_NAME                          = "Users";
-    public static readonly TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
-    private                IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
-    public static          string                        TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    public const                                  int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
+    public const                                  int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
+    public const                                  int                           MAX_PASSWORD_SIZE                   = 250;
+    public const                                  int                           MAX_SIZE                            = SQL.ANSI_STRING_CAPACITY;
+    public const                                  string                        TABLE_NAME                          = "Users";
+    public static readonly                        TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
+    private                                       IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
+    public static                                 string                        TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [StringLength( IUserRights.MAX_SIZE )] public string                        Rights    { get; set; } = Rights;
 
 
+    Guid? IUserData<Guid>.                                                                                                     EscalateTo        => EscalateTo?.Value;
+    Guid? IUserData<Guid>.                                                                                                     CreatedBy         => CreatedBy?.Value;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData    { get => _additionalData; set => _additionalData = value; }
     [ProtectedPersonalData]                                                               public string                        Company           { get;                    set; } = Company;
     [ProtectedPersonalData]                                                               public string                        Department        { get;                    set; } = Department;
@@ -70,6 +79,9 @@ public sealed record UserRecord( Guid                                           
     [ProtectedPersonalData] public                                                               string                        Title             { get;                    set; } = Title;
     Guid IUserID.                                                                                                              UserID            => UserID;
     [ProtectedPersonalData] public string                                                                                      Website           { get; set; } = Website;
+    [StringLength( 256 )]   public string                                                                                      Gender            { get; set; } = Gender;
+    Guid? IImageID<Guid>.                                                                                                      ImageID           => ImageID?.Value;
+
 
     [Pure]
     public override DynamicParameters ToDynamicParameters()
@@ -136,6 +148,7 @@ public sealed record UserRecord( Guid                                           
         string                        ext                    = reader.GetFieldValue<string>( nameof(Ext) );
         bool                          isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
         bool                          isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
+        var                           subscriptionExpires    = reader.GetFieldValue<DateTimeOffset?>( nameof(SubscriptionExpires) );
         var                           lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
         var                           lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
         int                           badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
@@ -153,6 +166,7 @@ public sealed record UserRecord( Guid                                           
         string                        concurrencyStamp       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
         RecordID<UserRecord>?         escalateTo             = RecordID<UserRecord>.TryCreate( reader, nameof(EscalateTo) );
         IDictionary<string, JToken?>? additionalData         = reader.GetAdditionalData();
+        RecordID<FileRecord>?         imageID                = RecordID<FileRecord>.TryCreate( reader, nameof(ImageID) );
         RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID( reader );
         RecordID<UserRecord>?         createdBy              = RecordID<UserRecord>.CreatedBy( reader );
         var                           ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
@@ -179,6 +193,7 @@ public sealed record UserRecord( Guid                                           
                                      ext,
                                      isPhoneNumberConfirmed,
                                      isTwoFactorEnabled,
+                                     subscriptionExpires,
                                      lastBadAttempt,
                                      lastLogin,
                                      badLogins,
@@ -196,6 +211,7 @@ public sealed record UserRecord( Guid                                           
                                      concurrencyStamp,
                                      escalateTo,
                                      additionalData,
+                                     imageID,
                                      id,
                                      createdBy,
                                      ownerUserID,
@@ -248,6 +264,7 @@ public sealed record UserRecord( Guid                                           
                                                                                                                            false,
                                                                                                                            null,
                                                                                                                            null,
+                                                                                                                           null,
                                                                                                                            0,
                                                                                                                            false,
                                                                                                                            null,
@@ -263,6 +280,7 @@ public sealed record UserRecord( Guid                                           
                                                                                                                            string.Empty,
                                                                                                                            null,
                                                                                                                            (data as JsonModels.IJsonModel)?.AdditionalData,
+                                                                                                                           null,
                                                                                                                            RecordID<UserRecord>.New(),
                                                                                                                            caller?.ID,
                                                                                                                            caller?.UserID,
@@ -293,6 +311,7 @@ public sealed record UserRecord( Guid                                           
                         false,
                         null,
                         null,
+                        null,
                         0,
                         false,
                         null,
@@ -306,6 +325,7 @@ public sealed record UserRecord( Guid                                           
                         string.Empty,
                         string.Empty,
                         string.Empty,
+                        null,
                         null,
                         null,
                         RecordID<UserRecord>.New(),
@@ -410,16 +430,14 @@ public sealed record UserRecord( Guid                                           
 
 
     [Pure]
-    public async ValueTask<UserRights<T>> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
-        where T : struct, Enum
+    public async ValueTask<UserModel<Guid>> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
     {
-        List<IUserRights> rights = new(50) { this };
+        UserModel<Guid> model = new(this);
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
 
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { rights.Add( record ); }
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
 
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { rights.Add( record ); }
-
-        return UserRights<T>.Merge( rights );
+        return model;
     }
 
 
@@ -806,7 +824,7 @@ public sealed record UserRecord( Guid                                           
 
         if ( types.HasFlag( ClaimType.Role ) )
         {
-            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { roles.Add( record.Name ); }
+            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { roles.Add( record.NameOfRole ); }
         }
 
         var claims = new List<Claim>( 16 + groups.Count + roles.Count );

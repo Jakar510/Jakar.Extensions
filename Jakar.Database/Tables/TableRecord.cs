@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, IEquatable<TID>
+public interface IRecordPair : IUniqueID<Guid>
 {
     public DateTimeOffset DateCreated { get; }
 }

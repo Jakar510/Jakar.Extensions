@@ -72,7 +72,7 @@ public static partial class Migrations
     {
         ICreateTableColumnOptionOrWithColumnSyntax reference = col.AsInt64();
 
-        reference.ForeignKey( propertyType.GetTableName(), nameof(IDataBaseID.ID) );
+        reference.ForeignKey( propertyType.GetTableName(), nameof(IUniqueID<Guid>.ID) );
 
         // return reference.SetNullable(false);
         return true;
@@ -111,7 +111,7 @@ public static partial class Migrations
     {
         if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
 
-        return propInfo.PropertyType.HasInterface<IDataBaseIgnore>();
+        return false;
     }
 
 
@@ -138,7 +138,11 @@ public static partial class Migrations
 
         if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type is DbType.Xml ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
-        if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
+        if ( propertyType.HasInterface<IUniqueID<int>>() ) { return col.CreateColumn_Reference( propertyType ); }
+
+        if ( propertyType.HasInterface<IUniqueID<long>>() ) { return col.CreateColumn_Reference( propertyType ); }
+
+        if ( propertyType.HasInterface<IUniqueID<Guid>>() ) { return col.CreateColumn_Reference( propertyType ); }
 
         return false;
     }
@@ -330,7 +334,6 @@ public static partial class Migrations
 
         throw new ExpectedValueTypeException( key,
                                               prop.PropertyType,
-                                              typeof(IDataBaseIgnore),
                                               typeof(string),
                                               typeof(bool),
                                               typeof(byte),

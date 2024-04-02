@@ -6,7 +6,15 @@ namespace Jakar.Extensions;
 
 [SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
 public interface IAddress<out TID> : IUniqueID<TID>
-    where TID : IComparable<TID>, IEquatable<TID>, IFormattable
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public            string? Address         { get; }
     public            string  City            { get; }
@@ -21,7 +29,15 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<UserAddress<TID>>, IComparable, JsonModels.IJsonModel
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     private bool                          _isPrimary;
     private IDictionary<string, JToken?>? _additionalData;

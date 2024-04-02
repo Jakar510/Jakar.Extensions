@@ -2,7 +2,15 @@
 
 
 public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     double?           Accuracy                { get; }
     double?           Altitude                { get; }
@@ -20,8 +28,16 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [Serializable]
-public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>, IDataBaseIgnore
+public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public       double?           Accuracy                { get; init; }
     public       double?           Altitude                { get; init; }

@@ -17,7 +17,7 @@ public abstract class MigrateGroupTable : OwnedMigration<GroupRecord>
 
         table.WithColumn( nameof(GroupRecord.CustomerID) ).AsString( 256 ).Nullable();
 
-        table.WithColumn( nameof(GroupRecord.OwnerID) ).AsGuid().NotNullable();
+        table.WithColumn( nameof(GroupRecord.OwnerUserID) ).AsGuid().Nullable();
 
         return table;
     }

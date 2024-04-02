@@ -6,7 +6,15 @@ namespace Jakar.Extensions;
 
 
 public interface ICreatedByUser<TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public TID? CreatedBy { get; }
 }
@@ -14,7 +22,15 @@ public interface ICreatedByUser<TID>
 
 
 public interface IUserID<out TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public TID UserID { get; }
 }
@@ -26,7 +42,15 @@ public interface IUserID : IUserID<Guid>;
 
 
 public interface IImageID<TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public TID? ImageID { get; }
 }
@@ -80,16 +104,32 @@ public interface IUserData : IUserName, IUserID
 
 
 public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
-    public TID? CreatedBy  { get; set; }
-    public TID? EscalateTo { get; set; }
+    public TID? CreatedBy  { get; }
+    public TID? EscalateTo { get; }
 }
 
 
 
 public interface IUserData<TID, TAddress> : IUserData<TID>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     where TAddress : IAddress<TID>
 {
     public ObservableCollection<TAddress> Addresses { get; }
@@ -98,7 +138,15 @@ public interface IUserData<TID, TAddress> : IUserData<TID>
 
 
 public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>, JsonModels.IJsonModel, IUserRights
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>
@@ -110,7 +158,15 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 
 public interface ICreateUserModel<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, IChangePassword
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>;

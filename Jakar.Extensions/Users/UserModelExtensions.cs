@@ -17,7 +17,15 @@ public static class UserDataExtensions
 
     [MethodImpl( MethodImplOptions.NoInlining )]
     public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> data, ClaimType types = CLAIM_TYPES )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+    #else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+    #endif
         where TGroupModel : IGroupModel<TID>
         where TRoleModel : IRoleModel<TID>
         where TAddress : IAddress<TID>

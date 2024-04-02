@@ -7,7 +7,15 @@ namespace Jakar.Extensions;
 
 [Serializable]
 public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, IVerifyRequestProvider
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>
@@ -110,7 +118,15 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 
 [Serializable]
 public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     where TClass : CreateUserModel<TClass, TID>, new()
 {
     protected CreateUserModel() : base() { }
@@ -122,7 +138,15 @@ public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID
 
 [Serializable]
 public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+#if NET8_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
     public CreateUserModel() : base() { }
     public CreateUserModel( IUserData<TID> value ) : base( value ) { }

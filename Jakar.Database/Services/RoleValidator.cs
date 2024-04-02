@@ -8,11 +8,11 @@ public sealed class RoleValidator : RoleValidator<RoleRecord>
 {
     public override Task<IdentityResult> ValidateAsync( RoleManager<RoleRecord> manager, RoleRecord role )
     {
-        IdentityResult result = string.IsNullOrWhiteSpace( role.Name )
+        IdentityResult result = string.IsNullOrWhiteSpace( role.NameOfRole )
                                     ? IdentityResult.Failed( new IdentityError
                                                              {
                                                                  Description = "Name of Role Invalid",
-                                                                 Code        = nameof(RoleRecord.Name)
+                                                                 Code        = nameof(RoleRecord.NameOfRole)
                                                              } )
                                     : string.IsNullOrWhiteSpace( role.NormalizedName )
                                         ? IdentityResult.Failed( new IdentityError

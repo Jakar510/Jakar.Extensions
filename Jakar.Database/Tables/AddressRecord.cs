@@ -18,12 +18,11 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                                     RecordID<UserRecord>?                    CreatedBy,
                                     Guid?                                    OwnerUserID,
                                     DateTimeOffset                           DateCreated,
-                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress, IEquatable<IAddress>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
     public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
-    Guid? IAddress.                             UserID         => OwnerUserID;
 
 
     [Pure]
@@ -149,7 +148,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
 
     [Pure]
-    public AddressRecord WithUserData( IAddress value ) =>
+    public AddressRecord WithUserData( IAddress<Guid> value ) =>
         this with
         {
             Line1 = value.Line1,
@@ -159,7 +158,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
             Country = value.Country,
             PostalCode = value.PostalCode
         };
-    public bool Equals( IAddress? other )
+    public bool Equals( IAddress<Guid>? other )
     {
         if ( other is null ) { return false; }
 

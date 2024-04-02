@@ -128,7 +128,7 @@ public abstract partial class Database
     }
 
 
-    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserData> request, CancellationToken token = default )
+    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, CancellationToken token = default )
     {
         if ( request.Data is null ) { return new Error( Status.BadRequest, $"{nameof(request.Data)} is null" ); }
 
@@ -139,10 +139,10 @@ public abstract partial class Database
         record = await Users.Insert( connection, transaction, record, token );
         return await GetToken( connection, transaction, record, DEFAULT_CLAIM_TYPES, token );
     }
-    protected virtual UserRecord CreateNewUser( VerifyRequest<UserData> request ) => UserRecord.Create( request, string.Empty );
+    protected virtual UserRecord CreateNewUser( VerifyRequest<UserModel<Guid>> request ) => UserRecord.Create( request, string.Empty );
 
 
-    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserData> request, CancellationToken                            token                          = default ) => this.TryCall( Register, request, token );
+    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserModel<Guid>> request, CancellationToken                            token                          = default ) => this.TryCall( Register, request, token );
     public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, T>                          func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
     public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ValueTask<T>>               func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
     public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, Task<T>>                    func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
