@@ -2,8 +2,7 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[Serializable]
-[JsonConverter( typeof(AppVersionJsonNetConverter) )]
+[Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) )]
 public sealed class AppVersion :
 #if NET7_0_OR_GREATER
     IComparable,
@@ -22,27 +21,29 @@ public sealed class AppVersion :
     ISpanFormattable
 #endif
 {
-    public static Equalizer<AppVersion>      Equalizer             => Equalizer<AppVersion>.Default;
-    public static Sorter<AppVersion>         Sorter                => Sorter<AppVersion>.Default;
-    public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer => FuzzyEqualizer<AppVersion>.Default;
-    public static AppVersion                 Default               { get; } = new();
-    public        Format                     Scheme                { get; init; }
-    public        int                        Major                 { get; init; }
-    public        int?                       Minor                 { get; init; }
-    public        int?                       Maintenance           { get; init; }
-    public        int?                       MajorRevision         { get; init; }
-    public        int?                       MinorRevision         { get; init; }
-    public        int?                       Build                 { get; init; }
-    public        AppVersionFlags            Flags                 { get; init; }
-    public        int                        Length                => Flags.Length + 65;
+    private const char SEPARATOR = '.';
+
+    public static Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
+    public static Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public static AppVersion                 Default               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new();
+    public        Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public        int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
 
 
-    public AppVersion() : this( 0, default, default, default, default, default, AppVersionFlags.Stable ) { }
-    public AppVersion( int major ) : this( major, default, default, default, default, default, AppVersionFlags.Stable ) { }
-    public AppVersion( int major, int  minor ) : this( major, minor, default, default, default, default, AppVersionFlags.Stable ) { }
-    public AppVersion( int major, int  minor, int  build ) : this( major, minor, default, default, default, build, AppVersionFlags.Stable ) { }
-    public AppVersion( int major, int  minor, int  maintenance, int  build ) : this( major, minor, maintenance, default, default, build, AppVersionFlags.Stable ) { }
-    public AppVersion( int major, int  minor, int  maintenance, int  majorRevision, int  build ) : this( major, minor, maintenance, majorRevision, default, build, AppVersionFlags.Stable ) { }
+    public AppVersion() : this( 0, null, null, null, null, null, AppVersionFlags.Stable ) { }
+    public AppVersion( int major ) : this( major, null, null, null, null, null, AppVersionFlags.Stable ) { }
+    public AppVersion( int major, int  minor ) : this( major, minor, null, null, null, null, AppVersionFlags.Stable ) { }
+    public AppVersion( int major, int  minor, int  build ) : this( major, minor, null, null, null, build, AppVersionFlags.Stable ) { }
+    public AppVersion( int major, int  minor, int  maintenance, int  build ) : this( major, minor, maintenance, null, null, build, AppVersionFlags.Stable ) { }
+    public AppVersion( int major, int  minor, int  maintenance, int  majorRevision, int  build ) : this( major, minor, maintenance, majorRevision, null, build, AppVersionFlags.Stable ) { }
     public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build ) : this( major, minor, maintenance, majorRevision, minorRevision, build, AppVersionFlags.Stable ) { }
     public AppVersion( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, AppVersionFlags flags )
     {
@@ -66,7 +67,7 @@ public sealed class AppVersion :
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = AppVersionFlags.Stable;
     }
-    public AppVersion( ReadOnlySpan<int> span, AppVersionFlags flags = default )
+    public AppVersion( scoped in ReadOnlySpan<int> span, AppVersionFlags flags = default )
     {
         Flags  = flags;
         Scheme = (Format)span.Length;
@@ -112,7 +113,7 @@ public sealed class AppVersion :
                 Build         = span[5];
                 return;
 
-            default: throw new OutOfRangeException( nameof(Scheme), Scheme, "value doesn't contain the correct amount of span." );
+            default: throw new OutOfRangeException( nameof(Scheme), Scheme, "value doesn't have the correct length." );
         }
     }
 
@@ -122,7 +123,7 @@ public sealed class AppVersion :
     {
         if ( span is null ) { throw new ArgumentNullException( nameof(span) ); }
 
-        Flags = flags;
+        Flags  = flags;
         Scheme = (Format)span.Count;
 
         switch ( Scheme )
@@ -143,30 +144,30 @@ public sealed class AppVersion :
                 return;
 
             case Format.Detailed:
-                Major = span[0];
-                Minor = span[1];
+                Major       = span[0];
+                Minor       = span[1];
                 Maintenance = span[2];
-                Build = span[3];
+                Build       = span[3];
                 return;
 
             case Format.DetailedRevisions:
-                Major = span[0];
-                Minor = span[1];
-                Maintenance = span[2];
+                Major         = span[0];
+                Minor         = span[1];
+                Maintenance   = span[2];
                 MajorRevision = span[3];
-                Build = span[4];
+                Build         = span[4];
                 return;
 
             case Format.Complete:
-                Major = span[0];
-                Minor = span[1];
-                Maintenance = span[2];
+                Major         = span[0];
+                Minor         = span[1];
+                Maintenance   = span[2];
                 MajorRevision = span[3];
                 MinorRevision = span[4];
-                Build = span[5];
+                Build         = span[5];
                 return;
 
-            default: throw new ArgumentOutOfRangeException( nameof(span), span.Count, @"value doesn't contain the correct amount of span." );
+            default: throw new OutOfRangeException( nameof(Scheme), Scheme, "span doesn't have the correct length." );
         }
     }
 
@@ -202,7 +203,7 @@ public sealed class AppVersion :
             catch ( ArgumentException e ) { e.WriteToDebug(); }
         }
 
-        version = default;
+        version = null;
         return false;
     }
     public static AppVersion Parse( ReadOnlySpan<char> value )                            => Parse( value, CultureInfo.CurrentCulture );
@@ -252,7 +253,7 @@ public sealed class AppVersion :
     {
         if ( string.IsNullOrEmpty( s ) )
         {
-            result = default;
+            result = null;
             return false;
         }
 
@@ -284,10 +285,7 @@ public sealed class AppVersion :
     // ---------------------------------------------------------------------------------------------------------------------------------
 
 
-    internal const char SEPARATOR = '.';
-
-
-    public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
+    public override string ToString() => ToString( null, CultureInfo.CurrentCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         Span<char> span = stackalloc char[Length + 1];
@@ -301,7 +299,7 @@ public sealed class AppVersion :
 #if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
 #endif
-    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
         Debug.Assert( span.Length > Length );
         charsWritten = 0;
