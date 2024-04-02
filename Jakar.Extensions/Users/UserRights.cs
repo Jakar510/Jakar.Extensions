@@ -4,19 +4,29 @@
 namespace Jakar.Extensions;
 
 
-public interface IRights
+public interface IUserRights
 {
-    public const                      int    MAX_SIZE = BaseClass.ANSI_STRING_CAPACITY;
-    [StringLength( MAX_SIZE )] public string Rights { get; }
+    public const                      int    MAX_SIZE = BaseRecord.ANSI_STRING_CAPACITY;
+    [StringLength( MAX_SIZE )] public string Rights { get; set; }
 }
 
 
 
 public static class RightsExtensions
 {
-    [Pure]
-    public static UserRights<TEnum> GetRights<TEnum>( this IRights rights )
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static UserRights<TEnum> GetRights<TEnum>( this IUserRights rights )
         where TEnum : struct, Enum => UserRights<TEnum>.Create( rights );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void SetRights<TEnum>( this IUserRights user, scoped in ReadOnlySpan<TEnum> array )
+        where TEnum : struct, Enum => user.SetRights( user.GetRights<TEnum>().Add( array ) );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void SetRights<TEnum>( this IUserRights user, scoped in UserRights<TEnum> value )
+        where TEnum : struct, Enum => user.Rights = value.ToString();
 }
 
 
@@ -25,17 +35,15 @@ public static class RightsExtensions
 public ref struct UserRights<TEnum>
     where TEnum : struct, Enum
 {
-    public const     int    MAX_SIZE = IRights.MAX_SIZE;
-    public const     char   VALID    = '+';
-    public const     char   INVALID  = '-';
-    private readonly char[] _rights  = ArrayPool<char>.Shared.Rent( _enumValues.Length );
+    public const     char   VALID   = '+';
+    public const     char   INVALID = '-';
+    private readonly char[] _rights = ArrayPool<char>.Shared.Rent( _enumValues.Length );
 
 #if NET6_0_OR_GREATER
     private static readonly TEnum[] _enumValues = Enum.GetValues<TEnum>();
 #else
     private static readonly TEnum[] _enumValues = (TEnum[])Enum.GetValues( typeof(TEnum) );
 #endif
-
 
     internal readonly Span<char>        Span    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _rights; }
     public static     UserRights<TEnum> Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(); }
@@ -55,7 +63,7 @@ public ref struct UserRights<TEnum>
 
     public UserRights()
     {
-        if ( _enumValues.Length > MAX_SIZE ) { throw new OutOfRangeException( nameof(TEnum), typeof(TEnum).Name, $"Max permission count is {MAX_SIZE}" ); }
+        if ( _enumValues.Length > IUserRights.MAX_SIZE ) { throw new OutOfRangeException( nameof(TEnum), typeof(TEnum).Name, $"Max permission count is {IUserRights.MAX_SIZE}" ); }
 
         Span.Fill( INVALID );
     }
@@ -75,12 +83,12 @@ public ref struct UserRights<TEnum>
 
     [Pure]
     public static UserRights<TEnum> Create<TRecord>( TRecord record )
-        where TRecord : class, IRights => Default.With( record );
+        where TRecord : class, IUserRights => Default.With( record );
 
 
     [Pure]
     public readonly UserRights<TEnum> With<TRecord>( TRecord record )
-        where TRecord : class, IRights => With( record.Rights );
+        where TRecord : class, IUserRights => With( record.Rights );
 
     private readonly UserRights<TEnum> With( scoped in ReadOnlySpan<char> other )
     {
@@ -98,22 +106,22 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure] public static UserRights<TEnum> Merge( IEnumerable<IEnumerable<IRights>> values ) => Merge( values.SelectMany( static x => x ) );
+    [Pure] public static UserRights<TEnum> Merge( IEnumerable<IEnumerable<IUserRights>> values ) => Merge( values.SelectMany( static x => x ) );
 
     [Pure]
-    public static UserRights<TEnum> Merge( IEnumerable<IRights> values )
+    public static UserRights<TEnum> Merge( IEnumerable<IUserRights> values )
     {
         UserRights<TEnum> rights = new();
-        foreach ( IRights value in values ) { rights = rights.With( value ); }
+        foreach ( IUserRights value in values ) { rights = rights.With( value ); }
 
         return rights;
     }
 
     [Pure]
-    public static UserRights<TEnum> Merge( scoped in ReadOnlySpan<IRights> values )
+    public static UserRights<TEnum> Merge( scoped in ReadOnlySpan<IUserRights> values )
     {
         UserRights<TEnum> rights = new();
-        foreach ( IRights value in values ) { rights = rights.With( value ); }
+        foreach ( IUserRights value in values ) { rights = rights.With( value ); }
 
         return rights;
     }

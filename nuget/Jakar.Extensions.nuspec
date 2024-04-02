@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>7.7.1</version>
+		<version>8.0.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>

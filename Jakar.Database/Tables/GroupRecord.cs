@@ -5,13 +5,13 @@
 [Table( TABLE_NAME )]
 public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID,
                                   [property: StringLength( GroupRecord.MAX_SIZE )] string  NameOfGroup,
-                                  RecordID<UserRecord>                                  OwnerID,
-                                  [property: StringLength( IRights.MAX_SIZE )] string      Rights,
-                                  RecordID<GroupRecord>                                 ID,
-                                  RecordID<UserRecord>?                                 CreatedBy,
-                                  Guid?                                                 OwnerUserID,
-                                  DateTimeOffset                                        DateCreated,
-                                  DateTimeOffset?                                       LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IRights
+                                  RecordID<UserRecord>                                     OwnerID,
+                                  [property: StringLength( IUserRights.MAX_SIZE )] string      Rights,
+                                  RecordID<GroupRecord>                                    ID,
+                                  RecordID<UserRecord>?                                    CreatedBy,
+                                  Guid?                                                    OwnerUserID,
+                                  DateTimeOffset                                           DateCreated,
+                                  DateTimeOffset?                                          LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IUserRights
 {
     public const  int    MAX_SIZE   = 1024;
     public const  string TABLE_NAME = "Groups";
@@ -19,7 +19,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
 
 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, UserRecord? caller                     = default ) : this( customerID, nameOfGroup, owner.ID, string.Empty, RecordID<GroupRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, IUserRights rights, UserRecord? caller = default ) : this( customerID, nameOfGroup, owner.ID, rights.ToString(), RecordID<GroupRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, IUserRights     rights, UserRecord? caller = default ) : this( customerID, nameOfGroup, owner.ID, rights.ToString(), RecordID<GroupRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
 
 
     [Pure]

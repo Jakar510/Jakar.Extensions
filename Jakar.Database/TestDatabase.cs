@@ -86,9 +86,8 @@ internal sealed class TestDatabase : Database
         using var userRights  = UserRights<TestRight>.Create( TestRight.Read );
         var       user        = UserRecord.Create( "User", "User", userRights, admin );
 
-        UserRecord[] users = [admin, user];
-
-        var results = new List<UserRecord>( users.Length );
+        UserRecord[]     users   = [admin, user];
+        List<UserRecord> results = new(users.Length);
         await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
 
         Debug.Assert( users.Length == results.Count );

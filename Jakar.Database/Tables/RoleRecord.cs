@@ -6,23 +6,23 @@
 public sealed record RoleRecord( [property: StringLength( 1024 )]             string Name,
                                  [property: StringLength( 1024 )]             string NormalizedName,
                                  [property: StringLength( 4096 )]             string ConcurrencyStamp,
-                                 [property: StringLength( IRights.MAX_SIZE )] string Rights,
+                                 [property: StringLength( IUserRights.MAX_SIZE )] string Rights,
                                  RecordID<RoleRecord>                             ID,
                                  RecordID<UserRecord>?                            CreatedBy,
                                  Guid?                                            OwnerUserID,
                                  DateTimeOffset                                   DateCreated,
-                                 DateTimeOffset?                                  LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRights
+                                 DateTimeOffset?                                  LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IUserRights
 {
     public const  string TABLE_NAME = "Roles";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
-    public RoleRecord( IdentityRole role, UserRecord?    caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
-    public RoleRecord( IdentityRole role, in IUserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
-    public RoleRecord( string       name, UserRecord?    caller                                                                                  = default ) : this( name, name, caller ) { }
-    public RoleRecord( string       name, string         normalizedName, UserRecord? caller                                                      = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string         normalizedName, string      concurrencyStamp, UserRecord?    caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string         normalizedName, string      concurrencyStamp, in IUserRights rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights.ToString(), RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( IdentityRole role, UserRecord? caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
+    public RoleRecord( IdentityRole role, in IUserRights  rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
+    public RoleRecord( string       name, UserRecord? caller                                                                                  = default ) : this( name, name, caller ) { }
+    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                      = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord?    caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, in IUserRights rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights.ToString(), RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
 
 
     [Pure]

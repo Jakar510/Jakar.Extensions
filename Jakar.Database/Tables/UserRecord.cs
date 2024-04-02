@@ -8,7 +8,7 @@ public sealed record UserRecord( Guid                                           
                                  string                                                                    FirstName,
                                  string                                                                    LastName,
                                  string                                                                    FullName,
-                                 [property: StringLength( IRights.MAX_SIZE )] string                       Rights,
+                                 [property: StringLength( IUserRights.MAX_SIZE )] string                       Rights,
                                  [property: StringLength( 256 )]              string                       Gender,
                                  string                                                                    Company,
                                  string                                                                    Description,
@@ -43,7 +43,7 @@ public sealed record UserRecord( Guid                                           
                                  RecordID<UserRecord>?                                                     CreatedBy,
                                  Guid?                                                                     OwnerUserID,
                                  DateTimeOffset                                                            DateCreated,
-                                 DateTimeOffset?                                                           LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, IRights
+                                 DateTimeOffset?                                                           LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<UserRecord>, IRefreshToken, IUserID, IUserDataRecord, IUserRights
 {
     public const           int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const           int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
@@ -413,7 +413,7 @@ public sealed record UserRecord( Guid                                           
     public async ValueTask<UserRights<T>> GetRights<T>( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
         where T : struct, Enum
     {
-        List<IRights> rights = new(50) { this };
+        List<IUserRights> rights = new(50) { this };
 
         await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { rights.Add( record ); }
 

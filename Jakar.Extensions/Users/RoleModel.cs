@@ -9,7 +9,7 @@ using Org.BouncyCastle.Tls;
 namespace Jakar.Extensions;
 
 
-public interface IRoleModel<out TID> : IUniqueID<TID>, IRights
+public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     [StringLength( BaseRecord.UNICODE_STRING_CAPACITY )] public string NameOfRole { get; }
@@ -28,7 +28,7 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 
 
     [StringLength( UNICODE_STRING_CAPACITY )] public string NameOfRole { get => _name;   set => SetProperty( ref _name,   value ); }
-    [StringLength( IRights.MAX_SIZE )]        public string Rights     { get => _rights; set => SetProperty( ref _rights, value ); }
+    [StringLength( IUserRights.MAX_SIZE )]    public string Rights     { get => _rights; set => SetProperty( ref _rights, value ); }
 
 
     public RoleModel( IRoleModel<TID> model ) : this( model.NameOfRole, model.Rights, model.ID ) { }

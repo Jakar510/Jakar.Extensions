@@ -8,7 +8,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>7.6.0</Version>
+		<Version>8.0.0</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -18,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReleaseNotes>
-			Jakar.Extensions 7.6.0
+			Jakar.Extensions 8.0.0
 
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>

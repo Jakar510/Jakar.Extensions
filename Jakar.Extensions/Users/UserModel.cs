@@ -113,7 +113,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
     [Phone, StringLength( UNICODE_STRING_CAPACITY )] public string                           PhoneNumber         { get => _phoneNumber;       set => SetProperty( ref _phoneNumber,       value ); }
     [EnumDataType( typeof(SupportedLanguage) )]      public SupportedLanguage                PreferredLanguage   { get => _preferredLanguage; set => SetProperty( ref _preferredLanguage, value ); }
-    [StringLength( IRights.MAX_SIZE )]               public string                           Rights              { get => _rights;            set => SetProperty( ref _rights,            value ); }
+    [StringLength( IUserRights.MAX_SIZE )]           public string                           Rights              { get => _rights;            set => SetProperty( ref _rights,            value ); }
     public                                                  ObservableCollection<TRoleModel> Roles               { get;                       init; } = [];
     public                                                  DateTimeOffset?                  SubscriptionExpires { get;                       init; }
 

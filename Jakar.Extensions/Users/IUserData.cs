@@ -97,7 +97,7 @@ public interface IUserData<TID, TAddress> : IUserData<TID>
 
 
 
-public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>, JsonModels.IJsonModel, IRights
+public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>, JsonModels.IJsonModel, IUserRights
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>

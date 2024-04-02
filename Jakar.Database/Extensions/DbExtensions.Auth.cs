@@ -5,10 +5,10 @@
 public static partial class DbExtensions
 {
     public static IServiceCollection AddAuth<T>( this IServiceCollection services )
-        where T : class, IAuthenticatorService
+        where T : class, IAuthenticationService
     {
         services.AddHttpContextAccessor();
-        services.AddTransient<IAuthenticatorService, T>();
+        services.AddTransient<IAuthenticationService, T>();
         return services;
     }
 }

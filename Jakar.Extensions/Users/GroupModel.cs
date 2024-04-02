@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IRights
+public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 {
     [StringLength( BaseRecord.UNICODE_STRING_CAPACITY )] string NameOfGroup { get; }
@@ -28,7 +28,7 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
     public                                           TID?   CreatedBy   { get => _createdBy;   set => SetProperty( ref _createdBy,   value ); }
     [StringLength( UNICODE_STRING_CAPACITY )] public string NameOfGroup { get => _nameOfGroup; set => SetProperty( ref _nameOfGroup, value ); }
     public                                           TID?   OwnerID     { get => _ownerID;     set => SetProperty( ref _ownerID,     value ); }
-    [StringLength( IRights.MAX_SIZE )] public        string Rights      { get => _permissions; set => SetProperty( ref _permissions, value ); }
+    [StringLength( IUserRights.MAX_SIZE )] public    string Rights      { get => _permissions; set => SetProperty( ref _permissions, value ); }
 
 
     public GroupModel( IGroupModel<TID> model ) : this( model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights ) { }
