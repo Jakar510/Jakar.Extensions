@@ -6,17 +6,12 @@ using System.Threading.Tasks;
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture]
-[TestOf( typeof(ConcurrentObservableCollection<>) )]
+[TestFixture, TestOf( typeof(ConcurrentObservableCollection<>) )]
 
 // ReSharper disable once InconsistentNaming
 public class ConcurrentObservableCollection_Tests : Assert
 {
-    [Test]
-    [TestCase( 10 )]
-    [TestCase( 20 )]
-    [TestCase( 30 )]
-    [TestCase( 40 )]
+    [Test, TestCase( 10 ), TestCase( 20 ), TestCase( 30 ), TestCase( 40 )]
     public void Indexes( int value )
     {
         ConcurrentObservableCollection<int> collection = [..Enumerable.Range( 0, 100 )];
@@ -31,11 +26,7 @@ public class ConcurrentObservableCollection_Tests : Assert
 
         bool Match( int x ) => x == value;
     }
-    [Test]
-    [TestCase( 10 )]
-    [TestCase( 20 )]
-    [TestCase( 30 )]
-    [TestCase( 40 )]
+    [Test, TestCase( 10 ), TestCase( 20 ), TestCase( 30 ), TestCase( 40 )]
     public async Task IndexesAsync( int value )
     {
         ConcurrentObservableCollection<int> collection = [..Enumerable.Range( 0, 100 )];
@@ -87,15 +78,7 @@ public class ConcurrentObservableCollection_Tests : Assert
     }
 
 
-    [Test]
-    [TestCase( 1 )]
-    [TestCase( 2 )]
-    [TestCase( 3 )]
-    [TestCase( 4 )]
-    [TestCase( "1" )]
-    [TestCase( "2" )]
-    [TestCase( "3" )]
-    [TestCase( "4" )]
+    [Test, TestCase( 1 ), TestCase( 2 ), TestCase( 3 ), TestCase( 4 ), TestCase( "1" ), TestCase( "2" ), TestCase( "3" ), TestCase( "4" )]
     public void Run<T>( T value )
     {
         ConcurrentObservableCollection<T> collection = [];
@@ -108,15 +91,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         collection.Clear();
         this.AreEqual( collection.Count, 0 );
     }
-    [Test]
-    [TestCase( 1 )]
-    [TestCase( 2 )]
-    [TestCase( 3 )]
-    [TestCase( 4 )]
-    [TestCase( "1" )]
-    [TestCase( "2" )]
-    [TestCase( "3" )]
-    [TestCase( "4" )]
+    [Test, TestCase( 1 ), TestCase( 2 ), TestCase( 3 ), TestCase( 4 ), TestCase( "1" ), TestCase( "2" ), TestCase( "3" ), TestCase( "4" )]
     public async Task RunAsync<T>( T value )
     {
         ConcurrentObservableCollection<T> collection = [];

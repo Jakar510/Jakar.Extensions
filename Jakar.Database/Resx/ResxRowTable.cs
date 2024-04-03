@@ -2,8 +2,7 @@
 
 
 /// <see cref="LocalizableString"/>
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record ResxRowRecord( long                    KeyID,
                                     string                  Key,
                                     string                  Neutral,

@@ -30,7 +30,7 @@ public ref struct SpanSplitEnumerator<T>
     }
 
 
-    public override readonly string                 ToString()      => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
+    public readonly override string                 ToString()      => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
     public readonly          SpanSplitEnumerator<T> GetEnumerator() => this;
     public                   void                   Reset()         => _span = _originalString;
 

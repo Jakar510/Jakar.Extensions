@@ -1,8 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[Serializable]
-[DebuggerDisplay( nameof(DisplayName) )]
+[Serializable, DebuggerDisplay( nameof(DisplayName) )]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
     private readonly CultureInfo _culture;

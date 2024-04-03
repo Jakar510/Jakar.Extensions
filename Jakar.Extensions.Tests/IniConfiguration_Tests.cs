@@ -8,8 +8,7 @@ using System.Net;
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture]
-[TestOf( typeof(IniConfig) )]
+[TestFixture, TestOf( typeof(IniConfig) )]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert

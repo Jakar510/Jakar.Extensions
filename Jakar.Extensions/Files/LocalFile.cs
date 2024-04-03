@@ -1168,7 +1168,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash = await hasher.ComputeHashAsync( stream );
 
             return BitConverter.ToString( hash );
         }

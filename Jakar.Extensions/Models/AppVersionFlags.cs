@@ -14,11 +14,11 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
     IComparable,
     IFormattable
 #else
-        IEquatable<AppVersionFlags?>,
-        IComparable<AppVersionFlags>,
-        IComparable<AppVersionFlags?>,
-        IComparable,
-        IFormattable
+    IEquatable<AppVersionFlags?>,
+    IComparable<AppVersionFlags>,
+    IComparable<AppVersionFlags?>,
+    IComparable,
+    IFormattable
 #endif
 {
     private const string ALPHA          = "alpha";

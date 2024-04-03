@@ -7,8 +7,7 @@ public static class ArrayExtensions
 #if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetInternalArray) )]
 #endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    [SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
                                                                                                             {
                                                                                                                 TElement[] array                                    => array,
@@ -35,8 +34,7 @@ public static class ArrayExtensions
 #if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetInternalArray) )]
 #endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
 
 
 

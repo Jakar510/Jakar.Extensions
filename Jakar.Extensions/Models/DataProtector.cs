@@ -47,9 +47,9 @@ public interface IDataProtector : IDisposable
 
 public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDataProtector
 {
-    private const    int                  BLOCK    = 512;
-    private const    int                  DATA     = 254;
-    private readonly RSA                  _rsa     = rsa;
+    private const    int                  BLOCK = 512;
+    private const    int                  DATA = 254;
+    private readonly RSA                  _rsa = rsa;
     private readonly RSAEncryptionPadding _padding = padding;
     private          bool                 _disposed;
     private          bool                 _keyIsSet;
@@ -126,7 +126,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
         for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
         {
-            int                size  = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
+            int                size = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
             ReadOnlySpan<byte> block = encrypted.AsSpan( i * BLOCK, size );
             if ( block.IsEmpty ) { continue; }
 
@@ -213,7 +213,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
         for ( int i = 0; i <= value.Length / DATA; i++ )
         {
-            int                size  = Math.Min( DATA, value.Length - i * DATA );
+            int                size = Math.Min( DATA, value.Length - i * DATA );
             ReadOnlySpan<byte> block = value.AsSpan( i * DATA, size );
             if ( block.IsEmpty ) { continue; }
 

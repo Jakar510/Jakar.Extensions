@@ -18,8 +18,7 @@ namespace Jakar.Json.Generator;
 ///         <see href="https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs"/>
 ///     </para>
 /// </summary>
-[Generator]
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[Generator, SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
     public const            string FROM_JSON  = "FromJson";

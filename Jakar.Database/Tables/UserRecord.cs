@@ -5,8 +5,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record UserRecord( Guid                                                                      UserID,
                                  [property: ProtectedPersonalData] string                                  UserName,
                                  string                                                                    FirstName,
@@ -51,36 +50,36 @@ public sealed record UserRecord( Guid                                           
                                  DateTimeOffset                                                            DateCreated,
                                  DateTimeOffset?                                                           LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IUserData<Guid>, IRefreshToken, IUserID, IUserDataRecord, IUserRights
 {
-    public const                                  int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
-    public const                                  int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
-    public const                                  int                           MAX_PASSWORD_SIZE                   = 250;
-    public const                                  int                           MAX_SIZE                            = SQL.ANSI_STRING_CAPACITY;
-    public const                                  string                        TABLE_NAME                          = "Users";
-    public static readonly                        TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
-    private                                       IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
-    public static                                 string                        TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    [StringLength( IUserRights.MAX_SIZE )] public string                        Rights    { get; set; } = Rights;
+    public const                                                                                 int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
+    public const                                                                                 int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
+    public const                                                                                 int                           MAX_PASSWORD_SIZE                   = 250;
+    public const                                                                                 int                           MAX_SIZE                            = SQL.ANSI_STRING_CAPACITY;
+    public const                                                                                 string                        TABLE_NAME                          = "Users";
+    public static readonly                                                                       TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
+    private                                                                                      IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
+    public static                                                                                string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [ProtectedPersonalData, StringLength( SQL.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    [ProtectedPersonalData]                                                               public string                        Company        { get;                    set; } = Company;
+    Guid? IUserData<Guid>.                                                                                                     CreatedBy      => CreatedBy?.Value;
+    [ProtectedPersonalData] public string                                                                                      Department     { get; set; } = Department;
+    [ProtectedPersonalData] public string                                                                                      Description    { get; set; } = Description;
+    [ProtectedPersonalData] public string                                                                                      Email          { get; set; } = Email;
 
 
-    Guid? IUserData<Guid>.                                                                                                     EscalateTo        => EscalateTo?.Value;
-    Guid? IUserData<Guid>.                                                                                                     CreatedBy         => CreatedBy?.Value;
-    [ProtectedPersonalData, StringLength( SQL.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData    { get => _additionalData; set => _additionalData = value; }
-    [ProtectedPersonalData]                                                               public string                        Company           { get;                    set; } = Company;
-    [ProtectedPersonalData]                                                               public string                        Department        { get;                    set; } = Department;
-    [ProtectedPersonalData]                                                               public string                        Description       { get;                    set; } = Description;
-    [ProtectedPersonalData]                                                               public string                        Email             { get;                    set; } = Email;
-    [ProtectedPersonalData]                                                               public string                        Ext               { get;                    set; } = Ext;
-    [ProtectedPersonalData]                                                               public string                        FirstName         { get;                    set; } = FirstName;
-    [ProtectedPersonalData]                                                               public string                        FullName          { get;                    set; } = FullName;
-    public                                                                                       DateTimeOffset?               LastLogin         { get;                    set; } = LastLogin;
-    [ProtectedPersonalData] public                                                               string                        LastName          { get;                    set; } = LastName;
-    [ProtectedPersonalData] public                                                               string                        PhoneNumber       { get;                    set; } = PhoneNumber;
-    public                                                                                       SupportedLanguage             PreferredLanguage { get;                    set; } = PreferredLanguage;
-    [ProtectedPersonalData] public                                                               string                        Title             { get;                    set; } = Title;
-    Guid IUserID.                                                                                                              UserID            => UserID;
-    [ProtectedPersonalData] public string                                                                                      Website           { get; set; } = Website;
-    [StringLength( 256 )]   public string                                                                                      Gender            { get; set; } = Gender;
-    Guid? IImageID<Guid>.                                                                                                      ImageID           => ImageID?.Value;
+    Guid? IUserData<Guid>.                                          EscalateTo        => EscalateTo?.Value;
+    [ProtectedPersonalData] public string                           Ext               { get; set; } = Ext;
+    [ProtectedPersonalData] public string                           FirstName         { get; set; } = FirstName;
+    [ProtectedPersonalData] public string                           FullName          { get; set; } = FullName;
+    [StringLength( 256 )]   public string                           Gender            { get; set; } = Gender;
+    Guid? IImageID<Guid>.                                           ImageID           => ImageID?.Value;
+    public                                        DateTimeOffset?   LastLogin         { get; set; } = LastLogin;
+    [ProtectedPersonalData] public                string            LastName          { get; set; } = LastName;
+    [ProtectedPersonalData] public                string            PhoneNumber       { get; set; } = PhoneNumber;
+    public                                        SupportedLanguage PreferredLanguage { get; set; } = PreferredLanguage;
+    [StringLength( IUserRights.MAX_SIZE )] public string            Rights            { get; set; } = Rights;
+    [ProtectedPersonalData]                public string            Title             { get; set; } = Title;
+    Guid IUserID.                                                   UserID            => UserID;
+    [ProtectedPersonalData] public string                           Website           { get; set; } = Website;
 
 
     [Pure]

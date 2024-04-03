@@ -4,17 +4,16 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
-public sealed record UserLoginInfoRecord( [property: StringLength(                                   int.MaxValue )] string  LoginProvider,
-                                          [property: StringLength(                                   int.MaxValue )] string? ProviderDisplayName,
-                                          [property: ProtectedPersonalData] [property: StringLength( int.MaxValue )] string  ProviderKey,
-                                          [property: ProtectedPersonalData]                                       string? Value,
-                                          RecordID<UserLoginInfoRecord>                                                   ID,
-                                          RecordID<UserRecord>?                                                           CreatedBy,
-                                          Guid?                                                                           OwnerUserID,
-                                          DateTimeOffset                                                                  DateCreated,
-                                          DateTimeOffset?                                                                 LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+[Serializable, Table( TABLE_NAME )]
+public sealed record UserLoginInfoRecord( [property: StringLength(                        int.MaxValue )]  string  LoginProvider,
+                                          [property: StringLength(                        int.MaxValue )]  string? ProviderDisplayName,
+                                          [property: ProtectedPersonalData, StringLength( int.MaxValue )]  string  ProviderKey,
+                                          [property: ProtectedPersonalData]                                string? Value,
+                                          RecordID<UserLoginInfoRecord>                                            ID,
+                                          RecordID<UserRecord>?                                                    CreatedBy,
+                                          Guid?                                                                    OwnerUserID,
+                                          DateTimeOffset                                                           DateCreated,
+                                          DateTimeOffset?                                                          LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public const  string TABLE_NAME = "UserLoginInfo";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }

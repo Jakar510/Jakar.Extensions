@@ -11,8 +11,8 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "InvertIf" )]
 public static class UserDataExtensions
 {
-    public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.GroupSid        | ClaimType.Role;
     public const ClaimType ADDRESS     = ClaimType.StreetAddressLine1 | ClaimType.StreetAddressLine2 | ClaimType.StateOrProvince | ClaimType.Country | ClaimType.PostalCode;
+    public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.GroupSid        | ClaimType.Role;
 
 
     [MethodImpl( MethodImplOptions.NoInlining )]
@@ -23,8 +23,8 @@ public static class UserDataExtensions
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
 #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#else
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
         where TGroupModel : IGroupModel<TID>
         where TRoleModel : IRoleModel<TID>
@@ -32,7 +32,7 @@ public static class UserDataExtensions
     {
         using Buffer<Claim> claims = new(20 + data.Groups.Count + data.Roles.Count + data.Addresses.Count * 5);
 
-        
+
         if ( types.HasFlag( ClaimType.UserID ) ) { claims.Add( new Claim( ClaimType.UserID.ToClaimTypes(), data.UserID.ToString(), ClaimValueTypes.String ) ); }
 
         if ( types.HasFlag( ClaimType.UserName ) ) { claims.Add( new Claim( ClaimType.UserName.ToClaimTypes(), data.UserName, ClaimValueTypes.String ) ); }

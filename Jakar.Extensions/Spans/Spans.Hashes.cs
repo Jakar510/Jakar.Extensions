@@ -15,11 +15,10 @@ public static partial class Spans
 
 
 #if NET7_0_OR_GREATER
-
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<bool> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(bool);
+        const int SIZE = sizeof(bool);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -28,7 +27,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -40,7 +39,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<char> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(char);
+        const int SIZE = sizeof(char);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -49,7 +48,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -61,7 +60,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<short> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(short);
+        const int SIZE = sizeof(short);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -70,7 +69,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -82,7 +81,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<ushort> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(ushort);
+        const int SIZE = sizeof(ushort);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -91,7 +90,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -103,7 +102,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<int> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(int);
+        const int SIZE = sizeof(int);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -112,7 +111,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -124,7 +123,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<uint> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(uint);
+        const int SIZE = sizeof(uint);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -133,7 +132,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -145,7 +144,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<long> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(long);
+        const int SIZE = sizeof(long);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -154,7 +153,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -166,7 +165,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<ulong> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(ulong);
+        const int SIZE = sizeof(ulong);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -175,7 +174,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -187,7 +186,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<Half> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(bool);
+        const int SIZE = sizeof(bool);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -196,7 +195,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -208,7 +207,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<float> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(float);
+        const int SIZE = sizeof(float);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -217,7 +216,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -229,7 +228,7 @@ public static partial class Spans
     [Pure]
     public static UInt128 Hash128( in ReadOnlySpan<double> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(double);
+        const int SIZE = sizeof(double);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -238,7 +237,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -251,11 +250,10 @@ public static partial class Spans
 
 
 #if NET6_0_OR_GREATER
-
     [Pure]
     public static ulong Hash( in ReadOnlySpan<Half> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(bool);
+        const int SIZE = sizeof(bool);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -264,7 +262,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -277,7 +275,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<bool> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(bool);
+        const int SIZE = sizeof(bool);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -286,7 +284,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -298,7 +296,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<char> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(char);
+        const int SIZE = sizeof(char);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -307,7 +305,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -319,7 +317,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<short> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(short);
+        const int SIZE = sizeof(short);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -328,7 +326,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -340,7 +338,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<ushort> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(ushort);
+        const int SIZE = sizeof(ushort);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -349,7 +347,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -361,7 +359,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<int> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(int);
+        const int SIZE = sizeof(int);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -370,7 +368,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -382,7 +380,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<uint> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(uint);
+        const int SIZE = sizeof(uint);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -391,7 +389,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -403,7 +401,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<long> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(long);
+        const int SIZE = sizeof(long);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -412,7 +410,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -424,7 +422,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<ulong> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(ulong);
+        const int SIZE = sizeof(ulong);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -433,7 +431,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -445,7 +443,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<float> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(float);
+        const int SIZE = sizeof(float);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -454,7 +452,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 
@@ -466,7 +464,7 @@ public static partial class Spans
     [Pure]
     public static ulong Hash( in ReadOnlySpan<double> value, long seed = 0 )
     {
-        const int SIZE   = sizeof(double);
+        const int SIZE = sizeof(double);
         byte[]    buffer = _bytePool.Rent( SIZE * value.Length );
 
         try
@@ -475,7 +473,7 @@ public static partial class Spans
             {
                 int        start = i * SIZE;
                 var        range = new Range( start, start + SIZE );
-                Span<byte> span  = buffer.AsSpan( range );
+                Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
 

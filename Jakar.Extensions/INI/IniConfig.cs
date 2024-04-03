@@ -2,11 +2,11 @@
 
 
 public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
-                                    #if NET6_0_OR_GREATER
+#if NET6_0_OR_GREATER
                                         ,
                                         ISpanFormattable
-                                    #endif
-                                    #if NET7_0_OR_GREATER
+#endif
+#if NET7_0_OR_GREATER
                                         ,
                                         ISpanParsable<IniConfig>
 #endif

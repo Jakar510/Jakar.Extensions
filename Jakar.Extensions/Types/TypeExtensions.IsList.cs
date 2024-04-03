@@ -14,7 +14,7 @@ public static partial class TypeExtensions
     #if NET6_0_OR_GREATER
         [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
-        this Type classType,
+        this                      Type  classType,
         [NotNullWhen( true )] out Type? itemType,
         [NotNullWhen( true )] out bool? isBuiltInType
     )
@@ -35,7 +35,7 @@ public static partial class TypeExtensions
     #if NET6_0_OR_GREATER
         [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
-        this Type propertyType,
+        this                      Type  propertyType,
         [NotNullWhen( true )] out Type? itemType
     )
     {
@@ -53,7 +53,7 @@ public static partial class TypeExtensions
     #if NET6_0_OR_GREATER
         [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
-        this Type classType,
+        this                      Type                 classType,
         [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes
     )
     {

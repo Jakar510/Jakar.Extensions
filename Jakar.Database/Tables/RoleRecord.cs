@@ -1,8 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfRole,
                                  [property: StringLength( 1024 )] string NormalizedName,
                                  [property: StringLength( 4096 )] string ConcurrencyStamp,
@@ -23,7 +22,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     public RoleRecord( string       name, UserRecord? caller                                                                               = default ) : this( name, name, caller ) { }
     public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights.ToString(), RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public RoleModel<Guid> ToRoleModel() => new(this);
 
 

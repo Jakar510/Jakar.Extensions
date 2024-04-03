@@ -42,20 +42,20 @@ public partial class WebRequester
         private          ILogger?                   _logger                       = default;
 
     #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols = default;
-        private ClientCertificateOption?   _clientCertificateOptions = default;
-        private X509CertificateCollection? _clientCertificates = default;
-        private DecompressionMethods?      _automaticDecompression = default;
+        private SslProtocols?              _sslProtocols                = default;
+        private ClientCertificateOption?   _clientCertificateOptions    = default;
+        private X509CertificateCollection? _clientCertificates          = default;
+        private DecompressionMethods?      _automaticDecompression      = default;
         private long?                      _maxRequestContentBufferSize = default;
     #else
-        private SslClientAuthenticationOptions? _sslOptions                  = default;
-        private TimeSpan?                       _responseDrainTimeout        = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
-        private TimeSpan?                       _keepAlivePingTimeout        = default;
-        private TimeSpan?                       _keepAlivePingDelay          = default;
-        private TimeSpan?                       _pooledConnectionLifetime    = default;
+        private SslClientAuthenticationOptions? _sslOptions = default;
+        private TimeSpan?                       _responseDrainTimeout = default;
+        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
+        private TimeSpan?                       _keepAlivePingTimeout = default;
+        private TimeSpan?                       _keepAlivePingDelay = default;
+        private TimeSpan?                       _pooledConnectionLifetime = default;
         private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize        = default;
+        private int?                            _maxResponseDrainSize = default;
     #endif
 
 
@@ -291,9 +291,9 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
         public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay   = pingDelay;
+            _keepAlivePingDelay = pingDelay;
             _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy  = policy;
+            _keepAlivePingPolicy = policy;
             return this;
         }
 

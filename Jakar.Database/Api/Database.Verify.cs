@@ -143,11 +143,11 @@ public abstract partial class Database
 
 
     public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserModel<Guid>> request, CancellationToken                            token                          = default ) => this.TryCall( Register, request, token );
-    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, T>                          func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ValueTask<T>>               func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest          request, Func<UserRecord, Task<T>>                    func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<OneOf<Tokens, Error>> Verify( VerifyRequest             request, ClaimType                                    types, CancellationToken token = default ) => this.TryCall( Verify,   request, types, token );
-    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ActionResult<T>>            func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, ValueTask<ActionResult<T>>> func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
-    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest          request, Func<UserRecord, Task<ActionResult<T>>>      func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, T>                          func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, ValueTask<T>>               func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<T, Error>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, Task<T>>                    func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<OneOf<Tokens, Error>> Verify( VerifyRequest                    request, ClaimType                                    types, CancellationToken token = default ) => this.TryCall( Verify,   request, types, token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, ActionResult<T>>            func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, ValueTask<ActionResult<T>>> func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
+    public ValueTask<ActionResult<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, Task<ActionResult<T>>>      func,  CancellationToken token = default ) => this.TryCall( Verify,   request, func,  token );
 }

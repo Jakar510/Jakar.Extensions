@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 

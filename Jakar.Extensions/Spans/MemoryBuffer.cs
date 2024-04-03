@@ -1,19 +1,16 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  21:3
 
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
 public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer ) : ICollection<T>
 {
-    public const     int                  DEFAULT_CAPACITY     = 64;
-    private readonly IEqualityComparer<T> _comparer            = comparer;
-    protected        T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
-    private          int                  _length;
+    public const       int                  DEFAULT_CAPACITY = 64;
+    private readonly   IEqualityComparer<T> _comparer        = comparer;
+    private            int                  _length;
+    protected          T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
+    protected internal Span<T>              Array { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
 
 
     public int         Capacity   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool.Length; }
@@ -28,7 +25,6 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     public             int       Length { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length; set => _length = Math.Clamp( value, 0, Capacity ); }
     protected internal Memory<T> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
     public             Span<T>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Array[Length..]; }
-    protected internal Span<T>   Array  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool; }
     public             Span<T>   Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Array[..Length]; }
 
 
@@ -376,7 +372,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     public sealed class Enumerator( scoped in MemoryBuffer<T> buffer ) : IEnumerator<T>
     {
         private readonly MemoryBuffer<T> _buffer = buffer;
-        private          int             _index  = 0;
+        private          int             _index;
 
         public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer[_index]; }
         object? IEnumerator.Current => Current;

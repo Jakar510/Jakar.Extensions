@@ -145,7 +145,7 @@ public static class UniqueIDs
 #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
 #else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
         => value.ID.CompareTo( default ) > 0;
 }

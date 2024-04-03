@@ -7,8 +7,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public readonly record struct LoginResult( LoginResult.State Result, UserRecord? User = default, Exception? Exception = default, ModelStateDictionary? Model = default )
 {
-    [MemberNotNullWhen( true,  nameof(User) )]
-    [MemberNotNullWhen( false, nameof(Exception) )]
+    [MemberNotNullWhen( true, nameof(User) ), MemberNotNullWhen( false, nameof(Exception) )]
     public bool Succeeded => User is not null
                                  ? Result == State.Success
                                  : Exception is null;

@@ -4,8 +4,7 @@
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture]
-[TestOf( typeof(Validate) )]
+[TestFixture, TestOf( typeof(Validate) )]
 public class Validate_MinMax_Tests : Assert
 {
     [Test]

@@ -75,8 +75,8 @@ public readonly record struct WebHandler : IDisposable
         using var                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+    #endif
+        using JsonReader reader = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
@@ -86,8 +86,8 @@ public readonly record struct WebHandler : IDisposable
         using var                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+    #endif
+        using JsonReader reader = new JsonTextReader( sr );
 
         var result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );

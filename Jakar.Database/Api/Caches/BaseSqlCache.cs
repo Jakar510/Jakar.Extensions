@@ -5,8 +5,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
-[SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" )]
+[SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" )]
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {

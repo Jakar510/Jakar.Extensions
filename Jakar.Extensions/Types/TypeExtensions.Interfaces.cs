@@ -16,7 +16,7 @@ public static partial class TypeExtensions
         [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
     #endif
         this Type type,
-        Type interfaceType
+        Type      interfaceType
     )
     {
         Type[] interfaces = type.GetInterfaces();

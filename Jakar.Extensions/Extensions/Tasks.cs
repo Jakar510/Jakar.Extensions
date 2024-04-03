@@ -73,7 +73,7 @@ public static partial class Tasks
     #if NET6_0_OR_GREATER
         var options = new ParallelOptions
                       {
-                          CancellationToken      = token,
+                          CancellationToken = token,
                           MaxDegreeOfParallelism = Environment.ProcessorCount
                       };
 
@@ -131,11 +131,11 @@ public static partial class Tasks
 
 
 #if NETSTANDARD2_1
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ValueTask          ValueTaskFromCanceled( this           CancellationToken token )  => new(token.TaskFromCanceled());
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token )  => new(token.TaskFromCanceled<TResult>());
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ValueTask          ValueTaskFromException( this          Exception         e )      => new(e.TaskFromException());
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e )      => new(e.TaskFromException<TResult>());
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => new(result);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromCanceled( this           CancellationToken token )  => new(token.TaskFromCanceled());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token )  => new(token.TaskFromCanceled<TResult>());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromException( this          Exception         e )      => new(e.TaskFromException());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e )      => new(e.TaskFromException<TResult>());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => new(result);
 
 #else
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromCanceled( this           CancellationToken token )  => ValueTask.FromCanceled( token );

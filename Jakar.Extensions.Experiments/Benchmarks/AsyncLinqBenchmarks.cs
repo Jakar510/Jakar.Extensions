@@ -21,12 +21,7 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[Config( typeof(BenchmarkConfig) )]
-[GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory )]
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+[Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();

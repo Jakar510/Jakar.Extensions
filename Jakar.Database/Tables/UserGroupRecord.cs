@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
 {
     public const  string TABLE_NAME = "UserGroups";

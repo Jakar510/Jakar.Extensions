@@ -28,7 +28,7 @@ public static partial class Spans
         return result;
     }
 #else
-    [ Pure ]
+    [Pure]
     public static double Max( this ReadOnlySpan<double> value )
     {
         double result = double.MinValue;
@@ -36,7 +36,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static float Max( this ReadOnlySpan<float> value )
     {
         float result = float.MinValue;
@@ -44,7 +44,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static long Max( this ReadOnlySpan<long> value )
     {
         long result = long.MinValue;
@@ -52,7 +52,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ulong Max( this ReadOnlySpan<ulong> value )
     {
         ulong result = ulong.MinValue;
@@ -60,7 +60,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static int Max( this ReadOnlySpan<int> value )
     {
         int result = int.MinValue;
@@ -68,7 +68,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static uint Max( this ReadOnlySpan<uint> value )
     {
         uint result = uint.MinValue;
@@ -76,7 +76,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static short Max( this ReadOnlySpan<short> value )
     {
         short result = short.MinValue;
@@ -84,7 +84,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ushort Max( this ReadOnlySpan<ushort> value )
     {
         ushort result = ushort.MinValue;
@@ -94,7 +94,7 @@ public static partial class Spans
     }
 
 
-    [ Pure ]
+    [Pure]
     public static int Max<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
         int result = int.MinValue;
@@ -102,7 +102,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static uint Max<T>( this ReadOnlySpan<T> value, Func<T, uint> selector )
     {
         uint result = uint.MinValue;
@@ -110,7 +110,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static long Max<T>( this ReadOnlySpan<T> value, Func<T, long> selector )
     {
         long result = long.MinValue;
@@ -118,7 +118,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ulong Max<T>( this ReadOnlySpan<T> value, Func<T, ulong> selector )
     {
         ulong result = ulong.MinValue;
@@ -126,7 +126,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static float Max<T>( this ReadOnlySpan<T> value, Func<T, float> selector )
     {
         float result = float.MinValue;
@@ -134,7 +134,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static double Max<T>( this ReadOnlySpan<T> value, Func<T, double> selector )
     {
         double result = double.MinValue;

@@ -1,8 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID,
                                   [property: StringLength( GroupRecord.MAX_SIZE )] string  NameOfGroup,
                                   string                                                   Rights,
@@ -12,12 +11,12 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
                                   DateTimeOffset                                           DateCreated,
                                   DateTimeOffset?                                          LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
-    public const                                  int    MAX_SIZE   = 1024;
-    public const                                  string TABLE_NAME = "Groups";
-    public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
-    Guid? IGroupModel<Guid>.                             OwnerID   => OwnerUserID;
+    public const  int                                    MAX_SIZE   = 1024;
+    public const  string                                 TABLE_NAME = "Groups";
+    public static string                                 TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
     Guid? ICreatedByUser<Guid>.                          CreatedBy => CreatedBy?.Value;
+    Guid? IGroupModel<Guid>.                             OwnerID   => OwnerUserID;
+    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
 
 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID ) : this( customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }

@@ -336,7 +336,7 @@ public static partial class Spans
         switch ( values.Length )
         {
             case 0: return default;
-                
+
             default:
             {
                 TNext[]     buffer = AsyncLinq.GetArray<TNext>( values.Length );

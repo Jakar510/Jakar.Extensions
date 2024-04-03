@@ -28,7 +28,7 @@ public static class Hashes
             hexChars[i * 2]     = HEX_ALPHABET[b >> 4];
             hexChars[i * 2 + 1] = HEX_ALPHABET[b & 0x0F];
         }
-        
+
         return hexChars.ToString();
     }
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>

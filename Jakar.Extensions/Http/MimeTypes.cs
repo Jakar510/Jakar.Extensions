@@ -7,7 +7,7 @@ public static class MimeTypes
     public static readonly FrozenSet<MimeType> All =
     #if NET6_0_OR_GREATER
         Enum.GetValues<MimeType>().ToFrozenSet();
-#else
+    #else
         Enum.GetValues( typeof(MimeType) ).Cast<MimeType>().ToFrozenSet();
 #endif
 

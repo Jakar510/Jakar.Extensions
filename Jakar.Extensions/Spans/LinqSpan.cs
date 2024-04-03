@@ -4,7 +4,6 @@
 namespace Jakar.Extensions;
 
 
-
 /*
 public interface ILinqSpanHandler<out TIn>
 {

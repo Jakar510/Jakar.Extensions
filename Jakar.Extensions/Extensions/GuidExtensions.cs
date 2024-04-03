@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/15/2022  5:45 PM
 
-using System.Drawing;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -143,18 +139,14 @@ public static class GuidExtensions
     }
 
 
-    public static (long Lower, long Upper) AsLong( this Guid value )
-    {
-        return value.AsLong( out long lower, out long upper )
-                   ? (lower, upper)
-                   : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
-    }
-    public static (ulong Lower, ulong Upper) AsULong( this Guid value )
-    {
-        return value.AsLong( out ulong lower, out ulong upper )
-                   ? (lower, upper)
-                   : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
-    }
+    public static (long Lower, long Upper) AsLong( this Guid value ) =>
+        value.AsLong( out long lower, out long upper )
+            ? (lower, upper)
+            : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
+    public static (ulong Lower, ulong Upper) AsULong( this Guid value ) =>
+        value.AsLong( out ulong lower, out ulong upper )
+            ? (lower, upper)
+            : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
 
 
     public static bool AsLong( this Guid value, out long lower, out long upper )

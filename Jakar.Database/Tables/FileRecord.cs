@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record FileRecord( RecordID<FileRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>
 {
     public const  string                       TABLE_NAME = "Files";

@@ -6,17 +6,15 @@ namespace Jakar.Database;
 
 public static class SQL // TODO: move to Jakar.Extensions.Sizes
 {
+    public const string AND                     = " AND ";
     public const int    ANSI_STRING_CAPACITY    = 8000;
     public const int    ANSI_TEXT_CAPACITY      = 2_147_483_647;
-    public const int    UNICODE_STRING_CAPACITY = 4000;
-    public const int    UNICODE_TEXT_CAPACITY   = 1_073_741_823;
     public const int    BINARY_CAPACITY         = ANSI_TEXT_CAPACITY;
-    public const int    DECIMAL_MAX_PRECISION   = 38;
-    public const int    DECIMAL_MAX_SCALE       = 29;
-    public const string AND                     = " AND ";
     public const string COUNT                   = "count";
     public const string CREATED_BY              = nameof(IOwnedTableRecord.CreatedBy);
     public const string DATE_CREATED            = nameof(IRecordPair.DateCreated);
+    public const int    DECIMAL_MAX_PRECISION   = 38;
+    public const int    DECIMAL_MAX_SCALE       = 29;
     public const string GUID_FORMAT             = "D";
     public const string ID                      = nameof(IRecordPair.ID);
     public const string IDS                     = "ids";
@@ -25,6 +23,8 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
     public const string OR                      = " OR ";
     public const string OWNER_USER_ID           = nameof(IOwnedTableRecord.OwnerUserID);
     public const char   QUOTE                   = '"';
+    public const int    UNICODE_STRING_CAPACITY = 4000;
+    public const int    UNICODE_TEXT_CAPACITY   = 1_073_741_823;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

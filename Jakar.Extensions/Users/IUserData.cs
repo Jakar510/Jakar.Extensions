@@ -70,7 +70,7 @@ public interface IUserData : IUserName, IUserID
     [Required] public     string            LastName            { get; set; }
     [Phone]    public     string            PhoneNumber         { get; set; }
     [Required] public     SupportedLanguage PreferredLanguage   { get; set; }
-    public                DateTimeOffset?   SubscriptionExpires { get; init; }
+    public                DateTimeOffset?   SubscriptionExpires { get; }
     public                string            Title               { get; set; }
     [Url] public          string            Website             { get; set; }
 

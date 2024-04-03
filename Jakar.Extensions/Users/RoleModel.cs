@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 4/1/2024  17:12
 
-using System;
-using Org.BouncyCastle.Tls;
-
-
-
 namespace Jakar.Extensions;
 
 

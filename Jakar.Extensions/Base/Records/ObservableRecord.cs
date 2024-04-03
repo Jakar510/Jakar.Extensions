@@ -293,9 +293,9 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
     public static Sorter<TRecord>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TRecord>.Default; }
 
 
-    public static TRecord? FromJson( [NotNullIfNotNull( nameof( json ) )] string? json ) => json?.FromJson<TRecord>();
-    public        string   ToJson()                                              => this.ToJson( Formatting.None );
-    public        string   ToPrettyJson()                                        => this.ToJson( Formatting.Indented );
+    public static TRecord? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TRecord>();
+    public        string   ToJson()                                                    => this.ToJson( Formatting.None );
+    public        string   ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
 
 
     public int CompareTo( object? other )

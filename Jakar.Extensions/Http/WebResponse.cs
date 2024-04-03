@@ -4,8 +4,7 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
-[SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
+[SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
 public readonly record struct WebResponse<T>
 {
     public const string ERROR_MESSAGE = "Error Message: ";

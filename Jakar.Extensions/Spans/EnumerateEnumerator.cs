@@ -36,10 +36,10 @@ public ref struct EnumerateEnumerator<T>( scoped in ReadOnlySpan<T> span, int in
 public ref struct EnumerateEnumerator<T, TNumber>( scoped in ReadOnlySpan<T> span, TNumber start )
     where TNumber : struct, INumber<TNumber>
 {
-    private readonly ReadOnlySpan<T> _span   = span;
-    private readonly TNumber         _start  = start;
+    private readonly ReadOnlySpan<T> _span = span;
+    private readonly TNumber         _start = start;
     private          TNumber         _number = start;
-    private          int             _index  = 0;
+    private          int             _index = 0;
 
 
     public (TNumber Index, T Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
@@ -56,17 +56,14 @@ public ref struct EnumerateEnumerator<T, TNumber>( scoped in ReadOnlySpan<T> spa
         if ( index >= _span.Length )
         {
             _number = _start;
-            _index  = 0;
+            _index = 0;
             return false;
         }
 
         Current = (_number, _span[index]);
-        _index  = index + 1;
+        _index = index + 1;
         _number++;
         return true;
     }
 }
-
-
-
 #endif

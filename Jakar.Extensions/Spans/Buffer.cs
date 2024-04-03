@@ -188,7 +188,7 @@ public ref struct Buffer<TValue>
         #else
             for ( int j = 0; j < span.Length; j++ )
             {
-                if ( _comparer.Equals( x: span[index: j], y: value[index: j] ) ) { return true; }
+                if ( _comparer.Equals( span[j], value[j] ) ) { return true; }
             }
 
         #endif

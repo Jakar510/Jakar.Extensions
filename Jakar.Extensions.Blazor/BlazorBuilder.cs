@@ -18,8 +18,7 @@
 ///         <see href="https://github.com/Blazored/SessionStorage"/>
 ///     </para>
 /// </summary>
-[SuppressMessage( "ReSharper", "UnusedType.Global" )]
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[SuppressMessage( "ReSharper", "UnusedType.Global" ), SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class BlazorBuilder
 {
     public static WebApplicationBuilder AddAppServices( this WebApplicationBuilder builder )

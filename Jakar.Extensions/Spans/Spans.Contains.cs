@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -16,7 +12,6 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
 #if NET8_0_OR_GREATER
-
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool ContainsAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.ContainsAny( value );
@@ -51,9 +46,9 @@ public static partial class Spans
 
     #if NETSTANDARD2_1
         this
-    #endif
-        Span<T> span,
-        T       value
+        #endif
+            Span<T> span,
+        T value
     )
         where T : IEquatable<T>
     {
@@ -71,9 +66,9 @@ public static partial class Spans
     public static bool Contains<T>(
     #if NETSTANDARD2_1
         this
-    #endif
-        ReadOnlySpan<T> span,
-        T               value
+        #endif
+            ReadOnlySpan<T> span,
+        T value
     )
         where T : IEquatable<T>
     {

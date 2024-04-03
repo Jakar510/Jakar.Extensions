@@ -4,14 +4,9 @@
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture]
-[TestOf( typeof(StringExtensions) )]
+[TestFixture, TestOf( typeof(StringExtensions) )]
 public class StringExtensions_Tests : Assert
 {
-    [Test]
-    [TestCase( "Hello World",     "hello_world" )]
-    [TestCase( "Hello55 World33", "hello55_world33" )]
-    [TestCase( "Hello55 World",   "hello55_world" )]
-    [TestCase( "fooBar",          "foo_bar" )]
+    [Test, TestCase( "Hello World", "hello_world" ), TestCase( "Hello55 World33", "hello55_world33" ), TestCase( "Hello55 World", "hello55_world" ), TestCase( "fooBar", "foo_bar" )]
     public void Run( string value, string expected ) => this.AreEqual( expected, value.ToSnakeCase() );
 }
