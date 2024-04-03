@@ -286,7 +286,9 @@ public sealed record UserRecord( Guid                                           
                                                                                                                            caller?.UserID,
                                                                                                                            DateTimeOffset.UtcNow);
 
-    [Pure] public static UserRecord Create( string userName, string password, IUserRights rights, UserRecord? caller = default ) => Create( userName, password, rights.ToString(), caller );
+    [Pure]
+    public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
+        where TEnum : struct, Enum => Create( userName, password, rights.ToString(), caller );
 
     [Pure]
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>

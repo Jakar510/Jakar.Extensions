@@ -90,6 +90,7 @@ public ref struct UserRights<TEnum>
     public readonly UserRights<TEnum> With<TRecord>( TRecord record )
         where TRecord : class, IUserRights => With( record.Rights );
 
+    [Pure]
     private readonly UserRights<TEnum> With( scoped in ReadOnlySpan<char> other )
     {
         With( Span, other );
@@ -127,13 +128,15 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure] public static UserRights<TEnum> Create()                                       => Default;
-    [Pure] public static UserRights<TEnum> Create( scoped in ReadOnlySpan<char>  rights ) => Default.With( rights );
-    [Pure] public static UserRights<TEnum> Create( scoped in ReadOnlySpan<TEnum> array )  => Default.Add( array );
+    [Pure] public static   UserRights<TEnum> Create()                                       => Default;
+    [Pure] internal static UserRights<TEnum> Create( scoped in ReadOnlySpan<char>  rights ) => Default.With( rights );
+    [Pure] public static   UserRights<TEnum> Create( scoped in ReadOnlySpan<TEnum> array )  => Default.Add( array );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( int   index ) => Span[index] == VALID;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( TEnum index ) => Has( index.AsInt() );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( int   index ) => Span[index] == VALID;
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( TEnum index ) => Has( index.AsInt() );
+
+    [Pure]
     public readonly bool Has( scoped in ReadOnlySpan<TEnum> array )
     {
         foreach ( TEnum i in array )
@@ -145,8 +148,9 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Remove( TEnum index ) => Set( index.AsInt(), INVALID );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Remove( TEnum index ) => Set( index.AsInt(), INVALID );
 
+    [Pure]
     public readonly UserRights<TEnum> Remove( scoped in ReadOnlySpan<TEnum> array )
 
     {
@@ -156,7 +160,9 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Add( TEnum index ) => Set( index.AsInt(), VALID );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Add( TEnum index ) => Set( index.AsInt(), VALID );
+
+    [Pure]
     public readonly UserRights<TEnum> Add( scoped in ReadOnlySpan<TEnum> array )
     {
         foreach ( TEnum i in array ) { Add( i ); }
@@ -165,7 +171,7 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
     internal readonly UserRights<TEnum> Set( int index, char value )
     {
         Guard.IsInRange( index, 0, _enumValues.Length );
@@ -177,5 +183,5 @@ public ref struct UserRights<TEnum>
 
 
 
-    public record struct Right( TEnum Index, bool Value );
+    public readonly record struct Right( TEnum Index, bool Value );
 }
