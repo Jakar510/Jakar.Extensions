@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using ZXing.Aztec.Internal;
 
 
 
@@ -26,6 +25,7 @@ public sealed record UserRecord( Guid                          UserID,
                                  string                        Ext,
                                  bool                          IsPhoneNumberConfirmed,
                                  bool                          IsTwoFactorEnabled,
+                                 Guid?                         SubscriptionID,
                                  DateTimeOffset?               SubscriptionExpires,
                                  DateTimeOffset?               LastBadAttempt,
                                  DateTimeOffset?               LastLogin,
@@ -60,7 +60,10 @@ public sealed record UserRecord( Guid                          UserID,
     private                                                                                      IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
     public static                                                                                string                        TableName              { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
     [ProtectedPersonalData, StringLength( SQL.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData         { get => _additionalData; set => _additionalData = value; }
-    [ProtectedPersonalData]                                                               public string                        Company                { get;                    set; } = Company;
+    [StringLength(                        MAX_SIZE )]                                     public string                        AuthenticatorKey       { get;                    set; } = AuthenticatorKey;
+    public                                                                                       int?                          BadLogins              { get;                    set; } = BadLogins;
+    [ProtectedPersonalData]    public                                                            string                        Company                { get;                    set; } = Company;
+    [StringLength( MAX_SIZE )] public                                                            string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
     Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => CreatedBy?.Value;
     [ProtectedPersonalData] public string                                                                                      Department             { get; set; } = Department;
     [ProtectedPersonalData] public string                                                                                      Description            { get; set; } = Description;
@@ -72,33 +75,33 @@ public sealed record UserRecord( Guid                          UserID,
     [ProtectedPersonalData] public string                                                                                      FullName               { get; set; } = FullName;
     [StringLength( 256 )]   public string                                                                                      Gender                 { get; set; } = Gender;
     Guid? IImageID<Guid>.                                                                                                      ImageID                => ImageID?.Value;
-    public                                        RecordID<FileRecord>?                                                        ImageID                { get; set; } = ImageID;
-    public                                        DateTimeOffset?                                                              LastLogin              { get; set; } = LastLogin;
-    [ProtectedPersonalData] public                string                                                                       LastName               { get; set; } = LastName;
-    [ProtectedPersonalData] public                string                                                                       PhoneNumber            { get; set; } = PhoneNumber;
-    public                                        SupportedLanguage                                                            PreferredLanguage      { get; set; } = PreferredLanguage;
-    [StringLength( IUserRights.MAX_SIZE )] public string                                                                       Rights                 { get; set; } = Rights;
-    [ProtectedPersonalData]                public string                                                                       Title                  { get; set; } = Title;
-    Guid IUserID<Guid>.                                                                                                        UserID                 => UserID;
-    [ProtectedPersonalData] public                       string                                                                Website                { get; set; } = Website;
-    public                                               bool                                                                  IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
-    [StringLength( MAX_SIZE )] public                    string                                                                ConcurrencyStamp       { get; set; } = ConcurrencyStamp;
-    public                                               bool                                                                  IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
-    public                                               bool                                                                  IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
-    public                                               DateTimeOffset?                                                       SubscriptionExpires    { get; set; } = SubscriptionExpires;
+    public   RecordID<FileRecord>?                                                                                             ImageID                { get; set; } = ImageID;
+    public   bool                                                                                                              IsActive               { get; set; } = IsActive;
+    public   bool                                                                                                              IsDisabled             { get; set; } = IsDisabled;
+    public   bool                                                                                                              IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
+    public   bool                                                                                                              IsLocked               { get; set; } = IsLocked;
+    public   bool                                                                                                              IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
+    public   bool                                                                                                              IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
+    internal bool                                                                                                              IsValid                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false && UserID != Guid.Empty; }
+    bool IValidator.                                                                                                           IsValid                => IsValid;
     public                                               DateTimeOffset?                                                       LastBadAttempt         { get; set; } = LastBadAttempt;
-    public                                               int?                                                                  BadLogins              { get; set; } = BadLogins;
-    public                                               bool                                                                  IsLocked               { get; set; } = IsLocked;
+    public                                               DateTimeOffset?                                                       LastLogin              { get; set; } = LastLogin;
+    [ProtectedPersonalData] public                       string                                                                LastName               { get; set; } = LastName;
     public                                               DateTimeOffset?                                                       LockDate               { get; set; } = LockDate;
     public                                               DateTimeOffset?                                                       LockoutEnd             { get; set; } = LockoutEnd;
     [StringLength( ENCRYPTED_MAX_PASSWORD_SIZE )] public string                                                                PasswordHash           { get; set; } = PasswordHash;
-    [StringLength( MAX_SIZE )]                    public string                                                                RefreshToken           { get; set; } = RefreshToken;
+    [ProtectedPersonalData]                       public string                                                                PhoneNumber            { get; set; } = PhoneNumber;
+    public                                               SupportedLanguage                                                     PreferredLanguage      { get; set; } = PreferredLanguage;
+    [StringLength( MAX_SIZE )] public                    string                                                                RefreshToken           { get; set; } = RefreshToken;
     public                                               DateTimeOffset?                                                       RefreshTokenExpiryTime { get; set; } = RefreshTokenExpiryTime;
+    [StringLength( IUserRights.MAX_SIZE )] public        string                                                                Rights                 { get; set; } = Rights;
+    [StringLength( MAX_SIZE )]             public        string                                                                SecurityStamp          { get; set; } = SecurityStamp;
     public                                               Guid?                                                                 SessionID              { get; set; } = SessionID;
-    public                                               bool                                                                  IsActive               { get; set; } = IsActive;
-    public                                               bool                                                                  IsDisabled             { get; set; } = IsDisabled;
-    [StringLength( MAX_SIZE )] public                    string                                                                SecurityStamp          { get; set; } = SecurityStamp;
-    [StringLength( MAX_SIZE )] public                    string                                                                AuthenticatorKey       { get; set; } = AuthenticatorKey;
+    public                                               DateTimeOffset?                                                       SubscriptionExpires    { get; set; } = SubscriptionExpires;
+    public                                               Guid?                                                                 SubscriptionID         { get; set; } = SubscriptionID;
+    [ProtectedPersonalData] public                       string                                                                Title                  { get; set; } = Title;
+    Guid IUserID<Guid>.                                                                                                        UserID                 => UserID;
+    [ProtectedPersonalData] public string                                                                                      Website                { get; set; } = Website;
 
 
     public override DynamicParameters ToDynamicParameters()
@@ -177,6 +180,7 @@ public sealed record UserRecord( Guid                          UserID,
         string                        refreshToken           = reader.GetFieldValue<string>( nameof(RefreshToken) );
         var                           refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
         var                           sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        var                           subscriptionID         = reader.GetFieldValue<Guid?>( nameof(SubscriptionID) );
         bool                          isActive               = reader.GetBoolean( nameof(IsActive) );
         bool                          isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
         string                        securityStamp          = reader.GetFieldValue<string>( nameof(SecurityStamp) );
@@ -210,6 +214,7 @@ public sealed record UserRecord( Guid                          UserID,
                                      ext,
                                      isPhoneNumberConfirmed,
                                      isTwoFactorEnabled,
+                                     subscriptionID,
                                      subscriptionExpires,
                                      lastBadAttempt,
                                      lastLogin,
@@ -282,10 +287,12 @@ public sealed record UserRecord( Guid                          UserID,
                                                                                                                                  null,
                                                                                                                                  null,
                                                                                                                                  null,
+                                                                                                                                 null,
                                                                                                                                  0,
                                                                                                                                  false,
                                                                                                                                  null,
                                                                                                                                  null,
+                                                                                                                                 string.Empty,
                                                                                                                                  string.Empty,
                                                                                                                                  string.Empty,
                                                                                                                                  null,
@@ -330,10 +337,12 @@ public sealed record UserRecord( Guid                          UserID,
                         null,
                         null,
                         null,
+                        null,
                         0,
                         false,
                         null,
                         null,
+                        string.Empty,
                         string.Empty,
                         string.Empty,
                         null,
@@ -478,6 +487,9 @@ public sealed record UserRecord( Guid                          UserID,
 
         return model;
     }
+
+
+    public string GetDescription() => IUserData.GetDescription( this );
 
 
     public bool Equals( IUserData? other )

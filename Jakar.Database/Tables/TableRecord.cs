@@ -56,6 +56,7 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
+    public DateTimeOffset? LastModified { get; set; } = LastModified;
 
     public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
