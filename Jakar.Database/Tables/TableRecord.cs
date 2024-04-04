@@ -83,14 +83,14 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
     public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );
     public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(ID), id.Value );
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(ID),           ID.Value );
         parameters.Add( nameof(DateCreated),  DateCreated );
         parameters.Add( nameof(LastModified), LastModified );
@@ -134,20 +134,23 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
 public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
+
+
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
     protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(CreatedBy),   user.ID.Value );
         parameters.Add( nameof(OwnerUserID), user.UserID );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TRecord> record )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
         parameters.Add( nameof(CreatedBy),   record.CreatedBy?.Value );
         return parameters;

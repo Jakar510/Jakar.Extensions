@@ -33,16 +33,16 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     }
     public override SqlCommand Random( in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
 
         if ( _sql.TryGetValue( SqlCacheType.RandomCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomCount] = sql = $"SELECT * FROM {TableName} ORDER BY {RandomMethod} LIMIT @{nameof(count)}"; }
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( in Guid? userID, in int count )
+    public override SqlCommand Random( scoped in Guid? userID, in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count),  count );
         parameters.Add( nameof(userID), userID );
 
@@ -50,9 +50,9 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( in RecordID<UserRecord> id, in int count )
+    public override SqlCommand Random( scoped in RecordID<UserRecord> id, in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
         parameters.Add( nameof(id),    id );
 

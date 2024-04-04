@@ -6,9 +6,9 @@ namespace Jakar.Extensions;
 
 public interface IFileMetaData : IUniqueID<Guid>
 {
-    public const int DESCRIPTION_SIZE_LIMIT = Sizes.UNICODE_STRING_CAPACITY;
+    public const int DESCRIPTION_SIZE_LIMIT = Sizes.UNICODE_CAPACITY;
     public const int NAME_SIZE_LIMIT        = 256;
-    public const int TYPE_SIZE_LIMIT        = Sizes.UNICODE_STRING_CAPACITY;
+    public const int TYPE_SIZE_LIMIT        = Sizes.UNICODE_CAPACITY;
 
     string? FileDescription { get; }
     string? FileName        { get; }

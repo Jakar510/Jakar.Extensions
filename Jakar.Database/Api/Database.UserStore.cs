@@ -67,7 +67,7 @@
         public ValueTask<UserRecord?> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( FindByLoginAsync, loginProvider, providerKey, token );
         public virtual async ValueTask<UserRecord?> FindByLoginAsync( DbConnection connection, DbTransaction transaction, string loginProvider, string providerKey, CancellationToken token )
         {
-            var parameters = new DynamicParameters();
+            DynamicParameters parameters = new();
             parameters.Add( nameof(UserLoginInfoRecord.LoginProvider), loginProvider );
             parameters.Add( nameof(UserLoginInfoRecord.ProviderKey),   providerKey );
             return await Users.Get( true, parameters, token );

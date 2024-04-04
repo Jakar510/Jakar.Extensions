@@ -37,19 +37,19 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public static DynamicParameters GetDynamicParameters( TValue record )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(KeyID), record.ID );
         return parameters;
     }
     public static DynamicParameters GetDynamicParameters( TKey key )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(KeyID), key.ID );
         return parameters;
     }
     public static DynamicParameters GetDynamicParameters( TKey key, TValue value )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(KeyID),   key.ID );
         parameters.Add( nameof(ValueID), value.ID );
         return parameters;

@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 
 [Serializable]
 public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, IVerifyRequestProvider
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -19,13 +19,17 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>
+#if NET8_0_OR_GREATER
+    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+#else
     where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+#endif
 {
     private string _confirmPassword = string.Empty;
     private string _userPassword    = string.Empty;
 
 
-    [Required, StringLength( UNICODE_STRING_CAPACITY )]
+    [Required, StringLength( UNICODE_CAPACITY )]
     public virtual string ConfirmPassword
     {
         get => _confirmPassword;
@@ -40,7 +44,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     [JsonIgnore] public virtual  bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Password ) is false && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ); }
 
 
-    [Required, StringLength( UNICODE_STRING_CAPACITY )]
+    [Required, StringLength( UNICODE_CAPACITY )]
     public virtual string Password
     {
         get => _userPassword;
@@ -51,7 +55,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [Required, StringLength( UNICODE_STRING_CAPACITY )]
+    [Required, StringLength( UNICODE_CAPACITY )]
     public override string UserName
     {
         [MethodImpl( MethodImplOptions.AggressiveInlining )] get => base.UserName;
@@ -118,7 +122,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 
 [Serializable]
 public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -127,7 +131,11 @@ public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID
 #else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
+#if NET8_0_OR_GREATER
+    where TClass : CreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
+#else
     where TClass : CreateUserModel<TClass, TID>, new()
+#endif
 {
     protected CreateUserModel() : base() { }
     protected CreateUserModel( IUserData<TID> value ) : base( value ) { }
@@ -137,8 +145,16 @@ public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID
 
 
 [Serializable]
-public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
-#if NET8_0
+public sealed class CreateUserModel<TID> :
+#if NET8_0_OR_GREATER
+    CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>,
+    ICreateUserModel<CreateUserModel<TID>, TID>,
+    ICreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+#else
+    CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+#endif
+
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -149,6 +165,16 @@ public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>,
 #endif
 {
     public CreateUserModel() : base() { }
-    public CreateUserModel( IUserData<TID> value ) : base( value ) { }
-    public CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
+    public CreateUserModel( IUserData<TID>                    value ) : base( value ) { }
+    public CreateUserModel( string                            firstName, string lastName ) : base( firstName, lastName ) { }
+    public static CreateUserModel<TID> Create( IUserData<TID> model ) => new(model);
+    public static CreateUserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>> addresses, IEnumerable<GroupModel<TID>> groups, IEnumerable<RoleModel<TID>> roles )
+    {
+        CreateUserModel<TID> user = new();
+        user.With( model );
+        user.WithAddresses( addresses );
+        user.Groups.Add( groups );
+        user.Roles.Add( roles );
+        return user;
+    }
 }

@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 public interface ICreatedByUser<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -22,7 +22,7 @@ public interface ICreatedByUser<TID>
 
 
 public interface IUserID<out TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -42,7 +42,7 @@ public interface IUserID : IUserID<Guid>;
 
 
 public interface IImageID<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -104,7 +104,7 @@ public interface IUserData : IUserName, IUserID
 
 
 public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -116,12 +116,14 @@ public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>
 {
     public TID? CreatedBy  { get; }
     public TID? EscalateTo { get; }
+
+    public void With( IUserData<TID> value );
 }
 
 
 
 public interface IUserData<TID, TAddress> : IUserData<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -138,7 +140,7 @@ public interface IUserData<TID, TAddress> : IUserData<TID>
 
 
 public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>, JsonModels.IJsonModel, IUserRights
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -157,16 +159,25 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 
 
-public interface ICreateUserModel<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, IChangePassword
-#if NET8_0
+#if NET8_0_OR_GREATER
+public interface ICreateUserModel<out T, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
-    where TAddress : IAddress<TID>;
+    where TAddress : IAddress<TID>
+    where T : ICreateUserModel<T, TID, TAddress, TGroupModel, TRoleModel>
+{
+    public abstract static T Create( IUserData<TID> model, IEnumerable<TAddress> addresses, IEnumerable<TGroupModel> groups, IEnumerable<TRoleModel> roles );
+}
+
+
+
+public interface ICreateUserModel<out T, TID> : IUserData<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    where T : ICreateUserModel<T, TID>
+{
+    public abstract static T Create( IUserData<TID> model );
+}
+
+
+#endif

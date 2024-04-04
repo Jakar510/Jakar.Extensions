@@ -57,7 +57,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
 
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(CreatedBy),   user.ID.Value );
         parameters.Add( nameof(OwnerUserID), user.UserID );
         parameters.Add( nameof(Value),       value );

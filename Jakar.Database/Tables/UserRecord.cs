@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using Microsoft.OpenApi.Extensions;
 
 
 
@@ -41,7 +42,7 @@ public sealed record UserRecord( Guid                                           
                                  [property: StringLength( UserRecord.MAX_SIZE )] string                    SecurityStamp,
                                  [property: StringLength( UserRecord.MAX_SIZE )] string                    AuthenticatorKey,
                                  [property: StringLength( UserRecord.MAX_SIZE )] string                    ConcurrencyStamp,
-                                 [property: StringLength( 256 )]                 RecordID<UserRecord>?     EscalateTo,
+                                 RecordID<UserRecord>?                                                     EscalateTo,
                                  IDictionary<string, JToken?>?                                             AdditionalData,
                                  RecordID<FileRecord>?                                                     ImageID,
                                  RecordID<UserRecord>                                                      ID,
@@ -53,7 +54,7 @@ public sealed record UserRecord( Guid                                           
     public const                                                                                 int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                 int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
     public const                                                                                 int                           MAX_PASSWORD_SIZE                   = 250;
-    public const                                                                                 int                           MAX_SIZE                            = SQL.ANSI_STRING_CAPACITY;
+    public const                                                                                 int                           MAX_SIZE                            = SQL.ANSI_CAPACITY;
     public const                                                                                 string                        TABLE_NAME                          = "Users";
     public static readonly                                                                       TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
     private                                                                                      IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
@@ -80,6 +81,7 @@ public sealed record UserRecord( Guid                                           
     [ProtectedPersonalData]                public string            Title             { get; set; } = Title;
     Guid IUserID.                                                   UserID            => UserID;
     [ProtectedPersonalData] public string                           Website           { get; set; } = Website;
+    public                         RecordID<UserRecord>?            EscalateTo        { get; set; } = EscalateTo;
 
 
     [Pure]
@@ -229,12 +231,13 @@ public sealed record UserRecord( Guid                                           
 
 
     [Pure]
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, IUserRights rights, UserRecord? caller = default )
-        where TUser : IUserData => Create( request, rights.ToString(), caller );
+    public static UserRecord Create<TUser, TEnum>( VerifyRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
+        where TUser : IUserData<Guid>
+        where TEnum : struct, Enum => Create( request, rights.ToString(), caller );
 
     [Pure]
     public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default )
-        where TUser : IUserData
+        where TUser : IUserData<Guid>
     {
         ArgumentNullException.ThrowIfNull( request.Data );
         UserRecord record = Create( request.UserName, rights, request.Data, caller );
@@ -242,48 +245,48 @@ public sealed record UserRecord( Guid                                           
     }
 
     [Pure]
-    public static UserRecord Create( string userName, string rights, IUserData data, UserRecord? caller = default ) => new(Guid.NewGuid(),
-                                                                                                                           userName,
-                                                                                                                           data.FirstName,
-                                                                                                                           data.LastName,
-                                                                                                                           data.FullName,
-                                                                                                                           rights,
-                                                                                                                           data.Gender,
-                                                                                                                           data.Company,
-                                                                                                                           data.Description,
-                                                                                                                           data.Department,
-                                                                                                                           data.Title,
-                                                                                                                           data.Website,
-                                                                                                                           data.PreferredLanguage,
-                                                                                                                           data.Email,
-                                                                                                                           false,
-                                                                                                                           data.PhoneNumber,
-                                                                                                                           data.Ext,
-                                                                                                                           false,
-                                                                                                                           false,
-                                                                                                                           null,
-                                                                                                                           null,
-                                                                                                                           null,
-                                                                                                                           0,
-                                                                                                                           false,
-                                                                                                                           null,
-                                                                                                                           null,
-                                                                                                                           string.Empty,
-                                                                                                                           string.Empty,
-                                                                                                                           null,
-                                                                                                                           null,
-                                                                                                                           true,
-                                                                                                                           false,
-                                                                                                                           string.Empty,
-                                                                                                                           string.Empty,
-                                                                                                                           string.Empty,
-                                                                                                                           null,
-                                                                                                                           (data as JsonModels.IJsonModel)?.AdditionalData,
-                                                                                                                           null,
-                                                                                                                           RecordID<UserRecord>.New(),
-                                                                                                                           caller?.ID,
-                                                                                                                           caller?.UserID,
-                                                                                                                           DateTimeOffset.UtcNow);
+    public static UserRecord Create( string userName, string rights, IUserData<Guid> data, UserRecord? caller = default ) => new(Guid.NewGuid(),
+                                                                                                                                 userName,
+                                                                                                                                 data.FirstName,
+                                                                                                                                 data.LastName,
+                                                                                                                                 data.FullName,
+                                                                                                                                 rights,
+                                                                                                                                 data.Gender,
+                                                                                                                                 data.Company,
+                                                                                                                                 data.Description,
+                                                                                                                                 data.Department,
+                                                                                                                                 data.Title,
+                                                                                                                                 data.Website,
+                                                                                                                                 data.PreferredLanguage,
+                                                                                                                                 data.Email,
+                                                                                                                                 false,
+                                                                                                                                 data.PhoneNumber,
+                                                                                                                                 data.Ext,
+                                                                                                                                 false,
+                                                                                                                                 false,
+                                                                                                                                 null,
+                                                                                                                                 null,
+                                                                                                                                 null,
+                                                                                                                                 0,
+                                                                                                                                 false,
+                                                                                                                                 null,
+                                                                                                                                 null,
+                                                                                                                                 string.Empty,
+                                                                                                                                 string.Empty,
+                                                                                                                                 null,
+                                                                                                                                 null,
+                                                                                                                                 true,
+                                                                                                                                 false,
+                                                                                                                                 string.Empty,
+                                                                                                                                 string.Empty,
+                                                                                                                                 string.Empty,
+                                                                                                                                 RecordID<UserRecord>.TryCreate( data.EscalateTo ),
+                                                                                                                                 (data as JsonModels.IJsonModel)?.AdditionalData,
+                                                                                                                                 RecordID<FileRecord>.TryCreate( data.ImageID ),
+                                                                                                                                 RecordID<UserRecord>.New(),
+                                                                                                                                 caller?.ID,
+                                                                                                                                 caller?.UserID,
+                                                                                                                                 DateTimeOffset.UtcNow);
 
     [Pure]
     public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
@@ -338,7 +341,7 @@ public sealed record UserRecord( Guid                                           
     [Pure]
     public static DynamicParameters GetDynamicParameters( IUserData data )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(Email),     data.Email );
         parameters.Add( nameof(FirstName), data.FirstName );
         parameters.Add( nameof(LastName),  data.LastName );
@@ -348,21 +351,21 @@ public sealed record UserRecord( Guid                                           
     [Pure]
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(UserName), request.UserName );
         return parameters;
     }
     [Pure]
     public static DynamicParameters GetDynamicParameters( string userName )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(UserName), userName );
         return parameters;
     }
     [Pure]
     public static DynamicParameters GetDynamicParameters( Guid userID )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(UserID), userID );
         return parameters;
     }
@@ -375,6 +378,31 @@ public sealed record UserRecord( Guid                                           
                                                                        RefreshTokenExpiryTime = default,
                                                                        SecurityStamp = securityStamp
                                                                    };
+
+
+    public void With( IUserData<Guid> value )
+    {
+        CreatedBy         = RecordID<UserRecord>.TryCreate( value.CreatedBy );
+        EscalateTo        = RecordID<UserRecord>.TryCreate( value.EscalateTo );
+        FirstName         = value.FirstName;
+        LastName          = value.LastName;
+        FullName          = value.FullName;
+        Description       = value.Description;
+        Website           = value.Website;
+        Email             = value.Email;
+        PhoneNumber       = value.PhoneNumber;
+        Ext               = value.Ext;
+        Title             = value.Title;
+        Department        = value.Department;
+        Company           = value.Company;
+        PreferredLanguage = value.PreferredLanguage;
+
+        IDictionary<string, JToken?>? data = (value as JsonModels.IJsonModel)?.AdditionalData;
+        if ( data is null ) { return; }
+
+        AdditionalData ??= new Dictionary<string, JToken?>();
+        foreach ( (string key, JToken? jToken) in data ) { AdditionalData[key] = jToken; }
+    }
 
 
     public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
@@ -811,73 +839,52 @@ public sealed record UserRecord( Guid                                           
 
 
 
+    public async ValueTask<UserModel<Guid>> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    {
+        UserModel<Guid> model = new(this);
+
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
+
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
+
+        return model;
+    }
+    public async ValueTask<T> ToUserModel<T>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where T : UserModel<T, Guid>, new()
+    {
+        T model = new();
+        model.With( this );
+
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
+
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
+
+        return model;
+    }
+    public async ValueTask<T> ToUserModel<T, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where T : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, new()
+        where TGroupModel : IGroupModel<Guid>
+        where TRoleModel : IRoleModel<Guid>
+        where TAddress : IAddress<Guid>
+    {
+        T model = new();
+        model.With( this );
+
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
+
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
+
+        return model;
+    }
+
+
+
     #region Claims
 
     public async ValueTask<Claim[]> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
     {
-        var groups = new List<string>( 25 );
-        var roles  = new List<string>( 25 );
-
-        if ( types.HasFlag( ClaimType.GroupSid ) )
-        {
-            await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { groups.Add( record.NameOfGroup ); }
-        }
-
-        if ( types.HasFlag( ClaimType.Role ) )
-        {
-            await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { roles.Add( record.NameOfRole ); }
-        }
-
-        var claims = new List<Claim>( 16 + groups.Count + roles.Count );
-
-        if ( types.HasFlag( ClaimType.UserID ) ) { claims.Add( new Claim( ClaimTypes.Sid, UserID.ToString(), ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.UserName ) ) { claims.Add( new Claim( ClaimTypes.NameIdentifier, UserName, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.FirstName ) ) { claims.Add( new Claim( ClaimTypes.GivenName, FirstName, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.LastName ) ) { claims.Add( new Claim( ClaimTypes.Surname, LastName, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.FullName ) ) { claims.Add( new Claim( ClaimTypes.Name, FullName, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.Gender ) ) { claims.Add( new Claim( ClaimTypes.Gender, Gender, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.SubscriptionExpiration ) && types.HasFlag( ClaimType.Expired ) )
-        {
-            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
-            claims.Add( new Claim( ClaimTypes.Expiration, expires?.ToString() ?? string.Empty,          ClaimValueTypes.DateTime ) );
-            claims.Add( new Claim( ClaimTypes.Expired,    (expires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) );
-        }
-        else if ( types.HasFlag( ClaimType.SubscriptionExpiration ) && !types.HasFlag( ClaimType.Expired ) )
-        {
-            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
-            claims.Add( new Claim( ClaimTypes.Expiration, expires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) );
-        }
-        else if ( types.HasFlag( ClaimType.Expired ) && !types.HasFlag( ClaimType.SubscriptionExpiration ) )
-        {
-            DateTimeOffset? expires = await db.GetSubscriptionExpiration( connection, transaction, this, token );
-            claims.Add( new Claim( ClaimTypes.Expired, (expires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) );
-        }
-
-        if ( types.HasFlag( ClaimType.Email ) ) { claims.Add( new Claim( ClaimTypes.Email, Email, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimTypes.MobilePhone, PhoneNumber, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimTypes.Webpage, Website, ClaimValueTypes.String ) ); }
-
-        if ( types.HasFlag( ClaimType.GroupSid ) )
-        {
-            claims.AddRange( from nameOfGroup in groups
-                             select new Claim( ClaimTypes.GroupSid, nameOfGroup, ClaimValueTypes.String ) );
-        }
-
-        if ( types.HasFlag( ClaimType.Role ) )
-        {
-            claims.AddRange( from role in roles
-                             select new Claim( ClaimTypes.Role, role, ClaimValueTypes.String ) );
-        }
-
-        return [.. claims];
+        var model = await ToUserModel( connection, transaction, db, token );
+        return model.GetClaims( types );
     }
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
         TryFromClaims( connection, transaction, db, context.User, types, token );
@@ -886,32 +893,29 @@ public sealed record UserRecord( Guid                                           
 
     public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
     {
-        Debug.Assert( types.HasFlag( ClaimType.UserID ) );
-        Debug.Assert( types.HasFlag( ClaimType.UserName ) );
+        types |= ClaimType.UserID | ClaimType.UserName;
+        DynamicParameters parameters = new();
+        parameters.Add( nameof(UserName), claims.Span.Single( x => x.Type == ClaimType.UserName.ToClaimTypes() ).Value );
+        parameters.Add( nameof(UserID),   Guid.Parse( claims.Span.Single( x => x.Type == ClaimType.UserID.ToClaimTypes() ).Value ) );
 
 
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(UserName), claims.Span.Single( x => x.Type == ClaimTypes.NameIdentifier ).Value );
-        parameters.Add( nameof(UserID),   Guid.Parse( claims.Span.Single( x => x.Type == ClaimTypes.Sid ).Value ) );
+        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Span.Single( x => x.Type == ClaimType.FirstName.ToClaimTypes() ).Value ); }
 
+        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Span.Single( x => x.Type == ClaimType.LastName.ToClaimTypes() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Span.Single( x => x.Type == ClaimTypes.GivenName ).Value ); }
+        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Span.Single( x => x.Type == ClaimType.FullName.ToClaimTypes() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Span.Single( x => x.Type == ClaimTypes.Surname ).Value ); }
+        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Span.Single( x => x.Type == ClaimType.Email.ToClaimTypes() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Span.Single( x => x.Type == ClaimTypes.Name ).Value ); }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Span.Single( x => x.Type == ClaimType.MobilePhone.ToClaimTypes() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Span.Single( x => x.Type == ClaimTypes.Email ).Value ); }
-
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Span.Single( x => x.Type == ClaimTypes.MobilePhone ).Value ); }
-
-        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Span.Single( x => x.Type == ClaimTypes.Webpage ).Value ); }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Span.Single( x => x.Type == ClaimType.WebSite.ToClaimTypes() ).Value ); }
 
         return await db.Users.Get( connection, transaction, true, parameters, token );
     }
     public static async IAsyncEnumerable<UserRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
 
         switch ( claim.Type )
         {

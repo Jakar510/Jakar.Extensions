@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>8.0.3</version>
+		<version>8.2.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -80,6 +80,11 @@
 							version="2.0.31" />
 				<dependency id="NoAlloq"
 							version="0.2.0" />
+				<dependency id="Otp.NET"
+							version="1.3.0" />
+				<dependency id="ZXing.Net"
+							version="0.16.9" />
+
 			</group>
 
 			<group targetFramework="net6.0">
@@ -137,6 +142,10 @@
 							version="8.0.0" />
 				<dependency id="NoAlloq"
 							version="0.2.0" />
+				<dependency id="Otp.NET"
+							version="1.3.0" />
+				<dependency id="ZXing.Net"
+							version="0.16.9" />
 			</group>
 
 			<group targetFramework="net7.0">
@@ -194,6 +203,10 @@
 							version="8.0.0" />
 				<dependency id="NoAlloq"
 							version="0.2.0" />
+				<dependency id="Otp.NET"
+							version="1.3.0" />
+				<dependency id="ZXing.Net"
+							version="0.16.9" />
 			</group>
 
 			<group targetFramework="net8.0">
@@ -251,6 +264,10 @@
 							version="8.0.0" />
 				<dependency id="NoAlloq"
 							version="0.2.0" />
+				<dependency id="Otp.NET"
+							version="1.3.0" />
+				<dependency id="ZXing.Net"
+							version="0.16.9" />
 			</group>
 		</dependencies>
 	</metadata>

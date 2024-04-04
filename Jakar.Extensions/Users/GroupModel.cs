@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -15,16 +15,27 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    [StringLength( BaseRecord.UNICODE_STRING_CAPACITY )] string NameOfGroup { get; }
+    [StringLength( BaseRecord.UNICODE_CAPACITY )] string NameOfGroup { get; }
     TID?                                                        OwnerID     { get; }
 }
+
+
+
+#if NET8_0_OR_GREATER
+public interface IGroupModel<out T, TID> : IGroupModel<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    where T : IGroupModel<T, TID>
+{
+    public abstract static T Create( IGroupModel<TID> model );
+}
+#endif
 
 
 
 [Serializable]
 [method: JsonConstructor]
 public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : ObservableRecord<TRecord, TID>( ID ), IGroupModel<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -33,7 +44,12 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
 #else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
+
+#if NET8_0_OR_GREATER
+    where TRecord : GroupModel<TRecord, TID>, IGroupModel<TRecord, TID>
+#else
     where TRecord : GroupModel<TRecord, TID>
+#endif
 {
     private string _nameOfGroup = NameOfGroup;
     private string _permissions = Rights;
@@ -42,7 +58,7 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
 
 
     public                                           TID?   CreatedBy   { get => _createdBy;   set => SetProperty( ref _createdBy,   value ); }
-    [StringLength( UNICODE_STRING_CAPACITY )] public string NameOfGroup { get => _nameOfGroup; set => SetProperty( ref _nameOfGroup, value ); }
+    [StringLength( UNICODE_CAPACITY )] public string NameOfGroup { get => _nameOfGroup; set => SetProperty( ref _nameOfGroup, value ); }
     public                                           TID?   OwnerID     { get => _ownerID;     set => SetProperty( ref _ownerID,     value ); }
     [StringLength( IUserRights.MAX_SIZE )] public    string Rights      { get => _permissions; set => SetProperty( ref _permissions, value ); }
 
@@ -75,8 +91,14 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
 
 [Serializable]
 [method: JsonConstructor]
-public record GroupModel<TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : GroupModel<GroupModel<TID>, TID>( NameOfGroup, OwnerID, CreatedBy, ID, Rights )
-#if NET8_0
+public record GroupModel<TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) :
+#if NET8_0_OR_GREATER
+    GroupModel<GroupModel<TID>, TID>( NameOfGroup, OwnerID, CreatedBy, ID, Rights ), IGroupModel<GroupModel<TID>, TID>
+#else
+    GroupModel<GroupModel<TID>, TID>( NameOfGroup, OwnerID, CreatedBy, ID, Rights )
+#endif
+
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -86,5 +108,6 @@ public record GroupModel<TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy,
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    public GroupModel( IGroupModel<TID> model ) : this( model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights ) { }
+    public GroupModel( IGroupModel<TID>                    model ) : this( model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights ) { }
+    public static GroupModel<TID> Create( IGroupModel<TID> model ) => new(model);
 }

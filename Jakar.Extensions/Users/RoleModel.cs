@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -15,15 +15,26 @@ public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    [StringLength( BaseRecord.UNICODE_STRING_CAPACITY )] public string NameOfRole { get; }
+    [StringLength( BaseRecord.UNICODE_CAPACITY )] public string NameOfRole { get; }
 }
+
+
+
+#if NET8_0_OR_GREATER
+public interface IRoleModel<out T, TID> : IRoleModel<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    where T : IRoleModel<T, TID>
+{
+    public abstract static T Create( IRoleModel<TID> model );
+}
+#endif
 
 
 
 [Serializable]
 [method: JsonConstructor]
 public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID ) : ObservableRecord<TRecord, TID>( ID ), IRoleModel<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -32,13 +43,18 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 #else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
+
+#if NET8_0_OR_GREATER
+    where TRecord : RoleModel<TRecord, TID>, IRoleModel<TRecord, TID>
+#else
     where TRecord : RoleModel<TRecord, TID>
+#endif
 {
     private string _name   = NameOfRole;
     private string _rights = Rights;
 
 
-    [StringLength( UNICODE_STRING_CAPACITY )] public string NameOfRole { get => _name;   set => SetProperty( ref _name,   value ); }
+    [StringLength( UNICODE_CAPACITY )] public string NameOfRole { get => _name;   set => SetProperty( ref _name,   value ); }
     [StringLength( IUserRights.MAX_SIZE )]    public string Rights     { get => _rights; set => SetProperty( ref _rights, value ); }
 
 
@@ -70,8 +86,15 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 
 [Serializable]
 [method: JsonConstructor]
-public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) : RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID )
-#if NET8_0
+public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) :
+#if NET8_0_OR_GREATER
+    RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID ),
+    IRoleModel<RoleModel<TID>, TID>
+#else
+    RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID )
+#endif
+
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -81,5 +104,6 @@ public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) 
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    public RoleModel( IRoleModel<TID> model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
+    public RoleModel( IRoleModel<TID>                    model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
+    public static RoleModel<TID> Create( IRoleModel<TID> model ) => new(model);
 }

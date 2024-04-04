@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 [SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
 public interface IAddress<out TID> : IUniqueID<TID>
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -29,7 +29,7 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<UserAddress<TID>>, IComparable, JsonModels.IJsonModel
-#if NET8_0
+#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
@@ -54,9 +54,9 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
 
 
     [JsonExtensionData]                       public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
-    [StringLength( UNICODE_STRING_CAPACITY )] public string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
+    [StringLength( UNICODE_CAPACITY )] public string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
 
-    [StringLength( UNICODE_STRING_CAPACITY )]
+    [StringLength( UNICODE_CAPACITY )]
     public string City
     {
         get => _city;
@@ -66,7 +66,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    [StringLength( UNICODE_STRING_CAPACITY )]
+    [StringLength( UNICODE_CAPACITY )]
     public string Country
     {
         get => _country;
@@ -98,7 +98,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    [StringLength( UNICODE_STRING_CAPACITY )]
+    [StringLength( UNICODE_CAPACITY )]
     public string Line1
     {
         get => _line1;
@@ -108,7 +108,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    [StringLength( UNICODE_STRING_CAPACITY )]
+    [StringLength( UNICODE_CAPACITY )]
     public string Line2
     {
         get => _line2;
@@ -118,7 +118,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    [Required, StringLength( UNICODE_STRING_CAPACITY )]
+    [Required, StringLength( UNICODE_CAPACITY )]
     public string PostalCode
     {
         get => _postalCode;
@@ -128,7 +128,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    [StringLength( UNICODE_STRING_CAPACITY )]
+    [StringLength( UNICODE_CAPACITY )]
     public string StateOrProvince
     {
         get => _stateOrProvince;

@@ -40,6 +40,9 @@ public static class ClaimTypeExtensions
     public const string ALL = "http://schemas.microsoft.com/ws/2008/06/identity/claims/all";
 
 
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool HasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
+
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string ToClaimTypes( this ClaimType type ) => type switch
                                                                 {

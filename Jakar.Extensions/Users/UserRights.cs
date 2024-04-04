@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 public interface IUserRights
 {
-    public const                      int    MAX_SIZE = BaseRecord.ANSI_STRING_CAPACITY;
+    public const                      int    MAX_SIZE = BaseRecord.ANSI_CAPACITY;
     [StringLength( MAX_SIZE )] public string Rights { get; set; }
 }
 
