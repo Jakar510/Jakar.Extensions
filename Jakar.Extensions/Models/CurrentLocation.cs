@@ -28,7 +28,7 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [Serializable]
-public sealed class CurrentLocation<TID> : BaseJsonModel, ICurrentLocation<TID>
+public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0

@@ -34,7 +34,7 @@ public interface IGroupModel<out T, TID> : IGroupModel<TID>
 
 [Serializable]
 [method: JsonConstructor]
-public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : ObservableRecord<TRecord, TID>( ID ), IGroupModel<TID>
+public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : JsonModelRecord<TRecord, TID>( ID ), IGroupModel<TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0

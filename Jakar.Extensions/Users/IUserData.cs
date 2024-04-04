@@ -5,22 +5,6 @@
 namespace Jakar.Extensions;
 
 
-public interface ICreatedByUser<TID>
-#if NET8_0_OR_GREATER
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-{
-    public TID? CreatedBy { get; }
-}
-
-
-
 public interface IUserID<out TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
@@ -41,23 +25,7 @@ public interface IUserID : IUserID<Guid>;
 
 
 
-public interface IImageID<TID>
-#if NET8_0_OR_GREATER
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-{
-    public TID? ImageID { get; }
-}
-
-
-
-public interface IUserData : IUserName, IUserID
+public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonModels.IJsonModel, INotifyPropertyChanged, INotifyPropertyChanging
 {
     public                string            Company             { get; set; }
     public                string            Department          { get; set; }
@@ -103,7 +71,7 @@ public interface IUserData : IUserName, IUserID
 
 
 
-public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>
+public interface ICreatedByUser<TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -114,10 +82,56 @@ public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    public TID? CreatedBy  { get; }
-    public TID? EscalateTo { get; }
+    public TID? CreatedBy { get; }
+}
 
-    public void With( IUserData<TID> value );
+
+
+public interface IEscalateToUser<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public TID? EscalateTo { get; }
+}
+
+
+
+public interface IImageID<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public TID? ImageID { get; }
+}
+
+
+
+public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>, ICreatedByUser<TID>, IEscalateToUser<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public void   With( IUserData<TID> value );
+    public string GetDescription();
 }
 
 
@@ -139,7 +153,7 @@ public interface IUserData<TID, TAddress> : IUserData<TID>
 
 
 
-public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>, JsonModels.IJsonModel, IUserRights
+public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -190,7 +204,58 @@ public interface ICreateUserModel<out TClass, TID> : IUserData<TID>
 {
     public abstract static TClass Create( IUserData<TID> model );
 }
-
-
-
 #endif
+
+
+
+public interface IIsVendor
+{
+    public bool IsVendor { get; set; }
+}
+
+
+
+public interface IUserDetailsModel<TID> : IUserData<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public int?            BadLogins              { get; set; }
+    public DateTimeOffset  DateCreated            { get; }
+    public bool            IsDisabled             { get; set; }
+    public bool            IsEmailConfirmed       { get; set; }
+    public bool            IsLocked               { get; set; }
+    public bool            IsPhoneNumberConfirmed { get; set; }
+    public bool            IsTwoFactorEnabled     { get; set; }
+    public DateTimeOffset? LastActive             { get; set; }
+    public DateTimeOffset? LastBadAttempt         { get; set; }
+    public DateTimeOffset? LockDate               { get; set; }
+}
+
+
+
+public interface IUserRecord<TID> : IUserDetailsModel<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    /// <summary> A random value that must change whenever a user is persisted to the store </summary>
+    public string ConcurrencyStamp { get; set; }
+
+    public bool            IsActive       { get; set; }
+    public DateTimeOffset? LastModified   { get; set; }
+    public string          PasswordHash   { get; set; }
+    public Guid?           SubscriptionID { get; set; }
+}

@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
+public record JsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 {
     [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
@@ -10,8 +10,8 @@ public record BaseJsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 
 
 [Serializable]
-public abstract record BaseJsonModelRecord<TRecord, TID> : ObservableRecord<TRecord, TID>
-    where TRecord : BaseJsonModelRecord<TRecord, TID>
+public abstract record JsonModelRecord<TRecord, TID> : ObservableRecord<TRecord, TID>
+    where TRecord : JsonModelRecord<TRecord, TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -22,5 +22,8 @@ public abstract record BaseJsonModelRecord<TRecord, TID> : ObservableRecord<TRec
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    protected JsonModelRecord() : base() { }
+    protected JsonModelRecord( TID ID ) : base( ID ) { }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData            { get; set; }
+    public                     void                          Deconstruct( out TID ID ) { ID = this.ID; }
 }

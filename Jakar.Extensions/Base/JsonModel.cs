@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public class BaseJsonModel : ObservableClass, JsonModels.IJsonModel
+public class JsonModel : ObservableClass, JsonModels.IJsonModel
 {
     [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
@@ -10,8 +10,8 @@ public class BaseJsonModel : ObservableClass, JsonModels.IJsonModel
 
 
 [Serializable]
-public abstract class BaseJsonModel<TClass> : ObservableClass<TClass>, JsonModels.IJsonModel
-    where TClass : BaseJsonModel<TClass>
+public abstract class JsonModel<TClass> : ObservableClass<TClass>, JsonModels.IJsonModel
+    where TClass : JsonModel<TClass>
 {
     [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 }
