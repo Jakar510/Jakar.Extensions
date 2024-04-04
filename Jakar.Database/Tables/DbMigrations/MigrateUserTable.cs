@@ -67,8 +67,6 @@ public abstract class MigrateUserTable : OwnedMigration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.RefreshTokenExpiryTime) ).AsDateTimeOffset().Nullable();
 
-        table.WithColumn( nameof(UserRecord.AuthenticatorKey) ).AsString( TokenValidationParameters.DefaultMaximumTokenSizeInBytes ).Nullable();
-
         table.WithColumn( nameof(UserRecord.IsEmailConfirmed) ).AsBoolean().NotNullable();
 
         table.WithColumn( nameof(UserRecord.IsPhoneNumberConfirmed) ).AsBoolean().NotNullable();

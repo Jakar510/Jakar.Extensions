@@ -90,8 +90,7 @@
         public ValueTask SetAuthenticatorKeyAsync( UserRecord user, string key, CancellationToken token ) => this.TryCall( SetAuthenticatorKeyAsync, user, key, token );
         public virtual async ValueTask SetAuthenticatorKeyAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string key, CancellationToken token )
         {
-            user = user with { AuthenticatorKey = key };
-
+            user.AuthenticatorKey = key;
             await Users.Update( connection, transaction, user, token );
         }
 
@@ -100,8 +99,7 @@
         public         ValueTask       SetTwoFactorEnabledAsync( UserRecord user, bool              enabled, CancellationToken token ) => this.TryCall( SetTwoFactorEnabledAsync, user, enabled, token );
         public virtual async ValueTask SetTwoFactorEnabledAsync( DbConnection connection, DbTransaction transaction, UserRecord user, bool enabled, CancellationToken token )
         {
-            user = user with { IsTwoFactorEnabled = enabled };
-
+            user.IsTwoFactorEnabled = enabled;
             await Users.Update( connection, transaction, user, token );
         }
 
@@ -143,7 +141,7 @@
         }
 
 
-        public ValueTask<int>             GetAccessFailedCountAsync( UserRecord user, CancellationToken token = default ) => new(user.BadLogins);
+        public ValueTask<int>             GetAccessFailedCountAsync( UserRecord user, CancellationToken token = default ) => new(user.BadLogins ?? 0);
         public ValueTask<bool>            GetLockoutEnabledAsync( UserRecord    user, CancellationToken token = default ) => new(user.IsLocked);
         public ValueTask<DateTimeOffset?> GetLockoutEndDateAsync( UserRecord    user, CancellationToken token = default ) => new(user.LockoutEnd);
 
@@ -185,7 +183,7 @@
         {
             user = user.MarkBadLogin();
             await Users.Update( connection, transaction, user, token );
-            return user.BadLogins;
+            return user.BadLogins ?? 0;
         }
 
 

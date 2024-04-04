@@ -25,7 +25,7 @@ public interface IUserID : IUserID<Guid>;
 
 
 
-public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonModels.IJsonModel, INotifyPropertyChanged, INotifyPropertyChanging
+public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonModels.IJsonModel
 {
     public                string            Company             { get; set; }
     public                string            Department          { get; set; }
