@@ -851,7 +851,7 @@ public sealed record UserRecord( Guid                                           
 
     public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, db, token );
     public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : UserModel<TClass, Guid, UserAddress<Guid>, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress<Guid>, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress<Guid>, GroupModel, RoleModel>( connection, transaction, db, token );
+        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, db, token );
     public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
         where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : IGroupModel<TGroupModel, Guid>

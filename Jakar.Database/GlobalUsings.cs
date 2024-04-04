@@ -59,6 +59,7 @@ global using Jakar.Database;
 global using Jakar.Database.Caches;
 global using Jakar.Database.DbMigrations;
 global using Jakar.Extensions;
+global using Jakar.Extensions.UserGuid;
 global using JetBrains.Annotations;
 global using Microsoft.AspNetCore.Authentication;
 global using Microsoft.AspNetCore.Authentication.Cookies;
