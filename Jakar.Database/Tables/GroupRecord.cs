@@ -22,6 +22,8 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID ) : this( customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, IUserRights rights ) : this( customerID, nameOfGroup, rights.ToString(), RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }
     public GroupModel<Guid> ToGroupModel() => new(this);
+    public TGroupModel ToGroupModel<TGroupModel>()
+        where TGroupModel : IGroupModel<TGroupModel, Guid> => TGroupModel.Create( this );
 
 
     [Pure]

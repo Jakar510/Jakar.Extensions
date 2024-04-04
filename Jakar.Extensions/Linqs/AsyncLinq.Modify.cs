@@ -9,18 +9,42 @@ public static partial class AsyncLinq
     }
     public static async ValueTask Add<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
     {
+        if ( collection is ConcurrentObservableCollection<TElement> list )
+        {
+            await list.AddAsync( values, token );
+            return;
+        }
+
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.Add( value ); }
     }
     public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
     {
+        if ( collection is ConcurrentObservableCollection<TElement> list )
+        {
+            await list.AddOrUpdate( values, token );
+            return;
+        }
+
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.AddOrUpdate( value ); }
     }
     public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
     {
+        if ( collection is ConcurrentObservableCollection<TElement> list )
+        {
+            await list.RemoveAsync( values, token );
+            return;
+        }
+
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.Remove( value ); }
     }
     public static async ValueTask TryAdd<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
     {
+        if ( collection is ConcurrentObservableCollection<TElement> list )
+        {
+            await list.TryAddAsync( values, token );
+            return;
+        }
+
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.TryAdd( value ); }
     }
     public static void Add<TElement>( this ConcurrentBag<TElement> collection, scoped in ReadOnlySpan<TElement> values )

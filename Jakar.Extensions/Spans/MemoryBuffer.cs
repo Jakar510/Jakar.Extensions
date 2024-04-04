@@ -6,7 +6,6 @@ namespace Jakar.Extensions;
 
 public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer ) : ICollection<T>
 {
-    public const       int                  DEFAULT_CAPACITY = 64;
     private readonly   IEqualityComparer<T> _comparer        = comparer;
     private            int                  _length;
     protected          T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
@@ -148,12 +147,12 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
             if ( _comparer.Equals( span[i], value ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( Predicate<T> match, in int start = 0 ) => IndexOf( match, start, Length - 1 );
-    public int IndexOf( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( Predicate<T> match, in int start = 0 ) => IndexOf( start, Length - 1, match );
+    public int IndexOf( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -166,7 +165,7 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
             if ( match( span[i] ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
 
 
@@ -183,11 +182,11 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
             if ( _comparer.Equals( span[i], value ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( Predicate<T> match, in int endInclusive = 0 ) => LastIndexOf( match, Length - 1, endInclusive );
-    public int LastIndexOf( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( Predicate<T> match, in int endInclusive = 0 ) => LastIndexOf( Length - 1, endInclusive, match );
+    public int LastIndexOf( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -200,12 +199,12 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
             if ( match( span[i] ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match, in int endInclusive = 0 ) => FindLast( match, Length - 1, endInclusive );
-    public T? FindLast( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match, in int endInclusive = 0 ) => FindLast( Length - 1, endInclusive, match );
+    public T? FindLast( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -222,8 +221,8 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, in int start = 0 ) => Find( match, start, Length - 1 );
-    public T? Find( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, in int start = 0 ) => Find( start, Length - 1, match );
+    public T? Find( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -240,8 +239,8 @@ public class MemoryBuffer<T>( int initialCapacity, IEqualityComparer<T> comparer
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( Predicate<T> match, in int start = 0 ) => FindAll( match, start, Length - 1 );
-    public T[] FindAll( Predicate<T> match, in int start, in int endInclusive )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( Predicate<T> match, in int start = 0 ) => FindAll( start, Length - 1, match );
+    public T[] FindAll( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );

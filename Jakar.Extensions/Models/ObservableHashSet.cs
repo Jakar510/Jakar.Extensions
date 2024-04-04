@@ -83,6 +83,6 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     public         void CopyTo( T[] array, int arrayIndex ) => _values.CopyTo( array, arrayIndex );
 
 
-    protected internal override ReadOnlyMemory<T> FilteredValues() => _values.Where( Filter ).ToArray();
-    IEnumerator IEnumerable.                      GetEnumerator()  => GetEnumerator();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<T> FilteredValues() => FilteredValues( _values.ToSpanEnumerable() );
+    IEnumerator IEnumerable.                                                                           GetEnumerator()  => GetEnumerator();
 }

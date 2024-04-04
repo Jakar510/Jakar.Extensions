@@ -1878,7 +1878,7 @@
 				<paramref name="other" />
 				is equivalent.
 				<br />
-				<see langword="-1" />
+				<see langword="NOT_FOUND" />
 				if the
 				<paramref name="other" />
 				is smaller.
@@ -1915,7 +1915,7 @@
 				<paramref name="other" />
 				is equivalent.
 				<br />
-				<see langword="-1" />
+				<see langword="NOT_FOUND" />
 				if the
 				<paramref name="other" />
 				is smaller.

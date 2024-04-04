@@ -24,6 +24,8 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
     public RoleModel<Guid> ToRoleModel() => new(this);
+    public TRoleModel ToRoleModel<TRoleModel>()
+        where TRoleModel : IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
 
 
     [Pure]

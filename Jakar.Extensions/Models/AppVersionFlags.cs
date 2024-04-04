@@ -195,7 +195,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
                                            },
                                  RC => other.Flag switch
                                        {
-                                           STABLE => -1,
+                                           STABLE => NOT_FOUND,
                                            RC     => 0,
                                            ALPHA  => 1,
                                            BETA   => 1,
@@ -203,17 +203,17 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
                                        },
                                  ALPHA => other.Flag switch
                                           {
-                                              STABLE => -1,
-                                              RC     => -1,
+                                              STABLE => NOT_FOUND,
+                                              RC     => NOT_FOUND,
                                               ALPHA  => 0,
                                               BETA   => 1,
                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                           },
                                  BETA => other.Flag switch
                                          {
-                                             STABLE => -1,
-                                             RC     => -1,
-                                             ALPHA  => -1,
+                                             STABLE => NOT_FOUND,
+                                             RC     => NOT_FOUND,
+                                             ALPHA  => NOT_FOUND,
                                              BETA   => 0,
                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                          },

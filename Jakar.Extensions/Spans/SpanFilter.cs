@@ -9,7 +9,7 @@ public ref struct SpanFilter<T>( scoped in ReadOnlySpan<T> span, Predicate<T> fu
 {
     private readonly ReadOnlySpan<T> _span  = span;
     private readonly Predicate<T>    _func  = func;
-    private          int             _index = -1;
+    private          int             _index = NOT_FOUND;
 
     public T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
 
@@ -28,7 +28,7 @@ public ref struct SpanFilter<T>( scoped in ReadOnlySpan<T> span, Predicate<T> fu
     }
     public void Reset()
     {
-        Interlocked.Exchange( ref _index, -1 );
+        Interlocked.Exchange( ref _index, NOT_FOUND );
         Current = default!;
     }
 }

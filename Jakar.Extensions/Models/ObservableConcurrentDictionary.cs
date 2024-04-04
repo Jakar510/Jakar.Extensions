@@ -128,7 +128,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         }
     }
 
-
-    protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => _dictionary.Where( Filter ).ToArray();
+    
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => FilteredValues( _dictionary.ToSpanEnumerable() );
     IEnumerator IEnumerable.                                               GetEnumerator()  => GetEnumerator();
 }

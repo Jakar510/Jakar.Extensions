@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 04/12/2022  1:54 PM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -41,26 +45,45 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     }
 
 
-    protected virtual bool                        Filter( T? value ) => true;
-    public virtual    IEnumerator<T>              GetEnumerator()    => new Enumerator( this );
-    IEnumerator IEnumerable.                      GetEnumerator()    => GetEnumerator();
+    protected virtual bool Filter( T? value ) => true;
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected ReadOnlyMemory<T> FilteredValues( scoped in ReadOnlySpan<T> span ) => FilteredValues( span.Where( Filter ) );
+    protected ReadOnlyMemory<T> FilteredValues( scoped in SpanEnumerable<T, T, WhereDelegateProducer<T>> span )
+    {
+        using Buffer<T> values = new(Count);
+        foreach ( T value in span ) { values.Add( value ); }
+
+        return values.ToArray();
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected ReadOnlyMemory<T> FilteredValues( SpanEnumerable<T, EnumerableProducer<T>> span ) => FilteredValues( span.Where( Filter ) );
+    protected ReadOnlyMemory<T> FilteredValues( scoped in SpanEnumerable<T, SecondaryWhereDelegateProducer<T, EnumerableProducer<T>>> span )
+    {
+        using Buffer<T> values = new(Count);
+        foreach ( T value in span ) { values.Add( value ); }
+
+        return values.ToArray();
+    }
+
+
+    public virtual IEnumerator<T>                 GetEnumerator() => new Enumerator( this );
+    IEnumerator IEnumerable.                      GetEnumerator() => GetEnumerator();
     protected internal abstract ReadOnlyMemory<T> FilteredValues();
 
 
 
-    public struct Enumerator( CollectionAlerts<T> enumerator ) : IEnumerator<T>, IEnumerable<T>
+    public sealed class Enumerator( CollectionAlerts<T> enumerator ) : IEnumerator<T>, IEnumerable<T>
     {
-        private          int               _index;
-        private readonly ReadOnlyMemory<T> _collection = enumerator.FilteredValues();
+        private int               _index;
+        private ReadOnlyMemory<T> _collection = enumerator.FilteredValues();
 
+        public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _collection.Span[_index]; }
+        object? IEnumerator.Current => Current;
 
-        public readonly T                   Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _collection.Span[_index]; }
-        readonly        object? IEnumerator.Current => Current;
-
-        readonly IEnumerator<T> IEnumerable<T>.GetEnumerator() => this;
-        readonly IEnumerator IEnumerable.      GetEnumerator() => this;
-        public   void                          Dispose()       => this = default;
-        public   bool                          MoveNext()      => ++_index < _collection.Length;
-        public   void                          Reset()         => _index = -1;
+        IEnumerator<T> IEnumerable<T>.GetEnumerator() => this;
+        IEnumerator IEnumerable.      GetEnumerator() => this;
+        public void                   Dispose()       => _collection = default;
+        public bool                   MoveNext()      => ++_index < _collection.Length;
+        public void                   Reset()         => _index = NOT_FOUND;
     }
 }

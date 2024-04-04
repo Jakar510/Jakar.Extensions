@@ -106,6 +106,6 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     }
 
 
-    protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => _dictionary.Where( Filter ).ToArray();
-    IEnumerator IEnumerable.                                               GetEnumerator()  => GetEnumerator();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => FilteredValues( _dictionary.ToSpanEnumerable() );
+    IEnumerator IEnumerable.                                                                                                    GetEnumerator()  => GetEnumerator();
 }

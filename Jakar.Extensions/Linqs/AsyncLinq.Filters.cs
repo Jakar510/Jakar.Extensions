@@ -161,7 +161,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, bool> predicate )
     {
-        int index = -1;
+        int index = NOT_FOUND;
 
         await foreach ( TElement element in source )
         {
@@ -172,7 +172,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<bool>> predicate )
     {
-        int index = -1;
+        int index = NOT_FOUND;
 
         await foreach ( TElement element in source )
         {

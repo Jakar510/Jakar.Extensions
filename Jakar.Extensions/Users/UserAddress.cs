@@ -4,7 +4,16 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedMemberInSuper.Global" )]
+#if NET8_0_OR_GREATER
+public interface IAddress<out TClass, TID> : IAddress<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+{
+    public abstract static TClass Create( IAddress<TID> address );
+}
+#endif
+
+
+
 public interface IAddress<out TID> : IUniqueID<TID>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
@@ -28,7 +37,8 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 
-public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<UserAddress<TID>>, IComparable, JsonModels.IJsonModel
+[Serializable]
+public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress<TID>, JsonModels.IJsonModel
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -37,6 +47,12 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
 #else
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+
+#if NET8_0_OR_GREATER
+    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
+#else
+    where TClass : UserAddress<TClass, TID>
 #endif
 {
     private bool                          _isPrimary;
@@ -50,10 +66,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
     private string?                       _address;
 
 
-    public static Sorter<UserAddress<TID>> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<UserAddress<TID>>.Default; }
-
-
-    [JsonExtensionData]                       public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
+    [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
     [StringLength( UNICODE_CAPACITY )] public string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
 
     [StringLength( UNICODE_CAPACITY )]
@@ -76,7 +89,6 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         }
     }
 
-    public TID  ID        { get;               init; }
     public bool IsPrimary { get => _isPrimary; set => SetProperty( ref _isPrimary, value ); }
 
     [JsonIgnore]
@@ -140,7 +152,7 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
 
 
     public UserAddress() { }
-    public UserAddress( IAddress<TID> address )
+    public UserAddress( IAddress<TID> address ) : base( address.ID )
     {
         Address         = address.Address;
         Line1           = address.Line1;
@@ -150,16 +162,14 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
         Country         = address.Country;
         PostalCode      = address.PostalCode;
         IsPrimary       = address.IsPrimary;
-        ID              = address.ID;
     }
-    public static UserAddress<TID> Create( IAddress<TID> address ) => new(address);
 
 
     public override string ToString() => string.IsNullOrWhiteSpace( Line2 )
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
-    public int CompareTo( UserAddress<TID>? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
@@ -185,14 +195,30 @@ public class UserAddress<TID> : ObservableClass, IAddress<TID>, IComparable<User
 
         return string.Compare( _stateOrProvince, other._stateOrProvince, StringComparison.Ordinal );
     }
-    public int CompareTo( object? other )
-    {
-        if ( other is null ) { return 1; }
+    public override bool Equals( TClass? other ) => false;
+}
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is UserAddress<TID> address
-                   ? CompareTo( address )
-                   : throw new ArgumentException( $"Object must be of type {nameof(UserAddress<TID>)}" );
-    }
+
+[Serializable]
+public sealed record UserAddress<TID>
+#if NET8_0_OR_GREATER
+    : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
+#else
+    : UserAddress<UserAddress<TID>, TID>
+#endif
+
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public UserAddress() { }
+    public UserAddress( IAddress<TID>                    address ) : base( address ) { }
+    public static UserAddress<TID> Create( IAddress<TID> address ) => new(address);
 }

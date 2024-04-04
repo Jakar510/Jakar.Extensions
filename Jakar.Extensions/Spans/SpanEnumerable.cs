@@ -13,7 +13,7 @@ namespace Jakar.Extensions;
 public ref struct SpanEnumerator<T>( scoped in ReadOnlySpan<T> span )
 {
     private readonly ReadOnlySpan<T> _span  = span;
-    private          int             _index = -1;
+    private          int             _index = NOT_FOUND;
 
 
     public readonly Item Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_span, _index); }

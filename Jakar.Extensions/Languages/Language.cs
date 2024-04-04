@@ -48,7 +48,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
                                                      : throw new ExpectedValueTypeException( nameof(value), value, typeof(Language) );
     public int CompareTo( Language? other )
     {
-        if ( other is null ) { return -1; }
+        if ( other is null ) { return NOT_FOUND; }
 
         int displayNameComparison = string.Compare( DisplayName, other.DisplayName, StringComparison.Ordinal );
         if ( displayNameComparison != 0 ) { return displayNameComparison; }

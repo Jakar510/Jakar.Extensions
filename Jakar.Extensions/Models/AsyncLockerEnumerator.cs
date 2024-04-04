@@ -6,24 +6,24 @@ namespace Jakar.Extensions;
 
 public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
 {
-    private const    int                       START_INDEX = -1;
+    private const    int                       START_INDEX = NOT_FOUND;
     private readonly ILockedCollection<TValue> _collection = collection;
     private          bool                      _isDisposed;
     private          CancellationToken         _token = token;
     private          int                       _index = START_INDEX;
-    private          ReadOnlyMemory<TValue>    _cache;
+    private          ReadOnlyMemory<TValue>    _memory;
 
 
-    public ref readonly TValue      Current        => ref _cache.Span[_index];
     TValue IAsyncEnumerator<TValue>.Current        => Current;
-    internal bool                   ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && ++_index < _cache.Length; }
+    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _memory.Span[_index]; }
+    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && _index < _memory.Length; }
 
 
     public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
         _isDisposed = true;
-        _cache      = default;
+        _memory     = default;
         return default;
     }
 
@@ -31,8 +31,9 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     public async ValueTask<bool> MoveNextAsync()
     {
         ThrowIfDisposed();
-        if ( _cache.IsEmpty ) { _cache = await _collection.CopyAsync( _token ); }
+        if ( _memory.IsEmpty ) { _memory = await _collection.CopyAsync( _token ); }
 
+        _index++;
         bool result = ShouldContinue;
         if ( result is false ) { Reset(); }
 
@@ -48,8 +49,8 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     public void Reset()
     {
         ThrowIfDisposed();
-        _cache = default;
-        _index = START_INDEX;
+        _memory = default;
+        _index  = START_INDEX;
     }
 
 

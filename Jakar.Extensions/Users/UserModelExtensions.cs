@@ -15,10 +15,9 @@ public static class UserDataExtensions
     public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.GroupSid        | ClaimType.Role;
 
 
-    [MethodImpl( MethodImplOptions.NoInlining )]
-    public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> data, ClaimType types = CLAIM_TYPES )
+    public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> model, ClaimType types = CLAIM_TYPES )
 #if NET8_0_OR_GREATER
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
 #elif NET6_0
@@ -30,34 +29,34 @@ public static class UserDataExtensions
         where TRoleModel : IRoleModel<TID>
         where TAddress : IAddress<TID>
     {
-        using Buffer<Claim> claims = new(20 + data.Groups.Count + data.Roles.Count + data.Addresses.Count * 5);
+        using Buffer<Claim> claims = new(20 + model.Groups.Count + model.Roles.Count + model.Addresses.Count * 5);
 
         types |= ClaimType.UserID | ClaimType.UserName;
-        claims.Add( new Claim( ClaimType.UserID.ToClaimTypes(),   data.UserID.ToString(), ClaimValueTypes.String ) );
-        claims.Add( new Claim( ClaimType.UserName.ToClaimTypes(), data.UserName,          ClaimValueTypes.String ) );
+        claims.Add( new Claim( ClaimType.UserID.ToClaimTypes(),   model.UserID.ToString(), ClaimValueTypes.String ) );
+        claims.Add( new Claim( ClaimType.UserName.ToClaimTypes(), model.UserName,          ClaimValueTypes.String ) );
 
-        if ( HasFlag( types, ClaimType.FirstName ) ) { claims.Add( new Claim( ClaimType.FirstName.ToClaimTypes(), data.FirstName, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.FirstName ) ) { claims.Add( new Claim( ClaimType.FirstName.ToClaimTypes(), model.FirstName, ClaimValueTypes.String ) ); }
 
-        if ( HasFlag( types, ClaimType.LastName ) ) { claims.Add( new Claim( ClaimType.LastName.ToClaimTypes(), data.LastName, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.LastName ) ) { claims.Add( new Claim( ClaimType.LastName.ToClaimTypes(), model.LastName, ClaimValueTypes.String ) ); }
 
-        if ( HasFlag( types, ClaimType.FullName ) ) { claims.Add( new Claim( ClaimType.FullName.ToClaimTypes(), data.FullName, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.FullName ) ) { claims.Add( new Claim( ClaimType.FullName.ToClaimTypes(), model.FullName, ClaimValueTypes.String ) ); }
 
-        if ( HasFlag( types, ClaimType.Gender ) ) { claims.Add( new Claim( ClaimType.Gender.ToClaimTypes(), data.Gender, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.Gender ) ) { claims.Add( new Claim( ClaimType.Gender.ToClaimTypes(), model.Gender, ClaimValueTypes.String ) ); }
 
-        if ( HasFlag( types, ClaimType.SubscriptionExpiration ) ) { claims.Add( new Claim( ClaimType.SubscriptionExpiration.ToClaimTypes(), data.SubscriptionExpires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) ); }
+        if ( HasFlag( types, ClaimType.SubscriptionExpiration ) ) { claims.Add( new Claim( ClaimType.SubscriptionExpiration.ToClaimTypes(), model.SubscriptionExpires?.ToString() ?? string.Empty, ClaimValueTypes.DateTime ) ); }
 
-        if ( HasFlag( types, ClaimType.Expired ) ) { claims.Add( new Claim( ClaimType.Expired.ToClaimTypes(), (data.SubscriptionExpires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) ); }
+        if ( HasFlag( types, ClaimType.Expired ) ) { claims.Add( new Claim( ClaimType.Expired.ToClaimTypes(), (model.SubscriptionExpires > DateTimeOffset.UtcNow).ToString(), ClaimValueTypes.Boolean ) ); }
 
-        if ( HasFlag( types, ClaimType.Email ) ) { claims.Add( new Claim( ClaimType.Email.ToClaimTypes(), data.Email, ClaimValueTypes.Email ) ); }
+        if ( HasFlag( types, ClaimType.Email ) ) { claims.Add( new Claim( ClaimType.Email.ToClaimTypes(), model.Email, ClaimValueTypes.Email ) ); }
 
-        if ( HasFlag( types, ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimType.MobilePhone.ToClaimTypes(), data.PhoneNumber, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.MobilePhone ) ) { claims.Add( new Claim( ClaimType.MobilePhone.ToClaimTypes(), model.PhoneNumber, ClaimValueTypes.String ) ); }
 
-        if ( HasFlag( types, ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimType.WebSite.ToClaimTypes(), data.Website, ClaimValueTypes.String ) ); }
+        if ( HasFlag( types, ClaimType.WebSite ) ) { claims.Add( new Claim( ClaimType.WebSite.ToClaimTypes(), model.Website, ClaimValueTypes.String ) ); }
 
 
         if ( HasFlag( types, ADDRESS ) )
         {
-            foreach ( TAddress address in data.Addresses )
+            foreach ( TAddress address in model.Addresses )
             {
                 if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { claims.Add( new Claim( ClaimType.StreetAddressLine1.ToClaimTypes(), address.Line1, ClaimValueTypes.String ) ); }
 
@@ -74,13 +73,13 @@ public static class UserDataExtensions
 
         if ( HasFlag( types, ClaimType.GroupSid ) )
         {
-            foreach ( TGroupModel record in data.Groups ) { claims.Add( new Claim( ClaimType.GroupSid.ToClaimTypes(), record.NameOfGroup, ClaimValueTypes.String ) ); }
+            foreach ( TGroupModel record in model.Groups ) { claims.Add( new Claim( ClaimType.GroupSid.ToClaimTypes(), record.NameOfGroup, ClaimValueTypes.String ) ); }
         }
 
 
         if ( HasFlag( types, ClaimType.Role ) )
         {
-            foreach ( TRoleModel record in data.Roles.AsSpan() ) { claims.Add( new Claim( ClaimType.Role.ToClaimTypes(), record.NameOfRole, ClaimValueTypes.String ) ); }
+            foreach ( TRoleModel record in model.Roles.AsSpan() ) { claims.Add( new Claim( ClaimType.Role.ToClaimTypes(), record.NameOfRole, ClaimValueTypes.String ) ); }
         }
 
         return [.. claims.Span];

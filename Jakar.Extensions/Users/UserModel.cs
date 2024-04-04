@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass>, IUserData<TID, TAddress, TGroupModel, TRoleModel>, IValidator
+public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>, IValidator
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -20,7 +20,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     where TAddress : IAddress<TID>
 
 #if NET8_0_OR_GREATER
-    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>, new()
+    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 #else
     where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 #endif
@@ -80,7 +80,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
     [StringLength(               UNICODE_CAPACITY )] public string Description { get => _description ??= GetDescription(); set => SetProperty( ref _description, value ); }
     [EmailAddress, StringLength( UNICODE_CAPACITY )] public string Email       { get => _email;                            set => SetProperty( ref _email,       value ); }
-    public                                                         TID?   EscalateTo  { get => _escalateTo;                       set => SetProperty( ref _escalateTo,  value ); }
+    public                                                  TID?   EscalateTo  { get => _escalateTo;                       set => SetProperty( ref _escalateTo,  value ); }
     [StringLength( UNICODE_CAPACITY )] public               string Ext         { get => _ext;                              set => SetProperty( ref _ext,         value ); }
 
     [Required, StringLength( UNICODE_CAPACITY )]
@@ -98,9 +98,8 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
     [StringLength( UNICODE_CAPACITY )] public string                            FullName { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
     [StringLength( UNICODE_CAPACITY )] public string                            Gender   { get => _gender;                     set => SetProperty( ref _gender,   value ); }
-    public                                           ObservableCollection<TGroupModel> Groups   { get;                                init; } = [];
-    public                                           TID                               ID       { get;                                init; }
-    public                                           TID?                              ImageID  { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
+    public                                    ObservableCollection<TGroupModel> Groups   { get;                                init; } = [];
+    public                                    TID?                              ImageID  { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
 
 
     [JsonIgnore] public virtual bool IsValid            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsValidEmail                                && IsValidName && IsValidUserName; }
@@ -124,11 +123,11 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         }
     }
 
-    [Phone, StringLength( UNICODE_CAPACITY )] public string                           PhoneNumber         { get => _phoneNumber;       set => SetProperty( ref _phoneNumber,       value ); }
-    [EnumDataType( typeof(SupportedLanguage) )]      public SupportedLanguage                PreferredLanguage   { get => _preferredLanguage; set => SetProperty( ref _preferredLanguage, value ); }
-    [StringLength( IUserRights.MAX_SIZE )]           public string                           Rights              { get => _rights;            set => SetProperty( ref _rights,            value ); }
-    public                                                  ObservableCollection<TRoleModel> Roles               { get;                       init; } = [];
-    public                                                  DateTimeOffset?                  SubscriptionExpires { get;                       init; }
+    [Phone, StringLength( UNICODE_CAPACITY )]   public string                           PhoneNumber         { get => _phoneNumber;       set => SetProperty( ref _phoneNumber,       value ); }
+    [EnumDataType( typeof(SupportedLanguage) )] public SupportedLanguage                PreferredLanguage   { get => _preferredLanguage; set => SetProperty( ref _preferredLanguage, value ); }
+    [StringLength( IUserRights.MAX_SIZE )]      public string                           Rights              { get => _rights;            set => SetProperty( ref _rights,            value ); }
+    public                                             ObservableCollection<TRoleModel> Roles               { get;                       init; } = [];
+    public                                             DateTimeOffset?                  SubscriptionExpires { get;                       init; }
 
     [StringLength( UNICODE_CAPACITY )]
     public string Title
@@ -158,8 +157,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
 
     protected UserModel() : base() { }
-    protected UserModel( IUserData<TID> value ) => With( value );
-    protected UserModel( IUserData<TID> value, IEnumerable<TAddress> addresses ) : this( value ) => WithAddresses( addresses );
+    protected UserModel( IUserData<TID> value ) : base( value.ID ) => With( value );
     protected UserModel( string firstName, string lastName )
     {
         _firstName = firstName;
@@ -171,12 +169,12 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     public virtual string GetDescription() => IUserData.GetDescription( this );
 
 
-    public TClass WithAddresses( IEnumerable<TAddress> addresses )
+    public TClass With( IEnumerable<TAddress> addresses )
     {
         Addresses.Add( addresses );
         return (TClass)this;
     }
-    public TClass WithAddresses( scoped in ReadOnlySpan<TAddress> addresses )
+    public TClass With( scoped in ReadOnlySpan<TAddress> addresses )
     {
         Addresses.Add( addresses );
         return (TClass)this;
@@ -331,7 +329,7 @@ public abstract class UserModel<TClass, TID> : UserModel<TClass, TID, UserAddres
 #endif
 
 #if NET8_0_OR_GREATER
-    where TClass : UserModel<TClass, TID>, ICreateUserModel<TClass, TID>, new()
+    where TClass : UserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
 #else
     where TClass : UserModel<TClass, TID>, new()
 #endif
@@ -347,7 +345,8 @@ public abstract class UserModel<TClass, TID> : UserModel<TClass, TID, UserAddres
 public sealed class UserModel<TID> :
 
 #if NET8_0_OR_GREATER
-    UserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, ICreateUserModel<UserModel<TID>, TID>
+    UserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>,
+    ICreateUserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
 #else
     UserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
 #endif
@@ -363,7 +362,41 @@ public sealed class UserModel<TID> :
 #endif
 {
     public UserModel() : base() { }
-    public UserModel( IUserData<TID>                    value ) : base( value ) { }
-    public UserModel( string                            firstName, string lastName ) : base( firstName, lastName ) { }
-    public static UserModel<TID> Create( IUserData<TID> model ) => new(model);
+    public UserModel( IUserData<TID> value ) : base( value ) { }
+    public UserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
+
+
+    public UserModel<TID> With( IEnumerable<GroupModel<TID>> values )
+    {
+        Groups.Add( values );
+        return this;
+    }
+    public UserModel<TID> With( scoped in ReadOnlySpan<GroupModel<TID>> values )
+    {
+        Groups.Add( values );
+        return this;
+    }
+    public UserModel<TID> With( IEnumerable<RoleModel<TID>> values )
+    {
+        Roles.Add( values );
+        return this;
+    }
+    public UserModel<TID> With( scoped in ReadOnlySpan<RoleModel<TID>> values )
+    {
+        Roles.Add( values );
+        return this;
+    }
+
+
+    public static UserModel<TID> Create( IUserData<TID> model )                                                                                                                                                   => new(model);
+    public static UserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>>            addresses, IEnumerable<GroupModel<TID>>            groups, IEnumerable<RoleModel<TID>>            roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
+    public static UserModel<TID> Create( IUserData<TID> model, scoped in ReadOnlySpan<UserAddress<TID>> addresses, scoped in ReadOnlySpan<GroupModel<TID>> groups, scoped in ReadOnlySpan<RoleModel<TID>> roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
+    public static async ValueTask<UserModel<TID>> CreateAsync( IUserData<TID> model, IAsyncEnumerable<UserAddress<TID>> addresses, IAsyncEnumerable<GroupModel<TID>> groups, IAsyncEnumerable<RoleModel<TID>> roles, CancellationToken token = default )
+    {
+        UserModel<TID> user = Create( model );
+        await user.Addresses.Add( addresses, token );
+        await user.Groups.Add( groups, token );
+        await user.Roles.Add( roles, token );
+        return user;
+    }
 }

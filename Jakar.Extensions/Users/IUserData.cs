@@ -160,24 +160,34 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 
 #if NET8_0_OR_GREATER
-public interface ICreateUserModel<out T, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>
+public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>
-    where T : ICreateUserModel<T, TID, TAddress, TGroupModel, TRoleModel>
+    where TClass : ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
 {
-    public abstract static T Create( IUserData<TID> model, IEnumerable<TAddress> addresses, IEnumerable<TGroupModel> groups, IEnumerable<TRoleModel> roles );
+    public TClass With( IEnumerable<TAddress>               values );
+    public TClass With( scoped in ReadOnlySpan<TAddress>    values );
+    public TClass With( IEnumerable<TGroupModel>            values );
+    public TClass With( scoped in ReadOnlySpan<TGroupModel> values );
+    public TClass With( IEnumerable<TRoleModel>             values );
+    public TClass With( scoped in ReadOnlySpan<TRoleModel>  values );
+
+    public abstract static TClass            Create( IUserData<TID>      model, IEnumerable<TAddress>            addresses, IEnumerable<TGroupModel>            groups, IEnumerable<TRoleModel>            roles );
+    public abstract static TClass            Create( IUserData<TID>      model, scoped in ReadOnlySpan<TAddress> addresses, scoped in ReadOnlySpan<TGroupModel> groups, scoped in ReadOnlySpan<TRoleModel> roles );
+    public abstract static ValueTask<TClass> CreateAsync( IUserData<TID> model, IAsyncEnumerable<TAddress>       addresses, IAsyncEnumerable<TGroupModel>       groups, IAsyncEnumerable<TRoleModel>       roles, CancellationToken token = default );
 }
 
 
 
-public interface ICreateUserModel<out T, TID> : IUserData<TID>
+public interface ICreateUserModel<out TClass, TID> : IUserData<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where T : ICreateUserModel<T, TID>
+    where TClass : ICreateUserModel<TClass, TID>
 {
-    public abstract static T Create( IUserData<TID> model );
+    public abstract static TClass Create( IUserData<TID> model );
 }
+
 
 
 #endif

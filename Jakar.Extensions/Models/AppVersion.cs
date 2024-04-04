@@ -391,7 +391,7 @@ public sealed class AppVersion :
     /// <summary> Compares two <see cref="AppVersion"/> instances </summary>
     /// <param name="other"> </param>
     /// <returns>
-    ///     <see langword="0"/> if the <paramref name="other"/> is equivalent. <br/> <see langword="-1"/> if the <paramref name="other"/> is smaller. <br/> <see langword="1"/> if the <paramref name="other"/> is greater. <br/>
+    ///     <see langword="0"/> if the <paramref name="other"/> is equivalent. <br/> <see langword="NOT_FOUND"/> if the <paramref name="other"/> is smaller. <br/> <see langword="1"/> if the <paramref name="other"/> is greater. <br/>
     ///     <see
     ///         langword="-2"/>
     ///     if the

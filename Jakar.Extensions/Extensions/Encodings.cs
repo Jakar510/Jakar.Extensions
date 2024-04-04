@@ -5,7 +5,7 @@ public static class Encodings
 {
     public static Encoding Ascii            { get; } = Encoding.ASCII;
     public static Encoding BigEndianUnicode { get; } = Encoding.BigEndianUnicode;
-    public static Encoding Latin            { get; } = Encoding.GetEncoding( "ISO-8859-1" );
+    public static Encoding Latin            { get; } = Encoding.GetEncoding( "ISO-8859NOT_FOUND" );
     public static Encoding Unicode          { get; } = Encoding.Unicode;
     public static Encoding Utf32            { get; } = Encoding.UTF32;
 

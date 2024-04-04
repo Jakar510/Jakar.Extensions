@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
     where TList : IReadOnlyList<TValue>
 {
-    private const    int               START_INDEX = -1;
+    private const    int               START_INDEX = NOT_FOUND;
     private readonly TList             _list       = list;
     private          CancellationToken _token      = token;
     private          int               _index      = START_INDEX;

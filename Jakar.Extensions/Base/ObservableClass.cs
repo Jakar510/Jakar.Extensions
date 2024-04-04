@@ -263,3 +263,31 @@ public abstract class ObservableClass<TClass> : ObservableClass, IEquatable<TCla
     public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass file && Equals( file );
     public override        int  GetHashCode()           => RuntimeHelpers.GetHashCode( this );
 }
+
+
+
+public abstract class ObservableClass<TRecord, TID> : ObservableClass<TRecord>, IUniqueID<TID>
+    where TRecord : ObservableClass<TRecord, TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    private TID _id;
+
+
+    public virtual TID ID { get => _id; init => _id = value; }
+
+
+    protected ObservableClass() : base() { }
+    protected ObservableClass( TID id ) => ID = id;
+
+
+    protected bool SetID( TRecord record ) => SetID( record.ID );
+    protected bool SetID( TID     id )     => SetProperty( ref _id, id, nameof(ID) );
+}

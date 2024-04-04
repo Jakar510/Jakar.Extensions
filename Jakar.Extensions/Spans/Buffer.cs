@@ -6,7 +6,6 @@ namespace Jakar.Extensions;
 
 public ref struct Buffer<TValue>
 {
-    public const     int                        DEFAULT_CAPACITY = 64;
     private          TValue[]                   _arrayToReturnToPool;
     internal         Span<TValue>               buffer = default;
     private readonly IEqualityComparer<TValue>? _comparer;
@@ -130,14 +129,14 @@ public ref struct Buffer<TValue>
         Trace.Assert( end   >= 0 && end   <= Length );
         Trace.Assert( end >= start );
 
-        if ( _comparer is null ) { return -1; }
+        if ( _comparer is null ) { return NOT_FOUND; }
 
         for ( int i = start; i < end; i++ )
         {
             if ( _comparer.Equals( buffer[i], value ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly int LastIndexOf( TValue value, in int end = 0 ) => LastIndexOf( value, Length, end );
     [Pure]
@@ -147,14 +146,14 @@ public ref struct Buffer<TValue>
         Trace.Assert( end   >= 0 && end   <= Length );
         Trace.Assert( start >= end );
 
-        if ( _comparer is null ) { return -1; }
+        if ( _comparer is null ) { return NOT_FOUND; }
 
         for ( int i = start; i < end; i-- )
         {
             if ( _comparer.Equals( buffer[i], value ) ) { return i; }
         }
 
-        return -1;
+        return NOT_FOUND;
     }
 
 
@@ -331,6 +330,10 @@ public ref struct Buffer<TValue>
 
 public static class BufferExtensions
 {
+    public const int NOT_FOUND        = -1;
+    public const int DEFAULT_CAPACITY = 64;
+
+
     public static Buffer<T> AsBuffer<T>( this ReadOnlySpan<T> span ) => new(span);
     public static void Trim<T>( this Buffer<T> buffer, scoped in T value )
         where T : IEquatable<T>

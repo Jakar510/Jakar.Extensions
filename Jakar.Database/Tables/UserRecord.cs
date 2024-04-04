@@ -2,6 +2,12 @@
 using Microsoft.OpenApi.Extensions;
 
 
+// using UserModel = Jakar.Extensions.UserModel<System.Guid>;
+// using UserAddress = Jakar.Extensions.UserAddress<System.Guid>;
+// using GroupModel = Jakar.Extensions.GroupModel<System.Guid>;
+// using RoleModel = Jakar.Extensions.RoleModel<System.Guid>;
+
+
 
 namespace Jakar.Database;
 
@@ -819,6 +825,18 @@ public sealed record UserRecord( Guid                                           
 
     #region Roles
 
+    public async ValueTask<bool>                 TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
+    public       IAsyncEnumerable<AddressRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserAddressRecord.Where( connection, transaction, db.UserRoles, db.Addresses, this, token );
+    public async ValueTask<bool>                 HasRole( DbConnection  connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask                       Remove( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
+
+    #endregion
+
+
+
+
+    #region Roles
+
     public async ValueTask<bool>              TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
     public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
     public async ValueTask<bool>              HasRole( DbConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
@@ -839,40 +857,20 @@ public sealed record UserRecord( Guid                                           
 
 
 
-    public async ValueTask<UserModel<Guid>> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-    {
-        UserModel<Guid> model = new(this);
-
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
-
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
-
-        return model;
-    }
-    public async ValueTask<T> ToUserModel<T>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where T : UserModel<T, Guid>, new()
-    {
-        T model = new();
-        model.With( this );
-
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
-
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
-
-        return model;
-    }
-    public async ValueTask<T> ToUserModel<T, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where T : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, new()
-        where TGroupModel : IGroupModel<Guid>
-        where TRoleModel : IRoleModel<Guid>
+    public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, db, token );
+    public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where TClass : UserModel<TClass, Guid, UserAddress<Guid>, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress<Guid>, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress<Guid>, GroupModel, RoleModel>( connection, transaction, db, token );
+    public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+        where TGroupModel : IGroupModel<TGroupModel, Guid>
+        where TRoleModel : IRoleModel<TRoleModel, Guid>
         where TAddress : IAddress<Guid>
     {
-        T model = new();
-        model.With( this );
+        TClass model = TClass.Create( this );
+        
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel<TGroupModel>() ); }
 
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
-
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel<TRoleModel>() ); }
 
         return model;
     }

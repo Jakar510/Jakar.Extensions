@@ -20,7 +20,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     where TRoleModel : IRoleModel<TID>
     where TAddress : IAddress<TID>
 #if NET8_0_OR_GREATER
-    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 #else
     where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 #endif
@@ -148,7 +148,6 @@ public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID
 public sealed class CreateUserModel<TID> :
 #if NET8_0_OR_GREATER
     CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>,
-    ICreateUserModel<CreateUserModel<TID>, TID>,
     ICreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
 #else
     CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
@@ -165,16 +164,41 @@ public sealed class CreateUserModel<TID> :
 #endif
 {
     public CreateUserModel() : base() { }
-    public CreateUserModel( IUserData<TID>                    value ) : base( value ) { }
-    public CreateUserModel( string                            firstName, string lastName ) : base( firstName, lastName ) { }
-    public static CreateUserModel<TID> Create( IUserData<TID> model ) => new(model);
-    public static CreateUserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>> addresses, IEnumerable<GroupModel<TID>> groups, IEnumerable<RoleModel<TID>> roles )
+    public CreateUserModel( IUserData<TID> value ) : base( value ) { }
+    public CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
+
+
+    public CreateUserModel<TID> With( IEnumerable<GroupModel<TID>> values )
     {
-        CreateUserModel<TID> user = new();
-        user.With( model );
-        user.WithAddresses( addresses );
-        user.Groups.Add( groups );
-        user.Roles.Add( roles );
+        Groups.Add( values );
+        return this;
+    }
+    public CreateUserModel<TID> With( scoped in ReadOnlySpan<GroupModel<TID>> values )
+    {
+        Groups.Add( values );
+        return this;
+    }
+    public CreateUserModel<TID> With( IEnumerable<RoleModel<TID>> values )
+    {
+        Roles.Add( values );
+        return this;
+    }
+    public CreateUserModel<TID> With( scoped in ReadOnlySpan<RoleModel<TID>> values )
+    {
+        Roles.Add( values );
+        return this;
+    }
+
+
+    public static CreateUserModel<TID> Create( IUserData<TID> model )                                                                                                                                                   => new(model);
+    public static CreateUserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>>            addresses, IEnumerable<GroupModel<TID>>            groups, IEnumerable<RoleModel<TID>>            roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
+    public static CreateUserModel<TID> Create( IUserData<TID> model, scoped in ReadOnlySpan<UserAddress<TID>> addresses, scoped in ReadOnlySpan<GroupModel<TID>> groups, scoped in ReadOnlySpan<RoleModel<TID>> roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
+    public static async ValueTask<CreateUserModel<TID>> CreateAsync( IUserData<TID> model, IAsyncEnumerable<UserAddress<TID>> addresses, IAsyncEnumerable<GroupModel<TID>> groups, IAsyncEnumerable<RoleModel<TID>> roles, CancellationToken token = default )
+    {
+        CreateUserModel<TID> user = Create( model );
+        await user.Addresses.Add( addresses, token );
+        await user.Groups.Add( groups, token );
+        await user.Roles.Add( roles, token );
         return user;
     }
 }

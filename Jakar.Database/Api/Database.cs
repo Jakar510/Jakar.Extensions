@@ -31,6 +31,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public             DbTable<UserLoginInfoRecord>    UserLogins        { get; }
     public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
     public             DbTable<UserRoleRecord>         UserRoles         { get; }
+    public             DbTable<UserAddressRecord>      UserAddresses     { get; }
     public             DbTable<UserRecord>             Users             { get; }
     public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.Version; }
 
@@ -46,14 +47,16 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         DateOnlyHandler.Register();
         TimeOnlyHandler.Register();
         AppVersionHandler.Register();
-        RecordID<GroupRecord>.RegisterDapperTypeHandlers();
+        RecordID<AddressRecord>.RegisterDapperTypeHandlers();
         RecordID<RecoveryCodeRecord>.RegisterDapperTypeHandlers();
+        RecordID<GroupRecord>.RegisterDapperTypeHandlers();
         RecordID<RoleRecord>.RegisterDapperTypeHandlers();
-        RecordID<UserGroupRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserRecord>.RegisterDapperTypeHandlers();
         RecordID<UserLoginInfoRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRecoveryCodeRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserGroupRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
-        RecordID<UserRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserAddressRecord>.RegisterDapperTypeHandlers();
     }
 
     protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base()
@@ -73,6 +76,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserLogins         = Create<UserLoginInfoRecord>();
         UserRecoveryCodes  = Create<UserRecoveryCodeRecord>();
         Addresses          = Create<AddressRecord>();
+        UserAddresses      = Create<UserAddressRecord>();
         Current            = this;
     }
     public virtual async ValueTask DisposeAsync()
