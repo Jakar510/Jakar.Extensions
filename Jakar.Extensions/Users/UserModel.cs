@@ -179,9 +179,30 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Addresses.Add( addresses );
         return (TClass)this;
     }
+    public TClass With( IEnumerable<TGroupModel> values )
+    {
+        Groups.Add( values );
+        return (TClass)this;
+    }
+    public TClass With( scoped in ReadOnlySpan<TGroupModel> values )
+    {
+        Groups.Add( values );
+        return (TClass)this;
+    }
+    public TClass With( IEnumerable<TRoleModel> values )
+    {
+        Roles.Add( values );
+        return (TClass)this;
+    }
+    public TClass With( scoped in ReadOnlySpan<TRoleModel> values )
+    {
+        Roles.Add( values );
+        return (TClass)this;
+    }
 
 
-    public void With( IUserData<TID> value )
+    void IUserData<TID>.With( IUserData<TID> value ) => With( value );
+    public TClass With( IUserData<TID> value )
     {
         CreatedBy         = value.CreatedBy;
         EscalateTo        = value.EscalateTo;
@@ -197,12 +218,16 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Department        = value.Department;
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
-
-        IDictionary<string, JToken?>? data = (value as JsonModels.IJsonModel)?.AdditionalData;
-        if ( data is null ) { return; }
+        return With( (value as JsonModels.IJsonModel)?.AdditionalData );
+    }
+    public TClass With( IDictionary<string, JToken?>? data )
+    {
+        if ( data is null ) { return (TClass)this; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
         foreach ( (string key, JToken? jToken) in data ) { AdditionalData[key] = jToken; }
+
+        return (TClass)this;
     }
 
 
@@ -364,28 +389,6 @@ public sealed class UserModel<TID> :
     public UserModel() : base() { }
     public UserModel( IUserData<TID> value ) : base( value ) { }
     public UserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
-
-
-    public UserModel<TID> With( IEnumerable<GroupModel<TID>> values )
-    {
-        Groups.Add( values );
-        return this;
-    }
-    public UserModel<TID> With( scoped in ReadOnlySpan<GroupModel<TID>> values )
-    {
-        Groups.Add( values );
-        return this;
-    }
-    public UserModel<TID> With( IEnumerable<RoleModel<TID>> values )
-    {
-        Roles.Add( values );
-        return this;
-    }
-    public UserModel<TID> With( scoped in ReadOnlySpan<RoleModel<TID>> values )
-    {
-        Roles.Add( values );
-        return this;
-    }
 
 
     public static UserModel<TID> Create( IUserData<TID> model )                                                                                                                                                   => new(model);

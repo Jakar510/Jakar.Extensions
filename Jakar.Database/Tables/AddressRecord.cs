@@ -153,6 +153,11 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
     }
 
 
+    public UserAddress<Guid> ToAddressModel() => UserAddress<Guid>.Create( this );
+    public TAddress ToAddressModel<TAddress>()
+        where TAddress : IAddress<TAddress, Guid> => TAddress.Create( this );
+
+
     [Pure]
     public AddressRecord WithUserData( IAddress<Guid> value ) =>
         this with

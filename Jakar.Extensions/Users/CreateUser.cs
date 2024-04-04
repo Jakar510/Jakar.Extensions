@@ -168,28 +168,6 @@ public sealed class CreateUserModel<TID> :
     public CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
 
 
-    public CreateUserModel<TID> With( IEnumerable<GroupModel<TID>> values )
-    {
-        Groups.Add( values );
-        return this;
-    }
-    public CreateUserModel<TID> With( scoped in ReadOnlySpan<GroupModel<TID>> values )
-    {
-        Groups.Add( values );
-        return this;
-    }
-    public CreateUserModel<TID> With( IEnumerable<RoleModel<TID>> values )
-    {
-        Roles.Add( values );
-        return this;
-    }
-    public CreateUserModel<TID> With( scoped in ReadOnlySpan<RoleModel<TID>> values )
-    {
-        Roles.Add( values );
-        return this;
-    }
-
-
     public static CreateUserModel<TID> Create( IUserData<TID> model )                                                                                                                                                   => new(model);
     public static CreateUserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>>            addresses, IEnumerable<GroupModel<TID>>            groups, IEnumerable<RoleModel<TID>>            roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
     public static CreateUserModel<TID> Create( IUserData<TID> model, scoped in ReadOnlySpan<UserAddress<TID>> addresses, scoped in ReadOnlySpan<GroupModel<TID>> groups, scoped in ReadOnlySpan<RoleModel<TID>> roles ) => Create( model ).With( addresses ).With( groups ).With( roles );

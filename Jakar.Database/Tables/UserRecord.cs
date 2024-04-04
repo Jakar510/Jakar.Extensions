@@ -1,11 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using Microsoft.OpenApi.Extensions;
-
-
-// using UserModel = Jakar.Extensions.UserModel<System.Guid>;
-// using UserAddress = Jakar.Extensions.UserAddress<System.Guid>;
-// using GroupModel = Jakar.Extensions.GroupModel<System.Guid>;
-// using RoleModel = Jakar.Extensions.RoleModel<System.Guid>;
 
 
 
@@ -461,7 +454,7 @@ public sealed record UserRecord( Guid                                           
 
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
-        UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, db.RecoveryCodes, this, token );
+        UserRecoveryCodeRecord.Where( connection, transaction, db.RecoveryCodes, this, token );
 
 
     [Pure]
@@ -825,20 +818,19 @@ public sealed record UserRecord( Guid                                           
 
     #region Roles
 
-    public async ValueTask<bool>                 TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public       IAsyncEnumerable<AddressRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserAddressRecord.Where( connection, transaction, db.UserRoles, db.Addresses, this, token );
-    public async ValueTask<bool>                 HasRole( DbConnection  connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
-    public async ValueTask                       Remove( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord     value, CancellationToken token ) => await UserAddressRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask<bool>                 TryAdd( DbConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd( connection, transaction, db.UserAddresses, this, value, token );
+    public       IAsyncEnumerable<AddressRecord> GetAddresses( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where( connection, transaction, db.Addresses, this, token );
+    public async ValueTask<bool>                 HasAddress( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists( connection, transaction, db.UserAddresses, this, value, token );
+    public async ValueTask                       Remove( DbConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete( connection, transaction, db.UserAddresses, this, value, token );
 
     #endregion
-
 
 
 
     #region Roles
 
     public async ValueTask<bool>              TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Roles, this, token );
+    public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, db.Roles, this, token );
     public async ValueTask<bool>              HasRole( DbConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
     public async ValueTask                    Remove( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
 
@@ -849,7 +841,7 @@ public sealed record UserRecord( Guid                                           
     #region Groups
 
     public async ValueTask<bool>               TryAdd( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
-    public       IAsyncEnumerable<GroupRecord> GetGroups( DbConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where( connection, transaction, db.UserGroups, db.Groups, this, token );
+    public       IAsyncEnumerable<GroupRecord> GetGroups( DbConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where( connection, transaction, db.Groups, this, token );
     public async ValueTask<bool>               IsPartOfGroup( DbConnection connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
     public async ValueTask                     Remove( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
 
@@ -864,13 +856,15 @@ public sealed record UserRecord( Guid                                           
         where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : IGroupModel<TGroupModel, Guid>
         where TRoleModel : IRoleModel<TRoleModel, Guid>
-        where TAddress : IAddress<Guid>
+        where TAddress : IAddress<TAddress, Guid>
     {
         TClass model = TClass.Create( this );
-        
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel<TGroupModel>() ); }
 
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel<TRoleModel>() ); }
+        await foreach ( var record in GetAddresses( connection, transaction, db, token ) ) { model.Addresses.Add( record.ToAddressModel<TAddress>() ); }
+
+        await foreach ( var record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel<TGroupModel>() ); }
+
+        await foreach ( var record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel<TRoleModel>() ); }
 
         return model;
     }
