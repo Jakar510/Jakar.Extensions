@@ -254,8 +254,8 @@ public interface IUserRecord<TID> : IUserDetailsModel<TID>
     /// <summary> A random value that must change whenever a user is persisted to the store </summary>
     public string ConcurrencyStamp { get; set; }
 
-    public bool            IsActive       { get; set; }
-    public DateTimeOffset? LastModified   { get; set; }
-    public string          PasswordHash   { get; set; }
-    public Guid?           SubscriptionID { get; set; }
+    public bool            IsActive     { get; set; }
+    public DateTimeOffset? LastModified { get; set; }
+    public string          PasswordHash { get; set; }
+    public TID?           SubscriptionID { get; set; }
 }

@@ -218,6 +218,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Department        = value.Department;
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
+        Rights            = value.Rights;
         return With( (value as JsonModels.IJsonModel)?.AdditionalData );
     }
     public TClass With( IDictionary<string, JToken?>? data )

@@ -16,6 +16,7 @@
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
 
+    // await PasswordChecker.Run();
 
     // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
 }
