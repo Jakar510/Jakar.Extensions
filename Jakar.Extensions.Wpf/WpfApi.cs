@@ -1,8 +1,4 @@
-﻿// TrueLogic :: TrueKeep.Client
-// 01/25/2022  12:40 PM
-
-
-namespace Jakar.Extensions.Wpf;
+﻿namespace Jakar.Extensions.Wpf;
 
 
 public static partial class WpfApi

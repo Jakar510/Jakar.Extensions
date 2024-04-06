@@ -1,7 +1,4 @@
-﻿// // TrueLogic :: TrueKeep.Client.Models
-// // 04/05/2022  6:25 PM
-//
-// using System.Threading.Channels;
+﻿// using System.Threading.Channels;
 //
 //
 //

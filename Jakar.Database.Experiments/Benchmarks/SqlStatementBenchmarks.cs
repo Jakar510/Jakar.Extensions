@@ -1,8 +1,4 @@
-﻿// TrueLogic :: Experiments
-// 03/29/2023  5:39 PM
-
-
-// using CommunityToolkit.HighPerformance;
+﻿// using CommunityToolkit.HighPerformance;
 // using CommunityToolkit.HighPerformance.Enumerables;
 
 

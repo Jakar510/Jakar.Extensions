@@ -1,7 +1,4 @@
-﻿// TrueLogic :: TrueLogic.Blazor
-// 3/28/2024  13:34
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public static class JwtParser

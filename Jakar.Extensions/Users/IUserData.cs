@@ -254,8 +254,24 @@ public interface IUserRecord<TID> : IUserDetailsModel<TID>
     /// <summary> A random value that must change whenever a user is persisted to the store </summary>
     public string ConcurrencyStamp { get; set; }
 
-    public bool            IsActive     { get; set; }
-    public DateTimeOffset? LastModified { get; set; }
-    public string          PasswordHash { get; set; }
-    public TID?           SubscriptionID { get; set; }
+    public bool            IsActive       { get; set; }
+    public DateTimeOffset? LastModified   { get; set; }
+    public string          PasswordHash   { get; set; }
+    public TID?            SubscriptionID { get; set; }
+}
+
+
+
+public interface ISessionID<out TID> : IDeviceID
+#if NET8_0_OR_GREATER
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+{
+    public TID SessionID { get; }
 }

@@ -1,7 +1,14 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface IUserDevice<out TID> : IUniqueID<TID>
+public interface IDeviceID
+{
+    public Guid DeviceID { get; }
+}
+
+
+
+public interface IUserDevice<out TID> : IUniqueID<TID>, IDeviceID
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -12,7 +19,6 @@ public interface IUserDevice<out TID> : IUniqueID<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
 #endif
 {
-    public Guid        DeviceID   { get; }
     public string      DeviceName { get; }
     public DeviceType  DeviceType { get; }
     public DeviceIdiom Idiom      { get; }
