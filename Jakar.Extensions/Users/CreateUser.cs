@@ -40,8 +40,14 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [JsonIgnore] public override bool IsValid         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => base.IsValid                                   && IsValidPassword; }
-    [JsonIgnore] public virtual  bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Password ) is false && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ); }
+    [JsonIgnore] public override bool IsValid { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => base.IsValid && IsValidPassword; }
+
+#if NET6_0_OR_GREATER
+    [JsonIgnore, MemberNotNullWhen( true, nameof(Password), nameof(ConfirmPassword) )]
+#else
+    [JsonIgnore]
+#endif
+    public virtual bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Password ) is false && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password ); }
 
 
     [Required, StringLength( UNICODE_CAPACITY )]
@@ -100,8 +106,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    public VerifyRequest                 GetVerifyRequest() => new(UserName, Password);
-    VerifyRequest IVerifyRequestProvider.GetVerifyRequest() => GetVerifyRequest();
+    public VerifyRequest GetVerifyRequest() => new(UserName, Password);
 
 
     public virtual bool Validate( ICollection<string> errors )

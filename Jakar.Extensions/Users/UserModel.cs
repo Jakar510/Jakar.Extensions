@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>, IValidator
+public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0

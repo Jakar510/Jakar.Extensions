@@ -18,7 +18,8 @@ public interface ILoginRequest : IValidator, IUserName
 
 
 
-public interface IChangePassword : ILoginRequest
+public interface IChangePassword : ILoginRequest, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    public string ConfirmPassword { get; }
+    public new string Password        { get; set; }
+    public     string ConfirmPassword { get; set; }
 }

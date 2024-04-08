@@ -10,12 +10,13 @@ public readonly ref struct PasswordValidator
 {
     private readonly Requirements _requirements;
 
-    public static PasswordValidator Default => new(Requirements.Default);
+    public static PasswordRequirements Requirements { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => PasswordRequirements.Current; [MethodImpl( MethodImplOptions.AggressiveInlining )] set => PasswordRequirements.Current = value; }
+    public static PasswordValidator    Default      => new(Requirements);
     public PasswordValidator() => throw new InvalidOperationException( "Use the constructor with Requirements" );
     public PasswordValidator( scoped in Requirements requirements ) => _requirements = requirements;
 
 
-    public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( password, Requirements.Default );
+    public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( password, Requirements );
     public static bool Check( scoped in ReadOnlySpan<char> password, scoped in Requirements requirements )
     {
         var validator = new PasswordValidator( requirements );
@@ -23,7 +24,7 @@ public readonly ref struct PasswordValidator
     }
 
 
-    public bool Validate( scoped in ReadOnlySpan<char> span ) => Validate( span, out Results _ );
+    public bool Validate( scoped in ReadOnlySpan<char> span ) => Validate( span, out _ );
     public bool Validate( scoped in ReadOnlySpan<char> span, out Results results )
     {
         ReadOnlySpan<char> password      = span.Trim();
