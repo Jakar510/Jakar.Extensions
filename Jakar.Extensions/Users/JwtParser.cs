@@ -54,7 +54,11 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     #else
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
+    #if NET8_0_OR_GREATER
+        where TUser : UserModel<TUser, TID>, ICreateUserModel<TUser, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
+    #else
         where TUser : UserModel<TUser, TID>, new()
+#endif
     {
         ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
         return CreateToken( user, request, identity );

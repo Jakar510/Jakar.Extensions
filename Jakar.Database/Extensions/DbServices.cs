@@ -309,6 +309,7 @@ public static class DbServices
                                                            string                               authenticationScheme            = AUTHENTICATION_SCHEME,
                                                            string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
     )
+
     {
         AuthenticationBuilder builder = collection.AddAuthentication( options =>
                                                                       {
