@@ -702,20 +702,20 @@ public sealed record UserRecord( Guid                          UserID,
                          ? now + lockoutTime
                          : null;
 
-        return this;
+        return Modified();
     }
 
     public UserRecord SetActive()
     {
         LastLogin = DateTimeOffset.UtcNow;
-        return this;
+        return Modified();
     }
 
     public UserRecord SetActive( bool isActive )
     {
         LastLogin = DateTimeOffset.UtcNow;
         IsActive  = isActive;
-        return this;
+        return Modified();
     }
 
 
@@ -723,14 +723,14 @@ public sealed record UserRecord( Guid                          UserID,
     {
         IsActive   = false;
         IsDisabled = true;
-        return this;
+        return Modified();
     }
 
     public UserRecord Enable()
     {
         IsDisabled = false;
         IsActive   = true;
-        return this;
+        return Modified();
     }
 
 
@@ -742,7 +742,7 @@ public sealed record UserRecord( Guid                          UserID,
         BadLogins  = 0;
         IsDisabled = false;
         IsActive   = true;
-        return this;
+        return Modified();
     }
 
 
@@ -751,7 +751,7 @@ public sealed record UserRecord( Guid                          UserID,
         IsLocked   = false;
         LockDate   = default;
         LockoutEnd = default;
-        return this;
+        return Modified();
     }
     public UserRecord Lock() => Lock( DefaultLockoutTime );
 
@@ -762,7 +762,7 @@ public sealed record UserRecord( Guid                          UserID,
         IsLocked   = true;
         LockDate   = lockDate;
         LockoutEnd = lockDate + lockoutTime;
-        return this;
+        return Modified();
     }
     public static bool TryEnable( scoped ref UserRecord record )
     {
@@ -780,13 +780,13 @@ public sealed record UserRecord( Guid                          UserID,
     public UserRecord WithAdditionalData<T>( T? value )
         where T : IDictionary<string, JToken?>
     {
-        if ( value is null || value.Count <= 0 ) { return this; }
+        if ( value is null || value.Count <= 0 ) { return Modified(); }
 
         IDictionary<string, JToken?> data = AdditionalData ?? new Dictionary<string, JToken?>();
         foreach ( (string? key, JToken? jToken) in value ) { data[key] = jToken; }
 
         AdditionalData = data;
-        return this;
+        return Modified();
     }
 
 
@@ -836,26 +836,29 @@ public sealed record UserRecord( Guid                          UserID,
     }
 
 
-    public UserRecord WithNoRefreshToken() => WithRefreshToken( null, null );
-    public UserRecord WithRefreshToken( in string? token, scoped in DateTimeOffset? date, in bool hashed = true )
+    public UserRecord WithNoRefreshToken()                                                                 => WithRefreshToken( string.Empty );
+    public UserRecord WithRefreshToken( Tokens token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken( token.RefreshToken, date, securityStamp );
+    public UserRecord WithRefreshToken( in string? token, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
     {
-        RefreshToken = (hashed
-                            ? Spans.Hash128( token ).ToString()
-                            : token) ??
-                       string.Empty;
+        if ( string.IsNullOrEmpty( token ) )
+        {
+            RefreshToken           = string.Empty;
+            RefreshTokenExpiryTime = null;
+            SecurityStamp          = securityStamp ?? string.Empty;
+            return Modified();
+        }
+
+        date ??= DateTimeOffset.UtcNow;
+        string hash = Spans.Hash128( token ).ToString();
+        SecurityStamp = securityStamp ?? hash;
+
+        RefreshToken = hashed
+                           ? hash
+                           : token ?? string.Empty;
 
         RefreshTokenExpiryTime = date;
-        return this;
+        return Modified();
     }
-    public UserRecord WithRefreshToken( in string? token, scoped in DateTimeOffset? date, string securityStamp, in bool hashed = true )
-    {
-        SecurityStamp = securityStamp;
-        return WithRefreshToken( token, date );
-    }
-
-
-    public UserRecord SetRefreshToken( Tokens token, scoped in DateTimeOffset? date, in bool hashed                        = true ) => WithRefreshToken( token.RefreshToken, date, hashed );
-    public UserRecord SetRefreshToken( Tokens token, scoped in DateTimeOffset? date, string  securityStamp, in bool hashed = true ) => WithRefreshToken( token.RefreshToken, date, securityStamp, hashed );
 
     #endregion
 
@@ -896,15 +899,8 @@ public sealed record UserRecord( Guid                          UserID,
 
     #region Claims
 
-    public async ValueTask<Claim[]> GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType types, CancellationToken token )
-    {
-        UserModel model = await ToUserModel( connection, transaction, db, token );
-        return model.GetClaims( types );
-    }
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, HttpContext context, ClaimType types, CancellationToken token ) =>
-        TryFromClaims( connection, transaction, db, context.User, types, token );
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ClaimsPrincipal principal, ClaimType types, CancellationToken token ) =>
-        TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
+    public async  ValueTask<Claim[]>     GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, db, token )).GetClaims( types );
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
 
     public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
     {

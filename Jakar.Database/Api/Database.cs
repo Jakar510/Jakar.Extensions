@@ -78,6 +78,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         Addresses          = Create<AddressRecord>();
         UserAddresses      = Create<UserAddressRecord>();
         Current            = this;
+        Task.Run( InitDataProtector );
     }
     public virtual async ValueTask DisposeAsync()
     {
@@ -88,6 +89,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         ConnectionString = null;
         GC.SuppressFinalize( this );
     }
+
+
+    protected async Task InitDataProtector()
+    {
+        if ( Options.DataProtectorKey.HasValue ) { await InitDataProtector( Options.DataProtectorKey.Value.Pem, Options.DataProtectorKey.Value.Password ); }
+    }
+    protected async Task InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ) );
 
 
     protected abstract DbConnection CreateConnection( in SecuredString secure );

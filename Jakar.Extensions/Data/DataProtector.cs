@@ -1,10 +1,17 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/29/2023  10:47 PM
 
+using Microsoft.Extensions.Configuration;
+
+
+
 namespace Jakar.Extensions;
 
 
 #if NET6_0_OR_GREATER
+
+
+
 public interface IDataProtectorProvider
 {
     public IDataProtector            GetProtector();
@@ -47,9 +54,9 @@ public interface IDataProtector : IDisposable
 
 public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDataProtector
 {
-    private const    int                  BLOCK = 512;
-    private const    int                  DATA = 254;
-    private readonly RSA                  _rsa = rsa;
+    private const    int                  BLOCK    = 512;
+    private const    int                  DATA     = 254;
+    private readonly RSA                  _rsa     = rsa;
     private readonly RSAEncryptionPadding _padding = padding;
     private          bool                 _disposed;
     private          bool                 _keyIsSet;
@@ -63,7 +70,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    public DataProtector WithKey( ReadOnlySpan<char> pem )
+    public DataProtector WithKey( scoped in ReadOnlySpan<char> pem )
     {
         if ( _keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)} has already been called" ); }
 
@@ -71,7 +78,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         _keyIsSet = true;
         return this;
     }
-    public DataProtector WithKey( ReadOnlySpan<char> pem, ReadOnlySpan<char> password )
+    public DataProtector WithKey( scoped in ReadOnlySpan<char> pem, scoped in ReadOnlySpan<char> password )
     {
         if ( _keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)}  has already been called" ); }
 
@@ -81,16 +88,20 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     }
 
 
-    public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name )                              => WithKey( resources.GetResourceText( name ) );
-    public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, ReadOnlySpan<char> password ) => WithKey( resources.GetResourceText( name ), password );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                  => WithKey( await resources.GetResourceTextAsync( name ) );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string password ) => WithKey( await resources.GetResourceTextAsync( name ), password );
+    public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name )                                        => WithKey( resources.GetResourceText( name ) );
+    public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, scoped in ReadOnlySpan<char> password ) => WithKey( resources.GetResourceText( name ), password );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                                                                                               => WithKey( await resources.GetResourceTextAsync( name ) );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string                       password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => WithKey( await resources.GetResourceTextAsync( name ), await password.GetSecuredStringAsync( configuration, token ) );
 
 
-    public       DataProtector            WithKey( LocalFile      pem )                              => WithKey( pem.Read().AsString() );
-    public       DataProtector            WithKey( LocalFile      pem, ReadOnlySpan<char> password ) => WithKey( pem.Read().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem )                  => WithKey( await pem.ReadAsync().AsString() );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string password ) => WithKey( await pem.ReadAsync().AsString(), password );
+    public       DataProtector            WithKeyFile( LocalFile  pem )                                        => WithKey( pem.Read().AsString() );
+    public       DataProtector            WithKeyFile( LocalFile  pem, scoped in ReadOnlySpan<char> password ) => WithKey( pem.Read().AsString(), password );
+    public       DataProtector            WithKeyFile( LocalFile  pem, SecuredString                password ) => WithKey( pem.Read().AsString(), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem )                                                                                               => WithKey( await pem.ReadAsync().AsString() );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => WithKey( await pem.ReadAsync().AsString(), await password.GetSecuredStringAsync( configuration, token ) );
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )
@@ -126,7 +137,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
         for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
         {
-            int                size = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
+            int                size  = Math.Min( BLOCK, encrypted.Length - i * BLOCK );
             ReadOnlySpan<byte> block = encrypted.AsSpan( i * BLOCK, size );
             if ( block.IsEmpty ) { continue; }
 
@@ -213,7 +224,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
         for ( int i = 0; i <= value.Length / DATA; i++ )
         {
-            int                size = Math.Min( DATA, value.Length - i * DATA );
+            int                size  = Math.Min( DATA, value.Length - i * DATA );
             ReadOnlySpan<byte> block = value.AsSpan( i * DATA, size );
             if ( block.IsEmpty ) { continue; }
 

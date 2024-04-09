@@ -50,7 +50,7 @@
 		<PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
 		<PackageReference Include="MailKit" Version="4.4.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.4" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.60.1" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="2.17.4" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.1" />
@@ -81,14 +81,14 @@
 		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.4" />
 	</ItemGroup>
 
 	<!--

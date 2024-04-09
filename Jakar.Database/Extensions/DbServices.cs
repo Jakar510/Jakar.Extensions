@@ -24,7 +24,7 @@ public static class DbServices
 
     public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder           builder,
                                                                             DbInstance                           dbType,
-                                                                            ConnectionStringResolverOptions      connectionStringResolver,
+                                                                            SecuredStringResolverOptions      connectionStringResolver,
                                                                             Action<RedisCacheOptions>            configureRedis,
                                                                             AppVersion?                          version                         = default,
                                                                             Action<JwtBearerOptions>?            configureJwt                    = default,
