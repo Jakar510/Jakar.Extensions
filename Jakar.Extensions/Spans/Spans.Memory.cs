@@ -8,6 +8,21 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public static partial class Spans
 {
+    [Pure]
+    public static async ValueTask<MemoryStream> ToMemoryStream( this Stream stream )
+    {
+        MemoryStream buffer = new((int)stream.Length);
+        await stream.CopyToAsync( buffer ).ConfigureAwait( false );
+        buffer.Seek( 0, SeekOrigin.Begin );
+        return buffer;
+    }
+    [Pure] public static Memory<byte>         AsMemory( this         MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+    [Pure] public static ReadOnlyMemory<byte> AsReadOnlyMemory( this MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+    [Pure] public static ArraySegment<byte>   AsArraySegment( this   MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+    [Pure] public static ReadOnlySpan<byte>   AsReadOnlySpan( this   MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+    [Pure] public static Span<byte>           AsSpan( this           MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
+
+
     [Pure] public static bool TryAsSegment<T>( this ReadOnlyMemory<T> value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
     [Pure] public static bool TryAsSegment<T>( this Memory<T>         value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
 

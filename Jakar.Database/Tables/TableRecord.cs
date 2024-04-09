@@ -14,12 +14,10 @@ public interface IRecordPair : IUniqueID<Guid>
 public interface IDbReaderMapping<out TRecord>
     where TRecord : IDbReaderMapping<TRecord>
 {
-    public abstract static string                    TableName { get; }
-    public abstract static TRecord                   Create( DbDataReader      reader );
-    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
-
-
-    public DynamicParameters ToDynamicParameters();
+    public abstract static        string                    TableName { [Pure] get; }
+    [Pure] public abstract static TRecord                   Create( DbDataReader      reader );
+    [Pure] public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    [Pure] public                 DynamicParameters         ToDynamicParameters();
 }
 
 
@@ -37,7 +35,7 @@ public interface ITableRecord<TRecord> : ITableRecord
     Guid IUniqueID<Guid>.          ID => ID.Value;
     public new RecordID<TRecord>   ID { get; }
     public     RecordPair<TRecord> ToPair();
-    public     TRecord             NewID( RecordID<TRecord> id );
+    public     TRecord             NewID( in RecordID<TRecord> id );
     public     UInt128             GetHash();
 }
 
@@ -52,13 +50,21 @@ public interface IOwnedTableRecord
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
-    public DateTimeOffset? LastModified { get; set; } = LastModified;
+    private RecordID<TRecord> _id           = ID;
+    private DateTimeOffset?   _lastModified = LastModified;
 
-    public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
+
+    public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
+    [Key] public RecordID<TRecord> ID           { get => _id;           init => _id = value; }
+
+
+    protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
+
+
+    [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
     [Conditional( "DEBUG" )]
@@ -98,6 +104,8 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
         return parameters;
     }
 
+
+    [Pure]
     protected static T TryGet<T>( DbDataReader reader, in string key )
     {
         int index = reader.GetOrdinal( key );
@@ -105,10 +113,24 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    [Pure]
+    public TRecord Modified()
+    {
+        _lastModified = DateTimeOffset.UtcNow;
+        return (TRecord)this;
+    }
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+
+    [Pure]
+    public TRecord NewID( in RecordID<TRecord> id )
+    {
+        _id = id;
+        return (TRecord)this;
+    }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with { ID = id });
+    [Pure]
     public UInt128 GetHash()
     {
         string json = this.ToJson();

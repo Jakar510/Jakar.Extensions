@@ -17,24 +17,26 @@ public interface IFileMetaData : IUniqueID<Guid>
 
 
 
-public sealed record FileMetaData( [property: StringLength( IFileMetaData.NAME_SIZE_LIMIT )] string? FileName, [property: StringLength( IFileMetaData.TYPE_SIZE_LIMIT )] string? FileType, [property: StringLength( IFileMetaData.DESCRIPTION_SIZE_LIMIT )] string? FileDescription = null, Guid ID = default ) : IFileMetaData
+public interface IFileData<out TFileMetaData>
+#if NET8_0_OR_GREATER
+    where TFileMetaData : IFileMetaData<TFileMetaData>
+#else
+    where TFileMetaData : IFileMetaData
+#endif
 {
-    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription, value.ID ) { }
-    public FileMetaData( LocalFile     value ) : this( value.Name, value.ContentType ) { }
+    long                  FileSize { get; }
+    string                Hash     { get; }
+    MimeType              MimeType { get; }
+    string                Payload  { get; }
+    public TFileMetaData? MetaData { get; }
 }
 
 
 
-public interface IFileData
+public interface IFileData : IFileData<FileMetaData>
 {
     public const int FILE_SIZE_LIMIT = 0x3FFFFFDF; // 1 GB -- from string.MaxSize
     public const int HASH_SIZE_LIMIT = 4096;
-    long             FileSize { get; }
-
-    string         Hash     { get; }
-    IFileMetaData? MetaData { get; }
-    MimeType       MimeType { get; }
-    string         Payload  { get; }
 
 
     public static OneOf<byte[], string> GetData( string data )
@@ -78,42 +80,87 @@ public interface IFileData
 
 
 
-[Serializable]
-public record FileData<TFileMetaData>( long FileSize, MimeType MimeType, [property: StringLength( IFileData.HASH_SIZE_LIMIT )] string Hash, [property: StringLength( IFileData.FILE_SIZE_LIMIT )] string Payload, TFileMetaData? FileMetaData ) : IFileData
-    where TFileMetaData : IFileMetaData
+#if NET8_0_OR_GREATER
+public interface IFileData<T, out TFileMetaData> : IFileData<TFileMetaData>
+    where TFileMetaData : IFileMetaData<TFileMetaData>
+    where T : IFileData<T, TFileMetaData>
 {
-    IFileMetaData? IFileData.MetaData => FileMetaData;
+    public abstract static T            Create( IFileData                                        data );
+    public abstract static T?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData? data );
+    public abstract static ValueTask<T> Create( LocalFile                                        file,   CancellationToken token = default );
+    public abstract static ValueTask<T> Create( Stream                                           stream, MimeType          mime, FileMetaData? metaData, CancellationToken token = default );
+    public abstract static T            Create( MemoryStream                                     stream, MimeType          mime, FileMetaData? metaData );
+    public abstract static T            Create( ReadOnlyMemory<byte>                             data,   MimeType          mime, FileMetaData? metaData );
+    public abstract static T            Create( ReadOnlySpan<byte>                               data,   MimeType          mime, FileMetaData? metaData );
+}
 
 
-    public FileData( ReadOnlySpan<byte>   content, MimeType mime, TFileMetaData? metaData ) : this( content.Length, mime, IFileData.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
-    public FileData( ReadOnlyMemory<byte> content, MimeType mime, TFileMetaData? metaData ) : this( content.Span, mime, metaData ) { }
+
+public interface IFileMetaData<out T> : IFileMetaData
+    where T : IFileMetaData<T>
+{
+    public abstract static T  Create( IFileMetaData                                        data );
+    public abstract static T? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
+}
+#endif
 
 
-    public static async ValueTask<FileData<TFileMetaData>> Create( Stream stream, MimeType mime, TFileMetaData? metaData, CancellationToken token = default )
+
+[Serializable, SuppressMessage( "ReSharper", "InconsistentNaming" )]
+public sealed record FileData( MimeType MimeType, long FileSize, [property: StringLength( IFileData.HASH_SIZE_LIMIT )] string Hash, [property: StringLength( IFileData.FILE_SIZE_LIMIT )] string Payload, FileMetaData? MetaData ) :
+#if NET8_0_OR_GREATER
+    IFileData<FileData, FileMetaData>
+#else
+    IFileData<FileMetaData>
+#endif
+{
+    public FileData( IFileData                    file ) : this( file, FileMetaData.TryCreate( file.MetaData ) ) { }
+    public FileData( IFileData                    file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
+    public FileData( scoped in ReadOnlySpan<byte> content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, IFileData.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( MemoryStream         stream, MimeType mime, FileMetaData? metaData ) => Create( stream.AsReadOnlyMemory(), mime, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlyMemory<byte> data,   MimeType mime, FileMetaData? metaData ) => Create( data.Span,                 mime, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlySpan<byte>   data,   MimeType mime, FileMetaData? metaData ) => new(data, mime, metaData);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData            data ) => new(data);
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData? data ) => data is not null
+                                                                                                   ? Create( data )
+                                                                                                   : null;
+    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
+    {
+        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
+        return new FileData( content.Span, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
+    }
+    public static async ValueTask<FileData> Create( Stream stream, MimeType mime, FileMetaData? metaData, CancellationToken token = default )
     {
         stream.Seek( 0, SeekOrigin.Begin );
         using MemoryStream memory = new((int)stream.Length);
         await stream.CopyToAsync( memory, token );
         return Create( memory, mime, metaData );
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( MemoryStream         stream, MimeType mime, TFileMetaData? metaData ) => new(new ReadOnlyMemory<byte>( stream.GetBuffer() ), mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( ReadOnlyMemory<byte> data,   MimeType mime, TFileMetaData? metaData ) => new(data, mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( ReadOnlySpan<byte>   data,   MimeType mime, TFileMetaData? metaData ) => new(data, mime, metaData);
 }
 
 
 
 [Serializable]
-public record FileData : FileData<FileMetaData>
+public sealed record FileMetaData( [property: StringLength( IFileMetaData.NAME_SIZE_LIMIT )] string? FileName, [property: StringLength( IFileMetaData.TYPE_SIZE_LIMIT )] string? FileType, [property: StringLength( IFileMetaData.DESCRIPTION_SIZE_LIMIT )] string? FileDescription = null, Guid ID = default ) :
+#if NET8_0_OR_GREATER
+    IFileMetaData<FileMetaData>
+#else
+    IFileMetaData
+#endif
 {
-    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
-    {
-        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
-        return new FileData( content, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
-    }
-    public FileData( ReadOnlySpan<byte>   content,  MimeType mime,     FileMetaData? metaData ) : base( content, mime, metaData ) { }
-    public FileData( ReadOnlyMemory<byte> content,  MimeType mime,     FileMetaData? metaData ) : base( content, mime, metaData ) { }
-    public FileData( long                 FileSize, MimeType MimeType, string        Hash, string Payload, FileMetaData? metaData ) : base( FileSize, MimeType, Hash, Payload, metaData ) { }
+    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription, value.ID ) { }
+    public FileMetaData( LocalFile     value ) : this( value.Name, value.ContentType ) { }
+
+
+    public static FileMetaData Create( IFileMetaData data ) => new(data.FileName, data.FileType, data.FileDescription, data.ID);
+    public static FileMetaData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data ) => data is not null
+                                                                                                           ? Create( data )
+                                                                                                           : null;
 }
 
 
