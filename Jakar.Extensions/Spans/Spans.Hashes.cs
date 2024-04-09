@@ -26,7 +26,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -47,7 +47,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -68,7 +68,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -89,7 +89,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -110,7 +110,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -131,7 +131,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -152,7 +152,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -173,7 +173,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -194,7 +194,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -215,7 +215,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -236,7 +236,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -261,7 +261,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -283,7 +283,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -304,7 +304,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -325,7 +325,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -346,7 +346,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -367,7 +367,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -388,7 +388,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -409,7 +409,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -430,7 +430,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -451,7 +451,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -472,7 +472,7 @@ public static partial class Spans
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                var        range = new Range( start, start + SIZE );
+                Range        range = new Range( start, start + SIZE );
                 Span<byte> span = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }

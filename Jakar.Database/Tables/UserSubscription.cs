@@ -17,7 +17,7 @@ public abstract record UserSubscription<TRecord>( DateTimeOffset? SubscriptionEx
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(SubscriptionExpires), SubscriptionExpires );
         return parameters;
     }

@@ -12,7 +12,7 @@ public class DbTokenHandler : JsonWebTokenHandler
 
     public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken )
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
         return tokenHandler.ValidateToken( jsonToken, parameters, out securityToken );
     }
 

@@ -9,42 +9,42 @@ public class AppVersion_Tests : Assert
     [Test, TestCase( 1, 0, 0, 0, 0, 0, "1.0.0.0.0.0" )]
     public void Construct_Complete( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, string expected )
     {
-        var version = new AppVersion( major, minor, maintenance, majorRevision, minorRevision, build );
+        AppVersion version = new AppVersion( major, minor, maintenance, majorRevision, minorRevision, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, 0, 0, "1.0.0.0.0" )]
     public void Construct_DetailedRevisions( int major, int minor, int maintenance, int majorRevision, int build, string expected )
     {
-        var version = new AppVersion( major, minor, maintenance, majorRevision, build );
+        AppVersion version = new AppVersion( major, minor, maintenance, majorRevision, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, 0, "1.0.0.0" )]
     public void Construct_Detailed( int major, int minor, int maintenance, int build, string expected )
     {
-        var version = new AppVersion( major, minor, maintenance, build );
+        AppVersion version = new AppVersion( major, minor, maintenance, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, "1.0.0" )]
     public void Construct_Typical( int major, int minor, int build, string expected )
     {
-        var version = new AppVersion( major, minor, build );
+        AppVersion version = new AppVersion( major, minor, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, "1.0" )]
     public void Construct_Minimal( int major, int minor, string expected )
     {
-        var version = new AppVersion( major, minor );
+        AppVersion version = new AppVersion( major, minor );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, "1" )]
     public void Construct_Singular( int major, string expected )
     {
-        var version = new AppVersion( major );
+        AppVersion version = new AppVersion( major );
         this.AreEqual( expected, version.ToString() );
     }
 
@@ -76,7 +76,7 @@ public class AppVersion_Tests : Assert
     [Test, TestCase( "1.0" ), TestCase( "1.2.3" ), TestCase( "1.2.3.4" ), TestCase( "0.7.0.25" ), TestCase( "2147483647.2147483647.2147483647.2147483647" )]
     public void ToVersion( string s )
     {
-        var value = AppVersion.Parse( s ).ToVersion();
+        Version value = AppVersion.Parse( s ).ToVersion();
 
         this.AreEqual( Version.Parse( s ), value );
     }

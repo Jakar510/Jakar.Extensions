@@ -74,7 +74,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static int GetHash<T>( this IEnumerable<T> values )
     {
-        var hash = new HashCode();
+        HashCode hash = new HashCode();
         foreach ( T value in values ) { hash.Add( value ); }
 
         return hash.ToHashCode();

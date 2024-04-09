@@ -28,7 +28,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
 
     protected static string GetMessage( Type? actual, Type[] expected, TKey? key = default )
     {
-        var builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
 
         builder.AppendLine( key is null
                                 ? "The passed value was of an unexpected Type."

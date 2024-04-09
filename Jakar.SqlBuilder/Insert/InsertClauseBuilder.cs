@@ -23,7 +23,7 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
     }
     private EasySqlBuilder SetValues<T>( T obj )
     {
-        var cache = new Dictionary<string, string>();
+        Dictionary<string, string> cache = new Dictionary<string, string>();
 
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ) )
         {

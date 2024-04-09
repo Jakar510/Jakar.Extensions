@@ -170,8 +170,8 @@ public readonly record struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        uint count      = 0;
-        var  exceptions = new Exception[policy.MaxRetires];
+        uint        count      = 0;
+        Exception[] exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
@@ -193,8 +193,8 @@ public readonly record struct WebResponse<T>
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        uint count      = 0;
-        var  exceptions = new Exception[policy.MaxRetires];
+        uint        count      = 0;
+        Exception[] exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
@@ -230,7 +230,7 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using var reader       = new StreamReader( stream );
+            using StreamReader reader       = new StreamReader( stream );
             string    errorMessage = await reader.ReadToEndAsync();
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
@@ -254,7 +254,7 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using var reader = new StreamReader( stream );
+            using StreamReader reader = new StreamReader( stream );
 
         #if NET7_0_OR_GREATER
             string errorMessage = await reader.ReadToEndAsync( token );

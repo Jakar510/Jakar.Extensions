@@ -150,7 +150,7 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
     public double CalculateDistance( double                latitudeStart, double       longitudeStart, DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
     public override int GetHashCode()
     {
-        var hashCode = new HashCode();
+        HashCode hashCode = new HashCode();
         hashCode.Add( ID );
         hashCode.Add( InstanceID );
         hashCode.Add( Timestamp );

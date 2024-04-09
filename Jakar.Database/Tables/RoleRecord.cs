@@ -31,7 +31,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(NameOfRole),       NameOfRole );
         parameters.Add( nameof(NormalizedName),   NormalizedName );
         parameters.Add( nameof(ConcurrencyStamp), ConcurrencyStamp );
@@ -45,12 +45,12 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         string                name             = reader.GetFieldValue<string>( nameof(NameOfRole) );
         string                normalizedName   = reader.GetFieldValue<string>( nameof(NormalizedName) );
         string                concurrencyStamp = reader.GetFieldValue<string>( nameof(ConcurrencyStamp) );
-        var                   dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                   lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var                   ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        DateTimeOffset        dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                   ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>? createdBy        = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        var                   record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RoleRecord                   record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

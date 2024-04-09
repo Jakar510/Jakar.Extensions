@@ -95,7 +95,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     {
         public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
-            var guid = serializer.Deserialize<Guid?>( reader );
+            Guid? guid = serializer.Deserialize<Guid?>( reader );
 
             return guid.HasValue
                        ? new RecordID<TRecord>( guid.Value )

@@ -72,7 +72,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(List<TElement>).GetField( "_items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            var dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true );
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument
@@ -90,7 +90,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(Collection<TElement>).GetField( "items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            var dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true );
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument

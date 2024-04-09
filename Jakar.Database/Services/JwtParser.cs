@@ -20,10 +20,10 @@ public static class JwtParser
     }
     public static List<Claim> ParseClaimsFromJwt( string jwt )
     {
-        List<Claim> claims        = [];
-        string      payload       = jwt.Split( '.' )[1];
-        string      jsonBytes     = ParseBase64WithoutPadding( payload ).ConvertToString( Encoding.Default );
-        var         keyValuePairs = jsonBytes.FromJson<Dictionary<string, object>>();
+        List<Claim>                claims        = [];
+        string                     payload       = jwt.Split( '.' )[1];
+        string                     jsonBytes     = ParseBase64WithoutPadding( payload ).ConvertToString( Encoding.Default );
+        Dictionary<string, object> keyValuePairs = jsonBytes.FromJson<Dictionary<string, object>>();
 
         ExtractRolesFromJwt( claims, keyValuePairs );
         claims.AddRange( keyValuePairs.Select( static kvp => new Claim( kvp.Key, kvp.Value.ToString() ?? string.Empty ) ) );

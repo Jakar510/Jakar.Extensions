@@ -23,7 +23,7 @@ public static partial class AsyncLinq
     public static                                                      ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
-        var list = new HashSet<TElement>( comparer );
+        HashSet<TElement> list = new HashSet<TElement>( comparer );
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
@@ -110,7 +110,7 @@ public static partial class AsyncLinq
 
             default:
             {
-                using var builder = new Buffer<T>();
+                using Buffer<T> builder = new Buffer<T>();
                 foreach ( T equatable in sequence ) { builder.Append( equatable ); }
 
                 return builder.Span.ToArray();
@@ -132,7 +132,7 @@ public static partial class AsyncLinq
     #if NET6_0_OR_GREATER
         TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
     #else
-        var array = new TElement[source.Count];
+        TElement[] array = new TElement[source.Count];
     #endif
 
         for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
@@ -142,7 +142,7 @@ public static partial class AsyncLinq
     public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using var buffer = new Buffer<TResult>();
+        using Buffer<TResult> buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
 
         return buffer.Span.ToArray();
@@ -150,7 +150,7 @@ public static partial class AsyncLinq
     public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using var buffer = new Buffer<TResult>();
+        using Buffer<TResult> buffer = new Buffer<TResult>();
         foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
 
         return buffer.Span.ToArray();
@@ -179,14 +179,14 @@ public static partial class AsyncLinq
 
     public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        var list = new List<TElement>();
+        List<TElement> list = new List<TElement>();
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
     }
     public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        var list = new ObservableCollection<TElement>();
+        ObservableCollection<TElement> list = new ObservableCollection<TElement>();
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;

@@ -209,7 +209,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteAllRecursivelyAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -237,7 +237,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteFilesAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -257,7 +257,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteSubFoldersAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -272,7 +272,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles() )
         {
@@ -289,7 +289,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
@@ -306,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
@@ -323,7 +323,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {

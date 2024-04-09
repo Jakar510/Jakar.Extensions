@@ -72,7 +72,7 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
         await using MemoryStream stream = await AsStream( response );
-        using var                sr     = new StreamReader( stream, Encoding );
+        using StreamReader                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
     #endif
@@ -83,13 +83,13 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
         await using MemoryStream stream = await AsStream( response );
-        using var                sr     = new StreamReader( stream, Encoding );
+        using StreamReader                sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
     #endif
         using JsonReader reader = new JsonTextReader( sr );
 
-        var result = serializer.Deserialize<TResult>( reader );
+        TResult? result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
@@ -104,7 +104,7 @@ public readonly record struct WebHandler : IDisposable
     {
         if ( response.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
+            MimeType mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
             return await AsFile( response, mimeType );
         }
@@ -112,7 +112,7 @@ public readonly record struct WebHandler : IDisposable
 
         if ( response.Content.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Content.Headers.GetValues( fileNameHeader ).First().ToMimeType();
+            MimeType mimeType = response.Content.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
             return await AsFile( response, mimeType );
         }
@@ -126,7 +126,7 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
     {
-        var file = new LocalFile( path );
+        LocalFile file = new LocalFile( path );
         return await AsFile( response, file );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
@@ -153,7 +153,7 @@ public readonly record struct WebHandler : IDisposable
         await using Stream stream = await content.ReadAsStreamAsync( Token );
     #endif
 
-        var buffer = new MemoryStream( (int)stream.Length );
+        MemoryStream buffer = new MemoryStream( (int)stream.Length );
         await stream.CopyToAsync( buffer, Token );
 
         buffer.Seek( 0, SeekOrigin.Begin );

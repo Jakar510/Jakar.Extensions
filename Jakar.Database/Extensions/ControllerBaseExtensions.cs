@@ -191,14 +191,14 @@ public static class ControllerBaseExtensions
         state.TryGetValue( nameof(ProblemDetails.Title),    out ModelStateEntry? title );
         state.TryGetValue( nameof(ProblemDetails.Type),     out ModelStateEntry? type );
 
-        var problem = new ProblemDetails
-                      {
-                          Detail   = detail?.AttemptedValue,
-                          Instance = instance?.AttemptedValue,
-                          Title    = title?.AttemptedValue,
-                          Type     = type?.AttemptedValue,
-                          Status   = status.AsInt()
-                      };
+        ProblemDetails problem = new ProblemDetails
+                                 {
+                                     Detail   = detail?.AttemptedValue,
+                                     Instance = instance?.AttemptedValue,
+                                     Title    = title?.AttemptedValue,
+                                     Type     = type?.AttemptedValue,
+                                     Status   = status.AsInt()
+                                 };
 
         foreach ( (string key, ModelStateEntry value) in state )
         {

@@ -77,11 +77,11 @@ public sealed class EmailBuilder
 
     public async ValueTask<MimeMessage> Create()
     {
-        var builder = new BodyBuilder
-                      {
-                          TextBody = _body,
-                          HtmlBody = _html
-                      };
+        BodyBuilder builder = new BodyBuilder
+                              {
+                                  TextBody = _body,
+                                  HtmlBody = _html
+                              };
 
         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
 

@@ -50,7 +50,7 @@
 
             if ( record is not null )
             {
-                var state = new ModelStateDictionary();
+                ModelStateDictionary state = new ModelStateDictionary();
                 state.AddModelError( nameof(login.LoginProvider), login.LoginProvider );
                 state.AddModelError( nameof(login.ProviderKey),   login.ProviderKey );
                 state.AddModelError( nameof(UserRecord.UserID),   user.UserID.ToString() );

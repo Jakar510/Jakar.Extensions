@@ -38,7 +38,7 @@ public static class StringExtensions
                              { '[', ']' }
                          };
 
-        var brackets = new Stack<char>();
+        Stack<char> brackets = new Stack<char>();
 
         try
         {
@@ -102,7 +102,7 @@ public static class StringExtensions
     {
         fixed (char* token = &value.GetPinnableReference())
         {
-            var secure = new SecureString( token, value.Length );
+            SecureString secure = new SecureString( token, value.Length );
             if ( makeReadonly ) { secure.MakeReadOnly(); }
 
             return secure;
@@ -208,7 +208,7 @@ public static class StringExtensions
         if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
 
-        using var        builder          = new ValueStringBuilder( span.Length + Math.Max( 2, span.Length / 5 ) );
+        using ValueStringBuilder        builder          = new ValueStringBuilder( span.Length + Math.Max( 2, span.Length / 5 ) );
         UnicodeCategory? previousCategory = default;
 
         for ( int currentIndex = 0; currentIndex < span.Length; currentIndex++ )

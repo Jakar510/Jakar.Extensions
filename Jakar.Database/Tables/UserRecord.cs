@@ -101,12 +101,13 @@ public sealed record UserRecord( Guid                          UserID,
     public                                               Guid?                                                                 SubscriptionID         { get; set; } = SubscriptionID;
     [ProtectedPersonalData] public                       string                                                                Title                  { get; set; } = Title;
     Guid IUserID<Guid>.                                                                                                        UserID                 => UserID;
-    [ProtectedPersonalData] public string                                                                                      Website                { get; set; } = Website;
+    [ProtectedPersonalData] public string                                                                                      Website                { get;                  set; } = Website;
+    DateTimeOffset? IUserRecord<Guid>.                                                                                         LastModified           { get => _lastModified; set => _lastModified = value; }
 
 
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(UserID),                 UserID );
         parameters.Add( nameof(UserName),               UserName );
         parameters.Add( nameof(FirstName),              FirstName );
@@ -149,7 +150,7 @@ public sealed record UserRecord( Guid                          UserID,
 
     public static UserRecord Create( DbDataReader reader )
     {
-        var                           userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
+        Guid                          userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
         string                        userName               = reader.GetFieldValue<string>( nameof(UserName) );
         string                        firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
         string                        lastName               = reader.GetFieldValue<string>( nameof(LastName) );
@@ -168,19 +169,19 @@ public sealed record UserRecord( Guid                          UserID,
         string                        ext                    = reader.GetFieldValue<string>( nameof(Ext) );
         bool                          isPhoneNumberConfirmed = reader.GetBoolean( nameof(IsPhoneNumberConfirmed) );
         bool                          isTwoFactorEnabled     = reader.GetBoolean( nameof(IsTwoFactorEnabled) );
-        var                           subscriptionExpires    = reader.GetFieldValue<DateTimeOffset?>( nameof(SubscriptionExpires) );
-        var                           lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
-        var                           lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
+        DateTimeOffset?               subscriptionExpires    = reader.GetFieldValue<DateTimeOffset?>( nameof(SubscriptionExpires) );
+        DateTimeOffset?               lastBadAttempt         = reader.GetFieldValue<DateTimeOffset?>( nameof(LastBadAttempt) );
+        DateTimeOffset?               lastLogin              = reader.GetFieldValue<DateTimeOffset?>( nameof(LastLogin) );
         int                           badLogins              = reader.GetFieldValue<int>( nameof(BadLogins) );
         bool                          isLocked               = reader.GetBoolean( nameof(IsLocked) );
-        var                           lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
-        var                           lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
+        DateTimeOffset?               lockDate               = reader.GetFieldValue<DateTimeOffset?>( nameof(LockDate) );
+        DateTimeOffset?               lockoutEnd             = reader.GetFieldValue<DateTimeOffset?>( nameof(LockoutEnd) );
         string                        passwordHash           = reader.GetFieldValue<string>( nameof(PasswordHash) );
         string                        authenticatorKey       = reader.GetFieldValue<string>( nameof(AuthenticatorKey) );
         string                        refreshToken           = reader.GetFieldValue<string>( nameof(RefreshToken) );
-        var                           refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
-        var                           sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
-        var                           subscriptionID         = reader.GetFieldValue<Guid?>( nameof(SubscriptionID) );
+        DateTimeOffset?               refreshTokenExpiryTime = reader.GetFieldValue<DateTimeOffset?>( nameof(RefreshTokenExpiryTime) );
+        Guid?                         sessionID              = reader.GetFieldValue<Guid?>( nameof(SessionID) );
+        Guid?                         subscriptionID         = reader.GetFieldValue<Guid?>( nameof(SubscriptionID) );
         bool                          isActive               = reader.GetBoolean( nameof(IsActive) );
         bool                          isDisabled             = reader.GetBoolean( nameof(IsDisabled) );
         string                        securityStamp          = reader.GetFieldValue<string>( nameof(SecurityStamp) );
@@ -190,55 +191,55 @@ public sealed record UserRecord( Guid                          UserID,
         RecordID<FileRecord>?         imageID                = RecordID<FileRecord>.TryCreate( reader, nameof(ImageID) );
         RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID( reader );
         RecordID<UserRecord>?         createdBy              = RecordID<UserRecord>.CreatedBy( reader );
-        var                           ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
-        var                           dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                           lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid?                         ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        DateTimeOffset                dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
-        var record = new UserRecord( userID,
-                                     userName,
-                                     firstName,
-                                     lastName,
-                                     fullName,
-                                     rights,
-                                     gender,
-                                     company,
-                                     description,
-                                     department,
-                                     title,
-                                     website,
-                                     preferredLanguage,
-                                     email,
-                                     isEmailConfirmed,
-                                     phoneNumber,
-                                     ext,
-                                     isPhoneNumberConfirmed,
-                                     isTwoFactorEnabled,
-                                     subscriptionID,
-                                     subscriptionExpires,
-                                     lastBadAttempt,
-                                     lastLogin,
-                                     badLogins,
-                                     isLocked,
-                                     lockDate,
-                                     lockoutEnd,
-                                     passwordHash,
-                                     refreshToken,
-                                     authenticatorKey,
-                                     refreshTokenExpiryTime,
-                                     sessionID,
-                                     isActive,
-                                     isDisabled,
-                                     securityStamp,
-                                     concurrencyStamp,
-                                     escalateTo,
-                                     additionalData,
-                                     imageID,
-                                     id,
-                                     createdBy,
-                                     ownerUserID,
-                                     dateCreated,
-                                     lastModified );
+        UserRecord record = new UserRecord( userID,
+                                            userName,
+                                            firstName,
+                                            lastName,
+                                            fullName,
+                                            rights,
+                                            gender,
+                                            company,
+                                            description,
+                                            department,
+                                            title,
+                                            website,
+                                            preferredLanguage,
+                                            email,
+                                            isEmailConfirmed,
+                                            phoneNumber,
+                                            ext,
+                                            isPhoneNumberConfirmed,
+                                            isTwoFactorEnabled,
+                                            subscriptionID,
+                                            subscriptionExpires,
+                                            lastBadAttempt,
+                                            lastLogin,
+                                            badLogins,
+                                            isLocked,
+                                            lockDate,
+                                            lockoutEnd,
+                                            passwordHash,
+                                            refreshToken,
+                                            authenticatorKey,
+                                            refreshTokenExpiryTime,
+                                            sessionID,
+                                            isActive,
+                                            isDisabled,
+                                            securityStamp,
+                                            concurrencyStamp,
+                                            escalateTo,
+                                            additionalData,
+                                            imageID,
+                                            id,
+                                            createdBy,
+                                            ownerUserID,
+                                            dateCreated,
+                                            lastModified );
 
         record.Validate();
         return record;
@@ -608,7 +609,7 @@ public sealed record UserRecord( Guid                          UserID,
         where TRoleModel : IRoleModel<TRoleModel, Guid>
         where TAddress : IAddress<TAddress, Guid>
     {
-        var model = TClass.Create( this );
+        TClass model = TClass.Create( this );
 
         await foreach ( AddressRecord record in GetAddresses( connection, transaction, db, token ) ) { model.Addresses.Add( record.ToAddressModel<TAddress>() ); }
 

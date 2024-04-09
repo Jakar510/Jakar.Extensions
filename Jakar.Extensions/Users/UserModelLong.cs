@@ -2,9 +2,11 @@
 // 4/4/2024  13:50
 
 
-// ReSharper disable once CheckNamespace
+// ReSharper disable CheckNamespace
 
 namespace Jakar.Extensions.UserLong;
+// ReSharper restore CheckNamespace
+
 
 
 [Serializable]
@@ -79,5 +81,52 @@ public sealed class UserModel :
         await user.Groups.Add( groups, token );
         await user.Roles.Add( roles, token );
         return user;
+    }
+}
+
+
+
+[Serializable]
+public sealed record FileMetaData( string? FileName, string? FileType, string? FileDescription = null, long ID = default ) : FileMetaData<FileMetaData, long>( FileName, FileType, FileDescription, ID ), IFileMetaData<FileMetaData, long>
+{
+    public FileMetaData( IFileMetaData<long>               file ) : this( file.FileName, file.FileType, file.FileDescription, file.ID ) { }
+    public FileMetaData( LocalFile                         file ) : this( file.Name, file.ContentType ) { }
+    public static FileMetaData Create( IFileMetaData<long> data ) => new(data);
+    public static FileMetaData? TryCreate( IFileMetaData<long>? data ) => data is not null
+                                                                              ? Create( data )
+                                                                              : null;
+}
+
+
+
+[Serializable]
+public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, long ID = default ) : FileData<FileData, long, FileMetaData>( MimeType, FileSize, Hash, Payload, MetaData, ID ), IFileData<FileData, long, FileMetaData>
+{
+    public FileData( IFileData<long, FileMetaData> file ) : this( file, file.MetaData ) { }
+    public FileData( IFileData<long>               file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
+    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, IFileData<long>.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( MemoryStream                  stream, MimeType mime, FileMetaData? metaData ) => Create( stream.AsReadOnlyMemory(), mime, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlyMemory<byte>          data,   MimeType mime, FileMetaData? metaData ) => Create( data.Span,                 mime, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlySpan<byte>            data,   MimeType mime, FileMetaData? metaData ) => new(data, mime, metaData);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<long, FileMetaData> data ) => new(data, data.MetaData);
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<long, FileMetaData>? data ) => data is not null
+                                                                                                                       ? Create( data )
+                                                                                                                       : null;
+    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
+    {
+        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
+        return new FileData( content.Span, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
+    }
+    public static async ValueTask<FileData> Create( Stream stream, MimeType mime, FileMetaData? metaData, CancellationToken token = default )
+    {
+        stream.Seek( 0, SeekOrigin.Begin );
+        using MemoryStream memory = new((int)stream.Length);
+        await stream.CopyToAsync( memory, token );
+        return Create( memory, mime, metaData );
     }
 }

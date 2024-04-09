@@ -344,11 +344,11 @@ public static class DbServices
 
     public static JwtBearerOptions GetJwtBearerOptions( this IServiceProvider provider )
     {
-        var bearer = provider.GetService<JwtBearerOptions>();
+        JwtBearerOptions? bearer = provider.GetService<JwtBearerOptions>();
         if ( bearer is not null ) { return bearer; }
 
-        var configuration = provider.GetRequiredService<IConfiguration>();
-        var options       = provider.GetRequiredService<DbOptions>();
+        IConfiguration configuration = provider.GetRequiredService<IConfiguration>();
+        DbOptions options       = provider.GetRequiredService<DbOptions>();
 
         JwtBearerOptions jwt = new()
                                {

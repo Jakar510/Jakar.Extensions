@@ -73,15 +73,15 @@ internal sealed class TestDatabase : Database
             await app.MigrateUpAsync();
 
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            var                           db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+            TestDatabase                           db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
             await TestUsers( db );
         }
         finally { await app.MigrateDownAsync(); }
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        var admin = UserRecord.Create( "Admin", "Admin", UserRights<TestRight>.SA );
-        var user  = UserRecord.Create( "User",  "User",  UserRights<TestRight>.Create( [TestRight.Read] ) );
+        UserRecord admin = UserRecord.Create( "Admin", "Admin", UserRights<TestRight>.SA );
+        UserRecord user  = UserRecord.Create( "User",  "User",  UserRights<TestRight>.Create( [TestRight.Read] ) );
 
         UserRecord[]     users   = [admin, user];
         List<UserRecord> results = new(users.Length);

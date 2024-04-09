@@ -9,7 +9,7 @@ public static partial class Spans
     public static Span<T> Replace<T>( this ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue )
         where T : unmanaged, IEquatable<T>
     {
-        var buffer = new Buffer<T>( value.Length );
+        Buffer<T> buffer = new Buffer<T>( value.Length );
 
         try
         {
@@ -75,7 +75,7 @@ public static partial class Spans
             {
                 if ( length + newValue.Length >= buffer.Length )
                 {
-                    var newBuffer = new T[buffer.Length * 2];
+                    T[] newBuffer = new T[buffer.Length * 2];
                     buffer.CopyTo( newBuffer );
                     buffer = newBuffer;
                 }
@@ -88,7 +88,7 @@ public static partial class Spans
             {
                 if ( length >= buffer.Length )
                 {
-                    var newBuffer = new T[buffer.Length * 2];
+                    T[] newBuffer = new T[buffer.Length * 2];
                     buffer.CopyTo( newBuffer );
                     buffer = newBuffer;
                 }

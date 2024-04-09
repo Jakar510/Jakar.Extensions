@@ -487,9 +487,9 @@ public ref struct ValueStringBuilder
 
         if ( format.IsEmpty ) { throw new ArgumentNullException( nameof(format) ); }
 
-        int  pos             = 0;
-        char ch              = '\0';
-        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        int               pos             = 0;
+        char              ch              = '\0';
+        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {
@@ -729,9 +729,9 @@ public ref struct ValueStringBuilder
 
         if ( format.IsEmpty ) { throw new ArgumentNullException( nameof(format) ); }
 
-        int  pos             = 0;
-        char ch              = '\0';
-        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        int               pos             = 0;
+        char              ch              = '\0';
+        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {

@@ -21,7 +21,7 @@ public abstract partial class Database
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials( token );
-        var                security          = new JwtSecurityToken( Options.TokenIssuer, Options.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        JwtSecurityToken                security          = new JwtSecurityToken( Options.TokenIssuer, Options.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
@@ -132,15 +132,15 @@ public abstract partial class Database
 
         Claim[] claims = await record.GetUserClaims( connection, transaction, this, types | DEFAULT_CLAIM_TYPES, token );
 
-        var descriptor = new SecurityTokenDescriptor
-                         {
-                             Subject            = new ClaimsIdentity( claims ),
-                             Expires            = GetExpiration( expires, TimeSpan.FromMinutes( 15 ) ),
-                             Issuer             = Options.TokenIssuer,
-                             Audience           = Options.TokenAudience,
-                             IssuedAt           = DateTime.UtcNow,
-                             SigningCredentials = await GetSigningCredentials( token )
-                         };
+        SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor
+                                             {
+                                                 Subject            = new ClaimsIdentity( claims ),
+                                                 Expires            = GetExpiration( expires, TimeSpan.FromMinutes( 15 ) ),
+                                                 Issuer             = Options.TokenIssuer,
+                                                 Audience           = Options.TokenAudience,
+                                                 IssuedAt           = DateTime.UtcNow,
+                                                 SigningCredentials = await GetSigningCredentials( token )
+                                             };
 
 
         string accessToken = DbTokenHandler.Instance.CreateToken( descriptor );
@@ -162,7 +162,7 @@ public abstract partial class Database
     public ValueTask<LoginResult> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jsonToken, types, token );
     protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        var                       handler              = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler                       handler              = new JwtSecurityTokenHandler();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
         TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jsonToken, validationParameters );
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
@@ -199,7 +199,7 @@ public abstract partial class Database
         {
             if ( int.TryParse( token, out _ ) )
             {
-                var provider = new AuthenticatorTokenProvider<UserRecord>();
+                AuthenticatorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>();
                 return await provider.ValidateAsync( purpose, token, manager, user );
             }
 

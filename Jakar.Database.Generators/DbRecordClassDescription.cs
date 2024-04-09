@@ -30,7 +30,7 @@ internal record DbRecordClassDescription
     public void Emit( in SourceProductionContext context ) => Emit( context, context.CancellationToken );
     public void Emit( in SourceProductionContext context, in CancellationToken token )
     {
-        var builder = new StringBuilder( 1000 );
+        StringBuilder builder = new StringBuilder( 1000 );
 
         builder.Append( $$"""
                           public partial record {{ClassName}}
@@ -158,7 +158,7 @@ public sealed record Property( PropertyDeclarationSyntax Declaration, string Nam
     {
         if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
 
-        var              builder          = new StringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
+        StringBuilder              builder          = new StringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
         UnicodeCategory? previousCategory = default;
 
         for ( int currentIndex = 0; currentIndex < value.Length; currentIndex++ )

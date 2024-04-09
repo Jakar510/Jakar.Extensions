@@ -22,7 +22,7 @@ public readonly record struct RecordPair<TRecord>( RecordID<TRecord> ID, DateTim
     [Pure]
     public static RecordPair<TRecord> Create( DbDataReader reader )
     {
-        var               dateCreated = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset               dateCreated = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         RecordID<TRecord> id          = RecordID<TRecord>.ID( reader );
         return new RecordPair<TRecord>( id, dateCreated );
     }

@@ -309,7 +309,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     }
     public override int GetHashCode()
     {
-        var hashCode = new HashCode();
+        HashCode hashCode = new HashCode();
         hashCode.Add( base.GetHashCode() );
         hashCode.Add( _additionalData );
         hashCode.Add( _company );

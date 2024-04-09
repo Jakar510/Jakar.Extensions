@@ -29,7 +29,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CustomerID),  CustomerID );
         parameters.Add( nameof(NameOfGroup), NameOfGroup );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
@@ -42,12 +42,12 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         string                customerID   = reader.GetFieldValue<string>( nameof(CustomerID) );
         string                nameOfGroup  = reader.GetFieldValue<string>( nameof(NameOfGroup) );
         string                rights       = reader.GetFieldValue<string>( nameof(Rights) );
-        var                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                   lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var                   ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                   ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>? createdBy    = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
-        var                   record       = new GroupRecord( customerID, nameOfGroup, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        GroupRecord                   record       = new GroupRecord( customerID, nameOfGroup, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

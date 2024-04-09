@@ -29,7 +29,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(KeyID),   KeyID );
         parameters.Add( nameof(ValueID), ValueID );
         return parameters;
@@ -94,7 +94,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     {
         if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
 
-        var   record = TSelf.Create( key, value );
+        TSelf   record = TSelf.Create( key, value );
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }
@@ -117,7 +117,7 @@ WHERE
 
         await foreach ( TValue value in valueTable.Where( connection, transaction, sql, parameters, token ) )
         {
-            var self = TSelf.Create( key, value );
+            TSelf self = TSelf.Create( key, value );
             await selfTable.Insert( connection, transaction, self, token );
         }
 
@@ -209,7 +209,7 @@ WHERE {TSelf.TableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
 
         foreach ( TValue value in values )
         {
-            var record = TSelf.Create( key, value );
+            TSelf record = TSelf.Create( key, value );
             await selfTable.Insert( connection, transaction, record, token );
         }
     }

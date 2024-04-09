@@ -104,7 +104,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         Key key = Key.Create( matchAll, parameters );
         if ( _deleteParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        using var buffer = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( 1000 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
         _deleteParameters[key] = sql = $"DELETE FROM {TableName} WHERE {buffer.Span};";
@@ -160,7 +160,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     public abstract SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters );
     public virtual SqlCommand Update( in TRecord record )
     {
-        var parameters = record.ToDynamicParameters();
+        DynamicParameters parameters = record.ToDynamicParameters();
         if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
         _sql[SqlCacheType.Random] = sql = $"UPDATE {TableName} SET {_KeyValuePairs} WHERE {IdColumnName} = @{SQL.ID};";
@@ -171,7 +171,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         Key key = Key.Create( matchAll, parameters );
         if ( _whereParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
         _whereParameters[key] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";
@@ -206,7 +206,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         Key key = Key.Create( matchAll, parameters );
         if ( _existParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
         _existParameters[key] = sql = $"EXISTS( SELECT {IdColumnName} FROM {TableName} WHERE {buffer.Span} )";
@@ -217,7 +217,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         Key key = Key.Create( matchAll, parameters );
         if ( _getParameters.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetDescriptors( parameters ) );
 
         _getParameters[key] = sql = $"SELECT * FROM {TableName} WHERE {buffer.Span}";

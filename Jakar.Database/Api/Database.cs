@@ -104,7 +104,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected virtual DbTable<TRecord> Create<TRecord>()
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
-        var table = new DbTable<TRecord>( this, _sqlCacheFactory );
+        DbTable<TRecord> table = new DbTable<TRecord>( this, _sqlCacheFactory );
         return AddDisposable( table );
     }
 
@@ -186,7 +186,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false )
         {
-            var state = new ModelStateDictionary();
+            ModelStateDictionary state = new ModelStateDictionary();
             state.AddModelError( "Error", "Password Validation Failed" );
 
             if ( results.LengthPassed ) { state.AddModelError( "Details", "Password not long enough" ); }
@@ -214,7 +214,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( nameof(value) )] string? variableName = default )
     {
         ArgumentNullException.ThrowIfNull( variableName );
-        var parameters = new DynamicParameters( template );
+        DynamicParameters parameters = new DynamicParameters( template );
         parameters.Add( variableName, value );
         return parameters;
     }

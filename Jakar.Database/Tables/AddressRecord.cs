@@ -28,7 +28,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Line1),           Line1 );
         parameters.Add( nameof(Line2),           Line2 );
         parameters.Add( nameof(City),            City );
@@ -53,24 +53,24 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
         bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
         RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
         RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        var                           ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        var                           dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                           lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                          ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        DateTimeOffset                dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?               lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
-        var record = new AddressRecord( line1,
-                                        line2,
-                                        city,
-                                        stateOrProvince,
-                                        country,
-                                        postalCode,
-                                        address,
-                                        isPrimary,
-                                        additionalData,
-                                        id,
-                                        createdBy,
-                                        ownerUserID,
-                                        dateCreated,
-                                        lastModified );
+        AddressRecord record = new AddressRecord( line1,
+                                                  line2,
+                                                  city,
+                                                  stateOrProvince,
+                                                  country,
+                                                  postalCode,
+                                                  address,
+                                                  isPrimary,
+                                                  additionalData,
+                                                  id,
+                                                  createdBy,
+                                                  ownerUserID,
+                                                  dateCreated,
+                                                  lastModified );
 
         record.Validate();
         return record;

@@ -42,7 +42,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
             string json = _json;
             if ( string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime ) ) { return default; }
 
-            var record = json.FromJson<TRecord>();
+            TRecord record = json.FromJson<TRecord>();
             _lastTime = DateTimeOffset.UtcNow;
             return record;
         }

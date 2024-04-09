@@ -19,12 +19,12 @@ public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, 
     [Pure]
     public static UserAddressRecord Create( DbDataReader reader )
     {
-        var key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var value        = new RecordID<AddressRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id           = new RecordID<UserAddressRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        var record       = new UserAddressRecord( key, value, id, dateCreated, lastModified );
+        RecordID<UserRecord>        key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<AddressRecord>     value        = new RecordID<AddressRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
+        DateTimeOffset              dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?             lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserAddressRecord> id           = new RecordID<UserAddressRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        UserAddressRecord                         record       = new UserAddressRecord( key, value, id, dateCreated, lastModified );
         record.Validate();
         return record;
     }

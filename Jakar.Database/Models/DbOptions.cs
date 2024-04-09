@@ -58,13 +58,13 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider )
     {
-        using var source = new CancellationTokenSource( TimeSpan.FromMinutes( 5 ) );
+        using CancellationTokenSource source = new CancellationTokenSource( TimeSpan.FromMinutes( 5 ) );
         return await GetConnectionStringAsync( provider, source.Token );
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )
     {
-        var           options       = provider.GetRequiredService<IOptions<DbOptions>>();
-        var           configuration = provider.GetRequiredService<IConfiguration>();
+        IOptions<DbOptions>    options       = provider.GetRequiredService<IOptions<DbOptions>>();
+        IConfiguration           configuration = provider.GetRequiredService<IConfiguration>();
         SecuredString secure        = await options.Value.GetConnectionStringAsync( configuration, token );
         return secure;
     }

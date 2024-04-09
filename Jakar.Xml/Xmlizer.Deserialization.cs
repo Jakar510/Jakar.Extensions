@@ -17,7 +17,7 @@ public static partial class Xmlizer
         if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
 
         Type type   = typeof(T);
-        var  writer = new XWriter();
+        XWriter  writer = new XWriter();
 
         return writer.ToString();
     }

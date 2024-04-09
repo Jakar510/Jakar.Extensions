@@ -75,7 +75,7 @@ public static partial class AsyncLinq
         source.DistinctBy( keySelector, EqualityComparer<TKey>.Default );
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer )
     {
-        var set = new HashSet<TKey>( comparer );
+        HashSet<TKey> set = new HashSet<TKey>( comparer );
 
         await foreach ( TElement element in source )
         {
@@ -84,7 +84,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector, IEqualityComparer<TKey> comparer )
     {
-        var set = new HashSet<TKey>( comparer );
+        HashSet<TKey> set = new HashSet<TKey>( comparer );
 
         await foreach ( TElement element in source )
         {
@@ -203,14 +203,14 @@ public static partial class AsyncLinq
 
     public static IEnumerable<TElement> Consolidate<TElement>( this IEnumerable<IEnumerable<TElement>> values )
     {
-        var results = new List<TElement>();
+        List<TElement> results = new List<TElement>();
         foreach ( IEnumerable<TElement> element in values ) { results.AddRange( element ); }
 
         return results;
     }
     public static IEnumerable<TElement> ConsolidateUnique<TElement>( this IEnumerable<IEnumerable<TElement>> values )
     {
-        var results = new HashSet<TElement>();
+        HashSet<TElement> results = new HashSet<TElement>();
 
         foreach ( IEnumerable<TElement> element in values )
         {
@@ -229,7 +229,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IAsyncEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
     {
-        var results = new HashSet<TElement>();
+        HashSet<TElement> results = new HashSet<TElement>();
 
         await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
 
@@ -251,7 +251,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> ConsolidateUnique<TElement>( this IAsyncEnumerable<IEnumerable<TElement>> values, [EnumeratorCancellation] CancellationToken token = default )
     {
-        var results = new HashSet<TElement>();
+        HashSet<TElement> results = new HashSet<TElement>();
 
         await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
 

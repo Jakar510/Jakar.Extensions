@@ -86,7 +86,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
     public static IniConfig Parse( ReadOnlySpan<char> span, IFormatProvider? provider )
     {
-        var config = new IniConfig();
+        IniConfig config = new IniConfig();
 
         // $"-- {nameof(IniConfig)}.{nameof(Refresh)}.{nameof(content)} --\n{content.ToString()}".WriteToConsole();
         if ( span.IsEmpty ) { return config; }

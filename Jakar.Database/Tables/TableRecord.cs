@@ -53,8 +53,8 @@ public interface IOwnedTableRecord
 public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private RecordID<TRecord> _id           = ID;
-    private DateTimeOffset?   _lastModified = LastModified;
+    private   RecordID<TRecord> _id           = ID;
+    protected DateTimeOffset?   _lastModified = LastModified;
 
 
     public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
@@ -75,7 +75,7 @@ public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffse
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        var missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        HashSet<string> missing = new HashSet<string>( properties.Select( x => x.Name ) );
         missing.ExceptWith( parameters.ParameterNames );
 
         string message = $"""
@@ -181,7 +181,7 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID
 
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CreatedBy),   CreatedBy?.Value );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;

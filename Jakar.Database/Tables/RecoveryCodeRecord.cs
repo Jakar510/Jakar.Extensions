@@ -22,7 +22,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Code), Code );
         return parameters;
     }
@@ -30,12 +30,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
         string                       code         = reader.GetFieldValue<string>( nameof(Code) );
-        var                          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var                          ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?              lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        Guid                          ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>?        createdBy    = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID( reader );
-        var                          record       = new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RecoveryCodeRecord                          record       = new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
@@ -130,11 +130,11 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
 
     public static UserRecoveryCodeRecord Create( DbDataReader reader )
     {
-        var key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var value        = new RecordID<RecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id           = new RecordID<UserRecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        RecordID<UserRecord>             key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<RecoveryCodeRecord>     value        = new RecordID<RecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        DateTimeOffset                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?                  lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserRecoveryCodeRecord> id           = new RecordID<UserRecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         return new UserRecoveryCodeRecord( key, value, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<UserRecoveryCodeRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )

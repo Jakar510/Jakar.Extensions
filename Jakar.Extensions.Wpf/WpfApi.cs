@@ -86,10 +86,10 @@ public static partial class WpfApi
     /// </returns>
     public static ImageSource ConvertImage( this Bitmap image )
     {
-        using var stream = new MemoryStream();
+        using MemoryStream stream = new MemoryStream();
         image.Save( stream, ImageFormat.Png );
 
-        var photo = new BitmapImage();
+        BitmapImage photo = new BitmapImage();
 
         photo.BeginInit();
         photo.CacheOption  = BitmapCacheOption.OnLoad;
@@ -106,7 +106,7 @@ public static partial class WpfApi
     public static ListCollectionView ToCollectionView<T>( this ConcurrentObservableCollection<T> list )
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
-        var collection = new ListCollectionView( list );
+        ListCollectionView collection = new ListCollectionView( list );
         return collection;
     }
     public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
@@ -114,7 +114,7 @@ public static partial class WpfApi
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        var collection = new ListCollectionView( list ) { CustomSort = comparer };
+        ListCollectionView collection = new ListCollectionView( list ) { CustomSort = comparer };
 
         return collection;
     }
@@ -125,11 +125,11 @@ public static partial class WpfApi
 
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        var collection = new ListCollectionView( list )
-                         {
-                             Filter     = Filter,
-                             CustomSort = comparer
-                         };
+        ListCollectionView collection = new ListCollectionView( list )
+                                        {
+                                            Filter     = Filter,
+                                            CustomSort = comparer
+                                        };
 
         return collection;
     }
@@ -145,13 +145,13 @@ public static partial class WpfApi
     /// <returns> </returns>
     public static LocalDirectory? PickFolder( string title )
     {
-        using var dialog = new FolderBrowserDialog
-                           {
-                               Description            = title,
-                               UseDescriptionForTitle = true,
-                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
-                               ShowNewFolderButton    = true
-                           };
+        using FolderBrowserDialog dialog = new FolderBrowserDialog
+                                           {
+                                               Description            = title,
+                                               UseDescriptionForTitle = true,
+                                               SelectedPath           = LocalDirectory.CurrentDirectory.FullPath,
+                                               ShowNewFolderButton    = true
+                                           };
 
         DialogResult result = dialog.ShowDialog();
 
@@ -162,16 +162,16 @@ public static partial class WpfApi
 
     public static LocalFile? PickFile( string title, params string[] filters )
     {
-        var file = new OpenFileDialog
-                   {
-                       Title            = title,
-                       Multiselect      = false,
-                       AddExtension     = true,
-                       CheckFileExists  = true,
-                       CheckPathExists  = true,
-                       InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
-                       Filter           = @"Files|" + string.Join( ';', filters )
-                   };
+        OpenFileDialog file = new OpenFileDialog
+                              {
+                                  Title            = title,
+                                  Multiselect      = false,
+                                  AddExtension     = true,
+                                  CheckFileExists  = true,
+                                  CheckPathExists  = true,
+                                  InitialDirectory = LocalDirectory.CurrentDirectory.FullPath,
+                                  Filter           = @"Files|" + string.Join( ';', filters )
+                              };
 
         DialogResult result = file.ShowDialog();
 

@@ -71,11 +71,11 @@ public static partial class Tasks
     public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
     {
     #if NET6_0_OR_GREATER
-        var options = new ParallelOptions
-                      {
-                          CancellationToken = token,
-                          MaxDegreeOfParallelism = Environment.ProcessorCount
-                      };
+        ParallelOptions options = new ParallelOptions
+                                  {
+                                      CancellationToken = token,
+                                      MaxDegreeOfParallelism = Environment.ProcessorCount
+                                  };
 
         await Parallel.ForEachAsync( funcs, options, ExecutorAsync );
 
@@ -92,13 +92,13 @@ public static partial class Tasks
     public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<Func<CancellationToken, ValueTask<TResult>>> funcs, CancellationToken token = default )
     {
     #if NET8_0_OR_GREATER
-        var options = new ParallelOptions
-                      {
-                          CancellationToken = token,
-                          MaxDegreeOfParallelism = Environment.ProcessorCount
-                      };
+        ParallelOptions options = new ParallelOptions
+                                  {
+                                      CancellationToken = token,
+                                      MaxDegreeOfParallelism = Environment.ProcessorCount
+                                  };
 
-        var results = new ConcurrentBag<TResult>();
+        ConcurrentBag<TResult>? results = new ConcurrentBag<TResult>();
         Func<CancellationToken, ValueTask<TResult>>[] tasks = funcs.ToArray();
         await Parallel.ForAsync( 0, tasks.Length, options, Executor );
 

@@ -46,7 +46,7 @@ public sealed class OneTimePassword : IOneTimePassword
 
     public bool ValidateToken( string token, VerificationWindow? window = default )
     {
-        var totp = new Totp( _key );
+        Totp totp = new Totp( _key );
         return totp.VerifyTotp( token, out long _, window );
     }
 
@@ -57,19 +57,19 @@ public sealed class OneTimePassword : IOneTimePassword
     public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode( record, size, size, format );
     public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
-        var writer = new BarcodeWriterSvg
-                     {
-                         Format = format,
-                         Options = new QrCodeEncodingOptions
-                                   {
-                                       DisableECI      = true,
-                                       PureBarcode     = true,
-                                       ErrorCorrection = ErrorCorrectionLevel.H,
-                                       CharacterSet    = "UTF-8",
-                                       Width           = width,
-                                       Height          = height
-                                   }
-                     };
+        BarcodeWriterSvg writer = new BarcodeWriterSvg
+                                  {
+                                      Format = format,
+                                      Options = new QrCodeEncodingOptions
+                                                {
+                                                    DisableECI      = true,
+                                                    PureBarcode     = true,
+                                                    ErrorCorrection = ErrorCorrectionLevel.H,
+                                                    CharacterSet    = "UTF-8",
+                                                    Width           = width,
+                                                    Height          = height
+                                                }
+                                  };
 
         string? result = writer.Write( GetContent( record ) ).ToString();
         return result ?? throw new NullReferenceException( nameof(result) );

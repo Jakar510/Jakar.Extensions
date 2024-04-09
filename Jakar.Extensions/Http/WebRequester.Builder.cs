@@ -83,7 +83,7 @@ public partial class WebRequester
         private readonly HttpMessageHandler GetHandler()
         {
         #if NETSTANDARD2_1
-            var handler = new HttpClientHandler();
+            HttpClientHandler handler = new HttpClientHandler();
 
 
             if ( _sslProtocols.HasValue ) { handler.SslProtocols = _sslProtocols.Value; }
@@ -97,7 +97,7 @@ public partial class WebRequester
             if ( _clientCertificates is not null ) { handler.ClientCertificates.AddRange( _clientCertificates ); }
 
         #else
-            var handler = new SocketsHttpHandler();
+            SocketsHttpHandler handler = new SocketsHttpHandler();
 
 
             if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }

@@ -55,7 +55,7 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        var sb = new StringBuilder( $@"
+        StringBuilder sb = new StringBuilder( $@"
 #nullable enable
 namespace {namespaceName};
 
@@ -194,7 +194,7 @@ public class JsonSerializationGenerator : ISourceGenerator
     {
         List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
 
-        var builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.AppendLine( $"namespace {namespaceName}" );
         builder.AppendLine( "{" );
         builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );

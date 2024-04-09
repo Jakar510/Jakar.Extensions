@@ -70,7 +70,7 @@ public static class HostedServiceExtensions
 {
     public static ServiceThread StartInThread( this IHostedService service, ILogger<ServiceThread> logger, CancellationToken token )
     {
-        var thread = new ServiceThread( service, logger, token );
+        ServiceThread thread = new ServiceThread( service, logger, token );
         thread.Start();
         return thread;
     }

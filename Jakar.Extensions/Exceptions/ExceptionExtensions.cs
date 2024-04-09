@@ -25,7 +25,7 @@ public static class ExceptionExtensions
 #endif
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
-        var dictionary = new Dictionary<string, object?>();
+        Dictionary<string, object> dictionary = new Dictionary<string, object?>();
 
         e.GetProperties( ref dictionary );
 
@@ -122,7 +122,7 @@ public static class ExceptionExtensions
 
     public static Dictionary<string, JToken?> GetData( this Exception e )
     {
-        var data = new Dictionary<string, JToken?>();
+        Dictionary<string, JToken> data = new Dictionary<string, JToken?>();
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( DictionaryEntry pair in e.Data )

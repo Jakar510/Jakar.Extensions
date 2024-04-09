@@ -26,7 +26,7 @@ public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCac
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         _source?.Cancel();
-        var cache = new TableCache<TRecord>( table, factory.CreateLogger<TableCache<TRecord>>(), options );
+        TableCache<TRecord> cache = new TableCache<TRecord>( table, factory.CreateLogger<TableCache<TRecord>>(), options );
         _services.Add( cache );
         return cache;
     }
@@ -42,7 +42,7 @@ public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCac
 
                 using ( _source )
                 {
-                    var tasks = new List<Task>( _services.Count );
+                    List<Task> tasks = new List<Task>( _services.Count );
 
                     // ReSharper disable once LoopCanBeConvertedToQuery
                     foreach ( IHostedService service in _services ) { tasks.Add( service.StartAsync( _source.Token ) ); }
@@ -243,7 +243,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
 
     public async Task StartAsync( CancellationToken token )
     {
-        using var timer = new PeriodicTimer( _options.RefreshTime );
+        using PeriodicTimer timer = new PeriodicTimer( _options.RefreshTime );
 
         while ( token.ShouldContinue() )
         {
