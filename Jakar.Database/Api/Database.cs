@@ -12,27 +12,26 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected readonly IDistributedCache       _distributedCache;
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
     protected readonly ITableCacheFactory      _tableCacheFactory;
-    protected readonly string                  _className;
 
 
-    public static      Database?                       Current           { get; set; }
-    public static      DataProtector                   DataProtector     { get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             DbTable<AddressRecord>          Addresses         { get; }
+    public static      Database?                       Current           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static      DataProtector                   DataProtector     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public             DbTable<AddressRecord>          Addresses         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             int?                            CommandTimeout    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.CommandTimeout; }
-    public             IConfiguration                  Configuration     { get; }
-    protected internal SecuredString?                  ConnectionString  { get; set; }
-    public             DbTable<GroupRecord>            Groups            { get; }
+    public             IConfiguration                  Configuration     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    protected internal SecuredString?                  ConnectionString  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public             DbTable<GroupRecord>            Groups            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbInstance                      Instance          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.DbType; }
-    public             DbOptions                       Options           { get; }
+    public             DbOptions                       Options           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     protected internal PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.PasswordRequirements.GetValidator(); }
-    public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { get; }
-    public             DbTable<RoleRecord>             Roles             { get; }
-    public             DbTable<UserGroupRecord>        UserGroups        { get; }
-    public             DbTable<UserLoginInfoRecord>    UserLogins        { get; }
-    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { get; }
-    public             DbTable<UserRoleRecord>         UserRoles         { get; }
-    public             DbTable<UserAddressRecord>      UserAddresses     { get; }
-    public             DbTable<UserRecord>             Users             { get; }
+    public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<RoleRecord>             Roles             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserGroupRecord>        UserGroups        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserLoginInfoRecord>    UserLogins        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRoleRecord>         UserRoles         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserAddressRecord>      UserAddresses     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRecord>             Users             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.Version; }
 
 
@@ -61,7 +60,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base()
     {
-        _className         = GetType().Name;
         _sqlCacheFactory   = sqlCacheFactory;
         _tableCacheFactory = tableCacheFactory;
         _distributedCache  = distributedCache;
@@ -93,9 +91,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     protected async Task InitDataProtector()
     {
-        if ( Options.DataProtectorKey.HasValue ) { await InitDataProtector( Options.DataProtectorKey.Value.Pem, Options.DataProtectorKey.Value.Password ); }
+        if ( Options.DataProtectorKey.HasValue )
+        {
+            (LocalFile pem, SecuredStringResolverOptions password) = Options.DataProtectorKey.Value;
+            await InitDataProtector( pem, password );
+        }
     }
-    protected async Task InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ) );
+    protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ) );
 
 
     protected abstract DbConnection CreateConnection( in SecuredString secure );
