@@ -7,7 +7,21 @@ namespace Jakar.Database;
 public interface IDbOptions
 {
     public int?       CommandTimeout { get; }
-    public DbInstance Instance       { get; }
+    public DbTypeInstance DbTypeInstance     { get; }
+
+    // public string                                                  AppName                  { get; }
+    // public string                                                  AuthenticationType       { get; }
+    // public TimeSpan                                                ClockSkew                { get; }
+    // public SecuredStringResolverOptions                            ConnectionStringResolver { get; }
+    // public Uri                                                     Domain                   { get; }
+    // public string                                                  JWTAlgorithm             { get; }
+    // public string                                                  JWTKey                   { get; }
+    // public PasswordRequirements                                    PasswordRequirements     { get; }
+    // public (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey         { get; }
+    // public string                                                  TokenAudience            { get; }
+    // public string                                                  TokenIssuer              { get; }
+    // public string                                                  UserExists               { get; }
+    // public AppVersion                                              Version                  { get; }
 }
 
 
@@ -19,7 +33,7 @@ public interface IDbTable : IAsyncDisposable
 
 
 
-public interface IConnectableDb : IDbOptions, IDbTable
+public interface IConnectableDb : IDbTable, IDbOptions
 {
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }

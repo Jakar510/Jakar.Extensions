@@ -244,7 +244,7 @@
         public ValueTask<IdentityResult> CreateAsync( UserRecord user, CancellationToken token ) => this.TryCall( CreateAsync, user, token );
         public virtual async ValueTask<IdentityResult> CreateAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token )
         {
-            if ( await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( user.UserName ), token ) is not null ) { return IdentityResult.Failed( new IdentityError { Description = Options.UserExists } ); }
+            if ( await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( user.UserName ), token ) is not null ) { return IdentityResult.Failed( new IdentityError { Description = Settings.UserExists } ); }
 
 
             await Users.Insert( connection, transaction, user, token );

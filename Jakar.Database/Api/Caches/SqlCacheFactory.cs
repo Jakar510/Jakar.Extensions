@@ -17,10 +17,10 @@ public sealed class SqlCacheFactory : ISqlCacheFactory
 {
     public ISqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot )
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
-        dbRoot.Instance switch
+        dbRoot.DbTypeInstance switch
         {
-            DbInstance.MsSql    => new MsSqlServer<TRecord>(),
-            DbInstance.Postgres => new PostgresSql<TRecord>(),
-            _                   => throw new OutOfRangeException( nameof(dbRoot.Instance), dbRoot.Instance )
+            DbTypeInstance.MsSql    => new MsSqlServer<TRecord>(),
+            DbTypeInstance.Postgres => new PostgresSql<TRecord>(),
+            _                   => throw new OutOfRangeException( nameof(dbRoot.DbTypeInstance), dbRoot.DbTypeInstance )
         };
 }

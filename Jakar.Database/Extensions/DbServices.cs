@@ -23,8 +23,8 @@ public static class DbServices
 
 
     public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder           builder,
-                                                                            DbInstance                           dbType,
-                                                                            SecuredStringResolverOptions      connectionStringResolver,
+                                                                            DbTypeInstance                           dbType,
+                                                                            SecuredStringResolverOptions         connectionStringResolver,
                                                                             Action<RedisCacheOptions>            configureRedis,
                                                                             AppVersion?                          version                         = default,
                                                                             Action<JwtBearerOptions>?            configureJwt                    = default,
@@ -46,7 +46,7 @@ public static class DbServices
 
         DbOptions dbOptions = new()
                               {
-                                  DbType                   = dbType,
+                                  DbTypeInstance               = dbType,
                                   AppName                  = appName,
                                   TokenAudience            = appName,
                                   TokenIssuer              = appName,
@@ -65,11 +65,11 @@ public static class DbServices
                                                  {
                                                      switch ( dbType )
                                                      {
-                                                         case DbInstance.MsSql:
+                                                         case DbTypeInstance.MsSql:
                                                              migration.ConfigureMigrationsMsSql<T>();
                                                              return;
 
-                                                         case DbInstance.Postgres:
+                                                         case DbTypeInstance.Postgres:
                                                              migration.ConfigureMigrationsPostgres<T>();
                                                              return;
 
@@ -348,7 +348,7 @@ public static class DbServices
         if ( bearer is not null ) { return bearer; }
 
         IConfiguration configuration = provider.GetRequiredService<IConfiguration>();
-        DbOptions options       = provider.GetRequiredService<DbOptions>();
+        DbOptions      options       = provider.GetRequiredService<DbOptions>();
 
         JwtBearerOptions jwt = new()
                                {

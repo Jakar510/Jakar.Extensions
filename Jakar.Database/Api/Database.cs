@@ -17,13 +17,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public static      Database?                       Current           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
     public static      DataProtector                   DataProtector     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
     public             DbTable<AddressRecord>          Addresses         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             int?                            CommandTimeout    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.CommandTimeout; }
+    public             int?                            CommandTimeout    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
     public             IConfiguration                  Configuration     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     protected internal SecuredString?                  ConnectionString  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
     public             DbTable<GroupRecord>            Groups            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbInstance                      Instance          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.DbType; }
-    public             DbOptions                       Options           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    protected internal PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.PasswordRequirements.GetValidator(); }
+    public             DbTypeInstance                      DbTypeInstance        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
+    public             DbOptions                       Settings          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    protected internal PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
     public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<RoleRecord>             Roles             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<UserGroupRecord>        UserGroups        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
@@ -32,7 +32,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public             DbTable<UserRoleRecord>         UserRoles         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<UserAddressRecord>      UserAddresses     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<UserRecord>             Users             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.Version; }
+    public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
 
 
     static Database()
@@ -64,7 +64,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _tableCacheFactory = tableCacheFactory;
         _distributedCache  = distributedCache;
         Configuration      = configuration;
-        Options            = options.Value;
+        Settings            = options.Value;
         Users              = Create<UserRecord>();
         Roles              = Create<RoleRecord>();
         UserRoles          = Create<UserRoleRecord>();
@@ -91,9 +91,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     protected async Task InitDataProtector()
     {
-        if ( Options.DataProtectorKey.HasValue )
+        if ( Settings.DataProtectorKey.HasValue )
         {
-            (LocalFile pem, SecuredStringResolverOptions password) = Options.DataProtectorKey.Value;
+            (LocalFile pem, SecuredStringResolverOptions password) = Settings.DataProtectorKey.Value;
             await InitDataProtector( pem, password );
         }
     }
@@ -103,7 +103,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected abstract DbConnection CreateConnection( in SecuredString secure );
     public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
     {
-        ConnectionString ??= await Options.GetConnectionStringAsync( Configuration, token );
+        ConnectionString ??= await Settings.GetConnectionStringAsync( Configuration, token );
         DbConnection connection = CreateConnection( ConnectionString );
         await connection.OpenAsync( token );
         return connection;

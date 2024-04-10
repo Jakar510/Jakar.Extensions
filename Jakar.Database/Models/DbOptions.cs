@@ -17,27 +17,26 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public const           string                JWT_ALGORITHM                             = SecurityAlgorithms.HmacSha512Signature;
     public const           string                JWT_KEY                                   = "JWT";
     public const           string                USER_EXISTS                               = "User Exists";
-    public static readonly FrozenSet<DbInstance> Instances                                 = Enum.GetValues<DbInstance>().ToFrozenSet();
+    public static readonly FrozenSet<DbTypeInstance> Instances                                 = Enum.GetValues<DbTypeInstance>().ToFrozenSet();
 
 
-    public static DbOptions                                        Default                  => new();
-    public        string                                           AppName                  { get; set; } = string.Empty;
-    public        string                                           AuthenticationType       { get; set; } = AUTHENTICATION_TYPE;
-    public        TimeSpan                                         ClockSkew                { get; set; } = TimeSpan.FromMinutes( 1 );
-    public        int?                                             CommandTimeout           { get; set; } = COMMAND_TIMEOUT;
-    public        SecuredStringResolverOptions                     ConnectionStringResolver { get; set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
-    public        DbInstance                                       DbType                   { get; set; } = DbInstance.Postgres;
-    public        Uri                                              Domain                   { get; set; } = new("https://localhost:443");
-    DbInstance IDbOptions.                                         Instance                 => DbType;
-    public string                                                  JWTAlgorithm             { get; set; } = JWT_ALGORITHM;
-    public string                                                  JWTKey                   { get; set; } = JWT_KEY;
-    public PasswordRequirements                                    PasswordRequirements     { get; set; } = new();
-    public (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey         { get; set; }
-    public string                                                  TokenAudience            { get; set; } = string.Empty;
-    public string                                                  TokenIssuer              { get; set; } = string.Empty;
-    public string                                                  UserExists               { get; set; } = USER_EXISTS;
-    DbOptions IOptions<DbOptions>.                                 Value                    => this;
-    public AppVersion                                              Version                  { get; set; } = AppVersion.Default;
+    public static DbOptions                                               Default                  => new();
+    public        string                                                  AppName                  { get; set; } = string.Empty;
+    public        string                                                  AuthenticationType       { get; set; } = AUTHENTICATION_TYPE;
+    public        TimeSpan                                                ClockSkew                { get; set; } = TimeSpan.FromMinutes( 1 );
+    public        int?                                                    CommandTimeout           { get; set; } = COMMAND_TIMEOUT;
+    public        SecuredStringResolverOptions                            ConnectionStringResolver { get; set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
+    public        DbTypeInstance                                              DbTypeInstance               { get; set; } = DbTypeInstance.Postgres;
+    public        Uri                                                     Domain                   { get; set; } = new("https://localhost:443");
+    public        string                                                  JWTAlgorithm             { get; set; } = JWT_ALGORITHM;
+    public        string                                                  JWTKey                   { get; set; } = JWT_KEY;
+    public        PasswordRequirements                                    PasswordRequirements     { get; set; } = new();
+    public        (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey         { get; set; }
+    public        string                                                  TokenAudience            { get; set; } = string.Empty;
+    public        string                                                  TokenIssuer              { get; set; } = string.Empty;
+    public        string                                                  UserExists               { get; set; } = USER_EXISTS;
+    DbOptions IOptions<DbOptions>.                                        Value                    => this;
+    public AppVersion                                                     Version                  { get; set; } = AppVersion.Default;
 
 
     public DbOptions WithAppName<T>()

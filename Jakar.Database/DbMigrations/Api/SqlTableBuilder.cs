@@ -315,11 +315,11 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    private static string GetDataType( scoped in DbInstance instance, scoped in ColumnMetaData column ) =>
+    private static string GetDataType( scoped in DbTypeInstance instance, scoped in ColumnMetaData column ) =>
         instance switch
         {
-            DbInstance.MsSql    => GetDataTypeSqlServer( column ),
-            DbInstance.Postgres => GetDataTypePostgresSql( column ),
+            DbTypeInstance.MsSql    => GetDataTypeSqlServer( column ),
+            DbTypeInstance.Postgres => GetDataTypePostgresSql( column ),
             _                   => throw new OutOfRangeException( nameof(instance), instance )
         };
 
@@ -421,7 +421,7 @@ public ref struct SqlTableBuilder<TRecord>
         };
 
 
-    private string BuildInternal( scoped in DbInstance instance )
+    private string BuildInternal( scoped in DbTypeInstance instance )
     {
         using ValueStringBuilder query = new(10240);
 
@@ -480,22 +480,22 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    public string Build( scoped in DbInstance instance )
+    public string Build( scoped in DbTypeInstance instance )
     {
         try { return BuildInternal( instance ); }
         finally { Dispose(); }
     }
-    public ReadOnlyDictionary<DbInstance, string> Build()
+    public ReadOnlyDictionary<DbTypeInstance, string> Build()
     {
         try
         {
-            Dictionary<DbInstance, string> dictionary = new(2)
+            Dictionary<DbTypeInstance, string> dictionary = new(2)
                                                         {
-                                                            { DbInstance.MsSql, BuildInternal( DbInstance.MsSql ) },
-                                                            { DbInstance.Postgres, BuildInternal( DbInstance.Postgres ) }
+                                                            { DbTypeInstance.MsSql, BuildInternal( DbTypeInstance.MsSql ) },
+                                                            { DbTypeInstance.Postgres, BuildInternal( DbTypeInstance.Postgres ) }
                                                         };
 
-            return new ReadOnlyDictionary<DbInstance, string>( dictionary );
+            return new ReadOnlyDictionary<DbTypeInstance, string>( dictionary );
         }
         finally { Dispose(); }
     }

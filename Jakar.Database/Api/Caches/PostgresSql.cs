@@ -7,7 +7,7 @@ namespace Jakar.Database;
 public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbInstance.Postgres; }
+    public override DbTypeInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbTypeInstance.Postgres; }
 
     public override string TableName { get; } = $"\"{TRecord.TableName}\"";
 

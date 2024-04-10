@@ -9,7 +9,7 @@ namespace Jakar.Database;
 public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly FrozenDictionary<DbInstance, FrozenDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
+    public static readonly FrozenDictionary<DbTypeInstance, FrozenDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
     protected readonly     ConcurrentDictionary<Key, string>                                  _deleteParameters = new(Key.Equalizer);
     protected readonly     ConcurrentDictionary<Key, string>                                  _existParameters  = new(Key.Equalizer);
     protected readonly     ConcurrentDictionary<Key, string>                                  _getParameters    = new(Key.Equalizer);
@@ -28,7 +28,7 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     public          string     CreatedBy    { get; init; }
     public          string     DateCreated  { get; init; }
     public          string     IdColumnName { get; init; }
-    public abstract DbInstance Instance     { get; }
+    public abstract DbTypeInstance Instance     { get; }
     public          string     LastModified { get; init; }
     public          string     OwnerUserID  { get; init; }
     public          string     RandomMethod { get; init; }

@@ -24,7 +24,7 @@ public interface ITokenService
 public class Tokenizer( Database dataBase ) : ITokenService // TODO: update Tokenizer
 {
     private readonly Database _dataBase = dataBase;
-    internal virtual Uri      Domain => _dataBase.Options.Domain;
+    internal virtual Uri      Domain => _dataBase.Settings.Domain;
 
 
     public virtual string GetUrl( in Tokens result ) => $"{Domain.OriginalString}/Token/{result.AccessToken}";

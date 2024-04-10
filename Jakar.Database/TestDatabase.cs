@@ -30,7 +30,7 @@ internal sealed class TestDatabase : Database
                                                        .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
                                                        .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
                                                        .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build( DbInstance.Postgres ) );
+                                                       .Build( DbTypeInstance.Postgres ) );
 
         Console.WriteLine();
 
@@ -43,7 +43,7 @@ internal sealed class TestDatabase : Database
                                                        .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
                                                        .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
                                                        .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build( DbInstance.MsSql ) );
+                                                       .Build( DbTypeInstance.MsSql ) );
 
         Console.WriteLine();
 
@@ -58,7 +58,7 @@ internal sealed class TestDatabase : Database
         SecuredString         connectionString = $"User ID=dev;Password=jetson;Host=localhost;Port=5432;Database={typeof(T).Name}";
         WebApplicationBuilder builder          = WebApplication.CreateBuilder();
 
-        builder.AddDefaultDbServices<T, TestDatabase>( DbInstance.Postgres,
+        builder.AddDefaultDbServices<T, TestDatabase>( DbTypeInstance.Postgres,
                                                        connectionString,
                                                        redis =>
                                                        {

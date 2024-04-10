@@ -7,7 +7,7 @@ namespace Jakar.Database;
 public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbInstance.MsSql; }
+    public override DbTypeInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbTypeInstance.MsSql; }
 
 
     public override SqlCommand First()

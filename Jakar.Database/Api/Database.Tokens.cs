@@ -14,14 +14,14 @@ public abstract partial class Database
     public static TimeSpan RefreshTokenExpirationTime { get => _refreshTokenExpirationTime; set => _refreshTokenExpirationTime.Value = value; }
 
 
-    public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials( Options ));
-    public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters( Options ));
+    public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials( Settings ));
+    public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters( Settings ));
 
 
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials( token );
-        JwtSecurityToken                security          = new JwtSecurityToken( Options.TokenIssuer, Options.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        JwtSecurityToken                security          = new JwtSecurityToken( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
@@ -92,8 +92,8 @@ public abstract partial class Database
                                                                   {
                                                                       Subject            = new ClaimsIdentity( claims ),
                                                                       Expires            = GetExpiration( expires, AccessTokenExpirationTime ),
-                                                                      Issuer             = Options.TokenIssuer,
-                                                                      Audience           = Options.TokenAudience,
+                                                                      Issuer             = Settings.TokenIssuer,
+                                                                      Audience           = Settings.TokenAudience,
                                                                       IssuedAt           = DateTime.UtcNow,
                                                                       SigningCredentials = credentials
                                                                   } );
@@ -102,8 +102,8 @@ public abstract partial class Database
                                                               {
                                                                   Subject            = new ClaimsIdentity( claims ),
                                                                   Expires            = refreshExpires,
-                                                                  Issuer             = Options.TokenIssuer,
-                                                                  Audience           = Options.TokenAudience,
+                                                                  Issuer             = Settings.TokenIssuer,
+                                                                  Audience           = Settings.TokenAudience,
                                                                   IssuedAt           = DateTime.UtcNow,
                                                                   SigningCredentials = credentials
                                                               } );
@@ -136,8 +136,8 @@ public abstract partial class Database
                                              {
                                                  Subject            = new ClaimsIdentity( claims ),
                                                  Expires            = GetExpiration( expires, TimeSpan.FromMinutes( 15 ) ),
-                                                 Issuer             = Options.TokenIssuer,
-                                                 Audience           = Options.TokenAudience,
+                                                 Issuer             = Settings.TokenIssuer,
+                                                 Audience           = Settings.TokenAudience,
                                                  IssuedAt           = DateTime.UtcNow,
                                                  SigningCredentials = await GetSigningCredentials( token )
                                              };
@@ -203,7 +203,7 @@ public abstract partial class Database
                 return await provider.ValidateAsync( purpose, token, manager, user );
             }
 
-            IOneTimePassword otp = OneTimePassword.Create( key, Options.TokenIssuer );
+            IOneTimePassword otp = OneTimePassword.Create( key, Settings.TokenIssuer );
             return otp.ValidateToken( token );
         }
 
