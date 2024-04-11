@@ -60,7 +60,9 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values, Comparer<T>.Default);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] ToArray() => buffer.Span.ToArray();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in int  capacity ) => buffer.EnsureCapacity( capacity );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in uint capacity ) => buffer.EnsureCapacity( capacity );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[]  ToArray()                          => buffer.Span.ToArray();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -146,6 +148,13 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     {
         buffer.Add( value );
         Added( value );
+        return true;
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal bool InternalAdd( IEnumerable<T> value )
+    {
+        buffer.Add( value );
+        Reset();
         return true;
     }
 
@@ -310,12 +319,9 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public virtual T?  FindLast( Predicate<T> match ) => buffer.FindLast( match );
 
 
-    public virtual bool TryAdd( T       value )  => InternalTryAdd( value );
-    public virtual void Add( params T[] values ) => Add( new ReadOnlySpan<T>( values ) );
-    public virtual void Add( IEnumerable<T> values )
-    {
-        foreach ( T value in values ) { InternalAdd( value ); }
-    }
+    public virtual bool TryAdd( T           value )  => InternalTryAdd( value );
+    public virtual void Add( params T[]     values ) => Add( new ReadOnlySpan<T>( values ) );
+    public virtual void Add( IEnumerable<T> values ) => InternalAdd( values );
     public virtual void Add( SpanEnumerable<T, EnumerableProducer<T>> values )
     {
         foreach ( T value in values ) { InternalAdd( value ); }

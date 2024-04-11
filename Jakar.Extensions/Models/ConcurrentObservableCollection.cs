@@ -217,10 +217,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     public override void Add( params T[] values ) => Add( new ReadOnlySpan<T>( values ) );
     public override void Add( IEnumerable<T> values )
     {
-        using ( AcquireLock() )
-        {
-            foreach ( T value in values ) { InternalAdd( value ); }
-        }
+        using ( AcquireLock() ) { InternalAdd( values ); }
     }
     public override void Add( SpanEnumerable<T, EnumerableProducer<T>> values )
     {
@@ -290,10 +287,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public virtual async ValueTask AddAsync( IEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
-        {
-            foreach ( T value in values ) { InternalAdd( value ); }
-        }
+        using ( await AcquireLockAsync( token ) ) { InternalAdd( values ); }
     }
     public virtual async ValueTask AddAsync( IAsyncEnumerable<T> values, CancellationToken token = default )
     {
