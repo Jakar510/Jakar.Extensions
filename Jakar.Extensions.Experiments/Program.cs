@@ -1,4 +1,7 @@
-﻿try
+﻿using Microsoft.Extensions.Primitives;
+
+
+try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
@@ -19,6 +22,11 @@
     // await PasswordChecker.Run();
 
     // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
+
+    StringValues values = new[] { "this is a test" };
+    values.WriteToConsole();
+    Console.WriteLine();
+    values.ToPrettyJson().WriteToConsole();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

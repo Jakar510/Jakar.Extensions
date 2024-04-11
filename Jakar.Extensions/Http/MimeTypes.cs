@@ -7,7 +7,7 @@ public static class MimeTypes
     public static readonly FrozenSet<MimeType> All =
     #if NET6_0_OR_GREATER
         Enum.GetValues<MimeType>().ToFrozenSet();
-    #else
+#else
         Enum.GetValues( typeof(MimeType) ).Cast<MimeType>().ToFrozenSet();
 #endif
 
@@ -16,7 +16,9 @@ public static class MimeTypes
     public static readonly FrozenDictionary<MimeType, string> ContentNames          = All.ToFrozenDictionary( SelectSelf,   ToContentType );
     public static readonly FrozenDictionary<MimeType, string> Extensions            = All.ToFrozenDictionary( SelectSelf,   ToExtension );
     public static readonly FrozenDictionary<MimeType, string> ExtensionsWithPeriods = All.ToFrozenDictionary( SelectSelf,   static x => $".{x.ToExtension()}" );
+    private static         int?                               _maxLength;
 
+    public static int MaxLength => _maxLength ??= Names.Values.Max( static x => x.Length );
 
     private static T SelectSelf<T>( T v ) => v;
 
