@@ -9,9 +9,14 @@ namespace Jakar.Database;
 public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable, IRegisterDapperTypeHandlers
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly RecordID<TRecord>                 Empty = new(Guid.Empty);
-    public static          ValueEqualizer<RecordID<TRecord>> Equalizer => ValueEqualizer<RecordID<TRecord>>.Default;
-    public static          ValueSorter<RecordID<TRecord>>    Sorter    => ValueSorter<RecordID<TRecord>>.Default;
+    public static readonly RecordID<TRecord> Empty      = new(Guid.Empty);
+    public static readonly string            RecordName = typeof(TRecord).Name;
+
+
+    public static ValueEqualizer<RecordID<TRecord>> Equalizer { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueEqualizer<RecordID<TRecord>>.Default; }
+    public static ValueSorter<RecordID<TRecord>>    Sorter    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<RecordID<TRecord>>.Default; }
+    public        string                            Key       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = $"{RecordName}:{Value}";
+
 
     [Pure] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
     [Pure] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
@@ -63,9 +68,9 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public static bool operator false( RecordID<TRecord> recordID ) => recordID.IsNotValid();
 
 
-    public          bool Equals( RecordID<TRecord>    other ) => Value.Equals( other.Value );
-    public          int  CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );
-    public override int  GetHashCode()                        => Value.GetHashCode();
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          bool Equals( RecordID<TRecord>    other ) => Value.Equals( other.Value );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          int  CompareTo( RecordID<TRecord> other ) => Value.CompareTo( other.Value );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public override int  GetHashCode()                        => Value.GetHashCode();
 
 
     public static void RegisterDapperTypeHandlers()
@@ -95,7 +100,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     {
         public override RecordID<TRecord> ReadJson( JsonReader reader, Type objectType, RecordID<TRecord> existingValue, bool hasExistingValue, JsonSerializer serializer )
         {
-            Guid? guid = serializer.Deserialize<Guid?>( reader );
+            var guid = serializer.Deserialize<Guid?>( reader );
 
             return guid.HasValue
                        ? new RecordID<TRecord>( guid.Value )

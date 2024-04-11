@@ -10,13 +10,13 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public const           string                AUTHENTICATION_TYPE                       = JwtBearerDefaults.AuthenticationScheme;
-    public const           int                   COMMAND_TIMEOUT                           = 300;
-    public const           string                DEFAULT_SQL_CONNECTION_STRING_KEY         = "DEFAULT";
-    public const           string                DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY = "ConnectionStrings";
-    public const           string                JWT_ALGORITHM                             = SecurityAlgorithms.HmacSha512Signature;
-    public const           string                JWT_KEY                                   = "JWT";
-    public const           string                USER_EXISTS                               = "User Exists";
+    public const           string                    AUTHENTICATION_TYPE                       = JwtBearerDefaults.AuthenticationScheme;
+    public const           int                       COMMAND_TIMEOUT                           = 300;
+    public const           string                    DEFAULT_SQL_CONNECTION_STRING_KEY         = "DEFAULT";
+    public const           string                    DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY = "ConnectionStrings";
+    public const           string                    JWT_ALGORITHM                             = SecurityAlgorithms.HmacSha512Signature;
+    public const           string                    JWT_KEY                                   = "JWT";
+    public const           string                    USER_EXISTS                               = "User Exists";
     public static readonly FrozenSet<DbTypeInstance> Instances                                 = Enum.GetValues<DbTypeInstance>().ToFrozenSet();
 
 
@@ -26,7 +26,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public        TimeSpan                                                ClockSkew                { get; set; } = TimeSpan.FromMinutes( 1 );
     public        int?                                                    CommandTimeout           { get; set; } = COMMAND_TIMEOUT;
     public        SecuredStringResolverOptions                            ConnectionStringResolver { get; set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
-    public        DbTypeInstance                                              DbTypeInstance               { get; set; } = DbTypeInstance.Postgres;
+    public        DbTypeInstance                                          DbTypeInstance           { get; set; } = DbTypeInstance.Postgres;
     public        Uri                                                     Domain                   { get; set; } = new("https://localhost:443");
     public        string                                                  JWTAlgorithm             { get; set; } = JWT_ALGORITHM;
     public        string                                                  JWTKey                   { get; set; } = JWT_KEY;

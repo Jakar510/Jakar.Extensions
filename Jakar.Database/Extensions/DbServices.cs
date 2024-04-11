@@ -2,6 +2,12 @@
 // 1/10/2024  14:10
 
 
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
+
+
+
 namespace Jakar.Database;
 
 
@@ -23,7 +29,7 @@ public static class DbServices
 
 
     public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder           builder,
-                                                                            DbTypeInstance                           dbType,
+                                                                            DbTypeInstance                       dbType,
                                                                             SecuredStringResolverOptions         connectionStringResolver,
                                                                             Action<RedisCacheOptions>            configureRedis,
                                                                             AppVersion?                          version                         = default,
@@ -35,6 +41,7 @@ public static class DbServices
                                                                             Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
                                                                             Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
                                                                             Action<GoogleOptions>?               configureGoogle                 = default,
+                                                                            Action<MemoryCacheOptions>?          configureMemoryCache            = default,
                                                                             string                               authenticationScheme            = AUTHENTICATION_SCHEME,
                                                                             string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
     )
@@ -46,7 +53,7 @@ public static class DbServices
 
         DbOptions dbOptions = new()
                               {
-                                  DbTypeInstance               = dbType,
+                                  DbTypeInstance           = dbType,
                                   AppName                  = appName,
                                   TokenAudience            = appName,
                                   TokenIssuer              = appName,
@@ -61,6 +68,7 @@ public static class DbServices
         builder.Services.AddDatabase<TDatabase>( dbOptions,
                                                  TableCacheOptions.Default,
                                                  configureRedis,
+                                                 configureMemoryCache ?? ConfigureMemoryCache,
                                                  migration =>
                                                  {
                                                      switch ( dbType )
@@ -106,6 +114,9 @@ public static class DbServices
 
         return builder;
     }
+
+
+    private static void ConfigureMemoryCache( MemoryCacheOptions obj ) { }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -237,34 +248,44 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
+    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
+        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
+
+
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
+        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
+
+
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCacheFactoryService
+        where TTableCacheFactory : class, ITableCache
     {
         DbOptions dbOptions = new();
         configureDbOptions( dbOptions );
         TableCacheOptions tableCacheOptions = new();
         configureTableCacheOptions( tableCacheOptions );
-        return collection.AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMigration );
+        return collection.AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
     }
 
 
-    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
+    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
+        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
+
+
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMigration );
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<IMigrationRunnerBuilder> configureMigration )
+        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
+
+
+    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
         where TDatabase : Database
         where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCacheFactoryService
+        where TTableCacheFactory : class, ITableCache
     {
+        collection.AddInMemoryTokenCaches();
+
         collection.AddSingleton( dbOptions );
         collection.AddTransient<IOptions<DbOptions>>( static provider => provider.GetRequiredService<DbOptions>() );
 
@@ -272,9 +293,10 @@ public static class DbServices
         collection.AddTransient<IOptions<TableCacheOptions>>( static provider => provider.GetRequiredService<TableCacheOptions>() );
 
         collection.AddStackExchangeRedisCache( configureRedis );
+        collection.AddMemoryCache( configureMemoryCache );
 
         collection.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
-        collection.AddSingleton<ITableCacheFactoryService, TTableCacheFactory>();
+        collection.AddSingleton<ITableCache, TTableCacheFactory>();
 
         collection.AddSingleton<TDatabase>();
         collection.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );

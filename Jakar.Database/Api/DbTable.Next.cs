@@ -19,7 +19,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             return await connection.ExecuteScalarAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -33,7 +33,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition                command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition                command = _database.GetCommand( sql, transaction, token );
             IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
             return pairs;
         }
@@ -48,7 +48,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             return await connection.ExecuteScalarAsync<Guid>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

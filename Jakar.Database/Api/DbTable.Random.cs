@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

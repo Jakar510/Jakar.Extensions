@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 public interface IDbOptions
 {
-    public int?       CommandTimeout { get; }
-    public DbTypeInstance DbTypeInstance     { get; }
+    public int?           CommandTimeout { get; }
+    public DbTypeInstance DbTypeInstance { get; }
 
     // public string                                                  AppName                  { get; }
     // public string                                                  AuthenticationType       { get; }
@@ -46,8 +46,9 @@ public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
         where T : IDbReaderMapping<T>;
     public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : struct;
-    public CommandDefinition       GetCommandDefinition( DbTransaction? transaction, in SqlCommand  sql,         CancellationToken token );
-    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection     connection,  DbTransaction? transaction, SqlCommand        sql, CancellationToken token );
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition       GetCommand( in SqlCommand        sql,        DbTransaction? transaction, CancellationToken token );
+    public                                                            ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand        sql, CancellationToken token );
 }
 
 
@@ -56,8 +57,5 @@ public readonly record struct SqlCommand( string SQL, DynamicParameters? Paramet
 {
     public static implicit operator SqlCommand( string sql ) => new(sql);
 
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition ToCommandDefinition( DbTransaction? transaction, int? timeout, CancellationToken token ) =>
-        new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, CancellationToken token, int? timeout = null ) => new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
 }

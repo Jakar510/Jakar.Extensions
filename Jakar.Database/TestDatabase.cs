@@ -13,7 +13,8 @@ internal sealed class TestDatabase : Database
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
 
-    internal TestDatabase( IConfiguration                              configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, IDistributedCache distributedCache, ITableCacheFactory tableCacheFactory ) : base( configuration, sqlCacheFactory, options, distributedCache, tableCacheFactory ) { }
+    internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, tableCache, options ) { }
+
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
 
@@ -73,7 +74,7 @@ internal sealed class TestDatabase : Database
             await app.MigrateUpAsync();
 
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            TestDatabase                           db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+            TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
             await TestUsers( db );
         }
         finally { await app.MigrateDownAsync(); }

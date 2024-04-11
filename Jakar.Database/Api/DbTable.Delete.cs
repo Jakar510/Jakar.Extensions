@@ -31,7 +31,7 @@ public partial class DbTable<TRecord>
     {
         SqlCommand sql = _sqlCache.Delete( id );
 
-        CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+        CommandDefinition command = _database.GetCommand( sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 
@@ -43,7 +43,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -52,7 +52,7 @@ public partial class DbTable<TRecord>
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         SqlCommand        sql     = _sqlCache.Delete( matchAll, parameters );
-        CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+        CommandDefinition command = _database.GetCommand( sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 }
