@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateGroupTable : OwnedMigration<GroupRecord>
+public abstract class Migrate_Groups : OwnedMigration<GroupRecord>
 {
-    protected MigrateGroupTable() : base() { }
+    protected Migrate_Groups() : base() { }
 
 
     protected override ICreateTableWithColumnSyntax CreateTable()

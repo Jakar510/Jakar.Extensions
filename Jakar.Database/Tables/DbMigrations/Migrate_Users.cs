@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateUserTable : OwnedMigration<UserRecord>
+public abstract class Migrate_Users : OwnedMigration<UserRecord>
 {
-    protected MigrateUserTable() : base() { }
+    protected Migrate_Users() : base() { }
 
 
     protected override ICreateTableWithColumnSyntax CreateTable()

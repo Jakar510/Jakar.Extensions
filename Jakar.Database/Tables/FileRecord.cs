@@ -4,6 +4,7 @@
 namespace Jakar.Database;
 
 
+
 [Serializable, Table( TABLE_NAME )]
 public sealed record FileRecord( string?              FileName,
                                  string?              FileDescription,

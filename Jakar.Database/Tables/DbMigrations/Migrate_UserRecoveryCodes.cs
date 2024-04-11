@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateUserRecoveryCodeRecord : Migration<UserRecoveryCodeRecord>
+public abstract class Migrate_UserRecoveryCodes : Migration<UserRecoveryCodeRecord>
 {
-    protected MigrateUserRecoveryCodeRecord() : base() { }
+    protected Migrate_UserRecoveryCodes() : base() { }
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();

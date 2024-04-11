@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateUserRoleTable : Migration<UserRoleRecord>
+public abstract class Migrate_UserRoles : Migration<UserRoleRecord>
 {
-    protected MigrateUserRoleTable() : base() { }
+    protected Migrate_UserRoles() : base() { }
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();

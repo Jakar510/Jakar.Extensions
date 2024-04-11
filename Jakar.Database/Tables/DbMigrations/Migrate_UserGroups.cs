@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateUserGroupRecord : Migration<UserGroupRecord>
+public abstract class Migrate_UserGroups : Migration<UserGroupRecord>
 {
-    protected MigrateUserGroupRecord() : base() { }
+    protected Migrate_UserGroups() : base() { }
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();

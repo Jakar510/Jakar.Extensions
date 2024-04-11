@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateAddress : OwnedMigration<AddressRecord>
+public abstract class Migrate_Address : OwnedMigration<AddressRecord>
 {
-    protected MigrateAddress() : base() { }
+    protected Migrate_Address() : base() { }
 
     protected override ICreateTableWithColumnSyntax CreateTable()
     {

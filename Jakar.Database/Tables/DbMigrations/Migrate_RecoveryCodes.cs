@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class MigrateRecoveryCodeTable : OwnedMigration<RecoveryCodeRecord>
+public abstract class Migrate_RecoveryCodes : OwnedMigration<RecoveryCodeRecord>
 {
-    protected MigrateRecoveryCodeTable() : base() { }
+    protected Migrate_RecoveryCodes() : base() { }
 
 
     protected override ICreateTableWithColumnSyntax CreateTable()
