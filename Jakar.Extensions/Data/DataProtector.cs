@@ -89,10 +89,12 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
 
     public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name )                                        => WithKey( resources.GetResourceText( name ) );
+    public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, SecuredString                password ) => WithKey( resources.GetResourceText( name ), password );
     public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, scoped in ReadOnlySpan<char> password ) => WithKey( resources.GetResourceText( name ), password );
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                                                                                               => WithKey( await resources.GetResourceTextAsync( name ) );
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string                       password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => WithKey( await resources.GetResourceTextAsync( name ), await password.GetSecuredStringAsync( configuration, token ) );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString                password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( resources, name, await password.GetSecuredStringAsync( configuration, token ) );
 
 
     public       DataProtector            WithKeyFile( LocalFile  pem )                                        => WithKey( pem.Read().AsString() );
@@ -101,7 +103,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem )                                                                                               => WithKey( await pem.ReadAsync().AsString() );
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => WithKey( await pem.ReadAsync().AsString(), await password.GetSecuredStringAsync( configuration, token ) );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ) );
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )
