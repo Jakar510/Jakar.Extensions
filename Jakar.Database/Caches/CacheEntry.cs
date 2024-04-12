@@ -17,7 +17,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     public static Sorter<CacheEntry<TRecord>>    Sorter       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<CacheEntry<TRecord>>.Default; }
     public        DateTimeOffset                 DateCreated  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
     public        bool                           HasValueSet  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _lastUpdated.HasValue; }
-    public        bool                           HasChanged   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == Spans.Hash128( _json ); }
+    public        bool                           HasChanged   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == GetHash( _json ); }
     Guid IUniqueID<Guid>.                        ID           => ID.Value;
     public RecordID<TRecord>                     ID           { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = id;
     public DateTimeOffset?                       LastModified { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
@@ -59,13 +59,17 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
             DateCreated  = record.DateCreated;
             LastModified = record.LastModified;
             _json        = record.ToJson();
-            _hash        = Spans.Hash128( _json );
+            _hash        = GetHash( _json );
             _lastUpdated = DateTimeOffset.UtcNow;
         }
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
+    [Pure] public bool HasChangedOrExpired( in TimeSpan lifeSpan ) => _lastUpdated.HasExpired( lifeSpan ) || _hash != GetHash( _json );
+
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128             GetHash( in ReadOnlySpan<char> value ) => Spans.Hash128( value );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public        RecordPair<TRecord> ToPair()                               => new(ID, DateCreated);
 
 
     public int CompareTo( object? other )

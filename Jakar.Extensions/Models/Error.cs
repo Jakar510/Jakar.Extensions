@@ -26,9 +26,10 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
 
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOr<T>( T? Value, Error? Error )
+public readonly record struct ErrorOr<T>( in T? Value, in Error? Error )
 {
     public static ErrorOr<T> Empty { get; } = new(default, null);
+
 
 #if NET6_0_OR_GREATER
     [MemberNotNullWhen( true, nameof(Error) )] public bool HasError { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Error is not null; }
