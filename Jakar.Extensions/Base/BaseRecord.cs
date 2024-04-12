@@ -4,10 +4,12 @@
 [Serializable]
 public record BaseRecord
 {
-    public const int ANSI_CAPACITY    = 8000;
-    public const int BINARY_CAPACITY  = int.MaxValue;
-    public const int MAX_STRING_SIZE  = int.MaxValue;
-    public const int UNICODE_CAPACITY = 4000;
+    public const int    ANSI_CAPACITY    = 8000;
+    public const int    BINARY_CAPACITY  = int.MaxValue;
+    public const int    MAX_STRING_SIZE  = int.MaxValue;
+    public const int    UNICODE_CAPACITY = 4000;
+    public const string EMPTY            = "";
+    public const string NULL             = "null";
 }
 
 
