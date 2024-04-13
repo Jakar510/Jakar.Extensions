@@ -155,6 +155,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
                    : info;
     }
 
+
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
     /// <param name="path"> </param>
     /// <exception cref="ArgumentException"> </exception>
@@ -167,7 +168,23 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public LocalFile Join( string path ) => Info.Combine( path );
+    public LocalFile Join( string path ) => new(Info.Combine( path ));
+
+
+    /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="path"> </param>
+    /// <param name="encoding"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns>
+    ///     <see cref="LocalFile"/>
+    /// </returns>
+    public LocalFile Join( string path, Encoding encoding ) => new(Info.Combine( path ), encoding);
 
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
