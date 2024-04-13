@@ -14,20 +14,21 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     protected FileInfo? _info;
 
 
-    public static       Equalizer<LocalFile> Equalizer     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<LocalFile>.Default; }
-    public static       Sorter<LocalFile>    Sorter        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<LocalFile>.Default; }
-    public              string               ContentType   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
-    public              string?              DirectoryName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
-    public              bool                 DoesNotExist  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
-    public              bool                 Exists        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
-    public              string               Extension     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
-    public              Encoding             FileEncoding  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Encoding.Default;
-    public              string               FullPath      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    [JsonIgnore] public FileInfo             Info          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _info ??= new FileInfo( FullPath ); }
-    bool TempFile.ITempFile.                 IsTemporary   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
-    public DateTimeOffset                    LastAccess    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
-    public MimeType                          Mime          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
-    public string                            Name          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
+    public static       Equalizer<LocalFile> Equalizer       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<LocalFile>.Default; }
+    public static       Sorter<LocalFile>    Sorter          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<LocalFile>.Default; }
+    public              string               ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
+    public              string?              DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
+    public              bool                 DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
+    public              bool                 Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
+    public              string               Extension       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
+    public              Encoding             FileEncoding    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Encoding.Default;
+    public              string               FullPath        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    [JsonIgnore] public FileInfo             Info            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _info ??= new FileInfo( FullPath ); }
+    bool TempFile.ITempFile.                 IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
+    public DateTimeOffset                    LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
+    public DateTimeOffset                    CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
+    public MimeType                          Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
+    public string                            Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
 
     [JsonIgnore]
     public LocalDirectory? Parent

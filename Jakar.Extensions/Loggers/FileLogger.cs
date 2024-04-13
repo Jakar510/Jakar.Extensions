@@ -28,25 +28,19 @@ public sealed class FileLoggerProviderOptions : IOptions<FileLoggerProviderOptio
 
 
 [Experimental( nameof(FileLoggerProvider) )]
-public sealed partial class FileLoggerProvider( IOptions<LoggerFilterOptions> filter, IOptions<FileLoggerProviderOptions> options ) : ILoggerProvider, IHostedService
+public sealed class FileLoggerProvider( IOptions<LoggerFilterOptions> filter, IOptions<FileLoggerProviderOptions> options ) : ILoggerProvider, IHostedService
 {
-    private readonly ConcurrentQueue<LogEvent> _queue   = [];
-    private readonly FileLoggerProviderOptions _options = options.Value;
-    private readonly Locker                    _locker  = Locker.Default;
-    private readonly LoggerFilterOptions       _filter  = filter.Value;
+    public const     int                       BUFFER_SIZE    = 4096;
+    public const     string                    FILE_EXTENSION = ".logs";
+    private readonly ConcurrentQueue<LogEvent> _queue         = [];
+    private readonly FileLoggerProviderOptions _options       = options.Value;
+    private readonly Locker                    _locker        = Locker.Default;
+    private readonly LoggerFilterOptions       _filter        = filter.Value;
     private          Stream?                   _stream;
 
 
     private FileLoggerRolloverOptions? _Rollover { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _options.Rollover; }
     public  LogLevel                   MinLevel  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _filter.MinLevel; }
-
-
-    [GeneratedRegex( @"^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d{1,7})?([+-]([01]\d|2[0-3]):([0-5]\d)|Z).log$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline, 200 )]
-    public static partial Regex GetDateTimeOffsetRegex();
-
-
-    [GeneratedRegex( @"\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01]).log$", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline, 200 )]
-    public static partial Regex GetDateRegex();
 
 
     public ILogger CreateLogger( string categoryName ) => new Logger( this, categoryName );
@@ -58,7 +52,23 @@ public sealed partial class FileLoggerProvider( IOptions<LoggerFilterOptions> fi
         _stream = null;
     }
 
+    private static SortedDictionary<DateTimeOffset, LocalFile> GetFiles( scoped in FileLoggerRolloverOptions options )
+    {
+        SortedDictionary<DateTimeOffset, LocalFile> files = new(ValueSorter<DateTimeOffset>.Default);
+        foreach ( LocalFile file in options.Directory.GetFiles() ) { files.Add( file.CreationTimeUtc, file ); }
 
+        if ( files.Count < options.MaxFiles ) { return files; }
+
+        foreach ( DateTimeOffset date in files.Keys.Take( files.Count - options.MaxFiles ) ) { files.Remove( date ); }
+
+        return files;
+    }
+    public static bool TryParse( scoped ReadOnlySpan<char> name, out DateTimeOffset date )
+    {
+        if ( name.EndsWith( FILE_EXTENSION, StringComparison.OrdinalIgnoreCase ) is false ) { name = name[..^FILE_EXTENSION.Length]; }
+
+        return DateTimeOffset.TryParse( name, out date );
+    }
     public async Task StartAsync( CancellationToken token )
     {
         if ( _Rollover.HasValue ) { await Rollover( _options.Encoding, _options.DelayTime, _Rollover.Value, token ); }
@@ -67,29 +77,26 @@ public sealed partial class FileLoggerProvider( IOptions<LoggerFilterOptions> fi
     private async Task Rollover( Encoding encoding, TimeSpan delay, FileLoggerRolloverOptions options, CancellationToken token )
     {
         using PeriodicTimer timer = new(delay);
-        DateTimeOffset      now   = DateTimeOffset.UtcNow;
 
         using ( await _locker.EnterAsync( token ) )
         {
             // LocalDirectory.Watcher watcher   = new(directory);
-            LocalDirectory  directory = options.Directory;
-            List<LocalFile> files     = [..directory.GetFiles()];
+            LocalDirectory                              directory = options.Directory;
+            SortedDictionary<DateTimeOffset, LocalFile> files     = GetFiles( options );
 
-            if ( files.Count >= options.MaxFiles )
-            {
-                files.Sort( static ( a, b ) => a.LastAccess.CompareTo( b.LastAccess ) );
-                int obsolete = files.Count - options.MaxFiles;
-                for ( int i = 0; i < obsolete; i++ ) { files[i].Delete(); }
+            LocalFile current = new($"{DateTimeOffset.UtcNow}{FILE_EXTENSION}");
+            files.Add( current.CreationTimeUtc, current );
 
-                files.RemoveRange( 0, obsolete );
-            }
-
-            await using Stream       stream = _options.Path.OpenWrite( FileMode.Append );
-            await using StreamWriter writer = new(stream, encoding, 4096, true);
+            await using Stream       stream = current.OpenWrite( FileMode.Append );
+            await using StreamWriter writer = new(stream, encoding, BUFFER_SIZE, true);
+            CancellationTokenSource  source = CancellationTokenSource.CreateLinkedTokenSource( token );
 
             while ( token.ShouldContinue() )
             {
                 await timer.WaitForNextTickAsync( token ).ConfigureAwait( false );
+
+                // ReSharper disable once MethodHasAsyncOverload
+                if ( current.Info.Length > options.MaxSize ) { source.Cancel(); }
 
                 while ( _queue.TryDequeue( out LogEvent log ) )
                 {

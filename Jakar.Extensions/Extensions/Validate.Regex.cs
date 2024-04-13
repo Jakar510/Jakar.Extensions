@@ -6,12 +6,14 @@ public static partial class Validate
     [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )]
     public static partial class Re
     {
-        private static          Regex?       _email;
-        private static          Regex?       _ip;
-        private static          Regex?       _ipv6;
-        private static          Regex?       _url;
-        private const           RegexOptions OPTIONS  = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline;
-        private static readonly TimeSpan     _timeout = TimeSpan.FromMilliseconds( 200 );
+        private static         Regex?       _dateTimeOffset;
+        private static         Regex?       _dateOnly;
+        private static         Regex?       _email;
+        private static         Regex?       _ip;
+        private static         Regex?       _ipv6;
+        private static         Regex?       _url;
+        public const           RegexOptions OPTIONS  = RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline;
+        public static readonly TimeSpan     _timeout = TimeSpan.FromMilliseconds( 200 );
 
 
     #if NET7_0_OR_GREATER
@@ -47,8 +49,11 @@ public static partial class Validate
         /// </summary>
         public static Regex Url => _url ??= GetUrl();
 
+        public static Regex DateTimeOffset => _dateTimeOffset ??= GetDateTimeOffsetRegex();
+        public static Regex DateOnly       => _dateOnly ??= GetDateOnlyRegex();
 
-        [GeneratedRegex( @"(?:[a-z0-9!#$%&'*+/=>?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=>?^_`{|}~-]+)*|""(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*"")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])",
+
+        [GeneratedRegex( """(?:[a-z0-9!#$%&'*+/=>?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=>?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""",
                          OPTIONS,
                          200 )]
         private static partial Regex GetEmail();
@@ -65,7 +70,20 @@ public static partial class Validate
 
         [GeneratedRegex( @"(?:(?:https?|ftp|file):\/\/|www\.|ftp\.)(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[-A-Z0-9+&@#\/%=~_|$?!:,.])*(?:\([-A-Z0-9+&@#\/%=~_|$?!:,.]*\)|[A-Z0-9+&@#\/%=~_|$])", OPTIONS, 200 )]
         private static partial Regex GetUrl();
+
+
+        [GeneratedRegex( @"^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d{1,7})?([+-]([01]\d|2[0-3]):([0-5]\d)|Z)$", OPTIONS, 200 )]
+        private static partial Regex GetDateTimeOffsetRegex();
+
+
+        [GeneratedRegex( @"\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$", OPTIONS, 200 )] private static partial Regex GetDateOnlyRegex();
+
+
     #else
+        public static Regex DateTimeOffset => _dateTimeOffset ??= new Regex( @"^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d{1,7})?([+-]([01]\d|2[0-3]):([0-5]\d)|Z)$", OPTIONS, _timeout );
+        public static Regex DateOnly       => _dateOnly ??= new Regex( @"\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$",                                                                                        OPTIONS, _timeout );
+
+
         /// <summary>
         ///     General Email Regex (RFC 5322 Official Standard)
         ///     <para>
@@ -75,7 +93,7 @@ public static partial class Validate
         public static Regex Email =>
             _email ??=
                 new
-                    Regex( @"(?:[a-z0-9!#$%&'*+/=>?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=>?^_`{|}~-]+)*|""(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*"")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])",
+                    Regex( """(?:[a-z0-9!#$%&'*+/=>?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=>?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])""",
                            OPTIONS,
                            _timeout );
 
