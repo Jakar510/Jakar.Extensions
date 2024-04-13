@@ -1,7 +1,3 @@
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -15,15 +11,16 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="T"> </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList, ILockedCollection<T, ConcurrentObservableCollection<T>.AsyncLockerEnumerator, ConcurrentObservableCollection<T>.LockerEnumerator>
+public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList, ILockedCollection<T, AsyncLockerEnumerator<T>, LockerEnumerator<T>>
 {
     protected internal readonly Locker locker = Locker.Default;
 
 
-    public AsyncLockerEnumerator AsyncValues { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
-    public Locker                Lock        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
-    object ICollection.          SyncRoot    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; }
-    public LockerEnumerator      Values      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public AsyncLockerEnumerator<T> AsyncValues    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public Locker                   Lock           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
+    object ICollection.             SyncRoot       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; }
+    bool ICollection.               IsSynchronized { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => true; }
+    public LockerEnumerator<T>      Values         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection() : base() { }
@@ -68,7 +65,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<bool> ExistsAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( match ) >= 0; }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match ) >= 0; }
     }
 
 
@@ -88,16 +85,16 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         Guard.IsInRangeFor( count, buffer, nameof(count) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( start, count, match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( start, count, match ); }
     }
     public async ValueTask<int> FindIndexAsync( int start, Predicate<T> match, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( match, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match, start ); }
     }
     public async ValueTask<int> FindIndexAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match ); }
     }
 
 
@@ -115,15 +112,15 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<int> FindLastIndexAsync( int start, int count, Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( start, count, match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( start, count, match ); }
     }
     public async ValueTask<int> FindLastIndexAsync( int start, Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( match, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( match, start ); }
     }
     public async ValueTask<int> FindLastIndexAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( match ); }
     }
 
 
@@ -141,17 +138,17 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<int> IndexOfAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( value ); }
     }
     public async ValueTask<int> IndexOfAsync( T value, int start, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( value, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( value, start ); }
     }
     public async ValueTask<int> IndexOfAsync( T value, int start, int count, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.IndexOf( value, start, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( value, start, count ); }
     }
 
 
@@ -169,18 +166,18 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<int> LastIndexOfAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( value ); }
     }
     public async ValueTask<int> LastIndexOfAsync( T value, int start, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( value, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( value, start ); }
     }
     public async ValueTask<int> LastIndexOfAsync( T value, int start, int count, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         Guard.IsInRangeFor( count, buffer, nameof(count) );
-        using ( await AcquireLockAsync( token ) ) { return buffer.LastIndexOf( value, start, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( value, start, count ); }
     }
 
 
@@ -190,7 +187,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<T[]> FindAllAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.FindAll( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindAll( match ); }
     }
     public override T? Find( Predicate<T> match )
     {
@@ -198,7 +195,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<T?> FindAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.Find( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.Find( match ); }
     }
     public override T? FindLast( Predicate<T> match )
     {
@@ -206,7 +203,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<T?> FindLastAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.FindLast( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindLast( match ); }
     }
 
 
@@ -252,7 +249,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public virtual async ValueTask AddOrUpdate( IAsyncEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             await foreach ( T value in values.WithCancellation( token ) ) { InternalAddOrUpdate( value ); }
         }
@@ -261,37 +258,37 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
 
     public virtual async ValueTask<bool> TryAddAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalTryAdd( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalTryAdd( value ); }
     }
     public virtual async ValueTask TryAddAsync( IEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             foreach ( T value in values ) { InternalTryAdd( value ); }
         }
     }
     public virtual async ValueTask TryAddAsync( IAsyncEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             await foreach ( T value in values.WithCancellation( token ) ) { InternalTryAdd( value ); }
         }
     }
     public virtual async ValueTask AddAsync( ReadOnlyMemory<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.Span ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values.Span ); }
     }
     public virtual async ValueTask AddAsync( ImmutableArray<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( values.AsSpan() ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values.AsSpan() ); }
     }
     public virtual async ValueTask AddAsync( IEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( values ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values ); }
     }
     public virtual async ValueTask AddAsync( IAsyncEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             await foreach ( T value in values.WithCancellation( token ) ) { InternalAdd( value ); }
         }
@@ -312,15 +309,15 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask CopyToAsync( T[] array, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { buffer.CopyTo( array ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array ); }
     }
     public async ValueTask CopyToAsync( T[] array, int arrayIndex, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { buffer.CopyTo( array, arrayIndex ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, arrayIndex ); }
     }
     public async ValueTask CopyToAsync( T[] array, int arrayIndex, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { buffer.CopyTo( array, arrayIndex, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, arrayIndex, count ); }
     }
 
 
@@ -334,22 +331,22 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask InsertRangeAsync( int index, IEnumerable<T> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, collection ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection ); }
     }
     public async ValueTask InsertRangeAsync( int index, IAsyncEnumerable<T> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             await foreach ( (int i, T value) in collection.Enumerate( index ).WithCancellation( token ) ) { InternalInsert( i, value ); }
         }
     }
     public async ValueTask InsertRangeAsync( int index, ImmutableArray<T> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, collection.AsSpan() ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection.AsSpan() ); }
     }
     public async ValueTask InsertRangeAsync( int index, ReadOnlyMemory<T> collection, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, collection.Span ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection.Span ); }
     }
 
 
@@ -359,7 +356,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask RemoveRangeAsync( int start, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalRemoveRange( start, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalRemoveRange( start, count ); }
     }
 
 
@@ -379,30 +376,30 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
 
     public virtual async ValueTask<bool> RemoveAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( value ); }
     }
     public virtual async ValueTask<int> RemoveAsync( Func<T, bool> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( buffer.Where( match ) ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( buffer.Where( match ) ); }
     }
     public virtual async ValueTask<int> RemoveAsync( IEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values ); }
     }
     public virtual async ValueTask RemoveAsync( IAsyncEnumerable<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             await foreach ( T value in values.WithCancellation( token ) ) { InternalRemove( value ); }
         }
     }
     public virtual async ValueTask<int> RemoveAsync( ReadOnlyMemory<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.Span ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values.Span ); }
     }
     public virtual async ValueTask<int> RemoveAsync( ImmutableArray<T> values, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return InternalRemove( values.AsSpan() ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values.AsSpan() ); }
     }
 
 
@@ -416,7 +413,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask<T?> RemoveAtAsync( int index, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) )
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
             return InternalRemoveAt( index, out T? value )
                        ? value
@@ -435,11 +432,11 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask ReverseAsync( CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalReverse(); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalReverse(); }
     }
     public async ValueTask ReverseAsync( int start, int count, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalReverse( start, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalReverse( start, count ); }
     }
 
 
@@ -459,16 +456,16 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     public ValueTask SortAsync( CancellationToken token = default ) => SortAsync( comparer, token );
     public async ValueTask SortAsync( IComparer<T> compare, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalSort( compare ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( compare ); }
     }
     public virtual async ValueTask SortAsync( Comparison<T> compare, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalSort( compare ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( compare ); }
     }
     public virtual ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync( start, count, comparer, token );
     public virtual async ValueTask SortAsync( int start, int count, IComparer<T> compare, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalSort( start, count, compare ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( start, count, compare ); }
     }
 
 
@@ -524,7 +521,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public virtual async ValueTask<bool> ContainsAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { return buffer.Contains( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.Contains( value ); }
     }
 
 
@@ -534,7 +531,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public virtual async ValueTask AddAsync( T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalAdd( value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( value ); }
     }
 
 
@@ -544,7 +541,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public virtual async ValueTask ClearAsync( CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalClear(); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalClear(); }
     }
 
 
@@ -554,7 +551,7 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     }
     public async ValueTask InsertAsync( int index, T value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ) ) { InternalInsert( index, value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, value ); }
     }
 
 
@@ -588,14 +585,6 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     ConfiguredValueTaskAwaitable<ReadOnlyMemory<T>> ILockedCollection<T>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
     protected async ValueTask<ReadOnlyMemory<T>> CopyAsync( CancellationToken token )
     {
-        using ( await AcquireLockAsync( token ) ) { return FilteredValues(); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return FilteredValues(); }
     }
-
-
-
-    public sealed class AsyncLockerEnumerator( ConcurrentObservableCollection<T> collection ) : AsyncLockerEnumerator<T>( collection );
-
-
-
-    public sealed class LockerEnumerator( ConcurrentObservableCollection<T> collection ) : LockerEnumerator<T>( collection );
 }

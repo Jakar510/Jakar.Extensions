@@ -37,6 +37,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="WeakEventManagers\**" />
+	  <EmbeddedResource Remove="WeakEventManagers\**" />
+	  <None Remove="WeakEventManagers\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
 	</ItemGroup>
 
@@ -115,6 +121,7 @@
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />

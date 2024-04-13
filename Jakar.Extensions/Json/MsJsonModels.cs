@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public static class JsonModels
+public static class MsJsonModels
 {
     static JsonModels() { }
     public static bool Contains<TClass>( this TClass self, string key )

@@ -13,6 +13,7 @@ public static partial class Tasks
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    ValueTask    task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this ValueTask<T> task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
 
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool WaitSynchronously( this Task task, CancellationToken token = default )
     {
@@ -43,9 +44,9 @@ public static partial class Tasks
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<Task>                            func, CancellationToken token = default ) => Task.Run( func,                                 token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( async () => await func(),             token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( func,                                 token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<CancellationToken, Task<T>>      func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
@@ -60,12 +61,29 @@ public static partial class Tasks
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int                 WaitAny( this          IEnumerable<Task>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
 
+    public static async IAsyncEnumerable<T> WheneverAny<T>( this IEnumerable<ValueTask<T>> tasks, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        await foreach ( T result in tasks.Select( static x => x.AsTask() ).WheneverAny( token ) ) { yield return result; }
+    }
+    public static async IAsyncEnumerable<T> WheneverAny<T>( this IEnumerable<Task<T>> tasks, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        List<Task<T>> list = [..tasks];
+
+        while ( token.ShouldContinue() && list.Count > 0 )
+        {
+            var task = await Task.WhenAny( list ).ConfigureAwait( false );
+            list.Remove( task );
+            yield return await task.ConfigureAwait( false );
+        }
+    }
+
+
     /// <summary>
     ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
     /// </summary>
     /// <exception cref="AggregateException"> </exception>
-    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks ) => await Task.WhenAll( tasks.Select( x => x.AsTask() ) );
-    public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => await Task.WhenAll( tasks.Select( x => x.AsTask() ) );
+    public static async ValueTask WhenAll( this IEnumerable<ValueTask> tasks ) => await Task.WhenAll( tasks.Select( static x => x.AsTask() ) );
+    public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<ValueTask<TResult>> tasks ) => await Task.WhenAll( tasks.Select( static x => x.AsTask() ) );
 
 
     public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
@@ -85,6 +103,8 @@ public static partial class Tasks
         await tasks.WhenAll();
     #endif
     }
+
+
     /// <summary>
     ///     <see href="https://stackoverflow.com/a/63141544/9530917"/>
     /// </summary>
@@ -117,32 +137,32 @@ public static partial class Tasks
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task                WhenAny( this          IEnumerable<ValueTask>          tasks )                                    => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks )                                    => Task.WhenAny( tasks.Select( x => x.AsTask() ) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void                WaitAll( this          IEnumerable<ValueTask>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.Select( x => x.AsTask() ).ToArray(), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int                 WaitAny( this          IEnumerable<ValueTask>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.Select( x => x.AsTask() ).ToArray(), token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task                WhenAny( this          IEnumerable<ValueTask>          tasks )                                    => Task.WhenAny( tasks.Select( static x => x.AsTask() ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<ValueTask<TResult>> tasks )                                    => Task.WhenAny( tasks.Select( static x => x.AsTask() ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void                WaitAll( this          IEnumerable<ValueTask>          tasks, CancellationToken token = default ) => Task.WaitAll( tasks.Select( static x => x.AsTask() ).ToArray(), token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int                 WaitAny( this          IEnumerable<ValueTask>          tasks, CancellationToken token = default ) => Task.WaitAny( tasks.Select( static x => x.AsTask() ).ToArray(), token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task          TaskFromCanceled( this           CancellationToken token )  => Task.FromCanceled( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> TaskFromCanceled<TResult>( this  CancellationToken token )  => Task.FromCanceled<TResult>( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task          TaskFromException( this          Exception         e )      => Task.FromException( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> TaskFromException<TResult>( this Exception         e )      => Task.FromException<TResult>( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> TaskFromResult<TResult>( this    TResult           result ) => Task.FromResult( result );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task          AsTask( this          CancellationToken token )  => Task.FromCanceled( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> AsTask<TResult>( this CancellationToken token )  => Task.FromCanceled<TResult>( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task          AsTask( this          Exception         e )      => Task.FromException( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> AsTask<TResult>( this Exception         e )      => Task.FromException<TResult>( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> AsTask<TResult>( this TResult           result ) => Task.FromResult( result );
 
 
 #if NETSTANDARD2_1
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromCanceled( this           CancellationToken token )  => new(token.TaskFromCanceled());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token )  => new(token.TaskFromCanceled<TResult>());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromException( this          Exception         e )      => new(e.TaskFromException());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e )      => new(e.TaskFromException<TResult>());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => new(result);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          CancellationToken token )  => new(token.AsTask());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this CancellationToken token )  => new(token.AsTask<TResult>());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          Exception         e )      => new(e.AsTask());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this Exception         e )      => new(e.AsTask<TResult>());
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this TResult           result ) => new(result);
 
 #else
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromCanceled( this           CancellationToken token )  => ValueTask.FromCanceled( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromCanceled<TResult>( this  CancellationToken token )  => ValueTask.FromCanceled<TResult>( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          ValueTaskFromException( this          Exception         e )      => ValueTask.FromException( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromException<TResult>( this Exception         e )      => ValueTask.FromException<TResult>( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> ValueTaskFromResult<TResult>( this    TResult           result ) => ValueTask.FromResult( result );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this           CancellationToken token )  => ValueTask.FromCanceled( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this  CancellationToken token )  => ValueTask.FromCanceled<TResult>( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          Exception         e )      => ValueTask.FromException( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this Exception         e )      => ValueTask.FromException<TResult>( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this    TResult           result ) => ValueTask.FromResult( result );
 
 #endif
 }

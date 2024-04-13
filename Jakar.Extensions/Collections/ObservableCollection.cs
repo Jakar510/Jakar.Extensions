@@ -20,14 +20,15 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     protected internal readonly MemoryBuffer<T> buffer;
 
 
-    public sealed override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
-    bool IList.                IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool IList.                IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool ICollection<T>.       IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool ICollection.          IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
-    object? IList.this[ int index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
-    public T this[ int      index ] { [MethodImpl(                 MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
-    object ICollection.SyncRoot { [MethodImpl(                     MethodImplOptions.AggressiveInlining )] get => buffer; }
+    public override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
+    bool IList.         IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool IList.         IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection<T>.IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection.   IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
+    object? IList.this[ int index ] { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
+    public T this[ int      index ] { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
+    object ICollection.SyncRoot { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => buffer; }
+    public bool        IsEmpty  { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => Count == 0; }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection() : this( Comparer<T>.Default ) { }

@@ -27,8 +27,7 @@ public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToke
     public AsyncEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
         Reset();
-        if ( token.CanBeCanceled ) { _token = token; }
-
+        _token = token;
         return this;
     }
     public void Reset() => _index = START_INDEX;

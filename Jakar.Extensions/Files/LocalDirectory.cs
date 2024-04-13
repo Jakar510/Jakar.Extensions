@@ -29,10 +29,10 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     public LocalDirectory() => FullPath = string.Empty;
-    public LocalDirectory( ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalDirectory( DirectoryInfo      path ) : this( path.FullName ) { }
-    public LocalDirectory( string             path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
-    public LocalDirectory( string             path ) => FullPath = Path.GetFullPath( path );
+    public LocalDirectory( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
+    public LocalDirectory( DirectoryInfo                path ) : this( path.FullName ) { }
+    public LocalDirectory( string                       path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
+    public LocalDirectory( string                       path ) => FullPath = Path.GetFullPath( path );
     public void Dispose()
     {
         Dispose( this.IsTempFile() );
@@ -272,7 +272,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles() )
         {
@@ -289,7 +289,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
@@ -306,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
@@ -323,7 +323,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {
@@ -491,7 +491,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     [Serializable]
-    public class Deque : MultiDeque<LocalDirectory>
+    public class Deque : ConcurrentDeque<LocalDirectory>
     {
         public Deque() : base() { }
         public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
@@ -510,10 +510,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     [Serializable]
-    public class Queue : MultiQueue<LocalDirectory>
+    public class Queue : Queue<LocalDirectory>
     {
         public Queue() : base() { }
         public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
+    {
+        public ConcurrentQueue() : base() { }
+        public ConcurrentQueue( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 
