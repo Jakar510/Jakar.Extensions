@@ -3,7 +3,6 @@
 
 
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 
 
