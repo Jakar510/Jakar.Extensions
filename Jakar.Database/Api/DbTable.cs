@@ -2,6 +2,10 @@
 // 10/16/2022  4:54 PM
 
 
+using System.Linq.Expressions;
+
+
+
 namespace Jakar.Database;
 
 
@@ -18,7 +22,7 @@ public partial class DbTable<TRecord> : IConnectableDb
     public static ImmutableArray<TRecord>  EmptyArray     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
     public static FrozenSet<TRecord>       Set            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
     public        int?                     CommandTimeout { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
-    public        DbTypeInstance               DbTypeInstance     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
+    public        DbTypeInstance           DbTypeInstance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
     public        RecordGenerator<TRecord> Records        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
