@@ -128,8 +128,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _tables.Add( value );
         return value;
     }
-   
-    
+
+
     public void ResetCaches()
     {
         foreach ( IDbTable table in _tables ) { table.ResetCaches(); }
@@ -196,7 +196,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.NotFound( request.UserName ); }
 
-        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return results.ToErrors<Tokens>(); }
+        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Password( results ); }
 
         record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, record, token );

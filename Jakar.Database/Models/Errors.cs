@@ -2,40 +2,26 @@
 // 03/06/2023  12:59 AM
 
 
-using Google.Protobuf.WellKnownTypes;
-using static Jakar.Database.LoginResult;
-
-
-
 namespace Jakar.Database;
 
 
 public static class Errors
 {
-    public const string NULL = "null";
-
-    public static Error[] ToErrors<T>( this PasswordValidator.Results results )
+    public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( GetStatus ) ?? Status.Ok;
+    public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
+    public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
     {
-        List<Error> errors = new(10) { Error.Validation( "Password Validation Failed" ) };
+        if ( errors.IsEmpty ) { return status; }
 
-        if ( results.LengthPassed ) { errors.Add( Error.Validation( "Password not long enough" ) ); }
+        foreach ( var error in errors )
+        {
+            Status? code = error.StatusCode;
+            if ( code > status ) { status = code.Value; }
+        }
 
-        if ( results.SpecialPassed ) { errors.Add( Error.Validation( "Password must contain a special character" ) ); }
-
-        if ( results.NumericPassed ) { errors.Add( Error.Validation( "Password must contain a numeric character" ) ); }
-
-        if ( results.LowerPassed ) { errors.Add( Error.Validation( "Password must contain a lower case character" ) ); }
-
-        if ( results.UpperPassed ) { errors.Add( Error.Validation( "Password must contain a upper case character" ) ); }
-
-        if ( results.BlockedPassed ) { errors.Add( Error.Validation( "Password cannot be a blocked password" ) ); }
-
-        return errors.ToArray();
+        return status;
     }
-
-
-    public static  Status GetStatus( this IEnumerable<Error>? errors ) => errors?.Max( GetStatus ) ?? Status.Ok;
-    private static Status GetStatus( this Error               error )  => error.StatusCode         ?? Status.Ok;
+    private static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 
     public static SerializableError? ToSerializableError<T>( this ErrorOr<T> result ) => result.HasErrors

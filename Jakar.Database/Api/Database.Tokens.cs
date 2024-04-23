@@ -114,11 +114,11 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOr<Tokens>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Refresh, refreshToken, types, token );
+    public virtual async ValueTask<ErrorOr<Tokens>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, refreshToken, types, token );
-        if ( loginResult.GetResult( out Error? error, out UserRecord? record ) ) { return error.Value; }
+        ErrorOr<UserRecord> result = await VerifyLogin( connection, transaction, refreshToken, types, token );
+        if ( result.TryGetValue( out UserRecord? record, out Error[]? error ) is false ) { return error; }
 
         DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
 
@@ -148,29 +148,33 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Verify( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Verify, jsonToken, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Verify( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOr<Tokens>> Verify( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Verify, jsonToken, types, token );
+    public virtual async ValueTask<ErrorOr<Tokens>> Verify( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        LoginResult loginResult = await VerifyLogin( connection, transaction, jsonToken, types, token );
+        ErrorOr<UserRecord> result = await VerifyLogin( connection, transaction, jsonToken, types, token );
 
-        return loginResult.GetResult( out Error? error, out UserRecord? record )
-                   ? error.Value
-                   : await GetToken( connection, transaction, record, types, token );
+        return result.TryGetValue( out UserRecord? record, out Error[]? error )
+                   ? await GetToken( connection, transaction, record, types, token )
+                   : error;
     }
 
 
-    public ValueTask<LoginResult> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jsonToken, types, token );
-    protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOr<UserRecord>> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jsonToken, types, token );
+    protected virtual async ValueTask<ErrorOr<UserRecord>> VerifyLogin( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         JwtSecurityTokenHandler   handler              = new JwtSecurityTokenHandler();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
         TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jsonToken, validationParameters );
-        if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }
 
-
+        if ( validationResult.Exception is not null )
+        {
+            Exception e = validationResult.Exception;
+            return Error.Create( Status.InternalServerError, e.GetType().Name, e.Message, e.Source, e.MethodName() );
+        }
+        
         Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
         UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
-        if ( record is null ) { return new LoginResult( LoginResult.State.NotFound ); }
+        if ( record is null ) { return Error.NotFound(); }
 
 
         record.LastLogin = DateTimeOffset.UtcNow;
@@ -207,8 +211,8 @@ public abstract partial class Database
             return otp.ValidateToken( token );
         }
 
-        OneOf<Tokens, Error> result = await Verify( token, token: cancellationToken );
-        return result.IsT0;
+        ErrorOr<Tokens> result = await Verify( token, token: cancellationToken );
+        return result.HasValue;
     }
     async Task<bool> IUserTwoFactorTokenProvider<UserRecord>.CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => await CanGenerateTwoFactorTokenAsync( manager, user );
     public virtual async ValueTask<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user, CancellationToken token = default )
