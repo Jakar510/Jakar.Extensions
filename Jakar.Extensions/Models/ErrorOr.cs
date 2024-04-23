@@ -43,18 +43,18 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
     public static Error Create( Exception e, in StringValues errors = default, Status status = Status.InternalServerError ) => new(status, e.GetType().Name, e.Message, e.Source, e.MethodName(), errors);
 
 
-    public static Error Password( scoped in PasswordValidator.Results results,
-                                  string                              lengthPassed  = "Password not long enough",
-                                  string                              mustBeTrimmed = "Password must be trimmed",
-                                  string                              specialPassed = "Password must contain a special character",
-                                  string                              numericPassed = "Password must contain a numeric character",
-                                  string                              lowerPassed   = "Password must contain a lower case character",
-                                  string                              upperPassed   = "Password must contain a upper case character",
-                                  string                              blockedPassed = "Password cannot be a blocked password",
-                                  string                              type          = PASSWORD_VALIDATION_TYPE,
-                                  string                              title         = PASSWORD_VALIDATION_TITLE,
-                                  string?                             detail        = null,
-                                  string?                             instance      = null
+    public static Error Unauthorized( scoped in PasswordValidator.Results results,
+                                      string                              lengthPassed  = "Password not long enough",
+                                      string                              mustBeTrimmed = "Password must be trimmed",
+                                      string                              specialPassed = "Password must contain a special character",
+                                      string                              numericPassed = "Password must contain a numeric character",
+                                      string                              lowerPassed   = "Password must contain a lower case character",
+                                      string                              upperPassed   = "Password must contain a upper case character",
+                                      string                              blockedPassed = "Password cannot be a blocked password",
+                                      string                              type          = PASSWORD_VALIDATION_TYPE,
+                                      string                              title         = PASSWORD_VALIDATION_TITLE,
+                                      string?                             detail        = null,
+                                      string?                             instance      = null
     )
     {
         using Buffer<string> errors = new(10);
@@ -73,9 +73,12 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
         if ( results.BlockedPassed ) { errors.Add( blockedPassed ); }
 
-        return Password( [.. errors.Span], type, title, detail, instance );
+        return Unauthorized( [.. errors.Span], type, title, detail, instance );
     }
-    public static Error Password( in StringValues errors, string type = PASSWORD_VALIDATION_TYPE, string title = PASSWORD_VALIDATION_TITLE, string? detail = null, string? instance = null ) => new(Status.Unauthorized, type, title, detail, instance, errors);
+
+
+    /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.Unauthorized"/> from a type and title. </summary>
+    public static Error Unauthorized( in StringValues errors = default, string type = UNAUTHORIZED_TYPE, string title = UNAUTHORIZED_TITLE, string? detail = null, string? instance = null ) => new(Status.Unauthorized, type, title, detail, instance, errors);
 
 
     public static Error Disabled( in            StringValues errors = default, string type = DISABLED_TYPE,             string title = DISABLED_TITLE,             string? detail = null, string? instance = null ) => new(Status.Disabled, type, title, detail, instance, errors);
@@ -99,9 +102,6 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.NotFound"/> from a type and title. </summary>
     public static Error NotFound( in StringValues errors = default, string type = NOT_FOUND_TYPE, string title = NOT_FOUND_TITLE, string? detail = null, string? instance = null ) => new(Status.NotFound, type, title, detail, instance, errors);
-
-    /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.Unauthorized"/> from a type and title. </summary>
-    public static Error Unauthorized( in StringValues errors = default, string type = UNAUTHORIZED_TYPE, string title = UNAUTHORIZED_TITLE, string? detail = null, string? instance = null ) => new(Status.Unauthorized, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.Forbidden"/> from a type and title. </summary>
     public static Error Forbidden( in StringValues errors = default, string type = FORBIDDEN_TYPE, string title = FORBIDDEN_TITLE, string? detail = null, string? instance = null ) => new(Status.Forbidden, type, title, detail, instance, errors);
@@ -137,30 +137,30 @@ public readonly record struct ErrorOr<T>( in T? Value, in Error[]? Errors )
     public Status GetStatus() => Errors?.Max( static x => x.StatusCode ) ?? Status.Ok;
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Error[]? error )
+    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Error[]? errors )
     {
         if ( Value is not null )
         {
-            value = Value;
-            error = null;
+            value  = Value;
+            errors = null;
             return true;
         }
 
-        value = default;
-        error = Errors ?? [];
+        value  = default;
+        errors = Errors ?? [];
         return false;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, out ReadOnlyMemory<Error> error )
+    public bool TryGetValue( [NotNullWhen( true )] out T? value, out ReadOnlyMemory<Error> errors )
     {
         if ( Value is not null )
         {
-            value = Value;
-            error = null;
+            value  = Value;
+            errors = default;
             return true;
         }
 
-        value = default;
-        error = Errors;
+        value  = default;
+        errors = Errors;
         return false;
     }
     public bool TryGetValue( [NotNullWhen( true )] out T? value )
@@ -168,10 +168,10 @@ public readonly record struct ErrorOr<T>( in T? Value, in Error[]? Errors )
         value = Value;
         return value is not null;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out Error[]? error )
+    public bool TryGetValue( [NotNullWhen( true )] out Error[]? errors )
     {
-        error = Errors;
-        return error is not null;
+        errors = Errors;
+        return errors is not null;
     }
     public bool TryGetValue( out ReadOnlyMemory<Error> error )
     {
