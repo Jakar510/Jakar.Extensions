@@ -40,5 +40,6 @@ public interface IErrorDetails
     /// </summary>
     string? Instance { get; }
 
+
     StringValues Errors { get; }
 }

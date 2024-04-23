@@ -1,4 +1,9 @@
-﻿namespace Jakar.Extensions;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+
+
+
+namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
@@ -27,12 +32,14 @@ public partial class IniConfig
         public   string Name    { get; }
 
 
-        public Section( string name ) : this( name, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string name, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = name;
-        public Section( string name, IDictionary<string, string?>               dictionary ) : this( name, dictionary, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string name, IDictionary<string, string?>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => Name = name;
-        public Section( string name, IEnumerable<KeyValuePair<string, string?>> collection ) : this( name, collection, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string name, IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => Name = name;
+        public Section( string sectionName ) : this( sectionName, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string sectionName, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = sectionName;
+        public Section( string sectionName, IDictionary<string, string?>               dictionary ) : this( sectionName, dictionary, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string sectionName, IDictionary<string, string?>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => Name = sectionName;
+        public Section( string sectionName, IEnumerable<KeyValuePair<string, string?>> collection ) : this( sectionName, collection, StringComparer.OrdinalIgnoreCase ) { }
+        public Section( string sectionName, IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => Name = sectionName;
+
+        public static implicit operator Section( string sectionName ) => new(sectionName);
 
 
         public override string ToString() => ToString( default, CultureInfo.CurrentCulture );

@@ -145,7 +145,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
         ReadOnlySpan<char> span  = value[(index - 1)..].Trim( FLAG_SEPARATOR );
         value = value[..index];
 
-        int end = span.IndexOfAny( Randoms.Numeric.Span );
+        int end = span.IndexOfAny( Randoms.Numeric );
 
         return end < 0
                    ? new AppVersionFlags( span.ToString(),        0 )

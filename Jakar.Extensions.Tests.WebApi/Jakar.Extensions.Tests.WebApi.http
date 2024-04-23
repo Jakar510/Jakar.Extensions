@@ -1,0 +1,6 @@
+@Jakar.Extensions.Tests.WebApi_HostAddress = http://localhost:5073
+
+GET {{Jakar.Extensions.Tests.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

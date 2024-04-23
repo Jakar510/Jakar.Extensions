@@ -37,8 +37,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Loggers\**" />
 	  <Compile Remove="WeakEventManagers\**" />
+	  <EmbeddedResource Remove="Loggers\**" />
 	  <EmbeddedResource Remove="WeakEventManagers\**" />
+	  <None Remove="Loggers\**" />
 	  <None Remove="WeakEventManagers\**" />
 	</ItemGroup>
 

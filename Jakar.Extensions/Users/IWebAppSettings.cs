@@ -8,9 +8,8 @@ using Microsoft.Extensions.Configuration;
 namespace Jakar.Extensions;
 
 
-public interface IWebAppSettings : IHostInfo
+public interface IWebAppSettings : IAppSettings, IHostInfo
 {
-    string         AppName          { get; }
     string[]       Args             { get; }
     IConfiguration Configuration    { get; }
     Uri?           Domain           { get; }

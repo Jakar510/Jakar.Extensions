@@ -1,16 +1,21 @@
-﻿namespace Jakar.Extensions;
+﻿using System;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+
+
+
+namespace Jakar.Extensions;
 
 
 public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
-#if NET6_0_OR_GREATER
+                                    #if NET7_0_OR_GREATER
+                                        ,
+                                        ISpanParsable<IniConfig>
+                                    #endif
+                                    #if NET6_0_OR_GREATER
                                         ,
                                         ISpanFormattable
 #endif
-#if NET7_0_OR_GREATER
-                                        ,
-                                        ISpanParsable<IniConfig>
-#endif
-
 {
     private readonly IEqualityComparer<string> _comparer;
     public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
@@ -42,51 +47,18 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = default )
     {
         string content = file.Read().AsString();
-
         return Parse( content, provider );
     }
     public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default )
     {
         string content = await file.ReadAsync().AsString();
-
         return Parse( content, provider );
     }
 
-
-    /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
-    /// <param name="sectionName"> Section Name </param>
-    /// <returns>
-    ///     <see cref="Section"/>
-    /// </returns>
-    public Section GetOrAdd( string sectionName )
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span ) => Parse( span, CultureInfo.InvariantCulture );
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider )
     {
-        if ( string.IsNullOrEmpty( sectionName ) ) { throw new ArgumentNullException( nameof(sectionName) ); }
-
-        foreach ( string key in Keys )
-        {
-            if ( _comparer.Equals( key, sectionName ) ) { return base[key]; }
-        }
-
-        return base[sectionName] = new Section( sectionName );
-    }
-
-
-    public static IniConfig Parse( string s ) => Parse( s, CultureInfo.InvariantCulture );
-    public static IniConfig Parse( string? s, IFormatProvider? provider )
-    {
-        ReadOnlySpan<char> span = s;
-        return Parse( span, provider );
-    }
-    public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
-    {
-        ReadOnlySpan<char> span = s;
-        return TryParse( span, provider, out result );
-    }
-
-
-    public static IniConfig Parse( ReadOnlySpan<char> span, IFormatProvider? provider )
-    {
-        IniConfig config = new IniConfig();
+        IniConfig config = new();
 
         // $"-- {nameof(IniConfig)}.{nameof(Refresh)}.{nameof(content)} --\n{content.ToString()}".WriteToConsole();
         if ( span.IsEmpty ) { return config; }
@@ -112,7 +84,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line.Slice( 1, line.Length - 2 ).Trim(); // remove the brackets and whitespace
+                    ReadOnlySpan<char> sectionSpan = line[1..^1].Trim(); // remove the brackets and whitespace
 
                     if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException( "section title cannot be empty or whitespace." ); }
 
@@ -138,14 +110,14 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
             Debug.Assert( !string.IsNullOrEmpty( section ) );
 
-            if ( config[section].ContainsKey( key ) ) { throw new FormatException( @$"Duplicate key '{key}':  '{section}'" ); }
+            if ( config[section].ContainsKey( key ) ) { throw new FormatException( $"Duplicate key '{key}':  '{section}'" ); }
 
             config[section][key] = value;
         }
 
         return config;
     }
-    public static bool TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
+    public static bool TryParse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result )
     {
         try
         {
@@ -160,18 +132,59 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
+#if NET7_0_OR_GREATER
+    static IniConfig IParsable<IniConfig>.    Parse( string?               s,    IFormatProvider? provider )                                              => Parse( s, provider );
+    static bool IParsable<IniConfig>.         TryParse( string?            s,    IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result ) => TryParse( s, provider, out result );
+    static IniConfig ISpanParsable<IniConfig>.Parse( ReadOnlySpan<char>    span, IFormatProvider? provider )                                              => Parse( span, provider );
+    static bool ISpanParsable<IniConfig>.     TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result ) => TryParse( span, provider, out result );
+#endif
+
+
+    /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
+    /// <param name="sectionName"> Section Name </param>
+    /// <returns>
+    ///     <see cref="Section"/>
+    /// </returns>
+    public Section GetOrAdd( string sectionName )
+    {
+        if ( string.IsNullOrEmpty( sectionName ) ) { throw new ArgumentNullException( nameof(sectionName) ); }
+
+        foreach ( string key in Keys )
+        {
+            if ( _comparer.Equals( key, sectionName ) ) { return base[key]; }
+        }
+
+        return base[sectionName] = new Section( sectionName );
+    }
+
+
+    public IniConfig Add( scoped in ReadOnlySpan<Section> values )
+    {
+        foreach ( Section section in values ) { Add( section ); }
+
+        return this;
+    }
+    public IniConfig Add( IEnumerable<Section> values )
+    {
+        foreach ( Section section in values ) { Add( section ); }
+
+        return this;
+    }
+    public IniConfig Add( Section value )
+    {
+        this[value.Name] = value;
+        return this;
+    }
+
+
     public override string ToString() => ToString( default, CultureInfo.InvariantCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         Span<char> span = stackalloc char[Length + 10];
+        if ( TryFormat( span, out int charsWritten, format, formatProvider ) is false ) { throw new InvalidOperationException( "Cannot convert to string" ); }
 
-        if ( TryFormat( span, out int charsWritten, format, formatProvider ) )
-        {
-            ReadOnlySpan<char> result = span[..charsWritten];
-            return result.ToString();
-        }
-
-        throw new InvalidOperationException( "Cannot convert to string" );
+        ReadOnlySpan<char> result = span[..charsWritten];
+        return result.ToString();
     }
 
 
@@ -202,8 +215,4 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         return stream.WriteAsync( buffer, token );
     }
     public async ValueTask WriteToFile( StringWriter writer ) => await writer.WriteAsync( ToString() );
-
-
-    public void Add( string  section ) => Add( new Section( section ) );
-    public void Add( Section value )   => this[value.Name] = value;
 }

@@ -14,20 +14,12 @@ namespace Jakar.Extensions;
 public class OneTimePassword<T>( string key )
     where T : IAppName
 {
-    private readonly byte[] _keyBytes   = Base32Encoding.ToBytes( key );
-    private readonly string _issuer     = typeof(T).Name;
-    private readonly string _secret_Key = key;
+    protected static readonly string _issuer     = typeof(T).Name;
+    protected readonly        byte[] _keyBytes   = Base32Encoding.ToBytes( key );
+    protected readonly        string _secret_Key = key;
 
 
-    public static OneTimePassword<T> Debug { get; } = new(GenerateSecret());
-
-
-    public static string GenerateSecret()
-    {
-        byte[] secretKey = new byte[20];
-        RandomNumberGenerator.Fill( secretKey );
-        return Base32Encoding.ToString( secretKey );
-    }
+    public static OneTimePassword<T> Debug { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new(Randoms.GenerateToken());
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool ValidateToken( string token, VerificationWindow? window = default ) => ValidateToken( token, out long _, window );
@@ -38,7 +30,7 @@ public class OneTimePassword<T>( string key )
     }
 
 
-    public string GetContent( string userName ) => $"otpauth://totp/{userName}?secret={_secret_Key}&issuer={_issuer}";
+    public virtual string GetContent( string userName ) => $"otpauth://totp/{userName}?secret={_secret_Key}&issuer={_issuer}";
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -64,7 +56,6 @@ public class OneTimePassword<T>( string key )
                                       Format  = format,
                                       Options = GetOptions( width, height )
                                   };
-
 
         return writer.Write( GetContent( userName ) ).ToString();
     }

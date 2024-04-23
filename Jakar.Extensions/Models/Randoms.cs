@@ -2,6 +2,10 @@
 // 09/07/2022  4:21 PM
 
 
+using OtpNet;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -18,20 +22,27 @@ public class Randoms : ObservableClass
     public const string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
 
 
-    public static ReadOnlyMemory<char>  AlphaNumeric { get; }      = ALPHANUMERIC.ToArray();
-    public static ReadOnlyMemory<char>  LowerCase    { get; }      = LOWER_CASE.ToArray();
-    public static ReadOnlyMemory<char>  Numeric      { get; }      = NUMERIC.ToArray();
-    public static Random                Random       { get; set; } = new(69420);
-    public static RandomNumberGenerator Rng          { get; set; } = RandomNumberGenerator.Create();
-    public static ReadOnlyMemory<char>  SpecialChars { get; }      = SPECIAL_CHARS.ToArray();
-    public static ReadOnlyMemory<char>  UpperCase    { get; }      = UPPER_CASE.ToArray();
+    public static char[]                AlphaNumeric { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. ALPHANUMERIC];
+    public static char[]                LowerCase    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. LOWER_CASE];
+    public static char[]                Numeric      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. NUMERIC];
+    public static Random                Random       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(69420);
+    public static RandomNumberGenerator Rng          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = RandomNumberGenerator.Create();
+    public static char[]                SpecialChars { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. SPECIAL_CHARS];
+    public static char[]                UpperCase    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. UPPER_CASE];
 
 
-    public static string GenerateToken( int length = 32 )
+
+    public static string GenerateToken( int length = 20 )
     {
-        Span<byte> randomNumber = stackalloc byte[length];
-        Rng.GetNonZeroBytes( randomNumber );
-        return Convert.ToBase64String( randomNumber );
+        byte[] token = new byte[length];
+        Rng.GetBytes( token );
+        return Base32Encoding.ToString( token );
+    }
+    public static string GenerateTokenB64( int length = 32 )
+    {
+        Span<byte> token = stackalloc byte[length];
+        Rng.GetBytes( token );
+        return Convert.ToBase64String( token );
     }
 
 

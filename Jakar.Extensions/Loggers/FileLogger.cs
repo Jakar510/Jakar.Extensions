@@ -9,37 +9,17 @@ namespace Jakar.Extensions.Loggers;
 
 
 
-[Experimental( nameof(FileLoggerProvider) )]
-public sealed class FileLoggerProviderOptions : IOptions<FileLoggerProviderOptions>
+[SuppressMessage( "ReSharper", "RedundantArgumentDefaultValue" )]
+public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> options ) : ILoggerProvider, IHostedService
 {
-    public const string                                           FILE_NAME = "App.logs";
-    public       string?                                          AppName   { get;                                                      set; }
-    public       TimeSpan                                         DelayTime { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = TimeSpan.FromSeconds( 5 );
-    public       Encoding                                         Encoding  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = Encoding.Default;
-    public       Func<FileLoggerProvider.LogEvent, string>        Formatter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = log => log.ToString();
-    public       OneOf<LocalFile, FileLoggerRolloverOptions>      Mode      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new LocalFile( FILE_NAME );
-    FileLoggerProviderOptions IOptions<FileLoggerProviderOptions>.Value     => this;
-}
+    public const     int                       BUFFER_SIZE    = 4096;
+    public const     string                    FILE_EXTENSION = ".log";
+    private readonly ConcurrentStack<LogEvent> _queue         = [];
+    private readonly FileLoggerProviderOptions _options       = options.Value;
+    private          Stream?                   _stream;
 
 
-
-[Experimental( nameof(FileLoggerProvider) )] public readonly record struct FileLoggerRolloverOptions( LocalDirectory Directory, TimeSpan? LifeSpan, int MaxFiles = 10, long MaxSize = 10_485_760 );
-
-
-
-[Experimental( nameof(FileLoggerProvider) )]
-public sealed class FileLoggerProvider( IOptions<LoggerFilterOptions> filter, IOptions<FileLoggerProviderOptions> options, ILogger<FileLoggerProvider> logger ) : ILoggerProvider, IHostedService
-{
-    public const     string                      FILE_EXTENSION = ".log";
-    private readonly ILogger<FileLoggerProvider> _logger        = logger;
-    public const     int                         BUFFER_SIZE    = 4096;
-    private readonly ConcurrentStack<LogEvent>   _queue         = [];
-    private readonly FileLoggerProviderOptions   _options       = options.Value;
-    private readonly Locker                      _locker        = Locker.Default;
-    private readonly LoggerFilterOptions         _filter        = filter.Value;
-    private          Stream?                     _stream;
-
-    public LogLevel MinLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _filter.MinLevel; }
+    public LogLevel MinLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = LogLevel.Debug;
 
 
     public ILogger CreateLogger( string categoryName ) => new Logger( this, categoryName );
@@ -54,65 +34,57 @@ public sealed class FileLoggerProvider( IOptions<LoggerFilterOptions> filter, IO
 
     public async Task StartAsync( CancellationToken token )
     {
-        using PeriodicTimer timer = new(_options.DelayTime);
-
-        using ( await _locker.EnterAsync( token ) )
+        while ( token.ShouldContinue() )
         {
-            while ( token.ShouldContinue() )
+            if ( _queue.IsEmpty is false )
             {
-                await timer.WaitForNextTickAsync( token ).ConfigureAwait( false );
-                await StartAsync( _options.Mode ).ConfigureAwait( false );
+                if ( _options.Mode.IsT0 ) { await Start( _options.Mode.AsT0 ).ConfigureAwait( false ); }
+                else
+                {
+                    FileLoggerRolloverOptions options = _options.Mode.AsT1;
+                    LocalFile                 current = options.Directory.Join( GetFileName( _options.AppName ), _options.Encoding );
+                    await Start( current, options ).ConfigureAwait( false );
+                }
             }
+
+            await Task.Delay( 100, token ).ConfigureAwait( false );
         }
     }
+    public Task StopAsync( CancellationToken token ) => Start( _options.File );
 
 
-    private Task StartAsync( scoped in OneOf<LocalFile, FileLoggerRolloverOptions> mode ) => mode.IsT1
-                                                                                                 ? StartRollover( _options.Encoding, mode.AsT1 )
-                                                                                                 : StartSingle( new LocalFile( mode.AsT0.FullPath, _options.Encoding ) );
-    private async Task StartRollover( Encoding encoding, FileLoggerRolloverOptions options )
+    private async Task Start( LocalFile current, FileLoggerRolloverOptions? rolloverOptions = null )
     {
-        LocalDirectory directory = options.Directory;
+        if ( rolloverOptions.HasValue ) { UpdateFiles( rolloverOptions.Value ); }
 
-        try
+        await using Stream       stream = current.OpenWrite( FileMode.Append, BUFFER_SIZE );
+        await using StreamWriter writer = new(stream, _options.Encoding, BUFFER_SIZE, true);
+
+        if ( rolloverOptions.HasValue )
         {
-            UpdateFiles( options );
-            LocalFile                current = directory.Join( GetFileName( _options.AppName ), encoding );
-            await using Stream       stream  = current.OpenWrite( FileMode.Append );
-            await using StreamWriter writer  = new(stream, encoding, BUFFER_SIZE, true);
-
             while ( _queue.TryPeek( out LogEvent log ) )
             {
-                string message = log.ToString();
-                if ( stream.Length + message.Length < options.MaxSize ) { return; }
+                string message = _options.Formatter( log );
+                if ( stream.Length + message.Length < rolloverOptions.Value.MaxSize ) { return; }
 
                 _queue.TryPop( out _ );
                 await writer.WriteLineAsync( message ).ConfigureAwait( false );
             }
         }
-        catch ( TaskCanceledException ) { }
-        catch ( Exception e ) { _logger.LogCritical( e, "{Caller}", nameof(FileLoggerProvider) ); }
-    }
-    private async Task StartSingle( LocalFile current )
-    {
-        await using Stream       stream = current.OpenWrite( FileMode.Append );
-        await using StreamWriter writer = new(stream, current.FileEncoding, 4096, true);
-
-        while ( _queue.TryPop( out LogEvent log ) )
+        else
         {
-            string message = log.ToString();
-            await writer.WriteLineAsync( message ).ConfigureAwait( false );
+            while ( _queue.TryPop( out LogEvent log ) )
+            {
+                string message = _options.Formatter( log );
+                await writer.WriteLineAsync( message ).ConfigureAwait( false );
+            }
         }
     }
-    public async Task StopAsync( CancellationToken token )
-    {
-        using ( await _locker.EnterAsync( token ) ) { await StartAsync( _options.Mode ).ConfigureAwait( false ); }
-    }
 
 
-    static string GetFileName( scoped in ReadOnlySpan<char> appName ) => appName.IsNullOrWhiteSpace()
-                                                                             ? $"{DateTimeOffset.UtcNow}{FILE_EXTENSION}"
-                                                                             : $"{appName}_{DateTimeOffset.UtcNow}{FILE_EXTENSION}";
+    private static string GetFileName( scoped in ReadOnlySpan<char> appName ) => appName.IsNullOrWhiteSpace()
+                                                                                     ? $"{DateTimeOffset.UtcNow}{FILE_EXTENSION}"
+                                                                                     : $"{appName}_{DateTimeOffset.UtcNow}{FILE_EXTENSION}";
 
 
     public static bool TryParse( scoped ReadOnlySpan<char> name, out DateTimeOffset date )
