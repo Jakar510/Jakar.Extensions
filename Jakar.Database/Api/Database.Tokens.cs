@@ -21,7 +21,7 @@ public abstract partial class Database
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials( token );
-        JwtSecurityToken                security          = new JwtSecurityToken( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        JwtSecurityToken   security          = new JwtSecurityToken( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
@@ -126,7 +126,7 @@ public abstract partial class Database
         {
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
-            return new Error( Status.Unauthorized );
+            return Error.Unauthorized();
         }
 
 
@@ -162,7 +162,7 @@ public abstract partial class Database
     public ValueTask<LoginResult> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jsonToken, types, token );
     protected virtual async ValueTask<LoginResult> VerifyLogin( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        JwtSecurityTokenHandler                       handler              = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler   handler              = new JwtSecurityTokenHandler();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
         TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jsonToken, validationParameters );
         if ( validationResult.Exception is not null ) { return new LoginResult( validationResult.Exception ); }

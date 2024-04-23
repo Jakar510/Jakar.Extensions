@@ -110,6 +110,9 @@ public readonly record struct ErrorOr<T>( in T? Value, Error[]? Errors )
     public static ErrorOr<T> Create( params Error[] errors ) => new(default, errors);
 
 
+    public Status GetStatus() => Errors?.Max( static x => x.StatusCode ) ?? Status.Ok;
+
+
     public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Error[]? error )
     {
         if ( Value is not null )
@@ -158,6 +161,9 @@ public readonly record struct ErrorOr<T>( in T? Value, Error[]? Errors )
     }
 
 
+    public static implicit operator OneOf<T?, Error[]>( ErrorOr<T> result ) => result.HasValue
+                                                                                  ? result.Value
+                                                                                  : result.Errors ?? [];
     public static implicit operator T?( ErrorOr<T>                    result ) => result.Value;
     public static implicit operator Error[]( ErrorOr<T>               result ) => result.Errors ?? [];
     public static implicit operator ReadOnlySpan<Error>( ErrorOr<T>   result ) => result.Errors;
@@ -166,91 +172,4 @@ public readonly record struct ErrorOr<T>( in T? Value, Error[]? Errors )
     public static implicit operator ErrorOr<T>( Error                 error )  => Create( error );
     public static implicit operator ErrorOr<T>( List<Error>           errors ) => Create( [..errors] );
     public static implicit operator ErrorOr<T>( Error[]               errors ) => Create( errors );
-}
-
-
-
-/// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-/// <typeparam name="T"> </typeparam>
-/// <typeparam name="TError"> </typeparam>
-/// <param name="Value"> </param>
-/// <param name="Errors"> </param>
-[Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOr<T, TError>( in T? Value, TError[]? Errors )
-    where TError : IErrorDetails
-{
-    public static ErrorOr<T, TError> Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(default, null); }
-
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Errors) )]
-#endif
-    public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Errors?.Length is > 0; }
-
-
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Value) )]
-#endif
-    public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
-
-
-    public static ErrorOr<T, TError> Create( in     T        value )  => new(value, null);
-    public static ErrorOr<T, TError> Create( params TError[] errors ) => new(default, errors);
-
-
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out TError[]? error )
-    {
-        if ( Value is not null )
-        {
-            value = Value;
-            error = null;
-            return true;
-        }
-
-        value = default;
-        error = Errors ?? [];
-        return false;
-    }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, out ReadOnlyMemory<TError> error )
-    {
-        if ( Value is not null )
-        {
-            value = Value;
-            error = null;
-            return true;
-        }
-
-        value = default;
-        error = Errors;
-        return false;
-    }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value )
-    {
-        value = Value;
-        return value is not null;
-    }
-    public bool TryGetValue( [NotNullWhen( true )] out TError[]? error )
-    {
-        error = Errors;
-        return error is not null;
-    }
-    public bool TryGetValue( out ReadOnlyMemory<TError> error )
-    {
-        error = Errors;
-        return error.IsEmpty is false;
-    }
-    public bool TryGetValue( out ReadOnlySpan<TError> error )
-    {
-        error = Errors;
-        return error.IsEmpty is false;
-    }
-
-
-    public static implicit operator T?( ErrorOr<T, TError>                     result ) => result.Value;
-    public static implicit operator TError[]( ErrorOr<T, TError>               result ) => result.Errors ?? [];
-    public static implicit operator ReadOnlySpan<TError>( ErrorOr<T, TError>   result ) => result.Errors;
-    public static implicit operator ReadOnlyMemory<TError>( ErrorOr<T, TError> result ) => result.Errors;
-    public static implicit operator ErrorOr<T, TError>( T                      value )  => Create( value );
-    public static implicit operator ErrorOr<T, TError>( TError                 error )  => Create( error );
-    public static implicit operator ErrorOr<T, TError>( List<TError>           errors ) => Create( [..errors] );
-    public static implicit operator ErrorOr<T, TError>( TError[]               errors ) => Create( errors );
 }

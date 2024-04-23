@@ -120,6 +120,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         return AddDisposable( table );
     }
 
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
@@ -127,6 +128,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _tables.Add( value );
         return value;
     }
+   
+    
     public void ResetCaches()
     {
         foreach ( IDbTable table in _tables ) { table.ResetCaches(); }
@@ -186,34 +189,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<OneOf<Tokens, Error>> Register( VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
+    public ValueTask<ErrorOr<Tokens>> Register( VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
         this.TryCall( Register, request, rights, types, token );
-    public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOr<Tokens>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return new Error( Status.BadRequest, request ); }
+        if ( record is not null ) { return Error.NotFound( request.UserName ); }
 
-
-        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false )
-        {
-            ModelStateDictionary state = new ModelStateDictionary();
-            state.AddModelError( "Error", "Password Validation Failed" );
-
-            if ( results.LengthPassed ) { state.AddModelError( "Details", "Password not long enough" ); }
-
-            if ( results.SpecialPassed ) { state.AddModelError( "Details", "Password must contain a special character" ); }
-
-            if ( results.NumericPassed ) { state.AddModelError( "Details", "Password must contain a numeric character" ); }
-
-            if ( results.LowerPassed ) { state.AddModelError( "Details", "Password must contain a lower case character" ); }
-
-            if ( results.UpperPassed ) { state.AddModelError( "Details", "Password must contain a upper case character" ); }
-
-            if ( results.BlockedPassed ) { state.AddModelError( "Details", "Password cannot be a blocked password" ); }
-
-            return new Error( Status.BadRequest, state );
-        }
-
+        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return results.ToErrors<Tokens>(); }
 
         record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, record, token );

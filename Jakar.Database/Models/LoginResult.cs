@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/10/2022  5:17 PM
 
+using Microsoft.Extensions.Primitives;
+
+
+
 namespace Jakar.Database;
 
 
@@ -27,26 +31,18 @@ public readonly record struct LoginResult( LoginResult.State Result, UserRecord?
     public Error? GetResult() =>
         Result switch
         {
-            State.Success => default,
-            State.UnknownError when Exception is not null => new Error( Status.InternalServerError,
-                                                                        new ProblemDetails
-                                                                        {
-                                                                            Detail   = Exception.Message,
-                                                                            Instance = Exception.Source,
-                                                                            Status   = (int)Status.InternalServerError,
-                                                                            Title    = Exception.MethodName(),
-                                                                            Type     = Exception.GetType().Name
-                                                                        } ),
-            State.UnknownError when Model is not null => new Error( Status.InternalServerError, GetModelStateDictionary() ),
-            State.UnknownError                        => new Error( Status.InternalServerError ),
-            State.BadCredentials                      => new Error( Status.Unauthorized ),
-            State.Inactive                            => new Error( Status.Forbidden ),
-            State.Locked                              => new Error( Status.Locked ),
-            State.Disabled                            => new Error( Status.Disabled ),
-            State.ExpiredSubscription                 => new Error( Status.PaymentRequired ),
-            State.NoSubscription                      => new Error( Status.PaymentRequired ),
-            State.NotFound                            => new Error( Status.NotFound ),
-            _                                         => throw new OutOfRangeException( nameof(Result), Result )
+            State.Success                                 => default,
+            State.UnknownError when Exception is not null => Error.Create( Status.InternalServerError, Exception.GetType().Name, Exception.Message, Exception.Source, Exception.MethodName(), StringValues.Empty ),
+            State.UnknownError when Model is not null     => new Error( Status.InternalServerError, GetModelStateDictionary() ),
+            State.UnknownError                            => new Error( Status.InternalServerError ),
+            State.BadCredentials                          => new Error( Status.Unauthorized ),
+            State.Inactive                                => new Error( Status.Forbidden ),
+            State.Locked                                  => new Error( Status.Locked ),
+            State.Disabled                                => new Error( Status.Disabled ),
+            State.ExpiredSubscription                     => new Error( Status.PaymentRequired ),
+            State.NoSubscription                          => new Error( Status.PaymentRequired ),
+            State.NotFound                                => new Error( Status.NotFound ),
+            _                                             => throw new OutOfRangeException( nameof(Result), Result )
         };
     public bool GetResult( [NotNullWhen( false )] out UserRecord? caller )
     {

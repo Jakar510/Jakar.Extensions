@@ -754,7 +754,6 @@ public sealed record UserRecord( Guid                          UserID,
         return Modified();
     }
     public UserRecord Lock() => Lock( DefaultLockoutTime );
-
     public UserRecord Lock( scoped in TimeSpan lockoutTime )
     {
         DateTimeOffset lockDate = DateTimeOffset.UtcNow;

@@ -43,18 +43,17 @@
         }
 
 
-        public ValueTask<OneOf<UserLoginInfoRecord, Error>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
-        public virtual async ValueTask<OneOf<UserLoginInfoRecord, Error>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
+        public ValueTask<ErrorOr<UserLoginInfoRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
+        public virtual async ValueTask<ErrorOr<UserLoginInfoRecord>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
         {
             UserLoginInfoRecord? record = await UserLogins.Get( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, login ), token );
 
             if ( record is not null )
             {
-                ModelStateDictionary state = new ModelStateDictionary();
-                state.AddModelError( nameof(login.LoginProvider), login.LoginProvider );
-                state.AddModelError( nameof(login.ProviderKey),   login.ProviderKey );
-                state.AddModelError( nameof(UserRecord.UserID),   user.UserID.ToString() );
-                return new Error( Status.Conflict, state );
+                Error provider = Error.NotFound( nameof(UserLoginInfoRecord.LoginProvider), login.LoginProvider );
+                Error key      = Error.NotFound( nameof(UserLoginInfoRecord.ProviderKey),   login.ProviderKey );
+                Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.OwnerUserID),   user.UserID.ToString() );
+                return ErrorOr<UserLoginInfoRecord>.Create( provider, key, userID );
             }
 
             record = new UserLoginInfoRecord( user, login );

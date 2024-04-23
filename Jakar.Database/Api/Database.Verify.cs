@@ -130,10 +130,10 @@ public abstract partial class Database
 
     public virtual async ValueTask<OneOf<Tokens, Error>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, CancellationToken token = default )
     {
-        if ( request.Data is null ) { return new Error( Status.BadRequest, $"{nameof(request.Data)} is null" ); }
+        if ( request.Data is null ) { return Error.Create( Status.BadRequest, $"{nameof(request.Data)} is null" ); }
 
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return new Error( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}" ); }
+        if ( record is not null ) { return Error.Create( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}" ); }
 
         record = CreateNewUser( request );
         record = await Users.Insert( connection, transaction, record, token );
