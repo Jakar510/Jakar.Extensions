@@ -41,7 +41,7 @@ public static class Tests
 
     public static async ValueTask Test_ConcurrentObservableCollection( CancellationToken token = default )
     {
-        ConcurrentObservableCollection<long> collection = new ConcurrentObservableCollection<long>();
+        ConcurrentObservableCollection<long> collection = [];
         await collection.AddAsync( Enumerable.Range( 0, 1000 ).Select<int, long>( static x => x ), token );
 
         foreach ( long x in collection ) { }

@@ -19,14 +19,14 @@ try
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
 
-    // await PasswordChecker.Run();
+    await PasswordChecker.Run();
 
     // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
 
-    StringValues values = new[] { "this is a test" };
-    values.WriteToConsole();
-    Console.WriteLine();
-    values.ToPrettyJson().WriteToConsole();
+    // StringValues values = new[] { "this is a test" };
+    // values.WriteToConsole();
+    // Console.WriteLine();
+    // values.ToPrettyJson().WriteToConsole();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }
