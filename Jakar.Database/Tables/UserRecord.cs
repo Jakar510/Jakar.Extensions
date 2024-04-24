@@ -478,7 +478,13 @@ public sealed record UserRecord( Guid                          UserID,
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         UserRecoveryCodeRecord.Where( connection, transaction, db.RecoveryCodes, this, token );
 
-
+    
+    public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+        where TEnum : struct, Enum
+    {
+        Rights = rights.ToString();
+        return this;
+    }
     public async ValueTask<UserModel<Guid>> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
     {
         UserModel<Guid> model = new(this);

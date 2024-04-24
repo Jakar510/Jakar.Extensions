@@ -12,6 +12,24 @@ public interface IUserRights
 
 
 
+public interface IUserRights<out T> : IUserRights
+    where T : IUserRights<T>
+{
+    public T WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+        where TEnum : struct, Enum;
+}
+
+
+
+public interface IUserRights<out T, TEnum> : IUserRights
+    where TEnum : struct, Enum
+    where T : IUserRights<T, TEnum>
+{
+    public T WithRights( scoped in UserRights<TEnum> rights );
+}
+
+
+
 public static class RightsExtensions
 {
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]

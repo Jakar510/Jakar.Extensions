@@ -79,7 +79,6 @@ public static class HostedServiceExtensions
 
     public sealed class ServiceThread : Service
     {
-        private const    string                   EMPTY = "";
         private readonly CancellationToken        _token;
         private readonly IHostedService           _service;
         private readonly ILogger                  _logger;

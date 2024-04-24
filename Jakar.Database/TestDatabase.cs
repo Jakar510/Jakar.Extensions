@@ -48,8 +48,8 @@ internal sealed class TestDatabase : Database
 
         Console.WriteLine();
 
-        // try { await InternalTestAsync<T>(); }
-        // catch ( Exception e ) { Console.WriteLine( e ); }
+        try { await InternalTestAsync<T>(); }
+        catch ( Exception e ) { Console.WriteLine( e ); }
 
         Console.ReadKey();
     }

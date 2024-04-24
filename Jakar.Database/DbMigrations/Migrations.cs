@@ -209,10 +209,10 @@ public static partial class Migrations
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context )
         where T : BaseRecord
     {
-        PropertyInfo[]             items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
-        Dictionary<string, object> columns = new Dictionary<string, object?>();
+        PropertyInfo[]              properties = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+        Dictionary<string, object?> columns    = new(properties.Length);
 
-        foreach ( PropertyInfo property in items )
+        foreach ( PropertyInfo property in properties )
 
         {
             object? value = property.GetValue( context );
@@ -292,7 +292,7 @@ public static partial class Migrations
     public static async ValueTask MigrateDown( this IHost app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateDown( 0 );
     }
     public static async ValueTask MigrateDown( this IHost app, string key )
@@ -305,7 +305,7 @@ public static partial class Migrations
     public static async ValueTask MigrateUp( this IHost app, long? version = default )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( version.HasValue )

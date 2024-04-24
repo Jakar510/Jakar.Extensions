@@ -33,34 +33,42 @@ public abstract partial class Database
 
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
-    public ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
-    protected virtual async ValueTask<Tokens?> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOr<Tokens>> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
+    protected virtual async ValueTask<ErrorOr<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        UserRecord? user = await Users.Get( nameof(UserRecord.UserName), request.UserName, token );
-        if ( user is null ) { return default; }
+        UserRecord? record = await Users.Get( nameof(UserRecord.UserName), request.UserName, token );
+        if ( record is null ) { return default; }
 
-        if ( !await ValidateSubscription( connection, transaction, user, token ) ) { return default; }
+        ErrorOr<SubscriptionStatus> status = await ValidateSubscription( connection, transaction, record, token );
 
-        if ( user.IsDisabled )
+        if ( status.HasErrors )
         {
-            user = user.MarkBadLogin();
-            await Users.Update( connection, transaction, user, token );
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, record, token );
 
-            return default;
+            return status.Errors;
         }
 
-        if ( user.IsLocked )
+        if ( record.IsDisabled )
         {
-            user = user.MarkBadLogin();
-            await Users.Update( connection, transaction, user, token );
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, record, token );
 
-            return default;
+            return Error.Disabled();
+        }
+
+        if ( record.IsLocked )
+        {
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, record, token );
+
+            return Error.Locked();
         }
 
 
-        if ( UserRecord.VerifyPassword( ref user, request ) ) { return await GetToken( connection, transaction, user, types, token ); }
+        if ( UserRecord.VerifyPassword( ref record, request ) ) { return await GetToken( connection, transaction, record, types, token ); }
 
-        await Users.Update( connection, transaction, user, token );
+        await Users.Update( connection, transaction, record, token );
         return default;
     }
 
@@ -171,7 +179,7 @@ public abstract partial class Database
             Exception e = validationResult.Exception;
             return Error.Create( Status.InternalServerError, e.GetType().Name, e.Message, e.Source, e.MethodName() );
         }
-        
+
         Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
         UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
         if ( record is null ) { return Error.NotFound(); }

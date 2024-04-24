@@ -4,6 +4,16 @@
 namespace Jakar.Database;
 
 
+public enum SubscriptionStatus
+{
+    None,
+    Invalid,
+    Expired,
+    Ok,
+}
+
+
+
 public abstract partial class Database
 {
     [SuppressMessage( "ReSharper", "UnusedParameter.Global" )] public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
@@ -14,7 +24,7 @@ public abstract partial class Database
     /// <summary> </summary>
     /// <returns> <see langword="true"/> is Subscription is valid; otherwise <see langword="false"/> </returns>
     [SuppressMessage( "ReSharper", "UnusedParameter.Global" )]
-    public virtual ValueTask<bool> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(true);
+    public virtual ValueTask<ErrorOr<SubscriptionStatus>> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(SubscriptionStatus.Ok);
 
 
     protected virtual async ValueTask<ErrorOr<UserRecord>> VerifyLogin( DbConnection connection, DbTransaction transaction, VerifyRequest request, CancellationToken token = default )
@@ -33,25 +43,27 @@ public abstract partial class Database
             if ( !record.IsActive )
             {
                 record = record.MarkBadLogin();
-                return Error.Create( Status.Disabled );
+                return Error.Disabled();
             }
 
             if ( record.IsDisabled )
             {
                 record = record.MarkBadLogin();
-                return Error.Create( Status.Disabled );
+                return Error.Disabled();
             }
 
             if ( record.IsLocked )
             {
                 record = record.MarkBadLogin();
-                return Error.Create( Status.Locked );
+                return Error.Locked();
             }
 
-            if ( !await ValidateSubscription( connection, transaction, record, token ) )
+            ErrorOr<SubscriptionStatus> status = await ValidateSubscription( connection, transaction, record, token );
+
+            if ( status.HasErrors )
             {
                 record = record.MarkBadLogin();
-                return Error.Create( Status.PaymentRequired );
+                return status.Errors;
             }
 
             return record;

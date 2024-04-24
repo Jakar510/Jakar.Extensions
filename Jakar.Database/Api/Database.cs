@@ -196,7 +196,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.NotFound( request.UserName ); }
 
-        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Unauthorized( results ); }
+        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Unauthorized( results ); }
 
         record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, record, token );
@@ -242,39 +242,5 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
 
         while ( await reader.ReadAsync( token ) ) { yield return reader.GetFieldValue<T>( 0 ); }
-    }
-
-
-    public static Error Unauthorized( scoped in PasswordValidator.Results results,
-                                      string                              lengthPassed  = "Password not long enough",
-                                      string                              mustBeTrimmed = "Password must be trimmed",
-                                      string                              specialPassed = "Password must contain a special character",
-                                      string                              numericPassed = "Password must contain a numeric character",
-                                      string                              lowerPassed   = "Password must contain a lower case character",
-                                      string                              upperPassed   = "Password must contain a upper case character",
-                                      string                              blockedPassed = "Password cannot be a blocked password",
-                                      string                              type          = "PASSWORD_VALIDATION_TYPE",
-                                      string                              title         = "PASSWORD_VALIDATION_TITLE",
-                                      string?                             detail        = null,
-                                      string?                             instance      = null
-    )
-    {
-        using Buffer<string> errors = new(10);
-
-        if ( results.LengthPassed ) { errors.Add( lengthPassed ); }
-
-        if ( results.MustBeTrimmed ) { errors.Add( mustBeTrimmed ); }
-
-        if ( results.SpecialPassed ) { errors.Add( specialPassed ); }
-
-        if ( results.NumericPassed ) { errors.Add( numericPassed ); }
-
-        if ( results.LowerPassed ) { errors.Add( lowerPassed ); }
-
-        if ( results.UpperPassed ) { errors.Add( upperPassed ); }
-
-        if ( results.BlockedPassed ) { errors.Add( blockedPassed ); }
-
-        return Error.Unauthorized( type, title, [.. errors.Span], detail, instance );
     }
 }

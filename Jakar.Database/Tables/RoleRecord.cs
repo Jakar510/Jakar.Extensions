@@ -27,6 +27,12 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
 
+    public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+        where TEnum : struct, Enum
+    {
+        Rights = rights.ToString();
+        return this;
+    }
 
     [Pure]
     public override DynamicParameters ToDynamicParameters()
@@ -47,10 +53,10 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         string                concurrencyStamp = reader.GetFieldValue<string>( nameof(ConcurrencyStamp) );
         DateTimeOffset        dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                   ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        Guid                  ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>? createdBy        = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        RoleRecord                   record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

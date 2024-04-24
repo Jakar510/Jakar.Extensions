@@ -20,10 +20,17 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
 
 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID ) : this( customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, IUserRights rights ) : this( customerID, nameOfGroup, rights.ToString(), RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }
+    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, string rights ) : this( customerID, nameOfGroup, rights, RecordID<GroupRecord>.New(), owner?.ID, owner?.UserID, DateTimeOffset.UtcNow ) { }
     public GroupModel<Guid> ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()
         where TGroupModel : IGroupModel<TGroupModel, Guid> => TGroupModel.Create( this );
+
+    public GroupRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+        where TEnum : struct, Enum
+    {
+        Rights = rights.ToString();
+        return this;
+    }
 
 
     [Pure]
@@ -44,10 +51,10 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         string                rights       = reader.GetFieldValue<string>( nameof(Rights) );
         DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                   ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        Guid                  ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
         RecordID<UserRecord>? createdBy    = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
-        GroupRecord                   record       = new GroupRecord( customerID, nameOfGroup, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        GroupRecord           record       = new GroupRecord( customerID, nameOfGroup, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
