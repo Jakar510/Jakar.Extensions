@@ -33,25 +33,25 @@ public abstract partial class Database
             if ( !record.IsActive )
             {
                 record = record.MarkBadLogin();
-                return Error.Disabled();
+                return Error.Create( Status.Disabled );
             }
 
             if ( record.IsDisabled )
             {
                 record = record.MarkBadLogin();
-                return Error.Disabled();
+                return Error.Create( Status.Disabled );
             }
 
             if ( record.IsLocked )
             {
                 record = record.MarkBadLogin();
-                return Error.Locked();
+                return Error.Create( Status.Locked );
             }
 
             if ( !await ValidateSubscription( connection, transaction, record, token ) )
             {
                 record = record.MarkBadLogin();
-                return Error.ExpiredSubscription();
+                return Error.Create( Status.PaymentRequired );
             }
 
             return record;
