@@ -252,69 +252,66 @@ public sealed record UserRecord( Guid                          UserID,
     }
 
 
-    public static UserRecord Create<TUser, TEnum>( VerifyRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
-        where TUser : IUserData<Guid>
+    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, UserRecord? caller = default )
+        where TUser : class, IUserData<Guid>
+        where TEnum : struct, Enum => Create( request, UserRights<TEnum>.Create( request.Data ), caller );
+    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
+        where TUser : class, IUserData<Guid>
         where TEnum : struct, Enum => Create( request, rights.ToString(), caller );
-
-
-    public static UserRecord Create<TUser>( VerifyRequest<TUser> request, string rights, UserRecord? caller = default )
-        where TUser : IUserData<Guid>
+    public static UserRecord Create<TUser>( ILoginRequest<TUser> request, string rights, UserRecord? caller = default )
+        where TUser : class, IUserData<Guid>
     {
         ArgumentNullException.ThrowIfNull( request.Data );
-        UserRecord record = Create( request.UserName, rights, request.Data, caller );
-        return record.WithPassword( request.Password ).Enable();
+        return Create( request.UserName, rights, request.Data, caller ).WithPassword( request.Password ).Enable();
     }
-
-
-    public static UserRecord Create( string userName, string rights, IUserData<Guid> data, UserRecord? caller = default ) => new(Guid.NewGuid(),
-                                                                                                                                 userName,
-                                                                                                                                 data.FirstName,
-                                                                                                                                 data.LastName,
-                                                                                                                                 data.FullName,
-                                                                                                                                 rights,
-                                                                                                                                 data.Gender,
-                                                                                                                                 data.Company,
-                                                                                                                                 data.Description,
-                                                                                                                                 data.Department,
-                                                                                                                                 data.Title,
-                                                                                                                                 data.Website,
-                                                                                                                                 data.PreferredLanguage,
-                                                                                                                                 data.Email,
-                                                                                                                                 false,
-                                                                                                                                 data.PhoneNumber,
-                                                                                                                                 data.Ext,
-                                                                                                                                 false,
-                                                                                                                                 false,
-                                                                                                                                 null,
-                                                                                                                                 null,
-                                                                                                                                 null,
-                                                                                                                                 null,
-                                                                                                                                 0,
-                                                                                                                                 false,
-                                                                                                                                 null,
-                                                                                                                                 null,
-                                                                                                                                 string.Empty,
-                                                                                                                                 string.Empty,
-                                                                                                                                 string.Empty,
-                                                                                                                                 null,
-                                                                                                                                 null,
-                                                                                                                                 true,
-                                                                                                                                 false,
-                                                                                                                                 string.Empty,
-                                                                                                                                 string.Empty,
-                                                                                                                                 RecordID<UserRecord>.TryCreate( data.EscalateTo ),
-                                                                                                                                 data.AdditionalData,
-                                                                                                                                 RecordID<FileRecord>.TryCreate( data.ImageID ),
-                                                                                                                                 RecordID<UserRecord>.New(),
-                                                                                                                                 caller?.ID,
-                                                                                                                                 caller?.UserID,
-                                                                                                                                 DateTimeOffset.UtcNow);
-
-
+    
+    public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = default )
+        where TUser : class, IUserData<Guid> => new(Guid.NewGuid(),
+                                                    userName,
+                                                    data.FirstName,
+                                                    data.LastName,
+                                                    data.FullName,
+                                                    rights,
+                                                    data.Gender,
+                                                    data.Company,
+                                                    data.Description,
+                                                    data.Department,
+                                                    data.Title,
+                                                    data.Website,
+                                                    data.PreferredLanguage,
+                                                    data.Email,
+                                                    false,
+                                                    data.PhoneNumber,
+                                                    data.Ext,
+                                                    false,
+                                                    false,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    null,
+                                                    0,
+                                                    false,
+                                                    null,
+                                                    null,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    null,
+                                                    null,
+                                                    true,
+                                                    false,
+                                                    string.Empty,
+                                                    string.Empty,
+                                                    RecordID<UserRecord>.TryCreate( data.EscalateTo ),
+                                                    data.AdditionalData,
+                                                    RecordID<FileRecord>.TryCreate( data.ImageID ),
+                                                    RecordID<UserRecord>.New(),
+                                                    caller?.ID,
+                                                    caller?.UserID,
+                                                    DateTimeOffset.UtcNow);
+    
     public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
         where TEnum : struct, Enum => Create( userName, password, rights.ToString(), caller );
-
-
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>
         new UserRecord( Guid.NewGuid(),
                         userName,
@@ -370,21 +367,18 @@ public sealed record UserRecord( Guid                          UserID,
         parameters.Add( nameof(FullName),  data.FullName );
         return parameters;
     }
-
     public static DynamicParameters GetDynamicParameters( ILoginRequest request )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(UserName), request.UserName );
         return parameters;
     }
-
     public static DynamicParameters GetDynamicParameters( string userName )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(UserName), userName );
         return parameters;
     }
-
     public static DynamicParameters GetDynamicParameters( Guid userID )
     {
         DynamicParameters parameters = new();
@@ -401,7 +395,8 @@ public sealed record UserRecord( Guid                          UserID,
                                                                    };
 
 
-    public void With( IUserData<Guid> value )
+    void IUserData<Guid>.With( IUserData<Guid> value ) => With( value );
+    public UserRecord With( IUserData<Guid> value )
     {
         CreatedBy         = RecordID<UserRecord>.TryCreate( value.CreatedBy );
         EscalateTo        = RecordID<UserRecord>.TryCreate( value.EscalateTo );
@@ -419,10 +414,12 @@ public sealed record UserRecord( Guid                          UserID,
         PreferredLanguage = value.PreferredLanguage;
 
         IDictionary<string, JToken?>? data = value?.AdditionalData;
-        if ( data is null ) { return; }
+        if ( data is null ) { return this; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
         foreach ( (string key, JToken? jToken) in data ) { AdditionalData[key] = jToken; }
+
+        return this;
     }
 
 
@@ -478,7 +475,7 @@ public sealed record UserRecord( Guid                          UserID,
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
         UserRecoveryCodeRecord.Where( connection, transaction, db.RecoveryCodes, this, token );
 
-    
+
     public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
         where TEnum : struct, Enum
     {

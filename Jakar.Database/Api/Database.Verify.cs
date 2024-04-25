@@ -16,7 +16,7 @@ public enum SubscriptionStatus
 
 public abstract partial class Database
 {
-    [SuppressMessage( "ReSharper", "UnusedParameter.Global" )] public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(default(DateTimeOffset?));
+    public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(record.SubscriptionExpires);
     public virtual ValueTask<TRecord?> TryGetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
         where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> => default;
 
@@ -113,10 +113,9 @@ public abstract partial class Database
     }
 
 
-    public virtual async ValueTask<ErrorOr<Tokens>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOr<Tokens>> Register<TUser>( DbConnection connection, DbTransaction transaction, ILoginRequest<TUser> request, CancellationToken token = default )
+        where TUser : class, IUserData<Guid>
     {
-        if ( request.Data is null ) { return Error.Create( Status.BadRequest, $"{nameof(request.Data)} is null" ); }
-
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.Create( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}" ); }
 
@@ -124,11 +123,13 @@ public abstract partial class Database
         record = await Users.Insert( connection, transaction, record, token );
         return await GetToken( connection, transaction, record, DEFAULT_CLAIM_TYPES, token );
     }
-    protected virtual UserRecord CreateNewUser( VerifyRequest<UserModel<Guid>> request ) => UserRecord.Create( request, string.Empty );
+    protected virtual UserRecord CreateNewUser<TUser>( ILoginRequest<TUser> request, UserRecord? caller = default )
+        where TUser : class, IUserData<Guid> => UserRecord.Create( request, request.Data.Rights, caller );
 
 
-    public ValueTask<ErrorOr<Tokens>> Register( VerifyRequest<UserModel<Guid>> request, CancellationToken              token                         = default ) => this.TryCall( Register, request, token );
-    public ValueTask<ErrorOr<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, T>            func, CancellationToken token = default ) => this.TryCall( Verify,   request, func, token );
-    public ValueTask<ErrorOr<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, ValueTask<T>> func, CancellationToken token = default ) => this.TryCall( Verify,   request, func, token );
-    public ValueTask<ErrorOr<T>>      Verify<T>( VerifyRequest                 request, Func<UserRecord, Task<T>>      func, CancellationToken token = default ) => this.TryCall( Verify,   request, func, token );
+    public ValueTask<ErrorOr<Tokens>> Register<TUser>( ILoginRequest<TUser> request, CancellationToken token = default )
+        where TUser : class, IUserData<Guid> => this.TryCall( Register, request, token );
+    public ValueTask<ErrorOr<T>> Verify<T>( VerifyRequest request, Func<UserRecord, T>            func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public ValueTask<ErrorOr<T>> Verify<T>( VerifyRequest request, Func<UserRecord, ValueTask<T>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public ValueTask<ErrorOr<T>> Verify<T>( VerifyRequest request, Func<UserRecord, Task<T>>      func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
 }

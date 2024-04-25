@@ -89,10 +89,8 @@ public abstract partial class Database
     public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall( GetToken, user, types, token );
     public virtual async ValueTask<Tokens> GetToken( DbConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        Claim[]         claims  = await record.GetUserClaims( connection, transaction, this, types, token );
-        DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
-
-
+        Claim[]            claims         = await record.GetUserClaims( connection, transaction, this, types, token );
+        DateTimeOffset?    expires        = await GetSubscriptionExpiration( connection, transaction, record, token );
         DateTime           refreshExpires = GetExpiration( expires, RefreshTokenExpirationTime );
         SigningCredentials credentials    = await GetSigningCredentials( token );
 
@@ -170,7 +168,7 @@ public abstract partial class Database
     public ValueTask<ErrorOr<UserRecord>> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( VerifyLogin, jsonToken, types, token );
     protected virtual async ValueTask<ErrorOr<UserRecord>> VerifyLogin( DbConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
-        JwtSecurityTokenHandler   handler              = new JwtSecurityTokenHandler();
+        JwtSecurityTokenHandler   handler              = new();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters( token );
         TokenValidationResult     validationResult     = await handler.ValidateTokenAsync( jsonToken, validationParameters );
 
@@ -191,39 +189,47 @@ public abstract partial class Database
     }
 
 
-    public async ValueTask<UserLoginInfoRecord[]> GetUserLoginInfoRecords( string purpose, UserRecord user, CancellationToken token = default )
+    public async ValueTask<UserLoginInfoRecord[]> GetUserLoginInfoRecords( string purpose, UserRecord user, CancellationToken token )
     {
         HashSet<UserLoginInfoRecord> list = await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user, purpose ), token ).ToHashSet( token );
         return [..list];
     }
-    async Task<string> IUserTwoFactorTokenProvider<UserRecord>.GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) => await GenerateAsync( purpose, manager, user );
-    public virtual async ValueTask<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user, CancellationToken token = default )
+
+
+    public Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) => GenerateAsync( purpose, manager, user, CancellationToken.None );
+    public virtual async Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user, CancellationToken token )
     {
         Tokens tokens = await GetToken( user, token: token );
         return tokens.AccessToken;
     }
-    async Task<bool> IUserTwoFactorTokenProvider<UserRecord>.ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user ) => await ValidateAsync( purpose, token, manager, user );
-    public virtual async ValueTask<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user, CancellationToken cancellationToken = default )
+
+
+    public Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user ) => ValidateAsync( purpose, token, manager, user, CancellationToken.None );
+    public virtual async Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user, CancellationToken cancellationToken )
     {
+        // AuthenticatorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>();
+        // return await provider.ValidateAsync( purpose, token, manager, user );
         string? key = await manager.GetAuthenticatorKeyAsync( user );
 
         if ( string.IsNullOrWhiteSpace( key ) is false )
         {
-            if ( int.TryParse( token, out _ ) )
-            {
-                AuthenticatorTokenProvider<UserRecord> provider = new AuthenticatorTokenProvider<UserRecord>();
-                return await provider.ValidateAsync( purpose, token, manager, user );
-            }
+            if ( long.TryParse( token, out _ ) ) { return OneTimePassword.Create( key, Settings.TokenIssuer ).ValidateToken( token ); }
 
-            IOneTimePassword otp = OneTimePassword.Create( key, Settings.TokenIssuer );
-            return otp.ValidateToken( token );
+            JwtSecurityTokenHandler   handler    = new();
+            TokenValidationParameters parameters = await GetTokenValidationParameters( cancellationToken );
+            TokenValidationResult     result     = await handler.ValidateTokenAsync( token, parameters );
+            return result.IsValid;
         }
-
-        ErrorOr<Tokens> result = await Verify( token, token: cancellationToken );
-        return result.HasValue;
+        else
+        {
+            ErrorOr<Tokens> result = await Verify( token, token: cancellationToken );
+            return result.HasValue;
+        }
     }
-    async Task<bool> IUserTwoFactorTokenProvider<UserRecord>.CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => await CanGenerateTwoFactorTokenAsync( manager, user );
-    public virtual async ValueTask<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user, CancellationToken token = default )
+
+
+    public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => CanGenerateTwoFactorTokenAsync( manager, user, CancellationToken.None );
+    public virtual async Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user, CancellationToken token )
     {
         if ( user.IsValidID() is false || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
 

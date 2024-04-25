@@ -15,6 +15,7 @@ public partial class DbTable<TRecord>
     public ValueTask Delete( IAsyncEnumerable<RecordID<TRecord>> ids,      CancellationToken token                               = default ) => this.TryCall( Delete, ids,      token );
     public ValueTask Delete( bool                                matchAll, DynamicParameters parameters, CancellationToken token = default ) => this.TryCall( Delete, matchAll, parameters, token );
 
+
     public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, TRecord              record,  CancellationToken token = default ) => Delete( connection, transaction, record.ID,                   token );
     public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, CancellationToken token = default ) => Delete( connection, transaction, records.Select( x => x.ID ), token );
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, CancellationToken token = default )
@@ -29,8 +30,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Delete( id );
-
+        SqlCommand        sql     = _sqlCache.Delete( id );
         CommandDefinition command = _database.GetCommand( sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }

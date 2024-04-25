@@ -238,10 +238,10 @@ public static class DbServices
                          .AddRoleManager<RoleManager>()
                          .AddSignInManager<SignInManager>()
                          .AddUserValidator<UserValidator>()
-                         .AddTokenProvider<TokenProvider>( nameof(TokenProvider) )
                          .AddRoleValidator<RoleValidator>()
                          .AddPasswordValidator<UserPasswordValidator>()
-                         .AddDefaultTokenProviders();
+                         .AddDefaultTokenProviders()
+                         .AddTokenProvider<TokenProvider>( nameof(TokenProvider) );
 
         static void ConfigureIdentityOptions( IdentityOptions _ ) { }
     }

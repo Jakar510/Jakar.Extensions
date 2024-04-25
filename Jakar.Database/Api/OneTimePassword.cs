@@ -4,17 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface IOneTimePassword
-{
-    bool          ValidateToken( string token, VerificationWindow? window = default );
-    public string GetContent( IUserName record );
-    public string GetQrCode( IUserName  record, int size,  BarcodeFormat format                       = BarcodeFormat.QR_CODE );
-    public string GetQrCode( IUserName  record, int width, int           height, BarcodeFormat format = BarcodeFormat.QR_CODE );
-}
-
-
-
-public sealed class OneTimePassword : IOneTimePassword
+public readonly struct OneTimePassword
 {
     private readonly byte[] _key;
     private readonly string _issuer;
@@ -31,9 +21,9 @@ public sealed class OneTimePassword : IOneTimePassword
     }
 
 
-    public static IOneTimePassword Create( string secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
-    public static IOneTimePassword Create<T>( string secretKey )
-        where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
+    public static OneTimePassword Create( string secretKey, string issuer ) => new(secretKey, issuer);
+    public static OneTimePassword Create<T>( string secretKey )
+        where T : IAppName => new(secretKey, typeof(T).Name);
 
 
     public static string GenerateSecret()

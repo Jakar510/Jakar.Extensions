@@ -193,11 +193,9 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID
         await db.Users.Get( connection, transaction, CreatedBy, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord user ) => (TRecord)(this with { OwnerUserID = user.UserID });
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Owns( UserRecord       record ) => CreatedBy == record.ID;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { OwnerUserID = user.UserID });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    Owns( UserRecord       record ) => CreatedBy == record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
     public override int CompareTo( TRecord? other )

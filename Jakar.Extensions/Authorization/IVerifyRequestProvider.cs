@@ -2,9 +2,3 @@
 // 08/24/2022  11:39 AM
 
 namespace Jakar.Extensions;
-
-
-public interface IVerifyRequestProvider
-{
-    public VerifyRequest GetVerifyRequest();
-}
