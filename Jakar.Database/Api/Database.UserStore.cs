@@ -37,8 +37,8 @@
             where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => UserLogins.Where( connection, transaction, nameof(record.OwnerUserID), record.OwnerUserID, token );
 
 
-        public ValueTask<ErrorOr<UserLoginInfoRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
-        public virtual async ValueTask<ErrorOr<UserLoginInfoRecord>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
+        public ValueTask<ErrorOrResult<UserLoginInfoRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
+        public virtual async ValueTask<ErrorOrResult<UserLoginInfoRecord>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
         {
             UserLoginInfoRecord? record = await UserLogins.Get( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, login ), token );
 
@@ -47,7 +47,7 @@
                 Error provider = Error.NotFound( nameof(UserLoginInfoRecord.LoginProvider), login.LoginProvider );
                 Error key      = Error.NotFound( nameof(UserLoginInfoRecord.ProviderKey),   login.ProviderKey );
                 Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.OwnerUserID),   user.UserID.ToString() );
-                return ErrorOr<UserLoginInfoRecord>.Create( provider, key, userID );
+                return ErrorOrResult<UserLoginInfoRecord>.Create( provider, key, userID );
             }
 
             record = new UserLoginInfoRecord( user, login );

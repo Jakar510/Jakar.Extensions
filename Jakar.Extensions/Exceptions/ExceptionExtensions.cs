@@ -109,7 +109,7 @@ public static class ExceptionExtensions
 
 
 #if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodName) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
 #endif
     public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
 
@@ -122,7 +122,7 @@ public static class ExceptionExtensions
 
     public static Dictionary<string, JToken?> GetData( this Exception e )
     {
-        Dictionary<string, JToken> data = new Dictionary<string, JToken?>();
+        Dictionary<string, JToken?> data = new();
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( DictionaryEntry pair in e.Data )

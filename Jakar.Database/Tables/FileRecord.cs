@@ -44,7 +44,7 @@ public sealed record FileRecord( string?              FileName,
 
 
     [Pure]
-    public async ValueTask<ErrorOr<FileData>> ToFileData( CancellationToken token = default )
+    public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
     {
         OneOf<byte[], string, FileData> data = await Read( token );
         if ( data.IsT2 ) { return data.AsT2; }
