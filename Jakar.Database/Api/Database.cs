@@ -31,6 +31,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public             DbTable<UserRoleRecord>         UserRoles         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<UserAddressRecord>      UserAddresses     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<UserRecord>             Users             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<FileRecord>             Files             { get; }
     public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
 
 
@@ -73,6 +74,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
         Addresses         = Create<AddressRecord>();
         UserAddresses     = Create<UserAddressRecord>();
+        Files             = Create<FileRecord>();
         Current           = this;
         Task.Run( InitDataProtector );
     }
@@ -99,7 +101,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
             await InitDataProtector( pem, password );
         }
     }
-    protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ) );
+    protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ), token );
 
 
     protected abstract DbConnection CreateConnection( in SecuredString secure );
