@@ -230,8 +230,13 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new StreamReader( stream );
-            string    errorMessage = await reader.ReadToEndAsync();
+            using StreamReader reader = new StreamReader( stream );
+
+        #if NET7_0_OR_GREATER
+            string             errorMessage = await reader.ReadToEndAsync( token );
+        #else
+            string errorMessage = await reader.ReadToEndAsync();
+        #endif
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
 

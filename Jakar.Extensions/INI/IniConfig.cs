@@ -49,9 +49,9 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         string content = file.Read().AsString();
         return Parse( content, provider );
     }
-    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default )
+    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default, CancellationToken token = default )
     {
-        string content = await file.ReadAsync().AsString();
+        string content = await file.ReadAsync().AsString( token );
         return Parse( content, provider );
     }
 

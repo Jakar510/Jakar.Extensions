@@ -198,5 +198,5 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 
         SetBlockedPasswords( content );
     }
-    public async ValueTask SetBlockedPasswords( LocalFile file ) => SetBlockedPasswords( await file.ReadAsync().AsString() );
+    public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default ) => SetBlockedPasswords( await file.ReadAsync().AsString( token ) );
 }

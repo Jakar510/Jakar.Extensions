@@ -36,18 +36,18 @@ public interface IDataProtector : IDisposable
     public byte[]            Decrypt( LocalFile             file );
     public string            Decrypt( LocalFile             file,  Encoding                                                        encoding );
     public T                 Decrypt<T>( LocalFile          file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
-    public ValueTask<byte[]> DecryptAsync( LocalFile        file,  CancellationToken                                               token = default );
-    public ValueTask<string> DecryptAsync( LocalFile        file,  Encoding                                                        encoding );
+    public ValueTask<byte[]> DecryptAsync( LocalFile        file,  CancellationToken                                               token                             = default );
+    public ValueTask<string> DecryptAsync( LocalFile        file,  Encoding                                                        encoding, CancellationToken token = default );
     public ValueTask<T>      DecryptAsync<T>( LocalFile     file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
-    public ValueTask         DecryptAsync( LocalFile        input, LocalFile                                                       output, CancellationToken token = default );
-    public ValueTask         DecryptAsync( LocalFile        input, LocalFile                                                       output, Encoding          encoding );
-    public ValueTask         EncryptAsync( LocalFile        file,  string                                                          value );
-    public ValueTask         EncryptAsync( LocalFile        file,  string                                                          value, Encoding          encoding );
-    public ValueTask         EncryptAsync( LocalFile        file,  byte[]                                                          value, CancellationToken token = default );
-    public ValueTask<byte[]> EncryptAsync( LocalFile        value, CancellationToken                                               token = default );
-    public ValueTask<string> EncryptAsync( LocalFile        value, Encoding                                                        encoding );
-    public ValueTask         EncryptAsync( LocalFile        input, LocalFile                                                       output, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile        input, LocalFile                                                       output, Encoding          encoding );
+    public ValueTask         DecryptAsync( LocalFile        input, LocalFile                                                       output, CancellationToken token                             = default );
+    public ValueTask         DecryptAsync( LocalFile        input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile        file,  string                                                          value,  CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile        file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile        file,  byte[]                                                          value,  CancellationToken token = default );
+    public ValueTask<byte[]> EncryptAsync( LocalFile        value, CancellationToken                                               token                                                         = default );
+    public ValueTask<string> EncryptAsync( LocalFile        value, Encoding                                                        encoding, CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile        input, LocalFile                                                       output,   CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile        input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
 }
 
 
@@ -97,13 +97,13 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( resources, name, await password.GetSecuredStringAsync( configuration, token ) );
 
 
-    public       DataProtector            WithKeyFile( LocalFile  pem )                                        => WithKey( pem.Read().AsString() );
-    public       DataProtector            WithKeyFile( LocalFile  pem, scoped in ReadOnlySpan<char> password ) => WithKey( pem.Read().AsString(), password );
-    public       DataProtector            WithKeyFile( LocalFile  pem, SecuredString                password ) => WithKey( pem.Read().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem )                                                                                               => WithKey( await pem.ReadAsync().AsString() );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password )                                                        => WithKey( await pem.ReadAsync().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ) );
+    public       DataProtector            WithKeyFile( LocalFile  pem )                                                                                                  => WithKey( pem.Read().AsString() );
+    public       DataProtector            WithKeyFile( LocalFile  pem, scoped in ReadOnlySpan<char> password )                                                           => WithKey( pem.Read().AsString(), password );
+    public       DataProtector            WithKeyFile( LocalFile  pem, SecuredString                password )                                                           => WithKey( pem.Read().AsString(), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken            token                             = default )                        => WithKey( await pem.ReadAsync().AsString( token ) );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration    configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ), token );
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )
@@ -172,30 +172,26 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public T Decrypt<T>( LocalFile file, Func<LocalFile.IReadHandler, IDataProtector, T> func ) => func( file.Read(), this );
     public async ValueTask<byte[]> DecryptAsync( LocalFile file, CancellationToken token = default )
     {
-        byte[] raw = await file.ReadAsync().AsBytes( token );
-
+        byte[] raw    = await file.ReadAsync().AsBytes( token );
         byte[] result = Decrypt( raw );
         return result;
     }
-    public async ValueTask<string> DecryptAsync( LocalFile file, Encoding encoding )
+    public async ValueTask<string> DecryptAsync( LocalFile file, Encoding encoding, CancellationToken token = default )
     {
-        string raw = await file.ReadAsync().AsString();
-
+        string raw    = await file.ReadAsync().AsString( token );
         string result = Decrypt( raw, encoding );
         return result;
     }
     public async ValueTask<T> DecryptAsync<T>( LocalFile file, Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func ) => await func( file.ReadAsync(), this );
     public async ValueTask DecryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
     {
-        byte[] raw = await input.ReadAsync().AsBytes( token );
-
+        byte[] raw    = await input.ReadAsync().AsBytes( token );
         byte[] result = Decrypt( raw );
         await output.WriteAsync( result, token );
     }
-    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, Encoding encoding )
+    public async ValueTask DecryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
     {
-        string raw = await input.ReadAsync().AsString();
-
+        string raw    = await input.ReadAsync().AsString( token );
         string result = Decrypt( raw, encoding );
         await output.WriteAsync( result );
     }
@@ -245,35 +241,31 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public       string    Encrypt( string         value, Encoding encoding )                 => Convert.ToBase64String( Encrypt( GetBytes( value, encoding ) ) );
     public       void      Encrypt( LocalFile      file,  string   value )                    => Encrypt( file, value, Encoding.Default );
     public       void      Encrypt( LocalFile      file,  string   value, Encoding encoding ) => file.Write( Encrypt( value, encoding ) );
-    public       void      Encrypt( LocalFile      file,  byte[]   value )                                    => file.Write( Encrypt( value ) );
-    public       ValueTask EncryptAsync( LocalFile file,  string   value )                                    => EncryptAsync( file, value, Encoding.Default );
-    public async ValueTask EncryptAsync( LocalFile file,  string   value, Encoding          encoding )        => await file.WriteAsync( Encrypt( value, encoding ) );
+    public       void      Encrypt( LocalFile      file,  byte[]   value )                                                                => file.Write( Encrypt( value ) );
+    public       ValueTask EncryptAsync( LocalFile file,  string   value, CancellationToken token                             = default ) => EncryptAsync( file, value, Encoding.Default, token );
+    public async ValueTask EncryptAsync( LocalFile file,  string   value, Encoding          encoding, CancellationToken token = default ) => await file.WriteAsync( Encrypt( value, encoding ) );
     public async ValueTask EncryptAsync( LocalFile file,  byte[]   value, CancellationToken token = default ) => await file.WriteAsync( Encrypt( value ), token );
     public async ValueTask<byte[]> EncryptAsync( LocalFile value, CancellationToken token = default )
     {
-        byte[] raw = await value.ReadAsync().AsBytes( token );
-
+        byte[] raw    = await value.ReadAsync().AsBytes( token );
         byte[] result = Encrypt( raw );
         return result;
     }
-    public async ValueTask<string> EncryptAsync( LocalFile value, Encoding encoding )
+    public async ValueTask<string> EncryptAsync( LocalFile value, Encoding encoding, CancellationToken token = default )
     {
-        string raw = await value.ReadAsync().AsString();
-
+        string raw    = await value.ReadAsync().AsString( token );
         string result = Encrypt( raw, encoding );
         return result;
     }
     public async ValueTask EncryptAsync( LocalFile input, LocalFile output, CancellationToken token = default )
     {
-        byte[] raw = await input.ReadAsync().AsBytes( token );
-
+        byte[] raw    = await input.ReadAsync().AsBytes( token );
         byte[] result = Encrypt( raw );
         await output.WriteAsync( result, token );
     }
-    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, Encoding encoding )
+    public async ValueTask EncryptAsync( LocalFile input, LocalFile output, Encoding encoding, CancellationToken token = default )
     {
-        string raw = await input.ReadAsync().AsString();
-
+        string raw    = await input.ReadAsync().AsString( token );
         string result = Encrypt( raw, encoding );
         await output.WriteAsync( result );
     }
