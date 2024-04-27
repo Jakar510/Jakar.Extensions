@@ -7,10 +7,9 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
                                  [property: StringLength( 4096 )] string ConcurrencyStamp,
                                  string                                  Rights,
                                  RecordID<RoleRecord>                    ID,
-                                 RecordID<UserRecord>?                   CreatedBy,
-                                 Guid?                                   OwnerUserID,
+                                 RecordID<UserRecord>?                   OwnerUserID,
                                  DateTimeOffset                          DateCreated,
-                                 DateTimeOffset?                         LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
+                                 DateTimeOffset?                         LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
 {
     public const                                  string TABLE_NAME = "Roles";
     public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -20,9 +19,9 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     public RoleRecord( IdentityRole role, UserRecord? caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
     public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
     public RoleRecord( string       name, UserRecord? caller                                                                               = default ) : this( name, name, caller ) { }
-    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
     public RoleModel<Guid> ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
@@ -53,10 +52,9 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         string                concurrencyStamp = reader.GetFieldValue<string>( nameof(ConcurrencyStamp) );
         DateTimeOffset        dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                  ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>? createdBy        = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.OwnerUserID( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

@@ -15,10 +15,9 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                                     bool                                     IsPrimary,
                                     IDictionary<string, JToken?>?            AdditionalData,
                                     RecordID<AddressRecord>                  ID,
-                                    RecordID<UserRecord>?                    CreatedBy,
-                                    Guid?                                    OwnerUserID,
+                                    RecordID<UserRecord>?                    OwnerUserID,
                                     DateTimeOffset                           DateCreated,
-                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( ID, OwnerUserID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -52,8 +51,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
         IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
         bool                          isPrimary       = reader.GetFieldValue<bool>( nameof(IsPrimary) );
         RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID( reader );
-        RecordID<UserRecord>?         createdBy       = RecordID<UserRecord>.CreatedBy( reader );
-        Guid                          ownerUserID     = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
+        RecordID<UserRecord>?         ownerUserID     = RecordID<UserRecord>.OwnerUserID( reader );
         DateTimeOffset                dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
@@ -67,7 +65,6 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                                                   isPrimary,
                                                   additionalData,
                                                   id,
-                                                  createdBy,
                                                   ownerUserID,
                                                   dateCreated,
                                                   lastModified );

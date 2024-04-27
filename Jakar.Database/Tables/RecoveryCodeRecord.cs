@@ -9,14 +9,14 @@ namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
+public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "Codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher    = new();
     public static           string                             TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
-    public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
+    public RecoveryCodeRecord( string code, UserRecord user ) : this( code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow ) { }
 
 
     [Pure]
@@ -32,10 +32,9 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
         string                       code         = reader.GetFieldValue<string>( nameof(Code) );
         DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?              lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                          ownerUserID  = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>?        createdBy    = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<UserRecord>?        ownerUserID  = RecordID<UserRecord>.OwnerUserID( reader );
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID( reader );
-        RecoveryCodeRecord                          record       = new RecoveryCodeRecord( code, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RecoveryCodeRecord           record       = new RecoveryCodeRecord( code, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }

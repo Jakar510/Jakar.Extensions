@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Random( user.OwnerUserID, count );
+        SqlCommand sql = _sqlCache.Random( user.ID.Value, count );
         return Where( connection, transaction, sql, token );
     }
 

@@ -5,22 +5,21 @@ namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record UserLoginInfoRecord( [property: StringLength(                        int.MaxValue )]  string  LoginProvider,
-                                          [property: StringLength(                        int.MaxValue )]  string? ProviderDisplayName,
-                                          [property: ProtectedPersonalData, StringLength( int.MaxValue )]  string  ProviderKey,
-                                          [property: ProtectedPersonalData]                                string? Value,
-                                          RecordID<UserLoginInfoRecord>                                            ID,
-                                          RecordID<UserRecord>?                                                    CreatedBy,
-                                          Guid?                                                                    OwnerUserID,
-                                          DateTimeOffset                                                           DateCreated,
-                                          DateTimeOffset?                                                          LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+public sealed record UserLoginInfoRecord( [property: StringLength(                        int.MaxValue )] string  LoginProvider,
+                                          [property: StringLength(                        int.MaxValue )] string? ProviderDisplayName,
+                                          [property: ProtectedPersonalData, StringLength( int.MaxValue )] string  ProviderKey,
+                                          [property: ProtectedPersonalData]                               string? Value,
+                                          RecordID<UserLoginInfoRecord>                                           ID,
+                                          RecordID<UserRecord>?                                                   OwnerUserID,
+                                          DateTimeOffset                                                          DateCreated,
+                                          DateTimeOffset?                                                         LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public const  string TABLE_NAME = "UserLoginInfo";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
     public UserLoginInfoRecord( UserRecord user, UserLoginInfo info ) : this( user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName ) { }
-    public UserLoginInfoRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginInfoRecord>.New(), user.ID, user.UserID, DateTimeOffset.UtcNow ) { }
+    public UserLoginInfoRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this( loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginInfoRecord>.New(), user.ID, DateTimeOffset.UtcNow ) { }
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
@@ -41,10 +40,9 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
         string                        value               = reader.GetFieldValue<string>( nameof(Value) );
         DateTimeOffset                dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        Guid                           ownerUserID         = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>?         createdBy           = RecordID<UserRecord>.CreatedBy( reader );
+        RecordID<UserRecord>?         ownerUserID         = RecordID<UserRecord>.OwnerUserID( reader );
         RecordID<UserLoginInfoRecord> id                  = RecordID<UserLoginInfoRecord>.ID( reader );
-        UserLoginInfoRecord                           record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, createdBy, ownerUserID, dateCreated, lastModified );
+        UserLoginInfoRecord           record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
@@ -58,8 +56,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(CreatedBy),   user.ID.Value );
-        parameters.Add( nameof(OwnerUserID), user.UserID );
+        parameters.Add( nameof(OwnerUserID), user.ID.Value );
         parameters.Add( nameof(Value),       value );
         return parameters;
     }
@@ -86,7 +83,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.OwnerUserID ?? Guid.Empty,
+                                                                                                UserId        = value.OwnerUserID?.Value ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey

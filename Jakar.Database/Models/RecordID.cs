@@ -22,7 +22,8 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     [Pure] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
     [Pure] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
     [Pure] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
-    [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader      reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [Pure] public static RecordID<TRecord>? OwnerUserID( DbDataReader    reader )                    => TryCreate( reader, SQL.OWNER_USER_ID );
+    [Pure] public static RecordID<TRecord>  Create( DbDataReader         reader, string columnName ) => Create( reader.GetFieldValue<Guid>( columnName ) );
     [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
     [Pure]
     public static RecordID<TRecord>? TryCreate( [NotNullIfNotNull( nameof(id) )] Guid? id ) => id.HasValue

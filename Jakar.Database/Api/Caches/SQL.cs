@@ -6,25 +6,24 @@ namespace Jakar.Database;
 
 public static class SQL // TODO: move to Jakar.Extensions.Sizes
 {
-    public const string AND                     = " AND ";
-    public const int    ANSI_CAPACITY    = 8000;
-    public const int    ANSI_TEXT_CAPACITY      = 2_147_483_647;
-    public const int    BINARY_CAPACITY         = ANSI_TEXT_CAPACITY;
-    public const string COUNT                   = "count";
-    public const string CREATED_BY              = nameof(IOwnedTableRecord.CreatedBy);
-    public const string DATE_CREATED            = nameof(IRecordPair.DateCreated);
-    public const int    DECIMAL_MAX_PRECISION   = 38;
-    public const int    DECIMAL_MAX_SCALE       = 29;
-    public const string GUID_FORMAT             = "D";
-    public const string ID                      = nameof(IRecordPair.ID);
-    public const string IDS                     = "ids";
-    public const string LAST_MODIFIED           = nameof(ITableRecord.LastModified);
-    public const string LIST_SEPARATOR          = ", ";
-    public const string OR                      = " OR ";
-    public const string OWNER_USER_ID           = nameof(IOwnedTableRecord.OwnerUserID);
-    public const char   QUOTE                   = '"';
-    public const int    UNICODE_CAPACITY = 4000;
-    public const int    UNICODE_TEXT_CAPACITY   = 1_073_741_823;
+    public const string AND                   = " AND ";
+    public const int    ANSI_CAPACITY         = 8000;
+    public const int    ANSI_TEXT_CAPACITY    = 2_147_483_647;
+    public const int    BINARY_CAPACITY       = ANSI_TEXT_CAPACITY;
+    public const string COUNT                 = "count";
+    public const string DATE_CREATED          = nameof(IRecordPair.DateCreated);
+    public const int    DECIMAL_MAX_PRECISION = 38;
+    public const int    DECIMAL_MAX_SCALE     = 29;
+    public const string GUID_FORMAT           = "D";
+    public const string ID                    = nameof(IRecordPair.ID);
+    public const string IDS                   = "ids";
+    public const string LAST_MODIFIED         = nameof(ITableRecord.LastModified);
+    public const string LIST_SEPARATOR        = ", ";
+    public const string OR                    = " OR ";
+    public const string OWNER_USER_ID         = nameof(IOwnedTableRecord.OwnerUserID);
+    public const char   QUOTE                 = '"';
+    public const int    UNICODE_CAPACITY      = 4000;
+    public const int    UNICODE_TEXT_CAPACITY = 1_073_741_823;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -85,9 +84,9 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
     public static string GetCreatedBy( this DbTypeInstance instance ) =>
         instance switch
         {
-            DbTypeInstance.Postgres => $"{QUOTE}{CREATED_BY}{QUOTE}",
-            DbTypeInstance.MsSql    => CREATED_BY,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            DbTypeInstance.Postgres => $"{QUOTE}{OWNER_USER_ID}{QUOTE}",
+            DbTypeInstance.MsSql    => OWNER_USER_ID,
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -97,7 +96,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{ID}{QUOTE}",
             DbTypeInstance.MsSql    => ID,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -107,7 +106,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{LAST_MODIFIED}{QUOTE}",
             DbTypeInstance.MsSql    => LAST_MODIFIED,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -117,7 +116,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{OWNER_USER_ID}{QUOTE}",
             DbTypeInstance.MsSql    => OWNER_USER_ID,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -128,7 +127,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
             DbTypeInstance.MsSql    => TRecord.TableName,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -138,7 +137,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.MsSql    => "NEWID()",
             DbTypeInstance.Postgres => "RANDOM()",
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
@@ -148,7 +147,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{DATE_CREATED}{QUOTE}",
             DbTypeInstance.MsSql    => DATE_CREATED,
-            _                   => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 

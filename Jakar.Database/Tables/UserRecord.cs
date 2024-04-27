@@ -46,10 +46,9 @@ public sealed record UserRecord( Guid                          UserID,
                                  IDictionary<string, JToken?>? AdditionalData,
                                  RecordID<FileRecord>?         ImageID,
                                  RecordID<UserRecord>          ID,
-                                 RecordID<UserRecord>?         CreatedBy,
-                                 Guid?                         OwnerUserID,
+                                 RecordID<UserRecord>?         OwnerUserID,
                                  DateTimeOffset                DateCreated,
-                                 DateTimeOffset?               LastModified = default ) : OwnedTableRecord<UserRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
+                                 DateTimeOffset?               LastModified = default ) : OwnedTableRecord<UserRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
 {
     public const                                                                                 int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                 int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
@@ -64,7 +63,7 @@ public sealed record UserRecord( Guid                          UserID,
     public                                                                                       int?                          BadLogins              { get;                    set; } = BadLogins;
     [ProtectedPersonalData]    public                                                            string                        Company                { get;                    set; } = Company;
     [StringLength( MAX_SIZE )] public                                                            string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => CreatedBy?.Value;
+    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => OwnerUserID?.Value;
     [ProtectedPersonalData] public string                                                                                      Department             { get; set; } = Department;
     [ProtectedPersonalData] public string                                                                                      Description            { get; set; } = Description;
     [ProtectedPersonalData] public string                                                                                      Email                  { get; set; } = Email;
@@ -190,8 +189,7 @@ public sealed record UserRecord( Guid                          UserID,
         IDictionary<string, JToken?>? additionalData         = reader.GetAdditionalData();
         RecordID<FileRecord>?         imageID                = RecordID<FileRecord>.TryCreate( reader, nameof(ImageID) );
         RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID( reader );
-        RecordID<UserRecord>?         createdBy              = RecordID<UserRecord>.CreatedBy( reader );
-        Guid?                         ownerUserID            = reader.GetFieldValue<Guid?>( nameof(OwnerUserID) );
+        RecordID<UserRecord>?         ownerUserID            = RecordID<UserRecord>.OwnerUserID( reader );
         DateTimeOffset                dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
@@ -236,7 +234,6 @@ public sealed record UserRecord( Guid                          UserID,
                                             additionalData,
                                             imageID,
                                             id,
-                                            createdBy,
                                             ownerUserID,
                                             dateCreated,
                                             lastModified );
@@ -264,7 +261,7 @@ public sealed record UserRecord( Guid                          UserID,
         ArgumentNullException.ThrowIfNull( request.Data );
         return Create( request.UserName, rights, request.Data, caller ).WithPassword( request.Password ).Enable();
     }
-    
+
     public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = default )
         where TUser : class, IUserData<Guid> => new(Guid.NewGuid(),
                                                     userName,
@@ -307,9 +304,8 @@ public sealed record UserRecord( Guid                          UserID,
                                                     RecordID<FileRecord>.TryCreate( data.ImageID ),
                                                     RecordID<UserRecord>.New(),
                                                     caller?.ID,
-                                                    caller?.UserID,
                                                     DateTimeOffset.UtcNow);
-    
+
     public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
         where TEnum : struct, Enum => Create( userName, password, rights.ToString(), caller );
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>
@@ -354,7 +350,6 @@ public sealed record UserRecord( Guid                          UserID,
                         null,
                         RecordID<UserRecord>.New(),
                         caller?.ID,
-                        caller?.UserID,
                         DateTimeOffset.UtcNow ).WithPassword( password );
 
 
@@ -398,7 +393,7 @@ public sealed record UserRecord( Guid                          UserID,
     void IUserData<Guid>.With( IUserData<Guid> value ) => With( value );
     public UserRecord With( IUserData<Guid> value )
     {
-        CreatedBy         = RecordID<UserRecord>.TryCreate( value.CreatedBy );
+        OwnerUserID       = RecordID<UserRecord>.TryCreate( value.CreatedBy );
         EscalateTo        = RecordID<UserRecord>.TryCreate( value.EscalateTo );
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -673,9 +668,9 @@ public sealed record UserRecord( Guid                          UserID,
 
 
     public bool DoesNotOwn<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != UserID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != ID;
     public bool Owns<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == UserID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == ID;
 
     #endregion
 

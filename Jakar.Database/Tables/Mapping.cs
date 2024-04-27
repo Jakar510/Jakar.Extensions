@@ -35,23 +35,26 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
         return parameters;
     }
 
-    public static DynamicParameters GetDynamicParameters( TValue record )
+    public static DynamicParameters GetDynamicParameters( TValue record ) => GetDynamicParameters( record.ID );
+    public static DynamicParameters GetDynamicParameters( in RecordID<TValue> value )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(KeyID), record.ID );
+        parameters.Add( nameof(ValueID), value );
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( TKey key )
+    public static DynamicParameters GetDynamicParameters( TKey key ) => GetDynamicParameters( key.ID );
+    public static DynamicParameters GetDynamicParameters( in RecordID<TKey> key )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(KeyID), key.ID );
+        parameters.Add( nameof(KeyID), key );
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( TKey key, TValue value )
+    public static DynamicParameters GetDynamicParameters( TKey key, TValue value ) => GetDynamicParameters( key.ID, value.ID );
+    public static DynamicParameters GetDynamicParameters( in RecordID<TKey> key, RecordID<TValue> value )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(KeyID),   key.ID );
-        parameters.Add( nameof(ValueID), value.ID );
+        parameters.Add( nameof(KeyID),   key );
+        parameters.Add( nameof(ValueID), value );
         return parameters;
     }
 
@@ -94,7 +97,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     {
         if ( await Exists( connection, transaction, selfTable, key, value, token ) ) { return false; }
 
-        TSelf   record = TSelf.Create( key, value );
+        TSelf record = TSelf.Create( key, value );
         TSelf self   = await selfTable.Insert( connection, transaction, record, token );
         return self.IsValidID();
     }

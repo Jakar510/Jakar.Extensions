@@ -56,7 +56,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         parameters.Add( nameof(count), count );
         parameters.Add( nameof(id),    id );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)} LIMIT @{nameof(count)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(id)} LIMIT @{nameof(count)}"; }
 
         return new SqlCommand( sql, parameters );
     }

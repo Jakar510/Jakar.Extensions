@@ -58,7 +58,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         parameters.Add( nameof(count), count );
         parameters.Add( nameof(id),    id );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(id)}"; }
 
         return new SqlCommand( sql, parameters );
     }

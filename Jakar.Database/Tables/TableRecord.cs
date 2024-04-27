@@ -43,8 +43,7 @@ public interface ITableRecord<TRecord> : ITableRecord
 
 public interface IOwnedTableRecord
 {
-    public RecordID<UserRecord>? CreatedBy   { get; }
-    public Guid?                 OwnerUserID { get; }
+    public RecordID<UserRecord>? OwnerUserID { get; }
 }
 
 
@@ -154,48 +153,44 @@ public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffse
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
+    public RecordID<UserRecord>? OwnerUserID { get; set; } = OwnerUserID;
 
 
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
-    protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }
+    protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, DateTimeOffset.UtcNow, null ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(CreatedBy),   user.ID.Value );
-        parameters.Add( nameof(OwnerUserID), user.UserID );
+        parameters.Add( nameof(OwnerUserID), user.ID.Value );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TRecord> record )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
-        parameters.Add( nameof(CreatedBy),   record.CreatedBy?.Value );
         return parameters;
     }
 
     public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(CreatedBy),   CreatedBy?.Value );
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;
     }
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await db.Users.Get( connection, transaction, true, GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await db.Users.Get( connection, transaction, CreatedBy, token );
+
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,        GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerUserID, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { OwnerUserID = user.UserID });
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    Owns( UserRecord       record ) => CreatedBy == record.ID;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { OwnerUserID = user.ID });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    Owns( UserRecord       record ) => OwnerUserID == record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    DoesNotOwn( UserRecord record ) => OwnerUserID != record.ID;
 
 
     public override int CompareTo( TRecord? other )
@@ -203,9 +198,6 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        int createdByComparison = Nullable.Compare( CreatedBy, other.CreatedBy );
-        if ( createdByComparison != 0 ) { return createdByComparison; }
 
         int userIDComparison = Nullable.Compare( OwnerUserID, other.OwnerUserID );
         if ( userIDComparison != 0 ) { return userIDComparison; }
