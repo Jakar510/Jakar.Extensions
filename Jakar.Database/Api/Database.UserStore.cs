@@ -46,7 +46,7 @@
             {
                 Error provider = Error.NotFound( nameof(UserLoginInfoRecord.LoginProvider), login.LoginProvider );
                 Error key      = Error.NotFound( nameof(UserLoginInfoRecord.ProviderKey),   login.ProviderKey );
-                Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.OwnerUserID),   user.UserID.ToString() );
+                Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.OwnerUserID),   user.ID.Value.ToString() );
                 return ErrorOrResult<UserLoginInfoRecord>.Create( provider, key, userID );
             }
 
@@ -210,7 +210,7 @@
         public ValueTask<UserRecord?> FindByIdAsync( string userID, CancellationToken token ) => this.TryCall( FindByIdAsync, userID, token );
         public virtual async ValueTask<UserRecord?> FindByIdAsync( DbConnection connection, DbTransaction transaction, string userID, CancellationToken token ) =>
             Guid.TryParse( userID, out Guid guid )
-                ? await Users.Get( connection, transaction, nameof(UserRecord.UserID),   guid,   token )
+                ? await Users.Get( connection, transaction, nameof(UserRecord.ID),       guid,   token )
                 : await Users.Get( connection, transaction, nameof(UserRecord.UserName), userID, token );
 
 

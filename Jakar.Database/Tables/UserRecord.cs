@@ -6,8 +6,7 @@ namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record UserRecord( Guid                          UserID,
-                                 string                        UserName,
+public sealed record UserRecord( string                        UserName,
                                  string                        FirstName,
                                  string                        LastName,
                                  string                        FullName,
@@ -81,7 +80,7 @@ public sealed record UserRecord( Guid                          UserID,
     public   bool                                                                                                              IsLocked               { get; set; } = IsLocked;
     public   bool                                                                                                              IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
     public   bool                                                                                                              IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
-    internal bool                                                                                                              IsValid                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false && UserID != Guid.Empty; }
+    internal bool                                                                                                              IsValid                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false && ID.IsValid(); }
     bool IValidator.                                                                                                           IsValid                => IsValid;
     public                                               DateTimeOffset?                                                       LastBadAttempt         { get; set; } = LastBadAttempt;
     public                                               DateTimeOffset?                                                       LastLogin              { get; set; } = LastLogin;
@@ -99,7 +98,7 @@ public sealed record UserRecord( Guid                          UserID,
     public                                               DateTimeOffset?                                                       SubscriptionExpires    { get; set; } = SubscriptionExpires;
     public                                               Guid?                                                                 SubscriptionID         { get; set; } = SubscriptionID;
     [ProtectedPersonalData] public                       string                                                                Title                  { get; set; } = Title;
-    Guid IUserID<Guid>.                                                                                                        UserID                 => UserID;
+    Guid IUserID<Guid>.                                                                                                        UserID                 => ID.Value;
     [ProtectedPersonalData] public string                                                                                      Website                { get;                  set; } = Website;
     DateTimeOffset? IUserRecord<Guid>.                                                                                         LastModified           { get => _lastModified; set => _lastModified = value; }
 
@@ -107,7 +106,6 @@ public sealed record UserRecord( Guid                          UserID,
     public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(UserID),                 UserID );
         parameters.Add( nameof(UserName),               UserName );
         parameters.Add( nameof(FirstName),              FirstName );
         parameters.Add( nameof(LastName),               LastName );
@@ -149,7 +147,6 @@ public sealed record UserRecord( Guid                          UserID,
 
     public static UserRecord Create( DbDataReader reader )
     {
-        Guid                          userID                 = reader.GetFieldValue<Guid>( nameof(UserID) );
         string                        userName               = reader.GetFieldValue<string>( nameof(UserName) );
         string                        firstName              = reader.GetFieldValue<string>( nameof(FirstName) );
         string                        lastName               = reader.GetFieldValue<string>( nameof(LastName) );
@@ -194,8 +191,7 @@ public sealed record UserRecord( Guid                          UserID,
         DateTimeOffset?               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
 
-        UserRecord record = new UserRecord( userID,
-                                            userName,
+        UserRecord record = new UserRecord( userName,
                                             firstName,
                                             lastName,
                                             fullName,
@@ -263,8 +259,7 @@ public sealed record UserRecord( Guid                          UserID,
     }
 
     public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = default )
-        where TUser : class, IUserData<Guid> => new(Guid.NewGuid(),
-                                                    userName,
+        where TUser : class, IUserData<Guid> => new(userName,
                                                     data.FirstName,
                                                     data.LastName,
                                                     data.FullName,
@@ -309,8 +304,7 @@ public sealed record UserRecord( Guid                          UserID,
     public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = default )
         where TEnum : struct, Enum => Create( userName, password, rights.ToString(), caller );
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = default ) =>
-        new UserRecord( Guid.NewGuid(),
-                        userName,
+        new UserRecord( userName,
                         string.Empty,
                         string.Empty,
                         string.Empty,
@@ -374,10 +368,10 @@ public sealed record UserRecord( Guid                          UserID,
         parameters.Add( nameof(UserName), userName );
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( Guid userID )
+    public static DynamicParameters GetDynamicParameters( RecordID<UserRecord> userID )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(UserID), userID );
+        parameters.Add( nameof(ID), userID );
         return parameters;
     }
 
@@ -408,7 +402,7 @@ public sealed record UserRecord( Guid                          UserID,
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
 
-        IDictionary<string, JToken?>? data = value?.AdditionalData;
+        IDictionary<string, JToken?>? data = value.AdditionalData;
         if ( data is null ) { return this; }
 
         AdditionalData ??= new Dictionary<string, JToken?>();
@@ -851,7 +845,7 @@ public sealed record UserRecord( Guid                          UserID,
 
         RefreshToken = hashed
                            ? hash
-                           : token ?? string.Empty;
+                           : token;
 
         RefreshTokenExpiryTime = date;
         return Modified();
@@ -899,27 +893,26 @@ public sealed record UserRecord( Guid                          UserID,
     public async  ValueTask<Claim[]>     GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, db, token )).GetClaims( types );
     public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
 
-    public static async ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
-        types |= ClaimType.UserID | ClaimType.UserName;
         DynamicParameters parameters = new();
-        parameters.Add( nameof(UserName), claims.Span.Single( x => x.Type == ClaimType.UserName.ToClaimTypes() ).Value );
-        parameters.Add( nameof(UserID),   Guid.Parse( claims.Span.Single( x => x.Type == ClaimType.UserID.ToClaimTypes() ).Value ) );
+        parameters.Add( nameof(ID), Guid.Parse( claims.Single( Claims.IsUserID ).Value ) );
 
+        if ( types.HasFlag( ClaimType.UserName ) ) { parameters.Add( nameof(UserName), claims.Single( Claims.IsUserName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Span.Single( x => x.Type == ClaimType.FirstName.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Single( Claims.IsFirstName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Span.Single( x => x.Type == ClaimType.LastName.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Single( Claims.IsLastName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Span.Single( x => x.Type == ClaimType.FullName.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Single( Claims.IsFullName ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Span.Single( x => x.Type == ClaimType.Email.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Single( Claims.IsEmail ).Value ); }
 
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Span.Single( x => x.Type == ClaimType.MobilePhone.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Single( Claims.IsMobilePhone ).Value ); }
 
-        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Span.Single( x => x.Type == ClaimType.WebSite.ToClaimTypes() ).Value ); }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( Claims.IsWebSite ).Value ); }
 
-        return await db.Users.Get( connection, transaction, true, parameters, token );
+        return db.Users.Get( connection, transaction, true, parameters, token );
     }
     public static async IAsyncEnumerable<UserRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
@@ -932,7 +925,7 @@ public sealed record UserRecord( Guid                          UserID,
                 break;
 
             case ClaimTypes.Sid:
-                parameters.Add( nameof(UserID), Guid.Parse( claim.Value ) );
+                parameters.Add( nameof(ID), Guid.Parse( claim.Value ) );
                 break;
 
             case ClaimTypes.GivenName:

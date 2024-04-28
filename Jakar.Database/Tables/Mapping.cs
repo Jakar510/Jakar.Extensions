@@ -218,7 +218,7 @@ WHERE {TSelf.TableName}.{nameof(ValueID)} = @{nameof(ValueID)}";
     }
 
 
-    public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, CancellationToken token )
+    public static async ValueTask Delete( DbConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, TKey key, CancellationToken token ) // TODO: OPTIMIZE THIS!!!
     {
         await foreach ( TSelf record in Where( connection, transaction, selfTable, key, token ) ) { await selfTable.Delete( connection, transaction, record.ID, token ); }
     }

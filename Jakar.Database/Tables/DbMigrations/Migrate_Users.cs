@@ -25,8 +25,6 @@ public abstract class Migrate_Users : OwnedMigration<UserRecord>
 
         table.WithColumn( nameof(UserRecord.SessionID) ).AsGuid().Nullable();
 
-        table.WithColumn( nameof(UserRecord.UserID) ).AsGuid().NotNullable();
-
         table.WithColumn( nameof(UserRecord.Gender) ).AsString( 256 ).Nullable();
 
         table.WithColumn( nameof(UserRecord.Website) ).AsString( 4096 ).NotNullable();

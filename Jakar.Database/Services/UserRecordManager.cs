@@ -15,7 +15,7 @@ public class UserRecordManager( Database                                    data
                                 IServiceProvider                            services,
                                 ILogger<UserRecordManager>                  logger ) : UserManager<UserRecord>( store, optionsAccessor, passwordHasher, userValidators, passwordValidators, keyNormalizer, errors, services, logger )
 {
-    private const    ClaimType CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.GroupSid;
+    private const    ClaimType CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.Group;
     private readonly Database  _database   = database;
 
 

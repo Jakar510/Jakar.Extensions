@@ -116,7 +116,7 @@ public abstract partial class Database
 
         record = record.WithRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, record, token );
-        return new Tokens( record.UserID, record.FullName, Version, accessToken, refresh );
+        return new Tokens( record.ID.Value, record.FullName, Version, accessToken, refresh );
     }
 
 
@@ -150,7 +150,7 @@ public abstract partial class Database
 
 
         string accessToken = DbTokenHandler.Instance.CreateToken( descriptor );
-        return new Tokens( record.UserID, record.FullName, Version, accessToken, refreshToken );
+        return new Tokens( record.ID.Value, record.FullName, Version, accessToken, refreshToken );
     }
 
 
