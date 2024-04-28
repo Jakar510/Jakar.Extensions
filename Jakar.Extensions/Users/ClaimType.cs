@@ -37,7 +37,8 @@ public enum ClaimType : long
 
 public static class Claims
 {
-    public const string ALL = "http://schemas.microsoft.com/ws/2008/06/identity/claims/all";
+    public const string    ALL      = "http://schemas.microsoft.com/ws/2008/06/identity/claims/all";
+    public const ClaimType DEFAULTS = ClaimType.UserID | ClaimType.UserName | ClaimType.Role | ClaimType.Group;
 
 
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID )
