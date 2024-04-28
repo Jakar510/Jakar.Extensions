@@ -81,6 +81,20 @@ public static class Claims
         userID = Guid.Empty;
         return false;
     }
+    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out Guid? userID, out string userName ) => TryParse( principal.Claims.ToArray(), out userID, out userName );
+    public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out Guid? userID, out string userName )
+    {
+        userName = claims.FirstOrDefault( IsUserName )?.Value ?? string.Empty;
+
+        if ( Guid.TryParse( claims.FirstOrDefault( IsUserID )?.Value, out Guid id ) )
+        {
+            userID = id;
+            return true;
+        }
+
+        userID = null;
+        return false;
+    }
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups )
     {

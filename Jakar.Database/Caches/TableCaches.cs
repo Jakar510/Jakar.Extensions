@@ -49,14 +49,15 @@ public static class TableCaches
     }
 
 
-    public static Task<T?> TryGet<T>( this ITableCache cache, scoped in RecordID<T> id, CancellationToken token )
+    public static ValueTask<T?> TryGet<T>( this ITableCache cache, scoped in RecordID<T> id, CancellationToken token )
         where T : ITableRecord<T>, IDbReaderMapping<T>
     {
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(id) ); }
 
         return cache.TryGet<T>( id.Key, token );
     }
-    public static async Task<T?> TryGet<T>( this ITableCache cache, string key, CancellationToken token )
+    public static async ValueTask<T?> TryGet<T>( this ITableCache cache, string key, CancellationToken token )
+        where T : notnull
     {
         if ( string.IsNullOrWhiteSpace( key ) ) { throw new ArgumentException( KEY, nameof(key) ); }
 
@@ -98,7 +99,7 @@ public static class TableCaches
         return cache.AddOrUpdate( id.Key, record, token, options );
     }
     public static Task AddOrUpdate<T>( this ITableCache cache, string key, T record, CancellationToken token, DistributedCacheEntryOptions? options = null )
-        where T : ITableRecord<T>, IDbReaderMapping<T>
+        where T : notnull
     {
         if ( string.IsNullOrWhiteSpace( key ) ) { throw new ArgumentException( KEY, nameof(key) ); }
 
