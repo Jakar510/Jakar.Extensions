@@ -9,19 +9,17 @@ namespace Jakar.Database;
 public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<RecordID<TRecord>>, ISpanFormattable, IRegisterDapperTypeHandlers
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public static readonly RecordID<TRecord> Empty      = new(Guid.Empty);
-    public static readonly string            RecordName = typeof(TRecord).Name;
-
+    public static readonly RecordID<TRecord> Empty = new(Guid.Empty);
 
     public static ValueEqualizer<RecordID<TRecord>> Equalizer { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueEqualizer<RecordID<TRecord>>.Default; }
     public static ValueSorter<RecordID<TRecord>>    Sorter    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<RecordID<TRecord>>.Default; }
-    public        string                            Key       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = $"{RecordName}:{Value}";
+    public        string                            Key       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = $"{TRecord.TableName}:{Value}";
 
 
     [Pure] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
     [Pure] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
     [Pure] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
-    [Pure] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => new(reader.GetFieldValue<Guid>( SQL.ID ));
+    [Pure] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => Create( reader, SQL.ID );
     [Pure] public static RecordID<TRecord>? OwnerUserID( DbDataReader    reader )                    => TryCreate( reader, SQL.OWNER_USER_ID );
     [Pure] public static RecordID<TRecord>  Create( DbDataReader         reader, string columnName ) => Create( reader.GetFieldValue<Guid>( columnName ) );
     [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
@@ -45,6 +43,7 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
 
     public static implicit operator RecordID<TRecord>( TRecord record ) => new(record.ID.Value);
 
+
     [Pure]
     public DynamicParameters ToDynamicParameters()
     {
@@ -58,11 +57,9 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     [Pure] public bool IsNotValid() => Guid.Empty.Equals( Value );
 
 
-    [Pure] public override string ToString() => Value.ToString();
-
-    [Pure] public string ToString( string? format, IFormatProvider? formatProvider ) => Value.ToString( format, formatProvider );
-
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
+    [Pure] public override string ToString()                                                                                                               => Value.ToString();
+    [Pure] public          string ToString( string?     format,      IFormatProvider? formatProvider )                                                     => Value.ToString( format, formatProvider );
+    [Pure] public          bool   TryFormat( Span<char> destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => Value.TryFormat( destination, out charsWritten, format );
 
 
     public static bool operator true( RecordID<TRecord>  recordID ) => recordID.IsValid();
