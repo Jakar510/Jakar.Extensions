@@ -10,7 +10,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable> _tables             = [];
     protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    protected readonly ITableCacheFactory      _tableCache;
+    protected readonly ITableCache             _tableCache;
 
 
     public static      Database?                       Current           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
