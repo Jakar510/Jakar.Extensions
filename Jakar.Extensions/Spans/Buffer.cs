@@ -328,7 +328,7 @@ public ref struct Buffer<TValue>
 
 
 
-public static class BufferExtensions
+public static class Buffers
 {
     public const int NOT_FOUND        = -1;
     public const int DEFAULT_CAPACITY = 64;

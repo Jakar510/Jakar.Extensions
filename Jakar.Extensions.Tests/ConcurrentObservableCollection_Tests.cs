@@ -50,7 +50,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         int[] sorted = [..array];
         Array.Sort( sorted, ValueSorter<int>.Default );
 
-        ConcurrentObservableCollection<int> collection = new(array, ValueSorter<int>.Default);
+        ConcurrentObservableCollection<int> collection = new(array, ValueSorter<int>.Default, ValueEqualizer<int>.Default);
         collection.Sort();
         this.AreEqual( sorted, collection.ToArray() );
 
@@ -67,7 +67,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         int[] sorted = [..array];
         Array.Sort( sorted, ValueSorter<int>.Default );
 
-        ConcurrentObservableCollection<int> collection = new(array, ValueSorter<int>.Default);
+        ConcurrentObservableCollection<int> collection = new(array, ValueSorter<int>.Default, ValueEqualizer<int>.Default);
         collection.Sort();
         this.AreEqual( sorted, collection.ToArray() );
 

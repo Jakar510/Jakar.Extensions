@@ -35,7 +35,7 @@ public class ObservableCollection_Tests : Assert
         int[] sorted = [..array];
         Array.Sort( sorted, ValueSorter<int>.Default );
 
-        ObservableCollection<int> collection = new(array, ValueSorter<int>.Default);
+        ObservableCollection<int> collection = new(array, ValueSorter<int>.Default, ValueEqualizer<int>.Default);
         collection.Sort();
         this.AreEqual( sorted, collection.ToArray() );
 

@@ -235,7 +235,8 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
     {
         if ( other is null ) { return false; }
 
-        return Equals( other.Value );
+        AppVersionFlags flags = other.Value;
+        return Equals( flags );
     }
     public          bool Equals( AppVersionFlags other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
     public override int  GetHashCode()                   => Flag.GetHashCode();

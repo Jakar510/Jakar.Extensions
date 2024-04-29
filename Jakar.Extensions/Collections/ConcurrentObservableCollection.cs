@@ -11,7 +11,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="T"> </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList, ILockedCollection<T, AsyncLockerEnumerator<T>, LockerEnumerator<T>>
+public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T> equalityComparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<T>( comparer, equalityComparer, capacity ), IList, ILockedCollection<T, AsyncLockerEnumerator<T>, LockerEnumerator<T>>
 {
     protected internal readonly Locker locker = Locker.Default;
 
@@ -23,14 +23,14 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     public LockerEnumerator<T>      Values         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection() : base() { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( int                       capacity ) : base( capacity ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( IComparer<T>              comparer, int capacity = DEFAULT_CAPACITY ) : base( comparer, capacity ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( scoped in ReadOnlySpan<T> values ) : base( values ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( scoped in ReadOnlySpan<T> values, IComparer<T> comparer ) : base( values, comparer ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( IEnumerable<T>            values ) : base( values ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ConcurrentObservableCollection( IEnumerable<T>            values, IComparer<T> comparer ) : base( values, comparer ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected ConcurrentObservableCollection( MemoryBuffer<T>        values, IComparer<T> comparer ) : base( values, comparer ) { }
+    public ConcurrentObservableCollection() : this( Comparer<T>.Default, EqualityComparer<T>.Default ) { }
+    public ConcurrentObservableCollection( int                       capacity ) : this( Comparer<T>.Default, EqualityComparer<T>.Default, capacity ) { }
+    public ConcurrentObservableCollection( scoped in ReadOnlySpan<T> values ) : this( values.Length ) => InternalAdd( values );
+    public ConcurrentObservableCollection( scoped in ReadOnlySpan<T> values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer, values.Length ) => InternalAdd( values );
+    public ConcurrentObservableCollection( IEnumerable<T>            values ) : this( values, Comparer<T>.Default, EqualityComparer<T>.Default ) { }
+    public ConcurrentObservableCollection( IEnumerable<T>            values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer ) => InternalAdd( values );
+    public ConcurrentObservableCollection( T[]                       values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
+    public ConcurrentObservableCollection( T[]                       values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( values.AsSpan(), comparer, equalityComparer ) { }
 
 
     public override void Dispose()
@@ -44,10 +44,10 @@ public class ConcurrentObservableCollection<T> : ObservableCollection<T>, IList,
     public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>                                       values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( System.Collections.ObjectModel.ObservableCollection<T> values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( Collection<T>                                          values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<T>( T[]                                                    values ) => new(new ReadOnlySpan<T>( values ));
+    public static implicit operator ConcurrentObservableCollection<T>( T[]                                                    values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( ReadOnlyMemory<T>                                      values ) => new(values.Span);
     public static implicit operator ConcurrentObservableCollection<T>( ReadOnlySpan<T>                                        values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values, Comparer<T>.Default);
+    public static implicit operator ConcurrentObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
 
 
     public override void Set( int index, T value )

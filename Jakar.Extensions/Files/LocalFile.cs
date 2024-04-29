@@ -943,8 +943,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
-        public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter ) { }
+        public ConcurrentCollection() : base( Sorter, Equalizer ) { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter, Equalizer ) { }
     }
 
 
@@ -1091,13 +1091,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
     [Serializable]
-    public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
+    public class Watcher : ConcurrentObservableCollection<LocalFile>
     {
         private readonly LocalDirectory.Watcher _watcher;
         public event ErrorEventHandler?         Error;
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter )
+        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter, Equalizer )
         {
             _watcher                     =  watcher;
             _watcher.Created             += OnCreated;

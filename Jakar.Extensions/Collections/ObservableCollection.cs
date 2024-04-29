@@ -14,10 +14,10 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="T"> </typeparam>
 [Serializable]
-public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList, IDisposable
+public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T> equalityComparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList, IDisposable
 {
-    protected internal readonly IComparer<T>    comparer;
-    protected internal readonly MemoryBuffer<T> buffer;
+    protected internal readonly IComparer<T>    comparer = comparer;
+    protected internal readonly MemoryBuffer<T> buffer   = new(equalityComparer, capacity);
 
 
     public override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
@@ -31,20 +31,14 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public bool        IsEmpty  { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => Count == 0; }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection() : this( Comparer<T>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<T> values ) : this( values, Comparer<T>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( scoped in ReadOnlySpan<T> values, IComparer<T> comparer ) : this( comparer, values.Length ) => InternalAdd( values );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<T>            values ) : this( values, Comparer<T>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IEnumerable<T>            values, IComparer<T> comparer ) : this( comparer ) => Add( values );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( T[]                       values ) : this( values, Comparer<T>.Default ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( T[]                       values, IComparer<T> comparer ) : this( values.AsSpan(), comparer ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( int                       capacity ) : this( Comparer<T>.Default, capacity ) { }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ObservableCollection( IComparer<T>              comparer, int capacity = DEFAULT_CAPACITY ) : this( new MemoryBuffer<T>( capacity ), comparer ) { }
-    protected internal ObservableCollection( MemoryBuffer<T> values, IComparer<T> comparer )
-    {
-        this.comparer = comparer;
-        buffer        = values;
-    }
+    public ObservableCollection() : this( Comparer<T>.Default, EqualityComparer<T>.Default ) { }
+    public ObservableCollection( int                       capacity ) : this( Comparer<T>.Default, EqualityComparer<T>.Default, capacity ) { }
+    public ObservableCollection( scoped in ReadOnlySpan<T> values ) : this( values.Length ) => InternalAdd( values );
+    public ObservableCollection( scoped in ReadOnlySpan<T> values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer, values.Length ) => InternalAdd( values );
+    public ObservableCollection( IEnumerable<T>            values ) : this( values, Comparer<T>.Default, EqualityComparer<T>.Default ) { }
+    public ObservableCollection( IEnumerable<T>            values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer ) => InternalAdd( values );
+    public ObservableCollection( T[]                       values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
+    public ObservableCollection( T[]                       values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( values.AsSpan(), comparer, equalityComparer ) { }
 
 
     public virtual void Dispose() => GC.SuppressFinalize( this );
@@ -54,37 +48,33 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public static implicit operator ObservableCollection<T>( HashSet<T>                                             values ) => new(values);
     public static implicit operator ObservableCollection<T>( ConcurrentBag<T>                                       values ) => new(values);
     public static implicit operator ObservableCollection<T>( Collection<T>                                          values ) => new(values);
+    public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
     public static implicit operator ObservableCollection<T>( System.Collections.ObjectModel.ObservableCollection<T> values ) => new(values);
-    public static implicit operator ObservableCollection<T>( T[]                                                    values ) => new(new ReadOnlySpan<T>( values ));
+    public static implicit operator ObservableCollection<T>( T[]                                                    values ) => new(values);
     public static implicit operator ObservableCollection<T>( ReadOnlyMemory<T>                                      values ) => new(values.Span);
     public static implicit operator ObservableCollection<T>( ReadOnlySpan<T>                                        values ) => new(values);
-    public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values, Comparer<T>.Default);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in int  capacity ) => buffer.EnsureCapacity( capacity );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in uint capacity ) => buffer.EnsureCapacity( capacity );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[]  ToArray()                          => buffer.Span.ToArray();
+    public void EnsureCapacity( in int  capacity ) => buffer.EnsureCapacity( capacity );
+    public void EnsureCapacity( in uint capacity ) => buffer.EnsureCapacity( capacity );
+    public T[]  ToArray()                          => buffer.Span.ToArray();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalInsert( int i, in T value )
     {
         buffer.Insert( i, value );
         Added( value, i );
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalInsert( int index, IEnumerable<T> collection )
     {
         foreach ( (int i, T? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalInsert( int index, scoped in ReadOnlySpan<T> collection )
     {
         foreach ( (int i, T? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalRemoveRange( int start, int count )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
@@ -98,7 +88,6 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal bool InternalRemove( in T value )
     {
         bool result = buffer.Remove( value );
@@ -106,7 +95,6 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
 
         return result;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal int InternalRemove( in Predicate<T> match )
     {
         int i = buffer.IndexOf( match );
@@ -117,7 +105,6 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalClear()
     {
         buffer.Clear();
@@ -125,7 +112,6 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal bool InternalRemoveAt( int index, [NotNullWhen( true )] out T? value )
     {
         if ( index < 0 || index >= buffer.Length )
@@ -139,27 +125,32 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
 
         return value is not null;
     }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal bool InternalTryAdd( in T value ) => buffer.Contains( value ) is false && InternalAdd( value );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal bool InternalAdd( in T value )
+    protected internal bool InternalTryAdd( in T value )
     {
-        buffer.Add( value );
-        Added( value );
+        if ( buffer.Contains( value ) ) { return false; }
+
+        InternalAdd( value );
         return true;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal bool InternalAdd( IEnumerable<T> value )
+
+
+    protected internal void InternalAdd( in T value )
+    {
+        buffer.Add( value );
+        Added( value, Count );
+    }
+    protected internal void InternalAdd( IEnumerable<T> value )
     {
         buffer.Add( value );
         Reset();
-        return true;
+    }
+    protected internal void InternalAdd( scoped in ReadOnlySpan<T> values )
+    {
+        buffer.Add( values );
+        Reset();
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+
     protected internal void InternalAddOrUpdate( in T value )
     {
         int index = buffer.IndexOf( value );
@@ -169,16 +160,7 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal void InternalAdd( scoped in ReadOnlySpan<T> values )
-    {
-        foreach ( T value in values ) { InternalAdd( value ); }
-    }
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal void InternalSort() => InternalSort( comparer );
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal void InternalSort() => InternalSort( comparer );
     protected internal void InternalSort( IComparer<T> compare )
     {
     #if NET6_0_OR_GREATER
@@ -188,17 +170,12 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     #endif
         Reset();
     }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalSort( Comparison<T> compare )
     {
         buffer.Span.Sort( compare );
         Reset();
     }
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal void InternalSort( int start, int count ) => InternalSort( start, count, comparer );
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal void InternalSort( int start, int count ) => InternalSort( start, count, comparer );
     protected internal void InternalSort( int start, int count, IComparer<T> compare )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
@@ -214,13 +191,11 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalReverse()
     {
         buffer.Span.Reverse();
         Reset();
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     protected internal void InternalReverse( int start, int count )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
@@ -231,9 +206,7 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal ref T InternalGet( int index ) => ref buffer[index];
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal ref T InternalGet( int index ) => ref buffer[index];
     protected internal void InternalSet( int index, T value )
     {
         T old = buffer[index];
@@ -242,8 +215,8 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal ReadOnlySpan<T>   AsSpan()   => buffer.Span;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal ReadOnlyMemory<T> AsMemory() => buffer.Memory;
+    protected internal ReadOnlySpan<T>   AsSpan()   => buffer.Span;
+    protected internal ReadOnlyMemory<T> AsMemory() => buffer.Memory;
 
 
     public virtual ref T    Get( int index )          => ref InternalGet( index );
@@ -478,5 +451,5 @@ public class ObservableCollection<T> : CollectionAlerts<T>, IList<T>, IReadOnlyL
     public virtual void Clear() => InternalClear();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<T> FilteredValues() => FilteredValues( buffer.Span );
+    protected internal override ReadOnlyMemory<T> FilteredValues() => FilteredValues( buffer.Span );
 }
