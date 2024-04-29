@@ -128,7 +128,17 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         }
     }
 
-    
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues() => FilteredValues( _dictionary.ToSpanEnumerable() );
-    IEnumerator IEnumerable.                                               GetEnumerator()  => GetEnumerator();
+
+    protected internal override KeyValuePair<TKey, TValue>[] FilteredValues()
+    {
+        KeyValuePair<TKey, TValue>[] result;
+        KeyValuePair<TKey, TValue>[] array = ArrayPool<KeyValuePair<TKey, TValue>>.Shared.Rent( _dictionary.Count );
+        ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo( array, 0 );
+
+        try { result = FilteredValues( new ReadOnlySpan<KeyValuePair<TKey, TValue>>( array, 0, _dictionary.Count ) ); }
+        finally { ArrayPool<KeyValuePair<TKey, TValue>>.Shared.Return( array ); }
+
+        return result;
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

@@ -16,19 +16,23 @@ namespace Jakar.Extensions;
 [Serializable]
 public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T> equalityComparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList, IDisposable
 {
-    protected internal readonly IComparer<T>    comparer = comparer;
-    protected internal readonly MemoryBuffer<T> buffer   = new(equalityComparer, capacity);
+    protected internal readonly IComparer<T>         comparer         = comparer;
+    protected internal readonly IEqualityComparer<T> equalityComparer = equalityComparer;
+    protected internal readonly MemoryBuffer<T>      buffer           = new(equalityComparer, capacity);
 
 
-    public override int Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
-    bool IList.         IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool IList.         IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool ICollection<T>.IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
-    bool ICollection.   IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
-    object? IList.this[ int index ] { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
-    public T this[ int      index ] { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Set( index, value ); }
-    object ICollection.SyncRoot { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => buffer; }
-    public bool        IsEmpty  { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+    public override int  Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
+    public          bool IsEmpty        { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+    bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    public bool          IsNotEmpty     { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count > 0; }
+    bool IList.          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection<T>. IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; }
+    bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
+    object? IList.this[ int      index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
+    public ref T this[ int       index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => ref Get( index ); }
+    T IList<T>.this[ int         index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); set => Get( index ) = value; }
+    T IReadOnlyList<T>.this[ int index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); }
+    object ICollection.SyncRoot { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer; }
 
 
     public ObservableCollection() : this( Comparer<T>.Default, EqualityComparer<T>.Default ) { }
@@ -44,20 +48,22 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual void Dispose() => GC.SuppressFinalize( this );
 
 
+    // public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
     public static implicit operator ObservableCollection<T>( List<T>                                                values ) => new(values);
     public static implicit operator ObservableCollection<T>( HashSet<T>                                             values ) => new(values);
     public static implicit operator ObservableCollection<T>( ConcurrentBag<T>                                       values ) => new(values);
     public static implicit operator ObservableCollection<T>( Collection<T>                                          values ) => new(values);
-    public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
     public static implicit operator ObservableCollection<T>( System.Collections.ObjectModel.ObservableCollection<T> values ) => new(values);
     public static implicit operator ObservableCollection<T>( T[]                                                    values ) => new(values);
     public static implicit operator ObservableCollection<T>( ReadOnlyMemory<T>                                      values ) => new(values.Span);
     public static implicit operator ObservableCollection<T>( ReadOnlySpan<T>                                        values ) => new(values);
 
 
-    public void EnsureCapacity( in int  capacity ) => buffer.EnsureCapacity( capacity );
-    public void EnsureCapacity( in uint capacity ) => buffer.EnsureCapacity( capacity );
-    public T[]  ToArray()                          => buffer.Span.ToArray();
+#if NET6_0_OR_GREATER
+    public void EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
+#endif
+    public             T[]             ToArray() => [.. buffer];
+    protected internal ReadOnlySpan<T> AsSpan()  => buffer.Span;
 
 
     protected internal void InternalInsert( int i, in T value )
@@ -95,13 +101,17 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
 
         return result;
     }
-    protected internal int InternalRemove( in Predicate<T> match )
+    protected internal int InternalRemove( in Func<T, bool> match )
     {
-        int i = buffer.IndexOf( match );
-        if ( buffer.RemoveAt( i ) is false ) { return NOT_FOUND; }
+        int count = 0;
 
-        Removed( i );
-        return i;
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( T value in buffer.Where( match ) )
+        {
+            if ( Remove( value ) ) { count++; }
+        }
+
+        return count;
     }
 
 
@@ -121,8 +131,8 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
         }
 
         value = buffer[index];
-        if ( buffer.RemoveAt( index ) ) { Removed( value, index ); }
-
+        buffer.RemoveAt( index );
+        Removed( value, index );
         return value is not null;
     }
     protected internal bool InternalTryAdd( in T value )
@@ -180,28 +190,25 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         Guard.IsInRangeFor( count, buffer, nameof(count) );
-
     #if NET6_0_OR_GREATER
         buffer.Span.Slice( start, count ).Sort( compare );
     #else
         buffer.Span.Slice( start, count ).Sort( compare.Compare );
     #endif
-
         Reset();
     }
 
 
     protected internal void InternalReverse()
     {
-        buffer.Span.Reverse();
+        buffer.Reverse();
         Reset();
     }
     protected internal void InternalReverse( int start, int count )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         Guard.IsInRangeFor( count, buffer, nameof(count) );
-
-        buffer.Span.Slice( start, count ).Reverse();
+        buffer.Reverse( start, count );
         Reset();
     }
 
@@ -215,53 +222,41 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    protected internal ReadOnlySpan<T>   AsSpan()   => buffer.Span;
-    protected internal ReadOnlyMemory<T> AsMemory() => buffer.Memory;
-
-
     public virtual ref T    Get( int index )          => ref InternalGet( index );
     public virtual     void Set( int index, T value ) => InternalSet( index, value );
 
 
-    public virtual bool Exists( Predicate<T> match ) => buffer.IndexOf( match ) >= 0;
-    public virtual int FindCount( Predicate<T> match )
+    public virtual bool Exists( Predicate<T>     match ) => buffer.FindIndex( match ) >= 0;
+    public virtual int  FindCount( Func<T, bool> match ) => buffer.Count( match );
+
+
+    public virtual int FindIndex( Predicate<T> match, int start, int endInclusive )
     {
-        int length = 0;
-        foreach ( T _ in buffer.Span.Where( match ) ) { length++; }
-
-        return length;
+        Guard.IsInRangeFor( start,        buffer, nameof(start) );
+        Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
+        return buffer.FindIndex( start, endInclusive, match );
     }
-
-
-    public virtual int FindIndex( int start, int count, Predicate<T> match )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        Guard.IsInRangeFor( count, buffer, nameof(count) );
-        return buffer.IndexOf( start, count, match );
-    }
-    public virtual int FindIndex( int start, Predicate<T> match )
+    public virtual int FindIndex( Predicate<T> match, int start = 0 )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.IndexOf( match, start );
+        return buffer.FindIndex( match, start );
     }
-    public virtual int FindIndex( Predicate<T> match ) => buffer.IndexOf( match );
 
 
-    public virtual int FindLastIndex( int start, int count, Predicate<T> match )
+    public virtual int FindLastIndex( Predicate<T> match, int start, int endInclusive )
+    {
+        Guard.IsInRangeFor( start,        buffer, nameof(start) );
+        Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
+        return buffer.FindLastIndex( start, endInclusive, match );
+    }
+    public virtual int FindLastIndex( Predicate<T> match, int start = 0 )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        Guard.IsInRangeFor( count, buffer, nameof(count) );
-        return buffer.LastIndexOf( start, count, match );
+        return buffer.FindLastIndex( match, start );
     }
-    public virtual int FindLastIndex( int start, Predicate<T> match )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.LastIndexOf( match, start );
-    }
-    public virtual int FindLastIndex( Predicate<T> match ) => buffer.LastIndexOf( match );
 
 
-    public virtual int IndexOf( T value ) => buffer.IndexOf( value );
+    public int IndexOf( T value ) => IndexOf( value, 0 );
     public virtual int IndexOf( T value, int start )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
@@ -288,7 +283,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    public virtual T[] FindAll( Predicate<T>  match ) => buffer.FindAll( match );
+    public virtual T[] FindAll( Predicate<T>  match ) => [.. buffer.FindAll( match )];
     public virtual T?  Find( Predicate<T>     match ) => buffer.Find( match );
     public virtual T?  FindLast( Predicate<T> match ) => buffer.FindLast( match );
 
@@ -334,9 +329,9 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    public virtual void CopyTo( T[] array )                            => buffer.CopyTo( array );
-    public virtual void CopyTo( T[] array, int arrayIndex )            => buffer.CopyTo( array, arrayIndex );
-    public virtual void CopyTo( T[] array, int arrayIndex, int count ) => buffer.CopyTo( array, arrayIndex, count );
+    public virtual void CopyTo( T[] array )                                                                  => buffer.CopyTo( array );
+    public virtual void CopyTo( T[] array, int destinationStartIndex )                                       => buffer.CopyTo( array, destinationStartIndex );
+    public virtual void CopyTo( T[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 ) => buffer.CopyTo( array, length, destinationStartIndex, sourceStartIndex );
 
 
     public virtual void InsertRange( int index, IEnumerable<T>              collection ) => InternalInsert( index, collection );
@@ -378,17 +373,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    public virtual int Remove( Predicate<T> match )
-    {
-        int count = 0;
-
-        foreach ( T value in buffer.Span.Where( match ) )
-        {
-            if ( Remove( value ) ) { count++; }
-        }
-
-        return count;
-    }
+    public virtual int  Remove( Func<T, bool>               match )  => InternalRemove( match );
     public virtual bool Remove( T                           value )  => InternalRemove( value );
     public virtual int  Remove( IEnumerable<T>              values ) => InternalRemove( values );
     public virtual int  Remove( scoped in ReadOnlySpan<T>   values ) => InternalRemove( values );
@@ -450,6 +435,16 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual void Insert( int index, T value ) => InternalInsert( index, value );
     public virtual void Clear() => InternalClear();
 
+    
+    protected internal override T[] FilteredValues()
+    {
+        T[] result;
+        T[] array = ArrayPool<T>.Shared.Rent( buffer.Length );
+        buffer.CopyTo( array );
 
-    protected internal override ReadOnlyMemory<T> FilteredValues() => FilteredValues( buffer.Span );
+        try { result = FilteredValues( new ReadOnlySpan<T>( array, 0, buffer.Length ) ); }
+        finally { ArrayPool<T>.Shared.Return( array ); }
+
+        return result;
+    }
 }

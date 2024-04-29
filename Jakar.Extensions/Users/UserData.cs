@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 public static class UserData
 {
     public const ClaimType ADDRESS     = ClaimType.StreetAddressLine1 | ClaimType.StreetAddressLine2 | ClaimType.StateOrProvince | ClaimType.Country | ClaimType.PostalCode;
-    public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.Group        | ClaimType.Role;
+    public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.Group           | ClaimType.Role;
 
 
     public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
@@ -73,13 +73,21 @@ public static class UserData
 
         if ( HasFlag( types, ClaimType.Group ) )
         {
-            foreach ( TGroupModel record in model.Groups ) { claims.Add( ClaimType.Group.ToClaim( record.NameOfGroup, issuer ) ); }
+            foreach ( TGroupModel record in model.Groups
+                                              #if NET6_0_OR_GREATER
+                                                 .AsSpan()
+                 #endif
+                    ) { claims.Add( ClaimType.Group.ToClaim( record.NameOfGroup, issuer ) ); }
         }
 
 
         if ( HasFlag( types, ClaimType.Role ) )
         {
-            foreach ( TRoleModel record in model.Roles.AsSpan() ) { claims.Add( ClaimType.Role.ToClaim( record.NameOfRole, issuer ) ); }
+            foreach ( TRoleModel record in model.Roles
+                                             #if NET6_0_OR_GREATER
+                                                .AsSpan()
+                 #endif
+                    ) { claims.Add( ClaimType.Role.ToClaim( record.NameOfRole, issuer ) ); }
         }
 
         return [.. claims.Span];

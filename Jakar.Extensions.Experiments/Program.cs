@@ -1,10 +1,23 @@
-﻿using Microsoft.Extensions.Primitives;
-
-
-try
+﻿try
 {
     "Hello World!".WriteToConsole();
     Console.WriteLine();
+
+    ObservableCollection<long> collection = new(20)
+                                            {
+                                                0,
+                                                1,
+                                                2,
+                                                3,
+                                                4,
+                                                5,
+                                                6,
+                                                7,
+                                                8,
+                                                9
+                                            };
+
+    collection.ToPrettyJson().WriteToConsole();
 
     // Tests.Test_Hashes();
 
@@ -19,7 +32,7 @@ try
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
 
-    await PasswordChecker.Run();
+    // await PasswordChecker.Run();
 
     // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
 

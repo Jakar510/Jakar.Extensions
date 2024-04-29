@@ -42,42 +42,39 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
     protected virtual bool Filter( T? value ) => true;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected ReadOnlyMemory<T> FilteredValues( scoped in ReadOnlySpan<T> span ) => FilteredValues( span.Where( Filter ) );
-    protected ReadOnlyMemory<T> FilteredValues( scoped in SpanEnumerable<T, T, WhereDelegateProducer<T>> span )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected T[] FilteredValues( scoped in ReadOnlySpan<T> span )
+    {
+        Guard.IsEqualTo( span.Length, Count );
+        return FilteredValues( span.Where( Filter ) );
+    }
+    protected T[] FilteredValues( SpanEnumerable<T, T, WhereDelegateProducer<T>> span )
     {
         using Buffer<T> values = new(Count);
         foreach ( T value in span ) { values.Add( value ); }
 
         return values.ToArray();
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected ReadOnlyMemory<T> FilteredValues( SpanEnumerable<T, EnumerableProducer<T>> span ) => FilteredValues( span.Where( Filter ) );
-    protected ReadOnlyMemory<T> FilteredValues( scoped in SpanEnumerable<T, SecondaryWhereDelegateProducer<T, EnumerableProducer<T>>> span )
-    {
-        using Buffer<T> values = new(Count);
-        foreach ( T value in span ) { values.Add( value ); }
-
-        return values.ToArray();
-    }
 
 
-    public virtual IEnumerator<T>                 GetEnumerator() => new Enumerator( this );
-    IEnumerator IEnumerable.                      GetEnumerator() => GetEnumerator();
-    protected internal abstract ReadOnlyMemory<T> FilteredValues();
+    public virtual IEnumerator<T>   GetEnumerator() => new Enumerator( this );
+    IEnumerator IEnumerable.        GetEnumerator() => GetEnumerator();
+    protected internal abstract T[] FilteredValues();
 
 
 
     public sealed class Enumerator( CollectionAlerts<T> enumerator ) : IEnumerator<T>, IEnumerable<T>
     {
-        private int               _index;
-        private ReadOnlyMemory<T> _collection = enumerator.FilteredValues();
+        private int               _index  = NOT_FOUND;
+        private ReadOnlyMemory<T> _buffer = enumerator.FilteredValues();
 
-        public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _collection.Span[_index]; }
+        public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer.Span[_index]; }
         object? IEnumerator.Current => Current;
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator() => this;
         IEnumerator IEnumerable.      GetEnumerator() => this;
-        public void                   Dispose()       => _collection = default;
-        public bool                   MoveNext()      => ++_index < _collection.Length;
+        public void                   Dispose()       => _buffer = default;
+        public bool                   MoveNext()      => ++_index < _buffer.Length;
         public void                   Reset()         => _index = NOT_FOUND;
     }
 }

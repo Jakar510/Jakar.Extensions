@@ -1,3 +1,7 @@
+using System.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -39,6 +43,7 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
         GC.SuppressFinalize( this );
     }
 
+    // public static implicit operator ConcurrentObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( List<T>                                                values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( HashSet<T>                                             values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( ConcurrentBag<T>                                       values ) => new(values);
@@ -47,7 +52,6 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     public static implicit operator ConcurrentObservableCollection<T>( T[]                                                    values ) => new(values);
     public static implicit operator ConcurrentObservableCollection<T>( ReadOnlyMemory<T>                                      values ) => new(values.Span);
     public static implicit operator ConcurrentObservableCollection<T>( ReadOnlySpan<T>                                        values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
 
 
     public override void Set( int index, T value )
@@ -59,75 +63,64 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
         using ( AcquireLock() ) { return ref InternalGet( index ); }
     }
 
+
     public override bool Exists( Predicate<T> match )
     {
-        using ( AcquireLock() ) { return buffer.IndexOf( match ) >= 0; }
+        using ( AcquireLock() ) { return buffer.FindIndex( match ) >= 0; }
     }
     public async ValueTask<bool> ExistsAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match ) >= 0; }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindIndex( match ) >= 0; }
     }
 
 
-    public override int FindIndex( int start, int count, Predicate<T> match )
+    public override int FindIndex( Predicate<T> match, int start, int endInclusive )
     {
-        using ( AcquireLock() ) { return buffer.IndexOf( start, count, match ); }
+        using ( AcquireLock() ) { return buffer.FindIndex( start, endInclusive, match ); }
     }
-    public override int FindIndex( int start, Predicate<T> match )
+    public override int FindIndex( Predicate<T> match, int start = 0 )
     {
-        using ( AcquireLock() ) { return buffer.IndexOf( match, start ); }
-    }
-    public override int FindIndex( Predicate<T> match )
-    {
-        using ( AcquireLock() ) { return buffer.IndexOf( match ); }
+        using ( AcquireLock() ) { return buffer.FindIndex( match, start ); }
     }
     public async ValueTask<int> FindIndexAsync( int start, int count, Predicate<T> match, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         Guard.IsInRangeFor( count, buffer, nameof(count) );
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( start, count, match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindIndex( start, count, match ); }
     }
     public async ValueTask<int> FindIndexAsync( int start, Predicate<T> match, CancellationToken token = default )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindIndex( match, start ); }
     }
     public async ValueTask<int> FindIndexAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.IndexOf( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindIndex( match ); }
     }
 
 
-    public override int FindLastIndex( int start, int count, Predicate<T> match )
+    public override int FindLastIndex( Predicate<T> match, int start, int count )
     {
-        using ( AcquireLock() ) { return buffer.LastIndexOf( start, count, match ); }
+        using ( AcquireLock() ) { return buffer.FindLastIndex( start, count, match ); }
     }
-    public override int FindLastIndex( int start, Predicate<T> match )
+    public override int FindLastIndex( Predicate<T> match, int start = 0 )
     {
-        using ( AcquireLock() ) { return buffer.LastIndexOf( match, start ); }
+        using ( AcquireLock() ) { return buffer.FindLastIndex( match, start ); }
     }
-    public override int FindLastIndex( Predicate<T> match )
+    public async ValueTask<int> FindLastIndexAsync( Predicate<T> match, int start, int count, CancellationToken token = default )
     {
-        using ( AcquireLock() ) { return buffer.LastIndexOf( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindLastIndex( start, count, match ); }
     }
-    public async ValueTask<int> FindLastIndexAsync( int start, int count, Predicate<T> match, CancellationToken token = default )
+    public async ValueTask<int> FindLastIndexAsync( Predicate<T> match, int start, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( start, count, match ); }
-    }
-    public async ValueTask<int> FindLastIndexAsync( int start, Predicate<T> match, CancellationToken token = default )
-    {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( match, start ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindLastIndex( match, start ); }
     }
     public async ValueTask<int> FindLastIndexAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.LastIndexOf( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindLastIndex( match ); }
     }
 
 
-    public override int IndexOf( T value )
-    {
-        using ( AcquireLock() ) { return buffer.IndexOf( value ); }
-    }
     public override int IndexOf( T value, int start )
     {
         using ( AcquireLock() ) { return buffer.IndexOf( value, start ); }
@@ -183,11 +176,11 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
 
     public override T[] FindAll( Predicate<T> match )
     {
-        using ( AcquireLock() ) { return buffer.FindAll( match ); }
+        using ( AcquireLock() ) { return [..buffer.FindAll( match )]; }
     }
     public async ValueTask<T[]> FindAllAsync( Predicate<T> match, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return buffer.FindAll( match ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return [..buffer.FindAll( match )]; }
     }
     public override T? Find( Predicate<T> match )
     {
@@ -299,25 +292,25 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     {
         using ( AcquireLock() ) { buffer.CopyTo( array ); }
     }
-    public override void CopyTo( T[] array, int arrayIndex )
+    public override void CopyTo( T[] array, int destinationStartIndex )
     {
-        using ( AcquireLock() ) { buffer.CopyTo( array, arrayIndex ); }
+        using ( AcquireLock() ) { buffer.CopyTo( array, destinationStartIndex ); }
     }
-    public override void CopyTo( T[] array, int arrayIndex, int count )
+    public override void CopyTo( T[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 )
     {
-        using ( AcquireLock() ) { buffer.CopyTo( array, arrayIndex, count ); }
+        using ( AcquireLock() ) { buffer.CopyTo( array, length, destinationStartIndex, sourceStartIndex ); }
     }
     public async ValueTask CopyToAsync( T[] array, CancellationToken token = default )
     {
         using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array ); }
     }
-    public async ValueTask CopyToAsync( T[] array, int arrayIndex, CancellationToken token = default )
+    public async ValueTask CopyToAsync( T[] array, int destinationStartIndex, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, arrayIndex ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, destinationStartIndex ); }
     }
-    public async ValueTask CopyToAsync( T[] array, int arrayIndex, int count, CancellationToken token = default )
+    public async ValueTask CopyToAsync( T[] array, int destinationStartIndex, int length, int sourceStartIndex = 0, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, arrayIndex, count ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { buffer.CopyTo( array, length, destinationStartIndex, sourceStartIndex ); }
     }
 
 
@@ -360,7 +353,7 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     }
 
 
-    public override int Remove( Predicate<T> match )
+    public override int Remove( Func<T, bool> match )
     {
         using ( AcquireLock() ) { return InternalRemove( match ); }
     }
@@ -490,7 +483,7 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
             if ( value is not T x ) { return NOT_FOUND; }
 
             buffer.Add( x );
-            return buffer.Length;
+            return Count;
         }
     }
     bool IList.Contains( object? value )
@@ -569,13 +562,14 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
 #if NET6_0_OR_GREATER
     protected internal ReadOnlySpan<T> AsSpan( ref bool lockTaken )
     {
-        using ( AcquireLock( ref lockTaken ) ) { return buffer.Span; }
+        using ( AcquireLock( ref lockTaken ) ) { return buffer.ToArray(); }
     }
     protected internal ReadOnlyMemory<T> AsMemory( ref bool lockTaken )
     {
-        using ( AcquireLock( ref lockTaken ) ) { return buffer.Memory; }
+        using ( AcquireLock( ref lockTaken ) ) { return buffer.ToArray(); }
     }
 #endif
+
 
     protected internal ReadOnlyMemory<T> Copy()
     {

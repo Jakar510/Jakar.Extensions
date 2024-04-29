@@ -1,15 +1,19 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/21/2022  9:29 AM
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
 {
-    private readonly       HashSet<T> _values = values;
-    public sealed override int        Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.Count; }
-    bool ICollection<T>.              IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)_values).IsReadOnly; }
+    private readonly       HashSet<T> _buffer = values;
+    public sealed override int        Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer.Count; }
+    bool ICollection<T>.              IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)_buffer).IsReadOnly; }
 
 
     public ObservableHashSet() : this( DEFAULT_CAPACITY ) { }
@@ -25,37 +29,37 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     public static implicit operator ObservableHashSet<T>( T[]                     items ) => new(items);
 
 
-    public virtual bool IsProperSubsetOf( IEnumerable<T>   other ) => _values.IsProperSubsetOf( other );
-    public virtual bool IsProperSupersetOf( IEnumerable<T> other ) => _values.IsProperSupersetOf( other );
-    public virtual bool IsSubsetOf( IEnumerable<T>         other ) => _values.IsSubsetOf( other );
-    public virtual bool IsSupersetOf( IEnumerable<T>       other ) => _values.IsSupersetOf( other );
-    public virtual bool Overlaps( IEnumerable<T>           other ) => _values.Overlaps( other );
-    public virtual bool SetEquals( IEnumerable<T>          other ) => _values.SetEquals( other );
+    public virtual bool IsProperSubsetOf( IEnumerable<T>   other ) => _buffer.IsProperSubsetOf( other );
+    public virtual bool IsProperSupersetOf( IEnumerable<T> other ) => _buffer.IsProperSupersetOf( other );
+    public virtual bool IsSubsetOf( IEnumerable<T>         other ) => _buffer.IsSubsetOf( other );
+    public virtual bool IsSupersetOf( IEnumerable<T>       other ) => _buffer.IsSupersetOf( other );
+    public virtual bool Overlaps( IEnumerable<T>           other ) => _buffer.Overlaps( other );
+    public virtual bool SetEquals( IEnumerable<T>          other ) => _buffer.SetEquals( other );
     public virtual void ExceptWith( IEnumerable<T> other )
     {
-        _values.ExceptWith( other );
+        _buffer.ExceptWith( other );
         Reset();
     }
     public virtual void IntersectWith( IEnumerable<T> other )
     {
-        _values.IntersectWith( other );
+        _buffer.IntersectWith( other );
         Reset();
     }
     public virtual void SymmetricExceptWith( IEnumerable<T> other )
     {
-        _values.SymmetricExceptWith( other );
+        _buffer.SymmetricExceptWith( other );
         Reset();
     }
     public virtual void UnionWith( IEnumerable<T> other )
     {
-        _values.UnionWith( other );
+        _buffer.UnionWith( other );
         Reset();
     }
 
 
     public virtual void Clear()
     {
-        _values.Clear();
+        _buffer.Clear();
         Reset();
     }
 
@@ -63,7 +67,7 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     void ICollection<T>.Add( T item ) => Add( item );
     public virtual bool Add( T item )
     {
-        bool result = _values.Add( item );
+        bool result = _buffer.Add( item );
         if ( result ) { Added( item ); }
 
         return result;
@@ -72,17 +76,27 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
 
     public virtual bool Remove( T item )
     {
-        bool result = _values.Remove( item );
+        bool result = _buffer.Remove( item );
         if ( result ) { Removed( item ); }
 
         return result;
     }
 
 
-    public virtual bool Contains( T item )                  => _values.Contains( item );
-    public         void CopyTo( T[] array, int arrayIndex ) => _values.CopyTo( array, arrayIndex );
+    public virtual bool Contains( T item )                  => _buffer.Contains( item );
+    public         void CopyTo( T[] array, int arrayIndex ) => _buffer.CopyTo( array, arrayIndex );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal override ReadOnlyMemory<T> FilteredValues() => FilteredValues( _values.ToSpanEnumerable() );
-    IEnumerator IEnumerable.                                                                           GetEnumerator()  => GetEnumerator();
+    protected internal override T[] FilteredValues()
+    {
+        T[] result;
+        T[] array = ArrayPool<T>.Shared.Rent( _buffer.Count );
+        _buffer.CopyTo( array );
+
+        try { result = FilteredValues( new ReadOnlySpan<T>( array, 0, _buffer.Count ) ); }
+        finally { ArrayPool<T>.Shared.Return( array ); }
+
+        return result;
+    }
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

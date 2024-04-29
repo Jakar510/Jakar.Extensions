@@ -1,10 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  21:3
 
+using NoAlloq;
+
+
+
 namespace Jakar.Extensions;
 
 
-public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialCapacity = DEFAULT_CAPACITY ) : ICollection<T>
+public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialCapacity = DEFAULT_CAPACITY ) : ICollection<T>, IDisposable
 {
     private readonly IEqualityComparer<T> _comparer = comparer;
     private          int                  _length;
@@ -29,8 +33,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             _length = value;
         }
     }
-    internal Memory<T> Memory { [Pure] get => _arrayToReturnToPool; }
-    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Length, Capacity - 1); }
+    internal Memory<T> Memory { [Pure] get => new(_arrayToReturnToPool, 0, Length); }
+    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Length, Capacity - Length); }
     public   Span<T>   Span   { [Pure] get => new(_arrayToReturnToPool, 0, Length); }
 
 
@@ -40,7 +44,11 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     public MemoryBuffer( scoped in Buffer<T>       span, IEqualityComparer<T> comparer ) : this( span.Span, comparer ) { }
     public MemoryBuffer( scoped in ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) { }
     public MemoryBuffer( scoped in ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( comparer, span.Length ) => Add( span );
-    public          void   Dispose()  => ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
+    public void Dispose()
+    {
+        ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
+        _arrayToReturnToPool = [];
+    }
     public override string ToString() => $"MemoryBuffer<{typeof(T).Name}>( {nameof(Capacity)}: {Capacity}, {nameof(Length)}: {Length}, {nameof(IsReadOnly)}: {IsReadOnly} )";
 
 
@@ -56,35 +64,36 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void EnsureCapacity( in int additionalCapacityBeyondPos ) => EnsureCapacity( (uint)additionalCapacityBeyondPos );
-    public void EnsureCapacity( in uint additionalCapacityBeyondPos )
+    public  void EnsureCapacity( in int  additionalCapacityBeyondPos )                => EnsureCapacity( (uint)additionalCapacityBeyondPos, out T[] _ );
+    public  void EnsureCapacity( in uint additionalCapacityBeyondPos )                => EnsureCapacity( additionalCapacityBeyondPos,       out T[] _ );
+    private void EnsureCapacity( in int  additionalCapacityBeyondPos, out T[] array ) => EnsureCapacity( (uint)additionalCapacityBeyondPos, out array );
+    private void EnsureCapacity( in uint additionalCapacityBeyondPos, out T[] array )
     {
         Guard.IsInRange( additionalCapacityBeyondPos, 1, int.MaxValue );
         uint capacity = (uint)Capacity;
-        if ( Length + additionalCapacityBeyondPos > capacity ) { Grow( capacity, (uint)_length + additionalCapacityBeyondPos ); }
+
+        if ( Length + additionalCapacityBeyondPos > capacity )
+        {
+            Grow( capacity, (uint)_length + additionalCapacityBeyondPos, out array );
+            return;
+        }
+
+        array = _arrayToReturnToPool;
     }
 
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="requestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="requestedCapacity"> the requested new size of the buffer. </param>
     /// <param name="capacity"> the current size of the buffer. </param>
-    private void Grow( in uint capacity, in uint requestedCapacity )
+    /// <param name="array"> </param>
+    private void Grow( in uint capacity, in uint requestedCapacity, out T[] array )
     {
         ThrowIfReadOnly();
         int minimumLength = GetLength( capacity, requestedCapacity );
-        T[] poolArray     = ArrayPool<T>.Shared.Rent( minimumLength );
-        new Span<T>( _arrayToReturnToPool ).CopyTo( poolArray );
+        array = ArrayPool<T>.Shared.Rent( minimumLength );
+        new Span<T>( _arrayToReturnToPool ).CopyTo( array );
         ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
-        _arrayToReturnToPool = poolArray;
-    }
-    private static int GetLength( in ulong capacity, in ulong requestedCapacity )
-    {
-        Debug.Assert( capacity          <= int.MaxValue );
-        Debug.Assert( requestedCapacity <= int.MaxValue );
-        Guard.IsGreaterThan( requestedCapacity, capacity );
-
-        ulong result = Math.Max( requestedCapacity, capacity * 2 );
-        return (int)Math.Min( result, int.MaxValue );
+        _arrayToReturnToPool = array;
     }
 
 
@@ -122,9 +131,14 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         length = 0;
         return false;
     }
-    public void CopyTo( T[] array )                             => CopyTo( array, 0 );
-    public void CopyTo( T[] array, int startIndex )             => CopyTo( array, 0, Length );
-    public void CopyTo( T[] array, int startIndex, int length ) => Span.CopyTo( new Span<T>( array, startIndex, length ) );
+    public void CopyTo( T[] array )                            => CopyTo( array, 0 );
+    public void CopyTo( T[] array, int destinationStartIndex ) => CopyTo( array, Length - 1, 0 );
+    public void CopyTo( T[] array, int length, int destinationStartIndex, int sourceStartIndex = 0 )
+    {
+        Guard.IsInRange( length, 0, Length );
+        Span<T> target = new(array, destinationStartIndex, array.Length);
+        Span[sourceStartIndex..length].CopyTo( target );
+    }
 
 
     public void Reverse( int start, int length ) => Span.Slice( start, length ).Reverse();
@@ -142,7 +156,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<T> Slice( int start, int length ) => Span.Slice( start, length );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T value, in int start = 0 ) => IndexOf( value, start, Length - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T value, int start = 0 ) => IndexOf( value, start, Length - 1 );
     public int IndexOf( T value, in int start, in int endInclusive )
     {
         Guard.IsInRange( start,        0, Length );
@@ -159,8 +173,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( Predicate<T> match, in int start = 0 ) => IndexOf( start, Length - 1, match );
-    public int IndexOf( in int start, in int endInclusive, Predicate<T> match )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Predicate<T> match, int start = 0 ) => FindIndex( start, Length - 1, match );
+    public int FindIndex( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -193,8 +207,9 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         return NOT_FOUND;
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( Predicate<T> match, in int endInclusive = 0 ) => LastIndexOf( Length - 1, endInclusive, match );
-    public int LastIndexOf( in int start, in int endInclusive, Predicate<T> match )
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Predicate<T> match, int endInclusive = 0 ) => FindLastIndex( Length - 1, endInclusive, match );
+    public int FindLastIndex( in int start, in int endInclusive, Predicate<T> match )
     {
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
@@ -273,7 +288,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     {
         if ( index < 0 || index >= Length ) { return false; }
 
-        System.Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
+        Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
         Length--;
         return true;
     }
@@ -282,17 +297,23 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
 
     public void Replace( int index, T value, int count = 1 )
     {
-        Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
-        EnsureCapacity( count );
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
+        Guard.IsInRange( index + count, 0, Length );
 
-        Span.Slice( index, count ).Fill( value );
+        EnsureCapacity( count, out T[] array );
+        Span<T> span = new(array, 0, Length);
+        span.Slice( index, count ).Fill( value );
     }
-    public void Replace( int index, scoped in ReadOnlySpan<T> span )
+    public void Replace( int index, scoped in ReadOnlySpan<T> values )
     {
         ThrowIfReadOnly();
-        EnsureCapacity( span.Length );
-        span.CopyTo( Span.Slice( index, span.Length ) );
+        Guard.IsInRange( index,                 0, Length );
+        Guard.IsInRange( index + values.Length, 0, Length );
+
+        EnsureCapacity( values.Length, out T[] array );
+        Span<T> span = new(array, 0, Length);
+        span.CopyTo( span.Slice( index, values.Length ) );
     }
 
 
@@ -307,33 +328,25 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     public void Insert( int index, scoped in ReadOnlySpan<T> values )
     {
         ThrowIfReadOnly();
-        EnsureCapacity( values.Length );
-
         if ( values.IsEmpty ) { return; }
 
-        T[] array = _arrayToReturnToPool;
-        if ( index < Capacity ) { System.Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
+        EnsureCapacity( values.Length, out T[] array );
+        if ( index < Capacity ) { Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
 
-        values.CopyTo( array.AsSpan()[index..] );
+        values.CopyTo( array.AsSpan( index, array.Length - index ) );
         Length += values.Length;
     }
 
 
-    public void Add( T value )
-    {
-        ThrowIfReadOnly();
-        EnsureCapacity( 1 );
-        Next[0] = value;
-        Length++;
-    }
-    public void Add( T c, in int count )
+    public void Add( T value ) => Add( value, 1 );
+    public void Add( T value, in int count )
     {
         Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
-        EnsureCapacity( count );
+        EnsureCapacity( count, out T[] array );
+        Span<T> span = new(array, Length, Capacity - Length);
 
-        Span<T> span = Next;
-        for ( int i = 0; i < count; i++ ) { span[i] = c; }
+        for ( int i = 0; i < count; i++ ) { span[i] = value; }
 
         Length += count;
     }
@@ -396,8 +409,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             int count = collection.Count;
             if ( count <= 0 ) { return; }
 
-            EnsureCapacity( count );
-            collection.CopyTo( _arrayToReturnToPool, Length );
+            EnsureCapacity( count, out T[] array );
+            collection.CopyTo( array, Length );
             Length += count;
         }
         else
@@ -416,7 +429,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer[_index]; }
         object? IEnumerator.Current => Current;
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = NOT_FOUND;
         [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer.Length;
         public                                                      void Dispose()  { }
     }
