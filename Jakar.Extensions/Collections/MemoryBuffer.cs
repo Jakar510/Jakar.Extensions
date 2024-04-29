@@ -30,7 +30,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         }
     }
     internal Memory<T> Memory { [Pure] get => _arrayToReturnToPool; }
-    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Length, Capacity); }
+    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Length, Capacity - 1); }
     public   Span<T>   Span   { [Pure] get => new(_arrayToReturnToPool, 0, Length); }
 
 
