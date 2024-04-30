@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>7.0.0.16-beta</version>
+		<version>7.0.0.17-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -30,7 +30,7 @@
 				<dependency id="Dapper" version="2.1.35" />
 				<dependency id="Dapper.Contrib" version="2.0.78" />
 				<dependency id="FluentMigrator.Abstractions" version="5.2.0" />
-				<dependency id="Jakar.Extensions" version="8.8.2" />
+				<dependency id="Jakar.Extensions" version="8.9.0" />
 				<dependency id="FluentMigrator" version="5.2.0" />
 				<dependency id="FluentMigrator.Runner" version="5.2.0" />
 				<dependency id="MailKit" version="4.5.0" />

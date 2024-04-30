@@ -44,13 +44,13 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
 
     public static Error Unauthorized( scoped in PasswordValidator.Results results,
-                                      string                              lengthPassed  = "Password not long enough",
-                                      string                              mustBeTrimmed = "Password must be trimmed",
-                                      string                              specialPassed = "Password must contain a special character",
-                                      string                              numericPassed = "Password must contain a numeric character",
-                                      string                              lowerPassed   = "Password must contain a lower case character",
-                                      string                              upperPassed   = "Password must contain a upper case character",
-                                      string                              blockedPassed = "Password cannot be a blocked password",
+                                      string                              lengthPassed  = Extensions.Errors.LENGTH_PASSED,
+                                      string                              mustBeTrimmed = Extensions.Errors.MUST_BE_TRIMMED,
+                                      string                              specialPassed = Extensions.Errors.SPECIAL_PASSED,
+                                      string                              numericPassed = Extensions.Errors.NUMERIC_PASSED,
+                                      string                              lowerPassed   = Extensions.Errors.LOWER_PASSED,
+                                      string                              upperPassed   = Extensions.Errors.UPPER_PASSED,
+                                      string                              blockedPassed = Extensions.Errors.BLOCKED_PASSED,
                                       string                              type          = Extensions.Errors.PASSWORD_VALIDATION_TYPE,
                                       string                              title         = Extensions.Errors.PASSWORD_VALIDATION_TITLE,
                                       string?                             detail        = null,
@@ -81,28 +81,28 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
     public static Error Unauthorized( in StringValues errors = default, string type = Extensions.Errors.UNAUTHORIZED_TYPE, string title = Extensions.Errors.UNAUTHORIZED_TITLE, string? detail = null, string? instance = null ) => new(Status.Unauthorized, type, title, detail, instance, errors);
 
 
-    public static Error Disabled( in            StringValues errors = default, string type = Extensions.Errors.DISABLED_TYPE,             string title = Extensions.Errors.DISABLED_TITLE,             string? detail = null, string? instance = null ) => new(Status.Disabled, type, title, detail, instance, errors);
-    public static Error Locked( in              StringValues errors = default, string type = Extensions.Errors.LOCKED_TYPE,               string title = Extensions.Errors.LOCKED_TITLE,               string? detail = null, string? instance = null ) => new(Status.Locked, type, title, detail, instance, errors);
-    public static Error ExpiredSubscription( in StringValues errors = default, string type = Extensions.Errors.EXPIRED_SUBSCRIPTION_TYPE, string title = Extensions.Errors.EXPIRED_SUBSCRIPTION_TITLE, string? detail = null, string? instance = null ) => new(Status.PaymentRequired, type, title, detail, instance, errors);
-    public static Error InvalidSubscription( in StringValues errors = default, string type = Extensions.Errors.INVALID_SUBSCRIPTION_TYPE, string title = Extensions.Errors.INVALID_SUBSCRIPTION_TITLE, string? detail = null, string? instance = null ) => new(Status.PaymentRequired, type, title, detail, instance, errors);
-    public static Error NoSubscription( in      StringValues errors = default, string type = Extensions.Errors.NO_SUBSCRIPTION_TYPE,      string title = Extensions.Errors.NO_SUBSCRIPTION_TITLE,      string? detail = null, string? instance = null ) => new(Status.PaymentRequired, type, title, detail, instance, errors);
+    public static Error Disabled( in            StringValues errors = default, string title = Extensions.Errors.DISABLED_TITLE,             string? detail = null, string? instance = null, string type = Extensions.Errors.DISABLED_TYPE )             => new(Status.Disabled, type, title, detail, instance, errors);
+    public static Error Locked( in              StringValues errors = default, string title = Extensions.Errors.LOCKED_TITLE,               string? detail = null, string? instance = null, string type = Extensions.Errors.LOCKED_TYPE )               => new(Status.Locked, type, title, detail, instance, errors);
+    public static Error ExpiredSubscription( in StringValues errors = default, string title = Extensions.Errors.EXPIRED_SUBSCRIPTION_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.EXPIRED_SUBSCRIPTION_TYPE ) => new(Status.PaymentRequired, type, title, detail, instance, errors);
+    public static Error InvalidSubscription( in StringValues errors = default, string title = Extensions.Errors.INVALID_SUBSCRIPTION_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.INVALID_SUBSCRIPTION_TYPE ) => new(Status.PaymentRequired, type, title, detail, instance, errors);
+    public static Error NoSubscription( in      StringValues errors = default, string title = Extensions.Errors.NO_SUBSCRIPTION_TITLE,      string? detail = null, string? instance = null, string type = Extensions.Errors.NO_SUBSCRIPTION_TYPE )      => new(Status.PaymentRequired, type, title, detail, instance, errors);
 
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.PreconditionFailed"/> from a type and title. </summary>
-    public static Error Failure( in StringValues errors = default, string type = Extensions.Errors.GENERAL_TYPE, string title = Extensions.Errors.GENERAL_TITLE, string? detail = null, string? instance = null ) => new(Status.PreconditionFailed, type, title, detail, instance, errors);
+    public static Error Failure( in StringValues errors = default, string title = Extensions.Errors.GENERAL_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.GENERAL_TYPE ) => new(Status.PreconditionFailed, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.UnprocessableEntity"/> from a type and title. </summary>
-    public static Error Unexpected( in StringValues errors = default, string type = Extensions.Errors.UNEXPECTED_TYPE, string title = Extensions.Errors.UNEXPECTED_TITLE, string? detail = null, string? instance = null ) => new(Status.UnprocessableEntity, type, title, detail, instance, errors);
+    public static Error Unexpected( in StringValues errors = default, string title = Extensions.Errors.UNEXPECTED_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.UNEXPECTED_TYPE ) => new(Status.UnprocessableEntity, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.BadRequest"/> from a type and title. </summary>
-    public static Error Validation( in StringValues errors = default, string type = Extensions.Errors.VALIDATION_TYPE, string title = Extensions.Errors.VALIDATION_TITLE, string? detail = null, string? instance = null ) => new(Status.BadRequest, type, title, detail, instance, errors);
+    public static Error Validation( in StringValues errors = default, string title = Extensions.Errors.VALIDATION_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.VALIDATION_TYPE ) => new(Status.BadRequest, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.Conflict"/> from a type and title. </summary>
-    public static Error Conflict( in StringValues errors = default, string type = Extensions.Errors.CONFLICT_TYPE, string title = Extensions.Errors.CONFLICT_TITLE, string? detail = null, string? instance = null ) => new(Status.Conflict, type, title, detail, instance, errors);
+    public static Error Conflict( in StringValues errors = default, string title = Extensions.Errors.CONFLICT_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.CONFLICT_TYPE ) => new(Status.Conflict, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.NotFound"/> from a type and title. </summary>
-    public static Error NotFound( in StringValues errors = default, string type = Extensions.Errors.NOT_FOUND_TYPE, string title = Extensions.Errors.NOT_FOUND_TITLE, string? detail = null, string? instance = null ) => new(Status.NotFound, type, title, detail, instance, errors);
+    public static Error NotFound( in StringValues errors = default, string title = Extensions.Errors.NOT_FOUND_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.NOT_FOUND_TYPE ) => new(Status.NotFound, type, title, detail, instance, errors);
 
     /// <summary> Creates an <see cref="Error"/> of type <see cref="Status.Forbidden"/> from a type and title. </summary>
-    public static Error Forbidden( in StringValues errors = default, string type = Extensions.Errors.FORBIDDEN_TYPE, string title = Extensions.Errors.FORBIDDEN_TITLE, string? detail = null, string? instance = null ) => new(Status.Forbidden, type, title, detail, instance, errors);
+    public static Error Forbidden( in StringValues errors = default, string title = Extensions.Errors.FORBIDDEN_TITLE, string? detail = null, string? instance = null, string type = Extensions.Errors.FORBIDDEN_TYPE ) => new(Status.Forbidden, type, title, detail, instance, errors);
 }

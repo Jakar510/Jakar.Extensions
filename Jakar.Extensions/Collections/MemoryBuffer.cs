@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  21:3
 
-using NoAlloq;
+using System;
 
 
 
@@ -15,16 +15,9 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     private          T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
 
 
-    public int         Capacity   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool.Length; }
-    int ICollection<T>.Count      => Length;
-    public bool        IsEmpty    { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length == 0; }
-    public bool        IsNotEmpty { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length > 0; }
-    public bool        IsReadOnly { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get; init; } = false;
-    public ref T this[ int     index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public ref T this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public Span<T> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => Span[range]; }
-    public Span<T> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.Slice( start, length ); }
-    public int Length
+    public int         Capacity { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _arrayToReturnToPool.Length; }
+    int ICollection<T>.Count    => Count;
+    public int Count
     {
         [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length;
         set
@@ -33,9 +26,24 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             _length = value;
         }
     }
-    internal Memory<T> Memory { [Pure] get => new(_arrayToReturnToPool, 0, Length); }
-    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Length, Capacity - Length); }
-    public   Span<T>   Span   { [Pure] get => new(_arrayToReturnToPool, 0, Length); }
+    public bool IsEmpty    { [Pure, MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+    public bool IsNotEmpty { [Pure, MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => Count > 0; }
+    public bool IsReadOnly { [Pure, MethodImpl(                         MethodImplOptions.AggressiveInlining )] get; init; } = false;
+    public ref T this[ int     index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
+    public ref T this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
+    public Span<T> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => Span[range]; }
+    public Span<T> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.Slice( start, length ); }
+    internal Memory<T> Memory { [Pure] get => new(_arrayToReturnToPool, 0, Count); }
+    public   Span<T>   Next   { [Pure] get => new(_arrayToReturnToPool, Count, Capacity - Count); }
+    public   Span<T>   Span   { [Pure] get => new(_arrayToReturnToPool, 0, Count); }
+    public ReadOnlySpan<T>.Enumerator Values
+    {
+        get
+        {
+            ReadOnlySpan<T> span = Span;
+            return span.GetEnumerator();
+        }
+    }
 
 
     public MemoryBuffer( int                       initialCapacity ) : this( EqualityComparer<T>.Default, initialCapacity ) { }
@@ -49,7 +57,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
         _arrayToReturnToPool = [];
     }
-    public override string ToString() => $"MemoryBuffer<{typeof(T).Name}>( {nameof(Capacity)}: {Capacity}, {nameof(Length)}: {Length}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public override string ToString() => $"MemoryBuffer<{typeof(T).Name}>( {nameof(Capacity)}: {Capacity}, {nameof(Count)}: {Count}, {nameof(IsReadOnly)}: {IsReadOnly} )";
 
 
     IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
@@ -72,7 +80,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         Guard.IsInRange( additionalCapacityBeyondPos, 1, int.MaxValue );
         uint capacity = (uint)Capacity;
 
-        if ( Length + additionalCapacityBeyondPos > capacity )
+        if ( Count + additionalCapacityBeyondPos > capacity )
         {
             Grow( capacity, (uint)_length + additionalCapacityBeyondPos, out array );
             return;
@@ -82,15 +90,15 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="requestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
+    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="requestedCapacity"/> to <see cref="Count"/> whichever is greater. </summary>
     /// <param name="requestedCapacity"> the requested new size of the buffer. </param>
     /// <param name="capacity"> the current size of the buffer. </param>
     /// <param name="array"> </param>
     private void Grow( in uint capacity, in uint requestedCapacity, out T[] array )
     {
         ThrowIfReadOnly();
-        int minimumLength = GetLength( capacity, requestedCapacity );
-        array = ArrayPool<T>.Shared.Rent( minimumLength );
+        int minimumCount = GetLength( capacity, requestedCapacity );
+        array = ArrayPool<T>.Shared.Rent( minimumCount );
         new Span<T>( _arrayToReturnToPool ).CopyTo( array );
         ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
         _arrayToReturnToPool = array;
@@ -110,12 +118,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
 
     public void Clear()
     {
-        Length = 0;
+        Count = 0;
         Span.Clear();
     }
     public void Reset( T value )
     {
-        Length = 0;
+        Count = 0;
         Span.Fill( value );
     }
 
@@ -124,19 +132,22 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     {
         if ( Span.TryCopyTo( destination ) )
         {
-            length = Length;
+            length = Count;
             return true;
         }
 
         length = 0;
         return false;
     }
-    public void CopyTo( T[] array )                            => CopyTo( array, 0 );
-    public void CopyTo( T[] array, int destinationStartIndex ) => CopyTo( array, Length - 1, 0 );
-    public void CopyTo( T[] array, int length, int destinationStartIndex, int sourceStartIndex = 0 )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( T[] array )                            => CopyTo( array, 0 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( T[] array, int destinationStartIndex ) => CopyTo( 0,     array, Count, 0 );
+    public void CopyTo( int sourceStartIndex, T[] array, int length, int destinationStartIndex )
     {
-        Guard.IsInRange( length, 0, Length );
-        Span<T> target = new(array, destinationStartIndex, array.Length);
+        Guard.IsGreaterThanOrEqualTo( destinationStartIndex + array.Length, Count );
+        Guard.IsGreaterThanOrEqualTo( length,                               0 );
+        Guard.IsLessThanOrEqualTo( length, Count );
+
+        Span<T> target = new(array, destinationStartIndex, array.Length - destinationStartIndex);
         Span[sourceStartIndex..length].CopyTo( target );
     }
 
@@ -156,11 +167,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<T> Slice( int start, int length ) => Span.Slice( start, length );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T value, int start = 0 ) => IndexOf( value, start, Length - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( T   value, int start = 0 ) => IndexOf( start, value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( int start, T   value )     => IndexOf( value, start, Count - 1 );
     public int IndexOf( T value, in int start, in int endInclusive )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
         Span<T> span = Span;
 
@@ -173,11 +185,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Predicate<T> match, int start = 0 ) => FindIndex( start, Length - 1, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Predicate<T> match, int          start = 0 ) => FindIndex( start, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( int          start, Predicate<T> match )     => FindIndex( start, Count - 1, match );
     public int FindIndex( in int start, in int endInclusive, Predicate<T> match )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
         Span<T> span = Span;
@@ -191,11 +204,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( T value, in int endInclusive = 0 ) => LastIndexOf( value, Length - 1, endInclusive );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( T   value,        int endInclusive = 0 ) => LastIndexOf( endInclusive, value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( int endInclusive, T   value )            => LastIndexOf( value,        Count - 1, endInclusive );
     public int LastIndexOf( T value, in int start, in int endInclusive )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
         Span<T> span = Span;
 
@@ -208,11 +222,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Predicate<T> match, int endInclusive = 0 ) => FindLastIndex( Length - 1, endInclusive, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Predicate<T> match,        int          endInclusive = 0 ) => FindLastIndex( endInclusive, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( int          endInclusive, Predicate<T> match )            => FindLastIndex( Count - 1,    endInclusive, match );
     public int FindLastIndex( in int start, in int endInclusive, Predicate<T> match )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
         Span<T> span = Span;
@@ -226,11 +241,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match, in int endInclusive = 0 ) => FindLast( Length - 1, endInclusive, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( Predicate<T> match,        int          endInclusive = 0 ) => FindLast( endInclusive, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? FindLast( int          endInclusive, Predicate<T> match )            => FindLast( Count - 1,    endInclusive, match );
     public T? FindLast( in int start, in int endInclusive, Predicate<T> match )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
         Span<T> span = Span;
@@ -244,11 +260,12 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, in int start = 0 ) => Find( start, Length - 1, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( Predicate<T> match, int          start = 0 ) => Find( start, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T? Find( int          start, Predicate<T> match )     => Find( start, Count - 1, match );
     public T? Find( in int start, in int endInclusive, Predicate<T> match )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
         Span<T> span = Span;
@@ -262,13 +279,14 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( Predicate<T> match, in int start = 0 ) => FindAll( start, Length - 1, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( Predicate<T> match, int          start = 0 ) => FindAll( start, match );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public T[] FindAll( int          start, Predicate<T> match )     => FindAll( start, Count - 1, match );
     public T[] FindAll( in int start, in int endInclusive, Predicate<T> match )
     {
-        Guard.IsInRange( start,        0, Length );
-        Guard.IsInRange( endInclusive, 0, Length );
+        Guard.IsInRange( start,        0, Count );
+        Guard.IsInRange( endInclusive, 0, Count );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
-        using Buffer<T> buffer = new(Length);
+        using Buffer<T> buffer = new(Count);
         ReadOnlySpan<T> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
@@ -286,10 +304,10 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
 
     public bool RemoveAt( int index )
     {
-        if ( index < 0 || index >= Length ) { return false; }
+        if ( index < 0 || index >= Count ) { return false; }
 
         Array.Copy( _arrayToReturnToPool, index + 1, _arrayToReturnToPool, index, _arrayToReturnToPool.Length - index - 1 );
-        Length--;
+        Count--;
         return true;
     }
     public bool Remove( T item ) => RemoveAt( IndexOf( item ) );
@@ -299,21 +317,21 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     {
         ThrowIfReadOnly();
         Guard.IsGreaterThanOrEqualTo( count, 0 );
-        Guard.IsInRange( index + count, 0, Length );
+        Guard.IsInRange( index + count, 0, Count );
 
         EnsureCapacity( count, out T[] array );
-        Span<T> span = new(array, 0, Length);
+        Span<T> span = new(array, 0, Count);
         span.Slice( index, count ).Fill( value );
     }
     public void Replace( int index, scoped in ReadOnlySpan<T> values )
     {
         ThrowIfReadOnly();
-        Guard.IsInRange( index,                 0, Length );
-        Guard.IsInRange( index + values.Length, 0, Length );
+        Guard.IsInRange( index,                 0, Count );
+        Guard.IsInRange( index + values.Length, 0, Count );
 
         EnsureCapacity( values.Length, out T[] array );
-        Span<T> span = new(array, 0, Length);
-        span.CopyTo( span.Slice( index, values.Length ) );
+        Span<T> span = new(array, 0, Count);
+        values.CopyTo( span.Slice( index, values.Length ) );
     }
 
 
@@ -334,7 +352,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         if ( index < Capacity ) { Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
 
         values.CopyTo( array.AsSpan( index, array.Length - index ) );
-        Length += values.Length;
+        Count += values.Length;
     }
 
 
@@ -344,11 +362,11 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
         EnsureCapacity( count, out T[] array );
-        Span<T> span = new(array, Length, Capacity - Length);
+        Span<T> span = new(array, Count, Capacity - Count);
 
         for ( int i = 0; i < count; i++ ) { span[i] = value; }
 
-        Length += count;
+        Count += count;
     }
     public void Add( scoped in ReadOnlySpan<T> values )
     {
@@ -363,7 +381,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             case 1 when span.Length >= 1:
             {
                 span[0] =  values[0];
-                Length  += 1;
+                Count   += 1;
                 return;
             }
 
@@ -371,7 +389,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             {
                 span[0] =  values[0];
                 span[1] =  values[1];
-                Length  += 2;
+                Count   += 2;
                 return;
             }
 
@@ -380,14 +398,14 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
                 span[0] =  values[0];
                 span[1] =  values[1];
                 span[2] =  values[2];
-                Length  += 3;
+                Count   += 3;
                 return;
             }
 
             case > 0 when span.Length > values.Length:
             {
                 values.CopyTo( span );
-                Length += values.Length;
+                Count += values.Length;
                 return;
             }
 
@@ -395,7 +413,7 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             {
                 EnsureCapacity( values.Length );
                 values.CopyTo( Next );
-                Length += values.Length;
+                Count += values.Length;
                 return;
             }
         }
@@ -410,8 +428,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             if ( count <= 0 ) { return; }
 
             EnsureCapacity( count, out T[] array );
-            collection.CopyTo( array, Length );
-            Length += count;
+            collection.CopyTo( array, Count );
+            Count += count;
         }
         else
         {
@@ -421,16 +439,31 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
 
 
 
-    public sealed class Enumerator( scoped in MemoryBuffer<T> buffer ) : IEnumerator<T>
+    public struct Enumerator( scoped in MemoryBuffer<T> buffer ) : IEnumerator<T>, IEnumerable<T>
     {
         private readonly MemoryBuffer<T> _buffer = buffer;
-        private          int             _index;
+        private          int             _index  = 0;
 
-        public T            Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer[_index]; }
-        object? IEnumerator.Current => Current;
 
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = NOT_FOUND;
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer.Length;
-        public                                                      void Dispose()  { }
+        public readonly ref readonly T                   Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer.Span[_index]; }
+        readonly                     T IEnumerator<T>.   Current => Current;
+        readonly                     object? IEnumerator.Current => Current;
+
+
+        public void Reset() => _index = 0;
+        public bool MoveNext()
+        {
+            MemoryBuffer<T> buffer = _buffer;
+            if ( (uint)_index >= (uint)buffer.Count ) { return false; }
+
+            ++_index;
+            return true;
+        }
+
+
+        public readonly void                          Dispose()       { }
+        public readonly Enumerator                    GetEnumerator() => this;
+        readonly        IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+        readonly        IEnumerator IEnumerable.      GetEnumerator() => GetEnumerator();
     }
 }
