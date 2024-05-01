@@ -1109,15 +1109,15 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         }
         private void OnChanged( object sender, FileSystemEventArgs e )
         {
-            var file = new LocalFile( e.FullPath );
-            Replaced( file, file );
+            LocalFile file = new(e.FullPath);
+            AddOrUpdate( file );
         }
         private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
         private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
-            LocalFile? file = this.AsEnumerable().FirstOrDefault( x => x.FullPath == e.OldFullPath );
+            LocalFile? file = Values.FirstOrDefault( x => x.FullPath == e.OldFullPath );
             if ( file is not null ) { Remove( file ); }
 
             Add( e.FullPath );
@@ -1136,6 +1136,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error   -= OnError;
 
             _watcher.Dispose();
+            GC.SuppressFinalize( this );
         }
     }
 

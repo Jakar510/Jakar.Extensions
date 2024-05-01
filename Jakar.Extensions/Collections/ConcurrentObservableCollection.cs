@@ -54,9 +54,9 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     {
         using ( AcquireLock() ) { InternalSet( index, value ); }
     }
-    public override ref T Get( int index )
+    public override T Get( int index )
     {
-        using ( AcquireLock() ) { return ref InternalGet( index ); }
+        using ( AcquireLock() ) { return InternalGet( index ); }
     }
 
 
@@ -544,9 +544,15 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     }
 
 
-    public          IAsyncEnumerator<T> GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
-    public override IEnumerator<T>      GetEnumerator()                               => Values;
-    IEnumerator IEnumerable.            GetEnumerator()                               => GetEnumerator();
+    public AsyncLockerEnumerator<T>         GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
+    IAsyncEnumerator<T> IAsyncEnumerable<T>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+
+#if NET6_0_OR_GREATER
+    public override LockerEnumerator<T> GetEnumerator() => Values;
+#else
+    public override IEnumerator<T> GetEnumerator() => Values;
+#endif
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock()                                                                                     => locker.Enter();

@@ -11,19 +11,19 @@ namespace Jakar.Extensions;
 public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
 {
-    protected readonly ConcurrentDictionary<TKey, TValue> _dictionary;
+    protected internal readonly ConcurrentDictionary<TKey, TValue> buffer;
 
 
-    public sealed override int  Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Count; }
-    public                 bool IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((IDictionary)_dictionary).IsReadOnly; }
+    public sealed override int  Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
+    public                 bool IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((IDictionary)buffer).IsReadOnly; }
 
     public TValue this[ TKey key ]
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary[key];
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer[key];
         set
         {
             bool exists = TryGetValue( key, out TValue? old );
-            _dictionary[key] = value;
+            buffer[key] = value;
 
             // ReSharper disable once NullableWarningSuppressionIsUsed
             if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
@@ -31,10 +31,10 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         }
     }
 
-    public ICollection<TKey>                              Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Keys; }
-    public ICollection<TValue>                            Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _dictionary.Values; }
+    public ICollection<TKey>                              Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Keys; }
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Keys; }
+    public ICollection<TValue>                            Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Values; }
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Values; }
 
 
     public ObservableConcurrentDictionary() : this( DEFAULT_CAPACITY ) { }
@@ -47,7 +47,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public ObservableConcurrentDictionary( int                                     capacity,         IEqualityComparer<TKey> comparer ) : this( Environment.ProcessorCount, capacity, comparer ) { }
     public ObservableConcurrentDictionary( int                                     concurrencyLevel, int                     capacity ) : this( concurrencyLevel, capacity, EqualityComparer<TKey>.Default ) { }
     public ObservableConcurrentDictionary( int                                     concurrencyLevel, int                     capacity, IEqualityComparer<TKey> comparer ) : this( new ConcurrentDictionary<TKey, TValue>( concurrencyLevel, capacity, comparer ) ) { }
-    protected ObservableConcurrentDictionary( ConcurrentDictionary<TKey, TValue>   dictionary ) => _dictionary = dictionary;
+    protected ObservableConcurrentDictionary( ConcurrentDictionary<TKey, TValue>   dictionary ) => buffer = dictionary;
 
 
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
@@ -60,7 +60,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
     public void Clear()
     {
-        _dictionary.Clear();
+        buffer.Clear();
         Reset();
         OnCountChanged();
     }
@@ -69,7 +69,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
-        if ( !_dictionary.TryAdd( key, value ) ) { return false; }
+        if ( !buffer.TryAdd( key, value ) ) { return false; }
 
         Added( new KeyValuePair<TKey, TValue>( key, value ) );
         return true;
@@ -88,20 +88,20 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value ) => _dictionary.TryGetValue( key, out value ) && value is not null;
+    public bool TryGetValue( TKey key, [NotNullWhen( true )] out TValue? value ) => buffer.TryGetValue( key, out value ) && value is not null;
 
 
-    public bool ContainsValue( TValue                value ) => _dictionary.Values.Contains( value );
-    public bool ContainsKey( TKey                    key )   => _dictionary.ContainsKey( key );
+    public bool ContainsValue( TValue                value ) => buffer.Values.Contains( value );
+    public bool ContainsKey( TKey                    key )   => buffer.ContainsKey( key );
     public bool Contains( KeyValuePair<TKey, TValue> item )  => ContainsKey( item.Key ) && ContainsValue( item.Value );
 
 
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
-        if ( !_dictionary.ContainsKey( key ) ) { return false; }
+        if ( !buffer.ContainsKey( key ) ) { return false; }
 
-        if ( !_dictionary.TryRemove( key, out TValue? value ) ) { return false; }
+        if ( !buffer.TryRemove( key, out TValue? value ) ) { return false; }
 
         Removed( new KeyValuePair<TKey, TValue>( key, value ) );
         OnCountChanged();
@@ -129,16 +129,18 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    protected internal override KeyValuePair<TKey, TValue>[] FilteredValues()
+    protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues()
     {
-        KeyValuePair<TKey, TValue>[] result;
-        KeyValuePair<TKey, TValue>[] array = ArrayPool<KeyValuePair<TKey, TValue>>.Shared.Rent( _dictionary.Count );
-        ((ICollection<KeyValuePair<TKey, TValue>>)_dictionary).CopyTo( array, 0 );
+        int                                      count  = buffer.Count;
+        using Buffer<KeyValuePair<TKey, TValue>> values = new(count);
 
-        try { result = FilteredValues( new ReadOnlySpan<KeyValuePair<TKey, TValue>>( array, 0, _dictionary.Count ) ); }
-        finally { ArrayPool<KeyValuePair<TKey, TValue>>.Shared.Return( array ); }
+        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+        foreach ( KeyValuePair<TKey, TValue> t in buffer )
+        {
+            if ( Filter( t ) ) { values.Add( t ); }
+        }
 
-        return result;
+        return values.ToArray();
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

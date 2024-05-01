@@ -11,7 +11,7 @@ namespace Jakar.Extensions;
 public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialCapacity = DEFAULT_CAPACITY ) : ICollection<T>, IDisposable
 {
     private readonly IEqualityComparer<T> _comparer = comparer;
-    private          int                  _length;
+    private          long                 _length;
     private          T[]                  _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
 
 
@@ -19,11 +19,11 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     int ICollection<T>.Count    => Count;
     public int Count
     {
-        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _length;
+        get => (int)Interlocked.Read( ref _length );
         set
         {
             Guard.IsInRange( value, 0, Capacity );
-            _length = value;
+            Interlocked.Exchange( ref _length, value );
         }
     }
     public bool IsEmpty    { [Pure, MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => Count == 0; }
@@ -72,21 +72,13 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     }
 
 
-    public  void EnsureCapacity( in int  additionalCapacityBeyondPos )                => EnsureCapacity( (uint)additionalCapacityBeyondPos, out T[] _ );
-    public  void EnsureCapacity( in uint additionalCapacityBeyondPos )                => EnsureCapacity( additionalCapacityBeyondPos,       out T[] _ );
-    private void EnsureCapacity( in int  additionalCapacityBeyondPos, out T[] array ) => EnsureCapacity( (uint)additionalCapacityBeyondPos, out array );
-    private void EnsureCapacity( in uint additionalCapacityBeyondPos, out T[] array )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void EnsureCapacity( in int additionalCapacityBeyondPos ) => EnsureCapacity( (uint)additionalCapacityBeyondPos );
+    private void EnsureCapacity( in uint additionalCapacityBeyondPos )
     {
         Guard.IsInRange( additionalCapacityBeyondPos, 1, int.MaxValue );
         uint capacity = (uint)Capacity;
 
-        if ( Count + additionalCapacityBeyondPos > capacity )
-        {
-            Grow( capacity, (uint)_length + additionalCapacityBeyondPos, out array );
-            return;
-        }
-
-        array = _arrayToReturnToPool;
+        if ( Count + additionalCapacityBeyondPos > capacity ) { Grow( capacity, (uint)_length + additionalCapacityBeyondPos ); }
     }
 
 
@@ -94,11 +86,11 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     /// <param name="requestedCapacity"> the requested new size of the buffer. </param>
     /// <param name="capacity"> the current size of the buffer. </param>
     /// <param name="array"> </param>
-    private void Grow( in uint capacity, in uint requestedCapacity, out T[] array )
+    private void Grow( in uint capacity, in uint requestedCapacity )
     {
         ThrowIfReadOnly();
         int minimumCount = GetLength( capacity, requestedCapacity );
-        array = ArrayPool<T>.Shared.Rent( minimumCount );
+        T[] array        = ArrayPool<T>.Shared.Rent( minimumCount );
         new Span<T>( _arrayToReturnToPool ).CopyTo( array );
         ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
         _arrayToReturnToPool = array;
@@ -118,14 +110,10 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
 
     public void Clear()
     {
+        Array.Clear( _arrayToReturnToPool, 0, _arrayToReturnToPool.Length );
         Count = 0;
-        Span.Clear();
     }
-    public void Reset( T value )
-    {
-        Count = 0;
-        Span.Fill( value );
-    }
+    public void Fill( T value ) { Array.Fill( _arrayToReturnToPool, value, 0, Count ); }
 
 
     public bool TryCopyTo( scoped in Span<T> destination, out int length )
@@ -319,8 +307,9 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         Guard.IsGreaterThanOrEqualTo( count, 0 );
         Guard.IsInRange( index + count, 0, Count );
 
-        EnsureCapacity( count, out T[] array );
-        Span<T> span = new(array, 0, Count);
+        EnsureCapacity( count );
+        T[]     array = _arrayToReturnToPool;
+        Span<T> span  = new(array, 0, Count);
         span.Slice( index, count ).Fill( value );
     }
     public void Replace( int index, scoped in ReadOnlySpan<T> values )
@@ -329,8 +318,9 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         Guard.IsInRange( index,                 0, Count );
         Guard.IsInRange( index + values.Length, 0, Count );
 
-        EnsureCapacity( values.Length, out T[] array );
-        Span<T> span = new(array, 0, Count);
+        EnsureCapacity( values.Length );
+        T[]     array = _arrayToReturnToPool;
+        Span<T> span  = new(array, 0, Count);
         values.CopyTo( span.Slice( index, values.Length ) );
     }
 
@@ -348,7 +338,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
         ThrowIfReadOnly();
         if ( values.IsEmpty ) { return; }
 
-        EnsureCapacity( values.Length, out T[] array );
+        EnsureCapacity( values.Length );
+        T[] array = _arrayToReturnToPool;
         if ( index < Capacity ) { Array.Copy( array, index, array, index + values.Length, Capacity - index ); }
 
         values.CopyTo( array.AsSpan( index, array.Length - index ) );
@@ -361,8 +352,9 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     {
         Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
-        EnsureCapacity( count, out T[] array );
-        Span<T> span = new(array, Count, Capacity - Count);
+        EnsureCapacity( count );
+        T[]     array = _arrayToReturnToPool;
+        Span<T> span  = new(array, Count, Capacity - Count);
 
         for ( int i = 0; i < count; i++ ) { span[i] = value; }
 
@@ -427,7 +419,8 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
             int count = collection.Count;
             if ( count <= 0 ) { return; }
 
-            EnsureCapacity( count, out T[] array );
+            EnsureCapacity( count );
+            T[] array = _arrayToReturnToPool;
             collection.CopyTo( array, Count );
             Count += count;
         }

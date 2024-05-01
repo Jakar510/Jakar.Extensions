@@ -18,21 +18,21 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
 {
     protected internal readonly IComparer<T>         comparer         = comparer;
     protected internal readonly IEqualityComparer<T> equalityComparer = equalityComparer;
-    protected internal readonly MemoryBuffer<T>      buffer           = new(capacity);
+    protected internal readonly List<T>              buffer           = new(capacity);
 
 
-    public override int  Count          { [Pure, MethodImpl(         MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure, MethodImpl(         MethodImplOptions.AggressiveInlining )] get => Count == 0; }
-    bool IList.          IsFixedSize    { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; } // ((IList)buffer)
-    public bool          IsNotEmpty     { [Pure, MethodImpl(         MethodImplOptions.AggressiveInlining )] get => Count > 0; }
-    bool IList.          IsReadOnly     { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; } // ((IList)buffer)
-    bool ICollection<T>. IsReadOnly     { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer.IsReadOnly; } // ((ICollection<T>)buffer)
-    bool ICollection.    IsSynchronized { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => false; }
-    object? IList.this[ int      index ] { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => buffer[index]; set => buffer[index] = (T)value!; }
-    public T this[ int           index ] { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => Get( index ); [MethodImpl( MethodImplOptions.AggressiveInlining )] set => Set( index, value ); }
-    T IReadOnlyList<T>.this[ int index ] { [MethodImpl(              MethodImplOptions.AggressiveInlining )] get => Get( index ); }
-    public ReadOnlySpan<T>.Enumerator RefValues { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Values; }
-    object ICollection.               SyncRoot  { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => buffer; }
+    public          int  Capacity       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Capacity; }
+    public override int  Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
+    public          bool IsEmpty        { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+    bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((IList)buffer).IsReadOnly; }
+    public bool          IsNotEmpty     { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count > 0; }
+    bool IList.          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((IList)buffer).IsReadOnly; }
+    bool ICollection<T>. IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)buffer).IsReadOnly; }
+    bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
+    object? IList.this[ int      index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); [MethodImpl( MethodImplOptions.AggressiveInlining )] set => Set( index, (T)value! ); }
+    public T this[ int           index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); [MethodImpl( MethodImplOptions.AggressiveInlining )] set => Set( index, value ); }
+    T IReadOnlyList<T>.this[ int index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); }
+    object ICollection.SyncRoot { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer; }
 
 
     public ObservableCollection() : this( Comparer<T>.Default, EqualityComparer<T>.Default ) { }
@@ -143,16 +143,20 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     protected internal void InternalAdd( in T value )
     {
         buffer.Add( value );
-        Added( value, Count );
+        Added( value, buffer.Count - 1 );
     }
     protected internal void InternalAdd( IEnumerable<T> value )
     {
-        buffer.Add( value );
+        buffer.AddRange( value );
         Reset();
     }
     protected internal void InternalAdd( scoped in ReadOnlySpan<T> values )
     {
+    #if NET8_0_OR_GREATER
+        buffer.AddRange( values );
+    #else
         buffer.Add( values );
+    #endif
         Reset();
     }
 
@@ -169,16 +173,12 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     protected internal void InternalSort() => InternalSort( comparer );
     protected internal void InternalSort( IComparer<T> compare )
     {
-    #if NET6_0_OR_GREATER
-        buffer.Span.Sort( compare );
-    #else
-        buffer.Span.Sort( compare.Compare );
-    #endif
+        buffer.Sort( compare );
         Reset();
     }
     protected internal void InternalSort( Comparison<T> compare )
     {
-        buffer.Span.Sort( compare );
+        buffer.Sort( compare );
         Reset();
     }
     protected internal void InternalSort( int start, int length ) => InternalSort( start, length, comparer );
@@ -186,12 +186,38 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     {
         Guard.IsInRangeFor( start,  buffer, nameof(start) );
         Guard.IsInRangeFor( length, buffer, nameof(length) );
-    #if NET6_0_OR_GREATER
-        buffer.Span.Slice( start, length ).Sort( compare );
-    #else
-        buffer.Span.Slice( start, length ).Sort( compare.Compare );
-    #endif
+        buffer.Sort( start, length, compare );
         Reset();
+    }
+
+
+    protected internal int InternalRemove( IEnumerable<T> values )
+    {
+        int results = 0;
+
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( T value in values )
+        {
+            if ( InternalRemove( value ) is false ) { continue; }
+
+            results++;
+        }
+
+        return results;
+    }
+    protected internal int InternalRemove( scoped in ReadOnlySpan<T> values )
+    {
+        int results = 0;
+
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( T value in values )
+        {
+            if ( InternalRemove( value ) is false ) { continue; }
+
+            results++;
+        }
+
+        return results;
     }
 
 
@@ -209,17 +235,27 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    protected internal ref T InternalGet( int index ) => ref buffer[index];
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected internal T InternalGet( int index )
+    {
+        Guard.IsInRangeFor( index, buffer, nameof(index) );
+        T result = buffer[index];
+        return result;
+    }
     protected internal void InternalSet( int index, T value )
     {
-        T old = buffer[index];
+        T? old = index < buffer.Count
+                     ? buffer[index]
+                     : default;
+
+        Guard.IsInRangeFor( index, buffer, nameof(index) );
         buffer[index] = value;
         Replaced( old, value, index );
     }
 
 
-    public virtual ref T    Get( int index )          => ref InternalGet( index );
-    public virtual     void Set( int index, T value ) => InternalSet( index, value );
+    public virtual T    Get( int index )          => InternalGet( index );
+    public virtual void Set( int index, T value ) => InternalSet( index, value );
 
 
     public virtual bool Exists( Predicate<T>     match ) => buffer.FindIndex( match ) >= 0;
@@ -256,7 +292,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual int IndexOf( T value, int start )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.IndexOf( start, value );
+        return buffer.IndexOf( value, start );
     }
     public virtual int IndexOf( T value, int start, int count )
     {
@@ -269,7 +305,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual int LastIndexOf( T value, int start )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.LastIndexOf( start, value );
+        return buffer.LastIndexOf( value, start );
     }
     public virtual int LastIndexOf( T value, int start, int count )
     {
@@ -339,36 +375,6 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual void RemoveRange( int start, int count ) => InternalRemoveRange( start, count );
 
 
-    protected internal int InternalRemove( IEnumerable<T> values )
-    {
-        int results = 0;
-
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T value in values )
-        {
-            if ( InternalRemove( value ) is false ) { continue; }
-
-            results++;
-        }
-
-        return results;
-    }
-    protected internal int InternalRemove( scoped in ReadOnlySpan<T> values )
-    {
-        int results = 0;
-
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T value in values )
-        {
-            if ( InternalRemove( value ) is false ) { continue; }
-
-            results++;
-        }
-
-        return results;
-    }
-
-
     public virtual int  Remove( Func<T, bool>               match )  => InternalRemove( match );
     public virtual bool Remove( T                           value )  => InternalRemove( value );
     public virtual int  Remove( IEnumerable<T>              values ) => InternalRemove( values );
@@ -432,21 +438,23 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     public virtual void Clear() => InternalClear();
 
 
-    protected internal override T[] FilteredValues()
+    protected internal override ReadOnlyMemory<T> FilteredValues()
     {
-        T[] result;
-        T[] array = ArrayPool<T>.Shared.Rent( buffer.Count );
-        buffer.CopyTo( array );
+        int             count  = buffer.Count;
+        using Buffer<T> values = new(count);
 
-        try { result = FilteredValues( new ReadOnlySpan<T>( array, 0, buffer.Count ) ); }
-        finally { ArrayPool<T>.Shared.Return( array ); }
+        for ( int i = 0; i < count; i++ )
+        {
+            T t = buffer[i];
+            if ( Filter( t ) ) { values.Add( t ); }
+        }
 
-        return result;
+        return values.ToArray();
     }
 
-    protected internal ReadOnlySpan<T> AsSpan() => buffer.Span;
 
 #if NET6_0_OR_GREATER
-    public void EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
+    protected internal ReadOnlySpan<T> AsSpan()                          => CollectionsMarshal.AsSpan( buffer );
+    public             void            EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
 #endif
 }

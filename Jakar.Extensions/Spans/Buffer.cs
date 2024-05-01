@@ -262,33 +262,52 @@ public ref struct Buffer<T>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Add( T                         value )        => Append( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Add( scoped in ReadOnlySpan<T> span )         => Append( span );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Add( T                         c, int count ) => Append( c, count );
-    public Buffer<T> Append( T value )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( T                         value )        => Add( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( IEnumerable<T>            value )        => Add( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( scoped in ReadOnlySpan<T> span )         => Add( span );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( T                         c, int count ) => Add( c, count );
+
+
+    public Buffer<T> Add( T value )
     {
         ThrowIfReadOnly();
         EnsureCapacity( 1 );
         buffer[Length++] = value;
         return this;
     }
-    public Buffer<T> Append( scoped in ReadOnlySpan<T> span )
+    public Buffer<T> Add( IEnumerable<T> values )
+    {
+        ThrowIfReadOnly();
+
+        if ( values is ICollection<T> collection )
+        {
+            int count = collection.Count;
+            if ( count <= 0 ) { return this; }
+
+            EnsureCapacity( count );
+            collection.CopyTo( _arrayToReturnToPool, Length );
+            Length += count;
+        }
+        else
+        {
+            foreach ( T obj in values ) { Add( obj ); }
+        }
+
+        return this;
+    }
+    public Buffer<T> Add( scoped in ReadOnlySpan<T> span )
     {
         ThrowIfReadOnly();
 
         switch ( span.Length )
         {
-            // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-            case 1 when Length + 1 < Capacity:
-            {
-                buffer[Length++] = span[0];
-                return this;
-            }
+            case 0: return this;
 
-            case 2 when Length + 2 < Capacity:
+            case > 0 when Length + span.Length < Capacity:
             {
-                buffer[Length++] = span[0];
-                buffer[Length++] = span[1];
+                Span<T> next = Next;
+                span.CopyTo( next );
+                Length += span.Length;
                 return this;
             }
 
@@ -296,18 +315,19 @@ public ref struct Buffer<T>
             {
                 EnsureCapacity( span.Length );
 
-                span.CopyTo( Next );
+                Span<T> next = Next;
+                span.CopyTo( next );
                 Length += span.Length;
                 return this;
             }
         }
     }
-    public Buffer<T> Append( T c, int count )
+    public Buffer<T> Add( T c, int count )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
-
-        for ( int i = Length; i < Length + count; i++ ) { buffer[i] = c; }
+        Span<T> span = Next;
+        for ( int i = 0; i < count; i++ ) { span[i] = c; }
 
         Length += count;
         return this;
