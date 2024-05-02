@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, IVerifyRequestProvider
+public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
 #if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 #elif NET7_0
@@ -106,7 +106,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    public VerifyRequest GetVerifyRequest() => new(UserName, Password);
+    public LoginRequest GetLoginRequest() => new(UserName, Password);
 
 
     public virtual bool Validate( ICollection<string> errors )

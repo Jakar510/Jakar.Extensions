@@ -191,9 +191,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register( VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
+    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) =>
         this.TryCall( Register, request, rights, types, token );
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, VerifyRequest<UserModel<Guid>> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.NotFound( request.UserName ); }

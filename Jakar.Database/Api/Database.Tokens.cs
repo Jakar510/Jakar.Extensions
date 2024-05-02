@@ -33,8 +33,8 @@ public abstract partial class Database
 
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
-    public ValueTask<ErrorOrResult<Tokens>> Authenticate( VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
-    protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, VerifyRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
+    protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, LoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( nameof(UserRecord.UserName), request.UserName, token );
         if ( record is null ) { return default; }

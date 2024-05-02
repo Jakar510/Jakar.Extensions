@@ -634,7 +634,9 @@ public sealed record UserRecord( string                        UserName,
         record = record.WithPassword( password );
         return true;
     }
-    public static bool VerifyPassword( scoped ref UserRecord record, VerifyRequest request ) => VerifyPassword( ref record, request.Password );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword( ref record, request.Password );
     public static bool VerifyPassword( scoped ref UserRecord record, string password )
     {
         string value = Database.DataProtector.Decrypt( record.PasswordHash );
