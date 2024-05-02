@@ -4,13 +4,7 @@
 public interface ILoginRequestProvider
 {
     public LoginRequest GetLoginRequest();
-}
-
-
-
-public interface ILoginRequestProvider<T>
-{
-    public LoginRequest<T> GetLoginRequest();
+    public LoginRequest<T> GetLoginRequest<T>(T value);
 }
 
 
