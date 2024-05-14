@@ -104,12 +104,13 @@ public sealed record FileData( MimeType MimeType, long FileSize, string Hash, st
 {
     public FileData( IFileData<Guid, FileMetaData> file ) : this( file, file.MetaData ) { }
     public FileData( IFileData<Guid>               file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, IFileData<Guid>.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, Hashes.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
 
 
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( string                        data,   MimeType mime, FileMetaData? metaData, Encoding? encoding = null ) => new(mime, data.Length, Hashes.Hash_SHA256( data, encoding ?? Encoding.Default ), data, metaData);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( MemoryStream                  stream, MimeType mime, FileMetaData? metaData ) => Create( stream.AsReadOnlyMemory(), mime, metaData );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlyMemory<byte>          data,   MimeType mime, FileMetaData? metaData ) => Create( data.Span,                 mime, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlySpan<byte>            data,   MimeType mime, FileMetaData? metaData ) => new(data, mime, metaData);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( scoped in ReadOnlySpan<byte>  data,   MimeType mime, FileMetaData? metaData ) => new(data, mime, metaData);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<Guid, FileMetaData> data ) => new(data, data.MetaData);
 
 

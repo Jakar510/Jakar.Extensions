@@ -40,36 +40,6 @@ public interface IFileData<out TID>
     public IFileMetaData<TID>? MetaData { get; }
 
 
-    public static string GetHash( scoped in OneOf<byte[], string> data )
-    {
-        if ( data.IsT0 ) { return GetHash( data.AsT0 ); }
-
-        if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
-
-
-        throw new InvalidOperationException( "Invalid data type" );
-    }
-    public static string GetHash( scoped in OneOf<ReadOnlyMemory<byte>, byte[], string> data )
-    {
-        if ( data.IsT0 ) { return GetHash( data.AsT0.Span ); }
-
-        if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
-
-        if ( data.IsT2 ) { return GetHash( data.AsT2 ); }
-
-        throw new InvalidOperationException( "Invalid data type" );
-    }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] static        string GetHash( byte[]                       data ) => GetHash( new ReadOnlySpan<byte>( data ) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( scoped in ReadOnlySpan<byte> data ) => data.Hash_SHA256();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( string                       data ) => GetHash( data, Encoding.Default );
-    public static string GetHash( string data, Encoding encoding )
-    {
-        using IMemoryOwner<byte> owner = MemoryPool<byte>.Shared.Rent( encoding.GetByteCount( data ) );
-        encoding.GetBytes( data, owner.Memory.Span );
-        return GetHash( owner.Memory.Span );
-    }
-
-
     /*
     public static string GetHash( scoped in ReadOnlySpan<byte>   data )
     {
@@ -135,11 +105,12 @@ public interface IFileData<TClass, TID, TMetaData> : IFileData<TID, TMetaData>, 
 #if NET8_0_OR_GREATER
     public abstract static TClass            Create( IFileData<TID, TMetaData>                                        data );
     public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID, TMetaData>? data );
-    public abstract static ValueTask<TClass> Create( LocalFile                                                        file,   CancellationToken token = default );
+    public abstract static ValueTask<TClass> Create( LocalFile                                                        file,   CancellationToken token                                              = default );
     public abstract static ValueTask<TClass> Create( Stream                                                           stream, MimeType          mime, TMetaData? metaData, CancellationToken token = default );
     public abstract static TClass            Create( MemoryStream                                                     stream, MimeType          mime, TMetaData? metaData );
     public abstract static TClass            Create( ReadOnlyMemory<byte>                                             data,   MimeType          mime, TMetaData? metaData );
-    public abstract static TClass            Create( ReadOnlySpan<byte>                                               data,   MimeType          mime, TMetaData? metaData );
+    public abstract static TClass            Create( scoped in ReadOnlySpan<byte>                                     data,   MimeType          mime, TMetaData? metaData );
+    public abstract static TClass            Create( string                                                           data,   MimeType          mime, TMetaData? metaData, Encoding? encoding = null );
 #endif
 }
 
@@ -243,7 +214,7 @@ public abstract record FileData<TClass, TID, TMetaData>( MimeType MimeType, long
     protected FileData( IFileData<TID, TMetaData> file ) : this( file, TMetaData.TryCreate( file.MetaData ) ) { }
 #endif
     protected FileData( IFileData<TID>               file,    TMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    protected FileData( scoped in ReadOnlySpan<byte> content, MimeType   mime, TMetaData? metaData ) : this( mime, content.Length, IFileData<TID>.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+    protected FileData( scoped in ReadOnlySpan<byte> content, MimeType   mime, TMetaData? metaData ) : this( mime, content.Length, Hashes.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
 
 
     public override int CompareTo( TClass? other )

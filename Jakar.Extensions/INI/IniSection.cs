@@ -92,7 +92,6 @@ public partial class IniConfig
         #region Gets
 
         public bool ValueAs<T>( string key, [NotNullWhen( true )] out T? value )
-            where T : notnull
         {
             string? s = this[key];
 

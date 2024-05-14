@@ -12,7 +12,51 @@ namespace Jakar.Extensions;
 
 public static class Hashes
 {
-    public static string Hash( this HashAlgorithm hasher, in ReadOnlySpan<byte> data )
+    public static string GetHash( scoped in OneOf<byte[], string> data )
+    {
+        if ( data.IsT0 ) { return GetHash( data.AsT0 ); }
+
+        if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
+
+
+        throw new InvalidOperationException( "Invalid data type" );
+    }
+    public static string GetHash( scoped in OneOf<ReadOnlyMemory<byte>, byte[], string> data )
+    {
+        if ( data.IsT0 ) { return GetHash( data.AsT0.Span ); }
+
+        if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
+
+        if ( data.IsT2 ) { return GetHash( data.AsT2 ); }
+
+        throw new InvalidOperationException( "Invalid data type" );
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( byte[]                       data )                    => GetHash( new ReadOnlySpan<byte>( data ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( scoped in ReadOnlySpan<byte> data )                    => data.Hash_SHA256();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( string                       data )                    => GetHash( data, Encoding.Default );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( scoped in ReadOnlySpan<char> data, Encoding encoding ) { return data.Hash_SHA256( encoding ); }
+
+
+    [Pure]
+    public static byte[] ToBytes( this string data, Encoding? encoding = null )
+    {
+        ReadOnlySpan<char> span = data;
+        return span.ToBytes( encoding );
+    }
+    [Pure]
+    public static byte[] ToBytes( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        encoding ??= Encoding.Default;
+        int                       count  = encoding.GetByteCount( data );
+        using IMemoryOwner<byte>? buffer = MemoryPool<byte>.Shared.Rent( count );
+        Span<byte>                span   = buffer.Memory.Span[..count];
+        encoding.GetBytes( data, span );
+        return span.ToArray();
+    }
+
+
+    public static string Hash( this HashAlgorithm hasher, scoped in ReadOnlySpan<char> data, Encoding? encoding = null ) => hasher.Hash( data.ToBytes( encoding ) );
+    public static string Hash( this HashAlgorithm hasher, scoped in ReadOnlySpan<byte> data )
     {
         using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( BaseRecord.UNICODE_CAPACITY );
         Span<byte>               span   = buffer.Memory.Span;
@@ -31,35 +75,75 @@ public static class Hashes
 
         return hexChars.ToString();
     }
+
+
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public static string Hash_MD5( this ReadOnlySpan<byte> data )
     {
         using MD5 hasher = MD5.Create();
         return hasher.Hash( data );
     }
+    /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
+    public static string Hash_MD5( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        using MD5 hasher = MD5.Create();
+        return hasher.Hash( data, encoding );
+    }
+
+
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
     public static string Hash_SHA1( this ReadOnlySpan<byte> data )
     {
         using SHA1 hasher = SHA1.Create();
         return hasher.Hash( data );
     }
+    /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
+    public static string Hash_SHA1( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        using SHA1 hasher = SHA1.Create();
+        return hasher.Hash( data, encoding );
+    }
+
+
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
     public static string Hash_SHA256( this ReadOnlySpan<byte> data )
     {
         using SHA256 hasher = SHA256.Create();
         return hasher.Hash( data );
     }
+    /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
+    public static string Hash_SHA256( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        using SHA256 hasher = SHA256.Create();
+        return hasher.Hash( data, encoding );
+    }
+
+
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
     public static string Hash_SHA384( this ReadOnlySpan<byte> data )
     {
         using SHA384 hasher = SHA384.Create();
         return hasher.Hash( data );
     }
+    /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
+    public static string Hash_SHA384( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        using SHA384 hasher = SHA384.Create();
+        return hasher.Hash( data, encoding );
+    }
+
+
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
     public static string Hash_SHA512( this ReadOnlySpan<byte> data )
     {
         using SHA512 hasher = SHA512.Create();
         return hasher.Hash( data );
+    }
+    /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
+    public static string Hash_SHA512( this ReadOnlySpan<char> data, Encoding? encoding = null )
+    {
+        using SHA512 hasher = SHA512.Create();
+        return hasher.Hash( data, encoding );
     }
 
 
@@ -138,7 +222,7 @@ public static class Hashes
     public static async ValueTask<string> HashAsync( this byte[] data, HashAlgorithm hasher )
     {
         await using MemoryStream stream = new MemoryStream( data );
-        byte[]                   hash   = await hasher.ComputeHashAsync( stream );
+        byte[]                   hash = await hasher.ComputeHashAsync( stream );
         return BitConverter.ToString( hash );
     }
 #endif
@@ -157,8 +241,8 @@ public static class Hashes
     public static UInt128 Hash( this ReadOnlySpan<char> data, Encoding encoding )
     {
         using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( encoding.GetByteCount( data ) );
-        Span<byte>               span   = buffer.Memory.Span;
-        int                      size   = encoding.GetBytes( data, span );
+        Span<byte>               span = buffer.Memory.Span;
+        int                      size = encoding.GetBytes( data, span );
         span = span[..size];
         return Hash( span );
     }

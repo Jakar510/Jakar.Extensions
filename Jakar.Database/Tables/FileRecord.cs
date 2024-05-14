@@ -52,7 +52,7 @@ public sealed record FileRecord( string?              FileName,
         if ( data.IsT0 )
         {
             byte[] content = data.AsT0;
-            string hash    = IFileData<Guid>.GetHash( content );
+            string hash    = Hashes.GetHash( content );
             if ( FileSize != content.Length ) { return Error.Conflict( $"{nameof(FileSize)} mismatch. Got {content.Length} but expected {FileSize}" ); }
 
             if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
@@ -62,7 +62,7 @@ public sealed record FileRecord( string?              FileName,
         else
         {
             string content = data.AsT1;
-            string hash    = IFileData<Guid>.GetHash( content );
+            string hash    = Hashes.GetHash( content );
             if ( FileSize != content.Length ) { return Error.Conflict( $"{nameof(FileSize)} mismatch. Got {content.Length} but expected {FileSize}" ); }
 
             if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
