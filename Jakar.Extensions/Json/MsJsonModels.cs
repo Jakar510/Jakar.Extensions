@@ -2,7 +2,7 @@
 namespace Jakar.Extensions;
 
 
-public static class JsonModels
+public static class MsJsonModels
 {
     static JsonModels() { }
     public static bool Contains<TClass>( this TClass self, string key )
@@ -159,14 +159,14 @@ public static class JsonModels
 
     public interface IJsonModel<TClass> : IJsonModel
         where TClass : IJsonModel<TClass>
-#if NET8_0
+#if NET8_0_OR_GREATER
         , IJsonizer<TClass>
 #endif
     { }
 
 
 
-#if NET8_0
+#if NET8_0_OR_GREATER
     public static string ToJson<TClass>( this TClass model )
         where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), false );
     public static string ToPrettyJson<TClass>( this TClass model )
@@ -195,5 +195,6 @@ public static class JsonModels
 #endif
 }
 */
+
 
 

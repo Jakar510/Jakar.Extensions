@@ -3,7 +3,14 @@
 
 public static class Sizes
 {
-    private const int DEFAULT_SIZE = 500;
+    public const  int ANSI_CAPACITY    = 8000;
+    public const  int ANSI_TEXT_CAPACITY      = 2_147_483_647;
+    public const  int BINARY_CAPACITY         = ANSI_TEXT_CAPACITY;
+    public const  int DECIMAL_MAX_CAPACITY    = 38;
+    public const  int DECIMAL_MAX_SCALE       = 28;
+    private const int DEFAULT_SIZE            = 500;
+    public const  int UNICODE_CAPACITY = 4000;
+    public const  int UNICODE_TEXT_CAPACITY   = 1_073_741_823;
     private static readonly ConcurrentDictionary<Type, int> _sizes = new(Environment.ProcessorCount, 50)
                                                                      {
                                                                          [typeof(byte)]            = 3,

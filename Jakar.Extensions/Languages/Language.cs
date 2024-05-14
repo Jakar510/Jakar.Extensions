@@ -1,8 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[Serializable]
-[DebuggerDisplay( nameof(DisplayName) )]
+[Serializable, DebuggerDisplay( nameof(DisplayName) )]
 public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
 {
     private readonly CultureInfo _culture;
@@ -19,16 +18,16 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public        SupportedLanguage?  Version          { get; init; }
 
 
-    public Language( CultureInfo culture, in SupportedLanguage? version = default )
+    public Language( CultureInfo culture, SupportedLanguage? version = default )
     {
         _culture         = culture;
-        Version          = version ?? culture.GetSupportedLanguage();
         Name             = culture.Name;
         EnglishName      = culture.EnglishName;
         TwoLetterISO     = culture.TwoLetterISOLanguageName;
         ThreeLetterISO   = culture.ThreeLetterISOLanguageName;
         IsNeutralCulture = culture.IsNeutralCulture;
-        DisplayName      = Version?.GetName() ?? culture.DisplayName;
+        Version          = version ??= culture.GetSupportedLanguage();
+        DisplayName      = version?.GetName() ?? culture.DisplayName;
     }
     public Language( SupportedLanguage language ) : this( language.GetCultureInfo( CultureInfo.InvariantCulture ), language ) { }
 
@@ -42,11 +41,12 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public override string      ToString()   => DisplayName;
 
 
-    public int CompareTo( object? value ) => value is null
-                                                 ? 1
-                                                 : value is Language other
-                                                     ? CompareTo( other )
-                                                     : throw new ExpectedValueTypeException( nameof(value), value, typeof(Language) );
+    public int CompareTo( object? value ) => value switch
+                                             {
+                                                 null           => 1,
+                                                 Language other => CompareTo( other ),
+                                                 _              => throw new ExpectedValueTypeException( nameof(value), value, typeof(Language) )
+                                             };
     public int CompareTo( Language? other )
     {
         if ( other is null ) { return -1; }

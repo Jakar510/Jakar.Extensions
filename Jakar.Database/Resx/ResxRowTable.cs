@@ -2,8 +2,7 @@
 
 
 /// <see cref="LocalizableString"/>
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record ResxRowRecord( long                    KeyID,
                                     string                  Key,
                                     string                  Neutral,
@@ -87,26 +86,26 @@ public sealed record ResxRowRecord( long                    KeyID,
     [Pure]
     public static ResxRowRecord Create( DbDataReader reader )
     {
-        long   keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
-        string key          = reader.GetFieldValue<string>( nameof(Key) );
-        string neutral      = reader.GetFieldValue<string>( nameof(Neutral) );
-        string english      = reader.GetFieldValue<string>( nameof(English) );
-        string spanish      = reader.GetFieldValue<string>( nameof(Spanish) );
-        string french       = reader.GetFieldValue<string>( nameof(French) );
-        string swedish      = reader.GetFieldValue<string>( nameof(Swedish) );
-        string german       = reader.GetFieldValue<string>( nameof(German) );
-        string chinese      = reader.GetFieldValue<string>( nameof(Chinese) );
-        string polish       = reader.GetFieldValue<string>( nameof(Polish) );
-        string thai         = reader.GetFieldValue<string>( nameof(Thai) );
-        string japanese     = reader.GetFieldValue<string>( nameof(Japanese) );
-        string czech        = reader.GetFieldValue<string>( nameof(Czech) );
-        string portuguese   = reader.GetFieldValue<string>( nameof(Portuguese) );
-        string dutch        = reader.GetFieldValue<string>( nameof(Dutch) );
-        string korean       = reader.GetFieldValue<string>( nameof(Korean) );
-        string arabic       = reader.GetFieldValue<string>( nameof(Arabic) );
-        var    dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var    lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var    id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        long                    keyID        = reader.GetFieldValue<long>( nameof(KeyID) );
+        string                  key          = reader.GetFieldValue<string>( nameof(Key) );
+        string                  neutral      = reader.GetFieldValue<string>( nameof(Neutral) );
+        string                  english      = reader.GetFieldValue<string>( nameof(English) );
+        string                  spanish      = reader.GetFieldValue<string>( nameof(Spanish) );
+        string                  french       = reader.GetFieldValue<string>( nameof(French) );
+        string                  swedish      = reader.GetFieldValue<string>( nameof(Swedish) );
+        string                  german       = reader.GetFieldValue<string>( nameof(German) );
+        string                  chinese      = reader.GetFieldValue<string>( nameof(Chinese) );
+        string                  polish       = reader.GetFieldValue<string>( nameof(Polish) );
+        string                  thai         = reader.GetFieldValue<string>( nameof(Thai) );
+        string                  japanese     = reader.GetFieldValue<string>( nameof(Japanese) );
+        string                  czech        = reader.GetFieldValue<string>( nameof(Czech) );
+        string                  portuguese   = reader.GetFieldValue<string>( nameof(Portuguese) );
+        string                  dutch        = reader.GetFieldValue<string>( nameof(Dutch) );
+        string                  korean       = reader.GetFieldValue<string>( nameof(Korean) );
+        string                  arabic       = reader.GetFieldValue<string>( nameof(Arabic) );
+        DateTimeOffset          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?         lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<ResxRowRecord> id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new ResxRowRecord( keyID,
                                   key,
@@ -147,7 +146,7 @@ public sealed record ResxRowRecord( long                    KeyID,
     }
     public override int GetHashCode()
     {
-        var hashCode = new HashCode();
+        HashCode hashCode = new HashCode();
         hashCode.Add( base.GetHashCode() );
         hashCode.Add( Neutral );
         hashCode.Add( English );

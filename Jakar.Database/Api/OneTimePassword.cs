@@ -4,17 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface IOneTimePassword
-{
-    bool          ValidateToken( string token, VerificationWindow? window = default );
-    public string GetContent( IUserName record );
-    public string GetQrCode( IUserName  record, int size,  BarcodeFormat format                       = BarcodeFormat.QR_CODE );
-    public string GetQrCode( IUserName  record, int width, int           height, BarcodeFormat format = BarcodeFormat.QR_CODE );
-}
-
-
-
-public sealed class OneTimePassword : IOneTimePassword
+public readonly struct OneTimePassword
 {
     private readonly byte[] _key;
     private readonly string _issuer;
@@ -31,9 +21,9 @@ public sealed class OneTimePassword : IOneTimePassword
     }
 
 
-    public static IOneTimePassword Create( string secretKey, string issuer ) => new OneTimePassword( secretKey, issuer );
-    public static IOneTimePassword Create<T>( string secretKey )
-        where T : IAppName => new OneTimePassword( secretKey, typeof(T).Name );
+    public static OneTimePassword Create( string secretKey, string issuer ) => new(secretKey, issuer);
+    public static OneTimePassword Create<T>( string secretKey )
+        where T : IAppName => new(secretKey, typeof(T).Name);
 
 
     public static string GenerateSecret()
@@ -46,7 +36,7 @@ public sealed class OneTimePassword : IOneTimePassword
 
     public bool ValidateToken( string token, VerificationWindow? window = default )
     {
-        var totp = new Totp( _key );
+        Totp totp = new Totp( _key );
         return totp.VerifyTotp( token, out long _, window );
     }
 
@@ -57,19 +47,19 @@ public sealed class OneTimePassword : IOneTimePassword
     public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode( record, size, size, format );
     public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
-        var writer = new BarcodeWriterSvg
-                     {
-                         Format = format,
-                         Options = new QrCodeEncodingOptions
-                                   {
-                                       DisableECI      = true,
-                                       PureBarcode     = true,
-                                       ErrorCorrection = ErrorCorrectionLevel.H,
-                                       CharacterSet    = "UTF-8",
-                                       Width           = width,
-                                       Height          = height
-                                   }
-                     };
+        BarcodeWriterSvg writer = new BarcodeWriterSvg
+                                  {
+                                      Format = format,
+                                      Options = new QrCodeEncodingOptions
+                                                {
+                                                    DisableECI      = true,
+                                                    PureBarcode     = true,
+                                                    ErrorCorrection = ErrorCorrectionLevel.H,
+                                                    CharacterSet    = "UTF-8",
+                                                    Width           = width,
+                                                    Height          = height
+                                                }
+                                  };
 
         string? result = writer.Write( GetContent( record ) ).ToString();
         return result ?? throw new NullReferenceException( nameof(result) );

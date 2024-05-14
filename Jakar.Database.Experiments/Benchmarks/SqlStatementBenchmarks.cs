@@ -1,8 +1,4 @@
-﻿// TrueLogic :: Experiments
-// 03/29/2023  5:39 PM
-
-
-// using CommunityToolkit.HighPerformance;
+﻿// using CommunityToolkit.HighPerformance;
 // using CommunityToolkit.HighPerformance.Enumerables;
 
 
@@ -30,10 +26,7 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess )]
-[Orderer( SummaryOrderPolicy.FastestToSlowest )]
-[RankColumn]
-[MemoryDiagnoser]
+[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
     public IEnumerable<long> ids
@@ -50,14 +43,14 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public void Test_ValueStringBuilder()
     {
-        using var sb = new ValueStringBuilder();
+        using ValueStringBuilder sb = new ValueStringBuilder();
     }
 
 
     [Benchmark]
     public void Test_Join()
     {
-        using var sb = new ValueStringBuilder();
+        using ValueStringBuilder sb = new ValueStringBuilder();
         sb.AppendJoin( ", ", ids );
     }
 
@@ -72,7 +65,7 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public ReadOnlySpan<char> Test_VSB()
     {
-        using var sb = new ValueStringBuilder( "DELETE FROM " );
+        using ValueStringBuilder sb = new ValueStringBuilder( "DELETE FROM " );
         sb.Append( TableName );
         sb.Append( "WHERE ID in ( " );
         sb.AppendJoin( ", ", ids );
@@ -90,7 +83,7 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public string Test_StringBuilder()
     {
-        var sb = new StringBuilder( $"DELETE FROM {TableName} WHERE ID in ( " );
+        StringBuilder sb = new StringBuilder( $"DELETE FROM {TableName} WHERE ID in ( " );
         sb.AppendJoin( ", ", ids );
         sb.Append( " )" );
         return sb.ToString();

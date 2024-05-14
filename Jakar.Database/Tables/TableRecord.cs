@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, IEquatable<TID>
+public interface IRecordPair : IUniqueID<Guid>
 {
     public DateTimeOffset DateCreated { get; }
 }
@@ -14,12 +14,10 @@ public interface IRecordPair : IUniqueID<Guid> // where TID : IComparable<TID>, 
 public interface IDbReaderMapping<out TRecord>
     where TRecord : IDbReaderMapping<TRecord>
 {
-    public abstract static string                    TableName { get; }
-    public abstract static TRecord                   Create( DbDataReader      reader );
-    public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
-
-
-    public DynamicParameters ToDynamicParameters();
+    public abstract static        string                    TableName { [Pure] get; }
+    [Pure] public abstract static TRecord                   Create( DbDataReader      reader );
+    [Pure] public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    [Pure] public                 DynamicParameters         ToDynamicParameters();
 }
 
 
@@ -37,7 +35,7 @@ public interface ITableRecord<TRecord> : ITableRecord
     Guid IUniqueID<Guid>.          ID => ID.Value;
     public new RecordID<TRecord>   ID { get; }
     public     RecordPair<TRecord> ToPair();
-    public     TRecord             NewID( RecordID<TRecord> id );
+    public     TRecord             NewID( in RecordID<TRecord> id );
     public     UInt128             GetHash();
 }
 
@@ -45,19 +43,27 @@ public interface ITableRecord<TRecord> : ITableRecord
 
 public interface IOwnedTableRecord
 {
-    public RecordID<UserRecord>? CreatedBy   { get; }
-    public Guid?                 OwnerUserID { get; }
+    public RecordID<UserRecord>? OwnerUserID { get; }
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    private   RecordID<TRecord> _id           = ID;
+    protected DateTimeOffset?   _lastModified = LastModified;
+
+
+    public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
+    [Key] public RecordID<TRecord> ID           { get => _id;           init => _id = value; }
+
+
     protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
-    public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
+
+    [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
     [Conditional( "DEBUG" )]
@@ -68,7 +74,7 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        var missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        HashSet<string> missing = new HashSet<string>( properties.Select( x => x.Name ) );
         missing.ExceptWith( parameters.ParameterNames );
 
         string message = $"""
@@ -83,20 +89,22 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
     public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );
     public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(ID), id.Value );
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(ID),           ID.Value );
         parameters.Add( nameof(DateCreated),  DateCreated );
         parameters.Add( nameof(LastModified), LastModified );
         return parameters;
     }
 
+
+    [Pure]
     protected static T TryGet<T>( DbDataReader reader, in string key )
     {
         int index = reader.GetOrdinal( key );
@@ -104,10 +112,24 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+    [Pure]
+    public TRecord Modified()
+    {
+        _lastModified = DateTimeOffset.UtcNow;
+        return (TRecord)this;
+    }
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] protected internal TRecord NewID( Guid id ) => NewID( new RecordID<TRecord>( id ) );
+
+    [Pure]
+    public TRecord NewID( in RecordID<TRecord> id )
+    {
+        _id = id;
+        return (TRecord)this;
+    }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord NewID( RecordID<TRecord> id ) => (TRecord)(this with { ID = id });
+    [Pure]
     public UInt128 GetHash()
     {
         string json = this.ToJson();
@@ -131,47 +153,44 @@ public abstract record TableRecord<TRecord>( [property: Key] RecordID<TRecord> I
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, Guid? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public RecordID<UserRecord>? OwnerUserID { get; set; } = OwnerUserID;
+
+
     protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
-    protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, owner?.UserID, DateTimeOffset.UtcNow, null ) { }
+    protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( id, owner?.ID, DateTimeOffset.UtcNow, null ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
-        var parameters = new DynamicParameters();
-        parameters.Add( nameof(CreatedBy),   user.ID.Value );
-        parameters.Add( nameof(OwnerUserID), user.UserID );
+        DynamicParameters parameters = new();
+        parameters.Add( nameof(OwnerUserID), user.ID.Value );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TRecord> record )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(OwnerUserID), record.OwnerUserID );
-        parameters.Add( nameof(CreatedBy),   record.CreatedBy?.Value );
         return parameters;
     }
 
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(CreatedBy),   CreatedBy?.Value );
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(OwnerUserID), OwnerUserID );
         return parameters;
     }
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await db.Users.Get( connection, transaction, true, GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        await db.Users.Get( connection, transaction, CreatedBy, token );
+
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, true,        GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerUserID, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord user ) => (TRecord)(this with { OwnerUserID = user.UserID });
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Owns( UserRecord       record ) => CreatedBy == record.ID;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { OwnerUserID = user.ID });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    Owns( UserRecord       record ) => OwnerUserID == record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    DoesNotOwn( UserRecord record ) => OwnerUserID != record.ID;
 
 
     public override int CompareTo( TRecord? other )
@@ -179,9 +198,6 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<TRecord> ID, RecordID
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        int createdByComparison = Nullable.Compare( CreatedBy, other.CreatedBy );
-        if ( createdByComparison != 0 ) { return createdByComparison; }
 
         int userIDComparison = Nullable.Compare( OwnerUserID, other.OwnerUserID );
         if ( userIDComparison != 0 ) { return userIDComparison; }

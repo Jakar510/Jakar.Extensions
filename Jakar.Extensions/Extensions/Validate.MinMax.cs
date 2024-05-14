@@ -8,7 +8,7 @@ public static partial class Validate
     {
         if ( left is null && right is null ) { return default; }
 
-        return Nullable.Compare( left, right ) == -1
+        return Nullable.Compare( left, right ) == NOT_FOUND
                    ? left  ?? right
                    : right ?? left;
     }

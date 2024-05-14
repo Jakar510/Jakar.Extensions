@@ -46,7 +46,7 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         }
     }
     Uri IHostInfo.      HostInfo    => _hostInfo ?? _defaultHostInfo;
-    public virtual bool IsValidHost => HostInfo?.IsAbsoluteUri is true && HostInfo.Scheme.StartsWith( "http", StringComparison.OrdinalIgnoreCase );
+    public virtual bool IsValidHost { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => HostInfo?.IsAbsoluteUri is true && HostInfo.Scheme.StartsWith( "http", StringComparison.OrdinalIgnoreCase ); }
 
 
     protected BaseHostViewModel( Uri defaultHostInfo, Uri? hostInfo = default ) : this( null, defaultHostInfo, hostInfo ) { }

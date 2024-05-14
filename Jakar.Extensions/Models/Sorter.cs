@@ -39,7 +39,7 @@ public sealed class Sorter<T> : IComparer<T>, IComparer
     {
         if ( left is null ) { return 1; }
 
-        if ( right is null ) { return -1; }
+        if ( right is null ) { return NOT_FOUND; }
 
         if ( ReferenceEquals( left, right ) ) { return 0; }
 

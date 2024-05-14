@@ -6,5 +6,5 @@ namespace Jakar.Extensions.Blazor;
 
 public interface IModelState
 {
-    public ModelStateDictionary ModelState { get; set; }
+    [CascadingParameter( Name = ModelStateDictionaryCascadingValueSource.KEY )] public ModelStateDictionary ModelState { get; set; }
 }

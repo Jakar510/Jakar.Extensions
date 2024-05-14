@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions.Blazor</id>
-		<version>6.7.2</version>
+		<version>8.0.0</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -26,58 +26,37 @@
 					url="https://github.com/Jakar510/Jakar.Extensions"
 					branch="master" />
 		<dependencies>
-			<group targetFramework="net6.0">
-				<dependency id="Jakar.Extensions"
-							version="6.7.21" />
-				<dependency id="Jakar.Extensions.Hosting"
-							version="6.7.2" />
-				<dependency id="Blazored.LocalStorage"
-							version="4.3.0" />
-				<dependency id="Blazored.Modal"
-							version="7.1.0" />
-				<dependency id="Blazored.SessionStorage"
-							version="2.2.0" />
-				<dependency id="Blazored.TextEditor"
-							version="1.0.8" />
-				<dependency id="Blazored.Toast"
-							version="3.2.2" />
-				<dependency id="Blazored.Video"
-							version="1.0.0" />
-				<dependency id="BlazorComponentUtilities"
-							version="1.8.0" />
-				<dependency id="BlazorPro.BlazorSize"
-							version="6.2.0" />
-				<dependency id="PanoramicData.Blazor"
-							version="2.2.11" />
-				<dependency id="Radzen.Blazor"
-							version="4.9.1" />
-			</group>
-
-			<group targetFramework="net7.0">
-				<dependency id="Jakar.Extensions"
-							version="6.7.21" />
-				<dependency id="Jakar.Extensions.Hosting"
-							version="6.7.2" />
-				<dependency id="Blazored.LocalStorage"
-							version="4.3.0" />
-				<dependency id="Blazored.Modal"
-							version="7.1.0" />
-				<dependency id="Blazored.SessionStorage"
-							version="2.2.0" />
-				<dependency id="Blazored.TextEditor"
-							version="1.0.8" />
-				<dependency id="Blazored.Toast"
-							version="3.2.2" />
-				<dependency id="Blazored.Video"
-							version="1.0.0" />
-				<dependency id="BlazorComponentUtilities"
-							version="1.8.0" />
-				<dependency id="BlazorPro.BlazorSize"
-							version="6.2.0" />
-				<dependency id="PanoramicData.Blazor"
-							version="2.2.11" />
-				<dependency id="Radzen.Blazor"
-							version="4.9.1" />
+			<group targetFramework="net8.0">
+				<dependency id="Blazored.LocalStorage" version="4.5.0" />
+				<dependency id="Blazored.Modal" version="7.3.1" />
+				<dependency id="Blazored.SessionStorage" version="2.4.0" />
+				<dependency id="Blazored.TextEditor" version="1.1.0" />
+				<dependency id="Blazored.Toast" version="4.2.1" />
+				<dependency id="Blazored.Video" version="1.0.1" />
+				<dependency id="BlazorComponentUtilities" version="1.8.0" />
+				<dependency id="BlazorPro.BlazorSize" version="8.0.0" />
+				<dependency id="PanoramicData.Blazor" version="8.0.56" />
+				<dependency id="Radzen.Blazor" version="4.30.2" />
+				<dependency id="Jakar.Extensions" version="8.4.0" />
+				<dependency id="Hardware.Info" version="100.1.0" />
+				<dependency id="Microsoft.Extensions.Hosting" version="8.0.0" />
+				<dependency id="Microsoft.NETCore.Platforms" version="7.0.4" />
+				<dependency id="Swashbuckle.AspNetCore" version="6.5.0" />
+				<dependency id="Swashbuckle.AspNetCore.Annotations" version="6.5.0" />
+				<dependency id="Swashbuckle.AspNetCore.Newtonsoft" version="6.5.0" />
+				<dependency id="System.Security.Cryptography.Xml" version="8.0.0" />
+				<dependency id="Microsoft.Extensions.Options.DataAnnotations" version="8.0.0" />
+				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="8.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.Systemd" version="8.0.0" />
+				<dependency id="Microsoft.Extensions.Hosting.WindowsServices" version="8.0.0" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate" version="8.0.4" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Google" version="8.0.4" />
+				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount" version="8.0.4" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer" version="8.0.4" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="8.0.4" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks" version="8.0.4" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" version="8.0.4" />
+				<dependency id="Microsoft.AspNetCore.Components.WebAssembly" version="8.0.4" />
 			</group>
 		</dependencies>
 	</metadata>
@@ -88,20 +67,12 @@
 
 		<file src="..\images\icon.png" />
 
-		<!-- .net 6.0 -->
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.dll"
-			  target="lib/net6.0" />
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.xml"
-			  target="net6.0" />
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net6.0/Jakar.Extensions.Blazor.pdb"
-			  target="lib/net6.0" />
-
-		<!-- .net 7.0 -->
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net7.0/Jakar.Extensions.Blazor.dll"
-			  target="lib/net7.0" />
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net7.0/Jakar.Extensions.Blazor.xml"
-			  target="net7.0" />
-		<file src="../Jakar.Extensions.Blazor/bin/Release/net7.0/Jakar.Extensions.Blazor.pdb"
-			  target="lib/net7.0" />
+		<!-- .net 8.0 -->
+		<file src="../Jakar.Extensions.Blazor/bin/Release/net8.0/Jakar.Extensions.Blazor.dll"
+			  target="lib/net8.0" />
+		<file src="../Jakar.Extensions.Blazor/bin/Release/net8.0/Jakar.Extensions.Blazor.xml"
+			  target="net8.0" />
+		<file src="../Jakar.Extensions.Blazor/bin/Release/net8.0/Jakar.Extensions.Blazor.pdb"
+			  target="lib/net8.0" />
 	</files>
 </package>

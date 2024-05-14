@@ -41,7 +41,7 @@ public static class Tests
 
     public static async ValueTask Test_ConcurrentObservableCollection( CancellationToken token = default )
     {
-        var collection = new ConcurrentObservableCollection<long>();
+        ConcurrentObservableCollection<long> collection = [];
         await collection.AddAsync( Enumerable.Range( 0, 1000 ).Select<int, long>( static x => x ), token );
 
         foreach ( long x in collection ) { }
@@ -77,7 +77,7 @@ public static class Tests
     public static async Task Test_HttpBuilder( CancellationToken token = default )
     {
         // var target  = new Uri("https://www.toptal.com/developers/postbin/");
-        var    host    = new Uri( "https://httpbin.org/" );
+        Uri    host    = new Uri( "https://httpbin.org/" );
         string content = new AppVersion( 1, 2, 3 ).ToString();
 
         WebRequester builder = WebRequester.Builder.Create( host ).With_Timeout( 10 ).Build();

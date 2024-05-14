@@ -11,6 +11,10 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T>
 
     public EnumSqlHandler() { }
 
+    private static string GetString( T  k ) => k.ToString();
+    private static long   GetLong( T    k ) => k.AsLong();
+    private static T      SelectSelf( T v ) => v;
+
 
     public static T Parse( string? value ) => Names.TryGetValue( value ?? string.Empty, out T result )
                                                   ? result
@@ -60,9 +64,4 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T>
         parameter.Value  = item;
         parameter.DbType = DbType.Int64;
     }
-
-
-    private static string GetString( T  k ) => k.ToString();
-    private static long   GetLong( T    k ) => k.AsLong();
-    private static T      SelectSelf( T v ) => v;
 }

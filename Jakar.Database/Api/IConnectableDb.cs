@@ -6,8 +6,22 @@ namespace Jakar.Database;
 
 public interface IDbOptions
 {
-    public int?       CommandTimeout { get; }
-    public DbInstance Instance       { get; }
+    public int?           CommandTimeout { get; }
+    public DbTypeInstance DbTypeInstance { get; }
+
+    // public string                                                  AppName                  { get; }
+    // public string                                                  AuthenticationType       { get; }
+    // public TimeSpan                                                ClockSkew                { get; }
+    // public SecuredStringResolverOptions                            ConnectionStringResolver { get; }
+    // public Uri                                                     Domain                   { get; }
+    // public string                                                  JWTAlgorithm             { get; }
+    // public string                                                  JWTKey                   { get; }
+    // public PasswordRequirements                                    PasswordRequirements     { get; }
+    // public (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey         { get; }
+    // public string                                                  TokenAudience            { get; }
+    // public string                                                  TokenIssuer              { get; }
+    // public string                                                  UserExists               { get; }
+    // public AppVersion                                              Version                  { get; }
 }
 
 
@@ -19,7 +33,7 @@ public interface IDbTable : IAsyncDisposable
 
 
 
-public interface IConnectableDb : IDbOptions, IDbTable
+public interface IConnectableDb : IDbTable, IDbOptions
 {
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }
@@ -32,8 +46,9 @@ public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
         where T : IDbReaderMapping<T>;
     public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : struct;
-    public CommandDefinition       GetCommandDefinition( DbTransaction? transaction, in SqlCommand  sql,         CancellationToken token );
-    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection     connection,  DbTransaction? transaction, SqlCommand        sql, CancellationToken token );
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition       GetCommand( in SqlCommand        sql,        DbTransaction? transaction, CancellationToken token );
+    public                                                            ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand        sql, CancellationToken token );
 }
 
 
@@ -42,8 +57,5 @@ public readonly record struct SqlCommand( string SQL, DynamicParameters? Paramet
 {
     public static implicit operator SqlCommand( string sql ) => new(sql);
 
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition ToCommandDefinition( DbTransaction? transaction, int? timeout, CancellationToken token ) =>
-        new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, CancellationToken token, int? timeout = null ) => new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
 }

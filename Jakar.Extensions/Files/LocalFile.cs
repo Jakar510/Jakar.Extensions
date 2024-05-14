@@ -1,9 +1,6 @@
 ﻿// unset
 
-using System.Web;
-using ErrorEventArgs = System.IO.ErrorEventArgs;
-
-
+#pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1584
 
 
@@ -18,33 +15,21 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     protected FileInfo? _info;
 
 
-    public static Equalizer<LocalFile> Equalizer => Equalizer<LocalFile>.Default;
-    public static Sorter<LocalFile>    Sorter    => Sorter<LocalFile>.Default;
-
-
-    public string ContentType
-    {
-        get
-        {
-            try { return Mime.ToContentType(); }
-            catch ( ArgumentOutOfRangeException )
-            {
-                FullPath.WriteToConsole();
-                FullPath.WriteToDebug();
-                throw;
-            }
-        }
-    }
-    public              string?  DirectoryName => Info.DirectoryName;
-    public              bool     DoesNotExist  => !Exists;
-    public              bool     Exists        => Info.Exists;
-    public              string   Extension     => Info.Extension;
-    public              Encoding FileEncoding  { get; init; } = Encoding.Default;
-    public              string   FullPath      { get; init; }
-    [JsonIgnore] public FileInfo Info          => _info ??= new FileInfo( FullPath );
-    bool TempFile.ITempFile.     IsTemporary   { get => _isTemporary; set => _isTemporary = value; }
-    public MimeType              Mime          => Extension.FromExtension();
-    public string                Name          => Info.Name;
+    public static       Equalizer<LocalFile> Equalizer       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<LocalFile>.Default; }
+    public static       Sorter<LocalFile>    Sorter          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<LocalFile>.Default; }
+    public              string               ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
+    public              string?              DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
+    public              bool                 DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
+    public              bool                 Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
+    public              string               Extension       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
+    public              Encoding             FileEncoding    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Encoding.Default;
+    public              string               FullPath        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    [JsonIgnore] public FileInfo             Info            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _info ??= new FileInfo( FullPath ); }
+    bool TempFile.ITempFile.                 IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
+    public DateTimeOffset                    LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
+    public DateTimeOffset                    CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
+    public MimeType                          Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
+    public string                            Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
 
     [JsonIgnore]
     public LocalDirectory? Parent
@@ -58,17 +43,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
                        : new LocalDirectory( parent );
         }
     }
-    public string Root => Directory.GetDirectoryRoot( FullPath );
+    public string Root { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Directory.GetDirectoryRoot( FullPath ); }
 
 
     public LocalFile() => FullPath = string.Empty;
-    public LocalFile( Uri                path ) : this( FromUri( path ) ) { }
-    public LocalFile( ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalFile( FileInfo           path ) : this( path.FullName ) { }
-    public LocalFile( string             path, params string[] args ) : this( path, Encoding.Default, args ) { }
-    public LocalFile( string             path, Encoding?       encoding, params string[] args ) : this( path.Combine( args ), encoding ) { }
-    public LocalFile( DirectoryInfo      path, string          fileName ) : this( path.Combine( fileName ) ) { }
-    public LocalFile( string             path, string          fileName ) : this( new DirectoryInfo( path ), fileName ) { }
+    public LocalFile( Uri                          path ) : this( FromUri( path ) ) { }
+    public LocalFile( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
+    public LocalFile( FileInfo                     path ) : this( path.FullName ) { }
+    public LocalFile( string                       path, params string[] args ) : this( path, Encoding.Default, args ) { }
+    public LocalFile( string                       path, Encoding?       encoding, params string[] args ) : this( path.Combine( args ), encoding ) { }
+    public LocalFile( DirectoryInfo                path, string          fileName ) : this( path.Combine( fileName ) ) { }
+    public LocalFile( string                       path, string          fileName ) : this( new DirectoryInfo( path ), fileName ) { }
     public LocalFile( string path, Encoding? encoding = default )
     {
         this.SetNormal();
@@ -179,7 +164,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <exception cref="WebException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token = default )
     {
         var file = new LocalFile( path );
         await file.WriteAsync( payload, token );
@@ -197,7 +182,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
         var file = new LocalFile( path );
         await file.WriteAsync( payload, token );
@@ -382,7 +367,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     // /// <exception cref="FileNotFoundException">if file is not found</exception>
     // /// <returns><see cref="byte[]"/></returns>
-    // public async ValueTask<byte[]> ReadAsBytesAsync( CancellationToken token  )
+    // public async ValueTask<byte[]> ReadAsBytesAsync( CancellationToken token  = default )
     // {
     //     await using FileStream file   = OpenRead();
     //     await using var        stream = new MemoryStream();
@@ -409,12 +394,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     // /// <exception cref="FileNotFoundException">if file is not found</exception>
     // /// <returns><see cref="ReadOnlyMemory{byte}"/></returns>
-    // public async ValueTask<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token  )
+    // public async ValueTask<ReadOnlyMemory<byte>> ReadAsMemoryAsync( CancellationToken token  = default )
     // {
     //     ReadOnlyMemory<byte> results = await ReadAsBytesAsync(token);
     //     return results;
     // }
-    // public async ValueTask<MemoryStream> ReadAsStreamAsync( CancellationToken token  )
+    // public async ValueTask<MemoryStream> ReadAsStreamAsync( CancellationToken token  = default )
     // {
     //     await using FileStream file   = OpenRead();
     //     var                    stream = new MemoryStream();
@@ -502,7 +487,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <param name="newFile"> </param>
     /// <param name="token"> </param>
     /// <returns> </returns>
-    public async ValueTask Clone( LocalFile newFile, CancellationToken token )
+    public async ValueTask Clone( LocalFile newFile, CancellationToken token = default )
     {
         FileStream stream = OpenRead();
         await newFile.WriteAsync( stream, token );
@@ -512,7 +497,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args )  => ZipAsync( args,                                          token );
     public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken  token ) => ZipAsync( files.Select( item => new LocalFile( item ) ), token );
     public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
-    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token )
+    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token = default )
     {
         if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
 
@@ -742,7 +727,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter( stream, FileEncoding );
-
         await writer.WriteAsync( payload );
     }
 
@@ -755,12 +739,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( byte[] payload, CancellationToken token )
+    public async ValueTask WriteAsync( byte[] payload, CancellationToken token = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         await using FileStream stream = Create();
-
         await stream.WriteAsync( payload, token );
     }
 
@@ -773,12 +756,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token )
+    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
         await using FileStream stream = Create();
-
         await stream.WriteAsync( payload, token );
     }
 
@@ -791,7 +773,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token )
+    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token = default )
     {
         await using FileStream stream = Create();
         await using var        writer = new StreamWriter( stream, FileEncoding );
@@ -809,62 +791,58 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( Stream payload, CancellationToken token )
+    public async ValueTask WriteAsync( Stream payload, CancellationToken token = default )
     {
         if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
 
         await using var memory = new MemoryStream();
         await payload.CopyToAsync( memory, token );
         ReadOnlyMemory<byte> data = memory.GetBuffer();
-
         await WriteAsync( data, token );
     }
 
 
-    async ValueTask<string> IAsyncReadHandler.AsString()
+    async ValueTask<string> IAsyncReadHandler.AsString( CancellationToken token = default )
     {
         await using FileStream file   = OpenRead();
         using var              stream = new StreamReader( file, FileEncoding );
 
+    #if NET7_0_OR_GREATER
+        return await stream.ReadToEndAsync( token );
+    #else
         return await stream.ReadToEndAsync();
+    #endif
     }
 
     async ValueTask<T> IAsyncReadHandler.AsJson<T>()
     {
-        using var stream = new StreamReader( OpenRead(), FileEncoding );
-
-        string content = await stream.ReadToEndAsync();
-
+        using var stream  = new StreamReader( OpenRead(), FileEncoding );
+        string    content = await stream.ReadToEndAsync();
         return content.FromJson<T>();
     }
 
-    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token )
+    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
     {
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream();
-
         await file.CopyToAsync( stream, token );
-
         return stream.GetBuffer();
     }
 
-    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token )
+    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token = default )
     {
         await using FileStream file   = OpenRead();
         await using var        stream = new MemoryStream( (int)file.Length );
         await file.CopyToAsync( stream, token );
-
         ReadOnlyMemory<byte> results = stream.GetBuffer();
         return results;
     }
 
-    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( CancellationToken token )
+    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( CancellationToken token = default )
     {
         await using FileStream file   = OpenRead();
         var                    stream = new MemoryStream();
-
         await file.CopyToAsync( stream, token );
-
         return stream;
     }
 
@@ -965,8 +943,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
-        public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter ) { }
+        public ConcurrentCollection() : base( Sorter, Equalizer ) { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter, Equalizer ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentQueue : ConcurrentQueue<LocalFile>
+    {
+        public ConcurrentQueue() : base() { }
+        public ConcurrentQueue( IEnumerable<LocalFile> items ) : base( items ) { }
     }
 
 
@@ -976,7 +963,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     [Serializable]
-    public class Deque : MultiDeque<LocalFile>
+    public class Deque : ConcurrentDeque<LocalFile>
     {
         public Deque() : base() { }
         public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
@@ -993,9 +980,9 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="byte[]"/>
         /// </returns>
-        ValueTask<byte[]> AsBytes( CancellationToken token );
+        ValueTask<byte[]> AsBytes( CancellationToken token = default );
 
-        ValueTask<MemoryStream> AsStream( CancellationToken token );
+        ValueTask<MemoryStream> AsStream( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> , asynchronously. </summary>
         /// <param name="token"> </param>
@@ -1004,7 +991,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="ReadOnlyMemory{byte}"/>
         /// </returns>
-        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token );
+        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , asynchronously. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1012,7 +999,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        ValueTask<string> AsString();
+        ValueTask<string> AsString( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="T"> </typeparam>
@@ -1084,7 +1071,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     [Serializable]
-    public class Queue : MultiQueue<LocalFile>
+    public class Queue : Queue<LocalFile>
     {
         public Queue() : base() { }
         public Queue( IEnumerable<LocalFile> items ) : base( items ) { }
@@ -1104,13 +1091,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
     [Serializable]
-    public class Watcher : ConcurrentObservableCollection<LocalFile>, IDisposable
+    public class Watcher : ConcurrentObservableCollection<LocalFile>
     {
         private readonly LocalDirectory.Watcher _watcher;
         public event ErrorEventHandler?         Error;
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter )
+        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter, Equalizer )
         {
             _watcher                     =  watcher;
             _watcher.Created             += OnCreated;
@@ -1122,15 +1109,15 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         }
         private void OnChanged( object sender, FileSystemEventArgs e )
         {
-            var file = new LocalFile( e.FullPath );
-            Replaced( file, file );
+            LocalFile file = new(e.FullPath);
+            AddOrUpdate( file );
         }
         private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
         private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
         private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
-            LocalFile? file = this.AsEnumerable().FirstOrDefault( x => x.FullPath == e.OldFullPath );
+            LocalFile? file = Values.FirstOrDefault( x => x.FullPath == e.OldFullPath );
             if ( file is not null ) { Remove( file ); }
 
             Add( e.FullPath );
@@ -1149,6 +1136,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             _watcher.Error   -= OnError;
 
             _watcher.Dispose();
+            GC.SuppressFinalize( this );
         }
     }
 

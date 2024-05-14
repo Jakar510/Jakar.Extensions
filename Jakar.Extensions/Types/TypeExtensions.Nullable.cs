@@ -21,14 +21,18 @@ public static partial class TypeExtensions
     private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
     private const          string NULLABLE_CONTEXT = "System.Runtime.CompilerServices.NullableContextAttribute";
     public static readonly Type   NullableType     = typeof(Nullable<>);
-    public static          bool   IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper( property.DeclaringType, property.CustomAttributes );
-    public static          bool   IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper( field.DeclaringType, field.CustomAttributes );
-    public static          bool   IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper( parameter.Member, parameter.CustomAttributes );
-    private static bool IsNullableHelper( this Type memberType, MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
-    {
-        if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType( memberType ) != null; }
 
-        CustomAttributeData? nullable = customAttributes.FirstOrDefault( x => x.AttributeType.FullName == NULLABLE );
+
+    public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper( property.DeclaringType, property.CustomAttributes );
+    public static bool IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper( field.DeclaringType, field.CustomAttributes );
+    public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper( parameter.Member, parameter.CustomAttributes );
+
+
+    private static bool IsNullableHelper( this Type memberType, in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
+    {
+        if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType( memberType ) is not null; }
+
+        CustomAttributeData? nullable = customAttributes.FirstOrDefault( static x => x.AttributeType.FullName == NULLABLE );
 
         if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
         {
@@ -36,8 +40,7 @@ public static partial class TypeExtensions
 
             if ( attributeArgument.ArgumentType == typeof(byte[]) )
             {
-                var args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
-
+                ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
                 if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
             }
             else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }
@@ -45,8 +48,7 @@ public static partial class TypeExtensions
 
         for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
         {
-            CustomAttributeData? context = type.CustomAttributes.FirstOrDefault( x => x.AttributeType.FullName == NULLABLE_CONTEXT );
-
+            CustomAttributeData? context = type.CustomAttributes.FirstOrDefault( static x => x.AttributeType.FullName == NULLABLE_CONTEXT );
             if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
         }
 
@@ -54,25 +56,19 @@ public static partial class TypeExtensions
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen( true )] out Type? result )
+    public static bool TryGetUnderlyingEnumType( this Type type, [NotNullWhen( true )] out Type? result )
     {
-        if ( propertyType.IsEnum )
+        if ( type.IsEnum )
         {
-            result = Enum.GetUnderlyingType( propertyType );
+            result = Enum.GetUnderlyingType( type );
             return true;
         }
 
-        if ( propertyType.IsGenericType )
+        if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
         {
-            if ( propertyType.GetGenericTypeDefinition() == typeof(Nullable<>) )
+            foreach ( Type argument in type.GenericTypeArguments.AsSpan() )
             {
-                Type argType = propertyType.GenericTypeArguments.First();
-
-                if ( argType.IsEnum )
-                {
-                    result = Enum.GetUnderlyingType( argType );
-                    return true;
-                }
+                if ( argument.TryGetUnderlyingEnumType( out result ) ) { return true; }
             }
         }
 

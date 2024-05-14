@@ -7,20 +7,23 @@ namespace Jakar.Database.Caches;
 public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private DateTimeOffset _lastTime = DateTimeOffset.UtcNow;
-    private string         _json     = string.Empty;
-    private UInt128        _hash;
-    public  DateTimeOffset DateCreated { get; private set; }
+    private DateTimeOffset? _lastUpdated;
+    private string          _json = string.Empty;
+    private UInt128         _hash;
 
     // private WeakReference<TRecord>? _current;
 
-    public bool              HasChanged   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == Spans.Hash128( _json ); }
-    Guid IUniqueID<Guid>.    ID           => ID.Value;
-    public RecordID<TRecord> ID           { get; } = id;
-    public DateTimeOffset?   LastModified { get; private set; }
+    public static Equalizer<CacheEntry<TRecord>> Equalizer    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<CacheEntry<TRecord>>.Default; }
+    public static Sorter<CacheEntry<TRecord>>    Sorter       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<CacheEntry<TRecord>>.Default; }
+    public        DateTimeOffset                 DateCreated  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
+    public        bool                           HasValueSet  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _lastUpdated.HasValue; }
+    public        bool                           HasChanged   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == GetHash( _json ); }
+    Guid IUniqueID<Guid>.                        ID           => ID.Value;
+    public RecordID<TRecord>                     ID           { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = id;
+    public DateTimeOffset?                       LastModified { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure]
     public async ValueTask<TRecord?> TryGetValue( DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
     {
         TRecord? record = TryGetValue( options );
@@ -29,28 +32,25 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
         record = await table.Get( ID, token );
         if ( record is null ) { return default; }
 
-        SetValue( record );
+        SetValue( in record );
         return record;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public TRecord? TryGetValue( in TableCacheOptions options )
+    [Pure]
+    public TRecord? TryGetValue( TableCacheOptions options )
     {
         lock (this)
         {
             string json = _json;
-            if ( string.IsNullOrWhiteSpace( json ) || HasExpired( options.ExpireTime ) ) { return default; }
+            if ( string.IsNullOrWhiteSpace( json ) || _lastUpdated.HasExpired( options.ExpireTime ) ) { return null; }
 
-            var record = json.FromJson<TRecord>();
-            _lastTime = DateTimeOffset.UtcNow;
-            return record;
+            return json.FromJson<TRecord>();
         }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public void SetValue( TRecord record )
+    public void SetValue( ref readonly TRecord record )
     {
         if ( ID != record.ID ) { throw new ArgumentException( "ID mismatch" ); }
 
@@ -58,16 +58,18 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
         {
             DateCreated  = record.DateCreated;
             LastModified = record.LastModified;
-            string json = record.ToJson();
-            Interlocked.Exchange( ref _json, json );
-            _hash     = Spans.Hash128( json );
-            _lastTime = DateTimeOffset.UtcNow;
+            _json        = record.ToJson();
+            _hash        = GetHash( _json );
+            _lastUpdated = DateTimeOffset.UtcNow;
         }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public RecordPair<TRecord> ToPair()                       => new(ID, DateCreated);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool                HasExpired( in TimeSpan time ) => DateTimeOffset.UtcNow - _lastTime >= time;
+    [Pure] public bool HasChangedOrExpired( in TimeSpan lifeSpan ) => _lastUpdated.HasExpired( lifeSpan ) || _hash != GetHash( _json );
+
+
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128             GetHash( in ReadOnlySpan<char> value ) => Spans.Hash128( value );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public        RecordPair<TRecord> ToPair()                               => new(ID, DateCreated);
 
 
     public int CompareTo( object? other )
@@ -86,6 +88,9 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
+        int lastModifiedComparison = Nullable.Compare( LastModified, other.LastModified );
+        if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
+
         return string.Compare( _json, other._json, StringComparison.Ordinal );
     }
     public bool Equals( CacheEntry<TRecord>? other )
@@ -94,17 +99,17 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return string.Equals( _json, other._json, StringComparison.Ordinal );
+        return ID.Equals( other.ID ) && string.Equals( _json, other._json, StringComparison.Ordinal );
     }
     public          bool Equals( TRecord? other ) => _json.FromJson<TRecord>().Equals( other );
     public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
     public override int  GetHashCode()            => ID.GetHashCode();
 
 
-    public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
-    public static bool operator >( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) > 0;
-    public static bool operator >=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) >= 0;
-    public static bool operator !=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => !Equalizer<CacheEntry<TRecord>>.Default.Equals( left, right );
-    public static bool operator <( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) < 0;
-    public static bool operator <=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter<CacheEntry<TRecord>>.Default.Compare( left, right ) <= 0;
+    public static bool operator ==( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Equalizer.Equals( left, right );
+    public static bool operator >( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator !=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => !Equalizer.Equals( left, right );
+    public static bool operator <( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) <= 0;
 }

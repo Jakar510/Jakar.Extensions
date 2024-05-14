@@ -44,10 +44,10 @@ public static class Activities
         Source.CreateActivity( name, kind, parentContext, tags, links, idFormat ) ?? throw new InvalidOperationException( $"{nameof(Source)} doesn't have any Listeners" );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddUserID( this    Activity activity, UserRecord  record ) => activity.AddTag( nameof(record.UserID),    record.UserID );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddSessionID( this Activity activity, UserRecord  record ) => activity.AddTag( nameof(record.SessionID), record.SessionID );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddRoleID( this    Activity activity, RoleRecord  record ) => activity.AddTag( nameof(record.ID),        record.ID );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroupID( this   Activity activity, GroupRecord record ) => activity.AddTag( nameof(record.ID),        record.ID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddUserID( this    Activity activity, UserRecord  record ) => activity.AddTag( nameof(IUserID.UserID), record.ID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddSessionID( this Activity activity, UserRecord  record ) => activity.AddTag( Tags.SessionID,         record.SessionID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddRoleID( this    Activity activity, RoleRecord  record ) => activity.AddTag( Tags.RoleID,            record.ID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroupID( this   Activity activity, GroupRecord record ) => activity.AddTag( Tags.GroupID,           record.ID );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroup( this               Activity activity, string? value = default ) => activity.AddTag( Tags.AddGroup,               value );
@@ -136,6 +136,7 @@ public static class Activities
         public static  string  AddUserToGroup      { get; set; } = nameof(AddUserToGroup);
         public static  string  AddUserToRole       { get; set; } = nameof(AddUserToRole);
         public static  string  ConnectDatabase     { get; set; } = nameof(ConnectDatabase);
+        public static  string  GroupID             { get; set; } = nameof(GroupID);
         public static  string  LoginUser           { get; set; } = nameof(LoginUser);
         public static string? Prefix
         {
@@ -158,6 +159,8 @@ public static class Activities
         public static string RemoveUserRecoveryCode { get; set; } = nameof(RemoveUserRecoveryCode);
         public static string RemoveUserRights       { get; set; } = nameof(RemoveUserRights);
         public static string RemoveUserSubscription { get; set; } = nameof(RemoveUserSubscription);
+        public static string RoleID                 { get; set; } = nameof(RoleID);
+        public static string SessionID              { get; set; } = nameof(SessionID);
         public static string UpdateGroup            { get; set; } = nameof(UpdateGroup);
         public static string UpdateRole             { get; set; } = nameof(UpdateRole);
         public static string UpdateUser             { get; set; } = nameof(UpdateUser);

@@ -1,10 +1,46 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/01/2022  6:40 PM
 
+using Microsoft.Extensions.Caching.Memory;
+
+
+
 namespace Jakar.Database.Caches;
 
 
-public interface ITableCacheFactory
+public interface ITableCacheService : IHostedService, IAsyncDisposable;
+
+
+
+public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, ITableCacheService
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+{
+    public int  Count      { get; }
+    public bool HasChanged { get; }
+    public TRecord? this[ RecordPair<TRecord> id ] { get; }
+    public TRecord? this[ RecordID<TRecord>   id ] { get; }
+    public IEnumerable<RecordID<TRecord>> ChangedOrExpired { get; }
+    public IEnumerable<RecordID<TRecord>> Keys             { get; }
+    public IEnumerable<TRecord>           RecordsChanged   { get; }
+    public IEnumerable<TRecord>           RecordsExpired   { get; }
+    public void                           Reset();
+    public bool                           Contains( RecordPair<TRecord>    id );
+    public bool                           Contains( RecordID<TRecord>      id );
+    public bool                           Contains( TRecord                record );
+    public void                           AddOrUpdate( TRecord             record );
+    public bool                           TryGetValue( RecordPair<TRecord> id,   [NotNullWhen( true )] out TRecord? record );
+    public bool                           TryGetValue( RecordID<TRecord>   id,   [NotNullWhen( true )] out TRecord? record );
+    public ValueTask<TRecord?>            TryGetValue( RecordPair<TRecord> pair, CancellationToken                  token );
+    public ValueTask<TRecord?>            TryGetValue( RecordID<TRecord>   pair, CancellationToken                  token );
+    public ValueTask<TRecord?>            TryRemove( RecordPair<TRecord>   id,   CancellationToken                  token = default );
+    public ValueTask<TRecord?>            TryRemove( RecordID<TRecord>     id,   CancellationToken                  token = default );
+    public ValueTask                      RefreshAsync( CancellationToken  token );
+    public ValueTask                      RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
+}
+
+
+
+public interface ITableCacheFactory : ITableCacheService
 {
     ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>;
@@ -12,21 +48,41 @@ public interface ITableCacheFactory
 
 
 
-public interface ITableCacheFactoryService : ITableCacheFactory, IHostedService { }
+public interface ITableCache : ITableCacheFactory, IDistributedCache, IMemoryCache;
 
 
 
-public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCacheOptions> options ) : ITableCacheFactoryService
+public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCacheOptions> options, IMemoryCache memoryCache, IDistributedCache distributedCache ) : ITableCache
 {
-    private readonly ConcurrentBag<IHostedService> _services = new();
-    private          CancellationTokenSource?      _source;
+    private readonly ConcurrentBag<ITableCacheService> _services         = [];
+    private readonly IDistributedCache                 _distributedCache = distributedCache;
+    private readonly ILoggerFactory                    _factory          = factory;
+    private readonly IMemoryCache                      _memoryCache      = memoryCache;
+    private readonly IOptions<TableCacheOptions>       _options          = options;
+    private          CancellationTokenSource?          _source;
+
+
+    public void Dispose() => DisposeAsync().AsTask().Wait();
+    public async ValueTask DisposeAsync()
+    {
+        if ( _source is not null )
+        {
+            await _source.CancelAsync();
+            _source.Dispose();
+            _source = null;
+        }
+
+        _memoryCache.Dispose();
+        foreach ( ITableCacheService cache in _services ) { await cache.DisposeAsync(); }
+    }
 
 
     public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
         _source?.Cancel();
-        var cache = new TableCache<TRecord>( table, factory.CreateLogger<TableCache<TRecord>>(), options );
+        _source = null;
+        TableCache<TRecord> cache = new(table, _factory.CreateLogger<TableCache<TRecord>>(), _options);
         _services.Add( cache );
         return cache;
     }
@@ -38,14 +94,12 @@ public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCac
         {
             try
             {
-                _source = CancellationTokenSource.CreateLinkedTokenSource( token );
+                CancellationTokenSource source = _source = CancellationTokenSource.CreateLinkedTokenSource( token );
 
-                using ( _source )
+                using ( source )
                 {
-                    var tasks = new List<Task>( _services.Count );
-
-                    // ReSharper disable once LoopCanBeConvertedToQuery
-                    foreach ( IHostedService service in _services ) { tasks.Add( service.StartAsync( _source.Token ) ); }
+                    var tasks = new Task[_services.Count];
+                    foreach ( (int i, IHostedService service) in _services.Enumerate( 0 ) ) { tasks[i] = service.StartAsync( source.Token ); }
 
                     await Task.WhenAll( tasks );
                 }
@@ -53,51 +107,48 @@ public sealed class TableCacheFactory( ILoggerFactory factory, IOptions<TableCac
             catch ( TaskCanceledException ) { await StopAsync( token ); }
         }
     }
-    public async Task StopAsync( CancellationToken token ) => await Task.WhenAll( _services.Select( x => x.StopAsync( token ) ) );
+    public async Task StopAsync( CancellationToken token )
+    {
+        if ( _source is not null )
+        {
+            await _source.CancelAsync();
+            _source = null;
+        }
+
+        await Task.WhenAll( StopAllAsync( token ) );
+    }
+    private IEnumerable<Task> StopAllAsync( CancellationToken token )
+    {
+        // ReSharper disable once LoopCanBeConvertedToQuery
+        foreach ( ITableCacheService service in _services ) { yield return service.StopAsync( token ); }
+    }
+
+
+    public byte[]?       Get( string          key )                                  => _distributedCache.Get( key );
+    public Task<byte[]?> GetAsync( string     key, CancellationToken token = new() ) => _distributedCache.GetAsync( key, token );
+    public void          Refresh( string      key )                                  => _distributedCache.Refresh( key );
+    public Task          RefreshAsync( string key, CancellationToken token = new() ) => _distributedCache.RefreshAsync( key, token );
+    public void          Remove( string       key )                                                                                                 => _distributedCache.Remove( key );
+    public Task          RemoveAsync( string  key, CancellationToken token = new() )                                                                => _distributedCache.RemoveAsync( key, token );
+    public void          Set( string          key, byte[]            value, DistributedCacheEntryOptions options )                                  => _distributedCache.Set( key, value, options );
+    public Task          SetAsync( string     key, byte[]            value, DistributedCacheEntryOptions options, CancellationToken token = new() ) => _distributedCache.SetAsync( key, value, options, token );
+    public ICacheEntry   CreateEntry( object  key )                    => _memoryCache.CreateEntry( key );
+    public void          Remove( object       key )                    => _memoryCache.Remove( key );
+    public bool          TryGetValue( object  key, out object? value ) => _memoryCache.TryGetValue( key, out value );
 }
 
 
 
-public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, IHostedService
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
-{
-    public IEnumerable<RecordID<TRecord>> Changed    { get; }
-    public int                            Count      { get; }
-    public bool                           HasChanged { get; }
-    public TRecord? this[ RecordPair<TRecord> id ] { get; }
-    public TRecord? this[ RecordID<TRecord>   id ] { get; }
-    public IEnumerable<RecordID<TRecord>> Keys           { get; }
-    public IEnumerable<TRecord>           RecordsChanged { get; }
-    public IEnumerable<TRecord>           RecordsExpired { get; }
-    public void                           Reset();
-    public bool                           Contains( RecordPair<TRecord>    id );
-    public bool                           Contains( RecordID<TRecord>      id );
-    public bool                           Contains( TRecord                record );
-    public void                           AddOrUpdate( TRecord             record );
-    public ValueTask                      AddOrUpdateAsync( TRecord        record, CancellationToken                  token );
-    public bool                           TryGetValue( RecordPair<TRecord> id,     [NotNullWhen( true )] out TRecord? record );
-    public bool                           TryGetValue( RecordID<TRecord>   id,     [NotNullWhen( true )] out TRecord? record );
-    public ValueTask<TRecord?>            TryGetValue( RecordPair<TRecord> pair,   CancellationToken                  token );
-    public ValueTask<TRecord?>            TryGetValue( RecordID<TRecord>   pair,   CancellationToken                  token );
-    public ValueTask<TRecord?>            TryRemove( RecordPair<TRecord>   id,     CancellationToken                  token = default );
-    public ValueTask<TRecord?>            TryRemove( RecordID<TRecord>     id,     CancellationToken                  token = default );
-    public ValueTask                      RefreshAsync( CancellationToken  token );
-    public ValueTask                      RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
-}
-
-
-
-public sealed class TableCache<TRecord> : ITableCache<TRecord>
+public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCache<TRecord>> logger, IOptions<TableCacheOptions> options ) : ITableCache<TRecord>
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private readonly ConcurrentDictionary<RecordID<TRecord>, CacheEntry<TRecord>> _records = new(RecordID<TRecord>.Equalizer);
-    private readonly DbTable<TRecord>                                             _table;
-    private readonly ILogger<TableCache<TRecord>>                                 _logger;
-    private readonly TableCacheOptions                                            _options;
-    public           IEnumerable<RecordID<TRecord>>                               Changed => GetChangedIDs();
-    public           int                                                          Count   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _records.Count; }
+    private readonly DbTable<TRecord>                                             _table   = table;
+    private readonly ILogger<TableCache<TRecord>>                                 _logger  = logger;
+    private readonly TableCacheOptions                                            _options = options.Value;
 
 
+    public int  Count      { [MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => _records.Count; }
     public bool HasChanged { [MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => _records.Values.Any( static x => x.HasChanged ); }
     public TRecord? this[ RecordPair<TRecord> id ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => this[id.ID]; }
     public TRecord? this[ RecordID<TRecord> id ]
@@ -107,18 +158,47 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
                    ? value
                    : default;
     }
-    public IEnumerable<RecordID<TRecord>> Keys           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _records.Keys; }
-    public IEnumerable<TRecord>           RecordsChanged { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => GetChangedRecords(); }
-    public IEnumerable<TRecord>           RecordsExpired { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => GetExpiredRecords(); }
-
-
-    // ReSharper disable once ConvertToPrimaryConstructor
-    public TableCache( DbTable<TRecord> table, ILogger<TableCache<TRecord>> logger, IOptions<TableCacheOptions> options )
+    public IEnumerable<RecordID<TRecord>> Keys { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _records.Keys; }
+    public IEnumerable<RecordID<TRecord>> ChangedOrExpired
     {
-        _table   = table;
-        _logger  = logger;
-        _options = options.Value;
+        get
+        {
+            TimeSpan lifeSpan = _options.ExpireTime;
+
+            foreach ( CacheEntry<TRecord> entry in _records.Values )
+            {
+                if ( entry.HasChangedOrExpired( lifeSpan ) ) { yield return entry.ID; }
+            }
+        }
     }
+    public IEnumerable<TRecord> RecordsChanged
+    {
+        get
+        {
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach ( CacheEntry<TRecord> entry in _records.Values )
+            {
+                if ( entry.HasChanged is false ) { continue; }
+
+                TRecord? record = entry.TryGetValue( _options );
+                if ( record is not null ) { yield return record; }
+            }
+        }
+    }
+    public IEnumerable<TRecord> RecordsExpired
+    {
+        get
+        {
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach ( CacheEntry<TRecord> entry in _records.Values )
+            {
+                TRecord? record = entry.TryGetValue( _options );
+                if ( record is not null ) { yield return record; }
+            }
+        }
+    }
+
+
     public async ValueTask DisposeAsync()
     {
         await RefreshAsync( CancellationToken.None );
@@ -126,52 +206,17 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     }
 
 
-    private IEnumerable<TRecord> GetChangedRecords()
-    {
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( CacheEntry<TRecord> entry in _records.Values )
-        {
-            if ( entry.HasChanged is false ) { continue; }
-
-            TRecord? record = entry.TryGetValue( _options );
-            if ( record is not null ) { yield return record; }
-        }
-    }
-    private IEnumerable<TRecord> GetExpiredRecords()
-    {
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( CacheEntry<TRecord> entry in _records.Values )
-        {
-            TRecord? record = entry.TryGetValue( _options );
-            if ( record is not null ) { yield return record; }
-        }
-    }
-    private IEnumerable<RecordID<TRecord>> GetChangedIDs()
-    {
-        // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( CacheEntry<TRecord> entry in _records.Values )
-        {
-            if ( entry.HasChanged ) { yield return entry.ID; }
-        }
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void Reset()                                => _records.Clear();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( RecordPair<TRecord> id )     => _records.ContainsKey( id.ID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( RecordID<TRecord>   id )     => _records.ContainsKey( id );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID );
 
 
-    public void Reset()                                => _records.Clear();
-    public bool Contains( RecordPair<TRecord> id )     => _records.ContainsKey( id.ID );
-    public bool Contains( RecordID<TRecord>   id )     => _records.ContainsKey( id );
-    public bool Contains( TRecord             record ) => _records.ContainsKey( record.ID );
-
-
-    public ValueTask AddOrUpdateAsync( TRecord record, CancellationToken token )
-    {
-        AddOrUpdate( record );
-        return ValueTask.CompletedTask;
-    }
     public void AddOrUpdate( TRecord record )
     {
         if ( _records.TryGetValue( record.ID, out CacheEntry<TRecord>? entry ) is false ) { _records[record.ID] = entry = new CacheEntry<TRecord>( record.ID ); }
 
-        entry.SetValue( record );
+        entry.SetValue( in record );
     }
 
 
@@ -184,7 +229,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         if ( record is not null ) { return record; }
 
         _records.TryRemove( id, out _ );
-        return default;
+        return null;
     }
     public bool TryGetValue( RecordPair<TRecord> id, [NotNullWhen( true )] out TRecord? record ) => TryGetValue( id.ID, out record );
     public bool TryGetValue( RecordID<TRecord> id, [NotNullWhen( true )] out TRecord? record )
@@ -205,7 +250,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     {
         if ( _records.TryRemove( id, out CacheEntry<TRecord>? entry ) ) { return await entry.TryGetValue( _table, _options, token ); }
 
-        return default;
+        return null;
     }
 
 
@@ -221,7 +266,6 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
                 TRecord? record = await _table.Get( connection, transaction, id, token );
                 if ( record is null ) { continue; }
 
-                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
                 AddOrUpdate( record );
             }
 
@@ -232,11 +276,7 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         {
             await _table.Update( connection, transaction, RecordsChanged, token );
 
-            await foreach ( TRecord record in _table.Get( connection, transaction, Changed, token ) )
-            {
-                // ReSharper disable once MethodHasAsyncOverloadWithCancellation
-                AddOrUpdate( record );
-            }
+            await foreach ( TRecord record in _table.Get( connection, transaction, ChangedOrExpired, token ) ) { AddOrUpdate( record ); }
         }
     }
 
@@ -262,28 +302,34 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
     public AsyncEnumerator                              GetAsyncEnumerator( CancellationToken token = default ) => new(this, token);
 
 
-
-    public sealed class AsyncEnumerator : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
+    public ReadOnlyMemory<RecordPair<TRecord>> GetPairs()
     {
-        private const    int                       START_INDEX = -1;
-        private readonly List<RecordPair<TRecord>> _cache      = new(100);
-        private readonly TableCache<TRecord>       _tableCache;
-        private          bool                      _isDisposed;
-        private          CancellationToken         _token;
-        private          int                       _index = START_INDEX;
-        private          RecordPair<TRecord>       _pair;
-        private          TRecord?                  _current;
-        public           TRecord                   Current        => _current ?? throw new NullReferenceException( nameof(_current) );
-        internal         bool                      ShouldContinue => _token.ShouldContinue() && _index < _cache.Count;
+        ICollection<CacheEntry<TRecord>> values = _records.Values;
+        RecordPair<TRecord>[]            array  = GC.AllocateUninitializedArray<RecordPair<TRecord>>( values.Count );
+        foreach ( (int i, CacheEntry<TRecord>? entry) in values.Enumerate( 0 ) ) { array[i] = entry.ToPair(); }
+
+        Array.Sort( array, RecordPair<TRecord>.Sorter );
+        return array;
+    }
 
 
-        // ReSharper disable once ConvertToPrimaryConstructor
-        public AsyncEnumerator( TableCache<TRecord> tableCache, CancellationToken token = default )
-        {
-            _tableCache = tableCache;
-            _token      = token;
-            _cache.EnsureCapacity( _tableCache.Count );
-        }
+
+    public sealed class AsyncEnumerator( TableCache<TRecord> tableCache, CancellationToken token = default ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
+    {
+        private const    int                                 START_INDEX = -1;
+        private readonly TableCache<TRecord>                 _tableCache = tableCache;
+        private          bool                                _isDisposed;
+        private          CancellationToken                   _token = token;
+        private          int                                 _index = START_INDEX;
+        private          ReadOnlyMemory<RecordPair<TRecord>> _pairs;
+        private          RecordPair<TRecord>                 _pair;
+        private          TRecord?                            _current;
+
+
+        public   TRecord Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
+        internal bool    ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && _index < _pairs.Length; }
+
+
         public ValueTask DisposeAsync()
         {
             Reset();
@@ -292,30 +338,16 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         }
 
 
-        private static bool MoveNext( ref int index, in ReadOnlySpan<RecordPair<TRecord>> span, out RecordPair<TRecord> pair )
-        {
-            int i = Interlocked.Add( ref index, 1 );
-
-            pair = i < span.Length
-                       ? span[i]
-                       : default;
-
-            return i < span.Length;
-        }
         public async ValueTask<bool> MoveNextAsync()
         {
             ThrowIfDisposed();
+            if ( _pairs.IsEmpty ) { Reset(); }
 
-            if ( _cache.IsEmpty() )
-            {
-                Reset();
-                _cache.EnsureCapacity( _tableCache.Count );
-                _cache.AddRange( _tableCache._records.Values.Select( static x => x.ToPair() ) );
-                _cache.Sort( RecordPair<TRecord>.Sorter );
-            }
+            _index++;
 
-            if ( MoveNext( ref _index, CollectionsMarshal.AsSpan( _cache ), out _pair ) )
+            if ( ShouldContinue )
             {
+                _pair    = _pairs.Span[_index];
                 _current = await _tableCache.TryGetValue( _pair, _token );
                 return _current is not null;
             }
@@ -326,16 +358,13 @@ public sealed class TableCache<TRecord> : ITableCache<TRecord>
         public void Reset()
         {
             ThrowIfDisposed();
+            _pairs   = _tableCache.GetPairs();
+            _pair    = default;
+            _current = null;
+            _index   = START_INDEX;
+        }
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, typeof(AsyncEnumerator) );
 
-            _cache.Clear();
-            _pair = default;
-            Interlocked.Exchange( ref _index,   START_INDEX );
-            Interlocked.Exchange( ref _current, null );
-        }
-        private void ThrowIfDisposed()
-        {
-            if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncEnumerator) ); }
-        }
 
         IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
         public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )

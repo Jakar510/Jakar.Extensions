@@ -81,7 +81,7 @@ public readonly ref struct XNode
 
     public IReadOnlyDictionary<string, string> ToAttributeCollection()
     {
-        var attributes = new Dictionary<string, string>();
+        Dictionary<string, string> attributes = new Dictionary<string, string>();
 
         foreach ( JAttribute attribute in GetAttributes() )
         {

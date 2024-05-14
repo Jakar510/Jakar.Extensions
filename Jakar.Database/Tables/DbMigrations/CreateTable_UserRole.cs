@@ -4,10 +4,10 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( 3 )]
+[Migration( USER_ROLE )]
 
 // ReSharper disable once InconsistentNaming
-public sealed class CreateTable_UserRole : MigrateUserRoleTable
+public sealed class CreateTable_UserRole : Migrate_UserRoles
 {
     public CreateTable_UserRole() : base() { }
     public override void Up()   => CreateTable();

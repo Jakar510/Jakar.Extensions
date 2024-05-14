@@ -28,7 +28,7 @@ public static partial class Spans
         return result;
     }
 #else
-    [ Pure ]
+    [Pure]
     public static double Sum( this ReadOnlySpan<double> value )
     {
         double result = 0;
@@ -36,7 +36,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static float Sum( this ReadOnlySpan<float> value )
     {
         float result = 0;
@@ -44,7 +44,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static long Sum( this ReadOnlySpan<long> value )
     {
         long result = 0;
@@ -52,7 +52,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ulong Sum( this ReadOnlySpan<ulong> value )
     {
         ulong result = 0;
@@ -60,7 +60,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static int Sum( this ReadOnlySpan<int> value )
     {
         int result = 0;
@@ -68,7 +68,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static uint Sum( this ReadOnlySpan<uint> value )
     {
         uint result = 0;
@@ -76,7 +76,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static short Sum( this ReadOnlySpan<short> value )
     {
         short result = 0;
@@ -84,7 +84,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ushort Sum( this ReadOnlySpan<ushort> value )
     {
         ushort result = 0;
@@ -92,9 +92,9 @@ public static partial class Spans
 
         return result;
     }
-    
-    
-    [ Pure ]
+
+
+    [Pure]
     public static int Sum<T>( this ReadOnlySpan<T> value, Func<T, int> selector )
     {
         int result = 0;
@@ -102,7 +102,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static uint Sum<T>( this ReadOnlySpan<T> value, Func<T, uint> selector )
     {
         uint result = 0;
@@ -110,7 +110,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static long Sum<T>( this ReadOnlySpan<T> value, Func<T, long> selector )
     {
         long result = 0;
@@ -118,7 +118,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static ulong Sum<T>( this ReadOnlySpan<T> value, Func<T, ulong> selector )
     {
         ulong result = 0;
@@ -126,7 +126,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static float Sum<T>( this ReadOnlySpan<T> value, Func<T, float> selector )
     {
         float result = 0;
@@ -134,7 +134,7 @@ public static partial class Spans
 
         return result;
     }
-    [ Pure ]
+    [Pure]
     public static double Sum<T>( this ReadOnlySpan<T> value, Func<T, double> selector )
     {
         double result = 0;

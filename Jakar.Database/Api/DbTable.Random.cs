@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommandDefinition( transaction, sql, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Random( user.OwnerUserID, count );
+        SqlCommand sql = _sqlCache.Random( user.ID.Value, count );
         return Where( connection, transaction, sql, token );
     }
 

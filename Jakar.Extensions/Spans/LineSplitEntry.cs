@@ -7,14 +7,14 @@
 ///     </para>
 /// </summary>
 [SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
-public readonly ref struct LineSplitEntry<T>( ReadOnlySpan<T> line, ParamsArray<T> separator )
-    where T : unmanaged, IEquatable<T>
+public readonly ref struct LineSplitEntry<T>( scoped in ReadOnlySpan<T> line, scoped in ParamsArray<T> separator )
+    where T : IEquatable<T>
 {
-    public ReadOnlySpan<T> Value      { get; } = line;
-    public ParamsArray<T>  Separator  { get; } = separator;
-    public int             Length     => Value.Length;
-    public bool            IsEmpty    => Value.IsEmpty;
-    public bool            IsNotEmpty => !IsEmpty;
+    public ReadOnlySpan<T> Value      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = line;
+    public ParamsArray<T>  Separator  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = separator;
+    public int             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.Length; }
+    public bool            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.IsEmpty; }
+    public bool            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
 
 
     // This method allow to deconstruct the type, so you can write any of the following code
@@ -31,17 +31,5 @@ public readonly ref struct LineSplitEntry<T>( ReadOnlySpan<T> line, ParamsArray<
     // foreach (ReadOnlySpan<char> entry in str.SplitLines())
     public static implicit operator ReadOnlySpan<T>( LineSplitEntry<T> entry ) => entry.Value;
 
-
     public override string ToString() => $"{nameof(LineSplitEntry<T>)}<{nameof(Value)}: {Value.ToString()}, {nameof(Separator)}: {Separator.ToString()}>";
-    private bool TryFormat( Span<T> destination, out int charsWritten, ReadOnlySpan<T> format, IFormatProvider? provider )
-    {
-        if ( Value.TryCopyTo( destination ) )
-        {
-            charsWritten = Length;
-            return true;
-        }
-
-        charsWritten = 0;
-        return false;
-    }
 }

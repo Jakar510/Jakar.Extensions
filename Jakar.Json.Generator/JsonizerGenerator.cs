@@ -18,8 +18,7 @@ namespace Jakar.Json.Generator;
 ///         <see href="https://github.com/dotnet/roslyn-sdk/blob/main/samples/CSharp/SourceGenerators/SourceGeneratorSamples/AutoNotifyGenerator.cs"/>
 ///     </para>
 /// </summary>
-[Generator]
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[Generator, SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
 public class JsonizerGenerator : ISourceGenerator
 {
     public const            string FROM_JSON  = "FromJson";
@@ -56,7 +55,7 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        var sb = new StringBuilder( $@"
+        StringBuilder sb = new StringBuilder( $@"
 #nullable enable
 namespace {namespaceName};
 
@@ -195,7 +194,7 @@ public class JsonSerializationGenerator : ISourceGenerator
     {
         List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
 
-        var builder = new StringBuilder();
+        StringBuilder builder = new StringBuilder();
         builder.AppendLine( $"namespace {namespaceName}" );
         builder.AppendLine( "{" );
         builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );

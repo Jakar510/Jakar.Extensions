@@ -4,61 +4,49 @@
 namespace Jakar.Extensions;
 
 
-public interface IFileMetaData : IUniqueID<Guid>
+public interface IFileMetaData<out TID> : IUniqueID<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
-    public const int DESCRIPTION_SIZE_LIMIT = 2048;
-    public const int NAME_SIZE_LIMIT        = 256;
-    public const int TYPE_SIZE_LIMIT        = 2048;
-
-    [property: MaxLength( DESCRIPTION_SIZE_LIMIT )] string? FileDescription { get; }
-    [property: MaxLength( NAME_SIZE_LIMIT )]        string? FileName        { get; }
-    [property: MaxLength( TYPE_SIZE_LIMIT )]        string? FileType        { get; }
+    string? FileDescription { get; }
+    string? FileName        { get; }
+    string? FileType        { get; }
 }
 
 
 
-public sealed record FileMetaData( [property: MaxLength( IFileMetaData.NAME_SIZE_LIMIT )] string? FileName, [property: MaxLength( IFileMetaData.TYPE_SIZE_LIMIT )] string? FileType, [property: MaxLength( IFileMetaData.DESCRIPTION_SIZE_LIMIT )] string? FileDescription = null, Guid ID = default ) : IFileMetaData
+public interface IFileData<out TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
 {
-    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription, value.ID ) { }
-    public FileMetaData( LocalFile     value ) : this( value.Name, value.ContentType ) { }
-}
+    long                       FileSize { get; }
+    string                     Hash     { get; }
+    MimeType                   MimeType { get; }
+    string                     Payload  { get; }
+    public IFileMetaData<TID>? MetaData { get; }
 
 
-
-public interface IFileData
-{
-    public const int FILE_SIZE_LIMIT = 0x3FFFFFDF; // 1 GB -- from string.MaxSize
-    public const int HASH_SIZE_LIMIT = 4096;
-    long             FileSize { get; }
-
-    [property: MaxLength( HASH_SIZE_LIMIT )] string Hash     { get; }
-    IFileMetaData?                                  MetaData { get; }
-    MimeType                                        MimeType { get; }
-    [property: MaxLength( FILE_SIZE_LIMIT )] string Payload  { get; }
-
-
-    public static OneOf<byte[], string> GetData( string data )
-    {
-        try { return Convert.FromBase64String( data ); }
-        catch ( FormatException ) { return data; }
-    }
-    public static string GetHash( in OneOf<byte[], string>                       data ) => data.Match( GetHash, GetHash );
-    public static string GetHash( in OneOf<ReadOnlyMemory<byte>, byte[], string> data ) => data.Match( GetHash, GetHash, GetHash );
-    public static string GetHash( string                                         data ) => GetHash( data, Encoding.Default );
-    public static string GetHash( string data, Encoding encoding )
-    {
-        using IMemoryOwner<byte> owner = MemoryPool<byte>.Shared.Rent( encoding.GetByteCount( data ) );
-
-        encoding.GetBytes( data, owner.Memory.Span );
-        return GetHash( owner.Memory );
-    }
-    static        string GetHash( byte[]               x )    => Hashes.Hash_SHA256( x );
-    public static string GetHash( ReadOnlyMemory<byte> data ) => GetHash( data.Span );
-    public static string GetHash( ReadOnlySpan<byte> data )
+    /*
+    public static string GetHash( scoped in ReadOnlySpan<byte>   data )
     {
         Debug.Assert( data.Length > 0 );
-        using var  hasher = SHA256.Create();
-        Span<byte> span   = stackalloc byte[HASH_SIZE_LIMIT];
+        using SHA256             hasher = SHA256.Create();
+        using IMemoryOwner<byte> owner  = MemoryPool<byte>.Shared.Rent( BaseRecord.UNICODE_CAPACITY );
+        Span<byte>               span   = owner.Memory.Span;
         hasher.TryComputeHash( data, span, out int bytesWritten );
         Debug.Assert( bytesWritten > 0 );
 
@@ -74,54 +62,225 @@ public interface IFileData
 
         return hexChars.ToString();
     }
+    */
+}
+
+
+
+public interface IFileData<out TID, out TMetaData> : IFileData<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+#if NET8_0_OR_GREATER
+    where TMetaData : IFileMetaData<TMetaData, TID>, IComparable<TMetaData>, IEquatable<TMetaData>
+#else
+    where TMetaData : IFileMetaData<TID>
+#endif
+{
+    public new TMetaData? MetaData { get; }
+}
+
+
+
+[SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
+public interface IFileData<TClass, TID, TMetaData> : IFileData<TID, TMetaData>, IComparable<TClass>, IEquatable<TClass>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+    where TMetaData : IFileMetaData<TMetaData, TID>, IComparable<TMetaData>, IEquatable<TMetaData>
+    where TClass : IFileData<TClass, TID, TMetaData>
+{
+#if NET8_0_OR_GREATER
+    public abstract static TClass            Create( IFileData<TID, TMetaData>                                        data );
+    public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID, TMetaData>? data );
+    public abstract static ValueTask<TClass> Create( LocalFile                                                        file,   CancellationToken token                                              = default );
+    public abstract static ValueTask<TClass> Create( Stream                                                           stream, MimeType          mime, TMetaData? metaData, CancellationToken token = default );
+    public abstract static TClass            Create( MemoryStream                                                     stream, MimeType          mime, TMetaData? metaData );
+    public abstract static TClass            Create( ReadOnlyMemory<byte>                                             data,   MimeType          mime, TMetaData? metaData );
+    public abstract static TClass            Create( scoped in ReadOnlySpan<byte>                                     data,   MimeType          mime, TMetaData? metaData );
+    public abstract static TClass            Create( string                                                           data,   MimeType          mime, TMetaData? metaData, Encoding? encoding = null );
+#endif
+}
+
+
+
+[SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
+public interface IFileMetaData<TClass, TID> : IFileMetaData<TID>, IComparable<TClass>, IEquatable<TClass>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+    where TClass : IFileMetaData<TClass, TID>
+{
+#if NET8_0_OR_GREATER
+    public abstract static TClass  Create( IFileMetaData<TID>                                        data );
+    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData<TID>? data );
+#endif
 }
 
 
 
 [Serializable]
-public record FileData<TFileMetaData>( long FileSize, MimeType MimeType, [property: MaxLength( IFileData.HASH_SIZE_LIMIT )] string Hash, [property: MaxLength( IFileData.FILE_SIZE_LIMIT )] string Payload, TFileMetaData? FileMetaData ) : IFileData
-    where TFileMetaData : IFileMetaData
+[SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
+public abstract record FileMetaData<TClass, TID>( string? FileName, string? FileType, string? FileDescription = null, TID ID = default ) : BaseRecord<TClass, TID>( ID ), IFileMetaData<TID>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+    where TClass : FileMetaData<TClass, TID>, IFileMetaData<TClass, TID>
 {
-    IFileMetaData? IFileData.MetaData => FileMetaData;
+    [StringLength( UNICODE_CAPACITY )] public string? FileName        { get; init; } = FileName;
+    [StringLength( UNICODE_CAPACITY )] public string? FileType        { get; init; } = FileType;
+    [StringLength( UNICODE_CAPACITY )] public string? FileDescription { get; init; } = FileDescription;
 
 
-    public FileData( ReadOnlySpan<byte>   content, MimeType mime, TFileMetaData? metaData ) : this( content.Length, mime, IFileData.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
-    public FileData( ReadOnlyMemory<byte> content, MimeType mime, TFileMetaData? metaData ) : this( content.Span, mime, metaData ) { }
+    protected FileMetaData( IFileMetaData<TID> value ) : this( value.FileName, value.FileType, value.FileDescription, value.ID ) { }
+    protected FileMetaData( LocalFile          value ) : this( value.Name, value.ContentType ) { }
 
 
-    public static async ValueTask<FileData<TFileMetaData>> Create( Stream stream, MimeType mime, TFileMetaData? metaData, CancellationToken token = default )
+    public override int CompareTo( TClass? other )
     {
-        stream.Seek( 0, SeekOrigin.Begin );
-        using MemoryStream memory = new((int)stream.Length);
-        await stream.CopyToAsync( memory, token );
-        return Create( memory, mime, metaData );
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int fileNameComparison = string.Compare( FileName, other.FileName, StringComparison.Ordinal );
+        if ( fileNameComparison != 0 ) { return fileNameComparison; }
+
+        int fileTypeComparison = string.Compare( FileType, other.FileType, StringComparison.Ordinal );
+        if ( fileTypeComparison != 0 ) { return fileTypeComparison; }
+
+        return string.Compare( FileDescription, other.FileDescription, StringComparison.Ordinal );
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( MemoryStream         stream, MimeType mime, TFileMetaData? metaData ) => new(new ReadOnlyMemory<byte>( stream.GetBuffer() ), mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( ReadOnlyMemory<byte> data,   MimeType mime, TFileMetaData? metaData ) => new(data, mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData<TFileMetaData> Create( ReadOnlySpan<byte>   data,   MimeType mime, TFileMetaData? metaData ) => new(data, mime, metaData);
+    public override bool Equals( TClass? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return FileName == other.FileName && FileType == other.FileType && FileDescription == other.FileDescription;
+    }
+    public override int GetHashCode() => HashCode.Combine( FileName, FileType, FileDescription );
 }
 
 
 
-[Serializable]
-public record FileData : FileData<FileMetaData>
+[Serializable, SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage(               "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
+public abstract record FileData<TClass, TID, TMetaData>( MimeType MimeType, long FileSize, string Hash, string Payload, TMetaData? MetaData, TID ID = default ) : BaseRecord<TClass, TID>( ID ), IFileData<TID, TMetaData>
+#if NET8_0_OR_GREATER
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+    where TClass : FileData<TClass, TID, TMetaData>, IFileData<TClass, TID, TMetaData>
+    where TMetaData : class, IFileMetaData<TMetaData, TID>
 {
-    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
+    IFileMetaData<TID>? IFileData<TID>.                  MetaData => MetaData;
+    public                                    MimeType   MimeType { get; init; } = MimeType;
+    public                                    long       FileSize { get; init; } = FileSize;
+    [StringLength( UNICODE_CAPACITY )] public string     Hash     { get; init; } = Hash;
+    [StringLength( UNICODE_CAPACITY )] public string     Payload  { get; init; } = Payload;
+    public                                    TMetaData? MetaData { get; init; } = MetaData;
+
+
+#if NET8_0_OR_GREATER
+    protected FileData( IFileData<TID, TMetaData> file ) : this( file, TMetaData.TryCreate( file.MetaData ) ) { }
+#endif
+    protected FileData( IFileData<TID>               file,    TMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
+    protected FileData( scoped in ReadOnlySpan<byte> content, MimeType   mime, TMetaData? metaData ) : this( mime, content.Length, Hashes.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+
+
+    public override int CompareTo( TClass? other )
     {
-        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
-        return new FileData( content, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int mimeTypeComparison = MimeType.CompareTo( other.MimeType );
+        if ( mimeTypeComparison != 0 ) { return mimeTypeComparison; }
+
+        int fileSizeComparison = FileSize.CompareTo( other.FileSize );
+        if ( fileSizeComparison != 0 ) { return fileSizeComparison; }
+
+        int hashComparison = string.Compare( Hash, other.Hash, StringComparison.Ordinal );
+        if ( hashComparison != 0 ) { return hashComparison; }
+
+        int payloadComparison = string.Compare( Payload, other.Payload, StringComparison.Ordinal );
+        if ( payloadComparison != 0 ) { return payloadComparison; }
+
+        return Sorter<TMetaData>.Default.Compare( MetaData, other.MetaData );
     }
-    public FileData( ReadOnlySpan<byte>   content,  MimeType mime,     FileMetaData? metaData ) : base( content, mime, metaData ) { }
-    public FileData( ReadOnlyMemory<byte> content,  MimeType mime,     FileMetaData? metaData ) : base( content, mime, metaData ) { }
-    public FileData( long                 FileSize, MimeType MimeType, string        Hash, string Payload, FileMetaData? metaData ) : base( FileSize, MimeType, Hash, Payload, metaData ) { }
+    public override bool Equals( TClass? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return MimeType == other.MimeType && FileSize == other.FileSize && Hash == other.Hash && Payload == other.Payload && Equalizer<TMetaData>.Default.Equals( MetaData, other.MetaData );
+    }
+    public override int GetHashCode() => HashCode.Combine( MimeType, FileSize, Hash, Payload, MetaData );
 }
 
 
 
 public static class FileDataExtensions
 {
-    public static Stream GetStream( this IFileData data ) => data.GetStream( Encoding.Default );
-    public static Stream GetStream( this IFileData data, Encoding encoding )
+    public static OneOf<byte[], string> TryGetData( this string data )
+    {
+        try { return Convert.FromBase64String( data ); }
+        catch ( FormatException ) { return data; }
+    }
+
+    public static Stream GetStream<TID>( this IFileData<TID> data )
+#if NET8_0_OR_GREATER
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+        => data.GetStream( Encoding.Default );
+
+
+    public static Stream GetStream<TID>( this IFileData<TID> data, Encoding encoding )
+#if NET8_0_OR_GREATER
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
     {
         OneOf<byte[], string> one = data.GetData();
 
@@ -129,7 +288,19 @@ public static class FileDataExtensions
                    ? new MemoryStream( one.AsT0 )
                    : new MemoryStream( encoding.GetBytes( one.AsT1 ) );
     }
-    public static OneOf<byte[], string> GetData( this IFileData data ) => data.MimeType.IsText()
-                                                                              ? data.Payload
-                                                                              : IFileData.GetData( data.Payload );
+
+
+    public static OneOf<byte[], string> GetData<TID>( this IFileData<TID> data )
+#if NET8_0_OR_GREATER
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+#elif NET7_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
+#elif NET6_0
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
+#else
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
+#endif
+        => data.MimeType.IsText()
+               ? data.Payload
+               : data.Payload.TryGetData();
 }

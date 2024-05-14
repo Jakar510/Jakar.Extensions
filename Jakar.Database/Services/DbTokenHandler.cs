@@ -6,15 +6,11 @@ namespace Jakar.Database;
 
 public class DbTokenHandler : JsonWebTokenHandler
 {
-    public static DbTokenHandler Instance { get; set; } = new();
-    public DbTokenHandler() { }
+    private readonly JwtSecurityTokenHandler _handler = new();
+    public static    DbTokenHandler          Instance { get; set; } = new();
 
 
-    public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken )
-    {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        return tokenHandler.ValidateToken( jsonToken, parameters, out securityToken );
-    }
+    public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken ) => _handler.ValidateToken( jsonToken, parameters, out securityToken );
 
 
     public override async Task<TokenValidationResult> ValidateTokenAsync( string token, TokenValidationParameters validationParameters )

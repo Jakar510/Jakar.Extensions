@@ -36,7 +36,7 @@ public class Emailer
         SendAsync( settings, EmailBuilder.From( settings.Address() ).To( targets ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public static async ValueTask SendAsync( EmailSettings settings, MimeMessage message, CancellationToken token = default )
     {
-        using var client = new SmtpClient();
+        using SmtpClient client = new SmtpClient();
         await client.ConnectAsync( settings.Site, settings.Port, settings.Options, token );
 
         try

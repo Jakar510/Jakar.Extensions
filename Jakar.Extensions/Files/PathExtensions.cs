@@ -10,7 +10,7 @@ public static class PathExtensions
     public static IReadOnlyList<string> SubFolderNames( this DirectoryInfo root )                             => root.EnumerateDirectories().Select( item => item.Name ).ToList();
     public static string                Combine( this        DirectoryInfo path, string          fileName )   => Path.Combine( path.FullName, fileName );
     public static string                Combine( this        DirectoryInfo path, params string[] subFolders ) => path.FullName.Combine( subFolders );
-    public static string Combine( this string path, in ReadOnlySpan<string> subFolders )
+    public static string Combine( this string path, scoped in ReadOnlySpan<string> subFolders )
     {
         string[] results = new string[subFolders.Length + 1];
         results[0] = path;

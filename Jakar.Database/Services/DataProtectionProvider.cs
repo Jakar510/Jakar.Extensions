@@ -13,7 +13,7 @@ public sealed class ProtectedDataProvider : IDataProtectionProvider
     public static void Register( IServiceCollection builder ) => builder.TryAddSingleton<IDataProtectionProvider, ProtectedDataProvider>();
     public IProtectedData CreateProtector( string purpose )
     {
-        var data = new ProtectedData( Database.DataProtector );
+        ProtectedData data = new ProtectedData( Database.DataProtector );
         return data;
     }
 }

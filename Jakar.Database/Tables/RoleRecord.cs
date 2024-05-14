@@ -1,35 +1,43 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
-public sealed record RoleRecord( [property: MaxLength( 1024 )]             string Name,
-                                 [property: MaxLength( 1024 )]             string NormalizedName,
-                                 [property: MaxLength( 4096 )]             string ConcurrencyStamp,
-                                 [property: MaxLength( IRights.MAX_SIZE )] string Rights,
-                                 RecordID<RoleRecord>                             ID,
-                                 RecordID<UserRecord>?                            CreatedBy,
-                                 Guid?                                            OwnerUserID,
-                                 DateTimeOffset                                   DateCreated,
-                                 DateTimeOffset?                                  LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, CreatedBy, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRights
+[Serializable, Table( TABLE_NAME )]
+public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfRole,
+                                 [property: StringLength( 1024 )] string NormalizedName,
+                                 [property: StringLength( 4096 )] string ConcurrencyStamp,
+                                 string                                  Rights,
+                                 RecordID<RoleRecord>                    ID,
+                                 RecordID<UserRecord>?                   OwnerUserID,
+                                 DateTimeOffset                          DateCreated,
+                                 DateTimeOffset?                         LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
 {
-    public const  string TABLE_NAME = "Roles";
-    public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    public const                                  string TABLE_NAME = "Roles";
+    public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
 
 
-    public RoleRecord( IdentityRole role, UserRecord?    caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
-    public RoleRecord( IdentityRole role, in IUserRights rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
-    public RoleRecord( string       name, UserRecord?    caller                                                                                  = default ) : this( name, name, caller ) { }
-    public RoleRecord( string       name, string         normalizedName, UserRecord? caller                                                      = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string         normalizedName, string      concurrencyStamp, UserRecord?    caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
-    public RoleRecord( string       name, string         normalizedName, string      concurrencyStamp, in IUserRights rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights.ToString(), RecordID<RoleRecord>.New(), caller?.ID, caller?.UserID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( IdentityRole role, UserRecord? caller                     = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
+    public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = default ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller ) { }
+    public RoleRecord( string       name, UserRecord? caller                                                                               = default ) : this( name, name, caller ) { }
+    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = default ) : this( name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = default ) : this( name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = default ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
+    public RoleModel<Guid> ToRoleModel() => new(this);
+    public TRoleModel ToRoleModel<TRoleModel>()
+        where TRoleModel : IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
 
+    public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+        where TEnum : struct, Enum
+    {
+        Rights = rights.ToString();
+        return this;
+    }
 
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(Name),             Name );
+        DynamicParameters parameters = base.ToDynamicParameters();
+        parameters.Add( nameof(NameOfRole),       NameOfRole );
         parameters.Add( nameof(NormalizedName),   NormalizedName );
         parameters.Add( nameof(ConcurrencyStamp), ConcurrencyStamp );
         parameters.Add( nameof(Rights),           Rights );
@@ -39,15 +47,14 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]             strin
     public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>( nameof(Rights) );
-        string                name             = reader.GetFieldValue<string>( nameof(Name) );
+        string                name             = reader.GetFieldValue<string>( nameof(NameOfRole) );
         string                normalizedName   = reader.GetFieldValue<string>( nameof(NormalizedName) );
         string                concurrencyStamp = reader.GetFieldValue<string>( nameof(ConcurrencyStamp) );
-        var                   dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var                   lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var                   ownerUserID      = reader.GetFieldValue<Guid>( nameof(OwnerUserID) );
-        RecordID<UserRecord>? createdBy        = RecordID<UserRecord>.CreatedBy( reader );
+        DateTimeOffset        dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.OwnerUserID( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        var                   record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, createdBy, ownerUserID, dateCreated, lastModified );
+        RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
         return record;
     }
@@ -57,13 +64,13 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]             strin
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.UserRoles, db.Users, this, token );
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, db.Users, this, token );
 
 
     [Pure]
     public IdentityRole ToIdentityRole() => new()
                                             {
-                                                Name             = Name,
+                                                Name             = NameOfRole,
                                                 NormalizedName   = NormalizedName,
                                                 ConcurrencyStamp = ConcurrencyStamp
                                             };
@@ -75,7 +82,7 @@ public sealed record RoleRecord( [property: MaxLength( 1024 )]             strin
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int nameComparison = string.Compare( Name, other.Name, StringComparison.Ordinal );
+        int nameComparison = string.Compare( NameOfRole, other.NameOfRole, StringComparison.Ordinal );
         if ( nameComparison != 0 ) { return nameComparison; }
 
         int normalizedNameComparison = string.Compare( NormalizedName, other.NormalizedName, StringComparison.Ordinal );

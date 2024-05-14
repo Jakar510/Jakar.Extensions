@@ -43,16 +43,14 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden]
-    [DoesNotReturn]
+    [StackTraceHidden, DoesNotReturn]
 #endif
 
     protected virtual void ThrowDisabled( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden]
-    [DoesNotReturn]
+    [StackTraceHidden, DoesNotReturn]
 #endif
 
     protected void ThrowDisposed( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
@@ -72,7 +70,7 @@ public static class HostedServiceExtensions
 {
     public static ServiceThread StartInThread( this IHostedService service, ILogger<ServiceThread> logger, CancellationToken token )
     {
-        var thread = new ServiceThread( service, logger, token );
+        ServiceThread thread = new ServiceThread( service, logger, token );
         thread.Start();
         return thread;
     }
@@ -81,7 +79,6 @@ public static class HostedServiceExtensions
 
     public sealed class ServiceThread : Service
     {
-        private const    string                   EMPTY = "";
         private readonly CancellationToken        _token;
         private readonly IHostedService           _service;
         private readonly ILogger                  _logger;

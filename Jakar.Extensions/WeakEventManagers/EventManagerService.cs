@@ -4,29 +4,27 @@
 namespace Jakar.Extensions;
 
 
-/*
-
 public static class EventManagerService
 {
     private static readonly object _lock = new();
-    public const            string EMPTY = "";
+    public const            string EMPTY = BaseRecord.EMPTY;
 
 
 #if NET7_0_OR_GREATER
-    [ RequiresDynamicCode( nameof(TryGetDynamicMethod) ) ]
+    [RequiresDynamicCode( nameof(TryGetDynamicMethod) )]
 #endif
-    internal static bool TryGetDynamicMethod( this MethodInfo methodInfo, [ NotNullWhen( true ) ] out DynamicMethod? method )
+    internal static bool TryGetDynamicMethod( this MethodInfo methodInfo, [NotNullWhen( true )] out DynamicMethod? method )
     {
         method = GetMethod( methodInfo, typeof(DynamicMethod) );
         return method is not null;
 
 
     #if NET7_0_OR_GREATER
-        [ RequiresDynamicCode( nameof(GetMethod) ) ]
+        [RequiresDynamicCode( nameof(GetMethod) )]
     #endif
         static DynamicMethod? GetMethod( MethodInfo methodInfo,
                                      #if NET7_0_OR_GREATER
-                                         [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicNestedTypes | DynamicallyAccessedMemberTypes.PublicNestedTypes ) ]
+                                         [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicNestedTypes | DynamicallyAccessedMemberTypes.PublicNestedTypes | DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields )]
                                      #endif
                                          Type type
         )
@@ -37,12 +35,12 @@ public static class EventManagerService
 
 
     #if NET7_0_OR_GREATER
-        [ RequiresDynamicCode( nameof(GetDynamicMethod) ) ]
+        [RequiresDynamicCode( nameof(GetDynamicMethod) )]
     #endif
         static DynamicMethod? GetDynamicMethod( MethodInfo methodInfo,
                                                 TypeInfo?  methodType,
                                             #if NET7_0_OR_GREATER
-                                                [ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicFields ) ]
+                                                [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.NonPublicFields | DynamicallyAccessedMemberTypes.PublicFields )]
                                             #endif
                                                 Type? dynamicMethod
         )
@@ -118,8 +116,7 @@ public static class EventManagerService
 
         using ( toRaise )
         {
-            const string MSG =
-                "Parameter count mismatch. If invoking an `event EventHandler` use `HandleEvent(object sender, TEventArgs eventArgs, string eventName)` or if invoking an `event Action<T>` use `HandleEvent(object eventArgs, string eventName)`instead.";
+            const string MSG = "Parameter count mismatch. If invoking an `event EventHandler` use `HandleEvent(object sender, TEventArgs eventArgs, string eventName)` or if invoking an `event Action<T>` use `HandleEvent(object eventArgs, string eventName)`instead.";
 
             ReadOnlySpan<Target> targets = toRaise.Span;
             targets.HandleEvent( MSG, null );
@@ -156,7 +153,6 @@ public static class EventManagerService
 
         foreach ( Subscription subscription in toRemove.Span ) { subscriptions.Remove( subscription ); }
     }
-    /*
     private static void AddRemoveEvents<T>( this T eventHandlers, in string eventName, out List<Target> toRaise )
         where T : IReadOnlyDictionary<string, List<Subscription>>
     {
@@ -184,13 +180,12 @@ public static class EventManagerService
 
         foreach ( Subscription subscription in toRemove.Span ) { target.Remove( subscription ); }
     }
-    #1#
 
 
 
     public readonly record struct Subscription( in WeakReference? Subscriber, in MethodInfo Handler )
     {
-        internal bool TryGetTarget( [ NotNullWhen( true ) ] out Target? target )
+        internal bool TryGetTarget( [NotNullWhen( true )] out Target? target )
         {
             if ( Subscriber is null )
             {
@@ -210,7 +205,7 @@ public static class EventManagerService
 
 
 
-    internal readonly record struct Target( object? Instance, MethodInfo EventHandler )
+    public readonly record struct Target( object? Instance, MethodInfo EventHandler )
     {
         public void HandleEvent( in string errorMsg, params object?[]? parameters )
         {
@@ -261,8 +256,7 @@ public static class EventManagerService
 
         using ( toRaise )
         {
-            const string MSG =
-                "Parameter count mismatch. If invoking an `event EventHandler` use `HandleEvent(object sender, TEventArgs eventArgs, string eventName)` or if invoking an `event Action<T>` use `HandleEvent(object eventArgs, string eventName)`instead.";
+            const string MSG = "Parameter count mismatch. If invoking an `event EventHandler` use `HandleEvent(object sender, TEventArgs eventArgs, string eventName)` or if invoking an `event Action<T>` use `HandleEvent(object eventArgs, string eventName)`instead.";
 
             ReadOnlySpan<Target<TEventArgs>> targets = toRaise.Span;
             targets.HandleEvent( MSG, arg, sender );
@@ -289,7 +283,6 @@ public static class EventManagerService
 
         foreach ( Subscription<TEventArgs> subscription in toRemove.Span ) { subscriptions.Remove( subscription ); }
     }
-    /*
     private static void AddRemoveEvents<T, TEventArgs>( this T eventHandlers, in string eventName, out List<Target<TEventArgs>> toRaise )
         where T : IReadOnlyDictionary<string, List<Subscription<TEventArgs>>>
     {
@@ -323,7 +316,6 @@ public static class EventManagerService
 
         foreach ( Subscription<TEventArgs> subscription in toRemove.Span ) { target.Remove( subscription ); }
     }
-    #1#
 
 
 
@@ -332,7 +324,7 @@ public static class EventManagerService
         public Subscription( in WeakReference? Subscriber, in OneOf<EventHandler<TEventArgs>, Action<TEventArgs>> Handler ) : this( in Subscriber, Handler.Match( Convert, Convert ) ) { }
 
 
-        internal bool TryGetTarget( [ NotNullWhen( true ) ] out Target<TEventArgs>? target )
+        internal bool TryGetTarget( [NotNullWhen( true )] out Target<TEventArgs>? target )
         {
             if ( TryGetTarget( out OneOf<EventHandler<TEventArgs>, Action<TEventArgs>>? handler ) is false )
             {
@@ -354,7 +346,7 @@ public static class EventManagerService
 
             return target is not null;
         }
-        public bool TryGetTarget( [ NotNullWhen( true ) ] out OneOf<EventHandler<TEventArgs>, Action<TEventArgs>>? handler )
+        public bool TryGetTarget( [NotNullWhen( true )] out OneOf<EventHandler<TEventArgs>, Action<TEventArgs>>? handler )
         {
             if ( Handler.IsT0 && Handler.AsT0.TryGetTarget( out EventHandler<TEventArgs>? target1 ) )
             {
@@ -392,4 +384,3 @@ public static class EventManagerService
         }
     }
 }
-*/

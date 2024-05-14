@@ -3,7 +3,7 @@
 
 public enum SupportedLanguage
 {
-    Unspecified = -1,
+    Unspecified = NOT_FOUND,
     English     = 0,
     Spanish     = 1,
     French      = 2,

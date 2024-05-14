@@ -6,9 +6,9 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public ValueTask<string>  CreateContent( string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<string>  CreateHTMLContent( string   header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<Tokens?> Authenticate( VerifyRequest users,  ClaimType  types, CancellationToken token = default );
+    public ValueTask<string>          CreateContent( string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<string>          CreateHTMLContent( string   header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest users,  ClaimType  types, CancellationToken token = default );
 }
 
 
@@ -24,7 +24,7 @@ public interface ITokenService
 public class Tokenizer( Database dataBase ) : ITokenService // TODO: update Tokenizer
 {
     private readonly Database _dataBase = dataBase;
-    internal virtual Uri      Domain => _dataBase.Options.Domain;
+    internal virtual Uri      Domain => _dataBase.Settings.Domain;
 
 
     public virtual string GetUrl( in Tokens result ) => $"{Domain.OriginalString}/Token/{result.AccessToken}";
@@ -53,7 +53,7 @@ public class Tokenizer( Database dataBase ) : ITokenService // TODO: update Toke
          """;
 
 
-    public virtual ValueTask<Tokens?> Authenticate( VerifyRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate( request, types, token );
+    public virtual ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate( request, types, token );
 
 
     public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )

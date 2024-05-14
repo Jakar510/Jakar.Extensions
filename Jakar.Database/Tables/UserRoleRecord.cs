@@ -4,8 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable]
-[Table( TABLE_NAME )]
+[Serializable, Table( TABLE_NAME )]
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
 {
     public const  string TABLE_NAME = "UserRoles";
@@ -20,12 +19,12 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     [Pure]
     public static UserRoleRecord Create( DbDataReader reader )
     {
-        var key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        var value        = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
-        var dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        var lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        var id           = new RecordID<UserRoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        var record       = new UserRoleRecord( key, value, id, dateCreated, lastModified );
+        RecordID<UserRecord>     key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<RoleRecord>     value        = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
+        DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        DateTimeOffset?          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserRoleRecord> id           = new RecordID<UserRoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        UserRoleRecord                      record       = new UserRoleRecord( key, value, id, dateCreated, lastModified );
         record.Validate();
         return record;
     }

@@ -23,7 +23,7 @@ public static class XmlExtensions
     public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes )
         where TValue : IConvertible
     {
-        var results = new List<TValue>();
+        List<TValue> results = new List<TValue>();
 
         XmlNode? root = document.ChildNodes[0];
 
@@ -61,8 +61,8 @@ public static class XmlExtensions
         Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
         Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
 
-        Type target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
-        var  results = (IDictionary)Activator.CreateInstance( target );
+        Type         target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
+        IDictionary? results = (IDictionary)Activator.CreateInstance( target );
 
         for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
@@ -122,15 +122,15 @@ public static class XmlExtensions
                          IndentChars         = new string( ' ', 4 )
                      };
 
-        var builder = new StringBuilder();
-        var writer  = XmlWriter.Create( builder, settings );
+        StringBuilder builder = new StringBuilder();
+        XmlWriter writer  = XmlWriter.Create( builder, settings );
         document.Save( writer );
         return builder.ToString();
     }
     public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items )
-        where T : IDataBaseID => items.Consolidate().SetMappedIDs();
+        where T : IUniqueID<long> => items.Consolidate().SetMappedIDs();
     public static string SetMappedIDs<T>( this IEnumerable<T> items )
-        where T : IDataBaseID => items.Select( item => item.ID ).SetMappedIDs<T>();
+        where T : IUniqueID<long> => items.Select( item => item.ID ).SetMappedIDs<T>();
 
     public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(T).GetTableName() } );
 
@@ -154,7 +154,7 @@ public static class XmlExtensions
     {
         if ( string.IsNullOrWhiteSpace( xml ) ) { return default; }
 
-        var doc = new XmlDocument();
+        XmlDocument doc = new XmlDocument();
         doc.LoadXml( xml );
 
         string json = JsonConvert.SerializeXmlNode( doc );
@@ -163,7 +163,7 @@ public static class XmlExtensions
 
     public static XmlDocument ToRawXml( this string xml )
     {
-        var document = new XmlDocument();
+        XmlDocument document = new XmlDocument();
         document.LoadXml( xml );
 
         return document;

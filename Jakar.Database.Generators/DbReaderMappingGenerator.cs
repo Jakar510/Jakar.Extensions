@@ -67,13 +67,13 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
 
     private static ImmutableArray<DbRecordClassDescription> GetClasses( in SourceProductionContext context, in ImmutableArray<ClassDeclarationSyntax> declarations )
     {
-        var list = new List<DbRecordClassDescription>( declarations.Length );
+        List<DbRecordClassDescription> list = new List<DbRecordClassDescription>( declarations.Length );
 
         foreach ( ClassDeclarationSyntax declaration in declarations )
         {
             if ( context.CancellationToken.IsCancellationRequested ) { return default; }
 
-            var result = DbRecordClassDescription.Create( declaration );
+            DbRecordClassDescription result = DbRecordClassDescription.Create( declaration );
             context.ReportDiagnostic( Found( declaration, result ) );
             list.Add( result );
         }
@@ -83,8 +83,8 @@ public sealed class DbReaderMappingGenerator : IIncrementalGenerator
     private static Diagnostic Found( SyntaxNode declaration, DbRecordClassDescription description )
     {
         const string ID         = $"{nameof(DbReaderMappingGenerator)}.{nameof(Found)}";
-        var          descriptor = new DiagnosticDescriptor( ID, $"Found Class '{description.ClassName}'", string.Empty, nameof(DbReaderMappingGenerator), DiagnosticSeverity.Info, true );
-        var          location   = Location.Create( declaration.SyntaxTree, default );
+        DiagnosticDescriptor          descriptor = new DiagnosticDescriptor( ID, $"Found Class '{description.ClassName}'", string.Empty, nameof(DbReaderMappingGenerator), DiagnosticSeverity.Info, true );
+        Location          location   = Location.Create( declaration.SyntaxTree, default );
 
         return Diagnostic.Create( descriptor, location );
     }

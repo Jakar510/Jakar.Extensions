@@ -19,7 +19,7 @@ public ref struct SpanSplitEnumerator<T>
     public LineSplitEntry<T> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( ReadOnlySpan<T> span, ReadOnlySpan<T> separators )
+    public SpanSplitEnumerator( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> separators )
     {
         if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
@@ -30,11 +30,9 @@ public ref struct SpanSplitEnumerator<T>
     }
 
 
-    public override string ToString() => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
-
-
-    public SpanSplitEnumerator<T> GetEnumerator() => this;
-    public void                   Reset()         => _span = _originalString;
+    public readonly override string                 ToString()      => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
+    public readonly          SpanSplitEnumerator<T> GetEnumerator() => this;
+    public                   void                   Reset()         => _span = _originalString;
 
 
 #if NET6_0_OR_GREATER

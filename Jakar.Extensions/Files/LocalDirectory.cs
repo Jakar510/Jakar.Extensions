@@ -29,10 +29,10 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     public LocalDirectory() => FullPath = string.Empty;
-    public LocalDirectory( ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalDirectory( DirectoryInfo      path ) : this( path.FullName ) { }
-    public LocalDirectory( string             path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
-    public LocalDirectory( string             path ) => FullPath = Path.GetFullPath( path );
+    public LocalDirectory( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
+    public LocalDirectory( DirectoryInfo                path ) : this( path.FullName ) { }
+    public LocalDirectory( string                       path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
+    public LocalDirectory( string                       path ) => FullPath = Path.GetFullPath( path );
     public void Dispose()
     {
         Dispose( this.IsTempFile() );
@@ -155,6 +155,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
                    : info;
     }
 
+
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
     /// <param name="path"> </param>
     /// <exception cref="ArgumentException"> </exception>
@@ -167,7 +168,23 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public LocalFile Join( string path ) => Info.Combine( path );
+    public LocalFile Join( string path ) => new(Info.Combine( path ));
+
+
+    /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
+    /// <param name="path"> </param>
+    /// <param name="encoding"> </param>
+    /// <exception cref="ArgumentException"> </exception>
+    /// <exception cref="ArgumentNullException"> </exception>
+    /// <exception cref="DirectoryNotFoundException"> </exception>
+    /// <exception cref="IOException"> </exception>
+    /// <exception cref="PathTooLongException"> </exception>
+    /// <exception cref="SecurityException"> </exception>
+    /// <exception cref="NotSupportedException"> </exception>
+    /// <returns>
+    ///     <see cref="LocalFile"/>
+    /// </returns>
+    public LocalFile Join( string path, Encoding encoding ) => new(Info.Combine( path ), encoding);
 
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
@@ -209,7 +226,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteAllRecursivelyAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -237,7 +254,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteFilesAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -257,7 +274,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteSubFoldersAsync()
     {
-        var tasks = new List<Task>();
+        List<Task> tasks = new List<Task>();
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -272,7 +289,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles() )
         {
@@ -289,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
@@ -306,7 +323,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
@@ -323,7 +340,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
 
         foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {
@@ -484,14 +501,14 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
-        public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items, Sorter ) { }
+        public ConcurrentCollection() : base( Sorter, Equalizer ) { }
+        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items, Sorter, Equalizer ) { }
     }
 
 
 
     [Serializable]
-    public class Deque : MultiDeque<LocalDirectory>
+    public class Deque : ConcurrentDeque<LocalDirectory>
     {
         public Deque() : base() { }
         public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
@@ -510,10 +527,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     [Serializable]
-    public class Queue : MultiQueue<LocalDirectory>
+    public class Queue : Queue<LocalDirectory>
     {
         public Queue() : base() { }
         public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
+    {
+        public ConcurrentQueue() : base() { }
+        public ConcurrentQueue( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 

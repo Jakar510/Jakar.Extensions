@@ -41,6 +41,7 @@ public static partial class Validate
 
 
     public static bool IsEmailAddress( this string value ) => Re.Email.IsMatch( value );
+
 #if NET7_0_OR_GREATER
     public static bool IsEmailAddress( this ReadOnlySpan<char> value ) => Re.Email.IsMatch( value );
 #endif

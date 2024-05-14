@@ -12,7 +12,7 @@ public sealed class AttributeException : Exception
 
     private static string GetMessage( Type classType, PropertyInfo propInfo )
     {
-        var sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.Append( '"' );
         sb.Append( classType.FullName );
         sb.Append( '.' );

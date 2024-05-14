@@ -72,7 +72,7 @@ public static partial class Migrations
     {
         ICreateTableColumnOptionOrWithColumnSyntax reference = col.AsInt64();
 
-        reference.ForeignKey( propertyType.GetTableName(), nameof(IDataBaseID.ID) );
+        reference.ForeignKey( propertyType.GetTableName(), nameof(IUniqueID<Guid>.ID) );
 
         // return reference.SetNullable(false);
         return true;
@@ -111,7 +111,7 @@ public static partial class Migrations
     {
         if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined( typeof(JsonIgnoreAttribute) ) ) { return true; }
 
-        return propInfo.PropertyType.HasInterface<IDataBaseIgnore>();
+        return false;
     }
 
 
@@ -138,7 +138,11 @@ public static partial class Migrations
 
         if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type is DbType.Xml ) { return col.AsXml( int.MaxValue ).SetNullable( propInfo ); }
 
-        if ( propertyType.HasInterface<IDataBaseID>() ) { return col.CreateColumn_Reference( propertyType ); }
+        if ( propertyType.HasInterface<IUniqueID<int>>() ) { return col.CreateColumn_Reference( propertyType ); }
+
+        if ( propertyType.HasInterface<IUniqueID<long>>() ) { return col.CreateColumn_Reference( propertyType ); }
+
+        if ( propertyType.HasInterface<IUniqueID<Guid>>() ) { return col.CreateColumn_Reference( propertyType ); }
 
         return false;
     }
@@ -205,10 +209,10 @@ public static partial class Migrations
     public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context )
         where T : BaseRecord
     {
-        PropertyInfo[] items   = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
-        var            columns = new Dictionary<string, object?>();
+        PropertyInfo[]              properties = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+        Dictionary<string, object?> columns    = new(properties.Length);
 
-        foreach ( PropertyInfo property in items )
+        foreach ( PropertyInfo property in properties )
 
         {
             object? value = property.GetValue( context );
@@ -251,7 +255,7 @@ public static partial class Migrations
         }
 
 
-        if ( propertyType.IsEqualType( typeof(string) ) ) { return col.AsString( propInfo.GetCustomAttribute<MaxLengthAttribute>()?.Length ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) ); }
+        if ( propertyType.IsEqualType( typeof(string) ) ) { return col.AsString( propInfo.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength ?? throw new InvalidOperationException( $"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}" ) ); }
 
 
         if ( propertyType.IsOneOfType( [typeof(bool), typeof(bool?)] ) ) { return col.AsBoolean(); }
@@ -288,12 +292,12 @@ public static partial class Migrations
     public static async ValueTask MigrateDown( this IHost app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.MigrateDown( 0 );
     }
     public static async ValueTask MigrateDown( this IHost app, string key )
     {
-        var config = app.Services.GetRequiredService<IConfiguration>();
+        IConfiguration config = app.Services.GetRequiredService<IConfiguration>();
         if ( !config.GetValue( key, false ) ) { return; }
 
         await app.MigrateDown();
@@ -301,7 +305,7 @@ public static partial class Migrations
     public static async ValueTask MigrateUp( this IHost app, long? version = default )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        var                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( version.HasValue )
@@ -330,7 +334,6 @@ public static partial class Migrations
 
         throw new ExpectedValueTypeException( key,
                                               prop.PropertyType,
-                                              typeof(IDataBaseIgnore),
                                               typeof(string),
                                               typeof(bool),
                                               typeof(byte),

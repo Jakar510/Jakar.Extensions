@@ -4,11 +4,11 @@
 		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591;IDE0079;CS1658</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>7.6.0</Version>
+		<Version>8.0.0</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -18,7 +18,7 @@
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReleaseNotes>
-			Jakar.Extensions 7.6.0
+			Jakar.Extensions 8.0.0
 
 		</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
@@ -35,6 +35,15 @@
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Loggers\**" />
+	  <Compile Remove="WeakEventManagers\**" />
+	  <EmbeddedResource Remove="Loggers\**" />
+	  <EmbeddedResource Remove="WeakEventManagers\**" />
+	  <None Remove="Loggers\**" />
+	  <None Remove="WeakEventManagers\**" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
@@ -102,22 +111,24 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Folder Include="Properties\PublishProfiles\" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
+		<PackageReference Include="NoAlloq" Version="0.2.0" />
+		<PackageReference Include="Otp.NET" Version="1.4.0" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
 		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
 		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
@@ -134,6 +145,7 @@
 		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.263" />
 		<PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
 		<PackageReference Include="ValueOf" Version="2.0.31" />
+		<PackageReference Include="ZXing.Net" Version="0.16.9" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">

@@ -18,7 +18,7 @@ public static class OneOfChecks
 
 
 #if NETSTANDARD2_1
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsOneOf<TValue>( this TValue value, params TValue[] items )
     {
         ReadOnlySpan<TValue> span = items;
@@ -80,7 +80,7 @@ public static class OneOfChecks
 
 
 #if NETSTANDARD2_1
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static bool IsOneOf( this PropertyChangedEventArgs e, params string[] properties ) => e.PropertyName?.IsOneOf( properties ) ?? false;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOf( this PropertyChangedEventArgs e, params string[] properties ) => e.PropertyName?.IsOneOf( properties ) ?? false;
 #endif
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

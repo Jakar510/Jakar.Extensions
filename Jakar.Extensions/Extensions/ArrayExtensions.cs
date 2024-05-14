@@ -1,26 +1,34 @@
 ﻿namespace Jakar.Extensions;
 
 
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
 public static class ArrayExtensions
 {
 #if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetInternalArray) )]
 #endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    [SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
                                                                                                             {
-                                                                                                                TElement[] array                   => array,
-                                                                                                                List<TElement> list                => list.GetInternalArray(),
-                                                                                                                Collection<TElement> collection    => collection.GetInternalArray(),
-                                                                                                                IReadOnlyList<TElement> collection => collection.ToArray(),
-                                                                                                                _                                  => values.ToArray()
+                                                                                                                TElement[] array                                    => array,
+                                                                                                                List<TElement> list                                 => GetInternalArray( list ),
+                                                                                                                ConcurrentObservableCollection<TElement> collection => GetInternalArray( collection ),
+                                                                                                                Collection<TElement> collection                     => GetInternalArray( collection ),
+                                                                                                                IList<TElement> collection                          => collection.ToArray( collection.Count ),
+                                                                                                                IReadOnlyList<TElement> collection                  => collection.ToArray( collection.Count ),
+                                                                                                                ICollection<TElement> collection                    => collection.ToArray( collection.Count ),
+                                                                                                                _                                                   => values.ToArray()
                                                                                                             };
 
-#if NET7_0_OR_GREATER
-    [RequiresDynamicCode( nameof(GetInternalArray) )]
-#endif
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => new(ArrayAccessor<TElement>.Getter( list ), 0, list.Count);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list )
+    {
+    #if NET6_0_OR_GREATER
+        return CollectionsMarshal.AsSpan( list );
+    #else
+        return new ReadOnlySpan<TElement>( ArrayAccessor<TElement>.Getter( list ), 0, list.Count );
+    #endif
+    }
 
 
 #if NET7_0_OR_GREATER
@@ -64,7 +72,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(List<TElement>).GetField( "_items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            var dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true );
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument
@@ -82,7 +90,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(Collection<TElement>).GetField( "items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            var dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new DynamicMethod( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true );
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument

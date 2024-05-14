@@ -7,7 +7,7 @@ namespace Jakar.Database;
 public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbInstance.Postgres; }
+    public override DbTypeInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbTypeInstance.Postgres; }
 
     public override string TableName { get; } = $"\"{TRecord.TableName}\"";
 
@@ -35,16 +35,16 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     }
     public override SqlCommand Random( in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
 
         if ( _sql.TryGetValue( SqlCacheType.RandomCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomCount] = sql = $"SELECT TOP @{nameof(count)} * FROM {TableName} ORDER BY {RandomMethod}"; }
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( in Guid? userID, in int count )
+    public override SqlCommand Random(  scoped in Guid? userID, in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count),  count );
         parameters.Add( nameof(userID), userID );
 
@@ -52,26 +52,26 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( in RecordID<UserRecord> id, in int count )
+    public override SqlCommand Random(  scoped in RecordID<UserRecord> id, in int count )
     {
-        var parameters = new DynamicParameters();
+        DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
         parameters.Add( nameof(id),    id );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.OwnerUserID)} = @{nameof(id)}"; }
 
         return new SqlCommand( sql, parameters );
     }
     public override SqlCommand Insert( in TRecord record )
     {
-        var param = new DynamicParameters( record );
+        DynamicParameters param = new DynamicParameters( record );
 
         if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
 
-        using var keys = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using var values = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
         _sql[SqlCacheType.Insert] = sql = $"""
@@ -83,18 +83,18 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
     {
         Key key   = Key.Create( matchAll, parameters );
-        var param = new DynamicParameters( record );
+        DynamicParameters param = new DynamicParameters( record );
         param.AddDynamicParams( parameters );
 
         if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
 
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
-        using var keys = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using var values = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
         _tryInsert[key] = sql = $"""
@@ -114,23 +114,23 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
     public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
     {
         Key               key   = Key.Create( matchAll, parameters );
-        var               param = new DynamicParameters( record );
+        DynamicParameters               param = new DynamicParameters( record );
         RecordID<TRecord> id    = record.ID;
         param.Add( nameof(id), id );
         param.AddDynamicParams( parameters );
 
         if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
 
-        using var buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
+        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
         buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
 
-        using var keys = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using var values = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
-        using var keyValuePairs = new ValueStringBuilder( 1000 );
+        using ValueStringBuilder keyValuePairs = new ValueStringBuilder( 1000 );
         keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
 
         _insertOrUpdate[key] = sql = $"""

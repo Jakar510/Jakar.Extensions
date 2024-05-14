@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="BenchmarkDotNet" Version="0.13.12" />
-		<PackageReference Include="Bogus" Version="35.4.0" />
+		<PackageReference Include="Bogus" Version="35.5.1" />
 		<PackageReference Include="Hashids.net" Version="1.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>

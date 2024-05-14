@@ -17,8 +17,8 @@ public static partial class Xmlizer
     {
         // Activator.CreateInstance<T>() ?? throw new NullReferenceException(nameof(Activator.CreateInstance));
 
-        var document = new XDocument( xml );
-        var result   = new T();
+        XDocument document = new XDocument( xml );
+        T?        result   = new T();
 
         object obj  = result;
         Type   type = typeof(T);

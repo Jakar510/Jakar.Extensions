@@ -13,7 +13,7 @@ public class UserValidator : IUserValidator<UserRecord>
 
     protected IdentityError[] Check( UserRecord user )
     {
-        var errors = new List<IdentityError>( 5 );
+        List<IdentityError> errors = new List<IdentityError>( 5 );
         Check( errors, user );
         return [.. errors];
     }

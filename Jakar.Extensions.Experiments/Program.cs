@@ -3,6 +3,23 @@
     "Hello World!".WriteToConsole();
     Console.WriteLine();
 
+    ObservableCollection<long> collection = new(20)
+                                            {
+                                                0,
+                                                1,
+                                                2,
+                                                3,
+                                                4,
+                                                5,
+                                                6,
+                                                7,
+                                                8,
+                                                9,
+                                                10,
+                                            };
+
+    collection.ToPrettyJson().WriteToConsole();
+
     // Tests.Test_Hashes();
 
     // await Tests.Test_ConcurrentObservableCollection();
@@ -16,8 +33,14 @@
     // ULongHashTests.Run( 100_000_000 )
     //               .WriteToDebug();
 
+    // await PasswordChecker.Run();
 
     // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
+
+    // StringValues values = new[] { "this is a test" };
+    // values.WriteToConsole();
+    // Console.WriteLine();
+    // values.ToPrettyJson().WriteToConsole();
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }

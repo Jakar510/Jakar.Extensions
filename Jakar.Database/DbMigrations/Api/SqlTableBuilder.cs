@@ -1,17 +1,71 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 3/1/2024  23:20
 
-using FluentMigrator.Model;
+using System.Collections.ObjectModel;
 
 
 
 namespace Jakar.Database.DbMigrations;
 
 
+[Flags]
+public enum ColumnOptions
+{
+    AlwaysIdentity  = 1 << 0,
+    DefaultIdentity = 1 << 1,
+    Indexed         = 1 << 2,
+    Unique          = 1 << 3,
+    PrimaryKey      = 1 << 4
+}
+
+
+
+public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
+
+
+
+public readonly record struct ColumnCheckMetaData( bool And, params string[] Checks )
+{
+    public static implicit operator ColumnCheckMetaData( string   check )  => new(true, check);
+    public static implicit operator ColumnCheckMetaData( string[] checks ) => new(true, checks);
+}
+
+
+
+public readonly record struct ColumnMetaData( string Name, DbType DbType, bool IsNullable, OneOf<uint, ColumnPrecisionMetaData> Length = default, ColumnCheckMetaData? Check = default, ColumnOptions Options = 0 )
+{
+    // public bool    IsForeignKey { get; init; }
+    // public bool   IsPrimaryKey   { get; init; }
+    // public string PrimaryKeyName { get; init; }
+
+    public string? IndexColumnName { get; init; }
+
+    public static ColumnMetaData Nullable( string    name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 ) => new(name, dbType, true, length, check, options);
+    public static ColumnMetaData NotNullable( string name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 ) => new(name, dbType, false, length, check, options);
+    public static ColumnMetaData Indexed( string     name, string indexName ) => new(name, DbType.Int64, false) { IndexColumnName = indexName };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > SQL.DECIMAL_MAX_PRECISION, Scope: > SQL.DECIMAL_MAX_SCALE } };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public bool IsValidLength() =>
+        Length.IsT0 &&
+        Length.AsT0 switch
+        {
+            0                                                                                           => false,
+            > SQL.ANSI_CAPACITY when DbType is DbType.AnsiString or DbType.AnsiStringFixedLength => false,
+            > SQL.UNICODE_CAPACITY when DbType is DbType.String or DbType.StringFixedLength      => false,
+            _                                                                                           => true
+        };
+}
+
+
+
 /*
  Numeric Types
 
-       INTEGER: A whole number, varying in size from SMALLINT to BIGINT depending on the storage size and range.
+       INTEGER: A whole number, varying in column.Size from SMALLINT to BIGINT depending on the storage column.Size and range.
        DECIMAL(Precision, Scale): A fixed-point number with a specified number of digits before and after the decimal point.
        NUMERIC(Precision, Scale): Similar to DECIMAL, often used interchangeably.
        FLOAT(Precision): A floating-point number with machine-dependent precision.
@@ -21,7 +75,7 @@ namespace Jakar.Database.DbMigrations;
 
        CHAR(Size): A fixed-length character string, space-padded.
        VARCHAR(Size): A variable-length character string.
-       TEXT: A large text data type, with size limits depending on the DBMS.
+       TEXT: A large text data typeof(T), with column.Size limits depending on the DBMS.
 
    Date and Time Types
 
@@ -44,7 +98,7 @@ namespace Jakar.Database.DbMigrations;
 
        ENUM: A string object that can have only one value chosen from a list of predefined values.
        SET: Similar to ENUM, but can store multiple values from a predefined list.
-       UUID/GUID: A special type for storing Universally Unique Identifiers.
+       UUID/GUID: A special typeof(T) for storing Universally Unique Identifiers.
        JSON: Stores JSON data, allowing for complex data structures within a single database field.
        ARRAY: Supported by some databases like PostgreSQL, allowing storage of arrays.
        XML: For storing XML data, with some DBMS providing additional functions to manipulate XML data.
@@ -56,221 +110,393 @@ namespace Jakar.Database.DbMigrations;
 public ref struct SqlTableBuilder<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public const     int                ANSI_STRING_CAPACITY    = 8000;
-    public const     int                ANSI_TEXT_CAPACITY      = 2147483647;
-    public const     int                UNICODE_STRING_CAPACITY = 4000;
-    public const     int                UNICODE_TEXT_CAPACITY   = 1073741823;
-    public const     int                IMAGE_CAPACITY          = 2147483647;
-    public const     int                DECIMAL_CAPACITY        = 38;
-    private readonly DbInstance         _instance;
-    private          ValueStringBuilder _query = new(10240);
+    private Buffer<ColumnMetaData> _columns = new();
 
-
-    public SqlTableBuilder() => throw new NotImplementedException();
-    private SqlTableBuilder( DbInstance instance, string firstLine )
+    public SqlTableBuilder() { }
+    public static SqlTableBuilder<TRecord> Create() => new();
+    public void Dispose()
     {
-        _instance = instance;
-        _query.Append( firstLine );
+        _columns.Dispose();
+        this = default;
     }
-    public static SqlTableBuilder<TRecord> Create( DbInstance instance ) => new(instance, $"CREATE TABLE {TRecord.TableName} (");
 
-    /*
-    public static SqlTableBuilder<TRecord> Modify( DbInstance instance ) => new(instance, $"MODIFY TABLE {TRecord.TableName} (");
-    public static SqlTableBuilder<TRecord> Drop( DbInstance   instance ) => new(instance, $"DROP TABLE {TRecord.TableName} (");
-    public SqlTableBuilder<TRecord> Modify( string tableName )
+
+    public SqlTableBuilder<TRecord> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn( ColumnMetaData.Indexed( columnName, indexColumnName ) );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 )
     {
-        _query.Reset();
-        _query.Append( $"ALTER TABLE {tableName} " );
-        return this;
+        DbType         dbType = GetDataType<T>( out bool isNullable, ref length );
+        ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);
+        return WithColumn( column );
     }
-    public SqlTableBuilder<TRecord> DropColumn( string columnName )
+    public SqlTableBuilder<TRecord> WithColumn( scoped in ColumnMetaData column )
     {
-        _query.Reset();
-        _query.Append( $"DROP COLUMN {columnName}, " );
-        return this;
-    }
-    */
-
-    public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, int? size = null, bool isPrimaryKey = false )
-    {
-        DbType dbType = GetDataType<T>( out bool isNullable, ref size );
-        return WithColumn( columnName, dbType, isNullable, size, isPrimaryKey );
-    }
-    public SqlTableBuilder<TRecord> WithColumn( string columnName, DbType dbType, bool isNullable, int? size = null, bool isPrimaryKey = false )
-    {
-        ColumnDefinition definition = new();
-        string           dataType   = GetDataType( _instance, dbType, size );
-
-        _query.Append( _query.Span.EndsWith( "(" )
-                           ? $" {columnName} {dataType}"
-                           : $", {columnName} {dataType}" );
-
-        if ( isPrimaryKey ) { _query.Append( " PRIMARY KEY" ); }
-
-        if ( isNullable ) { _query.Append( " NOT NULL" ); }
-
-        _query.Append( '\n' );
+        _columns.Append( column );
         return this;
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    private static DbType GetDataType<T>( out bool isNullable, ref int? size )
+    private static DbType GetDataType<T>( out bool isNullable, ref OneOf<uint, ColumnPrecisionMetaData> length )
     {
-        Type type = typeof(T);
-        isNullable = type.IsNullableType() || type.IsBuiltInNullableType();
+        isNullable = typeof(T).IsNullableType() || typeof(T).IsBuiltInNullableType();
 
-        if ( type.IsEnum )
+        if ( typeof(T) == typeof(byte[]) ) { return DbType.Binary; }
+
+        if ( typeof(JToken).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+
+        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+
+        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+
+        if ( typeof(T).IsEnum )
         {
-            size = Spans.Max<string, int>( Enum.GetNames( typeof(T) ), static x => x.Length, 0 );
+            length = Spans.Max<string, uint>( Enum.GetNames( typeof(T) ), static x => (uint)x.Length, 0 );
             return DbType.StringFixedLength;
         }
 
-        if ( type == typeof(string) ) { return DbType.String; }
+        if ( typeof(T) == typeof(string) ) { return DbType.String; }
 
-        if ( type == typeof(Int128) || type == typeof(Int128?) ) { return DbType.String; }
+        if ( typeof(T) == typeof(Int128) ) { return DbType.String; }
 
-        if ( type == typeof(UInt128) || type == typeof(UInt128?) ) { return DbType.String; }
+        if ( typeof(T) == typeof(Int128?) )
+        {
+            isNullable = true;
+            return DbType.String;
+        }
 
-        if ( type == typeof(byte[]) ) { return DbType.Binary; }
+        if ( typeof(T) == typeof(UInt128) ) { return DbType.String; }
 
-        if ( typeof(JToken).IsAssignableFrom( type ) || typeof(IDictionary<string, JToken?>).IsAssignableFrom( type ) ) { return DbType.Object; }
+        if ( typeof(T) == typeof(UInt128?) )
+        {
+            isNullable = true;
+            return DbType.String;
+        }
 
-        if ( type == typeof(Guid) || type == typeof(Guid?) || type == typeof(RecordID<TRecord>) || type == typeof(RecordID<TRecord>?) ) { return DbType.Guid; }
+        if ( typeof(T) == typeof(Guid) || typeof(T) == typeof(RecordID<TRecord>) ) { return DbType.Guid; }
 
-        if ( type == typeof(byte) || type == typeof(byte?) ) { return DbType.Byte; }
+        if ( typeof(T) == typeof(Guid?) || typeof(T) == typeof(RecordID<TRecord>?) )
+        {
+            isNullable = true;
+            return DbType.Guid;
+        }
 
-        if ( type == typeof(short) || type == typeof(short?) ) { return DbType.Int16; }
+        if ( typeof(T) == typeof(byte) ) { return DbType.Byte; }
 
-        if ( type == typeof(ushort) || type == typeof(ushort?) ) { return DbType.UInt16; }
+        if ( typeof(T) == typeof(byte?) )
+        {
+            isNullable = true;
+            return DbType.Byte;
+        }
 
-        if ( type == typeof(int) || type == typeof(int?) ) { return DbType.Int32; }
+        if ( typeof(T) == typeof(short) ) { return DbType.Int16; }
 
-        if ( type == typeof(uint) || type == typeof(uint?) ) { return DbType.UInt32; }
+        if ( typeof(T) == typeof(short?) )
+        {
+            isNullable = true;
+            return DbType.Int16;
+        }
 
-        if ( type == typeof(long) || type == typeof(long?) ) { return DbType.Int64; }
+        if ( typeof(T) == typeof(ushort) ) { return DbType.UInt16; }
 
-        if ( type == typeof(ulong) || type == typeof(ulong?) ) { return DbType.UInt64; }
+        if ( typeof(T) == typeof(ushort?) )
+        {
+            isNullable = true;
+            return DbType.UInt16;
+        }
 
-        if ( type == typeof(float) || type == typeof(float?) ) { return DbType.Single; }
+        if ( typeof(T) == typeof(int) ) { return DbType.Int32; }
 
-        if ( type == typeof(double) || type == typeof(double?) ) { return DbType.Double; }
+        if ( typeof(T) == typeof(int?) )
+        {
+            isNullable = true;
+            return DbType.Int32;
+        }
 
-        if ( type == typeof(decimal) || type == typeof(decimal?) ) { return DbType.Decimal; }
+        if ( typeof(T) == typeof(uint) ) { return DbType.UInt32; }
 
-        if ( type == typeof(bool) || type == typeof(bool?) ) { return DbType.Boolean; }
+        if ( typeof(T) == typeof(uint?) )
+        {
+            isNullable = true;
+            return DbType.UInt32;
+        }
 
-        if ( type == typeof(DateOnly) || type == typeof(DateOnly?) ) { return DbType.Date; }
+        if ( typeof(T) == typeof(long) ) { return DbType.Int64; }
 
-        if ( type == typeof(TimeOnly) || type == typeof(TimeOnly?) ) { return DbType.Time; }
+        if ( typeof(T) == typeof(long?) )
+        {
+            isNullable = true;
+            return DbType.Int64;
+        }
 
-        if ( type == typeof(TimeSpan) || type == typeof(TimeSpan?) ) { return DbType.Time; }
+        if ( typeof(T) == typeof(ulong) ) { return DbType.UInt64; }
 
-        if ( type == typeof(DateTime) || type == typeof(DateTime?) ) { return DbType.DateTime2; }
+        if ( typeof(T) == typeof(ulong?) )
+        {
+            isNullable = true;
+            return DbType.UInt64;
+        }
 
-        if ( type == typeof(DateTimeOffset) || type == typeof(DateTimeOffset?) ) { return DbType.DateTimeOffset; }
+        if ( typeof(T) == typeof(float) ) { return DbType.Single; }
 
-        throw new ArgumentException( $"Unsupported type: {type.Name}" );
+        if ( typeof(T) == typeof(float?) )
+        {
+            isNullable = true;
+            return DbType.Single;
+        }
+
+        if ( typeof(T) == typeof(double) ) { return DbType.Double; }
+
+        if ( typeof(T) == typeof(double?) )
+        {
+            isNullable = true;
+            return DbType.Double;
+        }
+
+        if ( typeof(T) == typeof(decimal) ) { return DbType.Decimal; }
+
+        if ( typeof(T) == typeof(decimal?) )
+        {
+            isNullable = true;
+            return DbType.Decimal;
+        }
+
+        if ( typeof(T) == typeof(bool) ) { return DbType.Boolean; }
+
+        if ( typeof(T) == typeof(bool?) )
+        {
+            isNullable = true;
+            return DbType.Boolean;
+        }
+
+        if ( typeof(T) == typeof(DateOnly) ) { return DbType.Date; }
+
+        if ( typeof(T) == typeof(DateOnly?) )
+        {
+            isNullable = true;
+            return DbType.Date;
+        }
+
+        if ( typeof(T) == typeof(TimeOnly) ) { return DbType.Time; }
+
+        if ( typeof(T) == typeof(TimeOnly?) )
+        {
+            isNullable = true;
+            return DbType.Time;
+        }
+
+        if ( typeof(T) == typeof(TimeSpan) ) { return DbType.Time; }
+
+        if ( typeof(T) == typeof(TimeSpan?) )
+        {
+            isNullable = true;
+            return DbType.Time;
+        }
+
+        if ( typeof(T) == typeof(DateTime) ) { return DbType.DateTime2; }
+
+        if ( typeof(T) == typeof(DateTime?) )
+        {
+            isNullable = true;
+            return DbType.DateTime2;
+        }
+
+        if ( typeof(T) == typeof(DateTimeOffset) ) { return DbType.DateTimeOffset; }
+
+        if ( typeof(T) == typeof(DateTimeOffset?) )
+        {
+            isNullable = true;
+            return DbType.DateTimeOffset;
+        }
+
+        throw new ArgumentException( $"Unsupported typeof(T): {typeof(T).Name}" );
     }
 
 
-    private static string GetDataType( in DbInstance instance, in DbType dbType, in int? size = null ) =>
+    private static string GetDataType( scoped in DbTypeInstance instance, scoped in ColumnMetaData column ) =>
         instance switch
         {
-            DbInstance.MsSql    => GetDataTypeSqlServer( dbType, size ),
-            DbInstance.Postgres => GetDataTypePostgresSql( dbType, size ),
+            DbTypeInstance.MsSql    => GetDataTypeSqlServer( column ),
+            DbTypeInstance.Postgres => GetDataTypePostgresSql( column ),
             _                   => throw new OutOfRangeException( nameof(instance), instance )
         };
 
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
-    private static string GetDataTypePostgresSql( in DbType dbType, in int? size ) =>
-        dbType switch
+    private static string GetDataTypePostgresSql( scoped in ColumnMetaData column ) =>
+        column.DbType switch
         {
-            DbType.Binary => size.HasValue
-                                 ? $"VARBINARY({size})"
-                                 : "BLOB",
-            DbType.SByte => "bytea",
-            DbType.Byte  => "bytea",
-            DbType.AnsiString => size.HasValue
-                                     ? $"varchar({size})"
-                                     : "varchar(MAX)",
-            DbType.String => size.HasValue
-                                 ? $"text({size})"
-                                 : "text(MAX)",
-            DbType.AnsiStringFixedLength => $"char({size})",
-            DbType.StringFixedLength     => $"char({size})",
-            DbType.Guid                  => "uuid",
-            DbType.Int16                 => "smallint",
-            DbType.Int32                 => "integer",
-            DbType.Int64                 => "bigint",
-            DbType.UInt16                => "smallint",
-            DbType.UInt32                => "integer",
-            DbType.UInt64                => "bigint",
-            DbType.Single                => "float4",
-            DbType.Double                => "float8",
-            DbType.Decimal               => "decimal(19, 5)",
-            DbType.VarNumeric            => "decimal(19, 5)",
-            DbType.Boolean               => "bool",
-            DbType.Date                  => "date",
-            DbType.Time                  => "time",
-            DbType.DateTime              => "timestamp",
-            DbType.DateTime2             => "timestamp",
-            DbType.DateTimeOffset        => "timestamptz",
-            DbType.Currency              => "money",
-            DbType.Object                => "json",
-            DbType.Xml                   => "xml",
-            _                            => throw new OutOfRangeException( nameof(dbType), dbType )
+            DbType.String or DbType.StringFixedLength when column.IsValidLength() is false                                => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when column.IsValidLength() is false                        => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
+            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision() => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
+
+            _ => column.DbType switch
+                 {
+                     DbType.Binary => column.Length.IsT0
+                                          ? $"VARBINARY({column.Length.AsT0})"
+                                          : "BLOB",
+                     DbType.SByte => "bytea",
+                     DbType.Byte  => "bytea",
+                     DbType.AnsiString => column.Length.IsT0
+                                              ? $"varchar({column.Length.AsT0})"
+                                              : "varchar(MAX)",
+                     DbType.String => column.Length.IsT0
+                                          ? $"varchar({column.Length.AsT0})"
+                                          : "text",
+                     DbType.AnsiStringFixedLength              => $"char({column.Length})",
+                     DbType.StringFixedLength                  => $"char({column.Length})",
+                     DbType.Guid                               => "uuid",
+                     DbType.Int16                              => "smallint",
+                     DbType.Int32                              => "integer",
+                     DbType.Int64                              => "bigint",
+                     DbType.UInt16                             => "smallint",
+                     DbType.UInt32                             => "integer",
+                     DbType.UInt64                             => "bigint",
+                     DbType.Single                             => "float4",
+                     DbType.Double                             => "float8",
+                     DbType.Decimal                            => "decimal(19, 5)",
+                     DbType.VarNumeric when column.Length.IsT1 => $"decimal({column.Length.AsT1.Precision}, {column.Length.AsT1.Scope})",
+                     DbType.VarNumeric                         => $"decimal({SQL.DECIMAL_MAX_PRECISION}, {SQL.DECIMAL_MAX_SCALE})",
+                     DbType.Boolean                            => "bool",
+                     DbType.Date                               => "date",
+                     DbType.Time                               => "time",
+                     DbType.DateTime                           => "timestamp",
+                     DbType.DateTime2                          => "timestamp",
+                     DbType.DateTimeOffset                     => "timestamptz",
+                     DbType.Currency                           => "money",
+                     DbType.Object                             => "json",
+                     DbType.Xml                                => "xml",
+                     _                                         => throw new OutOfRangeException( nameof(column.DbType), column.DbType )
+                 }
         };
 
 
     [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
-    private static string GetDataTypeSqlServer( in DbType dbType, int? size ) =>
-        dbType switch
+    private static string GetDataTypeSqlServer( scoped in ColumnMetaData column ) =>
+        column.DbType switch
         {
-            DbType.Binary => size.HasValue
-                                 ? $"VARBINARY({size})"
-                                 : "BLOB",
-            DbType.SByte => "TINYINT",
-            DbType.Byte  => "TINYINT",
-            DbType.AnsiString => size.HasValue
-                                     ? $"NVARCHAR({size})"
-                                     : "NVARCHAR(MAX)",
-            DbType.String => size.HasValue
-                                 ? $"NTEXT({size})"
-                                 : "NTEXT(MAX)",
-            DbType.AnsiStringFixedLength => $"CHAR({size})",
-            DbType.StringFixedLength     => $"NCHAR({size})",
-            DbType.Guid                  => "GUID",
-            DbType.Int16                 => "SMALLINT",
-            DbType.Int32                 => "INT",
-            DbType.Int64                 => "BIGINT",
-            DbType.UInt16                => "SMALLINT",
-            DbType.UInt32                => "INT",
-            DbType.UInt64                => "BIGINT",
-            DbType.Single                => "FLOAT(9)",
-            DbType.Double                => "DOUBLE PRECISION",
-            DbType.Decimal               => "DECIMAL(19, 5)",
-            DbType.VarNumeric            => "DECIMAL(19, 5)",
-            DbType.Boolean               => "BOOLEAN",
-            DbType.Date                  => "DATE",
-            DbType.Time                  => "TIME",
-            DbType.DateTime              => "DATETIME2",
-            DbType.DateTime2             => "DATETIME2",
-            DbType.DateTimeOffset        => "TIMESTAMP",
-            DbType.Currency              => "MONEY",
-            DbType.Object                => "JSON",
-            DbType.Xml                   => "XML",
-            _                            => throw new OutOfRangeException( nameof(dbType), dbType )
+            DbType.String or DbType.StringFixedLength when column.Length is { IsT0        : true, AsT0: > SQL.UNICODE_CAPACITY } => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when column.Length is { IsT0: true, AsT0: > SQL.ANSI_CAPACITY }    => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
+            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision()               => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
+            _ => column.DbType switch
+                 {
+                     DbType.Binary => column.Length.IsT0
+                                          ? $"VARBINARY({column.Length.AsT0})"
+                                          : "BLOB",
+                     DbType.SByte => "TINYINT",
+                     DbType.Byte  => "TINYINT",
+                     DbType.AnsiString => column.Length.IsT0
+                                              ? $"VARCHAR({column.Length.AsT0})"
+                                              : "NVARCHAR(MAX)",
+                     DbType.String => column.Length.IsT0
+                                          ? $"NVARCHAR({column.Length.AsT0})"
+                                          : "NVARCHAR(MAX)",
+                     DbType.AnsiStringFixedLength              => $"CHAR({column.Length})",
+                     DbType.StringFixedLength                  => $"NCHAR({column.Length})",
+                     DbType.Guid                               => "GUID",
+                     DbType.Int16                              => "SMALLINT",
+                     DbType.Int32                              => "INT",
+                     DbType.Int64                              => "BIGINT",
+                     DbType.UInt16                             => "SMALLINT",
+                     DbType.UInt32                             => "INT",
+                     DbType.UInt64                             => "BIGINT",
+                     DbType.Single                             => "FLOAT(9)",
+                     DbType.Double                             => "DOUBLE PRECISION",
+                     DbType.Decimal                            => "DECIMAL(19, 5)",
+                     DbType.VarNumeric when column.Length.IsT1 => $"DECIMAL({column.Length.AsT1.Precision}, {column.Length.AsT1.Scope})",
+                     DbType.VarNumeric                         => $"DECIMAL({SQL.DECIMAL_MAX_PRECISION}, {SQL.DECIMAL_MAX_SCALE})",
+                     DbType.Boolean                            => "BOOLEAN",
+                     DbType.Date                               => "DATE",
+                     DbType.Time                               => "TIME",
+                     DbType.DateTime                           => "DATETIME2",
+                     DbType.DateTime2                          => "DATETIME2",
+                     DbType.DateTimeOffset                     => "TIMESTAMP",
+                     DbType.Currency                           => "MONEY",
+                     DbType.Object                             => "JSON",
+                     DbType.Xml                                => "XML",
+                     _                                         => throw new OutOfRangeException( nameof(column.DbType), column.DbType )
+                 }
         };
 
 
-    public string Build()
+    private string BuildInternal( scoped in DbTypeInstance instance )
     {
-        string query = _query.ToString().TrimEnd( ' ', ',' );
-        if ( query.EndsWith( '(' ) ) { query = query.Remove( query.Length - 1 ); }
+        using ValueStringBuilder query = new(10240);
 
-        query += " );";
-        return query;
+        query.Append( $"CREATE TABLE {TRecord.TableName} (" );
+
+        foreach ( ColumnMetaData column in _columns )
+        {
+            if ( column.Options.HasFlag( ColumnOptions.Indexed ) )
+            {
+                query.Append( column.IndexColumnName ?? $"{column.Name}_index" );
+                query.Append( " ON " );
+                query.Append( TRecord.TableName );
+                query.Append( " (" );
+                query.Append( column.Name );
+                query.Append( ");" );
+                continue;
+            }
+
+            string dataType = GetDataType( instance, column );
+
+            query.Append( query.Span.EndsWith( '(' )
+                              ? "\n    "
+                              : ",\n    " );
+
+            query.Append( column.Name );
+            query.Append( " " );
+            query.Append( dataType );
+
+            if ( column.Check.HasValue )
+            {
+                query.Append( " CHECK ( " );
+
+                query.AppendJoin( column.Check.Value.And
+                                      ? SQL.AND
+                                      : SQL.OR,
+                                  column.Check.Value.Checks );
+
+                query.Append( " )" );
+            }
+
+            if ( column.Options.HasFlag( ColumnOptions.Unique ) ) { query.Append( " UNIQUE" ); }
+
+            query.Append( column.IsNullable
+                              ? " NULL"
+                              : " NOT NULL" );
+
+            if ( column.Options.HasFlag( ColumnOptions.AlwaysIdentity ) ) { query.Append( " GENERATED ALWAYS AS IDENTITY" ); }
+
+            else if ( column.Options.HasFlag( ColumnOptions.DefaultIdentity ) ) { query.Append( " GENERATED BY DEFAULT AS IDENTITY" ); }
+
+            if ( column.Options.HasFlag( ColumnOptions.PrimaryKey ) ) { query.Append( " PRIMARY KEY" ); }
+        }
+
+        // return query.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' ).Append( "\n );" ).ToString();
+        return query.ToString();
+    }
+
+
+    public string Build( scoped in DbTypeInstance instance )
+    {
+        try { return BuildInternal( instance ); }
+        finally { Dispose(); }
+    }
+    public ReadOnlyDictionary<DbTypeInstance, string> Build()
+    {
+        try
+        {
+            Dictionary<DbTypeInstance, string> dictionary = new(2)
+                                                        {
+                                                            { DbTypeInstance.MsSql, BuildInternal( DbTypeInstance.MsSql ) },
+                                                            { DbTypeInstance.Postgres, BuildInternal( DbTypeInstance.Postgres ) }
+                                                        };
+
+            return new ReadOnlyDictionary<DbTypeInstance, string>( dictionary );
+        }
+        finally { Dispose(); }
     }
 }

@@ -4,7 +4,6 @@
 public class ResourceException : Exception
 {
     public string Path { get; init; }
-
     public ResourceException( string path, string message ) : base( message )
     {
         Path               = path;
@@ -16,7 +15,7 @@ public class ResourceException : Exception
 
 public class ResourceException<T>( string path ) : ResourceException( path, GetMessage( path ) )
 {
-    public static string GetMessage( string path ) => @$"{nameof(EmbeddedResources<T>)}.{nameof(EmbeddedResources<T>.GetResourceStream)}.{nameof(Assembly.GetManifestResourceStream)}: ""{path}"".";
+    public static string GetMessage( string path ) => $"""{nameof(EmbeddedResources<T>)}.{nameof(EmbeddedResources<T>.GetResourceStream)}.{nameof(Assembly.GetManifestResourceStream)}: "{path}".""";
 }
 
 
@@ -24,7 +23,7 @@ public class ResourceException<T>( string path ) : ResourceException( path, GetM
 public class EmbeddedResources<T>
 {
     private readonly Assembly _assembly = typeof(T).Assembly;
-    public           string   Namespace { get; } = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
+    public static    string   Namespace { get; } = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
 
 
     public Stream GetResourceStream( string fileName )
@@ -34,15 +33,15 @@ public class EmbeddedResources<T>
     }
 
 
-    protected string GetPath( string fileName ) => $"{Namespace}.{fileName}";
+    protected static string GetPath( string fileName ) => $"{Namespace}.{fileName}";
 
 
     public string GetResourceText( string fileName ) => GetResourceText( fileName, Encoding.Default );
     public string GetResourceText( string fileName, Encoding encoding )
     {
-        using Stream stream = GetResourceStream( fileName );
-        using var    reader = new StreamReader( stream, encoding );
-        string       text   = reader.ReadToEnd();
+        using Stream       stream = GetResourceStream( fileName );
+        using StreamReader reader = new StreamReader( stream, encoding );
+        string             text   = reader.ReadToEnd();
         return text;
     }
 
@@ -57,15 +56,15 @@ public class EmbeddedResources<T>
 
     public byte[] GetResourceBytes( string fileName )
     {
-        using Stream stream = GetResourceStream( fileName );
-        using var    memory = new MemoryStream( (int)stream.Length );
+        using Stream       stream = GetResourceStream( fileName );
+        using MemoryStream memory = new MemoryStream( (int)stream.Length );
         stream.CopyTo( memory );
         return memory.GetBuffer();
     }
     public async ValueTask<byte[]> GetResourceBytesAsync( string fileName )
     {
-        await using Stream stream = GetResourceStream( fileName );
-        await using var    reader = new MemoryStream();
+        await using Stream       stream = GetResourceStream( fileName );
+        await using MemoryStream reader = new MemoryStream();
         await stream.CopyToAsync( stream );
         return reader.GetBuffer();
     }
@@ -75,7 +74,7 @@ public class EmbeddedResources<T>
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
         await using Stream stream = GetResourceStream( fileName );
-        using var          reader = new StreamReader( stream, encoding );
+        using StreamReader reader = new StreamReader( stream, encoding );
         return await reader.ReadToEndAsync();
     }
 

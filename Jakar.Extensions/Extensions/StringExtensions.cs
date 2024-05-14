@@ -38,7 +38,7 @@ public static class StringExtensions
                              { '[', ']' }
                          };
 
-        var brackets = new Stack<char>();
+        Stack<char> brackets = new Stack<char>();
 
         try
         {
@@ -82,12 +82,12 @@ public static class StringExtensions
     }
 
 
-    public static IEnumerable<string> SplitAndTrimLines( this string value, char   separator = '\n' ) => value.Split( separator ).Select( line => line.Trim() );
-    public static IEnumerable<string> SplitAndTrimLines( this string value, string separator )        => value.Split( separator ).Select( line => line.Trim() );
+    public static IEnumerable<string> SplitAndTrimLines( this string value, char   separator = '\n' ) => value.Split( separator ).Select( static line => line.Trim() );
+    public static IEnumerable<string> SplitAndTrimLines( this string value, string separator )        => value.Split( separator ).Select( static line => line.Trim() );
 
 
-    public static IEnumerable<string>  SplitLines( this       string value, char      separator = '\n' )   => value.Split( separator );
-    public static IEnumerable<string>  SplitLines( this       string value, string    separator )          => value.Split( separator );
+    public static string[]             SplitLines( this       string value, char      separator = '\n' )   => value.Split( separator );
+    public static string[]             SplitLines( this       string value, string    separator )          => value.Split( separator );
     public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = default ) => value.ToByteArray( encoding ?? Encoding.Default ).AsMemory();
     public static object               ConvertTo( this        string value, Type      target )             => Convert.ChangeType( value, target );
     public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = default ) => value.ToMemory( encoding ?? Encoding.Default );
@@ -102,7 +102,7 @@ public static class StringExtensions
     {
         fixed (char* token = &value.GetPinnableReference())
         {
-            var secure = new SecureString( token, value.Length );
+            SecureString secure = new SecureString( token, value.Length );
             if ( makeReadonly ) { secure.MakeReadOnly(); }
 
             return secure;
@@ -149,22 +149,16 @@ public static class StringExtensions
     /// <param name="span"> </param>
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
 
-#if NETSTANDARD2_1
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, params T[] separators )
-        where T : unmanaged, IEquatable<T> => new(span, separators);
-#endif
+
     public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, T separator )
         where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, in ReadOnlySpan<T> separators )
+    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, scoped in ReadOnlySpan<T> separators )
         where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
-    // public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, ParamsArray<T> array ) where T : unmanaged, IEquatable<T> => new(span, array);
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, params T[] separators )
-        where T : unmanaged, IEquatable<T> => new(span, separators);
     public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator )
         where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, in ReadOnlySpan<T> separators )
+    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> separators )
         where T : unmanaged, IEquatable<T> => new(span, separators);
 
 
@@ -204,20 +198,22 @@ public static class StringExtensions
     public static string ToScreamingCase( this string value ) => value.ToSnakeCase().ToUpper().Replace( "__", "_" );
 
 
-    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+    /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
     public static string ToSnakeCase( this string value ) => value.ToSnakeCase( CultureInfo.InvariantCulture );
-    /// <summary> copied from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
-    public static string ToSnakeCase( this string value, CultureInfo cultureInfo )
+
+    /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
+    public static string ToSnakeCase( this string value, CultureInfo cultureInfo ) => ToSnakeCase( value.AsSpan(), cultureInfo );
+    public static string ToSnakeCase( scoped in ReadOnlySpan<char> span, CultureInfo cultureInfo )
     {
-        if ( string.IsNullOrWhiteSpace( value ) ) { return value; }
+        if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
 
-        using var        builder          = new ValueStringBuilder( value.Length + Math.Max( 2, value.Length / 5 ) );
+        using ValueStringBuilder        builder          = new ValueStringBuilder( span.Length + Math.Max( 2, span.Length / 5 ) );
         UnicodeCategory? previousCategory = default;
 
-        for ( int currentIndex = 0; currentIndex < value.Length; currentIndex++ )
+        for ( int currentIndex = 0; currentIndex < span.Length; currentIndex++ )
         {
-            char currentChar = value[currentIndex];
+            char currentChar = span[currentIndex];
 
             switch ( currentChar )
             {
@@ -239,7 +235,7 @@ public static class StringExtensions
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( previousCategory is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter || previousCategory is not UnicodeCategory.DecimalDigitNumber && previousCategory is not null && currentIndex > 0 && currentIndex + 1 < value.Length && char.IsLower( value[currentIndex + 1] ) ) { builder.Append( '_' ); }
+                    if ( IsSpaceOrLower( previousCategory ) || IsNextLower( previousCategory, currentIndex, in span ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;
@@ -247,6 +243,11 @@ public static class StringExtensions
                 case UnicodeCategory.LowercaseLetter:
                     if ( previousCategory is UnicodeCategory.SpaceSeparator ) { builder.Append( '_' ); }
 
+                    break;
+
+                case UnicodeCategory.DecimalDigitNumber:
+                case UnicodeCategory.LetterNumber:
+                case UnicodeCategory.OtherNumber:
                     break;
 
                 default:
@@ -260,6 +261,11 @@ public static class StringExtensions
         }
 
         return builder.ToString();
+
+        static bool IsSpaceOrLower( in UnicodeCategory? category ) => category is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter;
+
+        static bool IsNextLower( in UnicodeCategory? category, in int index, scoped in ReadOnlySpan<char> span ) =>
+            category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower( span[index + 1] );
     }
 
 

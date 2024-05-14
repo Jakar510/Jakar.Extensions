@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public enum DbInstance
+public enum DbTypeInstance
 {
     MsSql,
     Postgres
