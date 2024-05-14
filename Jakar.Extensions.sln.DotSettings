@@ -565,6 +565,7 @@ ${CurrentDate.Month}/${CurrentDate.Day}/${CurrentDate.Year}  ${CurrentDate.Hour}
 	<s:Boolean x:Key="/Default/Environment/ContinuousTesting/TriggerOnSave/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Editor/QuickInfo/EnableQuickInfo/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Editor/UseCamelHumps/@EntryValue">False</s:Boolean>
+	<s:Boolean x:Key="/Default/Environment/ExternalSources/Decompiler/DecompileMethodBodies/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/Environment/ExternalSources/NavigationMode/@EntryValue">Sources</s:String>
 	<s:Boolean x:Key="/Default/Environment/ExternalSources/ShowNonPublicCompiledElementsInGoto/@EntryValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/Environment/Hierarchy/Build/BuildTool/MsBuildSolutionLoadingOrderingEnabled/@EntryValue">True</s:Boolean>

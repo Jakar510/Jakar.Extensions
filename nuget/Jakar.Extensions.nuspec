@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.Extensions</id>
-		<version>8.10.2</version>
+		<version>8.10.3</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -47,7 +47,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.2" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="7.5.1" />
+							version="7.5.2" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
@@ -112,7 +112,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.2" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="7.5.1" />
+							version="7.5.2" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
@@ -179,7 +179,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.2" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="7.5.1" />
+							version="7.5.2" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
@@ -246,7 +246,7 @@
 				<dependency id="Microsoft.Extensions.Options"
 							version="8.0.2" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens"
-							version="7.5.1" />
+							version="7.5.2" />
 				<dependency id="Newtonsoft.Json"
 							version="13.0.3" />
 				<dependency id="Nito.Collections.Deque"
