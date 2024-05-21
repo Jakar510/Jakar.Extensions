@@ -33,11 +33,11 @@
 				<dependency id="Jakar.Extensions" version="8.10.3" />
 				<dependency id="FluentMigrator" version="5.2.0" />
 				<dependency id="FluentMigrator.Runner" version="5.2.0" />
-				<dependency id="MailKit" version="4.5.0" />
+				<dependency id="MailKit" version="4.6.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp" version="4.9.2" />
 				<dependency id="Microsoft.Extensions.Caching.StackExchangeRedis" version="8.0.5" />
 				<dependency id="Microsoft.Identity.Client" version="4.61.0" />
-				<dependency id="Microsoft.Identity.Web" version="2.18.1" />
+				<dependency id="Microsoft.Identity.Web" version="2.18.2" />
 				<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="7.5.2" />
 				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="7.5.2" />
 				<dependency id="Microsoft.IdentityModel.Tokens" version="7.5.2" />
@@ -58,9 +58,9 @@
 				<dependency id="Hardware.Info" version="100.1.0" />
 				<dependency id="Microsoft.Extensions.Hosting" version="8.0.0" />
 				<dependency id="Microsoft.NETCore.Platforms" version="7.0.4" />
-				<dependency id="Swashbuckle.AspNetCore" version="6.6.1" />
-				<dependency id="Swashbuckle.AspNetCore.Annotations" version="6.6.1" />
-				<dependency id="Swashbuckle.AspNetCore.Newtonsoft" version="6.6.1" />
+				<dependency id="Swashbuckle.AspNetCore" version="6.6.2" />
+				<dependency id="Swashbuckle.AspNetCore.Annotations" version="6.6.2" />
+				<dependency id="Swashbuckle.AspNetCore.Newtonsoft" version="6.6.2" />
 				<dependency id="Microsoft.Extensions.Options.DataAnnotations" version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.Systemd" version="8.0.0" />
