@@ -13,23 +13,48 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
 {
     public static ErrorOrResult<T> Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(default, null); }
 
+
 #if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Errors) )]
+    [MemberNotNullWhen( true, nameof(Errors) ), MemberNotNullWhen( false, nameof(Value) )]
 #endif
-    public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Errors?.Length is > 0; }
+    public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
 
 
 #if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Value) )]
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Errors) )]
 #endif
-    public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
+    public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
+
+
+    public Status GetStatus() => Errors?.Max( static x => x.StatusCode ) ?? Status.Ok;
+
+
+    public TResult Match<TResult>( Func<T, TResult> value, Func<Error[], TResult> errors )
+    {
+        return TryGetValue( out T? x, out Error[]? e )
+                   ? value( x )
+                   : errors( e );
+    }
+
+
+    public ValueTask<TResult> Match<TResult>( Func<T, ValueTask<TResult>> value, Func<Error[], ValueTask<TResult>> errors )
+    {
+        return TryGetValue( out T? x, out Error[]? e )
+                   ? value( x )
+                   : errors( e );
+    }
+
+
+    public Task<TResult> Match<TResult>( Func<T, Task<TResult>> value, Func<Error[], Task<TResult>> errors )
+    {
+        return TryGetValue( out T? x, out Error[]? e )
+                   ? value( x )
+                   : errors( e );
+    }
 
 
     public static ErrorOrResult<T> Create( in     T       value )  => new(value, null);
     public static ErrorOrResult<T> Create( params Error[] errors ) => new(default, errors);
-
-
-    public Status GetStatus() => Errors?.Max( static x => x.StatusCode ) ?? Status.Ok;
 
 
     public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Error[]? errors )
@@ -45,19 +70,6 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
         errors = Errors ?? [];
         return false;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, out ReadOnlyMemory<Error> errors )
-    {
-        if ( Value is not null )
-        {
-            value  = Value;
-            errors = default;
-            return true;
-        }
-
-        value  = default;
-        errors = Errors;
-        return false;
-    }
     public bool TryGetValue( [NotNullWhen( true )] out T? value )
     {
         value = Value;
@@ -68,15 +80,15 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
         errors = Errors;
         return errors is not null;
     }
-    public bool TryGetValue( out ReadOnlyMemory<Error> error )
+    public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
-        error = Errors;
-        return error.IsEmpty is false;
+        errors = Errors;
+        return errors.IsEmpty is false;
     }
-    public bool TryGetValue( out ReadOnlySpan<Error> error )
+    public bool TryGetValue( out ReadOnlySpan<Error> errors )
     {
-        error = Errors;
-        return error.IsEmpty is false;
+        errors = Errors;
+        return errors.IsEmpty is false;
     }
 
 

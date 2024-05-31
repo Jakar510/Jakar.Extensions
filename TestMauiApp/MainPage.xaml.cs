@@ -8,9 +8,8 @@ namespace TestMauiApp;
 
 public partial class MainPage : ContentPage
 {
-    private int _count;
-
     private readonly ObservableCollection<string> _collection = [];
+    private          int                          _count;
 
     // private readonly System.Collections.ObjectModel.ObservableCollection<string> _collection = [];
 
@@ -21,11 +20,7 @@ public partial class MainPage : ContentPage
         Cv.ItemsSource                =  _collection;
         _collection.CollectionChanged += OnCollectionChanged;
     }
-    private void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args )
-    {
-        // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
-        args.Action.WriteToDebug();
-    }
+    private static void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args ) => args.Action.WriteToDebug(); // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
 
 
     private void CounterClicked()
@@ -46,9 +41,7 @@ public partial class MainPage : ContentPage
         catch ( Exception exception )
         {
             Console.WriteLine();
-            Console.WriteLine();
             Console.WriteLine( exception.ToString() );
-            Console.WriteLine();
             Console.WriteLine();
         }
     }

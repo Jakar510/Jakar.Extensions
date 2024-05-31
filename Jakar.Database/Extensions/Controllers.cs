@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public static class ControllerBaseExtensions
+public static class Controllers
 {
     public const  string       DETAILS = nameof(DETAILS);
     public const  string       ERROR   = nameof(ERROR);
@@ -13,12 +13,12 @@ public static class ControllerBaseExtensions
 
     public static ActionResult Duplicate( this ControllerBase controller, Exception e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.ItemNotFound();
     }
     public static ActionResult Duplicate( this ControllerBase controller, Exception e, params string[] errors )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.ItemNotFound( errors );
     }
     public static ActionResult Duplicate( this ControllerBase controller, params string[] errors )
@@ -38,7 +38,7 @@ public static class ControllerBaseExtensions
 
     public static ActionResult FileNotFound( this ControllerBase controller, FileNotFoundException e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         ModelStateDictionary modelState = controller.ModelState;
 
         return modelState.ErrorCount > 0
@@ -51,7 +51,7 @@ public static class ControllerBaseExtensions
 
     public static ActionResult GetBadRequest( this ControllerBase controller, Exception e, params string[] errors )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.GetBadRequest( errors );
     }
     public static ActionResult GetBadRequest( this ControllerBase controller, params string[] errors )
@@ -70,12 +70,12 @@ public static class ControllerBaseExtensions
 
     public static ActionResult ItemNotFound( this ControllerBase controller, Exception e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.ItemNotFound();
     }
     public static ActionResult ItemNotFound( this ControllerBase controller, Exception e, params string[] errors )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.ItemNotFound( errors );
     }
     public static ActionResult ItemNotFound( this ControllerBase controller, params string[] errors )
@@ -95,17 +95,17 @@ public static class ControllerBaseExtensions
 
     public static ActionResult NotAcceptable( this ControllerBase controller, Exception e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.NotAcceptable();
     }
     public static ActionResult NotAcceptable( this ControllerBase controller, FormatException e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.NotAcceptable();
     }
     public static ActionResult NotAcceptable( this ControllerBase controller, NotAcceptableException e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.NotAcceptable();
     }
     public static ActionResult NotAcceptable( this ControllerBase controller, string message )
@@ -134,12 +134,12 @@ public static class ControllerBaseExtensions
 
     public static ActionResult TimeoutOccurred( this ControllerBase controller, Exception e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.NotAcceptable();
     }
     public static ActionResult TimeoutOccurred( this ControllerBase controller, TimeoutException e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         return controller.NotAcceptable();
     }
     public static ActionResult TimeoutOccurred( this ControllerBase controller )
@@ -153,7 +153,7 @@ public static class ControllerBaseExtensions
 
     public static ActionResult UnauthorizedAccess( this ControllerBase controller, Exception e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         ModelStateDictionary modelState = controller.ModelState;
 
         return modelState.ErrorCount > 0
@@ -164,7 +164,7 @@ public static class ControllerBaseExtensions
     }
     public static ActionResult UnauthorizedAccess( this ControllerBase controller, UnauthorizedAccessException e )
     {
-        controller.AddModelError( e );
+        controller.AddError( e );
         ModelStateDictionary modelState = controller.ModelState;
 
         return modelState.ErrorCount > 0
@@ -211,10 +211,10 @@ public static class ControllerBaseExtensions
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error )             => controller.ModelState.AddError( error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              key, string error ) => controller.ModelState.AddError( key, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error, string? title = null, string key = ERROR ) => controller.ModelState.AddError( error, title, key );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors.AsSpan() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, Exception           e )      => controller.ModelState.AddError( e );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -223,20 +223,27 @@ public static class ControllerBaseExtensions
         controller.AddError( e.Message );
         foreach ( DictionaryEntry pair in e.Data ) { controller.AddError( $"{pair.Key}: {pair.Value}" ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string error )                          => state.AddModelError( ERROR, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string key,  string error )             => state.AddError( DETAILS, key, error );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ModelStateDictionary state, string type, string key, string error ) => state.AddModelError( type, $"{key} : {error}" );
+
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void AddError( this ModelStateDictionary state, params string[] errors )
+    public static void AddError( this ModelStateDictionary state, string error, string? title = null, string key = ERROR ) => state.AddError( key,
+                                                                                                                                              title is null
+                                                                                                                                                  ? error
+                                                                                                                                                  : $"{title} : {error}" );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void AddError( this ModelStateDictionary state, scoped in ReadOnlySpan<string> errors )
     {
-        if ( errors.Length == 0 ) { return; }
+        if ( errors.IsEmpty ) { return; }
 
         foreach ( string error in errors ) { state.AddError( error ); }
     }
+
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void AddError( this ModelStateDictionary state, IEnumerable<string> errors )
     {
         foreach ( string error in errors ) { state.AddError( error ); }
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddModelError( this ControllerBase controller, Exception e ) => controller.ModelState.AddError( e );
 }

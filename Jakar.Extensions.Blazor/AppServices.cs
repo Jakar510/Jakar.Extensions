@@ -60,12 +60,11 @@ public class AppServices( IModalService           modal,
     public Task                     SignOutAsync( HttpContext      context, string? scheme, AuthenticationProperties? properties ) => _authenticationService.SignOutAsync( context, scheme, properties );
 
 
-    public ValueTask         ClearAsync( CancellationToken token                          = default ) => _localStorage.ClearAsync( token );
-    public ValueTask<bool>   ContainKeyAsync( string       key,   CancellationToken token = default ) => _localStorage.ContainKeyAsync( key, token );
-    public ValueTask<string> GetItemAsStringAsync( string  key,   CancellationToken token = default ) => _localStorage.GetItemAsStringAsync( key, token );
-    public ValueTask<T>      GetItemAsync<T>( string       key,   CancellationToken token = default ) => _localStorage.GetItemAsync<T>( key, token );
-    public ValueTask<string> KeyAsync( int                 index, CancellationToken token = default ) => _localStorage.KeyAsync( index, token );
-
+    public ValueTask                      ClearAsync( CancellationToken         token                          = default ) => _localStorage.ClearAsync( token );
+    public ValueTask<bool>                ContainKeyAsync( string               key,   CancellationToken token = default ) => _localStorage.ContainKeyAsync( key, token );
+    public ValueTask<string?>             GetItemAsStringAsync( string          key,   CancellationToken token = default ) => _localStorage.GetItemAsStringAsync( key, token );
+    public ValueTask<T?>                  GetItemAsync<T>( string               key,   CancellationToken token = default ) => _localStorage.GetItemAsync<T>( key, token );
+    public ValueTask<string?>             KeyAsync( int                         index, CancellationToken token = default ) => _localStorage.KeyAsync( index, token );
     public ValueTask<IEnumerable<string>> KeysAsync( CancellationToken          token                         = default ) => _localStorage.KeysAsync( token );
     public ValueTask<int>                 LengthAsync( CancellationToken        token                         = default ) => _localStorage.LengthAsync( token );
     public ValueTask                      RemoveItemAsync( string               key,  CancellationToken token = default ) => _localStorage.RemoveItemAsync( key, token );

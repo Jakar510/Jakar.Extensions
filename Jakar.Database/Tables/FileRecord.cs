@@ -30,7 +30,7 @@ public sealed record FileRecord( string?              FileName,
 
 
     [Pure]
-    public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
+    public async ValueTask<ErrorOrResult<byte[], string, FileData>> Read( CancellationToken token = default )
     {
         if ( string.IsNullOrWhiteSpace( FullPath ) ) { return new FileData( this, FileMetaData.Create( this ) ); }
 
@@ -46,7 +46,7 @@ public sealed record FileRecord( string?              FileName,
     [Pure]
     public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
     {
-        OneOf<byte[], string, FileData> data = await Read( token );
+        ErrorOrResult<byte[], string, FileData> data = await Read( token );
         if ( data.IsT2 ) { return data.AsT2; }
 
         if ( data.IsT0 )

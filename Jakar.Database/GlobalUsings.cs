@@ -88,7 +88,6 @@ global using Microsoft.IdentityModel.JsonWebTokens;
 global using Microsoft.IdentityModel.Tokens;
 global using MimeKit;
 global using Newtonsoft.Json.Serialization;
-global using OneOf;
 global using OtpNet;
 global using ZXing;
 global using ZXing.QrCode;

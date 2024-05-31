@@ -129,7 +129,7 @@ public abstract partial class Database
 
     public ValueTask<ErrorOrResult<Tokens>> Register<TUser>( ILoginRequest<TUser> request, CancellationToken token = default )
         where TUser : class, IUserData<Guid> => this.TryCall( Register, request, token );
-    public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>>                               func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>>                                      func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
     public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<T>>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
     public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<T>>>      func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
 }

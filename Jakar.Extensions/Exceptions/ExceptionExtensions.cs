@@ -25,7 +25,7 @@ public static class ExceptionExtensions
 #endif
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
-        Dictionary<string, object> dictionary = new Dictionary<string, object?>();
+        Dictionary<string, object?> dictionary = new();
 
         e.GetProperties( ref dictionary );
 
@@ -49,7 +49,7 @@ public static class ExceptionExtensions
 #endif
     public static IEnumerable<string> Frames( StackTrace trace )
     {
-        foreach ( StackFrame frame in trace.GetFrames()! )
+        foreach ( StackFrame frame in trace.GetFrames() )
         {
             MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
             string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );

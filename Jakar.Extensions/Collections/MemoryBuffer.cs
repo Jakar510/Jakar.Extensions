@@ -85,7 +85,6 @@ public sealed class MemoryBuffer<T>( IEqualityComparer<T> comparer, int initialC
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="requestedCapacity"/> to <see cref="Count"/> whichever is greater. </summary>
     /// <param name="requestedCapacity"> the requested new size of the buffer. </param>
     /// <param name="capacity"> the current size of the buffer. </param>
-    /// <param name="array"> </param>
     private void Grow( in uint capacity, in uint requestedCapacity )
     {
         ThrowIfReadOnly();
