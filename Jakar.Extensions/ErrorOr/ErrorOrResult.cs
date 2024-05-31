@@ -92,9 +92,9 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
     }
 
 
-    public static implicit operator OneOf<T?, Error[]>( ErrorOrResult<T> result ) => result.HasValue
-                                                                                         ? result.Value
-                                                                                         : result.Errors ?? [];
+    public static implicit operator OneOf<T, Error[]>( ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
+                                                                                        ? value
+                                                                                        : errors;
     public static implicit operator T?( ErrorOrResult<T>                    result ) => result.Value;
     public static implicit operator Error[]( ErrorOrResult<T>               result ) => result.Errors ?? [];
     public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<T>   result ) => result.Errors;

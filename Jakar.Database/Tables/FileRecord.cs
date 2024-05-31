@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 4/2/2024  17:43
 
+using OneOf;
+
+
+
 namespace Jakar.Database;
 
 
@@ -30,7 +34,7 @@ public sealed record FileRecord( string?              FileName,
 
 
     [Pure]
-    public async ValueTask<ErrorOrResult<byte[], string, FileData>> Read( CancellationToken token = default )
+    public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
     {
         if ( string.IsNullOrWhiteSpace( FullPath ) ) { return new FileData( this, FileMetaData.Create( this ) ); }
 
@@ -46,7 +50,7 @@ public sealed record FileRecord( string?              FileName,
     [Pure]
     public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
     {
-        ErrorOrResult<byte[], string, FileData> data = await Read( token );
+        OneOf<byte[], string, FileData> data = await Read( token );
         if ( data.IsT2 ) { return data.AsT2; }
 
         if ( data.IsT0 )

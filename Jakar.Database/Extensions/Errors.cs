@@ -13,6 +13,8 @@ public static class Errors
     {
         if ( errors.IsEmpty ) { return status; }
 
+        status = Status.NotSet;
+
         foreach ( var error in errors )
         {
             Status? code = error.StatusCode;
@@ -60,14 +62,11 @@ public static class Errors
 
     public static async Task<IResult>       ToResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToResult();
     public static async ValueTask<IResult>  ToResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static async Task<IResult>       ToResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static async ValueTask<IResult>  ToResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static       IResult             ToResult<T>( this ErrorOrResult<T>            result ) => result.Match<IResult>( static x => new JsonResult<T>( x ), static x => x.ToResult() );
     public static       JsonResult<Error>   ToResult( this    Error                       error )  => new(error, (int)(error.StatusCode ?? Status.Ok));
     public static       JsonResult<Error[]> ToResult( this    Error[]                     error )  => new(error, (int)error.GetStatus());
     public static IResult ToResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? t, out Error[]? errors )
                                                                              ? new JsonResult<T>( t, (int)errors.GetStatus() )
-                                                                             : new JsonResult<Error[]>( errors, (int)errors.GetStatus() );
+                                                                             : errors.ToResult();
 
 
     public static ActionResult<T> ToActionResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? t, out Error[]? errors )
@@ -77,7 +76,4 @@ public static class Errors
     public static       ObjectResult               ToActionResult( this    Error[]                     error )  => new(error) { StatusCode = (int)error.GetStatus() };
     public static async Task<ActionResult<T>>      ToActionResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToActionResult();
     public static async ValueTask<ActionResult<T>> ToActionResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToActionResult();
-    public static async Task<ActionResult<T>>      ToActionResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToActionResult();
-    public static async ValueTask<ActionResult<T>> ToActionResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToActionResult();
-    public static       ActionResult<T>            ToActionResult<T>( this ErrorOrResult<T>            result ) => result.Match<ActionResult<T>>( static x => x, static x => x.ToActionResult() );
 }
