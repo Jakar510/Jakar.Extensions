@@ -64,13 +64,13 @@ public static class Errors
     public static async ValueTask<IResult>  ToResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
     public static       JsonResult<Error>   ToResult( this    Error                       error )  => new(error, (int)(error.StatusCode ?? Status.Ok));
     public static       JsonResult<Error[]> ToResult( this    Error[]                     error )  => new(error, (int)error.GetStatus());
-    public static IResult ToResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? t, out Error[]? errors )
-                                                                             ? new JsonResult<T>( t, (int)errors.GetStatus() )
+    public static IResult ToResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
+                                                                             ? new JsonResult<T>( value, (int)errors.GetStatus() )
                                                                              : errors.ToResult();
 
 
-    public static ActionResult<T> ToActionResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? t, out Error[]? errors )
-                                                                                           ? new ObjectResult( t ) { StatusCode      = (int)errors.GetStatus() }
+    public static ActionResult<T> ToActionResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
+                                                                                           ? new ObjectResult( value ) { StatusCode      = (int)errors.GetStatus() }
                                                                                            : new ObjectResult( errors ) { StatusCode = (int)errors.GetStatus() };
     public static       ObjectResult               ToActionResult( this    Error                       error )  => new(error) { StatusCode = (int)(error.StatusCode ?? Status.Ok) };
     public static       ObjectResult               ToActionResult( this    Error[]                     error )  => new(error) { StatusCode = (int)error.GetStatus() };

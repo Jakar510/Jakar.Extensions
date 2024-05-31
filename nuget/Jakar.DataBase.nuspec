@@ -4,7 +4,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
 	<metadata>
 		<id>Jakar.DataBase</id>
-		<version>7.0.0.22-beta</version>
+		<version>7.0.0.23-beta</version>
 		<title>Extension Library</title>
 		<authors>Tyler Stegmaier</authors>
 		<owners>Jakar510/Jakar</owners>
@@ -30,17 +30,17 @@
 				<dependency id="Dapper" version="2.1.35" />
 				<dependency id="Dapper.Contrib" version="2.0.78" />
 				<dependency id="FluentMigrator.Abstractions" version="5.2.0" />
-				<dependency id="Jakar.Extensions" version="8.10.4" />
+				<dependency id="Jakar.Extensions" version="8.11.1" />
 				<dependency id="FluentMigrator" version="5.2.0" />
 				<dependency id="FluentMigrator.Runner" version="5.2.0" />
 				<dependency id="MailKit" version="4.6.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp" version="4.9.2" />
-				<dependency id="Microsoft.Extensions.Caching.StackExchangeRedis" version="8.0.5" />
-				<dependency id="Microsoft.Identity.Client" version="4.61.0" />
-				<dependency id="Microsoft.Identity.Web" version="2.18.2" />
-				<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="7.5.2" />
-				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="7.5.2" />
-				<dependency id="Microsoft.IdentityModel.Tokens" version="7.5.2" />
+				<dependency id="Microsoft.Extensions.Caching.StackExchangeRedis" version="8.0.6" />
+				<dependency id="Microsoft.Identity.Client" version="4.61.1" />
+				<dependency id="Microsoft.Identity.Web" version="2.19.0" />
+				<dependency id="Microsoft.IdentityModel.JsonWebTokens" version="7.6.0" />
+				<dependency id="Microsoft.IdentityModel.Protocols.OpenIdConnect" version="7.6.0" />
+				<dependency id="Microsoft.IdentityModel.Tokens" version="7.6.0" />
 				<dependency id="Npgsql" version="8.0.3" />
 				<dependency id="Npgsql.Json.NET" version="8.0.3" />
 				<dependency id="Npgsql.OpenTelemetry" version="8.0.3" />
@@ -61,19 +61,19 @@
 				<dependency id="Swashbuckle.AspNetCore" version="6.6.2" />
 				<dependency id="Swashbuckle.AspNetCore.Annotations" version="6.6.2" />
 				<dependency id="Swashbuckle.AspNetCore.Newtonsoft" version="6.6.2" />
+				<dependency id="System.Security.Cryptography.Xml" version="8.0.1" />
 				<dependency id="Microsoft.Extensions.Options.DataAnnotations" version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Options.ConfigurationExtensions" version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.Systemd" version="8.0.0" />
 				<dependency id="Microsoft.Extensions.Hosting.WindowsServices" version="8.0.0" />
-				<dependency id="System.Security.Cryptography.Xml" version="8.0.1" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Certificate" version="8.0.5" />
-				<dependency id="Microsoft.AspNetCore.Authentication.Google" version="8.0.5" />
-				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount" version="8.0.5" />
-				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer" version="8.0.5" />
-				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="8.0.5" />
-				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks" version="8.0.5" />
-				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" version="8.0.5" />
-				<dependency id="Microsoft.AspNetCore.Components.WebAssembly" version="8.0.5" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Certificate" version="8.0.6" />
+				<dependency id="Microsoft.AspNetCore.Authentication.Google" version="8.0.6" />
+				<dependency id="Microsoft.AspNetCore.Authentication.MicrosoftAccount" version="8.0.6" />
+				<dependency id="Microsoft.AspNetCore.Authentication.JwtBearer" version="8.0.6" />
+				<dependency id="Microsoft.AspNetCore.Authentication.OpenIdConnect" version="8.0.6" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks" version="8.0.6" />
+				<dependency id="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" version="8.0.6" />
+				<dependency id="Microsoft.AspNetCore.Components.WebAssembly" version="8.0.6" />
 			</group>
 		</dependencies>
 	</metadata>
