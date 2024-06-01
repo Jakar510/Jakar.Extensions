@@ -2,8 +2,7 @@
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
-    : OwnedTableRecord<GroupRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
+public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<GroupRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
     public const  int                                    MAX_SIZE   = 1024;
     public const  string                                 TABLE_NAME = "Groups";
@@ -57,6 +56,6 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerUserID, token );
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.Users, this, token );
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, OwnerUserID, token );
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, activity, db.Users, this, token );
 }

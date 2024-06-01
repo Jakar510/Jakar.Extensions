@@ -6,9 +6,9 @@ namespace Jakar.Database;
 
 public interface ITokenService
 {
-    public ValueTask<string>          CreateContent( string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<string>          CreateHTMLContent( string   header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest users,  ClaimType  types, CancellationToken token = default );
+    public ValueTask<string>                CreateContent( Activity?     activity, string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<string>                CreateHTMLContent( Activity? activity, string       header, UserRecord user,  ClaimType         types, CancellationToken token = default );
+    public ValueTask<ErrorOrResult<Tokens>> Authenticate( Activity?      activity, LoginRequest users,  ClaimType  types, CancellationToken token = default );
 }
 
 
@@ -53,17 +53,17 @@ public class Tokenizer( Database dataBase ) : ITokenService // TODO: update Toke
          """;
 
 
-    public virtual ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate( request, types, token );
+    public virtual ValueTask<ErrorOrResult<Tokens>> Authenticate( Activity? activity, LoginRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate( activity, request, types, token );
 
 
-    public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateContent( Activity? activity, string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _dataBase.GetToken( user, types, token );
+        Tokens result = await _dataBase.GetToken( activity, user, types, token );
         return CreateContent( result, header );
     }
-    public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
+    public virtual async ValueTask<string> CreateHTMLContent( Activity? activity, string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _dataBase.GetToken( user, types, token );
+        Tokens result = await _dataBase.GetToken( activity, user, types, token );
         return CreateHTMLContent( result, header );
     }
 }

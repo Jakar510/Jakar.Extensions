@@ -90,6 +90,8 @@ public static class DbServices
         builder.Services.AddTokenizer();
         builder.Services.AddEmailer();
 
+        builder.Services.AddOpenTelemetry().WithMetrics( static metrics => { } ).WithTracing( static tracing => { } );
+
         AddAuthentication( builder.Services,
                            jwt =>
                            {
@@ -116,6 +118,9 @@ public static class DbServices
 
 
     private static void ConfigureMemoryCache( MemoryCacheOptions obj ) { }
+
+
+    public static string GetFullName( this Type type ) => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

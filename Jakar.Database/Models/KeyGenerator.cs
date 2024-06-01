@@ -17,18 +17,18 @@ public record struct KeyGenerator<TRecord> : IEnumerator<RecordID<TRecord>>, IEn
     public readonly bool               IsEmpty => _pairs.IsEmpty;
 
 
-    public KeyGenerator( ReadOnlyMemory<RecordPair<TRecord>>                     pairs ) => _pairs = pairs;
+    public KeyGenerator( scoped in ReadOnlyMemory<RecordPair<TRecord>>           pairs ) => _pairs = pairs;
     public static implicit operator KeyGenerator<TRecord>( RecordPair<TRecord>[] pairs ) => new(pairs);
 
 
     public   void                                                          Dispose()       => this = default;
     public   void                                                          Reset()         => _index = -1;
-    public   bool                                                          MoveNext()      => !_pairs.IsEmpty && ++_index < _pairs.Length;
+    public   bool                                                          MoveNext()      => _pairs.IsEmpty is false && ++_index < _pairs.Length;
     readonly IEnumerator<RecordID<TRecord>> IEnumerable<RecordID<TRecord>>.GetEnumerator() => this;
     readonly IEnumerator IEnumerable.                                      GetEnumerator() => this;
 
 
     public static KeyGenerator<TRecord> Create( RecordPair<TRecord>[]            records ) => new(records.Sorted());
     public static KeyGenerator<TRecord> Create( IEnumerable<RecordPair<TRecord>> records ) => Create( records.ToArray() );
-    public static KeyGenerator<TRecord> Create( IEnumerable<TRecord>             records ) => Create( records.Select( x => new RecordPair<TRecord>( x.ID, x.DateCreated ) ) );
+    public static KeyGenerator<TRecord> Create( IEnumerable<TRecord>             records ) => Create( records.Select( static x => x.ToPair() ) );
 }

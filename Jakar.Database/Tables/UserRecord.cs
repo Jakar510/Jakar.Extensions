@@ -412,18 +412,18 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, db, code, token );
-    public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
+    public ValueTask<bool> RedeemCode( Activity? activity, Database db, string code, CancellationToken token ) => db.TryCall( RedeemCode, activity, db, code, token );
+    public async ValueTask<bool> RedeemCode( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, string code, CancellationToken token )
     {
-        await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where( connection, transaction, db.UserRecoveryCodes, this, token ) )
+        await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where( connection, transaction, activity, db.UserRecoveryCodes, this, token ) )
         {
-            RecoveryCodeRecord? record = await mapping.Get( connection, transaction, db.RecoveryCodes, token );
+            RecoveryCodeRecord? record = await mapping.Get( connection, transaction, activity, db.RecoveryCodes, token );
 
-            if ( record is null ) { await db.UserRecoveryCodes.Delete( connection, transaction, mapping, token ); }
+            if ( record is null ) { await db.UserRecoveryCodes.Delete( connection, transaction, activity, mapping, token ); }
             else if ( RecoveryCodeRecord.IsValid( code, ref record ) )
             {
-                await db.RecoveryCodes.Delete( connection, transaction, record, token );
-                await db.UserRecoveryCodes.Delete( connection, transaction, mapping, token );
+                await db.RecoveryCodes.Delete( connection, transaction, activity, record, token );
+                await db.UserRecoveryCodes.Delete( connection, transaction, activity, mapping, token );
                 return true;
             }
         }
@@ -432,37 +432,36 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, count, token );
-    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
+    public ValueTask<string[]> ReplaceCodes( Activity? activity, Database db, int count = 10, CancellationToken token = default ) => db.TryCall( ReplaceCodes, activity, db, count, token );
+    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, int count = 10, CancellationToken token = default )
     {
-        IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, db, token );
+        IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes( connection, transaction, activity, db, token );
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, count );
         string[]                                        codes      = dictionary.Keys.ToArray();
 
 
-        await db.RecoveryCodes.Delete( connection, transaction, old, token );
-        await UserRecoveryCodeRecord.Replace( connection, transaction, db.UserRecoveryCodes, this, dictionary.Values, token );
+        await db.RecoveryCodes.Delete( connection, transaction, activity, old, token );
+        await UserRecoveryCodeRecord.Replace( connection, transaction, activity, db.UserRecoveryCodes, this, dictionary.Values, token );
         return codes;
     }
 
 
-    public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
-    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
+    public ValueTask<string[]> ReplaceCodes( Activity? activity, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, activity, db, recoveryCodes, token );
+    public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        IAsyncEnumerable<RecoveryCodeRecord>           old        = Codes( connection, transaction, db, token );
+        IAsyncEnumerable<RecoveryCodeRecord>           old        = Codes( connection, transaction, activity, db, token );
         ReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
         string[]                                       codes      = [.. dictionary.Keys];
 
 
-        await db.RecoveryCodes.Delete( connection, transaction, old, token );
-        await UserRecoveryCodeRecord.Replace( connection, transaction, db.UserRecoveryCodes, this, dictionary.Values, token );
+        await db.RecoveryCodes.Delete( connection, transaction, activity, old, token );
+        await UserRecoveryCodeRecord.Replace( connection, transaction, activity, db.UserRecoveryCodes, this, dictionary.Values, token );
         return codes;
     }
 
 
-    public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database db, CancellationToken token ) => db.TryCall( Codes, db, token );
-    public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token ) =>
-        UserRecoveryCodeRecord.Where( connection, transaction, db.RecoveryCodes, this, token );
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( Activity?    activity,   Database      db,          CancellationToken token )                                          => db.TryCall( Codes, activity, db, token );
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( DbConnection connection, DbTransaction transaction, Activity?         activity, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where( connection, transaction, activity, db.RecoveryCodes, this, token );
 
 
     public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
@@ -471,12 +470,12 @@ public sealed record UserRecord( string                        UserName,
         Rights = rights.ToString();
         return this;
     }
-    public async ValueTask<UserModel<Guid>> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async ValueTask<UserModel<Guid>> GetRights( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, CancellationToken token )
     {
         UserModel<Guid> model = new(this);
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, activity, db, token ) ) { model.Groups.Add( record.ToGroupModel() ); }
 
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, activity, db, token ) ) { model.Roles.Add( record.ToRoleModel() ); }
 
         return model;
     }
@@ -491,18 +490,7 @@ public sealed record UserRecord( string                        UserName,
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return string.Equals( Company,     other.Company,     StringComparison.Ordinal ) &&
-               string.Equals( Department,  other.Department,  StringComparison.Ordinal ) &&
-               string.Equals( Description, other.Description, StringComparison.Ordinal ) &&
-               string.Equals( Email,       other.Email,       StringComparison.Ordinal ) &&
-               string.Equals( Ext,         other.Ext,         StringComparison.Ordinal ) &&
-               string.Equals( FirstName,   other.FirstName,   StringComparison.Ordinal ) &&
-               string.Equals( FullName,    other.FullName,    StringComparison.Ordinal ) &&
-               string.Equals( LastName,    other.LastName,    StringComparison.Ordinal ) &&
-               string.Equals( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal ) &&
-               string.Equals( Title,       other.Title,       StringComparison.Ordinal ) &&
-               string.Equals( Website,     other.Website,     StringComparison.Ordinal ) &&
-               PreferredLanguage == other.PreferredLanguage;
+        return string.Equals( Company, other.Company, StringComparison.Ordinal ) && string.Equals( Department, other.Department, StringComparison.Ordinal ) && string.Equals( Description, other.Description, StringComparison.Ordinal ) && string.Equals( Email, other.Email, StringComparison.Ordinal ) && string.Equals( Ext, other.Ext, StringComparison.Ordinal ) && string.Equals( FirstName, other.FirstName, StringComparison.Ordinal ) && string.Equals( FullName, other.FullName, StringComparison.Ordinal ) && string.Equals( LastName, other.LastName, StringComparison.Ordinal ) && string.Equals( PhoneNumber, other.PhoneNumber, StringComparison.Ordinal ) && string.Equals( Title, other.Title, StringComparison.Ordinal ) && string.Equals( Website, other.Website, StringComparison.Ordinal ) && PreferredLanguage == other.PreferredLanguage;
     }
     public int CompareTo( IUserData? other )
     {
@@ -592,10 +580,10 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, db, token );
-    public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, db, token );
-    public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, activity, db, token );
+    public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token )
+        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, activity, db, token );
+    public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token )
         where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : IGroupModel<TGroupModel, Guid>
         where TRoleModel : IRoleModel<TRoleModel, Guid>
@@ -603,11 +591,11 @@ public sealed record UserRecord( string                        UserName,
     {
         TClass model = TClass.Create( this );
 
-        await foreach ( AddressRecord record in GetAddresses( connection, transaction, db, token ) ) { model.Addresses.Add( record.ToAddressModel<TAddress>() ); }
+        await foreach ( AddressRecord record in GetAddresses( connection, transaction, activity, db, token ) ) { model.Addresses.Add( record.ToAddressModel<TAddress>() ); }
 
-        await foreach ( GroupRecord record in GetGroups( connection, transaction, db, token ) ) { model.Groups.Add( record.ToGroupModel<TGroupModel>() ); }
+        await foreach ( GroupRecord record in GetGroups( connection, transaction, activity, db, token ) ) { model.Groups.Add( record.ToGroupModel<TGroupModel>() ); }
 
-        await foreach ( RoleRecord record in GetRoles( connection, transaction, db, token ) ) { model.Roles.Add( record.ToRoleModel<TRoleModel>() ); }
+        await foreach ( RoleRecord record in GetRoles( connection, transaction, activity, db, token ) ) { model.Roles.Add( record.ToRoleModel<TRoleModel>() ); }
 
         return model;
     }
@@ -657,10 +645,9 @@ public sealed record UserRecord( string                        UserName,
 
     #region Owners
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
-        EscalateTo.HasValue
-            ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
-            : default;
+    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => EscalateTo.HasValue
+                                                                                                                                                                        ? await db.Users.Get( connection, transaction, activity, EscalateTo.Value, token )
+                                                                                                                                                                        : null;
 
 
     public bool DoesNotOwn<TRecord>( TRecord record )
@@ -859,10 +846,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Roles
 
-    public async ValueTask<bool>                 TryAdd( DbConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd( connection, transaction, db.UserAddresses, this, value, token );
-    public       IAsyncEnumerable<AddressRecord> GetAddresses( DbConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where( connection, transaction, db.Addresses, this, token );
-    public async ValueTask<bool>                 HasAddress( DbConnection   connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists( connection, transaction, db.UserAddresses, this, value, token );
-    public async ValueTask                       Remove( DbConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete( connection, transaction, db.UserAddresses, this, value, token );
+    public async ValueTask<bool>                 TryAdd( DbConnection       connection, DbTransaction  transaction, Activity? activity, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd( connection, transaction, activity, db.UserAddresses, this, value, token );
+    public       IAsyncEnumerable<AddressRecord> GetAddresses( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where( connection, transaction, activity, db.Addresses, this, token );
+    public async ValueTask<bool>                 HasAddress( DbConnection   connection, DbTransaction  transaction, Activity? activity, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists( connection, transaction, activity, db.UserAddresses, this, value, token );
+    public async ValueTask                       Remove( DbConnection       connection, DbTransaction  transaction, Activity? activity, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete( connection, transaction, activity, db.UserAddresses, this, value, token );
 
     #endregion
 
@@ -870,10 +857,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Roles
 
-    public async ValueTask<bool>              TryAdd( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd( connection, transaction, db.UserRoles, this, value, token );
-    public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, db.Roles, this, token );
-    public async ValueTask<bool>              HasRole( DbConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists( connection, transaction, db.UserRoles, this, value, token );
-    public async ValueTask                    Remove( DbConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete( connection, transaction, db.UserRoles, this, value, token );
+    public async ValueTask<bool>              TryAdd( DbConnection   connection, DbTransaction  transaction, Activity? activity, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd( connection, transaction, activity, db.UserRoles, this, value, token );
+    public       IAsyncEnumerable<RoleRecord> GetRoles( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token = default )                => UserRoleRecord.Where( connection, transaction, activity, db.Roles, this, token );
+    public async ValueTask<bool>              HasRole( DbConnection  connection, DbTransaction  transaction, Activity? activity, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists( connection, transaction, activity, db.UserRoles, this, value, token );
+    public async ValueTask                    Remove( DbConnection   connection, DbTransaction  transaction, Activity? activity, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete( connection, transaction, activity, db.UserRoles, this, value, token );
 
     #endregion
 
@@ -881,10 +868,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Groups
 
-    public async ValueTask<bool>               TryAdd( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd( connection, transaction, db.UserGroups, this, value, token );
-    public       IAsyncEnumerable<GroupRecord> GetGroups( DbConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where( connection, transaction, db.Groups, this, token );
-    public async ValueTask<bool>               IsPartOfGroup( DbConnection connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists( connection, transaction, db.UserGroups, this, value, token );
-    public async ValueTask                     Remove( DbConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete( connection, transaction, db.UserGroups, this, value, token );
+    public async ValueTask<bool>               TryAdd( DbConnection        connection, DbTransaction  transaction, Activity? activity, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd( connection, transaction, activity, db.UserGroups, this, value, token );
+    public       IAsyncEnumerable<GroupRecord> GetGroups( DbConnection     connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token = default )                => UserGroupRecord.Where( connection, transaction, activity, db.Groups, this, token );
+    public async ValueTask<bool>               IsPartOfGroup( DbConnection connection, DbTransaction  transaction, Activity? activity, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists( connection, transaction, activity, db.UserGroups, this, value, token );
+    public async ValueTask                     Remove( DbConnection        connection, DbTransaction  transaction, Activity? activity, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete( connection, transaction, activity, db.UserGroups, this, value, token );
 
     #endregion
 
@@ -892,10 +879,9 @@ public sealed record UserRecord( string                        UserName,
 
     #region Claims
 
-    public async  ValueTask<Claim[]>     GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, db, token )).GetClaims( types );
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
-
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
+    public async  ValueTask<Claim[]>     GetUserClaims( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, activity, db, token )).GetClaims( types );
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction  transaction, Activity? activity, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, activity, db, principal.Claims.ToArray(), types, token );
+    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(ID), Guid.Parse( claims.Single( Claims.IsUserID ).Value ) );
@@ -914,9 +900,9 @@ public sealed record UserRecord( string                        UserName,
 
         if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( Claims.IsWebSite ).Value ); }
 
-        return db.Users.Get( connection, transaction, true, parameters, token );
+        return db.Users.Get( connection, transaction, activity, true, parameters, token );
     }
-    public static async IAsyncEnumerable<UserRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<UserRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
         DynamicParameters parameters = new();
 
@@ -955,7 +941,7 @@ public sealed record UserRecord( string                        UserName,
                 break;
         }
 
-        await foreach ( UserRecord record in db.Users.Where( connection, transaction, true, parameters, token ) ) { yield return record; }
+        await foreach ( UserRecord record in db.Users.Where( connection, transaction, activity, true, parameters, token ) ) { yield return record; }
     }
 
     #endregion

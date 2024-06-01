@@ -7,29 +7,30 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
+public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    private readonly AsyncKeyGenerator<TRecord> _generator = new(table);
     private readonly DbTable<TRecord>           _table     = table;
-    private readonly CancellationToken          _token     = default;
-    private          TRecord?                   _current   = default;
-    private          AsyncKeyGenerator<TRecord> _generator = new(table);
+    private          Activity?                  _activity;
+    private          CancellationToken          _token;
+    private          TRecord?                   _current;
 
 
-    public TRecord Current => _current ?? throw new NullReferenceException( nameof(_current) );
+    public TRecord Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
 
 
     public RecordGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
     public async ValueTask DisposeAsync()
     {
-        _current = default;
+        _current  = null;
+        _activity = null;
         await _generator.DisposeAsync();
-        this = default;
     }
 
 
-    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _token );
-    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _activity, _token );
+    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, Activity? activity, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested )
         {
@@ -37,7 +38,7 @@ public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumera
             return false;
         }
 
-        if ( await _generator.MoveNextAsync( connection, transaction, token ) ) { _current = await _table.Get( connection, transaction, _generator.Current, token ); }
+        if ( await _generator.MoveNextAsync( connection, transaction, activity, token ) ) { _current = await _table.Get( connection, transaction, activity, _generator.Current, token ); }
         else
         {
             _current = default;
@@ -48,6 +49,12 @@ public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumera
     }
 
 
-    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
-    public RecordGenerator<TRecord>                     WithCancellation( CancellationToken   token ) => new(_table, token);
+    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( null, token );
+    public RecordGenerator<TRecord> WithCancellation( Activity? activity, CancellationToken token )
+    {
+        _activity = activity;
+        _token    = token;
+        _generator.WithCancellation( activity, token );
+        return this;
+    }
 }

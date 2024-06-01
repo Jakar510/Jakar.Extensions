@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
+using System.Diagnostics;
 using Npgsql;
 
 
@@ -22,29 +23,11 @@ internal sealed class TestDatabase : Database
     public static async void TestAsync<T>()
         where T : IAppName
     {
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create()
-                                                       .WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) )
-                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String,            GroupRecord.MAX_SIZE,                     $"{nameof(GroupRecord.NameOfGroup)} > 0" ) )
-                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights),      DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) )
-                                                       .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
-                                                       .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) )
-                                                       .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
-                                                       .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
-                                                       .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build( DbTypeInstance.Postgres ) );
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.Postgres ) );
 
         Console.WriteLine();
 
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create()
-                                                       .WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) )
-                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String,            GroupRecord.MAX_SIZE,                     $"{nameof(GroupRecord.NameOfGroup)} > 0" ) )
-                                                       .WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights),      DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) )
-                                                       .WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) )
-                                                       .WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) )
-                                                       .WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) )
-                                                       .WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) )
-                                                       .WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) )
-                                                       .Build( DbTypeInstance.MsSql ) );
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.MsSql ) );
 
         Console.WriteLine();
 
@@ -75,23 +58,23 @@ internal sealed class TestDatabase : Database
 
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
             TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
-            await TestUsers( db );
+            await TestUsers( Activity.Current, db );
         }
         finally { await app.MigrateDownAsync(); }
     }
-    private static async ValueTask TestUsers( Database db, CancellationToken token = default )
+    private static async ValueTask TestUsers( Activity? activity, Database db, CancellationToken token = default )
     {
         UserRecord admin = UserRecord.Create( "Admin", "Admin", UserRights<TestRight>.SA );
         UserRecord user  = UserRecord.Create( "User",  "User",  UserRights<TestRight>.Create( [TestRight.Read] ) );
 
         UserRecord[]     users   = [admin, user];
         List<UserRecord> results = new(users.Length);
-        await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
+        await foreach ( UserRecord record in db.Users.Insert( activity, users, token ) ) { results.Add( record ); }
 
         Debug.Assert( users.Length == results.Count );
 
         results.Clear();
-        await foreach ( UserRecord record in db.Users.All( token ) ) { results.Add( record ); }
+        await foreach ( UserRecord record in db.Users.All( activity, token ) ) { results.Add( record ); }
 
         Debug.Assert( users.Length == results.Count );
     }
