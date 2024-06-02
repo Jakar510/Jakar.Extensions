@@ -2,6 +2,10 @@
 // 10/16/2022  4:54 PM
 
 
+using System.Diagnostics;
+
+
+
 namespace Jakar.Database;
 
 
@@ -46,7 +50,7 @@ public partial class DbTable<TRecord> : IConnectableDb
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, Activity? activity, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               sql    = _sqlCache.All();
-        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, activity, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
@@ -63,12 +67,12 @@ public partial class DbTable<TRecord> : IConnectableDb
     }
 
 
-    public ValueTask<TResult> Call<TResult>( SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, sql, func, token );
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public ValueTask<TResult> Call<TResult>( Activity? activity, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, activity, sql, func, token );
+    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, Activity? activity, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
-            await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
+            await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, activity, sql, token );
             return await func( reader, token );
         }
         catch ( Exception e ) { throw new SqlException( sql.SQL, sql.Parameters, e ); }

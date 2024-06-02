@@ -38,7 +38,7 @@ public sealed class AsyncKeyGenerator<TRecord>( DbTable<TRecord> table, Cancella
 
         if ( _generator.IsEmpty )
         {
-            IEnumerable<RecordPair<TRecord>> pairs = await _table.SortedIDs( connection, transaction, token );
+            IEnumerable<RecordPair<TRecord>> pairs = await _table.SortedIDs( connection, transaction, activity, token );
             _generator = KeyGenerator<TRecord>.Create( pairs );
         }
 

@@ -223,7 +223,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, activity, record, token );
-        return await GetToken( connection, transaction, record, types, token );
+        return await GetToken( connection, transaction, activity, record, types, token );
     }
 
 
@@ -237,7 +237,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, Activity? activity, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T :  IDbReaderMapping<T>
+        where T : IDbReaderMapping<T>
     {
         DbDataReader reader;
 

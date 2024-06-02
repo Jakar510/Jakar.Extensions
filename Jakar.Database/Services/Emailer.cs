@@ -89,13 +89,12 @@ public class Emailer
     {
         private EmailSettings? _settings;
 
-        public string          DefaultSubject { get; set; } = string.Empty;
-        public MailboxAddress? Sender         { get; set; }
-        public EmailSettings?  Settings       { get; set; }
 
-
-        Options IOptions<Options>.Value         => this;
-        public string?            VerifySubject { get; set; }
+        public string             DefaultSubject { get; set; } = string.Empty;
+        public MailboxAddress?    Sender         { get; set; }
+        public EmailSettings?     Settings       { get; set; }
+        Options IOptions<Options>.Value          => this;
+        public string?            VerifySubject  { get; set; }
 
 
         public Options() { }

@@ -23,7 +23,7 @@ public partial class DbTable<TRecord>
 
     public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, Activity? activity, SqlCommand sql, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, activity, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 

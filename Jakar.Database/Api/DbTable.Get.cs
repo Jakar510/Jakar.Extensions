@@ -51,7 +51,7 @@ public partial class DbTable<TRecord>
     public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, Activity? activity, IEnumerable<RecordID<TRecord>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Get( ids );
-        return Where( connection, transaction, sql, token );
+        return Where( connection, transaction, activity, sql, token );
     }
 
 
