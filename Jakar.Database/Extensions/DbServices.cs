@@ -3,7 +3,11 @@
 
 
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 
 
 
@@ -13,6 +17,7 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public static class DbServices
 {
+    public const string OTEL_EXPORTER_OTLP_ENDPOINT        = nameof(OTEL_EXPORTER_OTLP_ENDPOINT);
     public const string AUTHENTICATION_SCHEME              = JwtBearerDefaults.AuthenticationScheme;
     public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = $"Jwt.{AUTHENTICATION_SCHEME}";
 
@@ -27,100 +32,50 @@ public static class DbServices
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
 
-    public static WebApplicationBuilder AddDefaultDbServices<T, TDatabase>( this WebApplicationBuilder           builder,
-                                                                            DbTypeInstance                       dbType,
-                                                                            SecuredStringResolverOptions         connectionStringResolver,
-                                                                            Action<RedisCacheOptions>            configureRedis,
-                                                                            AppVersion?                          version                         = default,
-                                                                            Action<JwtBearerOptions>?            configureJwt                    = default,
-                                                                            Action<AuthenticationOptions>?       configureAuth                   = default,
-                                                                            Action<CookieAuthenticationOptions>? authCookie                      = default,
-                                                                            Action<CookieAuthenticationOptions>? configureApplication            = default,
-                                                                            Action<CookieAuthenticationOptions>? configureExternal               = default,
-                                                                            Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
-                                                                            Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
-                                                                            Action<GoogleOptions>?               configureGoogle                 = default,
-                                                                            Action<MemoryCacheOptions>?          configureMemoryCache            = default,
-                                                                            string                               authenticationScheme            = AUTHENTICATION_SCHEME,
-                                                                            string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
-    )
-        where T : IAppName
+    public static WebApplicationBuilder AddDbServices<TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>( this WebApplicationBuilder builder, ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory> services )
+        where TApp : IAppName
         where TDatabase : Database
-    {
-        string appName = typeof(T).Name;
-        builder.AddDefaultLogging<T>();
-
-        DbOptions dbOptions = new()
-                              {
-                                  DbTypeInstance           = dbType,
-                                  AppName                  = appName,
-                                  TokenAudience            = appName,
-                                  TokenIssuer              = appName,
-                                  ConnectionStringResolver = connectionStringResolver,
-                                  Version                  = version ?? AppVersion.FromAssembly<T>()
-                              };
-
-        TokenValidationParameters parameters = builder.GetTokenValidationParameters( dbOptions );
-
-        builder.Services.AddStackExchangeRedisCache( configureRedis );
-
-        builder.Services.AddDatabase<TDatabase>( dbOptions,
-                                                 TableCacheOptions.Default,
-                                                 configureRedis,
-                                                 configureMemoryCache ?? ConfigureMemoryCache,
-                                                 migration =>
-                                                 {
-                                                     switch ( dbType )
-                                                     {
-                                                         case DbTypeInstance.MsSql:
-                                                             migration.ConfigureMigrationsMsSql<T>();
-                                                             return;
-
-                                                         case DbTypeInstance.Postgres:
-                                                             migration.ConfigureMigrationsPostgres<T>();
-                                                             return;
-
-                                                         default: throw new OutOfRangeException( nameof(dbType), dbType );
-                                                     }
-                                                 } );
-
-        builder.Services.AddDataProtection();
-        builder.Services.AddIdentityServices();
-        builder.Services.AddPasswordValidator();
-        builder.Services.AddTokenizer();
-        builder.Services.AddEmailer();
-
-        builder.Services.AddOpenTelemetry().WithMetrics( static metrics => { } ).WithTracing( static tracing => { } );
-
-        AddAuthentication( builder.Services,
-                           jwt =>
-                           {
-                               jwt.Audience                   = appName;
-                               jwt.Authority                  = appName;
-                               jwt.UseSecurityTokenValidators = true;
-                               jwt.TokenValidationParameters  = parameters;
-                               configureJwt?.Invoke( jwt );
-                           },
-                           configureAuth,
-                           authCookie,
-                           configureApplication,
-                           configureExternal,
-                           configureOpenIdConnect,
-                           configureMicrosoftAccount,
-                           configureGoogle,
-                           authenticationScheme,
-                           authenticationSchemeDisplayName );
-
-        builder.Services.AddAuthorizationBuilder().RequireMultiFactorAuthentication();
-
-        return builder;
-    }
-
-
-    private static void ConfigureMemoryCache( MemoryCacheOptions obj ) { }
+        where TSqlCacheFactory : class, ISqlCacheFactory
+        where TTableCacheFactory : class, ITableCache => services.Configure( builder );
 
 
     public static string GetFullName( this Type type ) => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+
+
+    public static IHostApplicationBuilder OpenTelemetry( this IHostApplicationBuilder builder )
+    {
+        builder.Logging.AddOpenTelemetry( static x =>
+                                          {
+                                              x.IncludeScopes           = true;
+                                              x.IncludeFormattedMessage = true;
+                                          } );
+
+        builder.Services.AddOpenTelemetry()
+               .WithMetrics( static x => { x.AddRuntimeInstrumentation().AddMeter( "Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http", "WeatherApp.Api" ); } )
+               .WithTracing( x =>
+                             {
+                                 if ( builder.Environment.IsDevelopment() ) { x.SetSampler<AlwaysOnSampler>(); }
+
+                                 x.AddAspNetCoreInstrumentation().AddGrpcClientInstrumentation().AddHttpClientInstrumentation();
+                             } );
+
+        return builder.AddOpenTelemetryExporters();
+    }
+    public static IHostApplicationBuilder AddOpenTelemetryExporters( this IHostApplicationBuilder builder )
+    {
+        bool useOtlpExporter = string.IsNullOrWhiteSpace( builder.Configuration[OTEL_EXPORTER_OTLP_ENDPOINT] ) is false;
+
+        if ( useOtlpExporter )
+        {
+            builder.Services.Configure<OpenTelemetryLoggerOptions>( static logging => logging.AddOtlpExporter() );
+            builder.Services.ConfigureOpenTelemetryMeterProvider( static metrics => metrics.AddOtlpExporter() );
+            builder.Services.ConfigureOpenTelemetryTracerProvider( static tracing => tracing.AddOtlpExporter() );
+        }
+
+        builder.Services.AddOpenTelemetry().WithMetrics( static x => x.AddPrometheusExporter() );
+
+        return builder;
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -179,46 +134,46 @@ public static class DbServices
     }
 
 
-    public static IHealthChecksBuilder AddHealthCheck<T>( this IServiceCollection collection )
-        where T : IHealthCheck => collection.AddHealthCheck( HealthChecks.Create<T>() );
-    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection collection, HealthCheckRegistration registration ) => collection.AddHealthChecks().Add( registration );
+    public static IHealthChecksBuilder AddHealthCheck<T>( this IServiceCollection services )
+        where T : IHealthCheck => services.AddHealthCheck( HealthChecks.Create<T>() );
+    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) => services.AddHealthChecks().Add( registration );
 
 
-    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                         => new(new OptionsWrapper<FluentMigratorLoggerOptions>( options ));
-    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             collection, FluentMigratorLoggerOptions options ) => collection.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() );
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder collection, bool showSql = true, bool showElapsedTime = true ) => collection.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
-                                                                                                                                                                                      {
-                                                                                                                                                                                          ShowElapsedTime =
-                                                                                                                                                                                              showElapsedTime,
-                                                                                                                                                                                          ShowSql = showSql
-                                                                                                                                                                                      } );
+    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       => new(new OptionsWrapper<FluentMigratorLoggerOptions>( options ));
+    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) => services.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() );
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true ) =>
+        services.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
+                                          {
+                                              ShowElapsedTime = showElapsedTime,
+                                              ShowSql         = showSql
+                                          } );
 
 
-    public static void ConfigureMigrationsMsSql( this IMigrationRunnerBuilder configureMigration )
+    public static void MigrationsMsSql( this IMigrationRunnerBuilder migration )
     {
-        configureMigration.AddSqlServer2016();
-        DbOptions.GetConnectionString( configureMigration );
-        configureMigration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.AddSqlServer2016();
+        DbOptions.GetConnectionString( migration );
+        migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
-    public static void ConfigureMigrationsMsSql<T>( this IMigrationRunnerBuilder configureMigration )
+    public static void MigrationsMsSql<T>( this IMigrationRunnerBuilder migration )
         where T : IAppName
     {
-        configureMigration.AddSqlServer2016();
-        DbOptions.GetConnectionString( configureMigration );
-        configureMigration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.AddSqlServer2016();
+        DbOptions.GetConnectionString( migration );
+        migration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
-    public static void ConfigureMigrationsPostgres( this IMigrationRunnerBuilder configureMigration )
+    public static void MigrationsPostgres( this IMigrationRunnerBuilder migration )
     {
-        configureMigration.AddPostgres();
-        DbOptions.GetConnectionString( configureMigration );
-        configureMigration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.AddPostgres();
+        DbOptions.GetConnectionString( migration );
+        migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
-    public static void ConfigureMigrationsPostgres<T>( this IMigrationRunnerBuilder configureMigration )
+    public static void MigrationsPostgres<T>( this IMigrationRunnerBuilder migration )
         where T : IAppName
     {
-        configureMigration.AddPostgres();
-        DbOptions.GetConnectionString( configureMigration );
-        configureMigration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.AddPostgres();
+        DbOptions.GetConnectionString( migration );
+        migration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
 
 
@@ -229,142 +184,28 @@ public static class DbServices
     ///     </para>
     /// </summary>
     /// <returns> </returns>
-    public static IdentityBuilder AddIdentityServices( this IServiceCollection collection, Action<IdentityOptions>? options = default )
+    public static IdentityBuilder AddIdentityServices( this IServiceCollection services, Action<IdentityOptions>? options = default )
     {
-        collection.AddOptions<IdentityOptions>().Configure( options ?? ConfigureIdentityOptions );
+        services.AddOptions<IdentityOptions>().Configure( options ?? IdentityOptions );
 
-        RoleStore.Register( collection );
-        UserStore.Register( collection );
+        RoleStore.Register( services );
+        UserStore.Register( services );
 
-        return collection.AddIdentity<UserRecord, RoleRecord>()
-                         .AddUserStore<UserStore>()
-                         .AddUserManager<UserRecordManager>()
-                         .AddRoleStore<RoleStore>()
-                         .AddRoleManager<RoleManager>()
-                         .AddSignInManager<SignInManager>()
-                         .AddUserValidator<UserValidator>()
-                         .AddRoleValidator<RoleValidator>()
-                         .AddPasswordValidator<UserPasswordValidator>()
-                         .AddDefaultTokenProviders()
-                         .AddTokenProvider<TokenProvider>( nameof(TokenProvider) );
+        return services.AddIdentity<UserRecord, RoleRecord>().AddUserStore<UserStore>().AddUserManager<UserRecordManager>().AddRoleStore<RoleStore>().AddRoleManager<RoleManager>().AddSignInManager<SignInManager>().AddUserValidator<UserValidator>().AddRoleValidator<RoleValidator>().AddPasswordValidator<UserPasswordValidator>().AddDefaultTokenProviders().AddTokenProvider<TokenProvider>( nameof(TokenProvider) );
 
-        static void ConfigureIdentityOptions( IdentityOptions _ ) { }
+        static void IdentityOptions( IdentityOptions _ ) { }
     }
 
 
-    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
-
-
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( configureDbOptions, configureTableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
-
-
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, Action<DbOptions> configureDbOptions, Action<TableCacheOptions> configureTableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCache
-    {
-        DbOptions dbOptions = new();
-        configureDbOptions( dbOptions );
-        TableCacheOptions tableCacheOptions = new();
-        configureTableCacheOptions( tableCacheOptions );
-        return collection.AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
-    }
-
-
-    public static IServiceCollection AddDatabase<TDatabase>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database => collection.AddDatabase<TDatabase, SqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
-
-
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory => collection.AddDatabase<TDatabase, TSqlCacheFactory, TableCacheFactory>( dbOptions, tableCacheOptions, configureRedis, configureMemoryCache, configureMigration );
-
-
-    public static IServiceCollection AddDatabase<TDatabase, TSqlCacheFactory, TTableCacheFactory>( this IServiceCollection collection, DbOptions dbOptions, TableCacheOptions tableCacheOptions, Action<RedisCacheOptions> configureRedis, Action<MemoryCacheOptions> configureMemoryCache, Action<IMigrationRunnerBuilder> configureMigration )
-        where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCache
-    {
-        collection.AddInMemoryTokenCaches();
-
-        collection.AddSingleton( dbOptions );
-        collection.AddTransient<IOptions<DbOptions>>( static provider => provider.GetRequiredService<DbOptions>() );
-
-        collection.AddSingleton( tableCacheOptions );
-        collection.AddTransient<IOptions<TableCacheOptions>>( static provider => provider.GetRequiredService<TableCacheOptions>() );
-
-        collection.AddStackExchangeRedisCache( configureRedis );
-        collection.AddMemoryCache( configureMemoryCache );
-
-        collection.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
-        collection.AddSingleton<ITableCache, TTableCacheFactory>();
-
-        collection.AddSingleton<TDatabase>();
-        collection.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );
-        collection.AddHealthCheck<TDatabase>();
-
-        collection.AddFluentMigratorCore().ConfigureRunner( configureMigration );
-        return collection;
-    }
-
-
-    public static IServiceCollection AddOptions<T>( this IServiceCollection collection, Action<T> options )
-        where T : class, IOptions<T> => collection.AddOptions( options, Options.DefaultName );
-    public static IServiceCollection AddOptions<T>( this IServiceCollection collection, Action<T> options, string name )
+    public static IServiceCollection AddOptions<T>( this IServiceCollection services, Action<T> options )
+        where T : class, IOptions<T> => services.AddOptions( options, Options.DefaultName );
+    public static IServiceCollection AddOptions<T>( this IServiceCollection services, Action<T> options, string name )
         where T : class, IOptions<T>
     {
-        collection.AddSingleton<T>();
-        collection.Configure( name, options );
-        collection.AddTransient<IOptions<T>>( static provider => provider.GetRequiredService<T>() );
-        return collection;
-    }
-
-
-    public static AuthenticationBuilder AddAuthentication( this IServiceCollection              collection,
-                                                           Action<JwtBearerOptions>             configureJwt,
-                                                           Action<AuthenticationOptions>?       configureAuth                   = default,
-                                                           Action<CookieAuthenticationOptions>? authCookie                      = default,
-                                                           Action<CookieAuthenticationOptions>? configureApplication            = default,
-                                                           Action<CookieAuthenticationOptions>? configureExternal               = default,
-                                                           Action<OpenIdConnectOptions>?        configureOpenIdConnect          = default,
-                                                           Action<MicrosoftAccountOptions>?     configureMicrosoftAccount       = default,
-                                                           Action<GoogleOptions>?               configureGoogle                 = default,
-                                                           string                               authenticationScheme            = AUTHENTICATION_SCHEME,
-                                                           string                               authenticationSchemeDisplayName = AUTHENTICATION_SCHEME_DISPLAY_NAME
-    )
-
-    {
-        AuthenticationBuilder builder = collection.AddAuthentication( options =>
-                                                                      {
-                                                                          options.DefaultAuthenticateScheme = authenticationScheme;
-                                                                          options.DefaultScheme             = authenticationScheme;
-                                                                          configureAuth?.Invoke( options );
-                                                                      } );
-
-        builder.AddJwtBearer( authenticationScheme,
-                              authenticationSchemeDisplayName,
-                              bearer =>
-                              {
-                                  bearer.TokenHandlers.Add( DbTokenHandler.Instance );
-                                  configureJwt.Invoke( bearer );
-                              } );
-
-        if ( authCookie is not null ) { builder.AddCookie( authenticationScheme, IdentityConstants.BearerScheme, authCookie ); }
-
-        if ( configureApplication is not null ) { builder.AddCookie( IdentityConstants.ApplicationScheme, configureApplication ); }
-
-        if ( configureExternal is not null ) { builder.AddCookie( IdentityConstants.ExternalScheme, configureExternal ); }
-
-        if ( configureMicrosoftAccount is not null ) { builder.AddMicrosoftAccount( configureMicrosoftAccount ); }
-
-        if ( configureGoogle is not null ) { builder.AddGoogle( configureGoogle ); }
-
-        if ( configureOpenIdConnect is not null ) { builder.AddOpenIdConnect( configureOpenIdConnect ); }
-
-        return builder;
+        services.AddSingleton<T>();
+        services.Configure( name, options );
+        services.AddTransient<IOptions<T>>( static provider => provider.GetRequiredService<T>() );
+        return services;
     }
 
 
@@ -388,36 +229,36 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddDataProtection( this IServiceCollection collection )
+    public static IServiceCollection AddDataProtection( this IServiceCollection services )
     {
-        DataProtectionServiceCollectionExtensions.AddDataProtection( collection );
-        ProtectedDataProvider.Register( collection );
-        return collection;
+        DataProtectionServiceCollectionExtensions.AddDataProtection( services );
+        ProtectedDataProvider.Register( services );
+        return services;
     }
-    public static IServiceCollection AddEmailer( this IServiceCollection collection ) => collection.AddEmailer( static options => { } );
-    public static IServiceCollection AddEmailer( this IServiceCollection collection, Action<Emailer.Options> configure )
+    public static IServiceCollection AddEmailer( this IServiceCollection services ) => services.AddEmailer( static options => { } );
+    public static IServiceCollection AddEmailer( this IServiceCollection services, Action<Emailer.Options> options )
     {
-        collection.AddOptions( configure );
-        collection.AddScoped<Emailer>();
-        return collection;
-    }
-
-
-    public static IServiceCollection AddPasswordValidator( this IServiceCollection collection ) => collection.AddPasswordValidator( static requirements => { } );
-    public static IServiceCollection AddPasswordValidator( this IServiceCollection collection, Action<PasswordRequirements> configure )
-    {
-        collection.AddOptions( configure );
-        collection.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
-        return collection;
+        services.AddOptions( options );
+        services.AddScoped<Emailer>();
+        return services;
     }
 
 
-    public static IServiceCollection AddTokenizer( this IServiceCollection collection ) => collection.AddTokenizer<Tokenizer>();
-    public static IServiceCollection AddTokenizer<TTokenizer>( this IServiceCollection collection )
+    public static IServiceCollection AddPasswordValidator( this IServiceCollection services ) => services.AddPasswordValidator( static requirements => { } );
+    public static IServiceCollection AddPasswordValidator( this IServiceCollection services, Action<PasswordRequirements> options )
+    {
+        services.AddOptions( options );
+        services.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
+        return services;
+    }
+
+
+    public static IServiceCollection AddTokenizer( this IServiceCollection services ) => services.AddTokenizer<Tokenizer>();
+    public static IServiceCollection AddTokenizer<TTokenizer>( this IServiceCollection services )
         where TTokenizer : class, ITokenService
     {
-        collection.AddScoped<ITokenService, TTokenizer>();
-        return collection;
+        services.AddScoped<ITokenService, TTokenizer>();
+        return services;
     }
 
 

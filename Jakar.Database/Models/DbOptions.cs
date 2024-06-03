@@ -35,6 +35,9 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public AppVersion                                                     Version                  { get; set; } = AppVersion.Default;
 
 
+    public static IOptions<DbOptions> Get( IServiceProvider provider ) => provider.GetRequiredService<DbOptions>();
+
+
     public DbOptions WithAppName<T>()
         where T : IAppName
     {

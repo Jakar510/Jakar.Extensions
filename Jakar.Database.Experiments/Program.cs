@@ -16,7 +16,7 @@ try
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    TestDatabase.TestAsync<DbExperiments>();
+    TestDatabase<DbExperiments>.TestAsync( "dev", "jetson" );
 
     // JsonTest.Run();
 

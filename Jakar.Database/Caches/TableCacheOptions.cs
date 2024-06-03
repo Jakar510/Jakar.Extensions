@@ -14,6 +14,7 @@ public sealed class TableCacheOptions : IOptions<TableCacheOptions>
     TableCacheOptions IOptions<TableCacheOptions>.Value       => this;
 
 
+    public static IOptions<TableCacheOptions> Get( IServiceProvider provider ) => provider.GetRequiredService<TableCacheOptions>();
     public static IServiceCollection Register( IServiceCollection collection )
     {
         collection.AddSingleton<IOptions<TableCacheOptions>, TableCacheOptions>();
