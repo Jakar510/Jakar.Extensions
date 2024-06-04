@@ -61,8 +61,8 @@ public static class XmlExtensions
         Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
         Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
 
-        Type         target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
-        IDictionary? results = (IDictionary)Activator.CreateInstance( target );
+        Type        target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
+        IDictionary results = (IDictionary?)Activator.CreateInstance( target ) ?? throw new InvalidOperationException( $"Cannot Create instance of '{target.Name}'" );
 
         for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
@@ -123,7 +123,7 @@ public static class XmlExtensions
                      };
 
         StringBuilder builder = new StringBuilder();
-        XmlWriter writer  = XmlWriter.Create( builder, settings );
+        XmlWriter     writer  = XmlWriter.Create( builder, settings );
         document.Save( writer );
         return builder.ToString();
     }

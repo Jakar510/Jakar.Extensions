@@ -45,7 +45,7 @@ public class JsonizerGenerator : ISourceGenerator
 
     private static string? ProcessClass( INamedTypeSymbol classSymbol, IEnumerable<IFieldSymbol> fields, in ISymbol? attributeSymbol, GeneratorExecutionContext context )
     {
-        ArgumentNullException.ThrowIfNull( attributeSymbol );
+        if ( attributeSymbol is null ) { throw new ArgumentNullException( nameof(attributeSymbol) ); }
 
         if ( !classSymbol.ContainingSymbol.Equals( classSymbol.ContainingNamespace, SymbolEqualityComparer.Default ) )
         {
@@ -55,14 +55,16 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        StringBuilder sb = new StringBuilder( $@"
-#nullable enable
-namespace {namespaceName};
+        StringBuilder sb = new StringBuilder( $$"""
+
+                                                #nullable enable
+                                                namespace {{namespaceName}};
 
 
-public partial class {classSymbol.Name} 
-{{
-" );
+                                                public partial class {{classSymbol.Name}} 
+                                                {
+
+                                                """ );
 
         // if the class doesn't implement INotifyPropertyChanged already, add it
         // if ( !classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default) ) { source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;"); }
@@ -106,20 +108,22 @@ public partial class {classSymbol.Name}
             return;
         }
 
-        sb.Append( $@"
-    public {fieldType} {propertyName} 
-    {{
-        get 
-        {{
-            return this.{fieldName};
-        }}
-        set
-        {{
-            this.{fieldName} = value;
-            this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({propertyName})));
-        }}
-    }}
-" );
+        sb.Append( $$"""
+                     
+                         public {{fieldType}} {{propertyName}} 
+                         {
+                             get 
+                             {
+                                 return this.{{fieldName}};
+                             }
+                             set
+                             {
+                                 this.{{fieldName}} = value;
+                                 this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({{propertyName}})));
+                             }
+                         }
+
+                     """ );
     }
 
 
