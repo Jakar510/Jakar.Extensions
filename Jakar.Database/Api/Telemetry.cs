@@ -1,8 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 12/02/2023  12:12 PM
 
-using Prometheus;
 using System.Security.Cryptography.X509Certificates;
+using Prometheus;
+using Version = System.Version;
 
 
 
@@ -12,14 +13,23 @@ namespace Jakar.Database;
 [Experimental( nameof(OpenTelemetry) )]
 public static class Telemetry
 {
-    private static readonly KeyValuePair<string, object?>[]          _pairs = [];
-    public static           ConcurrentDictionary<string, Instrument> Instruments { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = new();
-    public static           Meter                                    Meter       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = CreateMeter();
-    public static           ConcurrentDictionary<string, Meter>      Meters      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = new();
-    public static           ActivitySource                           Source      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = CreateSource();
+    private static          ConcurrentDictionary<string, Instrument> _instruments   = [];
+    private static readonly KeyValuePair<string, object?>[]          _pairs         = [];
+    public static readonly  Version                                  DefaultVersion = new(1, 0, 0);
+    private static          Meter                                    _meter         = CreateMeter();
+    private static          ConcurrentDictionary<string, Meter>      _meters        = [];
+    private static          ActivitySource                           _source        = CreateSource();
+    private static readonly Meter                                    _dbMeter       = CreateMeter();
+    private static readonly ActivitySource                           _dbSource      = CreateSource();
 
 
-    public static IMetricServer Server( int port = 1234, string url = "/metrics", CollectorRegistry? registry = null, X509Certificate2? certificate = null )
+    public static ConcurrentDictionary<string, Instrument> Instruments { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _instruments, [],        null ); set => Interlocked.Exchange( ref _instruments, value ); }
+    public static Meter                                    Meter       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meter,       _dbMeter,  null ); set => Interlocked.Exchange( ref _meter,       value ); }
+    public static ConcurrentDictionary<string, Meter>      Meters      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meters,      [],        null ); set => Interlocked.Exchange( ref _meters,      value ); }
+    public static ActivitySource                           Source      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _source,      _dbSource, null ); set => Interlocked.Exchange( ref _source,      value ); }
+
+
+    public static IMetricServer Server( int port, string url = "/metrics", CollectorRegistry? registry = null, X509Certificate2? certificate = null )
     {
         KestrelMetricServer server = new(port, url, registry, certificate);
         return server.Start();
@@ -49,7 +59,7 @@ public static class Telemetry
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Assembly       GetAssembly()                            => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static AppVersion     GetVersion( this Assembly     assembly ) => assembly.GetName().GetVersion();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? new Version( 1, 0, 0 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter GetOrAddMeter( [CallerMemberName] string meterName = EMPTY ) => Meters.GetOrAdd( meterName, CreateMeter );
@@ -212,21 +222,22 @@ public static class Telemetry
     public static class Tags
     {
         private static string? _prefix;
-        public static  string  AddGroup            { get; set; } = nameof(AddGroup);
-        public static  string  AddGroupRights      { get; set; } = nameof(AddGroupRights);
-        public static  string  AddRole             { get; set; } = nameof(AddRole);
-        public static  string  AddRoleRights       { get; set; } = nameof(AddRoleRights);
-        public static  string  AddUser             { get; set; } = nameof(AddUser);
-        public static  string  AddUserAddress      { get; set; } = nameof(AddUserAddress);
-        public static  string  AddUserLoginInfo    { get; set; } = nameof(AddUserLoginInfo);
-        public static  string  AddUserRecoveryCode { get; set; } = nameof(AddUserRecoveryCode);
-        public static  string  AddUserRights       { get; set; } = nameof(AddUserRights);
-        public static  string  AddUserSubscription { get; set; } = nameof(AddUserSubscription);
-        public static  string  AddUserToGroup      { get; set; } = nameof(AddUserToGroup);
-        public static  string  AddUserToRole       { get; set; } = nameof(AddUserToRole);
-        public static  string  ConnectDatabase     { get; set; } = nameof(ConnectDatabase);
-        public static  string  GroupID             { get; set; } = nameof(GroupID);
-        public static  string  LoginUser           { get; set; } = nameof(LoginUser);
+
+        public static string AddGroup            { get; set; } = nameof(AddGroup);
+        public static string AddGroupRights      { get; set; } = nameof(AddGroupRights);
+        public static string AddRole             { get; set; } = nameof(AddRole);
+        public static string AddRoleRights       { get; set; } = nameof(AddRoleRights);
+        public static string AddUser             { get; set; } = nameof(AddUser);
+        public static string AddUserAddress      { get; set; } = nameof(AddUserAddress);
+        public static string AddUserLoginInfo    { get; set; } = nameof(AddUserLoginInfo);
+        public static string AddUserRecoveryCode { get; set; } = nameof(AddUserRecoveryCode);
+        public static string AddUserRights       { get; set; } = nameof(AddUserRights);
+        public static string AddUserSubscription { get; set; } = nameof(AddUserSubscription);
+        public static string AddUserToGroup      { get; set; } = nameof(AddUserToGroup);
+        public static string AddUserToRole       { get; set; } = nameof(AddUserToRole);
+        public static string ConnectDatabase     { get; set; } = nameof(ConnectDatabase);
+        public static string GroupID             { get; set; } = nameof(GroupID);
+        public static string LoginUser           { get; set; } = nameof(LoginUser);
         public static string? Prefix
         {
             get => _prefix;

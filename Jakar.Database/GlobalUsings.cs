@@ -105,4 +105,3 @@ global using JsonSerializer = Newtonsoft.Json.JsonSerializer;
 global using KeyAttribute = Dapper.Contrib.Extensions.KeyAttribute;
 global using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;
-global using Version = System.Version;
