@@ -21,8 +21,8 @@ public sealed class AppVersion :
     ISpanFormattable
 #endif
 {
-    private const char SEPARATOR = '.';
-
+    private const char                       SEPARATOR = '.';
+    private       string?                    _string;
     public static Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
     public static Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
     public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
@@ -123,7 +123,7 @@ public sealed class AppVersion :
     {
         if ( span is null ) { throw new ArgumentNullException( nameof(span) ); }
 
-        Flags  = flags;
+        Flags = flags;
         Scheme = (Format)span.Count;
 
         switch ( Scheme )
@@ -144,27 +144,27 @@ public sealed class AppVersion :
                 return;
 
             case Format.Detailed:
-                Major       = span[0];
-                Minor       = span[1];
+                Major = span[0];
+                Minor = span[1];
                 Maintenance = span[2];
-                Build       = span[3];
+                Build = span[3];
                 return;
 
             case Format.DetailedRevisions:
-                Major         = span[0];
-                Minor         = span[1];
-                Maintenance   = span[2];
+                Major = span[0];
+                Minor = span[1];
+                Maintenance = span[2];
                 MajorRevision = span[3];
-                Build         = span[4];
+                Build = span[4];
                 return;
 
             case Format.Complete:
-                Major         = span[0];
-                Minor         = span[1];
-                Maintenance   = span[2];
+                Major = span[0];
+                Minor = span[1];
+                Maintenance = span[2];
                 MajorRevision = span[3];
                 MinorRevision = span[4];
-                Build         = span[5];
+                Build = span[5];
                 return;
 
             default: throw new OutOfRangeException( nameof(Scheme), Scheme, "span doesn't have the correct length." );
@@ -288,11 +288,13 @@ public sealed class AppVersion :
     public override string ToString() => ToString( null, CultureInfo.CurrentCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
+        if ( string.IsNullOrEmpty( _string ) is false ) { return _string; }
+
         Span<char> span = stackalloc char[Length + 1];
-        if ( !TryFormat( span, out int charsWritten, format, formatProvider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
+        if ( TryFormat( span, out int charsWritten, format, formatProvider ) is false ) { throw new InvalidOperationException( "Conversion failed" ); }
 
         Span<char> result = span[..charsWritten];
-        return result.ToString();
+        return _string = result.ToString();
     }
 
 

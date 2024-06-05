@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
-public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>, IOpenTelemetry
+public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable> _tables             = [];
@@ -18,17 +18,15 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     public static      Database?                       Current           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
     public static      DataProtector                   DataProtector     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             ActivitySource                  ActivitySource    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _activitySource ??= new ActivitySource( ClassName, Version.ToString() ); }
     public             DbTable<AddressRecord>          Addresses         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    protected internal string                          ClassName         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
+    public             string                          ClassName         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
     public             int?                            CommandTimeout    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
     public             IConfiguration                  Configuration     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     protected internal SecuredString?                  ConnectionString  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
     public             DbTypeInstance                  DbTypeInstance    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
     public             DbTable<FileRecord>             Files             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<GroupRecord>            Groups            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             Meter                           Meter             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _meter ??= new Meter( ClassName, Version.ToString() ); }
-    protected internal PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
+    public             PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
     public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbTable<RoleRecord>             Roles             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public             DbOptions                       Settings          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
@@ -91,14 +89,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         ConnectionString?.Dispose();
         ConnectionString = null;
         GC.SuppressFinalize( this );
-    }
-
-
-    public Activity? StartActivity( ActivityKind kind = ActivityKind.Internal, [CallerMemberName] string name = EMPTY ) => ActivitySource.StartActivity( name );
-    public bool TryStartActivity( [NotNullWhen( true )] out Activity? activity, ActivityKind kind = ActivityKind.Internal, [CallerMemberName] string name = EMPTY )
-    {
-        activity = StartActivity( kind, name );
-        return activity is not null;
     }
 
 

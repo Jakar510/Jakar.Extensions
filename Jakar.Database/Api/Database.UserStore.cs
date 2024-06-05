@@ -80,8 +80,8 @@
         }
 
 
-        public         ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord   user,       CancellationToken token )                                                 => this.TryCall( GetAuthenticatorKeyAsync, user, token );
-        public virtual ValueTask<string?> GetAuthenticatorKeyAsync( DbConnection connection, DbTransaction     transaction, UserRecord user, CancellationToken token ) => new(user.AuthenticatorKey);
+        public         ValueTask<string?> GetAuthenticatorKeyAsync( Activity?    activity,   UserRecord    user,        CancellationToken token )                                              => this.TryCall( GetAuthenticatorKeyAsync, activity, user, token );
+        public virtual ValueTask<string?> GetAuthenticatorKeyAsync( DbConnection connection, DbTransaction transaction, Activity?         activity, UserRecord user, CancellationToken token ) => new(user.AuthenticatorKey);
 
 
         public ValueTask SetAuthenticatorKeyAsync( UserRecord user,     string     key,  CancellationToken token )                        => SetAuthenticatorKeyAsync( Activity.Current, user, key, token );
@@ -314,8 +314,8 @@
 
         #region Claims
 
-        public         ValueTask AddClaimsAsync( UserRecord   user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall( AddClaimsAsync, user, claims, token );
-        public virtual ValueTask AddClaimsAsync( DbConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
+        public         ValueTask AddClaimsAsync( Activity?    activity,   UserRecord    user,        IEnumerable<Claim> claims,   CancellationToken token )                                                    => this.TryCall( AddClaimsAsync, activity, user, claims, token );
+        public virtual ValueTask AddClaimsAsync( DbConnection connection, DbTransaction transaction, Activity?          activity, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
         public         ValueTask<Claim[]> GetClaimsAsync( UserRecord   user,       ClaimType      types,       CancellationToken token )                                                                      => GetClaimsAsync( Activity.Current, user, types, token );
