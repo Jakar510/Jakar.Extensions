@@ -4,4 +4,8 @@
 namespace Jakar.Database.Experiments;
 
 
-internal class DbExperiments : IAppName { }
+internal class DbExperiments : IAppName
+{
+    public static string     Name    => nameof(DbExperiments);
+    public static AppVersion Version { get; } = new(1, 0, 0, 1);
+}

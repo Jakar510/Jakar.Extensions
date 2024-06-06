@@ -35,15 +35,14 @@ internal sealed class TestDatabase<TApp> : Database
     }
     private static async Task InternalTestAsync( string user, string password )
     {
-        WebApplicationBuilder builder  = WebApplication.CreateBuilder();
-        builder.AddDbServices( new ConfigureDbServices(user, password) );
+        WebApplicationBuilder builder = WebApplication.CreateBuilder();
+        builder.AddDbServices( new ConfigureDbServices( user, password ) );
 
         await using WebApplication app = builder.Build();
 
         try
         {
             await app.MigrateUpAsync();
-
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
             TestDatabase<TApp>            db    = scope.ServiceProvider.GetRequiredService<TestDatabase<TApp>>();
             await TestUsers( Activity.Current, db );
@@ -102,7 +101,8 @@ internal sealed class TestDatabase<TApp> : Database
                             CommandTimeout           = 30,
                             TokenIssuer              = AppName,
                             TokenAudience            = AppName,
-                            AppName                  = AppName
+                            AppName                  = AppName,
+                            Version                  = TApp.Version
                         };
         }
         public override void Redis( RedisCacheOptions options )

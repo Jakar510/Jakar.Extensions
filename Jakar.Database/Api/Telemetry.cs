@@ -2,6 +2,12 @@
 // 12/02/2023  12:12 PM
 
 using System.Security.Cryptography.X509Certificates;
+using OpenTelemetry;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Prometheus;
 using Version = System.Version;
 
@@ -27,6 +33,47 @@ public static class Telemetry
     public static Meter                                    Meter       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meter,       _dbMeter,  null ); set => Interlocked.Exchange( ref _meter,       value ); }
     public static ConcurrentDictionary<string, Meter>      Meters      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meters,      [],        null ); set => Interlocked.Exchange( ref _meters,      value ); }
     public static ActivitySource                           Source      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _source,      _dbSource, null ); set => Interlocked.Exchange( ref _source,      value ); }
+
+
+    public static void ConfigureExporter( this OtlpExporterOptions exporter, Uri endpoint, ExportProcessorType type, OtlpExportProtocol protocol, string? headers = null, int timeout = 10000 )
+    {
+        exporter.Endpoint            = endpoint;
+        exporter.ExportProcessorType = type;
+        exporter.Protocol            = protocol;
+        exporter.TimeoutMilliseconds = timeout;
+        exporter.Headers             = headers;
+    }
+    public static void ConfigureExporter( this OtlpExporterOptions exporter, BatchExportProcessorOptions<Activity> processor ) => exporter.BatchExportProcessorOptions = processor;
+    public static void ConfigureExporter( this OtlpExporterOptions exporter, Func<HttpClient>                      factory )   => exporter.HttpClientFactory = factory;
+
+
+    public static WebApplicationBuilder AddTelemetry<TApp>( this WebApplicationBuilder builder, OtlpExportProtocol protocol, Uri endpoint )
+        where TApp : IAppName
+    {
+        bool isDevelopment = builder.Environment.IsDevelopment();
+
+        builder.Services.AddOpenTelemetry()
+               .ConfigureResource( static resource => resource.AddService( TApp.Name, null, TApp.Version.ToString() ) )
+               .WithTracing( tracing =>
+                             {
+                                 TracerProviderBuilder provider = tracing.AddSource( TApp.Name ).AddAspNetCoreInstrumentation();
+                                 if ( isDevelopment ) { provider.AddConsoleExporter(); }
+                             } )
+               .WithMetrics( metrics =>
+                             {
+                                 MeterProviderBuilder provider = metrics.AddMeter( TApp.Name );
+                                 if ( isDevelopment ) { provider.AddConsoleExporter(); }
+                             } )
+               .UseOtlpExporter( protocol, endpoint );
+
+        builder.Logging.AddOpenTelemetry( options =>
+                                          {
+                                              OpenTelemetryLoggerOptions provider = options.SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( TApp.Name, null, TApp.Version.ToString() ) );
+                                              if ( isDevelopment ) { provider.AddConsoleExporter(); }
+                                          } );
+
+        return builder;
+    }
 
 
     public static IMetricServer Server( int port, string url = "/metrics", CollectorRegistry? registry = null, X509Certificate2? certificate = null )

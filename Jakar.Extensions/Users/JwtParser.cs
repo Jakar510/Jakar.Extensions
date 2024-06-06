@@ -46,7 +46,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TID>( TUser user, ISessionID<TID> request, string authenticationType )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
+    #elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
     #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
@@ -55,7 +55,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     #endif
     #if NET8_0_OR_GREATER
         where TUser : UserModel<TUser, TID>, ICreateUserModel<TUser, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
-    #else
+#else
         where TUser : UserModel<TUser, TID>, new()
 #endif
     {
@@ -65,7 +65,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TAddress, TGroupModel, TRoleModel, TID>( TUser user, ISessionID<TID> request, string authenticationType )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
+    #elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
     #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
@@ -83,7 +83,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in ISessionID<TID> request, in ClaimsIdentity identity )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
+    #elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
     #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
@@ -94,7 +94,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in Guid deviceID, in TID sessionID, in ClaimsIdentity identity )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
+    #elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
     #elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
