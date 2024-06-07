@@ -16,23 +16,19 @@ using Version = System.Version;
 namespace Jakar.Database;
 
 
-[Experimental( nameof(OpenTelemetry) )]
 public static class Telemetry
 {
-    private static          ConcurrentDictionary<string, Instrument> _instruments   = [];
-    private static readonly KeyValuePair<string, object?>[]          _pairs         = [];
-    public static readonly  Version                                  DefaultVersion = new(1, 0, 0);
-    private static          Meter                                    _meter         = CreateMeter();
-    private static          ConcurrentDictionary<string, Meter>      _meters        = [];
-    private static          ActivitySource                           _source        = CreateSource();
-    private static readonly Meter                                    _dbMeter       = CreateMeter();
-    private static readonly ActivitySource                           _dbSource      = CreateSource();
+    public const           string                                   METER_NAME     = "Jakar.Database";
+    public static readonly Version                                  DefaultVersion = new(1, 0, 0);
+    public static readonly KeyValuePair<string, object?>[]          Pairs          = [];
+    public static readonly Meter                                    DbMeter        = CreateMeter( METER_NAME );
+    public static readonly ActivitySource                           DbSource       = CreateSource( METER_NAME );
+    public static readonly ConcurrentDictionary<string, Instrument> Instruments    = [];
+    public static readonly ConcurrentDictionary<string, Meter>      Meters         = [];
 
 
-    public static ConcurrentDictionary<string, Instrument> Instruments { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _instruments, [],        null ); set => Interlocked.Exchange( ref _instruments, value ); }
-    public static Meter                                    Meter       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meter,       _dbMeter,  null ); set => Interlocked.Exchange( ref _meter,       value ); }
-    public static ConcurrentDictionary<string, Meter>      Meters      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _meters,      [],        null ); set => Interlocked.Exchange( ref _meters,      value ); }
-    public static ActivitySource                           Source      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Interlocked.CompareExchange( ref _source,      _dbSource, null ); set => Interlocked.Exchange( ref _source,      value ); }
+    public static Meter          Meter  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = DbMeter;
+    public static ActivitySource Source { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = DbSource;
 
 
     public static void ConfigureExporter( this OtlpExporterOptions exporter, Uri endpoint, ExportProcessorType type, OtlpExportProtocol protocol, string? headers = null, int timeout = 10000 )
@@ -54,17 +50,18 @@ public static class Telemetry
 
         builder.Services.AddOpenTelemetry()
                .ConfigureResource( static resource => resource.AddService( TApp.Name, null, TApp.Version.ToString() ) )
-               .WithTracing( tracing =>
-                             {
-                                 TracerProviderBuilder provider = tracing.AddSource( TApp.Name ).AddAspNetCoreInstrumentation();
-                                 if ( isDevelopment ) { provider.AddConsoleExporter(); }
-                             } )
                .WithMetrics( metrics =>
                              {
-                                 MeterProviderBuilder provider = metrics.AddMeter( TApp.Name );
+                                 MeterProviderBuilder provider = metrics.AddMeter( TApp.Name ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddMeter( METER_NAME );
+                                 if ( isDevelopment ) { provider.AddConsoleExporter(); }
+                             } )
+               .WithTracing( tracing =>
+                             {
+                                 TracerProviderBuilder provider = tracing.AddSource( TApp.Name ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddSource( METER_NAME );
                                  if ( isDevelopment ) { provider.AddConsoleExporter(); }
                              } )
                .UseOtlpExporter( protocol, endpoint );
+
 
         builder.Logging.AddOpenTelemetry( options =>
                                           {
@@ -88,14 +85,6 @@ public static class Telemetry
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter()                                                                                                                         => CreateMeter( GetAssembly() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter( assembly.GetName() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter( assembly.Name ?? nameof(Database), assembly );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter( name,                              GetAssembly() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter( name,                              assembly.GetName() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter( name,                              assembly.GetVersion() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter( name,                              version.ToString(), tags, scope );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource()                                           => CreateSource( GetAssembly() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( Assembly     assembly )                    => CreateSource( assembly.GetName() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( AssemblyName assembly )                    => CreateSource( assembly.Name ?? nameof(Database), assembly );
@@ -104,6 +93,14 @@ public static class Telemetry
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( string       name, AssemblyName assembly ) => CreateSource( name,                              assembly.GetVersion() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( string       name, AppVersion   version )  => CreateSource( name,                              version.ToString() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter()                                                                                                                         => CreateMeter( GetAssembly() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter( assembly.GetName() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter( assembly.Name ?? nameof(Database), assembly );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter( name,                              GetAssembly() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter( name,                              assembly.GetName() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter( name,                              assembly.GetVersion() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter( name,                              version.ToString(), tags, scope );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Assembly       GetAssembly()                            => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static AppVersion     GetVersion( this Assembly     assembly ) => assembly.GetName().GetVersion();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
@@ -117,7 +114,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( description, out Instrument? value ) && value is Histogram<T> instrument ) { return instrument; }
 
-        Instruments[description] = instrument = GetOrAddMeter( meterName ).CreateHistogram<T>( meterName, unit, description, tags ?? _pairs );
+        Instruments[description] = instrument = GetOrAddMeter( meterName ).CreateHistogram<T>( meterName, unit, description, tags ?? Pairs );
         return instrument;
     }
 
@@ -127,7 +124,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
     public static ObservableGauge<T> GetOrAddGauge<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -135,7 +132,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
 
@@ -145,7 +142,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is Counter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateCounter<T>( name, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateCounter<T>( name, unit, description, tags ?? Pairs );
         return instrument;
     }
     public static ObservableCounter<T> GetOrAddCounter<T>( string name, Func<Measurement<T>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -153,7 +150,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
     public static ObservableCounter<T> GetOrAddCounter<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -161,7 +158,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
 
@@ -171,7 +168,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is UpDownCounter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateUpDownCounter<T>( name, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateUpDownCounter<T>( name, unit, description, tags ?? Pairs );
         return instrument;
     }
     public static ObservableUpDownCounter<T> GetOrAddUpDownCounter<T>( string name, Func<Measurement<T>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -179,7 +176,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
     public static ObservableUpDownCounter<T> GetOrAddUpDownCounter<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -187,7 +184,7 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<T> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? _pairs );
+        Instruments[name] = instrument = GetOrAddMeter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
 

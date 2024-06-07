@@ -2,6 +2,7 @@
 // 09/28/2023  10:02 AM
 
 using Npgsql;
+using OpenTelemetry.Exporter;
 
 
 
@@ -36,7 +37,9 @@ internal sealed class TestDatabase<TApp> : Database
     private static async Task InternalTestAsync( string user, string password )
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
+        builder.AddTelemetry<TApp>( OtlpExportProtocol.Grpc, new Uri( "http://localhost:4317" ) );
         builder.AddDbServices( new ConfigureDbServices( user, password ) );
+
 
         await using WebApplication app = builder.Build();
 
@@ -45,25 +48,31 @@ internal sealed class TestDatabase<TApp> : Database
             await app.MigrateUpAsync();
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
             TestDatabase<TApp>            db    = scope.ServiceProvider.GetRequiredService<TestDatabase<TApp>>();
-            await TestUsers( Activity.Current, db );
+            await TestUsers( db );
         }
         finally { await app.MigrateDownAsync(); }
     }
-    private static async ValueTask TestUsers( Activity? activity, Database db, CancellationToken token = default )
+    private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        UserRecord admin = UserRecord.Create( "Admin", "Admin", UserRights<TestRight>.SA );
-        UserRecord user  = UserRecord.Create( "User",  "User",  UserRights<TestRight>.Create( [TestRight.Read] ) );
-
+        UserRecord       admin   = UserRecord.Create( "Admin", "Admin", UserRights<TestRight>.SA );
+        UserRecord       user    = UserRecord.Create( "User",  "User",  UserRights<TestRight>.Create( [TestRight.Read] ) );
         UserRecord[]     users   = [admin, user];
         List<UserRecord> results = new(users.Length);
-        await foreach ( UserRecord record in db.Users.Insert( activity, users, token ) ) { results.Add( record ); }
 
-        Debug.Assert( users.Length == results.Count );
+        using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.Insert" ) )
+        {
+            await foreach ( UserRecord record in db.Users.Insert( activity, users, token ) ) { results.Add( record ); }
 
-        results.Clear();
-        await foreach ( UserRecord record in db.Users.All( activity, token ) ) { results.Add( record ); }
+            Debug.Assert( users.Length == results.Count );
+        }
 
-        Debug.Assert( users.Length == results.Count );
+        using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.All" ) )
+        {
+            results.Clear();
+            await foreach ( UserRecord record in db.Users.All( activity, token ) ) { results.Add( record ); }
+
+            Debug.Assert( users.Length == results.Count );
+        }
     }
 
 
@@ -92,7 +101,7 @@ internal sealed class TestDatabase<TApp> : Database
 
         public ConfigureDbServices( string user, string password )
         {
-            SecuredString connectionString = $"User ID={user};Password={password};Host=localhost;Port=5432;Database={AppName}";
+            SecuredString connectionString = $"User ID={user};Password={password};Host=192.168.2.50;Port=5432;Database={AppName}";
 
             DbOptions = new DbOptions
                         {
@@ -108,7 +117,7 @@ internal sealed class TestDatabase<TApp> : Database
         public override void Redis( RedisCacheOptions options )
         {
             options.InstanceName  = typeof(TApp).Name;
-            options.Configuration = "localhost:6379";
+            options.Configuration = "192.168.2.50:6379";
         }
     }
 }

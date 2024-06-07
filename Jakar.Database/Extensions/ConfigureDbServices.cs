@@ -88,8 +88,6 @@ public abstract class ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTa
         builder.Services.AddTokenizer();
         builder.Services.AddEmailer();
 
-        builder.Services.AddOpenTelemetry().WithMetrics( Metrics ).WithTracing( Tracing );
-
         AddAuthentication( builder );
 
         builder.Services.AddAuthorizationBuilder().RequireMultiFactorAuthentication();
