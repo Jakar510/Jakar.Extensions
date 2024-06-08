@@ -9,10 +9,13 @@ using OpenTelemetry.Exporter;
 namespace Jakar.Database;
 
 
-internal sealed class TestDatabase<TApp> : Database
-    where TApp : IAppName
+internal sealed class TestDatabase : Database, IAppName
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
+
+
+    public static     string     AppName    => nameof(TestDatabase);
+    public new static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
 
 
     internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, tableCache, options ) { }
@@ -21,7 +24,7 @@ internal sealed class TestDatabase<TApp> : Database
 
 
     [Conditional( "DEBUG" )]
-    public static async void TestAsync( string user, string password )
+    public static async void TestAsync()
     {
         Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.Postgres ) );
         Console.WriteLine();
@@ -29,16 +32,16 @@ internal sealed class TestDatabase<TApp> : Database
         Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<Guid?>( nameof(GroupRecord.OwnerUserID) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.MsSql ) );
         Console.WriteLine();
 
-        try { await InternalTestAsync( user, password ); }
+        try { await InternalTestAsync(); }
         catch ( Exception e ) { Console.WriteLine( e ); }
 
         Console.ReadKey();
     }
-    private static async Task InternalTestAsync( string user, string password )
+    private static async Task InternalTestAsync()
     {
         WebApplicationBuilder builder = WebApplication.CreateBuilder();
-        builder.AddTelemetry<TApp>( OtlpExportProtocol.Grpc, new Uri( "http://localhost:4317" ) );
-        builder.AddDbServices( new ConfigureDbServices( user, password ) );
+        builder.AddTelemetry<TestDatabase>( OtlpExportProtocol.Grpc, new Uri( "http://192.168.2.50:6317" ) );
+        ConfigureDbServices.Setup( builder );
 
 
         await using WebApplication app = builder.Build();
@@ -47,7 +50,7 @@ internal sealed class TestDatabase<TApp> : Database
         {
             await app.MigrateUpAsync();
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            TestDatabase<TApp>            db    = scope.ServiceProvider.GetRequiredService<TestDatabase<TApp>>();
+            TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
             await TestUsers( db );
         }
         finally { await app.MigrateDownAsync(); }
@@ -87,7 +90,7 @@ internal sealed class TestDatabase<TApp> : Database
 
 
 
-    internal sealed class ConfigureDbServices : ConfigureDbServices<TApp, TestDatabase<TApp>, SqlCacheFactory, TableCacheFactory>
+    internal sealed class ConfigureDbServices : ConfigureDbServices<ConfigureDbServices, TestDatabase, TestDatabase, SqlCacheFactory, TableCacheFactory>
     {
         public override bool UseApplicationCookie => false;
         public override bool UseAuth              => false;
@@ -99,9 +102,9 @@ internal sealed class TestDatabase<TApp> : Database
         public override bool UseRedis             => false;
 
 
-        public ConfigureDbServices( string user, string password )
+        public ConfigureDbServices()
         {
-            SecuredString connectionString = $"User ID={user};Password={password};Host=192.168.2.50;Port=5432;Database={AppName}";
+            SecuredString connectionString = $"User ID=dev;Password=dev;Host=192.168.2.50;Port=5432;Database={AppName}";
 
             DbOptions = new DbOptions
                         {
@@ -111,12 +114,12 @@ internal sealed class TestDatabase<TApp> : Database
                             TokenIssuer              = AppName,
                             TokenAudience            = AppName,
                             AppName                  = AppName,
-                            Version                  = TApp.Version
+                            Version                  = AppVersion
                         };
         }
         public override void Redis( RedisCacheOptions options )
         {
-            options.InstanceName  = typeof(TApp).Name;
+            options.InstanceName  = TestDatabase.AppName;
             options.Configuration = "192.168.2.50:6379";
         }
     }

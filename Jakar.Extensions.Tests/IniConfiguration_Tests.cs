@@ -16,7 +16,7 @@ public class IniConfig_Tests : Assert
     [Test]
     public void Test()
     {
-        IniConfig.Section project = new IniConfig.Section( "Project" ) { ["Name"] = nameof(IniConfig_Tests) };
+        IniConfig.Section project = new IniConfig.Section( "Project" ) { ["AppName"] = nameof(IniConfig_Tests) };
 
         project.Add( nameof(DateTime),       DateTime.Now );
         project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
@@ -24,7 +24,7 @@ public class IniConfig_Tests : Assert
         project.Add( nameof(AppVersion),     new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
 
-        IniConfig.Section server = new IniConfig.Section( "Server" ) { ["Name"] = nameof(ServicePoint) };
+        IniConfig.Section server = new IniConfig.Section( "Server" ) { ["AppName"] = nameof(ServicePoint) };
 
         server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
 

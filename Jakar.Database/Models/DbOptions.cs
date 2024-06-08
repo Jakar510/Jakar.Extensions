@@ -5,6 +5,7 @@ namespace Jakar.Database;
 
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
+
 {
     public const           string                    AUTHENTICATION_TYPE                       = JwtBearerDefaults.AuthenticationScheme;
     public const           int                       COMMAND_TIMEOUT                           = 300;

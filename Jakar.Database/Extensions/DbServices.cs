@@ -32,13 +32,6 @@ public static class DbServices
         where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
 
 
-    public static WebApplicationBuilder AddDbServices<TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>( this WebApplicationBuilder builder, ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory> services )
-        where TApp : IAppName
-        where TDatabase : Database
-        where TSqlCacheFactory : class, ISqlCacheFactory
-        where TTableCacheFactory : class, ITableCache => services.Configure( builder );
-
-
     public static string GetFullName( this Type type ) => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
 

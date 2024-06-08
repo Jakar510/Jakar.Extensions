@@ -17,7 +17,7 @@ public class OneTimePassword<TApp>( string key )
     // ReSharper disable once StaticMemberInGenericType
     protected static readonly string _issuer =
     #if NET8_0_OR_GREATER
-        TApp.Name;
+        TApp.AppName;
 #else
         typeof(TApp).Name;
 #endif

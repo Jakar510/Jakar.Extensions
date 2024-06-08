@@ -129,7 +129,7 @@
 //                           TextBody = _body
 //                       };
 //
-//         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync(element.Name, element.ContentStream); }
+//         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync(element.AppName, element.ContentStream); }
 //
 //         return new MimeMessage(_senders, _recipients, _subject, builder.ToMessageBody());
 //     }

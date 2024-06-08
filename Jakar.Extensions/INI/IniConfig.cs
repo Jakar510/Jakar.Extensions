@@ -141,7 +141,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
 
 
     /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
-    /// <param name="sectionName"> Section Name </param>
+    /// <param name="sectionName"> Section AppName </param>
     /// <returns>
     ///     <see cref="Section"/>
     /// </returns>

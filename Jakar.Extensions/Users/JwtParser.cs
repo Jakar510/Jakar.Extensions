@@ -42,7 +42,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
                               parameters,
                               settings.AppName,
                           #if NET8_0_OR_GREATER
-                              TApp.Name
+                              TApp.AppName
                           #else
                               typeof(TApp).Name
                           #endif

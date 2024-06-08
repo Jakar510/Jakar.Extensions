@@ -4,7 +4,7 @@
 public interface IAppName
 {
 #if NET8_0_OR_GREATER
-    public static abstract string     Name    { get; }
-    public static abstract AppVersion Version { get; }
+    public static abstract string     AppName    { get; }
+    public static abstract AppVersion AppVersion { get; }
 #endif
 }

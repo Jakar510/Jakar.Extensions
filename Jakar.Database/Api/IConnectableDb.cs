@@ -21,7 +21,7 @@ public interface IDbOptions
     // public string                                                  TokenAudience            { get; }
     // public string                                                  TokenIssuer              { get; }
     // public string                                                  UserExists               { get; }
-    // public AppVersion                                              Version                  { get; }
+    // public AppVersion                                              AppVersion                  { get; }
 }
 
 

@@ -56,7 +56,7 @@ public static partial class Migrations
 
         // migration.CreateEnumTable(propertyType);
         // return col.CreateColumn_Reference(propertyType);
-        // ICreateTableColumnOptionOrWithColumnSyntax item = col.AsInt64().ForeignKey(propertyType.Name, nameof(IDataBaseID.ID));
+        // ICreateTableColumnOptionOrWithColumnSyntax item = col.AsInt64().ForeignKey(propertyType.AppName, nameof(IDataBaseID.ID));
 
         return item.SetNullable( propertyInfo );
     }

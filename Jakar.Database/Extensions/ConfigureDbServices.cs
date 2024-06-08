@@ -12,13 +12,14 @@ using OpenTelemetry.Trace;
 namespace Jakar.Database;
 
 
-public abstract class ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>
+public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>
     where TApp : IAppName
     where TDatabase : Database
     where TSqlCacheFactory : class, ISqlCacheFactory
     where TTableCacheFactory : class, ITableCache
+    where T : ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>, new()
 {
-    public          string            AppName                         { get; }       = typeof(TApp).Name;
+    public          string            AppName                         { get; }       = TApp.AppName;
     public          string            AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
     public          string            AuthenticationSchemeDisplayName { get; init; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
     public          DbOptions         DbOptions                       { get; init; } = new();
@@ -28,7 +29,7 @@ public abstract class ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTa
     public abstract bool              UseAuthCookie                   { get; }
     public abstract bool              UseExternalCookie               { get; }
     public abstract bool              UseGoogleAccount                { get; }
-    public virtual  bool              UseMemoryCache                  { get; } = true;
+    public virtual  bool              UseMemoryCache                  => true;
     public abstract bool              UseMicrosoftAccount             { get; }
     public abstract bool              UseOpenIdConnect                { get; }
     public abstract bool              UseRedis                        { get; }
@@ -59,6 +60,11 @@ public abstract class ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTa
     }
 
 
+    public static void Setup( WebApplicationBuilder builder )
+    {
+        T instance = new();
+        instance.Configure( builder );
+    }
     protected internal virtual WebApplicationBuilder Configure( WebApplicationBuilder builder )
     {
         builder.Services.AddInMemoryTokenCaches();
@@ -93,6 +99,7 @@ public abstract class ConfigureDbServices<TApp, TDatabase, TSqlCacheFactory, TTa
         builder.Services.AddAuthorizationBuilder().RequireMultiFactorAuthentication();
         return builder;
     }
+
 
     private void ConfigureAuthentication( AuthenticationOptions options )
     {

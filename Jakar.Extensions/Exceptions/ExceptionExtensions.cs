@@ -266,7 +266,7 @@ public static class ExceptionExtensions
     {
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
-            string key = info.Name;
+            string key = info.AppName;
 
             if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
 

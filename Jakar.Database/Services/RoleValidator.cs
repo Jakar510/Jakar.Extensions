@@ -11,7 +11,7 @@ public sealed class RoleValidator : RoleValidator<RoleRecord>
         IdentityResult result = string.IsNullOrWhiteSpace( role.NameOfRole )
                                     ? IdentityResult.Failed( new IdentityError
                                                              {
-                                                                 Description = "Name of Role Invalid",
+                                                                 Description = "AppName of Role Invalid",
                                                                  Code        = nameof(RoleRecord.NameOfRole)
                                                              } )
                                     : string.IsNullOrWhiteSpace( role.NormalizedName )

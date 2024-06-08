@@ -25,9 +25,9 @@ public static partial class Xmlizer
 
     // private void Update( ref object obj, in XNode node )
     // {
-    //     if ( node.Name.SequenceEqual(Constants.GROUP) ) { PopulateList(ref obj, node); }
-    //     else if ( node.Name.SequenceEqual(Constants.DICTIONARY) ) { PopulateDictionary(ref obj, node); }
-    //     else if ( node.Name.SequenceEqual(Constants.GROUP) ) { PopulateArray(ref obj, node); }
+    //     if ( node.AppName.SequenceEqual(Constants.GROUP) ) { PopulateList(ref obj, node); }
+    //     else if ( node.AppName.SequenceEqual(Constants.DICTIONARY) ) { PopulateDictionary(ref obj, node); }
+    //     else if ( node.AppName.SequenceEqual(Constants.GROUP) ) { PopulateArray(ref obj, node); }
     //     else
     //     {
     //         if ( _objectType.IsClass ) { }
@@ -78,9 +78,9 @@ public static partial class Xmlizer
     //     for ( var i = 0; i < parent.ChildNodes.Count; i++ )
     //     {
     //         XmlNode? node = parent.ChildNodes[i];
-    //         if ( node?.Name is null ) { continue; }
+    //         if ( node?.AppName is null ) { continue; }
     //
-    //         if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new FormatException(nameof(node.Name)); }
+    //         if ( node.AppName != Constants.KEY_VALUE_PAIR ) { throw new FormatException(nameof(node.AppName)); }
     //
     //
     //         object? key   = default;
@@ -89,9 +89,9 @@ public static partial class Xmlizer
     //         for ( var c = 0; c < node.ChildNodes.Count; c++ )
     //         {
     //             XmlNode? child = node.ChildNodes[c];
-    //             if ( child?.Name is null ) { throw new NullReferenceException(nameof(child.InnerText)); }
+    //             if ( child?.AppName is null ) { throw new NullReferenceException(nameof(child.InnerText)); }
     //
-    //             switch ( child.Name )
+    //             switch ( child.AppName )
     //             {
     //                 case Constants.KEY:
     //                     if ( keyType.IsGenericType && keyType.HasInterface<IConvertible>() ) { key = child.InnerText.ConvertTo(keyType); }
@@ -110,7 +110,7 @@ public static partial class Xmlizer
     //         // ReSharper disable once ConvertSwitchStatementToSwitchExpression
     //         switch ( key )
     //         {
-    //             case null: { throw new FormatException($"Key is not found at {parent.Name}"); }
+    //             case null: { throw new FormatException($"Key is not found at {parent.AppName}"); }
     //
     //             case string s when string.IsNullOrWhiteSpace(s): { throw new NullReferenceException(nameof(key)); }
     //

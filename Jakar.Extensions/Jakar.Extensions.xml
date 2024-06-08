@@ -2517,7 +2517,7 @@
 				<paramref name="sectionName" />
 				. If it doesn't exist, it is created, then returned.
 			</summary>
-			<param name="sectionName"> Section Name </param>
+			<param name="sectionName"> Section AppName </param>
 			<returns>
 				<see cref="T:Jakar.Extensions.Models.IniConfiguration.IniConfig.Section" />
 			</returns>

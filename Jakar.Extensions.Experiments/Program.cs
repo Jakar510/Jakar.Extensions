@@ -35,7 +35,7 @@
 
     // await PasswordChecker.Run();
 
-    // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
+    // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.AppName ).Distinct() ) { Console.WriteLine( name ); }
 
     // StringValues values = new[] { "this is a test" };
     // values.WriteToConsole();
@@ -52,7 +52,7 @@ finally { "Bye".WriteToConsole(); }
 //
 //     //
 //     // .Where( x => x.DisplayName.Contains( "Czech", StringComparison.OrdinalIgnoreCase ) )
-//    .Where( x => x.Version is not null )
+//    .Where( x => x.AppVersion is not null )
 //    .ToPrettyJson()
 //    .WriteToConsole();
 
@@ -73,7 +73,7 @@ finally { "Bye".WriteToConsole(); }
 
 // var project = new IniConfig.Section( "Project" )
 //               {
-//                   ["Name"] = nameof(Program),
+//                   ["AppName"] = nameof(Program),
 //               };
 //
 // project.Add( nameof(DateTime),       DateTime.Now );
@@ -84,7 +84,7 @@ finally { "Bye".WriteToConsole(); }
 //
 // var server = new IniConfig.Section( "Server" )
 //              {
-//                  ["Name"] = nameof(ServicePoint),
+//                  ["AppName"] = nameof(ServicePoint),
 //              };
 //
 // server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );

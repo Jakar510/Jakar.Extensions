@@ -19,8 +19,8 @@ public static class Constants
     public const string PROPERTIES     = "Properties";
     public const string TYPE           = nameof(Type);
     public const string VALUE          = nameof(DictionaryEntry.Value);
-    public const string XMLS           = "xmls";    // Name Space
-    public const string XMLS_TAG       = "xmls=\""; // Name Space Tag
+    public const string XMLS           = "xmls";    // AppName Space
+    public const string XMLS_TAG       = "xmls=\""; // AppName Space Tag
 
 
 

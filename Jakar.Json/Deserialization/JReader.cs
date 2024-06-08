@@ -24,7 +24,7 @@ public ref struct JReader
 
     // public static JToken Parse( string json, JsonLoadSettings? settings, JsonReader? reader = default )
     // {
-    //     // reader ??= new JTokenReader(JToken.FromObject(new Version(1, 2, 3, 4)));
+    //     // reader ??= new JTokenReader(JToken.FromObject(new AppVersion(1, 2, 3, 4)));
     //     reader ??= new JsonTextReader(new StreamReader(json));
     //
     //     using ( reader )
