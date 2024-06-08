@@ -6,13 +6,15 @@ namespace Jakar.Database;
 
 public readonly struct SecuredStringResolverOptions
 {
-    private readonly Func<CancellationToken, Task<SecuredString>>?                      _value0 = null;
-    private readonly Func<CancellationToken, ValueTask<SecuredString>>?                 _value1 = null;
-    private readonly Func<IConfiguration, CancellationToken, Task<SecuredString>>?      _value2 = null;
-    private readonly Func<IConfiguration, CancellationToken, ValueTask<SecuredString>>? _value3 = null;
-    private readonly Func<IConfiguration, SecuredString>?                               _value4 = null;
-    private readonly Func<SecuredString>?                                               _value5 = null;
-    private readonly SecuredString?                                                     _value6 = null;
+    public const     string                                                             DEFAULT_SQL_CONNECTION_STRING_KEY         = "DEFAULT";
+    public const     string                                                             DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY = "ConnectionStrings";
+    private readonly Func<CancellationToken, Task<SecuredString>>?                      _value0                                   = null;
+    private readonly Func<CancellationToken, ValueTask<SecuredString>>?                 _value1                                   = null;
+    private readonly Func<IConfiguration, CancellationToken, Task<SecuredString>>?      _value2                                   = null;
+    private readonly Func<IConfiguration, CancellationToken, ValueTask<SecuredString>>? _value3                                   = null;
+    private readonly Func<IConfiguration, SecuredString>?                               _value4                                   = null;
+    private readonly Func<SecuredString>?                                               _value5                                   = null;
+    private readonly SecuredString?                                                     _value6                                   = null;
 
 
     public SecuredStringResolverOptions( SecuredString                                                     value ) => _value6 = value;
@@ -34,7 +36,8 @@ public readonly struct SecuredStringResolverOptions
     public static implicit operator SecuredStringResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => new(value);
 
 
-    public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token, string key = "Default", string section = "ConnectionStrings" )
+    public static SecuredString GetSecuredString( IConfiguration configuration, string key = DEFAULT_SQL_CONNECTION_STRING_KEY, string section = DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY ) => configuration.GetSection( section ).GetValue<string?>( key ) ?? throw new KeyNotFoundException( key );
+    public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token, string key = DEFAULT_SQL_CONNECTION_STRING_KEY, string section = DEFAULT_SQL_CONNECTION_STRING_SECTION_KEY )
     {
         if ( _value0 is not null ) { return await _value0( token ); }
 

@@ -30,7 +30,7 @@ public sealed class ApiMetric
     public static ApiMetric Create<TApp>( IServiceProvider provider, string method )
         where TApp : IAppName => Create<TApp>( provider.GetRequiredService<IMeterFactory>(), method );
     public static ApiMetric Create<TApp>( IMeterFactory factory, string method )
-        where TApp : IAppName => new(factory, $"{TApp.Name}.{method}");
+        where TApp : IAppName => new(factory, $"{TApp.AppName}.{method}");
 
 
 

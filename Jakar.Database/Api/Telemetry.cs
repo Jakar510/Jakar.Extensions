@@ -49,15 +49,15 @@ public static class Telemetry
         bool isDevelopment = builder.Environment.IsDevelopment();
 
         builder.Services.AddOpenTelemetry()
-               .ConfigureResource( static resource => resource.AddService( TApp.Name, null, TApp.Version.ToString() ) )
+               .ConfigureResource( static resource => resource.AddService( TApp.AppName, null, TApp.AppVersion.ToString() ) )
                .WithMetrics( metrics =>
                              {
-                                 MeterProviderBuilder provider = metrics.AddMeter( TApp.Name ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddMeter( METER_NAME );
+                                 MeterProviderBuilder provider = metrics.AddMeter( TApp.AppName ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddMeter( METER_NAME );
                                  if ( isDevelopment ) { provider.AddConsoleExporter(); }
                              } )
                .WithTracing( tracing =>
                              {
-                                 TracerProviderBuilder provider = tracing.AddSource( TApp.Name ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddSource( METER_NAME );
+                                 TracerProviderBuilder provider = tracing.AddSource( TApp.AppName ).AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddSource( METER_NAME );
                                  if ( isDevelopment ) { provider.AddConsoleExporter(); }
                              } )
                .UseOtlpExporter( protocol, endpoint );
@@ -65,7 +65,7 @@ public static class Telemetry
 
         builder.Logging.AddOpenTelemetry( options =>
                                           {
-                                              OpenTelemetryLoggerOptions provider = options.SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( TApp.Name, null, TApp.Version.ToString() ) );
+                                              OpenTelemetryLoggerOptions provider = options.SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( TApp.AppName, null, TApp.AppVersion.ToString() ) );
                                               if ( isDevelopment ) { provider.AddConsoleExporter(); }
                                           } );
 

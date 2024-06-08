@@ -14,8 +14,8 @@ internal sealed class TestDatabase : Database, IAppName
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
 
-    public static     string     AppName    => nameof(TestDatabase);
-    public new static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
+    public static string     AppName    => nameof(TestDatabase);
+    public static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
 
 
     internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, tableCache, options ) { }
@@ -115,7 +115,7 @@ internal sealed class TestDatabase : Database, IAppName
                             TokenAudience            = AppName,
                             AppName                  = AppName,
                             Version                  = AppVersion
-                        };
+                        }.WithAppName<TestDatabase>();
         }
         public override void Redis( RedisCacheOptions options )
         {

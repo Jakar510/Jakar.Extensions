@@ -81,7 +81,7 @@ public static class DbServices
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, bool isDevEnvironment )
         where TApp : IAppName => AddDefaultLogging<TApp>( builder, isDevEnvironment.GetLogLevel() );
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, in LogLevel minimumLevel )
-        where TApp : IAppName => AddDefaultLogging( builder, minimumLevel, TApp.Name );
+        where TApp : IAppName => AddDefaultLogging( builder, minimumLevel, TApp.AppName );
     public static ILoggingBuilder AddDefaultLogging( this ILoggingBuilder builder, in LogLevel minimumLevel, in string name )
     {
         builder.ClearProviders();

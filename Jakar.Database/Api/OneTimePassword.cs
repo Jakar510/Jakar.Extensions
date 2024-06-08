@@ -23,7 +23,7 @@ public readonly struct OneTimePassword
 
     public static OneTimePassword Create( string secretKey, string issuer ) => new(secretKey, issuer);
     public static OneTimePassword Create<TApp>( string secretKey )
-        where TApp : IAppName => new(secretKey, TApp.Name);
+        where TApp : IAppName => new(secretKey, TApp.AppName);
 
 
     public static string GenerateSecret()
