@@ -25,19 +25,29 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     private readonly        TokenValidationParameters               _parameters   = parameters;
 
 
-    public static async ValueTask<JwtParser> GetOrCreateParser<T>( IWebAppSettings settings, string authenticationType )
-        where T : IAppName
+    public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
+        where TApp : IAppName
     {
-        if ( _parsers.TryGetValue( authenticationType, out JwtParser? parser ) is false ) { _parsers[authenticationType] = parser = await CreateAsync<T>( settings, authenticationType ); }
+        if ( _parsers.TryGetValue( authenticationType, out JwtParser? parser ) is false ) { _parsers[authenticationType] = parser = await CreateAsync<TApp>( settings, authenticationType ); }
 
         return parser;
     }
-    public static async ValueTask<JwtParser> CreateAsync<T>( IWebAppSettings settings, string authenticationType )
-        where T : IAppName
+    public static async ValueTask<JwtParser> CreateAsync<TApp>( IWebAppSettings settings, string authenticationType )
+        where TApp : IAppName
     {
         SigningCredentials        credentials = await settings.Configuration.GetSigningCredentials();
         TokenValidationParameters parameters  = await settings.GetTokenValidationParameters( authenticationType );
-        return new JwtParser( credentials, parameters, settings.AppName, typeof(T).Name, settings.Version );
+
+        return new JwtParser( credentials,
+                              parameters,
+                              settings.AppName,
+                          #if NET8_0_OR_GREATER
+                              TApp.Name
+                          #else
+                              typeof(TApp).Name
+                          #endif
+                              ,
+                              settings.Version );
     }
 
 
@@ -46,16 +56,16 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TID>( TUser user, ISessionID<TID> request, string authenticationType )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    #elif NET7_0
+#elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-    #elif NET6_0
+#elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
+#else
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
     #if NET8_0_OR_GREATER
         where TUser : UserModel<TUser, TID>, ICreateUserModel<TUser, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
-#else
+    #else
         where TUser : UserModel<TUser, TID>, new()
 #endif
     {
@@ -65,11 +75,11 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TAddress, TGroupModel, TRoleModel, TID>( TUser user, ISessionID<TID> request, string authenticationType )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    #elif NET7_0
+#elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-    #elif NET6_0
+#elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
+#else
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
         where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>
@@ -83,22 +93,22 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in ISessionID<TID> request, in ClaimsIdentity identity )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    #elif NET7_0
+#elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-    #elif NET6_0
+#elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
+#else
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
         where TUser : IUserData<TID> => CreateToken( user, request.DeviceID, request.SessionID, identity );
     public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in Guid deviceID, in TID sessionID, in ClaimsIdentity identity )
 #if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    #elif NET7_0
+#elif NET7_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-    #elif NET6_0
+#elif NET6_0
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
+#else
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
     #endif
         where TUser : IUserData<TID>

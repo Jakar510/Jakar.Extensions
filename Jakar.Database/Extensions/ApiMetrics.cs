@@ -27,10 +27,10 @@ public sealed class ApiMetric
     public Duration MeasureRequestDuration() => new(_histogram);
 
 
-    public static ApiMetric Create<T>( IServiceProvider provider, string method )
-        where T : IAppName => Create<T>( provider.GetRequiredService<IMeterFactory>(), method );
-    public static ApiMetric Create<T>( IMeterFactory factory, string method )
-        where T : IAppName => new(factory, $"{typeof(T).Name}.{method}");
+    public static ApiMetric Create<TApp>( IServiceProvider provider, string method )
+        where TApp : IAppName => Create<TApp>( provider.GetRequiredService<IMeterFactory>(), method );
+    public static ApiMetric Create<TApp>( IMeterFactory factory, string method )
+        where TApp : IAppName => new(factory, $"{TApp.Name}.{method}");
 
 
 
@@ -61,12 +61,12 @@ public static class ApiMetrics
     */
 
 
-    public static IServiceCollection AddApiMetrics<T>( this IServiceCollection services, string method )
-        where T : IAppName => services.AddSingleton( provider => ApiMetric.Create<T>( provider, method ) );
-    public static IServiceCollection AddApiMetrics<T>( this IServiceCollection services, scoped in ReadOnlySpan<string> methods )
-        where T : IAppName
+    public static IServiceCollection AddApiMetrics<TApp>( this IServiceCollection services, string method )
+        where TApp : IAppName => services.AddSingleton( provider => ApiMetric.Create<TApp>( provider, method ) );
+    public static IServiceCollection AddApiMetrics<TApp>( this IServiceCollection services, scoped in ReadOnlySpan<string> methods )
+        where TApp : IAppName
     {
-        foreach ( string method in methods ) { services.AddApiMetrics<T>( method ); }
+        foreach ( string method in methods ) { services.AddApiMetrics<TApp>( method ); }
 
         return services;
     }

@@ -11,15 +11,21 @@ using ZXing.QrCode.Internal;
 namespace Jakar.Extensions;
 
 
-public class OneTimePassword<T>( string key )
-    where T : IAppName
+public class OneTimePassword<TApp>( string key )
+    where TApp : IAppName
 {
-    protected static readonly string _issuer     = typeof(T).Name;
-    protected readonly        byte[] _keyBytes   = Base32Encoding.ToBytes( key );
-    protected readonly        string _secret_Key = key;
+    // ReSharper disable once StaticMemberInGenericType
+    protected static readonly string _issuer =
+    #if NET8_0_OR_GREATER
+        TApp.Name;
+#else
+        typeof(TApp).Name;
+#endif
+    protected readonly byte[] _keyBytes   = Base32Encoding.ToBytes( key );
+    protected readonly string _secret_Key = key;
 
 
-    public static OneTimePassword<T> Debug { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new(Randoms.GenerateToken());
+    public static OneTimePassword<TApp> Debug { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new(Randoms.GenerateToken());
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool ValidateToken( string token, VerificationWindow? window = default ) => ValidateToken( token, out long _, window );

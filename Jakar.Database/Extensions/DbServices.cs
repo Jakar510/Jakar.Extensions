@@ -83,12 +83,12 @@ public static class DbServices
         isDevEnvironment
             ? LogLevel.Trace
             : LogLevel.Information;
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder )
-        where T : IAppName => AddDefaultLogging<T>( builder.Logging, builder.Environment.IsDevelopment() );
-    public static ILoggingBuilder AddDefaultLogging<T>( this ILoggingBuilder builder, bool isDevEnvironment )
-        where T : IAppName => AddDefaultLogging<T>( builder, isDevEnvironment.GetLogLevel() );
-    public static ILoggingBuilder AddDefaultLogging<T>( this ILoggingBuilder builder, in LogLevel minimumLevel )
-        where T : IAppName => AddDefaultLogging( builder, minimumLevel, typeof(T).Name );
+    public static ILoggingBuilder AddDefaultLogging<TApp>( this WebApplicationBuilder builder )
+        where TApp : IAppName => AddDefaultLogging<TApp>( builder.Logging, builder.Environment.IsDevelopment() );
+    public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, bool isDevEnvironment )
+        where TApp : IAppName => AddDefaultLogging<TApp>( builder, isDevEnvironment.GetLogLevel() );
+    public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, in LogLevel minimumLevel )
+        where TApp : IAppName => AddDefaultLogging( builder, minimumLevel, TApp.Name );
     public static ILoggingBuilder AddDefaultLogging( this ILoggingBuilder builder, in LogLevel minimumLevel, in string name )
     {
         builder.ClearProviders();

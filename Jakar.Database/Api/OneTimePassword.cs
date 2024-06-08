@@ -22,8 +22,8 @@ public readonly struct OneTimePassword
 
 
     public static OneTimePassword Create( string secretKey, string issuer ) => new(secretKey, issuer);
-    public static OneTimePassword Create<T>( string secretKey )
-        where T : IAppName => new(secretKey, typeof(T).Name);
+    public static OneTimePassword Create<TApp>( string secretKey )
+        where TApp : IAppName => new(secretKey, TApp.Name);
 
 
     public static string GenerateSecret()

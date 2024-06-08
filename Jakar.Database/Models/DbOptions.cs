@@ -38,10 +38,10 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public static IOptions<DbOptions> Get( IServiceProvider provider ) => provider.GetRequiredService<DbOptions>();
 
 
-    public DbOptions WithAppName<T>()
-        where T : IAppName
+    public DbOptions WithAppName<TApp>()
+        where TApp : IAppName
     {
-        AppName = typeof(T).Name;
+        AppName = TApp.Name;
         return this;
     }
     public static void GetConnectionString( IMigrationRunnerBuilder provider ) => provider.WithGlobalConnectionString( GetConnectionString );
