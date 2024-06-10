@@ -3,6 +3,7 @@
 
 using Npgsql;
 using OpenTelemetry.Exporter;
+using Prometheus;
 
 
 
@@ -46,12 +47,21 @@ internal sealed class TestDatabase : Database, IAppName
 
         await using WebApplication app = builder.Build();
 
+        app.UseStaticFiles();
+        app.UseRouting();
+        app.UseHttpMetrics();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseTelemetry();
+        app.MapGet( "Ping", () => DateTimeOffset.UtcNow );
+
         try
         {
             await app.MigrateUpAsync();
             await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
             TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
             await TestUsers( db );
+            await app.RunAsync();
         }
         finally { await app.MigrateDownAsync(); }
     }

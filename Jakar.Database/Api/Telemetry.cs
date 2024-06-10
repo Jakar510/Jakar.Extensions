@@ -43,6 +43,23 @@ public static class Telemetry
     public static void ConfigureExporter( this OtlpExporterOptions exporter, Func<HttpClient>                      factory )   => exporter.HttpClientFactory = factory;
 
 
+    public static WebApplication UseTelemetry( this WebApplication application, string path = "/metrics" )
+    {
+        application.UseOpenTelemetryPrometheusScrapingEndpoint( path );
+        return application;
+    }
+    public static WebApplication UseTelemetry( this WebApplication application, Func<HttpContext, bool> predicate )
+    {
+        application.UseOpenTelemetryPrometheusScrapingEndpoint( predicate );
+        return application;
+    }
+    public static WebApplication UseTelemetry( this WebApplication application, MeterProvider meterProvider, Func<HttpContext, bool> predicate, Action<IApplicationBuilder> configureBranchedPipeline, string optionsName, string path = "/metrics" )
+    {
+        application.UseOpenTelemetryPrometheusScrapingEndpoint( meterProvider, predicate, path, configureBranchedPipeline, optionsName );
+        return application;
+    }
+
+
     public static WebApplicationBuilder AddTelemetry<TApp>( this WebApplicationBuilder builder, OtlpExportProtocol protocol, Uri endpoint )
         where TApp : IAppName
     {
