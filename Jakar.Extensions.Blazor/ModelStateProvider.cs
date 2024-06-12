@@ -1,14 +1,33 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
-// 09/26/2022  10:26 AM
+// 04/25/2024  11:04
 
 namespace Jakar.Extensions.Blazor;
 
 
-public sealed class ModelStateProvider : CascadingValue<ModelStateDictionary>
+public class ErrorState : ObservableClass
 {
-    public ModelStateProvider()
+    public const string  KEY = nameof(ErrorState);
+    private      string? _errorText;
+
+
+    public string? ErrorText
     {
-        Value = new ModelStateDictionary();
-        Name  = nameof(ModelStateDictionary);
+        get => _errorText;
+        set
+        {
+            if ( SetProperty( ref _errorText, value ) ) { OnPropertyChanged( nameof(HasError) ); }
+        }
     }
+    public bool                 HasError => !string.IsNullOrEmpty( ErrorText ) || State.ErrorCount > 0;
+    public ModelStateDictionary State    { get; } = new();
+
+
+    public static ErrorState Get( IServiceProvider provider ) => provider.GetRequiredService<ErrorState>();
+}
+
+
+
+public interface IModelState
+{
+    [CascadingParameter( Name = ErrorState.KEY )] public ErrorState Errors { get; set; }
 }
