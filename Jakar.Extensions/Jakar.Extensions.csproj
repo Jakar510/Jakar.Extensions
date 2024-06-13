@@ -8,46 +8,33 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>8.0.0</Version>
+		<Version>8.11.6</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
 		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
-		<PackageTags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</PackageTags>
+		<PackageTags>Extension AsynLinq Linq Http Files Strings Types Languages Collections Ini</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-		<PackageReleaseNotes>
-			Jakar.Extensions 8.0.0
-
-		</PackageReleaseNotes>
+		<PackageReleaseNotes>Moved Spans.Hashes to Hashes</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<NeutralLanguage>en</NeutralLanguage>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageLicenseFile>W:\WorkSpace\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
 		<StripSymbols>false</StripSymbols>
 		<IsAotCompatible>true</IsAotCompatible>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
+		<Title>Jakar.Extensions</Title>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	</PropertyGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Loggers\**" />
-	  <Compile Remove="WeakEventManagers\**" />
-	  <EmbeddedResource Remove="Loggers\**" />
-	  <EmbeddedResource Remove="WeakEventManagers\**" />
-	  <None Remove="Loggers\**" />
-	  <None Remove="WeakEventManagers\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
-	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
@@ -81,6 +68,18 @@
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<Compile Remove="Loggers\**" />
+		<Compile Remove="WeakEventManagers\**" />
+		<EmbeddedResource Remove="Loggers\**" />
+		<EmbeddedResource Remove="WeakEventManagers\**" />
+		<None Remove="Loggers\**" />
+		<None Remove="WeakEventManagers\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\images\icon.png">
@@ -88,6 +87,10 @@
 			<PackagePath>\</PackagePath>
 		</None>
 		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
 			<Pack>True</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
@@ -104,20 +107,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\images\icon.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.10.0" />
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />

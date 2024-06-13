@@ -16,19 +16,19 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public        string                            Key       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = $"{TRecord.TableName}:{Value}";
 
 
-    [Pure] public static RecordID<TRecord>  New()                                                    => Create( Guid.NewGuid() );
-    [Pure] public static RecordID<TRecord>  Parse( in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
-    [Pure] public static RecordID<TRecord>  Create( Guid                 id )                        => new(id);
-    [Pure] public static RecordID<TRecord>  ID( DbDataReader             reader )                    => Create( reader, SQL.ID );
-    [Pure] public static RecordID<TRecord>? OwnerUserID( DbDataReader    reader )                    => TryCreate( reader, SQL.OWNER_USER_ID );
-    [Pure] public static RecordID<TRecord>  Create( DbDataReader         reader, string columnName ) => Create( reader.GetFieldValue<Guid>( columnName ) );
-    [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader      reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
+    [Pure] public static RecordID<TRecord>  New()                                                           => Create( Guid.NewGuid() );
+    [Pure] public static RecordID<TRecord>  Parse( scoped in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
+    [Pure] public static RecordID<TRecord>  Create( Guid                        id )                        => new(id);
+    [Pure] public static RecordID<TRecord>  ID( DbDataReader                    reader )                    => Create( reader, SQL.ID );
+    [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader             reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [Pure] public static RecordID<TRecord>  Create( DbDataReader                reader, string columnName ) => Create( reader.GetFieldValue<Guid>( columnName ) );
+    [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader             reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
     [Pure]
     public static RecordID<TRecord>? TryCreate( [NotNullIfNotNull( nameof(id) )] Guid? id ) => id.HasValue
                                                                                                    ? new RecordID<TRecord>( id.Value )
                                                                                                    : default;
     [Pure]
-    public static bool TryParse( in ReadOnlySpan<char> value, [NotNullWhen( true )] out RecordID<TRecord>? id )
+    public static bool TryParse( scoped in ReadOnlySpan<char> value, [NotNullWhen( true )] out RecordID<TRecord>? id )
     {
         if ( Guid.TryParse( value, out Guid guid ) )
         {

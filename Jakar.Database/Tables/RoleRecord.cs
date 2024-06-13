@@ -7,9 +7,9 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
                                  [property: StringLength( 4096 )] string ConcurrencyStamp,
                                  string                                  Rights,
                                  RecordID<RoleRecord>                    ID,
-                                 RecordID<UserRecord>?                   OwnerUserID,
+                                 RecordID<UserRecord>?                   CreatedBy,
                                  DateTimeOffset                          DateCreated,
-                                 DateTimeOffset?                         LastModified = default ) : OwnedTableRecord<RoleRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
+                                 DateTimeOffset?                         LastModified = default ) : OwnedTableRecord<RoleRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
 {
     public const                                  string TABLE_NAME = "Roles";
     public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -52,7 +52,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         string                concurrencyStamp = reader.GetFieldValue<string>( nameof(ConcurrencyStamp) );
         DateTimeOffset        dateCreated      = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.OwnerUserID( reader );
+        RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
         RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
         record.Validate();

@@ -2,6 +2,10 @@
 // using CommunityToolkit.HighPerformance.Enumerables;
 
 
+using System.Text;
+
+
+
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
@@ -83,7 +87,7 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public string Test_StringBuilder()
     {
-        StringBuilder sb = new StringBuilder( $"DELETE FROM {TableName} WHERE ID in ( " );
+        StringBuilder sb = new($"DELETE FROM {TableName} WHERE ID in ( ");
         sb.AppendJoin( ", ", ids );
         sb.Append( " )" );
         return sb.ToString();

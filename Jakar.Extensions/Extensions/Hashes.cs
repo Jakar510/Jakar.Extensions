@@ -12,16 +12,540 @@ namespace Jakar.Extensions;
 
 public static class Hashes
 {
-    public static string GetHash( scoped in OneOf<byte[], string> data )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static int GetHash<T>( this IEnumerable<T> values )
+    {
+        HashCode hash = new HashCode();
+        foreach ( T value in values ) { hash.Add( value ); }
+
+        return hash.ToHashCode();
+    }
+
+
+#if NET7_0_OR_GREATER
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<bool> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<string> values, long seed = 0 )
+    {
+        int    length = values.Sum( static x => x.Length );
+        char[] buffer = ArrayPool<char>.Shared.Rent( length );
+
+        try
+        {
+            Span<char> span = buffer;
+
+            foreach ( string value in values )
+            {
+                value.CopyTo( span );
+                span = span[value.Length..];
+            }
+
+            return Hash128( buffer.AsSpan( ..length ), seed );
+        }
+        finally { ArrayPool<char>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<char> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(char);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<short> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(short);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<ushort> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(ushort);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<int> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(int);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<uint> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(uint);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<long> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(long);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<ulong> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(ulong);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<Half> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<float> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(float);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static UInt128 Hash128( this ReadOnlySpan<double> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(double);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash128.HashToUInt128( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+#endif
+
+
+#if NET6_0_OR_GREATER
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<Half> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<bool> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(bool);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<string> values, long seed = 0 )
+    {
+        int    length = values.Sum( static x => x.Length );
+        char[] buffer = ArrayPool<char>.Shared.Rent( length );
+
+        try
+        {
+            Span<char> span = buffer;
+
+            foreach ( string value in values )
+            {
+                value.CopyTo( span );
+                span = span[value.Length..];
+            }
+
+            return Hash( buffer.AsSpan( ..length ), seed );
+        }
+        finally { ArrayPool<char>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<char> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(char);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<short> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(short);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<ushort> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(ushort);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<int> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(int);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<uint> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(uint);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<long> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(long);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<ulong> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(ulong);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<float> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(float);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+    [Pure]
+    public static ulong Hash( this ReadOnlySpan<double> value, long seed = 0 )
+    {
+        const int SIZE   = sizeof(double);
+        byte[]    buffer = ArrayPool<byte>.Shared.Rent( SIZE * value.Length );
+
+        try
+        {
+            for ( int i = 0; i < value.Length; i++ )
+            {
+                int        start = i * SIZE;
+                Range      range = new Range( start, start + SIZE );
+                Span<byte> span  = buffer.AsSpan( range );
+                if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
+            }
+
+            return XxHash64.HashToUInt64( buffer, seed );
+        }
+        finally { ArrayPool<byte>.Shared.Return( buffer ); }
+    }
+
+#endif
+
+
+    public static string GetHash( this OneOf<byte[], string> data )
     {
         if ( data.IsT0 ) { return GetHash( data.AsT0 ); }
 
         if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
-
-
+        
         throw new InvalidOperationException( "Invalid data type" );
     }
-    public static string GetHash( scoped in OneOf<ReadOnlyMemory<byte>, byte[], string> data )
+    public static string GetHash( this OneOf<ReadOnlyMemory<byte>, byte[], string> data )
     {
         if ( data.IsT0 ) { return GetHash( data.AsT0.Span ); }
 
@@ -32,9 +556,9 @@ public static class Hashes
         throw new InvalidOperationException( "Invalid data type" );
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( byte[]                       data )                    => GetHash( new ReadOnlySpan<byte>( data ) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( scoped in ReadOnlySpan<byte> data )                    => data.Hash_SHA256();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( this ReadOnlySpan<byte> data )                    => data.Hash_SHA256();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( string                       data )                    => GetHash( data, Encoding.Default );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( scoped in ReadOnlySpan<char> data, Encoding encoding ) { return data.Hash_SHA256( encoding ); }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( this ReadOnlySpan<char> data, Encoding encoding ) { return data.Hash_SHA256( encoding ); }
 
 
     [Pure]
@@ -222,7 +746,7 @@ public static class Hashes
     public static async ValueTask<string> HashAsync( this byte[] data, HashAlgorithm hasher )
     {
         await using MemoryStream stream = new MemoryStream( data );
-        byte[]                   hash = await hasher.ComputeHashAsync( stream );
+        byte[]                   hash   = await hasher.ComputeHashAsync( stream );
         return BitConverter.ToString( hash );
     }
 #endif
@@ -241,8 +765,8 @@ public static class Hashes
     public static UInt128 Hash( this ReadOnlySpan<char> data, Encoding encoding )
     {
         using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( encoding.GetByteCount( data ) );
-        Span<byte>               span = buffer.Memory.Span;
-        int                      size = encoding.GetBytes( data, span );
+        Span<byte>               span   = buffer.Memory.Span;
+        int                      size   = encoding.GetBytes( data, span );
         span = span[..size];
         return Hash( span );
     }

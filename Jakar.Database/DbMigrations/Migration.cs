@@ -66,7 +66,7 @@ public abstract class OwnedMigration<TRecord> : Migration<TRecord>
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
-        table.WithColumn( nameof(IOwnedTableRecord.OwnerUserID) ).AsGuid().Nullable();
+        table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable();
         return table;
     }
 }

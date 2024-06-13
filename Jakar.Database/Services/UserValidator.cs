@@ -21,11 +21,11 @@ public class UserValidator : IUserValidator<UserRecord>
         where T : ICollection<IdentityError>
     {
         /*
-        if ( user.OwnerUserID.IsValidID() )
+        if ( user.CreatedBy.IsValidID() )
         {
             errors.Add( new IdentityError
                         {
-                            Description = $"{nameof(UserRecord.OwnerUserID)} is invalid"
+                            Description = $"{nameof(UserRecord.CreatedBy)} is invalid"
                         } );
         }
         */

@@ -45,9 +45,9 @@ public sealed record UserRecord( string                        UserName,
                                  IDictionary<string, JToken?>? AdditionalData,
                                  RecordID<FileRecord>?         ImageID,
                                  RecordID<UserRecord>          ID,
-                                 RecordID<UserRecord>?         OwnerUserID,
+                                 RecordID<UserRecord>?         CreatedBy,
                                  DateTimeOffset                DateCreated,
-                                 DateTimeOffset?               LastModified = default ) : OwnedTableRecord<UserRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
+                                 DateTimeOffset?               LastModified = default ) : OwnedTableRecord<UserRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
 {
     public const                                                                                 int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                 int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
@@ -62,7 +62,7 @@ public sealed record UserRecord( string                        UserName,
     public                                                                                       int?                          BadLogins              { get;                    set; } = BadLogins;
     [ProtectedPersonalData]    public                                                            string                        Company                { get;                    set; } = Company;
     [StringLength( MAX_SIZE )] public                                                            string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => OwnerUserID?.Value;
+    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => CreatedBy?.Value;
     [ProtectedPersonalData] public string                                                                                      Department             { get; set; } = Department;
     [ProtectedPersonalData] public string                                                                                      Description            { get; set; } = Description;
     [ProtectedPersonalData] public string                                                                                      Email                  { get; set; } = Email;
@@ -186,7 +186,7 @@ public sealed record UserRecord( string                        UserName,
         IDictionary<string, JToken?>? additionalData         = reader.GetAdditionalData();
         RecordID<FileRecord>?         imageID                = RecordID<FileRecord>.TryCreate( reader, nameof(ImageID) );
         RecordID<UserRecord>          id                     = RecordID<UserRecord>.ID( reader );
-        RecordID<UserRecord>?         ownerUserID            = RecordID<UserRecord>.OwnerUserID( reader );
+        RecordID<UserRecord>?         ownerUserID            = RecordID<UserRecord>.CreatedBy( reader );
         DateTimeOffset                dateCreated            = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified           = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
@@ -376,18 +376,19 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public UserRecord ClearRefreshToken( string securityStamp ) => this with
-                                                                   {
-                                                                       RefreshToken = string.Empty,
-                                                                       RefreshTokenExpiryTime = default,
-                                                                       SecurityStamp = securityStamp
-                                                                   };
+    public UserRecord ClearRefreshToken( string securityStamp )
+    {
+        RefreshToken           = string.Empty;
+        RefreshTokenExpiryTime = null;
+        SecurityStamp          = securityStamp;
+        return this;
+    }
 
 
     void IUserData<Guid>.With( IUserData<Guid> value ) => With( value );
     public UserRecord With( IUserData<Guid> value )
     {
-        OwnerUserID       = RecordID<UserRecord>.TryCreate( value.CreatedBy );
+        CreatedBy       = RecordID<UserRecord>.TryCreate( value.CreatedBy );
         EscalateTo        = RecordID<UserRecord>.TryCreate( value.EscalateTo );
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -484,6 +485,7 @@ public sealed record UserRecord( string                        UserName,
     public string GetDescription() => IUserData.GetDescription( this );
 
 
+    /*
     public bool Equals( IUserData? other )
     {
         if ( other is null ) { return false; }
@@ -533,6 +535,8 @@ public sealed record UserRecord( string                        UserName,
 
         return PreferredLanguage.CompareTo( other.PreferredLanguage );
     }
+    */
+
     public override int CompareTo( UserRecord? other )
     {
         if ( other is null ) { return 1; }
@@ -580,6 +584,16 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
+    public UserModel ToUserModel() => ToUserModel<UserModel>();
+    public TClass ToUserModel<TClass>()
+        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>();
+    public TClass ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>()
+        where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+        where TGroupModel : IGroupModel<TGroupModel, Guid>
+        where TRoleModel : IRoleModel<TRoleModel, Guid>
+        where TAddress : IAddress<TAddress, Guid> => TClass.Create( this );
+
+
     public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, activity, db, token );
     public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token )
         where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, activity, db, token );
@@ -609,23 +623,25 @@ public sealed record UserRecord( string                        UserName,
 
     public UserRecord WithPassword( string password )
     {
-        if ( password.Length > ENCRYPTED_MAX_PASSWORD_SIZE ) { throw new ArgumentException( "Encrypted password Must be less than 550 chars", nameof(password) ); }
+        if ( password.Length > MAX_PASSWORD_SIZE ) { throw new ArgumentException( $"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password) ); }
 
-        return this with { PasswordHash = Database.DataProtector.Encrypt( password ) };
+        PasswordHash = Database.DataProtector.Encrypt( password );
+        return this;
     }
-    public static bool WithPassword( scoped ref UserRecord record, string password, PasswordValidator validator )
+    public UserRecord WithPassword( in string password, scoped in Requirements requirements ) => WithPassword( password, requirements, out _ );
+    public UserRecord WithPassword( in string password, scoped in Requirements requirements, out PasswordValidator.Results results )
     {
-        if ( password.Length > MAX_PASSWORD_SIZE ) { throw new ArgumentException( "Password Must be less than 550 chars", nameof(password) ); }
+        if ( requirements.stringLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException( $"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password) ); }
 
-        if ( validator.Validate( password ) is false ) { return false; }
+        PasswordValidator validator = new(requirements);
+        if ( validator.Validate( password, out results ) is false ) { return this; }
 
-        record = record.WithPassword( password );
-        return true;
+        return WithPassword( password );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword( ref record, request.Password );
-    public static bool VerifyPassword( scoped ref UserRecord record, string password )
+    public static bool VerifyPassword( scoped ref UserRecord record, in string password )
     {
         string value = Database.DataProtector.Decrypt( record.PasswordHash );
 
@@ -651,9 +667,9 @@ public sealed record UserRecord( string                        UserName,
 
 
     public bool DoesNotOwn<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID != ID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.CreatedBy != ID;
     public bool Owns<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.OwnerUserID == ID;
+        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.CreatedBy == ID;
 
     #endregion
 

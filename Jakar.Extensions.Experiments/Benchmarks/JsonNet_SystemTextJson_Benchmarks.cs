@@ -1,14 +1,4 @@
-﻿using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using BenchmarkDotNet.Configs;
-using Bogus;
-using JsonSerializer = System.Text.Json.JsonSerializer;
-
-
-
-namespace Jakar.Extensions.Experiments.Benchmarks;
+﻿namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 #pragma warning disable CA1822 // Mark members as static

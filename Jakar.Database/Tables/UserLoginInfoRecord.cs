@@ -10,9 +10,9 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
                                           [property: ProtectedPersonalData, StringLength( int.MaxValue )] string  ProviderKey,
                                           [property: ProtectedPersonalData]                               string? Value,
                                           RecordID<UserLoginInfoRecord>                                           ID,
-                                          RecordID<UserRecord>?                                                   OwnerUserID,
+                                          RecordID<UserRecord>?                                                   CreatedBy,
                                           DateTimeOffset                                                          DateCreated,
-                                          DateTimeOffset?                                                         LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
+                                          DateTimeOffset?                                                         LastModified = default ) : OwnedTableRecord<UserLoginInfoRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<UserLoginInfoRecord>
 {
     public const  string TABLE_NAME = "UserLoginInfo";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -40,7 +40,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
         string                        value               = reader.GetFieldValue<string>( nameof(Value) );
         DateTimeOffset                dateCreated         = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRecord>?         ownerUserID         = RecordID<UserRecord>.OwnerUserID( reader );
+        RecordID<UserRecord>?         ownerUserID         = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<UserLoginInfoRecord> id                  = RecordID<UserLoginInfoRecord>.ID( reader );
         UserLoginInfoRecord           record              = new UserLoginInfoRecord( loginProvider, providerDisplayName, providerKey, value, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
@@ -56,7 +56,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(OwnerUserID), user.ID.Value );
+        parameters.Add( nameof(CreatedBy), user.ID.Value );
         parameters.Add( nameof(Value),       value );
         return parameters;
     }
@@ -76,14 +76,14 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
     public static implicit operator UserLoginInfo( UserLoginInfoRecord value ) => value.ToUserLoginInfo();
     public static implicit operator IdentityUserToken<string>( UserLoginInfoRecord value ) => new()
                                                                                               {
-                                                                                                  UserId        = value.OwnerUserID?.ToString() ?? throw new NullReferenceException( nameof(value.OwnerUserID) ),
+                                                                                                  UserId        = value.CreatedBy?.ToString() ?? throw new NullReferenceException( nameof(value.CreatedBy) ),
                                                                                                   LoginProvider = value.LoginProvider,
                                                                                                   Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                   Value         = value.ProviderKey
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.OwnerUserID?.Value ?? Guid.Empty,
+                                                                                                UserId        = value.CreatedBy?.Value ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey

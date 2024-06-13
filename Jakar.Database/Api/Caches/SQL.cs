@@ -20,7 +20,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
     public const string LAST_MODIFIED         = nameof(ITableRecord.LastModified);
     public const string LIST_SEPARATOR        = ", ";
     public const string OR                    = " OR ";
-    public const string OWNER_USER_ID         = nameof(IOwnedTableRecord.OwnerUserID);
+    public const string CREATED_BY            = nameof(IOwnedTableRecord.CreatedBy);
     public const char   QUOTE                 = '"';
     public const int    UNICODE_CAPACITY      = 4000;
     public const int    UNICODE_TEXT_CAPACITY = 1_073_741_823;
@@ -32,60 +32,15 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
                                                                : OR;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static int GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.GetHash();
-
-    /*
-    [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-    public static ulong GetHash( this IEnumerable<string> parameters )
-    {
-        using var sb = new ValueStringBuilder( 1000 );
-        sb.Append( parameters );
-        ReadOnlySpan<char> span = sb.Span;
-        ulong              hash = OFFSET_BASIS;
-
-        foreach ( char c in span )
-        {
-            hash ^= c;
-            hash *= PRIME;
-        }
-
-        return hash;
-    }
-
-   [ MethodImpl( MethodImplOptions.AggressiveInlining ) ]
-   public static ulong GetLongHash<T>( this IEnumerable<T> values )
-   {
-       ulong hash = OFFSET_BASIS;
-
-       foreach ( var value in values )
-       {
-           int valueHash = value?.GetHashCode() ?? 0;
-
-           hash ^= (ulong)valueHash;
-           hash *= PRIME;
-       }
-
-   return hash;
-   }
-    */
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int GetHash<T>( this IEnumerable<T> values )
-    {
-        HashCode hash = new HashCode();
-        foreach ( T value in values ) { hash.Add( value ); }
-
-        return hash.ToHashCode();
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128 GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.ToArray().Hash128();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetCreatedBy( this DbTypeInstance instance ) =>
         instance switch
         {
-            DbTypeInstance.Postgres => $"{QUOTE}{OWNER_USER_ID}{QUOTE}",
-            DbTypeInstance.MsSql    => OWNER_USER_ID,
+            DbTypeInstance.Postgres => $"{QUOTE}{CREATED_BY}{QUOTE}",
+            DbTypeInstance.MsSql    => CREATED_BY,
             _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 
@@ -106,16 +61,6 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{LAST_MODIFIED}{QUOTE}",
             DbTypeInstance.MsSql    => LAST_MODIFIED,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
-        };
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static string GetOwnerUserID( this DbTypeInstance instance ) =>
-        instance switch
-        {
-            DbTypeInstance.Postgres => $"{QUOTE}{OWNER_USER_ID}{QUOTE}",
-            DbTypeInstance.MsSql    => OWNER_USER_ID,
             _                       => throw new OutOfRangeException( nameof(instance), instance )
         };
 

@@ -38,7 +38,7 @@
         public IAsyncEnumerable<UserLoginInfoRecord> GetLoginsAsync<TRecord>( Activity? activity, TRecord record, [EnumeratorCancellation] CancellationToken token )
             where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => this.TryCall( GetLoginsAsync, activity, record, token );
         public virtual IAsyncEnumerable<UserLoginInfoRecord> GetLoginsAsync<TRecord>( DbConnection connection, DbTransaction transaction, Activity? activity, TRecord record, [EnumeratorCancellation] CancellationToken token )
-            where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => UserLogins.Where( connection, transaction, activity, nameof(record.OwnerUserID), record.OwnerUserID, token );
+            where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => UserLogins.Where( connection, transaction, activity, nameof(record.CreatedBy), record.CreatedBy, token );
 
 
         public ValueTask<ErrorOrResult<UserLoginInfoRecord>> AddLoginAsync( Activity? activity, UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, activity, user, login, token );
@@ -50,7 +50,7 @@
             {
                 Error provider = Error.NotFound( nameof(UserLoginInfoRecord.LoginProvider), login.LoginProvider );
                 Error key      = Error.NotFound( nameof(UserLoginInfoRecord.ProviderKey),   login.ProviderKey );
-                Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.OwnerUserID),   user.ID.Value.ToString() );
+                Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.CreatedBy),   user.ID.Value.ToString() );
                 return ErrorOrResult<UserLoginInfoRecord>.Create( provider, key, userID );
             }
 

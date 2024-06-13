@@ -10,29 +10,28 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public static readonly FrozenDictionary<DbTypeInstance, FrozenDictionary<string, Descriptor>> SqlProperties     = SQL.CreateDescriptorMapping<TRecord>();
-    protected readonly     ConcurrentDictionary<Key, string>                                  _deleteParameters = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                  _existParameters  = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                  _getParameters    = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                  _insertOrUpdate   = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                  _tryInsert        = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<Key, string>                                  _whereParameters  = new(Key.Equalizer);
-    protected readonly     ConcurrentDictionary<SqlCacheType, string>                         _sql              = new(EqualityComparer<SqlCacheType>.Default);
-    protected readonly     ConcurrentDictionary<string, string>                               _whereColumn      = new(StringComparer.Ordinal);
-    protected readonly     ConcurrentDictionary<string, string>                               _whereIDColumn    = new(StringComparer.Ordinal);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _deleteParameters = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _existParameters  = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _getParameters    = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _insertOrUpdate   = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _tryInsert        = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<Key, string>                                      _whereParameters  = new(Key.Equalizer);
+    protected readonly     ConcurrentDictionary<SqlCacheType, string>                             _sql              = new(EqualityComparer<SqlCacheType>.Default);
+    protected readonly     ConcurrentDictionary<string, string>                                   _whereColumn      = new(StringComparer.Ordinal);
+    protected readonly     ConcurrentDictionary<string, string>                                   _whereIDColumn    = new(StringComparer.Ordinal);
 
 
     protected IEnumerable<string>                  _KeyValuePairs { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Properties.Values.Select( x => x.KeyValuePair ); }
     protected FrozenDictionary<string, Descriptor> _Properties    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => SqlProperties[Instance]; }
 
 
-    public          string     CreatedBy    { get; init; }
-    public          string     DateCreated  { get; init; }
-    public          string     IdColumnName { get; init; }
+    public          string         CreatedBy    { get; init; }
+    public          string         DateCreated  { get; init; }
+    public          string         IdColumnName { get; init; }
     public abstract DbTypeInstance Instance     { get; }
-    public          string     LastModified { get; init; }
-    public          string     OwnerUserID  { get; init; }
-    public          string     RandomMethod { get; init; }
-    public virtual  string     TableName    => TRecord.TableName;
+    public          string         LastModified { get; init; }
+    public          string         RandomMethod { get; init; }
+    public virtual  string         TableName    => TRecord.TableName;
 
     protected BaseSqlCache()
     {
@@ -41,7 +40,6 @@ public abstract class BaseSqlCache<TRecord> : ISqlCache<TRecord>
         DateCreated  = Instance.GetDateCreated();
         IdColumnName = Instance.GetID_ColumnName();
         LastModified = Instance.GetLastModified();
-        OwnerUserID  = Instance.GetOwnerUserID();
     }
 
 

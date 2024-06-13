@@ -108,7 +108,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
 {
     public readonly ReadOnlySpan<string> blockedPasswords         = blockedPasswords;
     public readonly int                  minLength                = minLength;
-    public readonly int                  stringLength             = maxLength;
+    public readonly int                  maxLength                = maxLength;
     public readonly bool                 requireLowerCase         = requireLowerCase;
     public readonly ReadOnlySpan<char>   lowerCase                = lowerCase;
     public readonly bool                 mustBeTrimmed            = mustBeTrimmed;
@@ -120,6 +120,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
     public readonly bool                 requireSpecialChar       = requireSpecialChar;
     public readonly bool                 cantStartWithSpecialChar = cantStartWithSpecialChar;
     public readonly ReadOnlySpan<char>   specialChars             = specialChars;
+
 
     public static Requirements Default { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => PasswordRequirements.Current; }
 

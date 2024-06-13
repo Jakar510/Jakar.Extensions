@@ -9,7 +9,7 @@ namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
+public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "Codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher    = new();
@@ -32,7 +32,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
         string                       code         = reader.GetFieldValue<string>( nameof(Code) );
         DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?              lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRecord>?        ownerUserID  = RecordID<UserRecord>.OwnerUserID( reader );
+        RecordID<UserRecord>?        ownerUserID  = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID( reader );
         RecoveryCodeRecord           record       = new RecoveryCodeRecord( code, id, ownerUserID, dateCreated, lastModified );
         record.Validate();
