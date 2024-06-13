@@ -74,7 +74,7 @@ public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffse
         int               length     = parameters.ParameterNames.Count();
         if ( length == properties.Length ) { return; }
 
-        HashSet<string> missing = new HashSet<string>( properties.Select( x => x.Name ) );
+        HashSet<string> missing = [..properties.Select( static x => x.Name )];
         missing.ExceptWith( parameters.ParameterNames );
 
         string message = $"""
@@ -133,7 +133,7 @@ public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffse
     public UInt128 GetHash()
     {
         string json = this.ToJson();
-        return Spans.Hash128( json );
+        return Hashes.Hash128( json );
     }
 
 
@@ -184,7 +184,7 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedB
     }
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, true,        GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, true,      GetDynamicParameters( this ), token );
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, CreatedBy, token );
 
 

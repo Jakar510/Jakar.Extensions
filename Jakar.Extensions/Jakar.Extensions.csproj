@@ -8,7 +8,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>8.11.6</Version>
+		<Version>8.11.7</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -17,7 +17,7 @@
 		<PackageTags>Extension AsynLinq Linq Http Files Strings Types Languages Collections Ini</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-		<PackageReleaseNotes>Moved Spans.Hashes to Hashes</PackageReleaseNotes>
+		<PackageReleaseNotes>Bug Fixes</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<NeutralLanguage>en</NeutralLanguage>

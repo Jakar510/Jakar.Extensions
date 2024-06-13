@@ -32,7 +32,15 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
                                                                : OR;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128 GetHash( this DynamicParameters parameters ) => parameters.ParameterNames.ToArray().Hash128();
+    public static int GetHash32( this DynamicParameters parameters )
+    {
+        HashCode code = new();
+        foreach ( string parameterName in parameters.ParameterNames ) { code.Add( parameterName ); }
+
+        return code.ToHashCode();
+    }
+    public static ulong   GetHash64( this  DynamicParameters parameters ) => Hashes.Hash( parameters.ParameterNames.ToArray() );
+    public static UInt128 GetHash128( this DynamicParameters parameters ) => Hashes.Hash128( parameters.ParameterNames.ToArray() );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

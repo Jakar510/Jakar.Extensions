@@ -68,8 +68,8 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     [Pure] public bool HasChangedOrExpired( in TimeSpan lifeSpan ) => _lastUpdated.HasExpired( lifeSpan ) || _hash != GetHash( _json );
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128             GetHash( in ReadOnlySpan<char> value ) => Spans.Hash128( value );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public        RecordPair<TRecord> ToPair()                               => new(ID, DateCreated);
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static UInt128             GetHash( scoped in ReadOnlySpan<char> value ) => value.Hash128();
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public        RecordPair<TRecord> ToPair()                                      => new(ID, DateCreated);
 
 
     public int CompareTo( object? other )

@@ -388,7 +388,7 @@ public sealed record UserRecord( string                        UserName,
     void IUserData<Guid>.With( IUserData<Guid> value ) => With( value );
     public UserRecord With( IUserData<Guid> value )
     {
-        CreatedBy       = RecordID<UserRecord>.TryCreate( value.CreatedBy );
+        CreatedBy         = RecordID<UserRecord>.TryCreate( value.CreatedBy );
         EscalateTo        = RecordID<UserRecord>.TryCreate( value.EscalateTo );
         FirstName         = value.FirstName;
         LastName          = value.LastName;
@@ -631,7 +631,7 @@ public sealed record UserRecord( string                        UserName,
     public UserRecord WithPassword( in string password, scoped in Requirements requirements ) => WithPassword( password, requirements, out _ );
     public UserRecord WithPassword( in string password, scoped in Requirements requirements, out PasswordValidator.Results results )
     {
-        if ( requirements.stringLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException( $"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password) ); }
+        if ( requirements.maxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException( $"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password) ); }
 
         PasswordValidator validator = new(requirements);
         if ( validator.Validate( password, out results ) is false ) { return this; }
@@ -826,7 +826,7 @@ public sealed record UserRecord( string                        UserName,
 
         return string.Equals( record.RefreshToken,
                               hashed
-                                  ? Spans.Hash128( token ).ToString()
+                                  ? Hashes.Hash128( token ).ToString()
                                   : token,
                               StringComparison.Ordinal );
     }
@@ -845,7 +845,7 @@ public sealed record UserRecord( string                        UserName,
         }
 
         date ??= DateTimeOffset.UtcNow;
-        string hash = Spans.Hash128( token ).ToString();
+        string hash = Hashes.Hash128( token ).ToString();
         SecurityStamp = securityStamp ?? hash;
 
         RefreshToken = hashed
