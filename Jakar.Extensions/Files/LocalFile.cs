@@ -795,10 +795,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     {
         if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
 
-        await using var memory = new MemoryStream();
-        await payload.CopyToAsync( memory, token );
-        ReadOnlyMemory<byte> data = memory.GetBuffer();
-        await WriteAsync( data, token );
+        await using FileStream stream = Create();
+        await payload.CopyToAsync( stream, token );
     }
 
 

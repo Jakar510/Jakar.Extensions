@@ -1,3 +1,12 @@
-﻿Console.WriteLine( "Hello World" );
+﻿using System.Reflection;
+using TypeExtensions = Jakar.Extensions.TypeExtensions;
 
-new HashSet<string>( typeof(AsyncLinq).GetMethods().Select( static x => x.Name ) ).ToPrettyJson().WriteToConsole();
+
+HashSet<string> set = [..typeof(TypeExtensions).GetMethods().Select( GetName )];
+set.ExceptWith( typeof(object).GetMethods().Select( GetName ) );
+
+
+foreach ( string name in set ) { Console.WriteLine( $"- {name}" ); }
+
+return;
+static string GetName( MethodInfo x ) => x.Name;
