@@ -39,10 +39,6 @@ Initial Release</PackageReleaseNotes>
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -91,5 +87,12 @@ Initial Release</PackageReleaseNotes>
 		<PackageReference Include="Syncfusion.Blazor.TreeGrid" Version="26.1.35" />
 		<PackageReference Include="Syncfusion.Blazor.TreeMap" Version="26.1.35" />
 		<PackageReference Include="Syncfusion.Blazor.WordProcessor" Version="26.1.35" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 </Project>

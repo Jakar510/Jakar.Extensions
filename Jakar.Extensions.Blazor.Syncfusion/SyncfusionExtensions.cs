@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Popups;
 
@@ -11,7 +12,7 @@ public static class SyncfusionExtensions
 {
     public static IServiceCollection AddSyncfusion( this IServiceCollection services )
     {
-        services.AddScoped<SfDialogService>();
+        services.TryAddScoped<SfDialogService>();
         services.AddSyncfusionBlazor();
         return services;
     }
