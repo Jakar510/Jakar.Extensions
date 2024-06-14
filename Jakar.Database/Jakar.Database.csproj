@@ -10,7 +10,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<Version>6.3.0</Version>
+		<Version>7.0.0.25-beta</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -19,21 +19,45 @@
 		<PackageTags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-		<PackageReleaseNotes>
-			Bug Fixes
-		</PackageReleaseNotes>
+		<PackageReleaseNotes>Bug Fixes</PackageReleaseNotes>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<NeutralLanguage>en</NeutralLanguage>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageLicenseFile>W:\WorkSpace\Public\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Service Include="{3259aa49-8aa1-44d3-9025-a0b520596a8c}" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="DbMigrations\Api\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\images\icon.png">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
+		<None Include="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Database.Experiments" />
+		<InternalsVisibleTo Include="Jakar.Database.Generators" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -45,7 +69,7 @@
 		<PackageReference Include="Dapper" Version="2.1.35" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="5.2.0" />
-		<PackageReference Include="Jakar.Extensions" Version="8.11.7" />
+		<PackageReference Include="Jakar.Extensions" Version="8.11.9" />
 		<PackageReference Include="FluentMigrator" Version="5.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
 		<PackageReference Include="MailKit" Version="4.6.0" />
@@ -110,18 +134,4 @@
 	</ItemGroup>
 	-->
 
-	<ItemGroup>
-		<Service Include="{3259aa49-8aa1-44d3-9025-a0b520596a8c}" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="DbMigrations\Api\" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
-	</ItemGroup>
 </Project>

@@ -14,7 +14,7 @@ TBD
 
 ## Installation
 
-You can install the `Jakar.Extensions.Blazor.Syncfusion` package via [Nuget](https://www.nuget.org/packages/Jakar.Extensions/):
+You can install the `Jakar.Extensions.Blazor.Syncfusion` package via [Nuget](https://www.nuget.org/packages/Jakar.Extensions.Blazor.Syncfusion/):
 
 ```sh
 dotnet add package Jakar.Extensions.Blazor.Syncfusion
