@@ -10,22 +10,26 @@ namespace Jakar.Extensions;
 
 public static class Errors
 {
-    public const string BLOCKED_PASSED            = "Password cannot be a blocked password";
-    public const string CONFLICT_TYPE             = "General.Conflict";
-    public const string DISABLED_TYPE             = "User.Disabled";
-    public const string EXPIRED_SUBSCRIPTION_TYPE = "User.Subscription.Expired";
-    public const string FORBIDDEN_TYPE            = "General.Forbidden";
-    public const string GENERAL_TYPE              = "General.Failure";
-    public const string INVALID_SUBSCRIPTION_TYPE = "User.Subscription.Invalid";
-    public const string LOCKED_TYPE               = "User.Disabled";
-    public const string NO_INTERNET_TYPE          = "Internet.Disabled";
-    public const string NO_INTERNET_WIFI_TYPE     = "Internet.Disabled.WiFi";
-    public const string NO_SUBSCRIPTION_TYPE      = "User.Subscription.None";
-    public const string NOT_FOUND_TYPE            = "General.NotFound";
-    public const string PASSWORD_VALIDATION_TYPE  = "Password.Unauthorized";
-    public const string UNAUTHORIZED_TYPE         = "General.Unauthorized";
-    public const string UNEXPECTED_TYPE           = "General.Unexpected";
-    public const string VALIDATION_TYPE           = "General.Unexpected";
+    public const string BLOCKED_PASSED             = "Password cannot be a blocked password";
+    public const string CLIENT_IS_OUTDATED_TYPE    = "Client.Outdated";
+    public const string CLIENT_IS_UNAVAILABLE_TYPE = "Client.Unavailable";
+    public const string CONFLICT_TYPE              = "General.Conflict";
+    public const string DISABLED_TYPE              = "User.Disabled";
+    public const string EXPIRED_SUBSCRIPTION_TYPE  = "User.Subscription.Expired";
+    public const string FORBIDDEN_TYPE             = "General.Forbidden";
+    public const string GENERAL_TYPE               = "General.Failure";
+    public const string INVALID_SUBSCRIPTION_TYPE  = "User.Subscription.Invalid";
+    public const string LOCKED_TYPE                = "User.Disabled";
+    public const string NO_INTERNET_TYPE           = "Internet.Disabled";
+    public const string NO_INTERNET_WIFI_TYPE      = "Internet.Disabled.WiFi";
+    public const string NO_SUBSCRIPTION_TYPE       = "User.Subscription.None";
+    public const string NOT_FOUND_TYPE             = "General.NotFound";
+    public const string PASSWORD_VALIDATION_TYPE   = "Password.Unauthorized";
+    public const string SERVER_IS_OUTDATED_TYPE    = "Server.Outdated";
+    public const string SERVER_IS_UNAVAILABLE_TYPE = "Server.Unavailable";
+    public const string UNAUTHORIZED_TYPE          = "General.Unauthorized";
+    public const string UNEXPECTED_TYPE            = "General.Unexpected";
+    public const string VALIDATION_TYPE            = "General.Unexpected";
 
 
     public static ErrorTitles Titles { get; set; } = new();
