@@ -4,31 +4,9 @@
 namespace Jakar.Extensions;
 
 
+[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class ErrorTitles
 {
-    /*
-    public const   string CONFLICT_TITLE             = "A conflict has occurred.";
-    public const   string VALIDATION_TITLE           = "A validation has occurred.";
-    public const   string FORBIDDEN_TITLE            = "A 'Forbidden' has occurred.";
-    public const   string INVALID_SUBSCRIPTION_TITLE = "User's subscription is no longer valid.";
-    public const   string LOCKED_TITLE               = "User is locked.";
-    public const   string GENERAL_TITLE              = "A failure has occurred.";
-    public const   string EXPIRED_SUBSCRIPTION_TITLE = "User's subscription is expired.";
-    public const   string UNEXPECTED_TITLE           = "A unexpected has occurred.";
-    public const   string NOT_FOUND_TITLE            = "A 'Not Found' has occurred.";
-    public const   string NO_SUBSCRIPTION_TITLE      = "User is not subscribed.";
-    public const   string UNAUTHORIZED_TITLE         = "A 'Unauthorized' has occurred.";
-    public const   string PASSWORD_VALIDATION_TITLE  = "Password validation failed";
-    public const   string DISABLED_TITLE             = "User is disabled.";
-    public const   string NUMERIC_PASSED             = "Password must contain a numeric character";
-    public const   string SPECIAL_PASSED             = "Password must contain a special character";
-    public const   string LOWER_PASSED               = "Password must contain a lower case character";
-    public const   string MUST_BE_TRIMMED            = "Password must be trimmed";
-    public const   string UPPER_PASSED               = "Password must contain a upper case character";
-    public const   string LENGTH_PASSED              = "Password not long enough";
-    */
-
-
     public virtual string  BlockedPassed                                   => "Password cannot be a blocked password";
     public virtual string  Conflict                                        => "A conflict has occurred.";
     public virtual string  Disabled                                        => "User is disabled.";
