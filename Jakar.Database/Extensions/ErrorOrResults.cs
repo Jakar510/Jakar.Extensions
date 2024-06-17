@@ -2,10 +2,14 @@
 // 03/06/2023  12:59 AM
 
 
+using Microsoft.AspNetCore.Http.HttpResults;
+
+
+
 namespace Jakar.Database;
 
 
-public static class Errors
+public static class ErrorOrResults
 {
     public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( GetStatus ) ?? Status.Ok;
     public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
@@ -60,17 +64,17 @@ public static class Errors
     }
 
 
-    public static async Task<IResult>       ToResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static async ValueTask<IResult>  ToResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static       JsonResult<Error>   ToResult( this    Error                       error )  => new(error, (int)(error.StatusCode ?? Status.Ok));
-    public static       JsonResult<Error[]> ToResult( this    Error[]                     error )  => new(error, (int)error.GetStatus());
-    public static IResult ToResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
-                                                                             ? new JsonResult<T>( value, (int)errors.GetStatus() )
-                                                                             : errors.ToResult();
+    public static async Task<Results<JsonResult<T>, JsonResult<Error[]>>>      ToResult<T>( this Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToResult();
+    public static async ValueTask<Results<JsonResult<T>, JsonResult<Error[]>>> ToResult<T>( this ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
+    public static       JsonResult<Error>                                      ToResult( this    Error                       error )  => new(error, (int)(error.StatusCode ?? Status.Ok));
+    public static       JsonResult<Error[]>                                    ToResult( this    Error[]                     error )  => new(error, (int)error.GetStatus());
+    public static Results<JsonResult<T>, JsonResult<Error[]>> ToResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
+                                                                                                                 ? new JsonResult<T>( value, (int)errors.GetStatus() )
+                                                                                                                 : errors.ToResult();
 
 
     public static ActionResult<T> ToActionResult<T>( this ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
-                                                                                           ? new ObjectResult( value ) { StatusCode      = (int)errors.GetStatus() }
+                                                                                           ? new ObjectResult( value ) { StatusCode  = (int)errors.GetStatus() }
                                                                                            : new ObjectResult( errors ) { StatusCode = (int)errors.GetStatus() };
     public static       ObjectResult               ToActionResult( this    Error                       error )  => new(error) { StatusCode = (int)(error.StatusCode ?? Status.Ok) };
     public static       ObjectResult               ToActionResult( this    Error[]                     error )  => new(error) { StatusCode = (int)error.GetStatus() };

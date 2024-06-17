@@ -37,7 +37,7 @@ public abstract partial class Database
             if ( UserRecord.VerifyPassword( ref record, request ) is false )
             {
                 record = record.MarkBadLogin();
-                return Error.Unauthorized();
+                return Error.Unauthorized(request.UserName);
             }
 
             if ( !record.IsActive )

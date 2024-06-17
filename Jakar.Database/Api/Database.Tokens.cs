@@ -136,7 +136,7 @@ public abstract partial class Database
         {
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, activity, record, token );
-            return Error.Unauthorized();
+            return Error.Unauthorized( record.UserName );
         }
 
 

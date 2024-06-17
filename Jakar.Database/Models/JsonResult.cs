@@ -38,16 +38,18 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
     object? IValueHttpResult.  Value      => Value;
 
 
-    public JsonResult( TValue? value, int status = 200 )
+    public JsonResult( TValue? value, Status status ) : this( value, status.AsInt() ) { }
+    public JsonResult( TValue? value, int status )
     {
         Value      = value;
         StatusCode = status;
         if ( value is ProblemDetails details ) { Apply( details, StatusCode ); }
     }
-    public static JsonResult Create( TValue? value, Status status = Status.Ok ) => new(value, status.AsInt());
+    public static JsonResult<TValue> Create( TValue? value, Status status = Status.Ok ) => new(value, status);
 
 
-    public static implicit operator JsonResult<TValue>( TValue?                     value )  => new(value, 200);
+    public static implicit operator JsonResult<TValue>( Status                      status ) => new(default, status);
+    public static implicit operator JsonResult<TValue>( TValue?                     value )  => new(value, Status.Ok);
     public static implicit operator JsonResult<TValue>( Ok<TValue>                  result ) => new(result.Value, result.StatusCode);
     public static implicit operator JsonResult<TValue>( Created<TValue>             result ) => new(result.Value, result.StatusCode);
     public static implicit operator JsonResult<TValue>( CreatedAtRoute<TValue>      result ) => new(result.Value, result.StatusCode);
