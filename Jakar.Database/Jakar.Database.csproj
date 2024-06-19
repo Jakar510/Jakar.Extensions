@@ -10,7 +10,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<Version>7.0.0.26-beta</Version>
+		<Version>7.0.0.27-beta</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -69,7 +69,7 @@
 		<PackageReference Include="Dapper" Version="2.1.35" />
 		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="5.2.0" />
-		<PackageReference Include="Jakar.Extensions" Version="8.12.0" />
+		<PackageReference Include="Jakar.Extensions" Version="8.12.2" />
 		<PackageReference Include="FluentMigrator" Version="5.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
 		<PackageReference Include="MailKit" Version="4.6.0" />
@@ -93,7 +93,7 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.7.0-beta.1" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.8.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
 		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
 		<PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />

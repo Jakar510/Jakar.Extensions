@@ -129,24 +129,26 @@ public static class Claims
     }
 
 
-    public static bool IsUserID( this                 Claim claim ) => string.Equals( claim.Type, ClaimType.UserID.ToClaimTypes(),                 StringComparison.Ordinal );
-    public static bool IsUserName( this               Claim claim ) => string.Equals( claim.Type, ClaimType.UserName.ToClaimTypes(),               StringComparison.Ordinal );
-    public static bool IsFirstName( this              Claim claim ) => string.Equals( claim.Type, ClaimType.FirstName.ToClaimTypes(),              StringComparison.Ordinal );
-    public static bool IsLastName( this               Claim claim ) => string.Equals( claim.Type, ClaimType.LastName.ToClaimTypes(),               StringComparison.Ordinal );
-    public static bool IsFullName( this               Claim claim ) => string.Equals( claim.Type, ClaimType.FullName.ToClaimTypes(),               StringComparison.Ordinal );
-    public static bool IsGender( this                 Claim claim ) => string.Equals( claim.Type, ClaimType.Gender.ToClaimTypes(),                 StringComparison.Ordinal );
-    public static bool IsSubscriptionExpiration( this Claim claim ) => string.Equals( claim.Type, ClaimType.SubscriptionExpiration.ToClaimTypes(), StringComparison.Ordinal );
-    public static bool IsExpired( this                Claim claim ) => string.Equals( claim.Type, ClaimType.Expired.ToClaimTypes(),                StringComparison.Ordinal );
-    public static bool IsEmail( this                  Claim claim ) => string.Equals( claim.Type, ClaimType.Email.ToClaimTypes(),                  StringComparison.Ordinal );
-    public static bool IsMobilePhone( this            Claim claim ) => string.Equals( claim.Type, ClaimType.MobilePhone.ToClaimTypes(),            StringComparison.Ordinal );
-    public static bool IsStreetAddressLine1( this     Claim claim ) => string.Equals( claim.Type, ClaimType.StreetAddressLine1.ToClaimTypes(),     StringComparison.Ordinal );
-    public static bool IsStreetAddressLine2( this     Claim claim ) => string.Equals( claim.Type, ClaimType.StreetAddressLine2.ToClaimTypes(),     StringComparison.Ordinal );
-    public static bool IsStateOrProvince( this        Claim claim ) => string.Equals( claim.Type, ClaimType.StateOrProvince.ToClaimTypes(),        StringComparison.Ordinal );
-    public static bool IsCountry( this                Claim claim ) => string.Equals( claim.Type, ClaimType.Country.ToClaimTypes(),                StringComparison.Ordinal );
-    public static bool IsPostalCode( this             Claim claim ) => string.Equals( claim.Type, ClaimType.PostalCode.ToClaimTypes(),             StringComparison.Ordinal );
-    public static bool IsWebSite( this                Claim claim ) => string.Equals( claim.Type, ClaimType.WebSite.ToClaimTypes(),                StringComparison.Ordinal );
-    public static bool IsGroup( this                  Claim claim ) => string.Equals( claim.Type, ClaimType.Group.ToClaimTypes(),                  StringComparison.Ordinal );
-    public static bool IsRole( this                   Claim claim ) => string.Equals( claim.Type, ClaimType.Role.ToClaimTypes(),                   StringComparison.Ordinal );
+    public static bool IsAuthorized( this             ClaimsPrincipal principal, Guid userID ) => string.Equals( principal.Claims.FirstOrDefault( static x => x.IsUserID() )?.Value, userID.ToString(), StringComparison.Ordinal ) is false;
+    public static bool IsAuthorized( this             ClaimsIdentity  principal, Guid userID ) => string.Equals( principal.Claims.FirstOrDefault( static x => x.IsUserID() )?.Value, userID.ToString(), StringComparison.Ordinal ) is false;
+    public static bool IsUserID( this                 Claim           claim ) => string.Equals( claim.Type, ClaimType.UserID.ToClaimTypes(),                 StringComparison.Ordinal );
+    public static bool IsUserName( this               Claim           claim ) => string.Equals( claim.Type, ClaimType.UserName.ToClaimTypes(),               StringComparison.Ordinal );
+    public static bool IsFirstName( this              Claim           claim ) => string.Equals( claim.Type, ClaimType.FirstName.ToClaimTypes(),              StringComparison.Ordinal );
+    public static bool IsLastName( this               Claim           claim ) => string.Equals( claim.Type, ClaimType.LastName.ToClaimTypes(),               StringComparison.Ordinal );
+    public static bool IsFullName( this               Claim           claim ) => string.Equals( claim.Type, ClaimType.FullName.ToClaimTypes(),               StringComparison.Ordinal );
+    public static bool IsGender( this                 Claim           claim ) => string.Equals( claim.Type, ClaimType.Gender.ToClaimTypes(),                 StringComparison.Ordinal );
+    public static bool IsSubscriptionExpiration( this Claim           claim ) => string.Equals( claim.Type, ClaimType.SubscriptionExpiration.ToClaimTypes(), StringComparison.Ordinal );
+    public static bool IsExpired( this                Claim           claim ) => string.Equals( claim.Type, ClaimType.Expired.ToClaimTypes(),                StringComparison.Ordinal );
+    public static bool IsEmail( this                  Claim           claim ) => string.Equals( claim.Type, ClaimType.Email.ToClaimTypes(),                  StringComparison.Ordinal );
+    public static bool IsMobilePhone( this            Claim           claim ) => string.Equals( claim.Type, ClaimType.MobilePhone.ToClaimTypes(),            StringComparison.Ordinal );
+    public static bool IsStreetAddressLine1( this     Claim           claim ) => string.Equals( claim.Type, ClaimType.StreetAddressLine1.ToClaimTypes(),     StringComparison.Ordinal );
+    public static bool IsStreetAddressLine2( this     Claim           claim ) => string.Equals( claim.Type, ClaimType.StreetAddressLine2.ToClaimTypes(),     StringComparison.Ordinal );
+    public static bool IsStateOrProvince( this        Claim           claim ) => string.Equals( claim.Type, ClaimType.StateOrProvince.ToClaimTypes(),        StringComparison.Ordinal );
+    public static bool IsCountry( this                Claim           claim ) => string.Equals( claim.Type, ClaimType.Country.ToClaimTypes(),                StringComparison.Ordinal );
+    public static bool IsPostalCode( this             Claim           claim ) => string.Equals( claim.Type, ClaimType.PostalCode.ToClaimTypes(),             StringComparison.Ordinal );
+    public static bool IsWebSite( this                Claim           claim ) => string.Equals( claim.Type, ClaimType.WebSite.ToClaimTypes(),                StringComparison.Ordinal );
+    public static bool IsGroup( this                  Claim           claim ) => string.Equals( claim.Type, ClaimType.Group.ToClaimTypes(),                  StringComparison.Ordinal );
+    public static bool IsRole( this                   Claim           claim ) => string.Equals( claim.Type, ClaimType.Role.ToClaimTypes(),                   StringComparison.Ordinal );
 
 
 #if NET6_0_OR_GREATER
