@@ -18,6 +18,6 @@ public abstract class Page : Widget
             _popup = value;
         }
     }
-    [Inject]    public BlazorServices Services { get; set; } = default!;
-    [Parameter] public string?        Title    { get; set; }
+    [Inject]    public required BlazorServices Services { get; set; }
+    [Parameter] public          string?        Title    { get; set; }
 }

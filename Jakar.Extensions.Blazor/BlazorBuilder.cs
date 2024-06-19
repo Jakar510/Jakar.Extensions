@@ -24,17 +24,19 @@ namespace Jakar.Extensions.Blazor;
 /// </summary>
 public static class BlazorBuilder
 {
-    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null )
+    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null ) =>
+        services.AddBlazorServices<LoginUserState, ModelErrorState>( configureLocal, configureSession );
+    public static IServiceCollection AddBlazorServices<TLoginState, TErrorState>( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null )
+        where TLoginState : class, ILoginUserState
+        where TErrorState : class, IModelErrorState
     {
         services.AddAuthentication();
         services.AddAuthorization();
-        services.TryAddScoped<LoginState>();
-        services.TryAddCascadingValue( LoginState.KEY, LoginState.Get );
-        services.TryAddScoped<ErrorState>();
-        services.TryAddCascadingValue( ErrorState.KEY, ErrorState.Get );
+        services.TryAddCascadingValueScopedNamed<TLoginState>();
+        services.TryAddCascadingValueScopedNamed<TErrorState>();
         services.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage( configureLocal ).AddBlazoredSessionStorage( configureSession );
         services.AddRadzenComponents();
-        services.AddScoped<BlazorServices>();
+        services.TryAddScoped<BlazorServices>();
         return services;
     }
 }

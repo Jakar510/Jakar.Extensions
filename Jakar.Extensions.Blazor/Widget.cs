@@ -6,9 +6,9 @@ namespace Jakar.Extensions.Blazor;
 
 public abstract class Widget : ComponentBase, IModelState, ILoginState
 {
-    [Inject, CascadingParameter( Name = ErrorState.KEY )] public ErrorState Errors { get; set; } = default!;
-    [Inject, CascadingParameter( Name = LoginState.KEY )] public LoginState User   { get; set; } = default!;
+    [CascadingParameter( Name = ModelErrorState.KEY )] public required ModelErrorState State { get; set; }
+    [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
 
 
-    public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
+    // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
 }
