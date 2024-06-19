@@ -11,6 +11,20 @@ namespace Jakar.Database;
 
 public static class ErrorOrResults
 {
+    public static NotFound               NotFound            { get; } = TypedResults.NotFound();
+    public static UnauthorizedHttpResult Unauthorized        { get; } = TypedResults.Unauthorized();
+    public static BadRequest             BadRequest          { get; } = TypedResults.BadRequest();
+    public static Conflict               Conflict            { get; } = TypedResults.Conflict();
+    public static NoContent              NoContent           { get; } = TypedResults.NoContent();
+    public static Ok                     Ok                  { get; } = TypedResults.Ok();
+    public static UnprocessableEntity    UnprocessableEntity { get; } = TypedResults.UnprocessableEntity();
+
+
+    public static JsonResult<T>       ToJsonResult<T>( this T       value, Status status = Status.Ok ) => new(value, status.AsInt());
+    public static JsonResult<Error[]> ToJsonResult( this    Error   value ) => new([value], value.GetStatus());
+    public static JsonResult<Error[]> ToJsonResult( this    Error[] value ) => new(value, value.GetStatus());
+
+
     public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( GetStatus ) ?? Status.Ok;
     public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
     public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
@@ -21,13 +35,13 @@ public static class ErrorOrResults
 
         foreach ( var error in errors )
         {
-            Status? code = error.StatusCode;
-            if ( code > status ) { status = code.Value; }
+            Status code = error.GetStatus();
+            if ( code > status ) { status = code; }
         }
 
         return status;
     }
-    private static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
+    public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 
     public static SerializableError? ToSerializableError<T>( this ErrorOrResult<T> result ) => result.HasErrors
