@@ -68,7 +68,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Database.Experiments"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestMauiApp", "TestMauiApp\TestMauiApp.csproj", "{1BCD8D19-9707-422F-88E8-C24B7EBE1439}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Experiments", "Jakar.Extensions.Experiments\Jakar.Extensions.Experiments.csproj", "{B603621D-13FD-4EFB-986A-267F1C125162}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Experiments", "Jakar.Extensions.Experiments\Jakar.Extensions.Experiments.csproj", "{B603621D-13FD-4EFB-986A-267F1C125162}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

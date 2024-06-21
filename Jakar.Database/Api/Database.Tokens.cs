@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
-using System.Diagnostics;
-
-
-
 namespace Jakar.Database;
 
 
@@ -37,11 +33,51 @@ public abstract partial class Database
 
     /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
-    public ValueTask<ErrorOrResult<Tokens>> Authenticate( Activity? activity, LoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, activity, request, types, token );
-    protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, Activity? activity, LoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<Tokens>> Authenticate( Activity? activity, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, activity, request, types, token );
+    protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, Activity? activity, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get( connection, transaction, activity, nameof(UserRecord.UserName), request.UserName, token );
-        if ( record is null ) { return default; }
+        if ( record is null ) { return Error.Unauthorized( request.UserName ); }
+
+        ErrorOrResult<SubscriptionStatus> status = await ValidateSubscription( connection, transaction, record, token );
+
+        if ( status.HasErrors )
+        {
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, activity, record, token );
+
+            return status.Errors;
+        }
+
+        if ( record.IsDisabled )
+        {
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, activity, record, token );
+
+            return Error.Disabled();
+        }
+
+        if ( record.IsLocked )
+        {
+            record = record.MarkBadLogin();
+            await Users.Update( connection, transaction, activity, record, token );
+
+            return Error.Locked();
+        }
+
+        if ( UserRecord.VerifyPassword( ref record, request ) ) { return await GetToken( connection, transaction, activity, record, types, token ); }
+
+        record = record.MarkBadLogin();
+        await Users.Update( connection, transaction, activity, record, token );
+        return Error.Unauthorized( request.UserName );
+    }
+
+
+    public ValueTask<ErrorOrResult<UserModel>> TryGetUserModel( Activity? activity, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( TryGetUserModel, activity, request, types, token );
+    protected virtual async ValueTask<ErrorOrResult<UserModel>> TryGetUserModel( DbConnection connection, DbTransaction transaction, Activity? activity, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    {
+        UserRecord? record = await Users.Get( connection, transaction, activity, nameof(UserRecord.UserName), request.UserName, token );
+        if ( record is null ) { return Error.Unauthorized( request.UserName ); }
 
         ErrorOrResult<SubscriptionStatus> status = await ValidateSubscription( connection, transaction, record, token );
 
@@ -70,10 +106,15 @@ public abstract partial class Database
         }
 
 
-        if ( UserRecord.VerifyPassword( ref record, request ) ) { return await GetToken( connection, transaction, activity, record, types, token ); }
+        if ( UserRecord.VerifyPassword( ref record, request ) )
+        {
+            UserModel model = await record.ToUserModel( connection, transaction, activity, this, token );
+            return model;
+        }
 
+        record = record.MarkBadLogin();
         await Users.Update( connection, transaction, activity, record, token );
-        return default;
+        return Error.Unauthorized( request.UserName );
     }
 
 
