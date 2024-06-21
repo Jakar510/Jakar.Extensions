@@ -32,7 +32,7 @@ public interface IUserRights<out T, TEnum> : IUserRights
 
 public static class RightsExtensions
 {
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static UserRights<TEnum> GetRights<TEnum>( this IUserRights rights )
         where TEnum : struct, Enum => UserRights<TEnum>.Create( rights );
 
@@ -63,11 +63,12 @@ public ref struct UserRights<TEnum>
     private static readonly TEnum[] _enumValues = (TEnum[])Enum.GetValues( typeof(TEnum) );
 #endif
 
-    internal readonly Span<char>        Span    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _rights; }
-    public static     UserRights<TEnum> Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(); }
+
+    internal readonly Span<char>        Span    => _rights;
+    public static     UserRights<TEnum> Default => new();
     public readonly Right[] Rights
     {
-        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+        [Pure]
         get
         {
             Right[] array = AsyncLinq.GetArray<Right>( _enumValues.Length );
@@ -76,7 +77,7 @@ public ref struct UserRights<TEnum>
             return array;
         }
     }
-    public static UserRights<TEnum> SA { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Default.Add( _enumValues ); }
+    public static UserRights<TEnum> SA => Default.Add( _enumValues );
 
 
     public UserRights()
@@ -90,6 +91,19 @@ public ref struct UserRights<TEnum>
         ArrayPool<char>.Shared.Return( _rights );
         this = default;
     }
+
+
+    public static   UserRights<TEnum> Create()                                       => Default;
+    internal static UserRights<TEnum> Create( scoped in ReadOnlySpan<char>  rights ) => Default.With( rights );
+    public static   UserRights<TEnum> Create( scoped in ReadOnlySpan<TEnum> array )  => Default.Add( array );
+    public static UserRights<TEnum> Create<T>( IEnumerable<IEnumerable<T>> user )
+        where T : IUserRights => Default.With( user );
+    public static UserRights<TEnum> Create<T>( IEnumerable<T> user )
+        where T : IUserRights => Default.With( user );
+    public static UserRights<TEnum> Create<T>( T user )
+        where T : IUserRights => Default.With( user );
+
+
     public override string ToString()
     {
         ReadOnlySpan<char> span   = Span;
@@ -99,62 +113,42 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure]
-    public static UserRights<TEnum> Create<TRecord>( TRecord record )
-        where TRecord : class, IUserRights => Default.With( record );
-
-
-    [Pure]
-    public readonly UserRights<TEnum> With<TRecord>( TRecord record )
-        where TRecord : class, IUserRights => With( record.Rights );
-
-    [Pure]
-    private readonly UserRights<TEnum> With( scoped in ReadOnlySpan<char> other )
+    public UserRights<TEnum> With<T>( IEnumerable<IEnumerable<T>> values )
+        where T : IUserRights => With( values.SelectMany( static x => x ) );
+    public UserRights<TEnum> With<T>( IEnumerable<T> values )
+        where T : IUserRights
     {
-        With( Span, other );
+        foreach ( T value in values ) { this = With( value ); }
+
         return this;
     }
-    private static void With( scoped in Span<char> span, scoped in ReadOnlySpan<char> other )
+    public UserRights<TEnum> With<T>( scoped in ReadOnlySpan<T> values )
+        where T : IUserRights
     {
+        foreach ( T value in values ) { this = With( value ); }
+
+        return this;
+    }
+
+
+    public readonly UserRights<TEnum> With<T>( T user )
+        where T : IUserRights => With( user.Rights );
+    private readonly UserRights<TEnum> With( scoped in ReadOnlySpan<char> other )
+    {
+        Span<char> span = Span;
         Guard.IsGreaterThanOrEqualTo( other.Length, span.Length );
 
         for ( int i = 0; i < span.Length; i++ )
         {
             if ( VALID.Equals( other[i] ) ) { span[i] = VALID; }
         }
+
+        return this;
     }
 
 
-    [Pure] public static UserRights<TEnum> Merge( IEnumerable<IEnumerable<IUserRights>> values ) => Merge( values.SelectMany( static x => x ) );
-
-    [Pure]
-    public static UserRights<TEnum> Merge( IEnumerable<IUserRights> values )
-    {
-        UserRights<TEnum> rights = new();
-        foreach ( IUserRights value in values ) { rights = rights.With( value ); }
-
-        return rights;
-    }
-
-    [Pure]
-    public static UserRights<TEnum> Merge( scoped in ReadOnlySpan<IUserRights> values )
-    {
-        UserRights<TEnum> rights = new();
-        foreach ( IUserRights value in values ) { rights = rights.With( value ); }
-
-        return rights;
-    }
-
-
-    [Pure] public static   UserRights<TEnum> Create()                                       => Default;
-    [Pure] internal static UserRights<TEnum> Create( scoped in ReadOnlySpan<char>  rights ) => Default.With( rights );
-    [Pure] public static   UserRights<TEnum> Create( scoped in ReadOnlySpan<TEnum> array )  => Default.Add( array );
-
-
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( int   index ) => Span[index] == VALID;
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly bool Has( TEnum index ) => Has( index.AsInt() );
-
-    [Pure]
+    public readonly bool Has( int   index ) => Span[index] == VALID;
+    public readonly bool Has( TEnum index ) => Has( index.AsInt() );
     public readonly bool Has( scoped in ReadOnlySpan<TEnum> array )
     {
         foreach ( TEnum i in array )
@@ -166,9 +160,7 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Remove( TEnum index ) => Set( index.AsInt(), INVALID );
-
-    [Pure]
+    public readonly UserRights<TEnum> Remove( TEnum index ) => Set( index.AsInt(), INVALID );
     public readonly UserRights<TEnum> Remove( scoped in ReadOnlySpan<TEnum> array )
 
     {
@@ -178,9 +170,7 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly UserRights<TEnum> Add( TEnum index ) => Set( index.AsInt(), VALID );
-
-    [Pure]
+    public readonly UserRights<TEnum> Add( TEnum index ) => Set( index.AsInt(), VALID );
     public readonly UserRights<TEnum> Add( scoped in ReadOnlySpan<TEnum> array )
     {
         foreach ( TEnum i in array ) { Add( i ); }
@@ -189,8 +179,7 @@ public ref struct UserRights<TEnum>
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    internal readonly UserRights<TEnum> Set( int index, char value )
+    private readonly UserRights<TEnum> Set( int index, char value )
     {
         Guard.IsInRange( index, 0, _enumValues.Length );
         Guard.IsTrue( value is VALID or INVALID );

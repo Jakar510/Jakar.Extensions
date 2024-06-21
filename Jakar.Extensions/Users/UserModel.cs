@@ -169,6 +169,10 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     public virtual string GetDescription() => IUserData.GetDescription( this );
 
 
+    public virtual UserRights<TEnum> GetRights<TEnum>()
+        where TEnum : struct, Enum => UserRights<TEnum>.Create( this ).With( Groups );
+
+
     public TClass With( IEnumerable<TAddress> addresses )
     {
         Addresses.Add( addresses );
@@ -202,7 +206,8 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
 
     void IUserData<TID>.With( IUserData<TID> value ) => With( value );
-    public TClass With( IUserData<TID> value )
+    public TClass With<T>( T value )
+        where T : IUserData<TID>
     {
         CreatedBy         = value.CreatedBy;
         EscalateTo        = value.EscalateTo;
@@ -219,14 +224,14 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Company           = value.Company;
         PreferredLanguage = value.PreferredLanguage;
         Rights            = value.Rights;
-        return With( (value as JsonModels.IJsonModel)?.AdditionalData );
+        return With( value.AdditionalData );
     }
     public TClass With( IDictionary<string, JToken?>? data )
     {
-        if ( data is null ) { return (TClass)this; }
+        if ( data?.Count is null or 0 ) { return (TClass)this; }
 
-        AdditionalData ??= new Dictionary<string, JToken?>();
-        foreach ( (string key, JToken? jToken) in data ) { AdditionalData[key] = jToken; }
+        IDictionary<string, JToken?> dict = AdditionalData ??= new Dictionary<string, JToken?>();
+        foreach ( (string key, JToken? jToken) in data ) { dict[key] = jToken; }
 
         return (TClass)this;
     }
@@ -282,30 +287,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return _company           == other._company              &&
-               _department        == other._department           &&
-               _email             == other._email                &&
-               _ext               == other._ext                  &&
-               _firstName         == other._firstName            &&
-               _gender            == other._gender               &&
-               _lastName          == other._lastName             &&
-               _phoneNumber       == other._phoneNumber          &&
-               _rights            == other._rights               &&
-               _title             == other._title                &&
-               _userName          == other._userName             &&
-               _website           == other._website              &&
-               _description       == other._description          &&
-               _fullName          == other._fullName             &&
-               _preferredLanguage == other._preferredLanguage    &&
-               Nullable.Equals( _createdBy,  other._createdBy )  &&
-               Nullable.Equals( _escalateTo, other._escalateTo ) &&
-               Nullable.Equals( _imageID,    other._imageID )    &&
-               Equals( UserID, other.UserID )                    &&
-               Addresses.Equals( other.Addresses )               &&
-               Groups.Equals( other.Groups )                     &&
-               ID.Equals( other.ID )                             &&
-               Roles.Equals( other.Roles )                       &&
-               Nullable.Equals( SubscriptionExpires, other.SubscriptionExpires );
+        return _company == other._company && _department == other._department && _email == other._email && _ext == other._ext && _firstName == other._firstName && _gender == other._gender && _lastName == other._lastName && _phoneNumber == other._phoneNumber && _rights == other._rights && _title == other._title && _userName == other._userName && _website == other._website && _description == other._description && _fullName == other._fullName && _preferredLanguage == other._preferredLanguage && Nullable.Equals( _createdBy, other._createdBy ) && Nullable.Equals( _escalateTo, other._escalateTo ) && Nullable.Equals( _imageID, other._imageID ) && Equals( UserID, other.UserID ) && Addresses.Equals( other.Addresses ) && Groups.Equals( other.Groups ) && ID.Equals( other.ID ) && Roles.Equals( other.Roles ) && Nullable.Equals( SubscriptionExpires, other.SubscriptionExpires );
     }
     public override int GetHashCode()
     {
