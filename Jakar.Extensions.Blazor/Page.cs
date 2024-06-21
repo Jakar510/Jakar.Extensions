@@ -4,7 +4,9 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public abstract class Page : Widget
+public abstract class Page<TLoginState, TErrorState> : Widget<TLoginState, TErrorState>
+    where TLoginState : class, ILoginUserState
+    where TErrorState : class, IModelErrorState
 {
     private IModalReference? _popup;
 
@@ -21,3 +23,7 @@ public abstract class Page : Widget
     [Inject]    public required BlazorServices Services { get; set; }
     [Parameter] public          string?        Title    { get; set; }
 }
+
+
+
+public abstract class Page : Page<LoginUserState, ModelErrorState>;

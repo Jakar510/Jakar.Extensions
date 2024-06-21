@@ -133,7 +133,8 @@ public class ModelErrorState : ObservableClass, IModelErrorState
 
 
 
-public interface IModelState
+public interface IModelState<T>
+    where T : IModelErrorState
 {
-    [CascadingParameter( Name = ModelErrorState.KEY )] public ModelErrorState State { get; set; }
+    [CascadingParameter( Name = ModelErrorState.KEY )] public T State { get; set; }
 }
