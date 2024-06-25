@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2024  21:04
 
-using ZXing;
-
-
-
 namespace Jakar.Extensions;
 
 

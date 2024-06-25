@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
+using Status = Jakar.Extensions.Status;
+
+
+
 namespace Jakar.Database;
 
 

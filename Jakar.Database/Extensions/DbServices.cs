@@ -2,15 +2,6 @@
 // 1/10/2024  14:10
 
 
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
-
-
-
 namespace Jakar.Database;
 
 

@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/10/2024  19:04
 
-using MimeTypes = Jakar.Extensions.MimeTypes;
-
-
-
 namespace Jakar.Database.DbMigrations;
 
 

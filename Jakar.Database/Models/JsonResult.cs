@@ -1,9 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 04/10/2024  20:04
 
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.WebUtilities;
+using Status = Jakar.Extensions.Status;
 
 
 

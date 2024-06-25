@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/12/2022  10:15 AM
 
-using NoAlloq;
-using System;
-
-
-
 namespace Jakar.Extensions;
 
 

@@ -2,8 +2,6 @@
 // 09/28/2023  10:02 AM
 
 using Npgsql;
-using OpenTelemetry.Exporter;
-using Prometheus;
 
 
 

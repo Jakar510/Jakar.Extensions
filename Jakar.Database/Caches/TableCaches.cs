@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-
-
-
-namespace Jakar.Database.Caches;
+﻿namespace Jakar.Database.Caches;
 
 
 public static class TableCaches

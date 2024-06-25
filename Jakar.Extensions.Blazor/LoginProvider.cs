@@ -1,13 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 06/12/2024  11:06
 
-using System.Collections.Specialized;
-using System.ComponentModel;
-using Jakar.Extensions.UserGuid;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-
-
-
 namespace Jakar.Extensions.Blazor;
 
 

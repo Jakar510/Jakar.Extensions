@@ -11,14 +11,6 @@ using System.Diagnostics;
 namespace Jakar.Extensions.Telemetry;
 
 
-public enum StatusCode
-{
-    Ok    = 1,
-    Error = 2
-}
-
-
-
 /// <summary> Represents an operation with context to be used for logging. </summary>
 public class Activity : IDisposable
 {
@@ -95,34 +87,5 @@ public class Activity : IDisposable
         if ( IsStopped is false ) { Stop(); }
 
         GC.SuppressFinalize( this );
-    }
-}
-
-
-
-public sealed class ActivitySource : IDisposable
-{
-    public          ConcurrentDictionary<string, Activity> Activities { get; init; } = new(Environment.ProcessorCount, 64);
-    public required AppVersion                             AppVersion { get; init; }
-    public required string                                 Name       { get; init; }
-
-
-    public Activity CreateActivity( string operationName, ActivityKind kind = ActivityKind.Internal ) => Activities[operationName] = Activity.Create( operationName, kind );
-    public Activity StartActivity( string  operationName, ActivityKind kind = ActivityKind.Internal ) => CreateActivity( operationName, kind ).Start();
-
-
-    public static ActivitySource Create<TApp>()
-        where TApp : IAppName => Create( TApp.AppName, TApp.AppVersion );
-    public static ActivitySource Create( string name, AppVersion appVersion ) => new()
-                                                                                 {
-                                                                                     Name       = name,
-                                                                                     AppVersion = appVersion
-                                                                                 };
-
-    public void Dispose()
-    {
-        foreach ( Activity activity in Activities.Values ) { activity.Dispose(); }
-
-        Activities.Clear();
     }
 }

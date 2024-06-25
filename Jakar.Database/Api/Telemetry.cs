@@ -3,13 +3,7 @@
 
 using System.Security.Cryptography.X509Certificates;
 using OpenTelemetry;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Trace;
-using Prometheus;
-using Version = System.Version;
 
 
 
