@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public static class GuidExtensions
+public static class Guids
 {
     private const char EQUALS     = '=';
     private const char HYPHEN     = '-';
