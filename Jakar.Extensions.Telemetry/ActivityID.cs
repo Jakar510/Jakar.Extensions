@@ -1,11 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using Newtonsoft.Json;
-
-
-
-namespace Jakar.Extensions.Telemetry;
+﻿namespace Jakar.Extensions.Telemetry;
 
 
 [DefaultValue( nameof(Default) ), JsonConverter( typeof(Converter) )]

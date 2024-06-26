@@ -49,7 +49,7 @@ public interface IOwnedTableRecord
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTimeOffset DateCreated, in DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     private   RecordID<TRecord> _id           = ID;
@@ -58,9 +58,6 @@ public abstract record TableRecord<TRecord>( RecordID<TRecord> ID, DateTimeOffse
 
     public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
     [Key] public RecordID<TRecord> ID           { get => _id;           init => _id = value; }
-
-
-    protected TableRecord( RecordID<TRecord> id ) : this( id, DateTimeOffset.UtcNow, null ) { }
 
 
     [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
@@ -157,10 +154,6 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedB
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
-
-
-    protected OwnedTableRecord( UserRecord?       owner ) : this( RecordID<TRecord>.New(), owner ) { }
-    protected OwnedTableRecord( RecordID<TRecord> id, UserRecord? owner = default ) : this( owner?.ID, id, DateTimeOffset.UtcNow, null ) { }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )

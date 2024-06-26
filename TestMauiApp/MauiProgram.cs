@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 
 
 
@@ -31,9 +33,26 @@ public static class MauiProgram
         builder.Services.AddHttpClient();
 
 
+        builder.Logging.ClearProviders();
+
     #if DEBUG
         builder.Logging.AddDebug();
     #endif
+
+        builder.Logging.AddOpenTelemetry( static options =>
+                                          {
+                                              options.IncludeScopes           = true;
+                                              options.IncludeFormattedMessage = true;
+                                              options.ParseStateValues        = true;
+
+                                              options.AddConsoleExporter();
+
+                                              options.AddOtlpExporter( static exporter =>
+                                                                       {
+                                                                           exporter.Protocol = OtlpExportProtocol.Grpc;
+                                                                           exporter.Endpoint = new Uri( "https://192.168.1.12:4317" );
+                                                                       } );
+                                          } );
 
         return builder.Build();
     }

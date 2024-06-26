@@ -1,11 +1,20 @@
-﻿
+﻿namespace Jakar.Extensions.Telemetry;
 
 
-
-namespace Jakar.Extensions.Telemetry;
-
-
-public readonly record struct TelemetryContext( string Name, ActivityID TraceID, ActivityID SpanID )
+public interface IAppID : IAppName
 {
-    public static TelemetryContext Create( string name ) => new(name, ActivityID.Create(), ActivityID.Create());
+    public static abstract Guid AppID { get; }
+}
+
+
+
+public sealed record TelemetryContext( string AppName, Guid AppID, AppVersion AppVersion, ActivityID? TraceID = null, ActivityID? SpanID = null )
+{
+    public ActivityID? TraceID { get; set; } = TraceID;
+    public ActivityID? SpanID  { get; set; } = SpanID;
+
+
+    public static TelemetryContext Create<TApp>()
+        where TApp : IAppID => Create( TApp.AppName, TApp.AppID, TApp.AppVersion );
+    public static TelemetryContext Create( string appName, Guid appID, AppVersion appVersion ) => new(appName, appID, appVersion);
 }

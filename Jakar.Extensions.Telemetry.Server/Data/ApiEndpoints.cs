@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-
-
-namespace Jakar.Extensions.Telemetry.Server.Data;
+﻿namespace Jakar.Extensions.Telemetry.Server.Data;
 
 
 public static class ApiEndpoints

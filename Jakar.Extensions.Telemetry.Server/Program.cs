@@ -1,8 +1,3 @@
-using Jakar.Extensions.Blazor;
-using Jakar.Extensions.Telemetry.Server.Data;
-using Syncfusion.Blazor;
-
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder( args );
 Encoding.RegisterProvider( CodePagesEncodingProvider.Instance );
 
@@ -16,7 +11,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddBlazorServices();
 builder.Services.AddSyncfusionBlazor();
 
-builder.Services.AddDataProtection();
+builder.Services.AddDataProtection( static options => options.ApplicationDiscriminator = TelemetryServer.AppName );
 ConfigureApiDatabase.Setup( builder );
 
 await using WebApplication app = builder.Build();

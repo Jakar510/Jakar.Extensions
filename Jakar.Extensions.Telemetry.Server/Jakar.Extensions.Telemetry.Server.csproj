@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Jakar.Extensions.Telemetry\Jakar.Extensions.Telemetry.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\DbMigrations\" />
+  </ItemGroup>
+
 </Project>
