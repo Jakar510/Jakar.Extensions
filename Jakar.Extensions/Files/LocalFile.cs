@@ -1059,11 +1059,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     [Serializable]
-    public class Items : List<LocalFile>
+    public class Files : List<LocalFile>
     {
-        public Items() : base() { }
-        public Items( int                    capacity ) : base( capacity ) { }
-        public Items( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Files() : base() { }
+        public Files( int                    capacity ) : base( capacity ) { }
+        public Files( IEnumerable<LocalFile> items ) : base( items ) { }
     }
 
 

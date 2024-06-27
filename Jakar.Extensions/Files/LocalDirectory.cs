@@ -10,22 +10,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
     public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath ); }
-    public static Equalizer<LocalDirectory> Equalizer => Equalizer<LocalDirectory>.Default;
-    public static Sorter<LocalDirectory>    Sorter    => Sorter<LocalDirectory>.Default;
-
-
-    public              DateTime      CreationTimeUtc { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
-    public              bool          DoesNotExist    => !Exists;
-    public              bool          Exists          => Info.Exists;
-    public              string        FullPath        { get; init; }
-    [JsonIgnore] public DirectoryInfo Info            => _info ??= new DirectoryInfo( FullPath );
-
-    bool TempFile.ITempFile.            IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
-    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
-    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
-    public              string          Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
-    public              string          Root              => Directory.GetDirectoryRoot( FullPath );
+    public static       Equalizer<LocalDirectory> Equalizer         => Equalizer<LocalDirectory>.Default;
+    public static       Sorter<LocalDirectory>    Sorter            => Sorter<LocalDirectory>.Default;
+    public              DateTime                  CreationTimeUtc   { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
+    public              bool                      DoesNotExist      => !Exists;
+    public              bool                      Exists            => Info.Exists;
+    public              string                    FullPath          { get; init; }
+    [JsonIgnore] public DirectoryInfo             Info              => _info ??= new DirectoryInfo( FullPath );
+    bool TempFile.ITempFile.                      IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
+    public              DateTime                  LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              DateTime                  LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              string                    Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory?           Parent            => GetParent();
+    public              string                    Root              => Directory.GetDirectoryRoot( FullPath );
 
 
     public LocalDirectory() => FullPath = string.Empty;
@@ -35,28 +32,34 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public LocalDirectory( string                       path ) => FullPath = Path.GetFullPath( path );
     public void Dispose()
     {
-        Dispose( this.IsTempFile() );
         GC.SuppressFinalize( this );
+        DisposeAsync().CallSynchronously();
     }
-    protected virtual void Dispose( bool remove )
+    public virtual async ValueTask DisposeAsync()
     {
-        if ( remove && Exists ) { Delete( true ); }
-    }
-    public async ValueTask DisposeAsync()
-    {
-        if ( !this.IsTempFile() ) { return; }
+        GC.SuppressFinalize( this );
+        if ( DoesNotExist || this.IsTempFile() is false ) { return; }
 
         await DeleteAllRecursivelyAsync();
     }
 
 
-    public static implicit operator Collection( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Collection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator string( LocalDirectory                         directory ) => directory.FullPath;
+    public static implicit operator DirectoryInfo( LocalDirectory                  directory ) => directory.Info;
+    public static implicit operator ReadOnlySpan<char>( LocalDirectory             directory ) => directory.FullPath;
+    public static implicit operator LocalDirectory( DirectoryInfo                  info )      => new(info);
+    public static implicit operator LocalDirectory( ReadOnlySpan<char>             path )      => new(path);
+    public static implicit operator LocalDirectory( string                         path )      => new(path);
+    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
+    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
+    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
+    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
+    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
+    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.Files( LocalDirectory                directory ) => new(directory.GetFiles());
+    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
 
-    // public static implicit operator ConcurrentCollection( LocalDirectory directory ) => new(directory.GetSubFolders());
-    // public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
-    public static implicit operator Items( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Items( LocalDirectory directory ) => new(directory.GetFiles());
 
     public static LocalDirectory AppData( string subPath )
     {
@@ -103,14 +106,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     private static LocalFile ConvertFile( FileInfo file ) => file;
 
-
-    // public static implicit operator LocalDirectory( string             path ) => new(path);
-    public static implicit operator LocalDirectory( DirectoryInfo      info )      => new(info);
-    public static implicit operator LocalDirectory( ReadOnlySpan<char> info )      => new(info);
-    public static implicit operator LocalDirectory( string             info )      => new(info);
-    public static implicit operator Set( LocalDirectory                directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Set( LocalDirectory      directory ) => new(directory.GetFiles());
-    public static implicit operator Watcher( LocalDirectory            directory ) => new(directory);
 
     // public static implicit operator LocalFile.Watcher( LocalDirectory  directory ) => new(new Watcher( directory ));
 
@@ -226,7 +221,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteAllRecursivelyAsync()
     {
-        List<Task> tasks = new List<Task>();
+        List<Task> tasks = new(64);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {

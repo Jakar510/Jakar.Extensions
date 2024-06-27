@@ -5,9 +5,7 @@ public partial class MainPage : ContentPage, IDisposable
 {
     private readonly ObservableCollection<string> _collection = [];
     private          int                          _count;
-
-    private readonly Activity          _activity = new(nameof(MainPage));
-    private readonly ILogger<MainPage> _logger;
+    private readonly ILogger                      _logger;
 
     // private readonly System.Collections.ObjectModel.ObservableCollection<string> _collection = [];
 
@@ -18,13 +16,12 @@ public partial class MainPage : ContentPage, IDisposable
         InitializeComponent();
         Cv.ItemsSource                =  _collection;
         _collection.CollectionChanged += OnCollectionChanged;
-        _logger                       =  app.LoggerFactory.CreateLogger<MainPage>();
+        _logger                       =  app.LoggerFactory.CreateLogger( nameof(MainPage) );
     }
     public void Dispose()
     {
+        _collection.CollectionChanged -= OnCollectionChanged;
         _collection.Dispose();
-
-        _activity.Dispose();
         GC.SuppressFinalize( this );
     }
     private static void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args ) => args.Action.WriteToDebug(); // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
@@ -33,39 +30,27 @@ public partial class MainPage : ContentPage, IDisposable
     protected override void OnAppearing()
     {
         base.OnAppearing();
-
-        _activity.Start();
-        _activity.SetBaggage( "UserID",    Guid.NewGuid().ToString() );
-        _activity.SetBaggage( "SessionID", "0" );
-        _activity.AddTag( "X", "Y" );
-        _activity.AddEvent( new ActivityEvent( nameof(OnAppearing), DateTimeOffset.UtcNow ) );
+        Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.NewGuid().ToString() ).SetBaggage( "SessionID", _count.ToString() ).AddTag( "X", "Y" );
+        _logger.LogInformation( "{Event}", nameof(OnAppearing) );
     }
-    protected override async void OnDisappearing()
+    protected override void OnDisappearing()
     {
         base.OnDisappearing();
-
-        _activity.AddEvent( new ActivityEvent( nameof(OnDisappearing), DateTimeOffset.UtcNow ) );
-        _activity.Stop();
-        await Save();
-    }
-    private async Task Save()
-    {
-        string json = _activity.ToPrettyJson();
-        json.WriteToDebug();
-        await Share.RequestAsync( json, nameof(json) );
+        Activity.Current?.AddEvent();
+        _logger.LogInformation( "{Event}", nameof(OnDisappearing) );
     }
 
 
     private void CounterClicked()
     {
-        _activity.AddEvent( new ActivityEvent( nameof(CounterClicked), DateTimeOffset.UtcNow ) );
+        Activity.Current?.AddEvent();
         _count++;
 
         string value = CounterBtn.Text = _count == 1
                                              ? $"Clicked {_count} time"
                                              : $"Clicked {_count} times";
 
-        _activity.SetCustomProperty( nameof(_count), _count.ToString() );
+        Activity.Current?.SetCustomProperty( nameof(_count), _count.ToString() );
         _logger.LogInformation( "CounterClicked.{Value}", value );
         if ( _count % 5 == 0 ) { _collection.Clear(); }
 

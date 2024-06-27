@@ -1,20 +1,34 @@
-﻿namespace TestMauiApp;
+﻿using Serilog;
+using Serilog.Extensions.Logging;
 
 
-public partial class App : Application
+
+namespace TestMauiApp;
+
+
+public sealed partial class App : Application, IDisposable
 {
-    public new static App            Current       => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
-    public            ILoggerFactory LoggerFactory { get; }
+    public new static App             Current       => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public            ILoggerProvider LoggerFactory { get; }
 
 
-    // public Telemetry<TestMauiApp> Telemetry { get; }
-    // public App( Telemetry<TestMauiApp> telemetry ) : base()
-    public App( ILoggerFactory factory ) : base()
+    public App( ILoggerProvider factory ) : base()
     {
         InitializeComponent();
-
-        // Telemetry = telemetry;
         LoggerFactory = factory;
         MainPage      = new AppShell();
+    }
+
+
+    protected override void OnStart()  => base.OnStart();
+    protected override void OnSleep()  => base.OnSleep();
+    protected override void OnResume() => base.OnResume();
+
+
+    public void Dispose()
+    {
+        Log.CloseAndFlush();
+        LoggerFactory.Dispose();
+        GC.SuppressFinalize( this );
     }
 }
