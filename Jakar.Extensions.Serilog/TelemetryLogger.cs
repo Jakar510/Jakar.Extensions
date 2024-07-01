@@ -4,6 +4,7 @@
 namespace Jakar.Extensions.Serilog;
 
 
+[Experimental( nameof(TelemetryLogger) )]
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class TelemetryLogger : BackgroundService, IBatchedLogEventSink, ILogEventSink
 {
