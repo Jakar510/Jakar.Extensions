@@ -4,16 +4,20 @@
 public interface IAppName
 {
 #if NET8_0_OR_GREATER
-    public static abstract string     AppName    { get; }
-    public static abstract AppVersion AppVersion { get; }
+    public abstract static string     AppName    { get; }
+    public abstract static AppVersion AppVersion { get; }
 #endif
 }
 
 
 
-public interface IAppID : IAppName
-{
 #if NET8_0_OR_GREATER
-    public static abstract Guid AppID { get; }
-#endif
+public interface IAppID<out T> : IAppName
+{
+    public abstract static T AppID { get; }
 }
+
+
+
+public interface IAppID : IAppID<Guid>;
+#endif

@@ -2,15 +2,9 @@
 using System.Globalization;
 using System.Text;
 using CommunityToolkit.Maui;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
 using Serilog;
 using Serilog.Configuration;
-using Serilog.Core;
-using Serilog.Core.Enrichers;
 using Serilog.Events;
-using Serilog.Extensions.Logging;
-using Serilog.Sinks.OpenTelemetry;
 using ILogger = Serilog.ILogger;
 
 
@@ -18,8 +12,9 @@ using ILogger = Serilog.ILogger;
 namespace TestMauiApp;
 
 
-public sealed class TestMauiApp : IAppName
+public sealed class TestMauiApp : IAppID
 {
+    public static Guid       AppID      { get; } = Guid.NewGuid();
     public static string     AppName    => nameof(TestMauiApp);
     public static AppVersion AppVersion { get; } = new(1, 0, 0);
 }
@@ -44,39 +39,32 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
 
-
         builder.Logging.ClearProviders();
-        builder.Logging.AddProvider( CreateSerilog() );
+        builder.Logging.AddSerilog( CreateSerilog() );
 
         return builder.Build();
     }
-    private static SerilogLoggerProvider CreateSerilog()
+    private static ILogger CreateSerilog()
     {
         LoggerConfiguration builder = new();
         builder.MinimumLevel.Verbose();
         builder.MinimumLevel.Override( "Microsoft", LogEventLevel.Warning );
         builder.MinimumLevel.Override( "System",    LogEventLevel.Warning );
         builder.Enrich.FromLogContext();
-        builder.Enrich.WithThreadName();
-        builder.Enrich.WithThreadId();
-        builder.WriteTo.Console();
-        builder.WriteTo.Debug();
+
+        // builder.Enrich.With<AppContextEnricher<TestMauiApp>>();
+        builder.WriteTo.Console( formatProvider: CultureInfo.InvariantCulture );
+        builder.WriteTo.Debug( formatProvider: CultureInfo.InvariantCulture );
         builder.WriteTo.Async( ConfigureFiles );
-        builder.WriteTo.Async( ConfigureOpenTelemetry );
 
+        // builder.WriteTo.Async( ConfigureTelemetry );
 
-        ILogger logger = Log.Logger = builder.CreateLogger();
-        return new SerilogLoggerProvider( logger, true );
+        return Log.Logger = builder.CreateLogger();
 
+        // LogContext.PushProperty(  )
+        static void ConfigureFiles( LoggerSinkConfiguration sink ) =>
+            sink.File( Activities.SetLogsFile( FileSystem.AppDataDirectory ).FullPath, formatProvider: CultureInfo.InvariantCulture, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default );
 
-        static void ConfigureFiles( LoggerSinkConfiguration sink ) => sink.File( Activities.SetLogsFile( FileSystem.AppDataDirectory ).FullPath, formatProvider: CultureInfo.InvariantCulture, rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default );
-
-        static void ConfigureOpenTelemetry( LoggerSinkConfiguration sink ) =>
-            sink.OpenTelemetry( static options =>
-                                {
-                                    options.Endpoint     = "https://192.168.1.12:4317";
-                                    options.Protocol     = OtlpProtocol.Grpc;
-                                    options.IncludedData = IncludedData.SpanIdField | IncludedData.SourceContextAttribute | IncludedData.TraceIdField | IncludedData.SpecRequiredResourceAttributes | IncludedData.MessageTemplateMD5HashAttribute | IncludedData.MessageTemplateRenderingsAttribute | IncludedData.MessageTemplateTextAttribute | IncludedData.TemplateBody;
-                                } );
+        // static void ConfigureTelemetry( LoggerSinkConfiguration sink ) => sink.Sink<TelemetryLogger>();
     }
 }

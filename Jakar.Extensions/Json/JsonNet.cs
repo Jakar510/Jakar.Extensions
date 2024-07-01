@@ -3,8 +3,9 @@
 
 public static class JsonNet
 {
-    private static JsonSerializer?         _serializer;
-    private static JsonSerializerSettings? _settings;
+    private static readonly JsonConverter[]         _converters = [];
+    private static          JsonSerializer?         _serializer;
+    private static          JsonSerializerSettings? _settings;
 
 
     public static JsonLoadSettings LoadSettings { get;                                                      set; } = new();
@@ -31,9 +32,9 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object value, JsonSerializer serializer ) => JToken.FromObject( value, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, Array.Empty<JsonConverter>() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, _converters );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, params JsonConverter[] converters )                                    => ToJson( value, Formatting.None, converters );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      Array.Empty<JsonConverter>() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      _converters );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting, params JsonConverter[] converters ) => value.ToString( formatting, converters );
 
 

@@ -8,12 +8,13 @@ namespace Jakar.Extensions.Telemetry;
 [JsonObject]
 public class Activity : IDisposable
 {
-    private bool           _isStopped;
-    private DateTimeOffset _startTimeUtc;
-    private StatusCode?    _status;
-    private string?        _displayName;
-    private string?        _statusDescription;
-    private TimeSpan       _duration;
+    public const string         OPERATION_NAME = "OperationName";
+    private      bool           _isStopped;
+    private      DateTimeOffset _startTimeUtc;
+    private      StatusCode?    _status;
+    private      string?        _displayName;
+    private      string?        _statusDescription;
+    private      TimeSpan       _duration;
 
 
     public          LinkedList<TelemetryBaggage>        Baggage           { get;                         init; } = [];

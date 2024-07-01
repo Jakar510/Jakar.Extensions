@@ -6,7 +6,7 @@ namespace Jakar.Extensions.Telemetry;
 
 public sealed class ActivityCollection : ConcurrentDictionary<string, Activity>, IDisposable
 {
-    public required TelemetryContext Context { get; init; }
+    public required AppContext Context { get; init; }
 
 
     public ActivityCollection() : base( Environment.ProcessorCount, 64, StringComparer.Ordinal ) { }
@@ -14,13 +14,15 @@ public sealed class ActivityCollection : ConcurrentDictionary<string, Activity>,
     public ActivityCollection( IDictionary<string, Activity>               values ) : base( values, StringComparer.Ordinal ) { }
 
 
-    public Activity CreateActivity( string operationName, ActivityKind kind = ActivityKind.Internal ) => this[operationName] = Activity.Create( operationName, Context, kind );
-    public Activity StartActivity( string  operationName, ActivityKind kind = ActivityKind.Internal ) => CreateActivity( operationName, kind ).Start();
+    public Activity CreateActivity( string operationName, ActivityTraceId? traceID = null, ActivitySpanId? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
+        this[operationName] = Activity.Create( operationName, TelemetryContext.Create( Context, traceID, spanID ), kind );
+    public Activity StartActivity( string operationName, ActivityTraceId? traceID = null, ActivitySpanId? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
+        CreateActivity( operationName, traceID, spanID, kind ).Start();
 
 
     public static ActivityCollection Create<TApp>()
-        where TApp : IAppID => Create( TelemetryContext.Create<TApp>() );
-    public static ActivityCollection Create( TelemetryContext context ) => new() { Context = context };
+        where TApp : IAppID => Create( AppContext.Create<TApp>() );
+    public static ActivityCollection Create( AppContext context ) => new() { Context = context };
     public void Dispose()
     {
         foreach ( Activity activity in Values ) { activity.Dispose(); }

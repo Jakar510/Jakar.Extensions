@@ -2,7 +2,7 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) )]
+[Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ), JsonObject]
 public sealed class AppVersion :
 #if NET7_0_OR_GREATER
     IComparable,
@@ -21,23 +21,24 @@ public sealed class AppVersion :
     ISpanFormattable
 #endif
 {
-    private const char                       SEPARATOR = '.';
-    private       string?                    _string;
-    public static Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
-    public static Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
-    public static FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public static AppVersion                 Default               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new();
-    public        Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public        int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    private const       char                       SEPARATOR = '.';
+    private             string?                    _string;
+    public static       Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
+    public static       Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public static       FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public static       AppVersion                 Default               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new();
+    public              Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    [JsonIgnore] public int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
 
 
+    static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );
     public AppVersion() : this( 0, null, null, null, null, null, AppVersionFlags.Stable ) { }
     public AppVersion( int major ) : this( major, null, null, null, null, null, AppVersionFlags.Stable ) { }
     public AppVersion( int major, int  minor ) : this( major, minor, null, null, null, null, AppVersionFlags.Stable ) { }
@@ -206,9 +207,9 @@ public sealed class AppVersion :
         version = null;
         return false;
     }
-    public static AppVersion Parse( ReadOnlySpan<char> value )                            => Parse( value, CultureInfo.CurrentCulture );
-    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( value, value, provider );
-    private static AppVersion Parse( ReadOnlySpan<char> value, in ReadOnlySpan<char> original, IFormatProvider? provider )
+    public static AppVersion Parse( ReadOnlySpan<char> value )                            => Parse( value,     CultureInfo.CurrentCulture );
+    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( ref value, value, provider );
+    private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
         try
         {
@@ -221,10 +222,9 @@ public sealed class AppVersion :
             int count = value.Count( SEPARATOR );
 
 
-            int       i      = 0;
-            Span<int> result = stackalloc int[count + 1];
-
-            ReadOnlySpan<char> separators = stackalloc char[1] { SEPARATOR };
+            int                i          = 0;
+            Span<int>          result     = stackalloc int[count + 1];
+            ReadOnlySpan<char> separators = [SEPARATOR];
 
 
             foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
@@ -248,7 +248,7 @@ public sealed class AppVersion :
         }
         catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e ); }
     }
-    public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan() );
+    public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan(), provider );
     public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? result )
     {
         if ( string.IsNullOrEmpty( s ) )
@@ -393,7 +393,10 @@ public sealed class AppVersion :
     /// <summary> Compares two <see cref="AppVersion"/> instances </summary>
     /// <param name="other"> </param>
     /// <returns>
-    ///     <see langword="0"/> if the <paramref name="other"/> is equivalent. <br/> <see langword="NOT_FOUND"/> if the <paramref name="other"/> is smaller. <br/> <see langword="1"/> if the <paramref name="other"/> is greater. <br/>
+    ///     <see langword="0"/> if the <paramref name="other"/> is equivalent. <br/> <see langword="NOT_FOUND"/> if the <paramref name="other"/> is smaller. <br/> <see langword="1"/> if the
+    ///     <paramref
+    ///         name="other"/>
+    ///     is greater. <br/>
     ///     <see
     ///         langword="-2"/>
     ///     if the
@@ -529,8 +532,9 @@ public sealed class AppVersion :
 
     public class AppVersionJsonNetConverter : JsonConverter<AppVersion>
     {
-        public override bool CanRead  => true;
-        public override bool CanWrite => true;
+        public static   AppVersionJsonNetConverter Instance { get; } = new();
+        public override bool                       CanRead  => true;
+        public override bool                       CanWrite => true;
 
 
         public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value is string version

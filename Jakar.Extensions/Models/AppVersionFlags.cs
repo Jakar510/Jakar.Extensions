@@ -77,7 +77,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
     public static AppVersionFlags Beta( uint             iteration = 0 ) => new(BETA, iteration);
 
 
-    public static AppVersionFlags Parse( ref ReadOnlySpan<char> value, StringComparison comparison = StringComparison.OrdinalIgnoreCase )
+    public static AppVersionFlags Parse( scoped ref ReadOnlySpan<char> value, StringComparison comparison = StringComparison.OrdinalIgnoreCase )
     {
         if ( value.EndsWith( "-rc", comparison ) )
         {
