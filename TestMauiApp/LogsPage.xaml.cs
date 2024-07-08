@@ -29,7 +29,7 @@ public sealed partial class LogsPage : ContentPage
         {
             IsBusy = true;
             Files.Clear();
-            foreach ( LocalFile file in Activities.LogsDirectory.GetFiles() ) { Files.Add( await FileLogs.Create( file, token ) ); }
+            foreach ( LocalFile file in App.Serilogger.LogsDirectory.GetFiles() ) { Files.Add( await FileLogs.Create( file, token ) ); }
         }
         finally { IsBusy = false; }
     }

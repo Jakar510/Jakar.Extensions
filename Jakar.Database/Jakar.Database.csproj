@@ -102,7 +102,7 @@
 		<PackageReference Include="Sigil" Version="5.0.0" />
 		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
 		<PackageReference Include="ZXing.Net" Version="0.16.9" />
-		<PackageReference Include="Hardware.Info" Version="100.1.0" />
+		<PackageReference Include="Hardware.Info" Version="100.1.0.1" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />

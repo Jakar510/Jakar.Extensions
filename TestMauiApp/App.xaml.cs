@@ -1,5 +1,4 @@
 ﻿using Serilog;
-using Serilog.Extensions.Logging;
 
 
 
@@ -8,8 +7,9 @@ namespace TestMauiApp;
 
 public sealed partial class App : Application, IDisposable
 {
-    public new static App             Current       => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
-    public            ILoggerProvider LoggerFactory { get; }
+    public static     Serilogger<TestMauiApp> Serilogger    { get; } = new(FileSystem.AppDataDirectory);
+    public new static App                     Current       => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public            ILoggerProvider         LoggerFactory { get; }
 
 
     public App( ILoggerProvider factory ) : base()
@@ -29,6 +29,7 @@ public sealed partial class App : Application, IDisposable
     {
         Log.CloseAndFlush();
         LoggerFactory.Dispose();
+        Serilogger.Dispose();
         GC.SuppressFinalize( this );
     }
 }

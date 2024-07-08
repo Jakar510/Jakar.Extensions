@@ -5,6 +5,7 @@ global using System.Collections.Specialized;
 global using System.Diagnostics;
 global using System.Diagnostics.Metrics;
 global using Jakar.Extensions;
+global using Jakar.Extensions.Serilog;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Maui.Accessibility;
 global using Microsoft.Maui.Controls;
