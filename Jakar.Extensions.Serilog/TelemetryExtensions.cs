@@ -11,14 +11,10 @@ namespace Jakar.Extensions.Serilog;
 public static class TelemetryExtensions
 {
     public static ILoggingBuilder AddTelemetry<TApp>( this ILoggingBuilder builder, LocalDirectory appData )
-        where TApp : IAppID => builder.AddTelemetry<TApp>( new TelemetryLogOptions( appData ) );
-    public static ILoggingBuilder AddTelemetry<TApp>( this ILoggingBuilder builder, TelemetryLogOptions options )
-        where TApp : IAppID
-    {
-        builder.ClearProviders();
-        builder.AddSerilog( options.CreateSerilog<TApp>() );
-        return builder;
-    }
+        where TApp : IAppID => builder.AddTelemetry<TApp>( new Serilogger<TApp>( appData ) );
+    public static ILoggingBuilder AddTelemetry<TApp>( this ILoggingBuilder builder, Serilogger<TApp> options )
+        where TApp : IAppID => options.Configure( builder );
+
 
 #if DEBUG
 #pragma warning disable TelemetryLogger
