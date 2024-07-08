@@ -1,7 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 06/28/2024  10:06
 
+#if DEBUG
 namespace Jakar.Extensions.Serilog;
+
 
 
 [Experimental( nameof(TelemetryLogger) )]
@@ -35,7 +37,8 @@ public class TelemetryLogger : BackgroundService, IBatchedLogEventSink, ILogEven
             await SendAsync( logs );
         }
     }
-    public async Task SendAsync( List<TelemetryLogEvent> logs ) { await Task.CompletedTask; }
+    public virtual Task SendAsync<T>( T logs )
+        where T : IEnumerable<TelemetryLogEvent> => Task.CompletedTask;
 
 
     public override async Task StopAsync( CancellationToken token )
@@ -44,7 +47,7 @@ public class TelemetryLogger : BackgroundService, IBatchedLogEventSink, ILogEven
         while ( _logs.TryTake( out TelemetryLogEvent? log ) ) { logs.Add( log ); }
 
         await SendAsync( logs );
-
         await base.StopAsync( token );
     }
 }
+#endif

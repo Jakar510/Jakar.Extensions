@@ -20,7 +20,7 @@ public static class TelemetryExtensions
         return builder;
     }
 
-
+#if DEBUG
 #pragma warning disable TelemetryLogger
     [Experimental( nameof(TelemetryLogger) )] public static IServiceCollection AddTelemetry( this IServiceCollection collection ) => collection.AddTelemetry( TelemetryLogger.Instance );
 
@@ -35,4 +35,5 @@ public static class TelemetryExtensions
 
     [Experimental( nameof(TelemetryLogger) )] public static LoggerConfiguration WithTelemetry( this LoggerConfiguration configuration ) => configuration.WriteTo.Async( static x => x.Sink( TelemetryLogger.Instance ) );
 #pragma warning restore TelemetryLogger
+#endif
 }

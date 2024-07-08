@@ -2,9 +2,46 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	  <LangVersion>latest</LangVersion>
+	  <Nullable>enable</Nullable>
+	  <NoWarn>$(NoWarn);1591;IDE0079;CS1658;CS1591</NoWarn>
+	  <ImplicitUsings>disable</ImplicitUsings>
+	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
+	  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+	  <Version>8.0.0</Version>
+	  <PackageId>Jakar.Extensions.Serilog</PackageId>
+	  <Company></Company>
+	  <Authors>Tyler Stegmaier</Authors>
+	  <PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+	  <Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
+	  <PackageTags>Serilog Logging Logger Log</PackageTags>
+	  <RepositoryType>git</RepositoryType>
+	  <RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+	  <PackageReleaseNotes>Bug Fixes</PackageReleaseNotes>
+	  <Description>Extensions to aid in development.</Description>
+	  <EnableNETAnalyzers>true</EnableNETAnalyzers>
+	  <NeutralLanguage>en</NeutralLanguage>
+	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	  <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <PackageIcon>icon.png</PackageIcon>
+	  <StripSymbols>false</StripSymbols>
+	  <IsAotCompatible>true</IsAotCompatible>
+	  <OptimizationPreference>Speed</OptimizationPreference>
+	  <EventSourceSupport>true</EventSourceSupport>
+	  <Title>Jakar.Extensions</Title>
+	  <IncludeSymbols>True</IncludeSymbols>
+	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	  <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\LICENSE.txt" Link="LICENSE.txt">
+      <PackagePath>\</PackagePath>
+      <Pack>True</Pack>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Jakar.Extensions" Version="8.12.3" />
@@ -13,6 +50,17 @@
 	<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
 	<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

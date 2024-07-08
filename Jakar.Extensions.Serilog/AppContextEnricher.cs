@@ -8,18 +8,19 @@ namespace Jakar.Extensions.Serilog;
 public class AppContextEnricher<TApp>() : ILogEventEnricher
     where TApp : IAppID
 {
-    public const string TOTAL_MEMORY                      = "TotalMemory";
-    public const string TOTAL_PAUSE_DURATION              = "TotalPauseDuration";
-    public const string TOTAL_ALLOCATED_BYTES             = "TotalAllocatedBytes";
-    public const string THREAD_ID                         = "ThreadID";
-    public const string THREAD_NAME                       = "ThreadName";
-    public const string TWO_LETTER_ISO_LANGUAGE_NAME      = nameof(CultureInfo.TwoLetterISOLanguageName);
-    public const string THREE_LETTER_ISO_LANGUAGE_NAME    = nameof(CultureInfo.ThreeLetterISOLanguageName);
-    public const string UI_TWO_LETTER_ISO_LANGUAGE_NAME   = $"UI_{nameof(CultureInfo.TwoLetterISOLanguageName)}";
-    public const string UI_THREE_LETTER_ISO_LANGUAGE_NAME = $"UI_{nameof(CultureInfo.ThreeLetterISOLanguageName)}";
+    public const string TOTAL_MEMORY                      = nameof(TOTAL_MEMORY);
+    public const string TOTAL_PAUSE_DURATION              = nameof(TOTAL_PAUSE_DURATION);
+    public const string TOTAL_ALLOCATED_BYTES             = nameof(TOTAL_ALLOCATED_BYTES);
+    public const string THREAD_ID                         = $"{nameof(Environment)}.{nameof(Environment.CurrentManagedThreadId)}";
+    public const string THREAD_NAME                       = $"{nameof(Thread)}.{nameof(Thread.Name)}";
+    public const string TWO_LETTER_ISO_LANGUAGE_NAME      = $"{nameof(CultureInfo)}.{nameof(CultureInfo.TwoLetterISOLanguageName)}";
+    public const string THREE_LETTER_ISO_LANGUAGE_NAME    = $"{nameof(CultureInfo)}.{nameof(CultureInfo.ThreeLetterISOLanguageName)}";
+    public const string UI_TWO_LETTER_ISO_LANGUAGE_NAME   = $"{nameof(CultureInfo)}.{nameof(CultureInfo.TwoLetterISOLanguageName)}.UI";
+    public const string UI_THREE_LETTER_ISO_LANGUAGE_NAME = $"{nameof(CultureInfo)}.{nameof(CultureInfo.ThreeLetterISOLanguageName)}.UI";
 
 
-    public virtual void Enrich( LogEvent log, ILogEventPropertyFactory factory )
+    public virtual void Enrich( LogEvent log, ILogEventPropertyFactory factory ) => Enrich( log, factory, Thread.CurrentThread );
+    public virtual void Enrich( LogEvent log, ILogEventPropertyFactory factory, Thread thread )
     {
         log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppName),              TApp.AppName ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppID),                TApp.AppID ) );
@@ -28,10 +29,10 @@ public class AppContextEnricher<TApp>() : ILogEventEnricher
         log.AddPropertyIfAbsent( factory.CreateProperty( TOTAL_PAUSE_DURATION,              GC.GetTotalPauseDuration() ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( TOTAL_ALLOCATED_BYTES,             GC.GetTotalAllocatedBytes() ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( THREAD_ID,                         Environment.CurrentManagedThreadId ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( THREAD_NAME,                       Thread.CurrentThread.Name ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( THREE_LETTER_ISO_LANGUAGE_NAME,    Thread.CurrentThread.CurrentCulture.ThreeLetterISOLanguageName ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( TWO_LETTER_ISO_LANGUAGE_NAME,      Thread.CurrentThread.CurrentCulture.TwoLetterISOLanguageName ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( UI_THREE_LETTER_ISO_LANGUAGE_NAME, Thread.CurrentThread.CurrentUICulture.ThreeLetterISOLanguageName ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( UI_TWO_LETTER_ISO_LANGUAGE_NAME,   Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( THREAD_NAME,                       thread.Name ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( THREE_LETTER_ISO_LANGUAGE_NAME,    thread.CurrentCulture.ThreeLetterISOLanguageName ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( TWO_LETTER_ISO_LANGUAGE_NAME,      thread.CurrentCulture.TwoLetterISOLanguageName ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( UI_THREE_LETTER_ISO_LANGUAGE_NAME, thread.CurrentUICulture.ThreeLetterISOLanguageName ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( UI_TWO_LETTER_ISO_LANGUAGE_NAME,   thread.CurrentUICulture.TwoLetterISOLanguageName ) );
     }
 }
