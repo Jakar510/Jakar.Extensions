@@ -17,7 +17,7 @@ public sealed partial class LogsPage : ContentPage
         InitializeComponent();
         BindingContext = this;
         RefreshCommand = new AsyncRelayCommand( RefreshAsync );
-        _logger        = App.Current.LoggerFactory.CreateLogger( nameof(LogsPage) );
+        _logger        = App.Serilogger.CreateLogger<LogsPage>();
     }
     protected override void OnAppearing()    => RefreshCommand.Execute( null );
     protected override void OnDisappearing() => Files.Clear();

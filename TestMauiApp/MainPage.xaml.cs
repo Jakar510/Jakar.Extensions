@@ -16,7 +16,7 @@ public partial class MainPage : ContentPage, IDisposable
         InitializeComponent();
         Cv.ItemsSource                =  _collection;
         _collection.CollectionChanged += OnCollectionChanged;
-        _logger                       =  app.LoggerFactory.CreateLogger( nameof(MainPage) );
+        _logger                       =  App.Serilogger.CreateLogger<MainPage>();
     }
     public void Dispose()
     {

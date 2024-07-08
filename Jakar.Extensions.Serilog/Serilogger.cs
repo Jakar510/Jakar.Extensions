@@ -32,6 +32,7 @@ public class Serilogger<TApp> : IOptions<Serilogger<TApp>>, ILoggerProvider, ILo
     private readonly Logger                _logger;
     private readonly SerilogLoggerProvider _provider;
 
+
     public bool                                 ApplyThemeToRedirectedOutput    { get; init; }
     public bool                                 BlockWhenFull                   { get; init; } = false;
     public bool                                 Buffered                        { get; init; }
@@ -78,10 +79,10 @@ public class Serilogger<TApp> : IOptions<Serilogger<TApp>>, ILoggerProvider, ILo
     }
 
 
-    public Microsoft.Extensions.Logging.ILogger CreateLogger( string categoryName ) => _provider.CreateLogger( categoryName );
-    public Microsoft.Extensions.Logging.ILogger CreateLogger<T>()                   => CreateLogger( typeof(T).Name );
-    void ILogEventSink.                         Emit( LogEvent  logEvent )          => ((ILogEventSink)_logger).Emit( logEvent );
-    void ILogger.                               Write( LogEvent logEvent )          => _logger.Write( logEvent );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Microsoft.Extensions.Logging.ILogger CreateLogger( string categoryName ) => _provider.CreateLogger( categoryName );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Microsoft.Extensions.Logging.ILogger CreateLogger<T>()                   => CreateLogger( typeof(T).Name );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]        void ILogEventSink.                  Emit( LogEvent  logEvent )          => ((ILogEventSink)_logger).Emit( logEvent );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]        void ILogger.                        Write( LogEvent logEvent )          => _logger.Write( logEvent );
 
 
     public ILoggingBuilder Configure( ILoggingBuilder builder, string? category = null, LogLevel level = LogLevel.Trace )
