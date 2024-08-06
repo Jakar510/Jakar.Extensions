@@ -2,35 +2,35 @@
 
 
 <CascadingValue TValue="Section"
-                Value="@this" >
+                Value="@( this )" >
     @if ( _isVisible )
     {
-        <div class="sv-section @Class" >
-            <div class="sv-header" >
+        <div class="@SV_SECTION @Class" >
+            <div class="@SV_SECTION_HEADER" >
                 <div class="@HeaderClass" >
                     @_headerContent(_headerTitle)
                 </div>
 
                 @if ( string.IsNullOrEmpty(_icon) is false )
                 {
-                    <div class="sv-icon"
+                    <div class="@SV_SECTION_HEADER_ICON"
                          @onclick="ToggleExpanded" >
                         <img alt=""
-                             class="aspect-fit img"
+                             class="@ASPECT_FIT @IMAGE"
                              src="@_icon" />
                         @* (<code>Expanded</code> = @_expanded) *@
                     </div>
                 }
             </div>
 
-            <oi class="sv-body" >
+            <oi class="@SV_SECTION_BODY" >
                 @if ( _isExpanded )
                 {
                     @foreach ( CellBase cell in Cells )
                     {
                         @if ( cell.IsVisible is false ) { continue; }
 
-                        <li class="sv-cell"
+                        <li class="@SV_CELL"
                             @key="cell" >
                             @cell.Fragment
                         </li>
@@ -38,7 +38,7 @@
                 }
             </oi>
 
-            <div class="sv-footer @FooterClass" >
+            <div class="@SV_SECTION_FOOTER @FooterClass" >
                 @_footerContent(_footerTitle)
             </div>
         </div>
@@ -58,28 +58,28 @@
     private string?                _icon;
 
 
-    [Parameter]                                         public          string                      Class                { get; set; } = string.Empty;
-    [Parameter]                                         public          EventCallback<string>       ClassChanged         { get; set; }
-    [Parameter]                                         public          IList<CellBase>             Cells                { get; set; } = new ObservableCollection<CellBase>();
-    [CascadingParameter(Name = SettingsView.COLLAPSED)] public          string?                     CollapsedIcon        { get; set; }
-    [CascadingParameter(Name = SettingsView.EXPANDED)]  public          string?                     ExpandedIcon         { get; set; }
-    [Parameter]                                         public          bool                        Expanded             { get; set; }
-    [Parameter]                                         public          EventCallback<bool>         ExpandedChanged      { get; set; }
-    [Parameter]                                         public          string?                     FooterClass          { get; set; }
-    [Parameter]                                         public          RenderFragment<string>?     FooterContent        { get; set; }
-    [Parameter]                                         public          EventCallback<string>       FooterContentChanged { get; set; }
-    [Parameter, EditorRequired]                         public required string                      FooterTitle          { get; set; }
-    [Parameter]                                         public          string?                     HeaderClass          { get; set; }
-    [Parameter]                                         public          RenderFragment<string>?     HeaderContent        { get; set; }
-    [Parameter]                                         public          EventCallback<string>       HeaderContentChanged { get; set; }
-    [Parameter, EditorRequired]                         public required string                      HeaderTitle          { get; set; }
-    [Parameter]                                         public          bool                        IsExpandable         { get; set; } = true;
-    [Parameter]                                         public          EventCallback<bool>         IsExpandableChanged  { get; set; }
-    [Parameter]                                         public          bool                        IsVisible            { get; set; } = true;
-    [Parameter]                                         public          EventCallback<bool>         IsVisibleChanged     { get; set; }
-    public                                                              RenderFragment              Fragment             => Render;
-    [CascadingParameter]                       public                   SettingsView                Parent               { get; set; } = null!;
-    [Parameter(CaptureUnmatchedValues = true)] public                   Dictionary<string, object>? HtmlAttributes       { get; set; }
+    [Parameter]                                                   public          string                      Class                { get; set; } = string.Empty;
+    [Parameter]                                                   public          EventCallback<string>       ClassChanged         { get; set; }
+    [Parameter]                                                   public          IList<CellBase>             Cells                { get; set; } = new ObservableCollection<CellBase>();
+    [CascadingParameter(Name = SV_SECTION_HEADER_ICON_COLLAPSED)] public          string?                     CollapsedIcon        { get; set; }
+    [CascadingParameter(Name = SV_SECTION_HEADER_ICON_EXPANDED)]  public          string?                     ExpandedIcon         { get; set; }
+    [Parameter]                                                   public          bool                        Expanded             { get; set; }
+    [Parameter]                                                   public          EventCallback<bool>         ExpandedChanged      { get; set; }
+    [Parameter]                                                   public          string?                     FooterClass          { get; set; }
+    [Parameter]                                                   public          RenderFragment<string>?     FooterContent        { get; set; }
+    [Parameter]                                                   public          EventCallback<string>       FooterContentChanged { get; set; }
+    [Parameter, EditorRequired]                                   public required string                      FooterTitle          { get; set; }
+    [Parameter]                                                   public          string?                     HeaderClass          { get; set; }
+    [Parameter]                                                   public          RenderFragment<string>?     HeaderContent        { get; set; }
+    [Parameter]                                                   public          EventCallback<string>       HeaderContentChanged { get; set; }
+    [Parameter, EditorRequired]                                   public required string                      HeaderTitle          { get; set; }
+    [Parameter]                                                   public          bool                        IsExpandable         { get; set; } = true;
+    [Parameter]                                                   public          EventCallback<bool>         IsExpandableChanged  { get; set; }
+    [Parameter]                                                   public          bool                        IsVisible            { get; set; } = true;
+    [Parameter]                                                   public          EventCallback<bool>         IsVisibleChanged     { get; set; }
+    public                                                                        RenderFragment              Fragment             => Render;
+    [CascadingParameter]                       public                             SettingsView                Parent               { get; set; } = null!;
+    [Parameter(CaptureUnmatchedValues = true)] public                             Dictionary<string, object>? HtmlAttributes       { get; set; }
 
 
     protected override async Task OnInitializedAsync()

@@ -2,16 +2,16 @@
 
 
 <CascadingValue TValue="SettingsView"
-                Value="@this" >
+                Value="@( this )" >
     <CascadingValue IsFixed="false"
-                    Name="@EXPANDED"
+                    Name="@SV_SECTION_HEADER_ICON_EXPANDED"
                     TValue="string"
                     Value="@_expandedIcon" >
         <CascadingValue IsFixed="false"
-                        Name="@COLLAPSED"
+                        Name="@SV_SECTION_HEADER_ICON_COLLAPSED"
                         TValue="string"
                         Value="@_collapsedIcon" >
-            <ol class="sv-root" >
+            <ol class="@SV_ROOT" >
                 @foreach ( Section section in Sections )
                 {
                     @if ( section.IsVisible is false ) { continue; }
@@ -28,8 +28,6 @@
 
 @code
 {
-    public const       string                 COLLAPSED = nameof(COLLAPSED);
-    public const       string                 EXPANDED  = nameof(EXPANDED);
     [Parameter] public IList<Section>         Sections             { get; set; } = new ObservableCollection<Section>();
     [Parameter] public string?                ExpandedIcon         { get; set; }
     [Parameter] public EventCallback<string?> ExpandedIconChanged  { get; set; }

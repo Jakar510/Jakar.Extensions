@@ -1,13 +1,16 @@
 ﻿@inherits SelectableCell
 
 
-<div class="@Class" >
-    <div>
-        <h2>@Title</h2>
-        <h3>@Description</h3>
+<div class="@SV_BUTTON @Class"
+     @onclick="OnClickHandler" >
+    <div class="@SV_CELL_BODY" >
+        <h2 class="@SV_CELL_BODY_TITLE" >@Title</h2>
+        <h3 class="@SV_CELL_BODY_DESCRIPTION" >@Description</h3>
     </div>
 </div>
 
 
-@code {
+@code
+{
+
 }
