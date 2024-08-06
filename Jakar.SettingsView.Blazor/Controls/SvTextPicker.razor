@@ -1,0 +1,56 @@
+﻿@inherits CellBase<string>
+
+
+<div class="@SV_CELL_BODY @Class"
+     id="@ID"
+     @onclick="OnClickHandler" >
+    <h2 class="@SV_CELL_BODY_TITLE"
+        id="@ID-title" >
+        @Title
+    </h2>
+    <h3 class="@SV_CELL_BODY_DESCRIPTION"
+        id="@ID-description" >
+        @Description
+    </h3>
+    <span class="@SV_CELL_BODY_HINT"
+          id="@ID-hint" >
+        @Hint
+    </span>
+    <span class="@SV_CELL_BODY_VALUE_ENTRY"
+          id="@ID-value" >
+        @Hint
+    </span>
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+    // ReSharper disable once CSharpWarnings::CS8618 
+    private OptionsPopup<string> _selector;
+
+    [Parameter] public IList<string>         Values  { get; set; } = new List<string>();
+    [Parameter] public EventCallback<string> OnClick { get; set; }
+
+    // [Parameter, EditorRequired] public required IModalService Modal { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+
+        _selector = new OptionsPopup<string>
+                    {
+                        Values = Values,
+                        ID     = ID
+                    };
+    }
+
+    private async Task OnClickHandler()
+    {
+        await _selector.CloseAsync(Control);
+        await _selector.ToggleAsync(Control);
+        await OnClick.InvokeAsync(Value);
+    }
+}

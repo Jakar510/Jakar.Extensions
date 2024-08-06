@@ -1,6 +1,36 @@
 ﻿namespace Jakar.SettingsView.Blazor;
 
 
+/*
+protected override void BuildRenderTree( RenderTreeBuilder builder )
+{
+    base.BuildRenderTree( builder );
+
+    builder.OpenElement( 1, _ElementName );
+
+    builder.AddMultipleAttributes( 2, HtmlAttributes );
+    builder.AddAttribute( 3, CLASS,    Class );
+    builder.AddAttribute( 4, DISABLED, Disabled );
+    builder.AddElementReferenceCapture( 5, SetElementReference );
+
+    builder.AddAttribute( 6, ON_CLICK, EventCallback.Factory.Create<MouseEventArgs>( this, OnClickHandler ) );
+
+    if ( string.IsNullOrEmpty( Content ) ) { builder.AddContent( 7, ChildContent ); }
+    else { builder.AddContent( 8,                                   Content ); }
+
+    if ( string.IsNullOrEmpty( IconCss ) is false )
+    {
+        builder.OpenElement( 9, SPAN );
+        builder.AddAttribute( 10, CLASS, IconCss );
+        builder.CloseElement();
+    }
+
+    builder.CloseElement();
+}
+*/
+
+
+
 public abstract class CellBase : ComponentBase
 {
     protected bool? _isVisible;
@@ -121,192 +151,4 @@ public abstract class CellBase<T> : CellBase
         Value = value;
         await ValueChanged.InvokeAsync( value );
     }
-}
-
-
-
-public abstract class ContentCellBase : CellBase
-{
-    [Parameter] public RenderFragment? ChildContent { get; set; }
-    [Parameter] public string?         Content      { get; set; }
-
-
-    /*
-    protected override void BuildRenderTree( RenderTreeBuilder builder )
-    {
-        base.BuildRenderTree( builder );
-
-        builder.OpenElement( 1, _ElementName );
-
-        builder.AddMultipleAttributes( 2, HtmlAttributes );
-        builder.AddAttribute( 3, CLASS,    Class );
-        builder.AddAttribute( 4, DISABLED, Disabled );
-        builder.AddElementReferenceCapture( 5, SetElementReference );
-
-        if ( string.IsNullOrEmpty( Content ) ) { builder.AddContent( 7, ChildContent ); }
-        else { builder.AddContent( 8,                                   Content ); }
-
-        if ( string.IsNullOrEmpty( IconCss ) is false )
-        {
-            builder.OpenElement( 9, SPAN );
-            builder.AddAttribute( 10, CLASS, IconCss );
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
-    }
-    */
-}
-
-
-
-public abstract class ContentCellBase<T> : CellBase<T>
-{
-    [Parameter] public RenderFragment? ChildContent { get; set; }
-    [Parameter] public string?         Content      { get; set; }
-
-
-    /*
-    protected override void BuildRenderTree( RenderTreeBuilder builder )
-    {
-        base.BuildRenderTree( builder );
-
-        builder.OpenElement( 1, _ElementName );
-
-        builder.AddMultipleAttributes( 2, HtmlAttributes );
-        builder.AddAttribute( 3, CLASS,    Class );
-        builder.AddAttribute( 4, DISABLED, Disabled );
-        builder.AddElementReferenceCapture( 5, SetElementReference );
-
-        if ( string.IsNullOrEmpty( Content ) ) { builder.AddContent( 7, ChildContent ); }
-        else { builder.AddContent( 8,                                   Content ); }
-
-        if ( string.IsNullOrEmpty( IconCss ) is false )
-        {
-            builder.OpenElement( 9, SPAN );
-            builder.AddAttribute( 10, CLASS, IconCss );
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
-    }
-    */
-}
-
-
-
-public abstract class SelectableCell : ContentCellBase
-{
-    protected bool? _isToggle;
-
-    [Parameter] public bool                          IsToggle        { get; set; }
-    [Parameter] public EventCallback<bool>           IsToggleChanged { get; set; }
-    [Parameter] public EventCallback<MouseEventArgs> OnClick         { get; set; }
-
-
-    public override async Task SetParametersAsync( ParameterView parameters )
-    {
-        await base.SetParametersAsync( parameters );
-        await SetIsToggle( IsToggle );
-    }
-    public async ValueTask SetIsToggle( bool value )
-    {
-        if ( _isToggle == value ) { return; }
-
-        _isToggle = value;
-        await IsVisibleChanged.InvokeAsync( value );
-    }
-    protected async Task OnClickHandler( MouseEventArgs? args = null )
-    {
-        Class = Class.ToggleClass( IsToggle );
-        await OnClick.Execute( args );
-    }
-
-
-    /*
-    protected override void BuildRenderTree( RenderTreeBuilder builder )
-    {
-        base.BuildRenderTree( builder );
-
-        builder.OpenElement( 1, _ElementName );
-
-        builder.AddMultipleAttributes( 2, HtmlAttributes );
-        builder.AddAttribute( 3, CLASS,    Class );
-        builder.AddAttribute( 4, DISABLED, Disabled );
-        builder.AddElementReferenceCapture( 5, SetElementReference );
-
-        builder.AddAttribute( 6, ON_CLICK, EventCallback.Factory.Create<MouseEventArgs>( this, OnClickHandler ) );
-
-        if ( string.IsNullOrEmpty( Content ) ) { builder.AddContent( 7, ChildContent ); }
-        else { builder.AddContent( 8,                                   Content ); }
-
-        if ( string.IsNullOrEmpty( IconCss ) is false )
-        {
-            builder.OpenElement( 9, SPAN );
-            builder.AddAttribute( 10, CLASS, IconCss );
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
-    }
-    */
-}
-
-
-
-public abstract class SelectableCell<T> : ContentCellBase<T>
-{
-    protected bool? _isToggle;
-
-    [Parameter] public bool                          IsToggle        { get; set; }
-    [Parameter] public EventCallback<bool>           IsToggleChanged { get; set; }
-    [Parameter] public EventCallback<MouseEventArgs> OnClick         { get; set; }
-
-
-    public override async Task SetParametersAsync( ParameterView parameters )
-    {
-        await base.SetParametersAsync( parameters );
-        await SetIsToggle( IsToggle );
-    }
-    public async ValueTask SetIsToggle( bool value )
-    {
-        if ( _isToggle == value ) { return; }
-
-        _isToggle = value;
-        await IsVisibleChanged.InvokeAsync( value );
-    }
-    protected async Task OnClickHandler( MouseEventArgs? args = null )
-    {
-        Class = Class.ToggleClass( IsToggle );
-        await OnClick.Execute( args );
-    }
-
-
-    /*
-    protected override void BuildRenderTree( RenderTreeBuilder builder )
-    {
-        base.BuildRenderTree( builder );
-
-        builder.OpenElement( 1, _ElementName );
-
-        builder.AddMultipleAttributes( 2, HtmlAttributes );
-        builder.AddAttribute( 3, CLASS,    Class );
-        builder.AddAttribute( 4, DISABLED, Disabled );
-        builder.AddElementReferenceCapture( 5, SetElementReference );
-
-        builder.AddAttribute( 6, ON_CLICK, EventCallback.Factory.Create<MouseEventArgs>( this, OnClickHandler ) );
-
-        if ( string.IsNullOrEmpty( Content ) ) { builder.AddContent( 7, ChildContent ); }
-        else { builder.AddContent( 8,                                   Content ); }
-
-        if ( string.IsNullOrEmpty( IconCss ) is false )
-        {
-            builder.OpenElement( 9, SPAN );
-            builder.AddAttribute( 10, CLASS, IconCss );
-            builder.CloseElement();
-        }
-
-        builder.CloseElement();
-    }
-    */
 }

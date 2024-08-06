@@ -1,0 +1,33 @@
+﻿@inherits Radzen.Blazor.Rendering.Popup
+@typeparam TValue
+
+<div class=""
+     id="@ID-popup" >
+    @*
+    <InputSelect DisplayName="@DisplayName"
+                 TValue="TValue"
+                 Value="Value"
+                 ValueChanged="ValueChanged"
+                 ValueExpression="ValueExpression"
+                 Values="@Values" />
+    *@
+    <ol class="" >
+        @foreach ( TValue value in Values )
+        {
+            <li class=""
+                @key="@value" >
+                @value
+            </li>
+        }
+    </ol>
+</div>
+
+@code
+{
+    [Parameter, EditorRequired] public required string                     ID              { get; set; }
+    [Parameter, EditorRequired] public required IList<TValue>              Values          { get; set; }
+    [Parameter]                 public          TValue?                    Value           { get; set; }
+    [Parameter]                 public          EventCallback<TValue?>     ValueChanged    { get; set; }
+    [Parameter]                 public          Expression<Func<TValue?>>? ValueExpression { get; set; }
+    [Parameter]                 public          string?                    DisplayName     { get; set; }
+}

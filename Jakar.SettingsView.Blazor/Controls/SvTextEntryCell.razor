@@ -1,23 +1,23 @@
-﻿@using Microsoft.AspNetCore.Components.Forms
-@inherits CellBase<string>
+﻿@inherits CellBase<string>
 
 
 <div class="@SV_CELL_BODY @Class"
-     id="@ID" >
+     id="@ID"
+     @onclick="OnClickHandler" >
     <h2 class="@SV_CELL_BODY_TITLE"
-        id="title" >
+        id="@ID-title" >
         @Title
     </h2>
     <h3 class="@SV_CELL_BODY_DESCRIPTION"
-        id="description" >
+        id="@ID-description" >
         @Description
     </h3>
     <span class="@SV_CELL_BODY_HINT"
-          id="hint" >
+          id="@ID-hint" >
         @Hint
     </span>
     <InputText class="@SV_CELL_BODY_VALUE_ENTRY"
-               id="value"
+               id="@ID-value"
                @onclick="OnClickHandler"
                TValue="@string"
                type="text"
@@ -32,8 +32,8 @@
 @code
 {
 
-    [Parameter] public EventCallback OnClick { get; set; }
+    [Parameter] public EventCallback<string> OnClick { get; set; }
 
 
-    private async Task OnClickHandler() { await OnClick.InvokeAsync(); }
+    private async Task OnClickHandler() => await OnClick.InvokeAsync(Value);
 }
