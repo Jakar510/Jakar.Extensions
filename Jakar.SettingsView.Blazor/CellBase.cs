@@ -36,6 +36,11 @@ public abstract class CellBase : ComponentBase
     protected virtual void Render( RenderTreeBuilder builder )
     {
         builder.OpenComponent( 0, GetType() );
+        builder.AddMultipleAttributes( 1, HtmlAttributes );
+        if ( Disabled ) { builder.AddAttribute( 2, DISABLED ); }
+
+        builder.AddElementReferenceCapture( 3, SetElementReference );
+        BuildRenderTree( builder );
         builder.CloseComponent();
     }
 

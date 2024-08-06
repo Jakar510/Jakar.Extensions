@@ -3,10 +3,12 @@
 
 <CascadingValue TValue="SettingsView"
                 Value="@this" >
-    <CascadingValue Name="@EXPANDED"
+    <CascadingValue IsFixed="false"
+                    Name="@EXPANDED"
                     TValue="string"
                     Value="@_expandedIcon" >
-        <CascadingValue Name="@COLLAPSED"
+        <CascadingValue IsFixed="false"
+                        Name="@COLLAPSED"
                         TValue="string"
                         Value="@_collapsedIcon" >
             <ol class="sv-root" >
@@ -38,7 +40,13 @@
     private string? _expandedIcon;
     private string? _collapsedIcon;
 
-    protected override async Task OnParametersSetAsync() { await SetExpandedIcon(ExpandedIcon); }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await SetExpandedIcon(ExpandedIcon);
+        await SetCollapsedIcon(CollapsedIcon);
+    }
+
 
     public async Task SetExpandedIcon( string? icon )
     {

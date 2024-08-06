@@ -2,7 +2,7 @@
 
 
 <CascadingValue TValue="Section"
-                Value=@this >
+                Value="@this" >
     @if ( _isVisible )
     {
         <div class="sv-section @Class" >
@@ -30,17 +30,16 @@
                     {
                         @if ( cell.IsVisible is false ) { continue; }
 
-                        <li @key="cell" >
+                        <li class="sv-cell"
+                            @key="cell" >
                             @cell.Fragment
                         </li>
                     }
                 }
             </oi>
 
-            <div class="sv-footer" >
-                <div class="@FooterClass" >
-                    @_footerContent(_footerTitle)
-                </div>
+            <div class="sv-footer @FooterClass" >
+                @_footerContent(_footerTitle)
             </div>
         </div>
     }
@@ -91,13 +90,18 @@
         await SetHeader(HeaderTitle);
         await SetFooter(FooterTitle);
     }
-    private static RenderFragment GetContent( string title ) => builder => builder.AddContent(0, title);
-
-
-    protected virtual void Render( Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder )
+    internal static RenderFragment GetContent( string title )
     {
-        builder.OpenComponent(0, GetType());
-        builder.CloseComponent();
+        return AddContent;
+
+        void AddContent( RenderTreeBuilder builder ) => builder.AddContent(0, title);
+    }
+
+
+    protected virtual void Render( RenderTreeBuilder builder )
+    {
+        builder.AddMultipleAttributes(0, HtmlAttributes);
+        BuildRenderTree(builder);
     }
 
     public async Task SetClass( string value )
