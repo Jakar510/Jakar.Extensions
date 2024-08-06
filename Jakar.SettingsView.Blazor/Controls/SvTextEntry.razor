@@ -1,0 +1,39 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@inherits CellBase<string>
+
+
+<div class="@SV_CELL_BODY @Class"
+     id="@ID" >
+    <h2 class="@SV_CELL_BODY_TITLE"
+        id="title" >
+        @Title
+    </h2>
+    <h3 class="@SV_CELL_BODY_DESCRIPTION"
+        id="description" >
+        @Description
+    </h3>
+    <span class="@SV_CELL_BODY_HINT"
+          id="hint" >
+        @Hint
+    </span>
+    <InputText class="@SV_CELL_BODY_VALUE_ENTRY"
+               id="value"
+               @onclick="OnClickHandler"
+               TValue="@string"
+               type="text"
+               Value="@Value"
+               ValueChanged="ValueChanged"
+               ValueExpression="ValueExpression" />
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+
+    [Parameter] public EventCallback OnClick { get; set; }
+
+
+    private async Task OnClickHandler() { await OnClick.InvokeAsync(); }
+}

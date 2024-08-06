@@ -72,9 +72,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Telemetry.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions.Serilog", "Jakar.Extensions.Serilog\Jakar.Extensions.Serilog.csproj", "{F9F509A2-BA3B-43BE-9D4F-F08257AA75E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.SettingsView.Blazor", "Jakar.SettingsView.Blazor\Jakar.SettingsView.Blazor.csproj", "{0EF87610-C971-4352-A3E2-53256AB137D9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Blazor", "Jakar.SettingsView.Blazor\Jakar.SettingsView.Blazor.csproj", "{0EF87610-C971-4352-A3E2-53256AB137D9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestBlazorMauiApp", "TestBlazorMauiApp\TestBlazorMauiApp.csproj", "{1906F1DF-09D1-4FEB-831B-61DEA656641D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorMauiApp", "TestBlazorMauiApp\TestBlazorMauiApp.csproj", "{1906F1DF-09D1-4FEB-831B-61DEA656641D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,9 +1,8 @@
-﻿@inherits SelectableCell
+﻿@inherits CellBase<string>
 
 
 <div class="@SV_BUTTON @Class"
-     id="@ID"
-     @onclick="OnClickHandler" >
+     id="@ID" >
     <div class="@SV_CELL_BODY" >
         <h2 class="@SV_CELL_BODY_TITLE"
             id="title" >
@@ -13,6 +12,14 @@
             id="description" >
             @Description
         </h3>
+        <span class="@SV_CELL_BODY_HINT"
+              id="hint" >
+            @Hint
+        </span>
+        <span class="@SV_CELL_BODY_VALUE_ENTRY"
+              id="value" >
+            @Value
+        </span>
     </div>
 </div>
 

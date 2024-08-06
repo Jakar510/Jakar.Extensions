@@ -11,16 +11,20 @@
                         Name="@SV_SECTION_HEADER_ICON_COLLAPSED"
                         TValue="string"
                         Value="@_collapsedIcon" >
-            <ol class="@SV_ROOT" >
-                @foreach ( Section section in Sections )
-                {
-                    @if ( section.IsVisible is false ) { continue; }
+            <div class="@SV_ROOT"
+                 for="@ID" >
+                <ol class="@SV_ROOT_LIST" >
+                    @foreach ( Section section in Sections )
+                    {
+                        @if ( section.IsVisible is false ) { continue; }
 
-                    <li @key="@section" >
-                        @section.Fragment
-                    </li>
-                }
-            </ol>
+                        <li class="@SV_SECTION"
+                            @key="@section.ID" >
+                            @section.Fragment
+                        </li>
+                    }
+                </ol>
+            </div>
         </CascadingValue>
     </CascadingValue>
 </CascadingValue>
@@ -28,11 +32,14 @@
 
 @code
 {
-    [Parameter] public IList<Section>         Sections             { get; set; } = new ObservableCollection<Section>();
-    [Parameter] public string?                ExpandedIcon         { get; set; }
-    [Parameter] public EventCallback<string?> ExpandedIconChanged  { get; set; }
-    [Parameter] public string?                CollapsedIcon        { get; set; }
-    [Parameter] public EventCallback<string?> CollapsedIconChanged { get; set; }
+    [Parameter]                                public             string                               ID                   { get; set; } = Guid.NewGuid().ToString();
+    [Parameter]                                public             IList<Section>                       Sections             { get; set; } = new ObservableCollection<Section>();
+    [Parameter]                                public             string?                              ExpandedIcon         { get; set; }
+    [Parameter]                                public             EventCallback<string?>               ExpandedIconChanged  { get; set; }
+    [Parameter]                                public             string?                              CollapsedIcon        { get; set; }
+    [Parameter]                                public             EventCallback<string?>               CollapsedIconChanged { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public             IReadOnlyDictionary<string, object>? HtmlAttributes       { get; set; }
+    [CascadingParameter]                       protected internal EditContext?                         CascadedEditContext  { get; set; }
 
 
     private string? _expandedIcon;

@@ -6,20 +6,25 @@ public abstract class CellBase : ComponentBase
     protected bool? _isVisible;
     protected bool? _isDisabled;
 
-    [Parameter] public                                  string                      Class              { get; set; } = string.Empty;
-    [Parameter] public                                  EventCallback<string>       ClassChanged       { get; set; }
-    public                                              ElementReference            Control            { get; private set; }
-    [Parameter] public                                  string?                     Description        { get; set; }
-    [Parameter] public                                  bool                        IsDisabled         { get; set; }
-    [Parameter] public                                  EventCallback<bool>         IsDisabledChanged  { get; set; }
-    public                                              RenderFragment              Fragment           => Render;
-    [Parameter( CaptureUnmatchedValues = true )] public Dictionary<string, object>? HtmlAttributes     { get; set; }
-    [Parameter]                                  public bool                        IsVisible          { get; set; } = true;
-    [Parameter]                                  public EventCallback<bool>         IsVisibleChanged   { get; set; }
-    [CascadingParameter]                         public Section                     Parent             { get; set; } = null!;
-    [Parameter]                                  public string?                     Title              { get; set; }
-    [Parameter]                                  public EventCallback<string?>      TitleChanged       { get; set; }
-    [Parameter]                                  public EventCallback<string?>      DescriptionChanged { get; set; }
+
+    [Parameter] public                                              string                               ID                    { get; set; } = Guid.NewGuid().ToString();
+    [Parameter] public                                              string                               Class                 { get; set; } = string.Empty;
+    [Parameter] public                                              EventCallback<string>                ClassChanged          { get; set; }
+    public                                                          ElementReference                     Control               { get; private set; }
+    [Parameter] public                                              bool                                 IsDisabled            { get; set; }
+    [Parameter] public                                              EventCallback<bool>                  IsDisabledChanged     { get; set; }
+    public                                                          RenderFragment                       Fragment              => Render;
+    [Parameter( CaptureUnmatchedValues = true )] public             IReadOnlyDictionary<string, object>? HtmlAttributes        { get; set; }
+    [CascadingParameter]                         protected internal EditContext?                         CascadedEditContext   { get; set; }
+    [Parameter]                                  public             bool                                 IsVisible             { get; set; } = true;
+    [Parameter]                                  public             EventCallback<bool>                  IsVisibleChanged      { get; set; }
+    [CascadingParameter]                         public             Section                              Parent                { get; set; } = null!;
+    [Parameter]                                  public             string?                              Title                 { get; set; }
+    [Parameter]                                  public             EventCallback<string?>               TitleChanged          { get; set; }
+    [Parameter]                                  public             Expression<Func<string?>>?           TitleExpression       { get; set; }
+    [Parameter]                                  public             string?                              Description           { get; set; }
+    [Parameter]                                  public             EventCallback<string?>               DescriptionChanged    { get; set; }
+    [Parameter]                                  public             Expression<Func<string?>>?           DescriptionExpression { get; set; }
 
 
     protected internal void SetElementReference( ElementReference reference ) => Control = reference;
@@ -94,10 +99,12 @@ public abstract class CellBase : ComponentBase
 
 public abstract class CellBase<T> : CellBase
 {
-    [Parameter] public string?                Hint         { get; set; }
-    [Parameter] public EventCallback<string?> HintChanged  { get; set; }
-    [Parameter] public T?                     Value        { get; set; }
-    [Parameter] public EventCallback<T>       ValueChanged { get; set; }
+    [Parameter] public string?                    Hint            { get; set; }
+    [Parameter] public EventCallback<string?>     HintChanged     { get; set; }
+    [Parameter] public Expression<Func<string?>>? HintExpression  { get; set; }
+    [Parameter] public T?                         Value           { get; set; }
+    [Parameter] public EventCallback<T?>          ValueChanged    { get; set; }
+    [Parameter] public Expression<Func<T>>?       ValueExpression { get; set; }
 
 
     public async ValueTask SetHint( string? value )
