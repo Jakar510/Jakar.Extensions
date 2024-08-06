@@ -1,0 +1,66 @@
+﻿@inherits ComponentBase
+
+
+<CascadingValue TValue="SettingsView"
+                Value="@this" >
+    <CascadingValue Name="@EXPANDED"
+                    TValue="string"
+                    Value="@_expandedIcon" >
+        <CascadingValue Name="@COLLAPSED"
+                        TValue="string"
+                        Value="@_collapsedIcon" >
+            <ol class="sv-root" >
+                @foreach ( Section section in Sections )
+                {
+                    @if ( section.IsVisible is false ) { continue; }
+
+                    <li @key="@section" >
+                        @section.Fragment
+                    </li>
+                }
+            </ol>
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>
+
+
+@code
+{
+    public const       string                 COLLAPSED = nameof(COLLAPSED);
+    public const       string                 EXPANDED  = nameof(EXPANDED);
+    [Parameter] public IList<Section>         Sections             { get; set; } = new ObservableCollection<Section>();
+    [Parameter] public string?                ExpandedIcon         { get; set; }
+    [Parameter] public EventCallback<string?> ExpandedIconChanged  { get; set; }
+    [Parameter] public string?                CollapsedIcon        { get; set; }
+    [Parameter] public EventCallback<string?> CollapsedIconChanged { get; set; }
+
+
+    private string? _expandedIcon;
+    private string? _collapsedIcon;
+
+    protected override async Task OnParametersSetAsync() { await SetExpandedIcon(ExpandedIcon); }
+
+    public async Task SetExpandedIcon( string? icon )
+    {
+        if ( _expandedIcon == icon ) { return; }
+
+        _expandedIcon = icon;
+        await ExpandedIconChanged.InvokeAsync(icon);
+    }
+    public async Task SetCollapsedIcon( string? icon )
+    {
+        if ( _collapsedIcon == icon ) { return; }
+
+        _collapsedIcon = icon;
+        await CollapsedIconChanged.InvokeAsync(icon);
+    }
+
+    public void OnAppearing()
+    {
+        foreach ( Section section in Sections ) { section.OnAppearing(); }
+    }
+    public void OnDisappearing()
+    {
+        foreach ( Section section in Sections ) { section.OnDisappearing(); }
+    }
+}

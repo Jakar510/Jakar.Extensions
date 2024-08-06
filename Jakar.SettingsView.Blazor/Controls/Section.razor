@@ -1,0 +1,172 @@
+﻿@inherits ComponentBase
+
+
+<CascadingValue TValue="Section"
+                Value=@this >
+    @if ( _isVisible )
+    {
+        <div class="sv-section @Class" >
+            <div class="sv-header" >
+                <div class="@HeaderClass" >
+                    @_headerContent(_headerTitle)
+                </div>
+
+                @if ( string.IsNullOrEmpty(_icon) is false )
+                {
+                    <div class="sv-icon"
+                         @onclick="ToggleExpanded" >
+                        <img alt=""
+                             class="aspect-fit img"
+                             src="@_icon" />
+                        @* (<code>Expanded</code> = @_expanded) *@
+                    </div>
+                }
+            </div>
+
+            <oi class="sv-body" >
+                @if ( _isExpanded )
+                {
+                    @foreach ( CellBase cell in Cells )
+                    {
+                        @if ( cell.IsVisible is false ) { continue; }
+
+                        <li @key="cell" >
+                            @cell.Fragment
+                        </li>
+                    }
+                }
+            </oi>
+
+            <div class="sv-footer" >
+                <div class="@FooterClass" >
+                    @_footerContent(_footerTitle)
+                </div>
+            </div>
+        </div>
+    }
+</CascadingValue>
+
+
+@code
+{
+    private bool                   _isExpanded;
+    private bool                   _isExpandable;
+    private bool                   _isVisible;
+    private RenderFragment<string> _footerContent = GetContent;
+    private RenderFragment<string> _headerContent = GetContent;
+    private string                 _footerTitle   = string.Empty;
+    private string                 _headerTitle   = string.Empty;
+    private string?                _icon;
+
+
+    [Parameter]                                         public          string                      Class                { get; set; } = string.Empty;
+    [Parameter]                                         public          EventCallback<string>       ClassChanged         { get; set; }
+    [Parameter]                                         public          IList<CellBase>             Cells                { get; set; } = new ObservableCollection<CellBase>();
+    [CascadingParameter(Name = SettingsView.COLLAPSED)] public          string?                     CollapsedIcon        { get; set; }
+    [CascadingParameter(Name = SettingsView.EXPANDED)]  public          string?                     ExpandedIcon         { get; set; }
+    [Parameter]                                         public          bool                        Expanded             { get; set; }
+    [Parameter]                                         public          EventCallback<bool>         ExpandedChanged      { get; set; }
+    [Parameter]                                         public          string?                     FooterClass          { get; set; }
+    [Parameter]                                         public          RenderFragment<string>?     FooterContent        { get; set; }
+    [Parameter]                                         public          EventCallback<string>       FooterContentChanged { get; set; }
+    [Parameter, EditorRequired]                         public required string                      FooterTitle          { get; set; }
+    [Parameter]                                         public          string?                     HeaderClass          { get; set; }
+    [Parameter]                                         public          RenderFragment<string>?     HeaderContent        { get; set; }
+    [Parameter]                                         public          EventCallback<string>       HeaderContentChanged { get; set; }
+    [Parameter, EditorRequired]                         public required string                      HeaderTitle          { get; set; }
+    [Parameter]                                         public          bool                        IsExpandable         { get; set; } = true;
+    [Parameter]                                         public          EventCallback<bool>         IsExpandableChanged  { get; set; }
+    [Parameter]                                         public          bool                        IsVisible            { get; set; } = true;
+    [Parameter]                                         public          EventCallback<bool>         IsVisibleChanged     { get; set; }
+    public                                                              RenderFragment              Fragment             => Render;
+    [CascadingParameter]                       public                   SettingsView                Parent               { get; set; } = null!;
+    [Parameter(CaptureUnmatchedValues = true)] public                   Dictionary<string, object>? HtmlAttributes       { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SetIsVisible(IsVisible);
+        await SetIsExpandable(IsExpandable);
+        await SetIsExpanded(Expanded);
+        await SetHeader(HeaderTitle);
+        await SetFooter(FooterTitle);
+    }
+    private static RenderFragment GetContent( string title ) => builder => builder.AddContent(0, title);
+
+
+    protected virtual void Render( Microsoft.AspNetCore.Components.Rendering.RenderTreeBuilder builder )
+    {
+        builder.OpenComponent(0, GetType());
+        builder.CloseComponent();
+    }
+
+    public async Task SetClass( string value )
+    {
+        if ( Class == value ) { return; }
+
+        Class = value;
+        await ClassChanged.InvokeAsync(value);
+    }
+
+    public async Task SetIsVisible( bool value )
+    {
+        if ( _isVisible == value ) { return; }
+
+        if ( value ) { OnAppearing(); }
+        else { OnDisappearing(); }
+
+        _isVisible = value;
+        await IsVisibleChanged.InvokeAsync(value);
+    }
+    public async Task SetHeader( string title )
+    {
+        _headerTitle = title;
+
+        if ( HeaderContent is not null )
+        {
+            _headerContent = HeaderContent;
+            await HeaderContentChanged.InvokeAsync(_headerTitle);
+        }
+    }
+    public async Task SetFooter( string title )
+    {
+        _footerTitle = title;
+
+        if ( FooterContent is not null )
+        {
+            _footerContent = FooterContent;
+            await FooterContentChanged.InvokeAsync(_footerTitle);
+        }
+    }
+    public async Task SetIsExpandable( bool isExpandable )
+    {
+        if ( _isExpandable == isExpandable ) { return; }
+
+        _isExpandable = isExpandable;
+        await IsExpandableChanged.InvokeAsync(isExpandable);
+    }
+    public async Task SetIsExpanded( bool isExpanded )
+    {
+        if ( _isExpanded == isExpanded ) { return; }
+
+        _isExpanded = isExpanded;
+
+        _icon = isExpanded
+                    ? ExpandedIcon
+                    : CollapsedIcon;
+
+        await ExpandedChanged.InvokeAsync(isExpanded);
+    }
+    public Task ToggleExpandable() => SetIsExpandable(!_isExpandable);
+    public Task ToggleExpanded()   => SetIsExpanded(!_isExpanded);
+
+
+    public void OnAppearing()
+    {
+        foreach ( CellBase cell in Cells ) { cell.OnAppearing(); }
+    }
+    public void OnDisappearing()
+    {
+        foreach ( CellBase cell in Cells ) { cell.OnDisappearing(); }
+    }
+}

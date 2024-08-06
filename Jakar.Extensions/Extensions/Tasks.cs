@@ -8,10 +8,10 @@ public static partial class Tasks
     public static Task Delay( this TimeSpan delay, CancellationToken token = default ) => Task.Delay( delay, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    Task         task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this Task<T>      task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    ValueTask    task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this ValueTask<T> task ) => task.ConfigureAwait( false ).GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    Task         task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this Task<T>      task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    ValueTask    task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this ValueTask<T> task ) => task.GetAwaiter().GetResult();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -30,14 +30,14 @@ public static partial class Tasks
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool WaitSynchronously( this ValueTask task )
     {
-        task.ConfigureAwait( false ).GetAwaiter().GetResult();
+        task.GetAwaiter().GetResult();
 
         return task.IsCompletedSuccessfully;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static T WaitSynchronously<T>( this ValueTask<T> task )
     {
-        task.ConfigureAwait( false ).GetAwaiter().GetResult();
+        task.GetAwaiter().GetResult();
 
         return task.Result;
     }
@@ -71,9 +71,9 @@ public static partial class Tasks
 
         while ( token.ShouldContinue() && list.Count > 0 )
         {
-            var task = await Task.WhenAny( list ).ConfigureAwait( false );
+            var task = await Task.WhenAny( list );
             list.Remove( task );
-            yield return await task.ConfigureAwait( false );
+            yield return await task;
         }
     }
 
@@ -127,7 +127,7 @@ public static partial class Tasks
         async ValueTask Executor( int i, CancellationToken token )
         {
             Func<CancellationToken, ValueTask<TResult>> task = tasks[i];
-            TResult                                     result = await task( token ).ConfigureAwait( false );
+            TResult                                     result = await task( token );
             results.Add( result );
         }
     #else
