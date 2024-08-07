@@ -37,10 +37,10 @@ public abstract class CellBase : ComponentBase
     protected bool? _isDisabled;
 
 
+    protected                                                       ElementReference                     _control;
     [Parameter] public                                              string                               ID                    { get; set; } = Guid.NewGuid().ToString();
     [Parameter] public                                              string                               Class                 { get; set; } = string.Empty;
     [Parameter] public                                              EventCallback<string>                ClassChanged          { get; set; }
-    public                                                          ElementReference                     Control               { get; private set; }
     [Parameter] public                                              bool                                 IsDisabled            { get; set; }
     [Parameter] public                                              EventCallback<bool>                  IsDisabledChanged     { get; set; }
     public                                                          RenderFragment                       Fragment              => Render;
@@ -57,7 +57,7 @@ public abstract class CellBase : ComponentBase
     [Parameter]                                  public             Expression<Func<string?>>?           DescriptionExpression { get; set; }
 
 
-    protected internal void SetElementReference( ElementReference reference ) => Control = reference;
+    protected internal void SetElementReference( ElementReference reference ) => _control = reference;
     protected override async Task OnParametersSetAsync()
     {
         await SetIsVisible( IsVisible );
@@ -134,7 +134,7 @@ public abstract class CellBase<T> : CellBase
     [Parameter] public Expression<Func<string?>>? HintExpression  { get; set; }
     [Parameter] public T?                         Value           { get; set; }
     [Parameter] public EventCallback<T?>          ValueChanged    { get; set; }
-    [Parameter] public Expression<Func<T>>?       ValueExpression { get; set; }
+    [Parameter] public Expression<Func<T?>>?      ValueExpression { get; set; }
 
 
     public async ValueTask SetHint( string? value )

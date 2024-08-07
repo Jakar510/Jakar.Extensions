@@ -30,27 +30,20 @@
     // ReSharper disable once CSharpWarnings::CS8618 
     private OptionsPopup<string> _selector;
 
-    [Parameter] public IList<string>         Values  { get; set; } = new List<string>();
-    [Parameter] public EventCallback<string> OnClick { get; set; }
-
-    // [Parameter, EditorRequired] public required IModalService Modal { get; set; }
+    [Parameter]                 public          IList<string>         Values        { get; set; } = new ObservableCollection<string>();
+    [Parameter]                 public          EventCallback<string> OnCPopupClose { get; set; }
+    [Parameter, EditorRequired] public required string                PopupTitle    { get; set; }
 
 
     protected override void OnParametersSet()
     {
-        base.OnParametersSet();
-
         _selector = new OptionsPopup<string>
                     {
-                        Values = Values,
-                        ID     = ID
+                        ID    = ID,
+                        Close = OnCPopupClose,
+                        Title = PopupTitle
                     };
     }
 
-    private async Task OnClickHandler()
-    {
-        await _selector.CloseAsync(Control);
-        await _selector.ToggleAsync(Control);
-        await OnClick.InvokeAsync(Value);
-    }
+    private async Task OnClickHandler() => await _selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
 }

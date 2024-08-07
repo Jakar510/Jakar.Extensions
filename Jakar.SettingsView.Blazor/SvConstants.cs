@@ -13,7 +13,6 @@ public static class SvConstants
     public const string SPAN                             = "span";
     public const string SV_ACTIVE                        = "sv-active";
     public const string SV_BUTTON                        = "sv-button";
-    public const string SV_LABEL                         = "sv-label";
     public const string SV_CELL                          = "sv-cell";
     public const string SV_CELL_BODY                     = "sv-cell-body";
     public const string SV_CELL_BODY_DESCRIPTION         = "sv-body-description";
@@ -22,8 +21,12 @@ public static class SvConstants
     public const string SV_CELL_BODY_VALUE               = "sv-body-value";
     public const string SV_CELL_BODY_VALUE_ENTRY         = "sv-body-value-entry";
     public const string SV_DISABLED                      = "sv-disabled";
+    public const string SV_LABEL                         = "sv-label";
+    public const string SV_POPUP                         = "sv-popup";
+    public const string SV_POPUP_LIST                    = "sv-popup-list";
+    public const string SV_POPUP_LIST_ITEM               = "sv-popup-list-item";
     public const string SV_ROOT                          = "sv-root";
-    public const string SV_ROOT_LIST                          = "sv-root-list";
+    public const string SV_ROOT_LIST                     = "sv-root-list";
     public const string SV_SECTION                       = "sv-section";
     public const string SV_SECTION_BODY                  = "sv-section-body";
     public const string SV_SECTION_FOOTER                = "sv-section-footer";
