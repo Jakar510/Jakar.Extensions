@@ -1,11 +1,12 @@
 ﻿// TrueLogic :: iTrueLogic.Maui
 // 07/18/2024  20:07
 
+
 namespace Jakar.SettingsView.Maui.Cells;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class SvSection : View, IDisposable
+public class SvSection : ContentView, IDisposable
 {
     public static readonly BindableProperty CellsProperty       = BindableProperty.Create( nameof(Cells),       typeof(ObservableCollection<CellBase>), typeof(SvSection), defaultValueCreator: static bindable => new ObservableCollection<CellBase>() );
     public static readonly BindableProperty FooterProperty      = BindableProperty.Create( nameof(Footer),      typeof(HeaderBase),                     typeof(SvSection), defaultValueCreator: FooterBase.Default.Create );
@@ -19,11 +20,11 @@ public class SvSection : View, IDisposable
     public bool                           UseDragSort { get => (bool)GetValue( UseDragSortProperty );                     set => SetValue( UseDragSortProperty, value ); }
 
 
-    public SvSection() : this( null ) { }
-    public SvSection( string? title ) : base() => Header.Title = title ?? string.Empty;
+    public SvSection() : base() { }
+    public SvSection( string? title ) : this() => Header.Title = title ?? string.Empty;
     public virtual void Dispose()
     {
-        Header?.Dispose();
+        Header.Dispose();
         GC.SuppressFinalize( this );
     }
 
@@ -65,41 +66,6 @@ public class SvSection : View, IDisposable
     }
     protected static void ClearGesture( View view ) => view.GestureRecognizers.Clear();
     protected static void DoNothing()               { }
-
-
-
-    public abstract class BorderBase : ContentView, IDisposable
-    {
-        public static readonly BindableProperty TextColorProperty = BindableProperty.Create( nameof(TextColor), typeof(Color),  typeof(BorderBase), propertyChanged: OnTextColorChanged );
-        public static readonly BindableProperty TitleProperty     = BindableProperty.Create( nameof(Title),     typeof(string), typeof(BorderBase), propertyChanged: OnTitleChanged );
-
-
-        public         Color  TextColor { get => (Color)GetValue( TextColorProperty ); set => SetValue( TextColorProperty, value ); }
-        public virtual string Title     { get => (string)GetValue( TitleProperty );    set => SetValue( TitleProperty,     value ); }
-
-
-        public virtual void Dispose()
-        {
-            GestureRecognizers.Clear();
-            GC.SuppressFinalize( this );
-        }
-        protected static void OnTextColorChanged( BindableObject bindable, object oldValue, object value )
-        {
-            if ( bindable is not BorderBase header ) { return; }
-
-            header.OnTextColorChanged( (Color?)value );
-        }
-        protected static void OnTitleChanged( BindableObject bindable, object oldValue, object value )
-        {
-            if ( bindable is not BorderBase header ) { return; }
-
-            header.OnTitleChanged( (string)value );
-        }
-
-
-        protected abstract void OnTitleChanged( string     value );
-        protected abstract void OnTextColorChanged( Color? value );
-    }
 
 
 
@@ -267,13 +233,11 @@ public class SvSection : View, IDisposable
             public static Default Create()                   => new();
 
 
-            protected override void OnTappedCommandChanged( ICommand? value ) { }
+            protected override void OnTappedCommandChanged( ICommand? value ) => _gestureRecognizer.Command = value;
             protected override void OnTitleChanged( string            value ) => _label.Text = value;
             protected override void OnTextColorChanged( Color?        value ) => _label.TextColor = value ?? Colors.Black;
             protected override void OnIsExpandedChanged( bool value )
             {
-                IsVisible = value;
-
                 IconSource = value
                                  ? Collapsed
                                  : Expanded;
