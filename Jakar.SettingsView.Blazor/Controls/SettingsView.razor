@@ -14,7 +14,7 @@
             <div class="@SV_ROOT"
                  for="@ID" >
                 <ol class="@SV_ROOT_LIST" >
-                    @foreach ( Section section in Sections )
+                    @foreach ( SvSection section in Sections )
                     {
                         @if ( section.IsVisible is false ) { continue; }
 
@@ -33,7 +33,7 @@
 @code
 {
     [Parameter]                                public             string                               ID                   { get; set; } = Guid.NewGuid().ToString();
-    [Parameter]                                public             IList<Section>                       Sections             { get; set; } = new ObservableCollection<Section>();
+    [Parameter]                                public             IList<SvSection>                     Sections             { get; set; } = new ObservableCollection<SvSection>();
     [Parameter]                                public             string?                              ExpandedIcon         { get; set; }
     [Parameter]                                public             EventCallback<string?>               ExpandedIconChanged  { get; set; }
     [Parameter]                                public             string?                              CollapsedIcon        { get; set; }
@@ -70,10 +70,10 @@
 
     public void OnAppearing()
     {
-        foreach ( Section section in Sections ) { section.OnAppearing(); }
+        foreach ( SvSection section in Sections ) { section.OnAppearing(); }
     }
     public void OnDisappearing()
     {
-        foreach ( Section section in Sections ) { section.OnDisappearing(); }
+        foreach ( SvSection section in Sections ) { section.OnDisappearing(); }
     }
 }

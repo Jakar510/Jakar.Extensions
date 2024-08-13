@@ -48,7 +48,7 @@ public abstract class CellBase : ComponentBase
     [CascadingParameter]                         protected internal EditContext?                         CascadedEditContext   { get; set; }
     [Parameter]                                  public             bool                                 IsVisible             { get; set; } = true;
     [Parameter]                                  public             EventCallback<bool>                  IsVisibleChanged      { get; set; }
-    [CascadingParameter]                         public             Section                              Parent                { get; set; } = null!;
+    [CascadingParameter]                         public             SvSection                            Parent                { get; set; } = null!;
     [Parameter]                                  public             string?                              Title                 { get; set; }
     [Parameter]                                  public             EventCallback<string?>               TitleChanged          { get; set; }
     [Parameter]                                  public             Expression<Func<string?>>?           TitleExpression       { get; set; }

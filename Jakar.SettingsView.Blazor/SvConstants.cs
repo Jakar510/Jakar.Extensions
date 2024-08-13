@@ -6,22 +6,15 @@ namespace Jakar.SettingsView.Blazor;
 
 public static class SvConstants
 {
-    public const string ASPECT_FIT                       = "aspect-fit";
-    public const string CLASS                            = "class";
-    public const string IMAGE                            = "img";
-    public const string ON_CLICK                         = "onclick";
-    public const string SPAN                             = "span";
     public const string SV_ACTIVE                        = "sv-active";
-    public const string SV_BUTTON                        = "sv-button";
     public const string SV_CELL                          = "sv-cell";
     public const string SV_CELL_BODY                     = "sv-cell-body";
-    public const string SV_CELL_BODY_DESCRIPTION         = "sv-body-description";
-    public const string SV_CELL_BODY_HINT                = "sv-body-hint";
-    public const string SV_CELL_BODY_TITLE               = "sv-body-title";
-    public const string SV_CELL_BODY_VALUE               = "sv-body-value";
-    public const string SV_CELL_BODY_VALUE_ENTRY         = "sv-body-value-entry";
+    public const string SV_CELL_BODY_DESCRIPTION         = "sv-cell-body-description";
+    public const string SV_CELL_BODY_HINT                = "sv-cell-body-hint";
+    public const string SV_CELL_BODY_TITLE               = "sv-cell-body-title";
+    public const string SV_CELL_BODY_VALUE               = "sv-cell-body-value";
+    public const string SV_CELL_BODY_VALUE_ENTRY         = "sv-cell-body-value-entry";
     public const string SV_DISABLED                      = "sv-disabled";
-    public const string SV_LABEL                         = "sv-label";
     public const string SV_POPUP                         = "sv-popup";
     public const string SV_POPUP_LIST                    = "sv-popup-list";
     public const string SV_POPUP_LIST_ITEM               = "sv-popup-list-item";
@@ -51,5 +44,24 @@ public static class SvConstants
         return classValue.Contains( SV_ACTIVE, StringComparison.Ordinal ) is false
                    ? classValue + ACTIVE
                    : classValue.Replace( ACTIVE, string.Empty, StringComparison.Ordinal );
+    }
+
+
+
+    public static class Cells
+    {
+        public const string BUTTON = "sv-cell-button";
+        public const string LABEL  = "sv-cell-label";
+    }
+
+
+
+    public static class Html
+    {
+        public const string ASPECT_FIT = "aspect-fit";
+        public const string CLASS      = "class";
+        public const string IMAGE      = "img";
+        public const string ON_CLICK   = "onclick";
+        public const string SPAN       = "span";
     }
 }

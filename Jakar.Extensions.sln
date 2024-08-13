@@ -76,6 +76,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Blazor",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorMauiApp", "TestBlazorMauiApp\TestBlazorMauiApp.csproj", "{1906F1DF-09D1-4FEB-831B-61DEA656641D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.SettingsView.Maui", "Jakar.SettingsView.Maui\Jakar.SettingsView.Maui.csproj", "{863EBD6D-5955-44C1-9537-13F5F522740F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -373,6 +375,18 @@ Global
 		{1906F1DF-09D1-4FEB-831B-61DEA656641D}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{1906F1DF-09D1-4FEB-831B-61DEA656641D}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 		{1906F1DF-09D1-4FEB-831B-61DEA656641D}.Release|iPhoneSimulator.Deploy.0 = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhone.Build.0 = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,7 @@
 ﻿@inherits ComponentBase
 
 
-<CascadingValue TValue="Section"
+<CascadingValue TValue="SvSection"
                 Value="@( this )" >
     @if ( _isVisible )
     {
@@ -17,7 +17,7 @@
                     <div class="@SV_SECTION_HEADER_ICON"
                          @onclick="ToggleExpanded" >
                         <img alt=""
-                             class="@ASPECT_FIT @IMAGE"
+                             class="@Html.ASPECT_FIT @Html.IMAGE"
                              src="@_icon" />
                     </div>
                 }
