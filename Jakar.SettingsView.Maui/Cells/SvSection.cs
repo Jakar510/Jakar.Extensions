@@ -6,7 +6,7 @@ namespace Jakar.SettingsView.Maui.Cells;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class SvSection : ContentView, IDisposable
+public class SvSection : ContentView, ISvSection<CellBase>
 {
     public static readonly BindableProperty CellsProperty       = BindableProperty.Create( nameof(Cells),       typeof(ObservableCollection<CellBase>), typeof(SvSection), defaultValueCreator: static bindable => new ObservableCollection<CellBase>() );
     public static readonly BindableProperty FooterProperty      = BindableProperty.Create( nameof(Footer),      typeof(HeaderBase),                     typeof(SvSection), defaultValueCreator: FooterBase.Default.Create );
@@ -14,10 +14,13 @@ public class SvSection : ContentView, IDisposable
     public static readonly BindableProperty UseDragSortProperty = BindableProperty.Create( nameof(UseDragSort), typeof(bool),                           typeof(SvSection), false );
 
 
-    public ObservableCollection<CellBase> Cells       { get => (ObservableCollection<CellBase>)GetValue( CellsProperty ); set => SetValue( CellsProperty,       value ); }
-    public HeaderBase                     Footer      { get => (HeaderBase)GetValue( FooterProperty );                    set => SetValue( FooterProperty,      value ); }
-    public HeaderBase                     Header      { get => (HeaderBase)GetValue( HeaderProperty );                    set => SetValue( HeaderProperty,      value ); }
-    public bool                           UseDragSort { get => (bool)GetValue( UseDragSortProperty );                     set => SetValue( UseDragSortProperty, value ); }
+    public ObservableCollection<CellBase> Cells       { get => (ObservableCollection<CellBase>)GetValue( CellsProperty ); set => SetValue( CellsProperty,  value ); }
+    public HeaderBase                     Footer      { get => (HeaderBase)GetValue( FooterProperty );                    set => SetValue( FooterProperty, value ); }
+    ISectionBorder ISvSection.            Footer      => Footer;
+    public HeaderBase                     Header      { get => (HeaderBase)GetValue( HeaderProperty ); set => SetValue( HeaderProperty, value ); }
+    ISectionBorder ISvSection.            Header      => Header;
+    public bool                           IsValid     => this.AreCellsValid();
+    public bool                           UseDragSort { get => (bool)GetValue( UseDragSortProperty ); set => SetValue( UseDragSortProperty, value ); }
 
 
     public SvSection() : base() { }
@@ -132,7 +135,7 @@ public class SvSection : ContentView, IDisposable
 
 
 
-    public abstract class HeaderBase : BorderBase
+    public abstract class HeaderBase : BorderBase, ISectionBorder<Color, ImageSource>
     {
         public const           string               HEADER_BACKGROUND_COLOR = "HeaderBackgroundColor";
         public const           string               HEADER_FONT_SIZE        = "HeaderFontSize";
@@ -236,12 +239,10 @@ public class SvSection : ContentView, IDisposable
             protected override void OnTappedCommandChanged( ICommand? value ) => _gestureRecognizer.Command = value;
             protected override void OnTitleChanged( string            value ) => _label.Text = value;
             protected override void OnTextColorChanged( Color?        value ) => _label.TextColor = value ?? Colors.Black;
-            protected override void OnIsExpandedChanged( bool value )
-            {
+            protected override void OnIsExpandedChanged( bool value ) =>
                 IconSource = value
                                  ? Collapsed
                                  : Expanded;
-            }
             protected override void OnCollapsedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
                                                                                                          ? Expanded
                                                                                                          : value );

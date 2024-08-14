@@ -76,7 +76,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Blazor",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorMauiApp", "TestBlazorMauiApp\TestBlazorMauiApp.csproj", "{1906F1DF-09D1-4FEB-831B-61DEA656641D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.SettingsView.Maui", "Jakar.SettingsView.Maui\Jakar.SettingsView.Maui.csproj", "{863EBD6D-5955-44C1-9537-13F5F522740F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Maui", "Jakar.SettingsView.Maui\Jakar.SettingsView.Maui.csproj", "{863EBD6D-5955-44C1-9537-13F5F522740F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.SettingsView.Abstractions", "Jakar.SettingsView.Abstractions\Jakar.SettingsView.Abstractions.csproj", "{6908E9AF-50BA-433D-857A-366AC7F8CC97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -387,6 +389,18 @@ Global
 		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhone.Build.0 = Release|Any CPU
 		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{863EBD6D-5955-44C1-9537-13F5F522740F}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|iPhone.Build.0 = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{6908E9AF-50BA-433D-857A-366AC7F8CC97}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,4 @@
-﻿// Jakar.Extensions :: Jakar.SettingsView.Maui
-// 08/12/2024  15:08
-
-namespace Jakar.SettingsView.Maui.Cells;
+﻿namespace Jakar.SettingsView.Abstractions;
 
 
 public enum WidgetType

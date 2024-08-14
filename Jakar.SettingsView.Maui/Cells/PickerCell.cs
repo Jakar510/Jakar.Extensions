@@ -1,7 +1,7 @@
 ﻿namespace Jakar.SettingsView.Maui.Cells;
 
 
-public abstract class PickerCell<T> : CellBase<T>
+public abstract class PickerCell<T> : ValueCellBase<T>
     where T : IEquatable<T>, IComparable<T>
 {
     public override WidgetType Type   => WidgetType.Picker;

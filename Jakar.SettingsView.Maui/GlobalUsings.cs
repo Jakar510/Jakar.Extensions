@@ -5,3 +5,4 @@ global using System.ComponentModel;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Windows.Input;
 global using Jakar.Extensions;
+global using Jakar.SettingsView.Abstractions;

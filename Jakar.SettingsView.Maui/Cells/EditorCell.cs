@@ -4,7 +4,7 @@
 namespace Jakar.SettingsView.Maui.Cells;
 
 
-public class EditorCell : CellBase<string>
+public class EditorCell : ValueCellBase<string>
 {
     public sealed override WidgetType            Type   => WidgetType.Editor;
     public override        ErrorOrResult<string> Save() => Value ?? string.Empty;

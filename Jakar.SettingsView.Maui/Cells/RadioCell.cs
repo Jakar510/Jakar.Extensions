@@ -4,7 +4,7 @@
 namespace Jakar.SettingsView.Maui.Cells;
 
 
-public abstract class RadioCell<T> : CellBase<T>
+public abstract class RadioCell<T> : ValueCellBase<T>
     where T : IEquatable<T>, IComparable<T>
 {
     public sealed override WidgetType Type => WidgetType.Radio;

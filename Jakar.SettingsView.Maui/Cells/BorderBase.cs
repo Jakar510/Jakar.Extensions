@@ -1,17 +1,23 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Maui
 // 08/13/2024  09:08
 
+using Jakar.SettingsView.Abstractions;
+
+
+
 namespace Jakar.SettingsView.Maui.Cells;
 
 
-public abstract class BorderBase : ContentView, IDisposable
+public abstract class BorderBase : ContentView, ISectionBorder<Color>
 {
     public static readonly BindableProperty TextColorProperty = BindableProperty.Create( nameof(TextColor), typeof(Color),  typeof(BorderBase), propertyChanged: OnTextColorChanged );
     public static readonly BindableProperty TitleProperty     = BindableProperty.Create( nameof(Title),     typeof(string), typeof(BorderBase), propertyChanged: OnTitleChanged );
 
 
-    public         Color  TextColor { get => (Color)GetValue( TextColorProperty ); set => SetValue( TextColorProperty, value ); }
-    public virtual string Title     { get => (string)GetValue( TitleProperty );    set => SetValue( TitleProperty,     value ); }
+    public         Color   TextColor  { get => (Color)GetValue( TextColorProperty ); set => SetValue( TextColorProperty, value ); }
+    public virtual string  Title      { get => (string)GetValue( TitleProperty );    set => SetValue( TitleProperty,     value ); }
+    public         double  FontSize   { get;                                         set; }
+    public         string? FontFamily { get;                                         set; }
 
 
     public virtual void Dispose()
