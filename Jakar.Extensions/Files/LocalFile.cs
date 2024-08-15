@@ -1,5 +1,8 @@
 ﻿// unset
 
+using AsyncAwaitBestPractices;
+
+
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1584
 
@@ -1091,8 +1094,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class Watcher : ConcurrentObservableCollection<LocalFile>
     {
-        private readonly LocalDirectory.Watcher _watcher;
-        public event ErrorEventHandler?         Error;
+        private readonly WeakEventManager<ErrorEventArgs> _errorEventManager = new();
+        private readonly LocalDirectory.Watcher           _watcher;
+
+
+        public event ErrorEventHandler? Error { add => _errorEventManager.AddEventHandler( x => value?.Invoke( this, x ) ); remove => _errorEventManager.RemoveEventHandler( x => value?.Invoke( this, x ) ); }
 
 
         public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter, Equalizer )
@@ -1112,7 +1118,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         }
         private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
         private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
-        private void OnError( object   sender, ErrorEventArgs      e ) => Error?.Invoke( sender, e );
+        private void OnError( object   sender, ErrorEventArgs      e ) => _errorEventManager.RaiseEvent( e, nameof(Error) );
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
             LocalFile? file = Values.FirstOrDefault( x => x.FullPath == e.OldFullPath );

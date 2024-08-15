@@ -6,3 +6,4 @@ global using System.Diagnostics.CodeAnalysis;
 global using System.Windows.Input;
 global using Jakar.Extensions;
 global using Jakar.SettingsView.Abstractions;
+global using Jakar.SettingsView.Maui;

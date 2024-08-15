@@ -80,7 +80,7 @@
     [Parameter]                                                   public             bool                                 IsVisible            { get; set; } = true;
     [Parameter]                                                   public             EventCallback<bool>                  IsVisibleChanged     { get; set; }
     public                                                                           RenderFragment                       Fragment             => Render;
-    [CascadingParameter]                       public                                SettingsView                         Parent               { get; set; } = null!;
+    [CascadingParameter]                       public                                SettingsView                         Sv                   { get; set; } = null!;
     [Parameter(CaptureUnmatchedValues = true)] public                                IReadOnlyDictionary<string, object>? HtmlAttributes       { get; set; }
 
 

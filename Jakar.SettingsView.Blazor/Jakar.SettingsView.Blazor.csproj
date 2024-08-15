@@ -16,4 +16,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.7" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Jakar.SettingsView.Abstractions\Jakar.SettingsView.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,49 @@
+﻿@inherits ValueCellBase<string>
+
+
+<div class="@SV_CELL_BODY @Class"
+     id="@ID"
+     @onclick="OnClickHandler" >
+    <h2 class="@SV_CELL_BODY_TITLE"
+        id="@ID-title" >
+        @Title
+    </h2>
+    <h3 class="@SV_CELL_BODY_DESCRIPTION"
+        id="@ID-description" >
+        @Description
+    </h3>
+    <span class="@SV_CELL_BODY_HINT"
+          id="@ID-hint" >
+        @Hint
+    </span>
+    <span class="@SV_CELL_BODY_VALUE_ENTRY"
+          id="@ID-value" >
+        @Hint
+    </span>
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+    // ReSharper disable once CSharpWarnings::CS8618 
+    private OptionsPopup<string> _selector;
+
+    [Parameter]                 public          IList<string>         Values        { get; set; } = new ObservableCollection<string>();
+    [Parameter]                 public          EventCallback<string> OnCPopupClose { get; set; }
+    [Parameter, EditorRequired] public required string                PopupTitle    { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        _selector = new OptionsPopup<string>
+                    {
+                        ID    = ID,
+                        Close = OnCPopupClose,
+                        Title = PopupTitle
+                    };
+    }
+
+    private async Task OnClickHandler() => await _selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
+}

@@ -1,16 +1,20 @@
-﻿namespace Jakar.Extensions;
+﻿using AsyncAwaitBestPractices;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
 public sealed class LanguageApi : ObservableClass
 {
-    // private readonly WeakEventManager<Language> _eventManager     = new();
-    private Language.Collection _languages        = new(Language.Supported);
-    private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
-    private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
-    private CultureInfo?        _defaultThreadCurrentCulture;
-    private CultureInfo?        _defaultThreadCurrentUiCulture;
-    private Language?           _selectedLanguage;
+    private readonly WeakEventManager<Language> _weakEventManager = new();
+    private          Language.Collection        _languages        = new(Language.Supported);
+    private          CultureInfo                _currentCulture   = CultureInfo.CurrentCulture;
+    private          CultureInfo                _currentUiCulture = CultureInfo.CurrentUICulture;
+    private          CultureInfo?               _defaultThreadCurrentCulture;
+    private          CultureInfo?               _defaultThreadCurrentUiCulture;
+    private          Language?                  _selectedLanguage;
 
 
     public CultureInfo CurrentCulture
@@ -18,7 +22,7 @@ public sealed class LanguageApi : ObservableClass
         get => _currentCulture;
         set
         {
-            if ( !SetProperty( ref _currentCulture, value ) ) { return; }
+            if ( SetProperty( ref _currentCulture, value ) is false ) { return; }
 
             CultureInfo.CurrentCulture = value;
         }
@@ -28,7 +32,7 @@ public sealed class LanguageApi : ObservableClass
         get => _currentUiCulture;
         set
         {
-            if ( !SetProperty( ref _currentUiCulture, value ) ) { return; }
+            if ( SetProperty( ref _currentUiCulture, value ) is false ) { return; }
 
             CultureInfo.CurrentUICulture = value;
         }
@@ -38,19 +42,17 @@ public sealed class LanguageApi : ObservableClass
         get => _defaultThreadCurrentCulture;
         set
         {
-            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
+            if ( SetProperty( ref _defaultThreadCurrentCulture, value ) is false ) { return; }
 
             CultureInfo.DefaultThreadCurrentCulture = value;
         }
     }
-
-
     public CultureInfo? DefaultThreadCurrentUiCulture
     {
         get => _defaultThreadCurrentUiCulture;
         set
         {
-            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
+            if ( SetProperty( ref _defaultThreadCurrentUiCulture, value ) is false ) { return; }
 
             CultureInfo.DefaultThreadCurrentUICulture = value;
         }
@@ -60,7 +62,7 @@ public sealed class LanguageApi : ObservableClass
         get => _languages;
         set
         {
-            if ( !SetProperty( ref _languages, value ) ) { return; }
+            if ( SetProperty( ref _languages, value ) is false ) { return; }
 
             if ( value.Contains( SelectedLanguage ) ) { return; }
 
@@ -72,13 +74,15 @@ public sealed class LanguageApi : ObservableClass
         get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
         {
-            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
+            if ( SetProperty( ref _selectedLanguage, value ) is false ) { return; }
 
-            // _eventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
-            OnLanguageChanged?.Invoke( value );
+            _weakEventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
             CurrentUICulture = value;
         }
     }
+
+
+    public event Action<Language> OnLanguageChanged { add => _weakEventManager.AddEventHandler( value ); remove => _weakEventManager.RemoveEventHandler( value ); }
 
 
     public LanguageApi() : this( CultureInfo.CurrentUICulture ) { }
@@ -89,14 +93,4 @@ public sealed class LanguageApi : ObservableClass
 
         Languages.Add( culture );
     }
-
-
-    public event Action<Language>? OnLanguageChanged;
-
-    /*
-    public event Action<Language> OnLanguageChanged
-    {
-        add => _eventManager.AddEventHandler( value );
-        remove => _eventManager.AddEventHandler( value );
-    }*/
 }

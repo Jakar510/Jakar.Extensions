@@ -1,0 +1,37 @@
+﻿@inherits ValueCellBase<double>
+
+
+<div class="@SV_CELL_BODY @Class"
+     id="@ID"
+     @onclick="OnClickHandler" >
+    <h2 class="@SV_CELL_BODY_TITLE"
+        id="@ID-title" >
+        @Title
+    </h2>
+    <h3 class="@SV_CELL_BODY_DESCRIPTION"
+        id="@ID-description" >
+        @Description
+    </h3>
+    <span class="@SV_CELL_BODY_HINT"
+          id="@ID-hint" >
+        @Hint
+    </span>
+    <input @bind-value="@Value"
+           class="@SV_CELL_BODY_VALUE_ENTRY"
+           id="@ID-value"
+           @onclick="OnClickHandler"
+           TValue="@string"
+           type="number" />
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+
+    [Parameter] public EventCallback<double> OnClick { get; set; }
+
+
+    private async Task OnClickHandler() => await OnClick.InvokeAsync(Value);
+}

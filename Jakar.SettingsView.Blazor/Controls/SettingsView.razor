@@ -1,4 +1,5 @@
-﻿@inherits ComponentBase
+﻿@using System.Globalization
+@inherits ComponentBase
 
 
 <CascadingValue TValue="SettingsView"
@@ -40,6 +41,9 @@
     [Parameter]                                public             EventCallback<string?>               CollapsedIconChanged { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public             IReadOnlyDictionary<string, object>? HtmlAttributes       { get; set; }
     [CascadingParameter]                       protected internal EditContext?                         CascadedEditContext  { get; set; }
+    [Parameter]                                public             CultureInfo?                         Culture              { get; set; }
+    [CascadingParameter]                       public             CultureInfo?                         DefaultCulture       { get; set; }
+    public                                                        CultureInfo                          CurrentCulture       => Culture ?? DefaultCulture ?? CultureInfo.CurrentUICulture;
 
 
     private string? _expandedIcon;

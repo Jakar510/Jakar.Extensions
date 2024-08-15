@@ -1,14 +1,23 @@
-﻿namespace Jakar.Extensions;
+﻿using AsyncAwaitBestPractices;
+
+
+
+namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "VirtualMemberNeverOverridden.Global" )]
 public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
-
 #if NET6_0_OR_GREATER
     public static DateOnly SQLMinDateOnly { get; } = SQLMinDate.AsDateOnly();
 #endif
+    private readonly       WeakEventManager<PropertyChangedEventArgs>  _changedEventManager  = new();
+    private readonly       WeakEventManager<PropertyChangingEventArgs> _changingEventManager = new();
+    public static readonly DateTime                                    SQLMinDate            = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
+
+
+    public event PropertyChangedEventHandler?  PropertyChanged  { add => _changedEventManager.AddEventHandler( x => value?.Invoke( this,  x ) ); remove => _changedEventManager.RemoveEventHandler( x => value?.Invoke( this,  x ) ); }
+    public event PropertyChangingEventHandler? PropertyChanging { add => _changingEventManager.AddEventHandler( x => value?.Invoke( this, x ) ); remove => _changingEventManager.RemoveEventHandler( x => value?.Invoke( this, x ) ); }
 
 
     /// <summary>
@@ -178,10 +187,10 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
     }
 
 
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( [CallerMemberName] string?  property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
-    [NotifyPropertyChangedInvocator] protected virtual void OnPropertyChanged( PropertyChangedEventArgs    e )                  => PropertyChanged?.Invoke( this, e );
-    protected virtual                                  void OnPropertyChanging( [CallerMemberName] string? property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
-    protected virtual                                  void OnPropertyChanging( PropertyChangingEventArgs  e )                  => PropertyChanging?.Invoke( this, e );
+    [NotifyPropertyChangedInvocator] protected void OnPropertyChanged( [CallerMemberName] string?  property = default ) => OnPropertyChanged( new PropertyChangedEventArgs( property ?? string.Empty ) );
+    [NotifyPropertyChangedInvocator] protected void OnPropertyChanged( PropertyChangedEventArgs    e )                  => _changedEventManager.RaiseEvent( e, nameof(PropertyChanged) );
+    protected                                  void OnPropertyChanging( [CallerMemberName] string? property = default ) => OnPropertyChanging( new PropertyChangingEventArgs( property ?? string.Empty ) );
+    protected                                  void OnPropertyChanging( PropertyChangingEventArgs  e )                  => _changingEventManager.RaiseEvent( e, nameof(PropertyChanging) );
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
@@ -236,10 +245,6 @@ public record ObservableRecord : BaseRecord, INotifyPropertyChanged, INotifyProp
 
         onChanged( value );
     }
-
-
-    public event PropertyChangedEventHandler?  PropertyChanged;
-    public event PropertyChangingEventHandler? PropertyChanging;
 
 
 #if NET6_0_OR_GREATER

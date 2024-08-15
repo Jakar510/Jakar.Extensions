@@ -12,6 +12,7 @@ public static class Errors
 {
     public const string BLOCKED_PASSED             = "Password cannot be a blocked password";
     public const string CLIENT_IS_OUTDATED_TYPE    = "Client.Outdated";
+    public const string CLIENT_OPERATION_CANCELED  = "Client.OperationCanceled";
     public const string CLIENT_IS_UNAVAILABLE_TYPE = "Client.Unavailable";
     public const string CONFLICT_TYPE              = "General.Conflict";
     public const string DISABLED_TYPE              = "User.Disabled";
@@ -32,7 +33,7 @@ public static class Errors
     public const string VALIDATION_TYPE            = "General.Unexpected";
 
 
-    public static ErrorTitles Titles { get; set; } = new();
+    public static IErrorTitles Titles { get; set; } = ErrorTitles.Instance;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
