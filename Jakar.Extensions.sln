@@ -78,7 +78,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestBlazorMauiApp", "TestBl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Maui", "Jakar.SettingsView.Maui\Jakar.SettingsView.Maui.csproj", "{863EBD6D-5955-44C1-9537-13F5F522740F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.SettingsView.Abstractions", "Jakar.SettingsView.Abstractions\Jakar.SettingsView.Abstractions.csproj", "{6908E9AF-50BA-433D-857A-366AC7F8CC97}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.SettingsView.Abstractions", "Jakar.SettingsView.Abstractions\Jakar.SettingsView.Abstractions.csproj", "{6908E9AF-50BA-433D-857A-366AC7F8CC97}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
