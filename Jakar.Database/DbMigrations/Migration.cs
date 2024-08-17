@@ -66,7 +66,7 @@ public abstract class OwnedMigration<TRecord> : Migration<TRecord>
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
-        table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable();
+        table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable().ForeignKey( $"{nameof(UserRecord.CreatedBy)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID) );
         return table;
     }
 }

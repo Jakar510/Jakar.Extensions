@@ -83,7 +83,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     public                                                  TID?   EscalateTo  { get => _escalateTo;                       set => SetProperty( ref _escalateTo,  value ); }
     [StringLength( UNICODE_CAPACITY )] public               string Ext         { get => _ext;                              set => SetProperty( ref _ext,         value ); }
 
-    [Required, StringLength( UNICODE_CAPACITY )]
+    [Required, StringLength( 2000 )]
     public string FirstName
     {
         get => _firstName;
@@ -110,7 +110,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     [JsonIgnore] public virtual bool IsValidWebsite     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
 
 
-    [Required, StringLength( UNICODE_CAPACITY )]
+    [Required, StringLength( 2000 )]
     public string LastName
     {
         get => _lastName;

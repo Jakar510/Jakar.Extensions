@@ -11,9 +11,9 @@ public abstract class Migrate_UserRecoveryCodes : Migration<UserRecoveryCodeReco
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(UserRecoveryCodeRecord.KeyID) ).AsGuid().NotNullable();
+        table.WithColumn( nameof(UserRecoveryCodeRecord.KeyID) ).AsGuid().NotNullable().ForeignKey( $"{nameof(UserRecoveryCodeRecord.KeyID)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID) );
 
-        table.WithColumn( nameof(UserRecoveryCodeRecord.ValueID) ).AsGuid().NotNullable();
+        table.WithColumn( nameof(UserRecoveryCodeRecord.ValueID) ).AsGuid().NotNullable().ForeignKey( $"{nameof(UserRecoveryCodeRecord.ValueID)}.{nameof(RecoveryCodeRecord.ID)}", RecoveryCodeRecord.TableName, nameof(RecoveryCodeRecord.ID) );
 
         return table;
     }
