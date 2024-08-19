@@ -2,10 +2,6 @@
 // 10/16/2022  4:54 PM
 
 
-
-
-
-
 namespace Jakar.Database;
 
 
@@ -16,14 +12,15 @@ public partial class DbTable<TRecord> : IConnectableDb
     protected readonly IConnectableDbRoot   _database;
     protected readonly ISqlCache<TRecord>   _sqlCache;
     protected readonly ITableCache<TRecord> _tableCache;
-    public static      TRecord[]            Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
 
 
-    public static ImmutableArray<TRecord>  EmptyArray     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
-    public static FrozenSet<TRecord>       Set            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
-    public        int?                     CommandTimeout { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
-    public        DbTypeInstance           DbTypeInstance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
-    public        RecordGenerator<TRecord> Records        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public static TRecord[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
+    public        IsolationLevel           TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.TransactionIsolationLevel; }
+    public static ImmutableArray<TRecord>  EmptyArray                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
+    public static FrozenSet<TRecord>       Set                       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
+    public        int?                     CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
+    public        DbTypeInstance           DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
+    public        RecordGenerator<TRecord> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
     public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )

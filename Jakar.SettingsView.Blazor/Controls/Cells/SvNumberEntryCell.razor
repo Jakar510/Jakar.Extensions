@@ -4,14 +4,14 @@
 <div class="@SV_CELL_BODY @Class"
      id="@ID"
      @onclick="OnClickHandler" >
-    <h2 class="@SV_CELL_BODY_TITLE"
-        id="@ID-title" >
+    <div class="@SV_CELL_BODY_TITLE"
+         id="@ID-title" >
         @Title
-    </h2>
-    <h3 class="@SV_CELL_BODY_DESCRIPTION"
-        id="@ID-description" >
+    </div>
+    <div class="@SV_CELL_BODY_DESCRIPTION"
+         id="@ID-description" >
         @Description
-    </h3>
+    </div>
     <span class="@SV_CELL_BODY_HINT"
           id="@ID-hint" >
         @Hint
@@ -29,7 +29,7 @@
 
 @code
 {
-
+    public override    WidgetType            Type    => WidgetType.NumberEntry;
     [Parameter] public EventCallback<double> OnClick { get; set; }
 
 

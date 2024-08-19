@@ -4,21 +4,21 @@
 <div class="@SV_CELL_BODY @Class"
      id="@ID"
      @onclick="OnClickHandler" >
-    <h2 class="@SV_CELL_BODY_TITLE"
-        id="@ID-title" >
+    <div class="@SV_CELL_BODY_TITLE"
+         id="@ID-title" >
         @Title
-    </h2>
-    <h3 class="@SV_CELL_BODY_DESCRIPTION"
-        id="@ID-description" >
+    </div>
+    <div class="@SV_CELL_BODY_DESCRIPTION"
+         id="@ID-description" >
         @Description
-    </h3>
-    <span class="@SV_CELL_BODY_HINT"
-          id="@ID-hint" >
+    </div>
+    <div class="@SV_CELL_BODY_HINT"
+         id="@ID-hint" >
         @Hint
-    </span>
+    </div>
     <span class="@SV_CELL_BODY_VALUE_ENTRY"
           id="@ID-value" >
-        @Hint
+        @Value
     </span>
 
     <ValidationMessage For="@ValueExpression" />
@@ -30,6 +30,7 @@
     // ReSharper disable once CSharpWarnings::CS8618 
     private OptionsPopup<string> _selector;
 
+    public override                             WidgetType            Type          => WidgetType.TextPicker;
     [Parameter]                 public          IList<string>         Values        { get; set; } = new ObservableCollection<string>();
     [Parameter]                 public          EventCallback<string> OnCPopupClose { get; set; }
     [Parameter, EditorRequired] public required string                PopupTitle    { get; set; }
@@ -39,9 +40,10 @@
     {
         _selector = new OptionsPopup<string>
                     {
-                        ID    = ID,
-                        Close = OnCPopupClose,
-                        Title = PopupTitle
+                        ID        = ID,
+                        Close     = OnCPopupClose,
+                        Title     = PopupTitle,
+                        Formatter = static x => x
                     };
     }
 

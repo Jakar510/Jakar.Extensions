@@ -29,22 +29,6 @@ public static class ErrorOrResults
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized( id.Value );
 
 
-    public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( GetStatus ) ?? Status.Ok;
-    public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
-    public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
-    {
-        if ( errors.IsEmpty ) { return status; }
-
-        status = Status.NotSet;
-
-        foreach ( var error in errors )
-        {
-            Status code = error.GetStatus();
-            if ( code > status ) { status = code; }
-        }
-
-        return status;
-    }
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 

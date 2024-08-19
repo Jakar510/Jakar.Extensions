@@ -28,6 +28,9 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
     public static implicit operator Error( StringValues error )  => Create( Status.BadRequest, error );
 
 
+    public Status GetStatus() => StatusCode ?? Status.Ok;
+
+
     public static Error Create<T>( T details )
         where T : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
     public static Error Create( Status status, in StringValues errors, [CallerMemberName] string       type = BaseRecord.EMPTY )                                                         => new(status, type, null, null, null, errors);

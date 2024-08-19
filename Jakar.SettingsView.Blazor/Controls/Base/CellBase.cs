@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.Globalization;
 using Jakar.SettingsView.Abstractions;
 
 
@@ -58,6 +59,9 @@ public abstract class CellBase : ComponentBase, ISvCellTitle
     [Parameter]                                  public             EventCallback<string?>               TitleChanged        { get; set; }
     [Parameter]                                  public             Expression<Func<string?>>?           TitleExpression     { get; set; }
     [Parameter]                                  public             bool                                 IsEnabled           { get; set; }
+    [Parameter]                                  public             CultureInfo?                         Culture             { get; set; }
+    [CascadingParameter]                         public             CultureInfo?                         DefaultCulture      { get; set; }
+    public                                                          CultureInfo                          CurrentCulture      => Culture ?? DefaultCulture ?? CultureInfo.CurrentUICulture;
 
 
     protected internal void SetElementReference( ElementReference reference ) => _control = reference;

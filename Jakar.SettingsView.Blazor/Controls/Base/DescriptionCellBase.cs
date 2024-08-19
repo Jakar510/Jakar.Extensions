@@ -14,7 +14,8 @@ public abstract class DescriptionCellBase : CellBase, ISvCellDescription
     [Parameter] public string?                    Description           { get; set; }
     [Parameter] public EventCallback<string?>     DescriptionChanged    { get; set; }
     [Parameter] public Expression<Func<string?>>? DescriptionExpression { get; set; }
-    public             WidgetType                 Type                  { get; }
+    public abstract    WidgetType                 Type                  { get; }
+
 
     protected override async Task OnParametersSetAsync()
     {

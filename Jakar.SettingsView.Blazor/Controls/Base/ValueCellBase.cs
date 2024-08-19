@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Blazor
 // 08/14/2024  22:08
 
-using System.Globalization;
 using Jakar.SettingsView.Abstractions;
 
 
@@ -37,11 +36,11 @@ public abstract class ValueCellBase<T> : DescriptionCellBase, ISvCellValue<T>
         Value = value;
         await ValueChanged.InvokeAsync( value );
 
-        await SetValue( value is IFormattable formattable
-                            ? formattable.ToString( ValueDisplayFormat, Section.Sv.CurrentCulture )
-                            : value?.ToString() );
+        await SetValueString( value is IFormattable formattable
+                                  ? formattable.ToString( ValueDisplayFormat, Section.Sv.CurrentCulture )
+                                  : value?.ToString() );
     }
-    public async ValueTask SetValue( string? value )
+    public async ValueTask SetValueString( string? value )
     {
         if ( string.Equals( ValueText, value, StringComparison.Ordinal ) ) { return; }
 

@@ -6,7 +6,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -26,7 +26,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -46,7 +46,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -66,7 +66,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -86,7 +86,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -106,7 +106,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -126,7 +126,7 @@ public static partial class DbExtensions
     public static async IAsyncEnumerable<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, IAsyncEnumerable<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, [EnumeratorCancellation] CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -157,7 +157,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -199,7 +199,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
         IAsyncEnumerable<TResult> result;
 
         try
@@ -232,7 +232,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, CancellationToken, ValueTask> func, Activity? activity, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -248,7 +248,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -264,7 +264,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1, TArg2>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, TArg2 arg2, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -280,7 +280,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1, TArg2, TArg3>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -296,7 +296,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1, TArg2, TArg3, TArg4>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -312,7 +312,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1, TArg2, TArg3, TArg4, TArg5>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -328,7 +328,7 @@ public static partial class DbExtensions
     public static async ValueTask TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, ValueTask> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -355,7 +355,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -394,7 +394,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -424,7 +424,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, CancellationToken, ValueTask<TResult>> func, Activity? activity, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -441,7 +441,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -458,7 +458,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TArg2, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, CancellationToken token = default )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -475,7 +475,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -492,7 +492,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -509,7 +509,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -526,7 +526,7 @@ public static partial class DbExtensions
     public static async ValueTask<TResult> TryCall<TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, TResult>( this IConnectableDb db, Func<DbConnection, DbTransaction, Activity?, TArg1, TArg2, TArg3, TArg4, TArg5, TArg6, CancellationToken, ValueTask<TResult>> func, Activity? activity, TArg1 arg1, TArg2 arg2, TArg3 arg3, TArg4 arg4, TArg5 arg5, TArg6 arg6, CancellationToken token )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -554,7 +554,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {
@@ -594,7 +594,7 @@ public static partial class DbExtensions
     )
     {
         await using DbConnection  conn        = await db.ConnectAsync( token );
-        await using DbTransaction transaction = await conn.BeginTransactionAsync( IsolationLevel.ReadCommitted, token );
+        await using DbTransaction transaction = await conn.BeginTransactionAsync( db.TransactionIsolationLevel, token );
 
         try
         {

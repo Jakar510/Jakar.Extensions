@@ -4,18 +4,18 @@
 <div class="@SV_CELL_BODY @Class"
      id="@ID"
      @onclick="OnClickHandler" >
-    <h2 class="@SV_CELL_BODY_TITLE"
-        id="@ID-title" >
+    <div class="@SV_CELL_BODY_TITLE"
+         id="@ID-title" >
         @Title
-    </h2>
-    <h3 class="@SV_CELL_BODY_DESCRIPTION"
-        id="@ID-description" >
+    </div>
+    <div class="@SV_CELL_BODY_DESCRIPTION"
+         id="@ID-description" >
         @Description
-    </h3>
-    <span class="@SV_CELL_BODY_HINT"
-          id="@ID-hint" >
+    </div>
+    <div class="@SV_CELL_BODY_HINT"
+         id="@ID-hint" >
         @Hint
-    </span>
+    </div>
     <input @bind-value="@Value"
            class="@SV_CELL_BODY_VALUE_ENTRY"
            id="@ID-value"
@@ -29,6 +29,7 @@
 
 @code
 {
+    public override    WidgetType              Type    => WidgetType.Time;
     [Parameter] public EventCallback<TimeSpan> OnClick { get; set; }
 
 

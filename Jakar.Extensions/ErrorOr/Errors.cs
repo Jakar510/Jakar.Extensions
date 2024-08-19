@@ -60,8 +60,8 @@ public static class Errors
 
 
     public static Status GetStatus<T>( this T? errors )
-        where T : IEnumerable<Error> => errors?.Max( GetStatus ) ?? Status.Ok;
-    public static Status GetStatus( this Error[]? errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
+        where T : IEnumerable<Error> => errors?.Max( static x => x.GetStatus() ) ?? Status.Ok;
+    public static Status GetStatus( this Error[]? errors, Status status = Status.Ok ) => GetStatus( new ReadOnlySpan<Error>( errors ), status );
     public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
     {
         if ( errors.IsEmpty ) { return status; }
@@ -74,7 +74,6 @@ public static class Errors
 
         return status;
     }
-    private static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 
     public static StringValues ToValues( this PasswordValidator.Results results )

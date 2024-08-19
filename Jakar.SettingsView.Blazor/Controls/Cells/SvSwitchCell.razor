@@ -1,5 +1,37 @@
-﻿<h3>SvSwitchCell</h3>
+﻿@inherits ValueCellBase<bool>
 
-@code {
 
+<div class="@SV_CELL_BODY @Class"
+     id="@ID"
+     @onclick="OnClickHandler" >
+    <div class="@SV_CELL_BODY_TITLE"
+         id="@ID-title" >
+        @Title
+    </div>
+    <div class="@SV_CELL_BODY_DESCRIPTION"
+         id="@ID-description" >
+        @Description
+    </div>
+    <div class="@SV_CELL_BODY_HINT"
+         id="@ID-hint" >
+        @Hint
+    </div>
+    <div @bind-value="@Value"
+         class="@SV_CELL_BODY_VALUE_ENTRY"
+         id="@ID-value"
+         @onclick="OnClickHandler"
+         TValue="@string"
+         type="time" />
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+    public override    WidgetType          Type    => WidgetType.Switch;
+    [Parameter] public EventCallback<bool> OnClick { get; set; }
+
+
+    private async Task OnClickHandler() => await OnClick.InvokeAsync(Value);
 }

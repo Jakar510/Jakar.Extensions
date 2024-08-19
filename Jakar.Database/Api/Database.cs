@@ -20,27 +20,28 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected          string?                 _className;
 
 
-    public static      Database?                       Current           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static      DataProtector                   DataProtector     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             DbTable<AddressRecord>          Addresses         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             string                          ClassName         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
-    public             int?                            CommandTimeout    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
-    public             IConfiguration                  Configuration     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    protected internal SecuredString?                  ConnectionString  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public             DbTypeInstance                  DbTypeInstance    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
-    public             DbTable<FileRecord>             Files             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<GroupRecord>            Groups            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             PasswordValidator               PasswordValidator { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
-    public             DbTable<RecoveryCodeRecord>     RecoveryCodes     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<RoleRecord>             Roles             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbOptions                       Settings          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserAddressRecord>      UserAddresses     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserGroupRecord>        UserGroups        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserLoginInfoRecord>    UserLogins        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRoleRecord>         UserRoles         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRecord>             Users             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             AppVersion                      Version           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
+    public static      Database?                       Current                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static      DataProtector                   DataProtector             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public             IsolationLevel                  TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IsolationLevel.RepeatableRead;
+    public             DbTable<AddressRecord>          Addresses                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             string                          ClassName                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
+    public             int?                            CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
+    public             IConfiguration                  Configuration             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    protected internal SecuredString?                  ConnectionString          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public             DbTypeInstance                  DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
+    public             DbTable<FileRecord>             Files                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<GroupRecord>            Groups                    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             PasswordValidator               PasswordValidator         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
+    public             DbTable<RecoveryCodeRecord>     RecoveryCodes             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<RoleRecord>             Roles                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbOptions                       Settings                  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserAddressRecord>      UserAddresses             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserGroupRecord>        UserGroups                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserLoginInfoRecord>    UserLogins                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRoleRecord>         UserRoles                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             DbTable<UserRecord>             Users                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public             AppVersion                      Version                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
 
 
     static Database()

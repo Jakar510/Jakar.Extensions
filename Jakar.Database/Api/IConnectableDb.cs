@@ -35,6 +35,8 @@ public interface IDbTable : IAsyncDisposable
 
 public interface IConnectableDb : IDbTable, IDbOptions
 {
+    public IsolationLevel TransactionIsolationLevel { get; }
+
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token );
 }
 
@@ -56,7 +58,7 @@ public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
 
 
 
-public readonly record struct SqlCommand( string SQL, DynamicParameters? Parameters = default, CommandType? CommandType = default, CommandFlags Flags = CommandFlags.None )
+public readonly record struct SqlCommand( string SQL, DynamicParameters? Parameters = null, CommandType? CommandType = null, CommandFlags Flags = CommandFlags.None )
 {
     public static implicit operator SqlCommand( string sql ) => new(sql);
 

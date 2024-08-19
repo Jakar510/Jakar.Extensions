@@ -1,5 +1,55 @@
-﻿<h3>SvPickerCell</h3>
+﻿@typeparam TValue where TValue : IEquatable<TValue>, IComparable<TValue>
+@inherits SelectableCell<TValue>
 
-@code {
 
+<div class="@SV_CELL_BODY @Class"
+     id="@ID"
+     @onclick="OnClickHandler" >
+    <div class="@SV_CELL_BODY_TITLE"
+         id="@ID-title" >
+        @Title
+    </div>
+    <div class="@SV_CELL_BODY_DESCRIPTION"
+         id="@ID-description" >
+        @Description
+    </div>
+    <div class="@SV_CELL_BODY_HINT"
+         id="@ID-hint" >
+        @Hint
+    </div>
+    <div class="@SV_CELL_BODY_VALUE_ENTRY"
+         id="@ID-value" >
+        @ValueText
+    </div>
+
+    <ValidationMessage For="@ValueExpression" />
+</div>
+
+
+@code
+{
+    // ReSharper disable once CSharpWarnings::CS8618 
+    private OptionsPopup<TValue> _selector;
+
+    public override                             WidgetType           Type       => WidgetType.Picker;
+    [Parameter]                 public          IList<TValue>        Values     { get; set; } = new ObservableCollection<TValue>();
+    [Parameter]                 public          Func<TValue, string> Formatter  { get; set; } = OptionsPopup<TValue>.DefaultFormatter;
+    [Parameter, EditorRequired] public required string               PopupTitle { get; set; }
+
+
+    protected override void OnParametersSet()
+    {
+        _selector = new OptionsPopup<TValue>
+                    {
+                        ID        = ID,
+                        Close     = new EventCallback<TValue>(this, SetValue),
+                        Title     = PopupTitle,
+                        Formatter = Formatter
+                    };
+    }
+    protected override async Task OnClickHandler( MouseEventArgs? args = null )
+    {
+        await base.OnClickHandler(args);
+        await _selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
+    }
 }
