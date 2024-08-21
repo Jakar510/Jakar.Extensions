@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 
 
@@ -9,7 +10,7 @@ namespace Jakar.SqlBuilder;
 public record struct EasySqlBuilder()
 {
     private readonly StringBuilder _sb          = new(10240);
-    private          bool          _needToClose = false;
+    private          long          _needToClose = 0;
 
     public string Result => ToString();
 
@@ -63,9 +64,7 @@ public record struct EasySqlBuilder()
         if ( columnName is null ) { _sb.Append( '*' ); }
         else { _sb.Append( columnName ); }
 
-        End();
-
-        return Space();
+        return End().Space();
     }
 
 
@@ -74,19 +73,19 @@ public record struct EasySqlBuilder()
     internal EasySqlBuilder Space() => Add( ' ' );
 
 
-    internal EasySqlBuilder Begin()
+    internal EasySqlBuilder Begin( char start = '(' )
     {
-        _needToClose = true;
-        return Add( '(' );
+        Interlocked.Increment( ref _needToClose );
+        return Add( start );
     }
-    internal EasySqlBuilder End()
+    internal EasySqlBuilder End( char end = ')' )
     {
-        _needToClose = false;
-        return Add( ')' );
+        Interlocked.Decrement( ref _needToClose );
+        return Add( end );
     }
     internal EasySqlBuilder VerifyParentheses()
     {
-        if ( _needToClose ) { End(); }
+        if ( Interlocked.Read( ref _needToClose ) != 0 ) { throw new InvalidOperationException( "Invalid SQL" ); }
 
         return this;
     }

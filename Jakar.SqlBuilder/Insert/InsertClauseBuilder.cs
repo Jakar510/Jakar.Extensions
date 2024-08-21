@@ -8,7 +8,7 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
 
     public EasySqlBuilder Into<T>( string tableName, T obj )
     {
-        _builder.Add( INSERT, INTO, obj.GetName( tableName ) );
+        _builder.Add( INSERT, INTO, tableName.GetName( obj ) );
         return SetValues( obj );
     }
     public EasySqlBuilder Into<T>( T obj )

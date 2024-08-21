@@ -8,7 +8,7 @@ public struct WhereInChainBuilder<TNext>
 {
     private readonly WhereClauseBuilder<TNext> _next;
     private          EasySqlBuilder            _builder;
-    private readonly List<string>              _cache = new();
+    private readonly List<string>              _cache = [];
 
 
     public WhereInChainBuilder( in WhereClauseBuilder<TNext> next, ref EasySqlBuilder builder )
@@ -21,7 +21,6 @@ public struct WhereInChainBuilder<TNext>
     public WhereClauseBuilder<TNext> Next()
     {
         _builder.AddRange( ',', _cache );
-
         _builder.VerifyParentheses().NewLine();
 
         return _next;

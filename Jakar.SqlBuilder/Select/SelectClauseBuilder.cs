@@ -8,11 +8,10 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
 
     public readonly TNext Done() => _next;
 
-
+    
     public EasySqlBuilder From( string tableName, string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM ); }
-
         else { _builder.Add( FROM, tableName, AS, alias ); }
 
         return _builder.NewLine();
@@ -20,7 +19,6 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     public EasySqlBuilder From<T>( T _, string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); } // TODO: Bug...?
-
         else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
@@ -28,7 +26,6 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     public EasySqlBuilder From<T>( string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
-
         else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
@@ -101,6 +98,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     /// </summary>
     public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
     {
+        
         _builder.Begin().AddRange<T>( ',', columnNames ).End().Add( AS, alias );
 
         return this;
