@@ -6,11 +6,13 @@ namespace Jakar.SettingsView.Maui.Sv.Base;
 
 public abstract class CellBase : ContentView, ISvCellTitle
 {
-    // public event PropertyChangingEventHandler? PropertyChanging;
-    public virtual  ICommand?  OnTappedCommand { get; set; }
-    public virtual  string?    Title           { get; set; }
+    public static readonly BindableProperty TitleProperty           = BindableProperty.Create( nameof(Title),           typeof(string),   typeof(CellBase) );
+    public static readonly BindableProperty OnTappedCommandProperty = BindableProperty.Create( nameof(OnTappedCommand), typeof(ICommand), typeof(CellBase) );
+
+
+    public virtual  ICommand?  OnTappedCommand { get => (ICommand?)GetValue( OnTappedCommandProperty ); set => SetValue( OnTappedCommandProperty, value ); }
+    public virtual  string?    Title           { get => (string?)GetValue( TitleProperty );             set => SetValue( TitleProperty,           value ); }
     public abstract WidgetType Type            { get; }
-    public virtual  string?    ValueText       { get; set; }
 
 
     public         void Hide()           => IsVisible = false;

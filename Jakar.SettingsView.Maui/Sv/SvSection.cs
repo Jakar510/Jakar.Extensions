@@ -132,8 +132,8 @@ public class SvSection : ContentView, ISvSection<CellBase>
             public static Default Create()                   => new();
 
 
-            protected override void OnTitleChanged( string     value ) => _label.Text = value;
-            protected override void OnTextColorChanged( Color? value ) => _label.TextColor = value ?? Colors.Black;
+            public override void OnTitleChanged( string     value ) => _label.Text = value;
+            public override void OnTextColorChanged( Color? value ) => _label.TextColor = value ?? Colors.Black;
         }
     }
 
@@ -241,8 +241,8 @@ public class SvSection : ContentView, ISvSection<CellBase>
 
 
             protected override void OnTappedCommandChanged( ICommand? value ) => _gestureRecognizer.Command = value;
-            protected override void OnTitleChanged( string            value ) => _label.Text = value;
-            protected override void OnTextColorChanged( Color?        value ) => _label.TextColor = value ?? Colors.Black;
+            public override    void OnTitleChanged( string            value ) => _label.Text = value;
+            public override    void OnTextColorChanged( Color?        value ) => _label.TextColor = value ?? Colors.Black;
             protected override void OnIsExpandedChanged( bool value ) =>
                 IconSource = value
                                  ? Collapsed

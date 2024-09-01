@@ -6,5 +6,6 @@ namespace Jakar.SettingsView.Maui.Sv.Base;
 
 public abstract class DescriptionCellBase : CellBase, ISvCellDescription
 {
-    public virtual string? Description { get; set; }
+    public static readonly BindableProperty DescriptionProperty = BindableProperty.Create( nameof(Description), typeof(string), typeof(DescriptionCellBase) );
+    public virtual         string?          Description { get => (string?)GetValue( DescriptionProperty ); set => SetValue( DescriptionProperty, value ); }
 }

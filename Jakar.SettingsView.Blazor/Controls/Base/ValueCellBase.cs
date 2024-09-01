@@ -29,10 +29,13 @@ public abstract class ValueCellBase<T> : DescriptionCellBase, ISvCellValue<T>
     public virtual            bool                       IsValid             => Value is not null || Equalizer.Equals( _default, Value ) is false;
 
 
+    public event EventHandler<ChangedEventArgs<T>>? TextChanged;
+
     public async ValueTask SetValue( T? value )
     {
         if ( EqualityComparer<T>.Default.Equals( Value, value ) ) { return; }
 
+        TextChanged?.Invoke( this, new ChangedEventArgs<T>( Value, value ) );
         Value = value;
         await ValueChanged.InvokeAsync( value );
 
