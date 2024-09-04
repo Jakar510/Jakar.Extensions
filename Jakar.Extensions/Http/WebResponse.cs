@@ -12,28 +12,28 @@ public readonly record struct WebResponse<T>
     public const string UNKNOWN_ERROR = "Unknown Error";
 
 
-    public              List<string>                Allow             { get; init; } = new();
-    public              List<string>                ContentEncoding   { get; init; } = new();
-    public              long?                       ContentLength     { get; init; } = default;
-    public              string?                     ContentType       { get; init; } = default;
+    public              List<string>                Allow             { get; init; } = [];
+    public              List<string>                ContentEncoding   { get; init; } = [];
+    public              long?                       ContentLength     { get; init; } = null;
+    public              string?                     ContentType       { get; init; } = null;
     [JsonIgnore] public OneOf<JToken, string, None> Error             { get; init; } = new None();
-    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => default );
-    [JsonIgnore] public Exception?                  Exception         { get; init; } = default;
-    public              DateTimeOffset?             Expires           { get; init; } = default;
-    public              DateTimeOffset?             LastModified      { get; init; } = default;
-    public              Uri?                        Location          { get; init; } = default;
-    public              string?                     Method            { get; init; } = default;
+    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => null );
+    [JsonIgnore] public Exception?                  Exception         { get; init; } = null;
+    public              DateTimeOffset?             Expires           { get; init; } = null;
+    public              DateTimeOffset?             LastModified      { get; init; } = null;
+    public              Uri?                        Location          { get; init; } = null;
+    public              string?                     Method            { get; init; } = null;
     public              T?                          Payload           { get; init; } = default;
-    public              string?                     Sender            { get; init; } = default;
-    public              string?                     Server            { get; init; } = default;
+    public              string?                     Sender            { get; init; } = null;
+    public              string?                     Server            { get; init; } = null;
     public              Status                      StatusCode        { get; init; } = Status.NotSet;
-    public              string?                     StatusDescription { get; init; } = default;
-    public              Uri?                        URL               { get; init; } = default;
+    public              string?                     StatusDescription { get; init; } = null;
+    public              Uri?                        URL               { get; init; } = null;
 
 
-    public WebResponse( HttpResponseMessage response, in string error ) : this( response, default, default, error ) { }
+    public WebResponse( HttpResponseMessage response, in string error ) : this( response, default, null, error ) { }
     public WebResponse( HttpResponseMessage response, Exception e, in string error ) : this( response, default, e, error ) { }
-    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = default, in string? error = default )
+    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = default, in string? error = null )
     {
         Error             = ParseError( error ?? exception?.Message );
         Payload           = payload;
@@ -65,7 +65,12 @@ public readonly record struct WebResponse<T>
         Debug.Assert( Payload is not null );
         return Payload ?? throw new NullReferenceException( nameof(Payload), Exception );
     }
-    public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest;
+
+
+#if NET6_0_OR_GREATER
+    [MemberNotNullWhen( true, nameof(Payload) )]
+#endif
+    public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest && Payload is not null;
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode() ) { return; }
@@ -233,7 +238,7 @@ public readonly record struct WebResponse<T>
             using StreamReader reader = new StreamReader( stream );
 
         #if NET7_0_OR_GREATER
-            string             errorMessage = await reader.ReadToEndAsync( token );
+            string errorMessage = await reader.ReadToEndAsync( token );
         #else
             string errorMessage = await reader.ReadToEndAsync();
         #endif

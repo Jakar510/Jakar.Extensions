@@ -21,33 +21,31 @@ public abstract class BaseFileSystemApi : IFilePaths
     {
         AppDataDirectory = _AppDataDirectory;
         CacheDirectory   = _CacheDirectory;
-        AccountsFile     = GetAppDataPath( "accounts.json" );
-        ZipFile          = GetAppDataPath( "AppData.zip" );
-        AppStateFile     = GetCacheDataPath( "AppState.json" );
-        DebugFile        = GetCacheDataPath( "debug.txt" );
-        FeedBackFile     = GetCacheDataPath( "feedback.json" );
-        IncomingFile     = GetCacheDataPath( "Incoming.json" );
-        OutgoingFile     = GetCacheDataPath( "Outgoing.json" );
-        ScreenShot       = GetCacheDataPath( "ScreenShot.png" );
+        AccountsFile     = AppDataDirectory.Join( "accounts.json" );
+        ZipFile          = AppDataDirectory.Join( "AppData.zip" );
+        AppStateFile     = CacheDirectory.Join( "AppState.json" );
+        DebugFile        = CacheDirectory.Join( "debug.txt" );
+        FeedBackFile     = CacheDirectory.Join( "feedback.json" );
+        IncomingFile     = CacheDirectory.Join( "Incoming.json" );
+        OutgoingFile     = CacheDirectory.Join( "Outgoing.json" );
+        ScreenShot       = CacheDirectory.Join( "ScreenShot.png" );
     }
     public void ClearCache()
     {
         foreach ( LocalFile file in CacheDirectory.GetFiles() ) { file.Delete(); }
     }
 
-    public LocalFile GetAppDataPath( string   file ) => AppDataDirectory.Join( file );
-    public LocalFile GetCacheDataPath( string file ) => CacheDirectory.Join( file );
 
 
     public async ValueTask<LocalFile> SaveFileAsync( string filename, Stream stream, CancellationToken token )
     {
-        LocalFile file = GetCacheDataPath( filename );
+        LocalFile file = CacheDirectory.Join( filename );
         await file.WriteAsync( stream, token );
         return file;
     }
     public async ValueTask<LocalFile> SaveFileAsync( string filename, byte[] payload, CancellationToken token )
     {
-        LocalFile file = GetCacheDataPath( filename );
+        LocalFile file = CacheDirectory.Join( filename );
         await file.WriteAsync( payload, token );
         return file;
     }
