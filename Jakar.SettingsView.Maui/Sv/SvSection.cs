@@ -55,7 +55,7 @@ public class SvSection : ContentView, ISvSection<CellBase>
     public         void Add( IEnumerable<CellBase>    cell ) => Cells.Add( cell );
 
 
-    protected static TapGestureRecognizer AddGesture( ICommand command )
+    public static TapGestureRecognizer AddGesture( ICommand command )
     {
         TapGestureRecognizer tap = new()
                                    {
@@ -65,14 +65,14 @@ public class SvSection : ContentView, ISvSection<CellBase>
 
         return tap;
     }
-    protected static TapGestureRecognizer AddGesture( View view, ICommand command )
+    public static TapGestureRecognizer AddGesture( View view, ICommand command )
     {
         TapGestureRecognizer tap = AddGesture( command );
         view.GestureRecognizers.Add( tap );
         return tap;
     }
-    protected static void ClearGesture( View view ) => view.GestureRecognizers.Clear();
-    protected static void DoNothing()               { }
+    public static void ClearGesture( View view ) => view.GestureRecognizers.Clear();
+    public static void DoNothing()               { }
 
 
 
@@ -82,6 +82,8 @@ public class SvSection : ContentView, ISvSection<CellBase>
         public const string FOOTER_FONT_SIZE        = "HeaderFontSize";
         public const string FOOTER_TEXT_COLOR       = "HeaderTextColor";
         public const double MINIMUM_HEIGHT_REQUEST  = 40;
+
+
         public override string Title
         {
             get => (string)GetValue( TitleProperty );
@@ -132,8 +134,15 @@ public class SvSection : ContentView, ISvSection<CellBase>
             public static Default Create()                   => new();
 
 
-            public override void OnTitleChanged( string     value ) => _label.Text = value;
-            public override void OnTextColorChanged( Color? value ) => _label.TextColor = value ?? Colors.Black;
+            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => _label.CharacterSpacing = value;
+            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => _label.FontFamily = value;
+            public override void OnFontSizeChanged( double                       oldValue, double         value ) => _label.FontSize = value;
+            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => _label.FontAutoScalingEnabled = value;
+            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => _label.FontAttributes = value;
+            public override void OnTitleChanged( string                          oldValue, string         value ) => _label.Text = value;
+            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => _label.HorizontalTextAlignment = value;
+            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => _label.VerticalTextAlignment = value;
+            public override void OnTextColorChanged( Color?                      oldValue, Color?         value ) => _label.TextColor = value ?? Colors.Black;
         }
     }
 
@@ -145,11 +154,11 @@ public class SvSection : ContentView, ISvSection<CellBase>
         public const           string               HEADER_FONT_SIZE        = "HeaderFontSize";
         public const           string               HEADER_TEXT_COLOR       = "HeaderTextColor";
         public const           double               MINIMUM_HEIGHT_REQUEST  = 60;
-        public static readonly BindableProperty     CollapsedProperty       = BindableProperty.Create( nameof(Collapsed),     typeof(ImageSource), typeof(HeaderBase) );
-        public static readonly BindableProperty     ExpandedProperty        = BindableProperty.Create( nameof(Expanded),      typeof(ImageSource), typeof(HeaderBase) );
-        public static readonly BindableProperty     IconSourceProperty      = BindableProperty.Create( nameof(IconSource),    typeof(ImageSource), typeof(HeaderBase) );
-        public static readonly BindableProperty     IsExpandedProperty      = BindableProperty.Create( nameof(IsExpanded),    typeof(bool),        typeof(HeaderBase) );
-        public static readonly BindableProperty     TappedCommandProperty   = BindableProperty.Create( nameof(TappedCommand), typeof(ICommand),    typeof(HeaderBase) );
+        public static readonly BindableProperty     CollapsedProperty       = BindableProperty.Create( nameof(Collapsed),     typeof(ImageSource), typeof(HeaderBase), propertyChanged: OnCollapsedChanged );
+        public static readonly BindableProperty     ExpandedProperty        = BindableProperty.Create( nameof(Expanded),      typeof(ImageSource), typeof(HeaderBase), propertyChanged: OnExpandedChanged );
+        public static readonly BindableProperty     IconSourceProperty      = BindableProperty.Create( nameof(IconSource),    typeof(ImageSource), typeof(HeaderBase), propertyChanged: OnIconSourceChanged );
+        public static readonly BindableProperty     IsExpandedProperty      = BindableProperty.Create( nameof(IsExpanded),    typeof(bool),        typeof(HeaderBase), propertyChanged: OnIsExpandedChanged );
+        public static readonly BindableProperty     TappedCommandProperty   = BindableProperty.Create( nameof(TappedCommand), typeof(ICommand),    typeof(HeaderBase), propertyChanged: OnTappedCommandChanged );
         protected readonly     TapGestureRecognizer _gestureRecognizer;
 
 
@@ -173,11 +182,16 @@ public class SvSection : ContentView, ISvSection<CellBase>
         public void Toggle() => IsExpanded = !IsExpanded;
 
 
-        protected abstract void OnCollapsedChanged( ImageSource?  value );
-        protected abstract void OnExpandedChanged( ImageSource?   value );
-        protected abstract void OnIconSourceChanged( ImageSource? value );
-        protected abstract void OnIsExpandedChanged( bool         value );
-        protected abstract void OnTappedCommandChanged( ICommand? value );
+        private static  void OnCollapsedChanged( BindableObject     bindable, object old, object value ) => ((HeaderBase)bindable).OnCollapsedChanged( (ImageSource?)value );
+        public abstract void OnCollapsedChanged( ImageSource?       value );
+        private static  void OnExpandedChanged( BindableObject      bindable, object old, object value ) => ((HeaderBase)bindable).OnExpandedChanged( (ImageSource?)value );
+        public abstract void OnExpandedChanged( ImageSource?        value );
+        private static  void OnIconSourceChanged( BindableObject    bindable, object old, object value ) => ((HeaderBase)bindable).OnIconSourceChanged( (ImageSource?)value );
+        public abstract void OnIconSourceChanged( ImageSource?      value );
+        private static  void OnIsExpandedChanged( BindableObject    bindable, object old, object value ) => ((HeaderBase)bindable).OnIsExpandedChanged( (bool)value );
+        public abstract void OnIsExpandedChanged( bool              value );
+        private static  void OnTappedCommandChanged( BindableObject bindable, object old, object value ) => ((HeaderBase)bindable).OnTappedCommandChanged( (ICommand?)value );
+        public abstract void OnTappedCommandChanged( ICommand?      value );
 
 
 
@@ -240,20 +254,26 @@ public class SvSection : ContentView, ISvSection<CellBase>
             public static Default Create()                   => new();
 
 
-            protected override void OnTappedCommandChanged( ICommand? value ) => _gestureRecognizer.Command = value;
-            public override    void OnTitleChanged( string            value ) => _label.Text = value;
-            public override    void OnTextColorChanged( Color?        value ) => _label.TextColor = value ?? Colors.Black;
-            protected override void OnIsExpandedChanged( bool value ) =>
-                IconSource = value
-                                 ? Collapsed
-                                 : Expanded;
-            protected override void OnCollapsedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
-                                                                                                         ? Expanded
-                                                                                                         : value );
-            protected override void OnExpandedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
-                                                                                                        ? value
-                                                                                                        : Collapsed );
-            protected override void OnIconSourceChanged( ImageSource? value ) => _icon.Source = value;
+            public override void OnTappedCommandChanged( ICommand?               value )                          => _gestureRecognizer.Command = value;
+            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => _label.CharacterSpacing = value;
+            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => _label.FontFamily = value;
+            public override void OnFontSizeChanged( double                       oldValue, double         value ) => _label.FontSize = value;
+            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => _label.FontAutoScalingEnabled = value;
+            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => _label.FontAttributes = value;
+            public override void OnTitleChanged( string                          old,      string         value ) => _label.Text = value;
+            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => _label.HorizontalTextAlignment = value;
+            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => _label.VerticalTextAlignment = value;
+            public override void OnTextColorChanged( Color?                      old,      Color?         value ) => _label.TextColor = value ?? Colors.Black;
+            public override void OnIsExpandedChanged( bool value ) => IconSource = value
+                                                                                       ? Collapsed
+                                                                                       : Expanded;
+            public override void OnCollapsedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
+                                                                                                      ? Expanded
+                                                                                                      : value );
+            public override void OnExpandedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
+                                                                                                     ? value
+                                                                                                     : Collapsed );
+            public override void OnIconSourceChanged( ImageSource? value ) => _icon.Source = value;
         }
     }
 }

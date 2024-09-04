@@ -10,15 +10,15 @@ namespace Jakar.SettingsView.Maui.Sv.Base;
 
 public abstract class BorderBase : ContentView, ISectionBorder<Color>, IFontElement, IDecorableTextElement
 {
-    public static readonly BindableProperty CharacterSpacingProperty        = BindableProperty.Create( nameof(CharacterSpacing),        typeof(double),          typeof(BorderBase), 0.0d, propertyChanged: OnCharacterSpacingPropertyChanged );
-    public static readonly BindableProperty FontFamilyProperty              = BindableProperty.Create( nameof(FontFamily),              typeof(string),          typeof(BorderBase), propertyChanged: OnFontFamilyPropertyChanged );
-    public static readonly BindableProperty FontSizeProperty                = BindableProperty.Create( nameof(FontSize),                typeof(double),          typeof(BorderBase), 0d,                  propertyChanged: OnFontSizePropertyChanged, defaultValueCreator: FontSizePropertyDefaultValueCreator );
-    public static readonly BindableProperty FontAttributesProperty          = BindableProperty.Create( nameof(FontAttributes),          typeof(FontAttributes),  typeof(BorderBase), FontAttributes.None, propertyChanged: OnFontAttributesPropertyChanged );
-    public static readonly BindableProperty FontAutoScalingEnabledProperty  = BindableProperty.Create( nameof(FontAutoScalingEnabled),  typeof(bool),            typeof(BorderBase), true,                propertyChanged: OnFontAutoScalingEnabledPropertyChanged );
-    public static readonly BindableProperty HorizontalTextAlignmentProperty = BindableProperty.Create( nameof(HorizontalTextAlignment), typeof(TextAlignment),   typeof(BorderBase), TextAlignment.Start, propertyChanged: OnHorizontalTextAlignmentPropertyChanged );
+    public static readonly BindableProperty CharacterSpacingProperty        = BindableProperty.Create( nameof(CharacterSpacing),        typeof(double),          typeof(BorderBase), 0.0d, propertyChanged: OnCharacterSpacingChanged );
+    public static readonly BindableProperty FontFamilyProperty              = BindableProperty.Create( nameof(FontFamily),              typeof(string),          typeof(BorderBase), propertyChanged: OnFontFamilyChanged );
+    public static readonly BindableProperty FontSizeProperty                = BindableProperty.Create( nameof(FontSize),                typeof(double),          typeof(BorderBase), 0d,                  propertyChanged: OnFontSizeChanged, defaultValueCreator: FontSizePropertyDefaultValueCreator );
+    public static readonly BindableProperty FontAttributesProperty          = BindableProperty.Create( nameof(FontAttributes),          typeof(FontAttributes),  typeof(BorderBase), FontAttributes.None, propertyChanged: OnFontAttributesChanged );
+    public static readonly BindableProperty FontAutoScalingEnabledProperty  = BindableProperty.Create( nameof(FontAutoScalingEnabled),  typeof(bool),            typeof(BorderBase), true,                propertyChanged: OnFontAutoScalingEnabledChanged );
+    public static readonly BindableProperty HorizontalTextAlignmentProperty = BindableProperty.Create( nameof(HorizontalTextAlignment), typeof(TextAlignment),   typeof(BorderBase), TextAlignment.Start, propertyChanged: OnHorizontalTextAlignmentChanged );
     public static readonly BindableProperty VerticalTextAlignmentProperty   = BindableProperty.Create( nameof(VerticalTextAlignment),   typeof(TextAlignment),   typeof(BorderBase), TextAlignment.Center );
-    public static readonly BindableProperty TextColorProperty               = BindableProperty.Create( nameof(TextColor),               typeof(Color),           typeof(BorderBase), propertyChanged: OnTextColorPropertyChanged );
-    public static readonly BindableProperty TitleProperty                   = BindableProperty.Create( nameof(Title),                   typeof(string),          typeof(BorderBase), propertyChanged: OnTitlePropertyChanged );
+    public static readonly BindableProperty TextColorProperty               = BindableProperty.Create( nameof(TextColor),               typeof(Color),           typeof(BorderBase), propertyChanged: OnTextColorChanged );
+    public static readonly BindableProperty TitleProperty                   = BindableProperty.Create( nameof(Title),                   typeof(string),          typeof(BorderBase), propertyChanged: OnTitleChanged );
     public static readonly BindableProperty TextDecorationsProperty         = BindableProperty.Create( nameof(TextDecorations),         typeof(TextDecorations), typeof(BorderBase), TextDecorations.None );
 
 
@@ -43,26 +43,24 @@ public abstract class BorderBase : ContentView, ISectionBorder<Color>, IFontElem
     }
 
 
-    private static   object FontSizePropertyDefaultValueCreator( BindableObject      bindable )                                => ((BorderBase)bindable).FontSizeDefaultValueCreator();
-    private static   void   OnCharacterSpacingPropertyChanged( BindableObject        bindable, object oldValue, object value ) => ((BorderBase)bindable).OnCharacterSpacingChanged( (double)oldValue, (double)value );
-    private static   void   OnFontFamilyPropertyChanged( BindableObject              bindable, object oldValue, object value ) => ((BorderBase)bindable).OnFontFamilyChanged( (string)oldValue, (string)value );
-    private static   void   OnFontSizePropertyChanged( BindableObject                bindable, object oldValue, object value ) => ((BorderBase)bindable).OnFontSizeChanged( (double)oldValue, (double)value );
-    private static   void   OnFontAttributesPropertyChanged( BindableObject          bindable, object oldValue, object value ) => ((BorderBase)bindable).OnFontAttributesChanged( (FontAttributes)oldValue, (FontAttributes)value );
-    private static   void   OnFontAutoScalingEnabledPropertyChanged( BindableObject  bindable, object oldValue, object value ) => ((BorderBase)bindable).OnFontAutoScalingEnabledChanged( (bool)oldValue, (bool)value );
-    protected static void   OnVerticalTextAlignmentPropertyChanged( BindableObject   bindable, object oldValue, object value ) => ((BorderBase)bindable).OnVerticalTextAlignmentChanged( (TextAlignment)oldValue, (TextAlignment)value );
-    protected static void   OnHorizontalTextAlignmentPropertyChanged( BindableObject bindable, object oldValue, object value ) => ((BorderBase)bindable).OnHorizontalTextAlignmentChanged( (TextAlignment)oldValue, (TextAlignment)value );
-    protected static void   OnTextColorPropertyChanged( BindableObject               bindable, object oldValue, object value ) => ((BorderBase)bindable).OnTextColorChanged( (Color?)oldValue, (Color?)value );
-    protected static void   OnTitlePropertyChanged( BindableObject                   bindable, object oldValue, object value ) => ((BorderBase)bindable).OnTitleChanged( (string)oldValue, (string)value );
-
-
-    public virtual  double FontSizeDefaultValueCreator() => 0;
-    public abstract void   OnCharacterSpacingChanged( double               oldValue, double         value );
-    public abstract void   OnFontFamilyChanged( string                     oldValue, string         value );
-    public abstract void   OnFontSizeChanged( double                       oldValue, double         value );
-    public abstract void   OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value );
-    public abstract void   OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value );
-    public abstract void   OnTitleChanged( string                          oldValue, string         value );
-    public abstract void   OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value );
-    public abstract void   OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value );
-    public abstract void   OnTextColorChanged( Color?                      oldValue, Color?         value );
+    private static   object FontSizePropertyDefaultValueCreator( BindableObject bindable )                                     => ((BorderBase)bindable).FontSizeDefaultValueCreator();
+    public virtual   double FontSizeDefaultValueCreator()                                                                      => 0;
+    private static   void   OnCharacterSpacingChanged( BindableObject        bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnCharacterSpacingChanged( (double)oldValue, (double)value );
+    public abstract  void   OnCharacterSpacingChanged( double                oldValue, double         value );
+    private static   void   OnFontFamilyChanged( BindableObject              bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnFontFamilyChanged( (string)oldValue, (string)value );
+    public abstract  void   OnFontFamilyChanged( string                      oldValue, string         value );
+    private static   void   OnFontSizeChanged( BindableObject                bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnFontSizeChanged( (double)oldValue, (double)value );
+    public abstract  void   OnFontSizeChanged( double                        oldValue, double         value );
+    private static   void   OnFontAutoScalingEnabledChanged( BindableObject  bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnFontAutoScalingEnabledChanged( (bool)oldValue, (bool)value );
+    public abstract  void   OnFontAutoScalingEnabledChanged( bool            oldValue, bool           value );
+    private static   void   OnFontAttributesChanged( BindableObject          bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnFontAttributesChanged( (FontAttributes)oldValue, (FontAttributes)value );
+    public abstract  void   OnFontAttributesChanged( FontAttributes          oldValue, FontAttributes value );
+    protected static void   OnTitleChanged( BindableObject                   bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnTitleChanged( (string)oldValue, (string)value );
+    public abstract  void   OnTitleChanged( string                           oldValue, string         value );
+    protected static void   OnHorizontalTextAlignmentChanged( BindableObject bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnHorizontalTextAlignmentChanged( (TextAlignment)oldValue, (TextAlignment)value );
+    public abstract  void   OnHorizontalTextAlignmentChanged( TextAlignment  oldValue, TextAlignment  value );
+    protected static void   OnVerticalTextAlignmentChanged( BindableObject   bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnVerticalTextAlignmentChanged( (TextAlignment)oldValue, (TextAlignment)value );
+    public abstract  void   OnVerticalTextAlignmentChanged( TextAlignment    oldValue, TextAlignment  value );
+    protected static void   OnTextColorChanged( BindableObject               bindable, object         oldValue, object value ) => ((BorderBase)bindable).OnTextColorChanged( (Color?)oldValue, (Color?)value );
+    public abstract  void   OnTextColorChanged( Color?                       oldValue, Color?         value );
 }
