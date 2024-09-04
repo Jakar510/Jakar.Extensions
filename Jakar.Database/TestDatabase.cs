@@ -72,7 +72,7 @@ internal sealed class TestDatabase : Database, IAppName
 
         using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.Insert" ) )
         {
-            await foreach ( UserRecord record in db.Users.Insert( activity, users, token ) ) { results.Add( record ); }
+            await foreach ( UserRecord record in db.Users.Insert(  users, token ) ) { results.Add( record ); }
 
             Debug.Assert( users.Length == results.Count );
         }
@@ -80,7 +80,7 @@ internal sealed class TestDatabase : Database, IAppName
         using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.All" ) )
         {
             results.Clear();
-            await foreach ( UserRecord record in db.Users.All( activity, token ) ) { results.Add( record ); }
+            await foreach ( UserRecord record in db.Users.All(  token ) ) { results.Add( record ); }
 
             Debug.Assert( users.Length == results.Count );
         }

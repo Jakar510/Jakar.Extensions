@@ -24,12 +24,12 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
 
     [Pure]
-    public async ValueTask<TRecord?> TryGetValue( Activity? activity, DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
+    public async ValueTask<TRecord?> TryGetValue(  DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
     {
         TRecord? record = TryGetValue( options );
         if ( record is not null ) { return record; }
 
-        record = await table.Get( activity, ID, token );
+        record = await table.Get(  ID, token );
         if ( record is null ) { return default; }
 
         SetValue( in record );

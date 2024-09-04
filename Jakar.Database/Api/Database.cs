@@ -151,12 +151,12 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition GetCommand( Activity? activity, in SqlCommand sql, DbTransaction? transaction, CancellationToken token )
+    public CommandDefinition GetCommand( in SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
-        activity?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
+        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return sql.ToCommandDefinition( transaction, token, CommandTimeout );
     }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, Activity? activity, SqlCommand sql, CancellationToken token )
+    public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
     {
         try
         {
@@ -175,7 +175,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
             DbDataReader temp = await dbCommand.ExecuteReaderAsync( CommandBehavior.SequentialAccess, token );
             */
 
-            CommandDefinition command = GetCommand( activity, sql, transaction, token );
+            CommandDefinition command = GetCommand( sql, transaction, token );
             DbDataReader      reader  = await connection.ExecuteReaderAsync( command );
             return reader;
         }
@@ -204,17 +204,17 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register( Activity? activity, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Register, activity, request, rights, types, token );
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, Activity? activity, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Register, request, rights, types, token );
+    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
-        UserRecord? record = await Users.Get( connection, transaction, activity, true, UserRecord.GetDynamicParameters( request ), token );
+        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.NotFound( request.UserName ); }
 
         if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Unauthorized( results ); }
 
         record = UserRecord.Create( request, rights );
-        record = await Users.Insert( connection, transaction, activity, record, token );
-        return await GetToken( connection, transaction, activity, record, types, token );
+        record = await Users.Insert( connection, transaction, record, token );
+        return await GetToken( connection, transaction, record, types, token );
     }
 
 
@@ -227,28 +227,28 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, Activity? activity, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : IDbReaderMapping<T>
     {
         DbDataReader reader;
 
         try
         {
-            CommandDefinition command = GetCommand( activity, new SqlCommand( sql, parameters ), transaction, token );
+            CommandDefinition command = GetCommand( new SqlCommand( sql, parameters ), transaction, token );
             reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
 
         await foreach ( T record in T.CreateAsync( reader, token ) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, Activity? activity, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : struct
     {
         DbDataReader reader;
 
         try
         {
-            CommandDefinition command = GetCommand( activity, new SqlCommand( sql, parameters ), transaction, token );
+            CommandDefinition command = GetCommand( new SqlCommand( sql, parameters ), transaction, token );
             await connection.QueryAsync<T>( command );
 
             reader = await connection.ExecuteReaderAsync( command );

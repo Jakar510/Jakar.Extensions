@@ -64,7 +64,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction, activity, db.Users, this, token );
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => UserRoleRecord.Where( connection, transaction,  db.Users, this, token );
 
 
     [Pure]

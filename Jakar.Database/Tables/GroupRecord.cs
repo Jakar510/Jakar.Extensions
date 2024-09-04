@@ -56,6 +56,6 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, CreatedBy, token );
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, activity, db.Users, this, token );
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => await db.Users.Get( connection, transaction,  CreatedBy, token );
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction,  db.Users, this, token );
 }

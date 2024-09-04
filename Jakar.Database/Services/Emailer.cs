@@ -49,19 +49,19 @@ public class Emailer
     }
 
 
-    public async Task VerifyEmail( Activity? activity, UserRecord user, ClaimType types, CancellationToken token )
+    public async Task VerifyEmail(  UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateContent( activity, subject, user, types, token );
+        string content = await _tokenService.CreateContent(  subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithBody( content );
 
         await SendAsync( builder, token );
     }
-    public async Task VerifyHTMLEmail( Activity? activity, UserRecord user, ClaimType types, CancellationToken token )
+    public async Task VerifyHTMLEmail(  UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateHTMLContent( activity, subject, user, types, token );
+        string content = await _tokenService.CreateHTMLContent(  subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithHTML( content );
 

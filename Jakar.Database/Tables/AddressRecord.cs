@@ -80,7 +80,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
 
     [Pure]
-    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
+    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction,  Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
         if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), claims.Span.Single( static x => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
@@ -93,13 +93,13 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
         if ( HasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), claims.Span.Single( static x => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
 
-        return await db.Addresses.Get( connection, transaction, activity, true, parameters, token );
+        return await db.Addresses.Get( connection, transaction,  true, parameters, token );
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         static bool HasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
     }
     [Pure]
-    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Activity? activity, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
+    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction,  Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         DynamicParameters parameters = new();
 
@@ -126,7 +126,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                 break;
         }
 
-        await foreach ( AddressRecord record in db.Addresses.Where( connection, transaction, activity, true, parameters, token ) ) { yield return record; }
+        await foreach ( AddressRecord record in db.Addresses.Where( connection, transaction,  true, parameters, token ) ) { yield return record; }
     }
 
 

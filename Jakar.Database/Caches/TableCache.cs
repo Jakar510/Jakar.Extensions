@@ -24,14 +24,14 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, ITableCacheSe
     public bool                           Contains( RecordID<TRecord>      id );
     public bool                           Contains( TRecord                record );
     public void                           AddOrUpdate( TRecord             record );
-    public bool                           TryGetValue( RecordPair<TRecord> id,         [NotNullWhen( true )] out TRecord? record );
-    public bool                           TryGetValue( RecordID<TRecord>   id,         [NotNullWhen( true )] out TRecord? record );
-    public ValueTask<TRecord?>            TryGetValue( Activity?           activity,   RecordPair<TRecord>                pair, CancellationToken token );
-    public ValueTask<TRecord?>            TryGetValue( Activity?           activity,   RecordID<TRecord>                  pair, CancellationToken token );
-    public ValueTask<TRecord?>            TryRemove( Activity?             activity,   RecordPair<TRecord>                id,   CancellationToken token = default );
-    public ValueTask<TRecord?>            TryRemove( Activity?             activity,   RecordID<TRecord>                  id,   CancellationToken token = default );
-    public ValueTask                      RefreshAsync( Activity?          activity,   CancellationToken                  token );
-    public ValueTask                      RefreshAsync( DbConnection       connection, DbTransaction                      transaction, Activity? activity, CancellationToken token = default );
+    public bool                           TryGetValue( RecordPair<TRecord> id,   [NotNullWhen( true )] out TRecord? record );
+    public bool                           TryGetValue( RecordID<TRecord>   id,   [NotNullWhen( true )] out TRecord? record );
+    public ValueTask<TRecord?>            TryGetValue( RecordPair<TRecord> pair, CancellationToken                  token );
+    public ValueTask<TRecord?>            TryGetValue( RecordID<TRecord>   pair, CancellationToken                  token );
+    public ValueTask<TRecord?>            TryRemove( RecordPair<TRecord>   id,   CancellationToken                  token = default );
+    public ValueTask<TRecord?>            TryRemove( RecordID<TRecord>     id,   CancellationToken                  token = default );
+    public ValueTask                      RefreshAsync( CancellationToken  token );
+    public ValueTask                      RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
 }
 
 
@@ -216,12 +216,12 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
     }
 
 
-    public ValueTask<TRecord?> TryGetValue( Activity? activity, RecordPair<TRecord> pair, CancellationToken token ) => TryGetValue( activity, pair.ID, token );
-    public async ValueTask<TRecord?> TryGetValue( Activity? activity, RecordID<TRecord> id, CancellationToken token )
+    public ValueTask<TRecord?> TryGetValue( RecordPair<TRecord> pair, CancellationToken token ) => TryGetValue( pair.ID, token );
+    public async ValueTask<TRecord?> TryGetValue( RecordID<TRecord> id, CancellationToken token )
     {
         if ( _records.TryGetValue( id, out CacheEntry<TRecord>? entry ) is false ) { return default; }
 
-        TRecord? record = await entry.TryGetValue( activity, _table, _options, token );
+        TRecord? record = await entry.TryGetValue( _table, _options, token );
         if ( record is not null ) { return record; }
 
         _records.TryRemove( id, out _ );
@@ -241,18 +241,17 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
     }
 
 
-    public ValueTask<TRecord?> TryRemove( Activity? activity, RecordPair<TRecord> id, CancellationToken token = default ) => TryRemove( activity, id.ID, token );
-    public async ValueTask<TRecord?> TryRemove( Activity? activity, RecordID<TRecord> id, CancellationToken token = default )
+    public ValueTask<TRecord?> TryRemove( RecordPair<TRecord> id, CancellationToken token = default ) => TryRemove( id.ID, token );
+    public async ValueTask<TRecord?> TryRemove( RecordID<TRecord> id, CancellationToken token = default )
     {
-        if ( _records.TryRemove( id, out CacheEntry<TRecord>? entry ) ) { return await entry.TryGetValue( activity, _table, _options, token ); }
+        if ( _records.TryRemove( id, out CacheEntry<TRecord>? entry ) ) { return await entry.TryGetValue( _table, _options, token ); }
 
         return null;
     }
 
 
-    public       ValueTask RefreshAsync( CancellationToken token )                             => RefreshAsync( Activity.Current, token );
-    public async ValueTask RefreshAsync( Activity?         activity, CancellationToken token ) => await _table.TryCall( RefreshAsync, activity, token );
-    public async ValueTask RefreshAsync( DbConnection connection, DbTransaction transaction, Activity? activity, CancellationToken token = default )
+    public async ValueTask RefreshAsync( CancellationToken token ) => await _table.TryCall( RefreshAsync, token );
+    public async ValueTask RefreshAsync( DbConnection connection, DbTransaction transaction, CancellationToken token = default )
     {
         if ( _records.IsEmpty )
         {
@@ -260,7 +259,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
 
             foreach ( RecordID<TRecord> id in ids )
             {
-                TRecord? record = await _table.Get( connection, transaction, activity, id, token );
+                TRecord? record = await _table.Get( connection, transaction, id, token );
                 if ( record is null ) { continue; }
 
                 AddOrUpdate( record );
@@ -271,9 +270,9 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
 
         if ( HasChanged )
         {
-            await _table.Update( connection, transaction, activity, RecordsChanged, token );
+            await _table.Update( connection, transaction, RecordsChanged, token );
 
-            await foreach ( TRecord record in _table.Get( connection, transaction, activity, ChangedOrExpired, token ) ) { AddOrUpdate( record ); }
+            await foreach ( TRecord record in _table.Get( connection, transaction, ChangedOrExpired, token ) ) { AddOrUpdate( record ); }
         }
     }
 
@@ -292,7 +291,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
             catch ( Exception e ) { Log.CacheFailure( _logger, e, nameof(TableCache<TRecord>) ); }
         }
     }
-    public async Task StopAsync( CancellationToken token ) => await _table.Update( Activity.Current, RecordsChanged, token );
+    public async Task StopAsync( CancellationToken token ) => await _table.Update( RecordsChanged, token );
 
 
     IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token )           => GetAsyncEnumerator( token );
@@ -321,7 +320,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
         private          ReadOnlyMemory<RecordPair<TRecord>> _pairs;
         private          RecordPair<TRecord>                 _pair;
         private          TRecord?                            _current;
-        private          Activity?                           _activity;
+
 
         public   TRecord Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
         internal bool    ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && _index < _pairs.Length; }
@@ -345,7 +344,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
             if ( ShouldContinue )
             {
                 _pair    = _pairs.Span[_index];
-                _current = await _tableCache.TryGetValue( _activity, _pair, _token );
+                _current = await _tableCache.TryGetValue( _pair, _token );
                 return _current is not null;
             }
 
@@ -363,12 +362,11 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
         [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, typeof(AsyncEnumerator) );
 
 
-        IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( Activity.Current, token );
-        public AsyncEnumerator GetAsyncEnumerator( Activity? activity, CancellationToken token = default )
+        IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+        public AsyncEnumerator GetAsyncEnumerator( CancellationToken token = default )
         {
             Reset();
-            _token    = token;
-            _activity = activity;
+            _token = token;
             return this;
         }
 

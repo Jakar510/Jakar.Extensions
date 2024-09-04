@@ -12,7 +12,6 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
 {
     private readonly AsyncKeyGenerator<TRecord> _generator = new(table);
     private readonly DbTable<TRecord>           _table     = table;
-    private          Activity?                  _activity;
     private          CancellationToken          _token;
     private          TRecord?                   _current;
 
@@ -23,14 +22,13 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
     public RecordGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
     public async ValueTask DisposeAsync()
     {
-        _current  = null;
-        _activity = null;
+        _current = null;
         await _generator.DisposeAsync();
     }
 
 
-    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _activity, _token );
-    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, Activity? activity, CancellationToken token = default )
+    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _token );
+    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested )
         {
@@ -38,7 +36,7 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
             return false;
         }
 
-        if ( await _generator.MoveNextAsync( connection, transaction, activity, token ) ) { _current = await _table.Get( connection, transaction, activity, _generator.Current, token ); }
+        if ( await _generator.MoveNextAsync( connection, transaction, token ) ) { _current = await _table.Get( connection, transaction, _generator.Current, token ); }
         else
         {
             _current = default;
@@ -49,12 +47,11 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
     }
 
 
-    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( null, token );
-    public RecordGenerator<TRecord> WithCancellation( Activity? activity, CancellationToken token )
+    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
+    public RecordGenerator<TRecord> WithCancellation( CancellationToken token )
     {
-        _activity = activity;
-        _token    = token;
-        _generator.WithCancellation( activity, token );
+        _token = token;
+        _generator.WithCancellation( token );
         return this;
     }
 }

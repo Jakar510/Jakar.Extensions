@@ -343,8 +343,8 @@ public static class Telemetry
 
             static string GetMethodLine( string property ) =>
                 $"""
-                 [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void {property}( this Activity activity, string? value = default ) => activity.AddTag( Tags.{property}, value );
-                 [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void {property}( this Activity activity, object? value = default ) => activity.AddTag( Tags.{property}, value );
+                 [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void {property}( this Activity activity,  string? value = default ) => activity.AddTag( Tags.{property}, value );
+                 [ MethodImpl( MethodImplOptions.AggressiveInlining ) ] public static void {property}( this Activity activity,  object? value = default ) => activity.AddTag( Tags.{property}, value );
                  """;
         }
 

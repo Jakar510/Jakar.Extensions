@@ -177,8 +177,8 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedB
     }
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, true,      GetDynamicParameters( this ), token );
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Activity? activity, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, activity, CreatedBy, token );
+    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction,  Database db, CancellationToken token ) => await db.Users.Get( connection, transaction,  true,      GetDynamicParameters( this ), token );
+    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => await db.Users.Get( connection, transaction,  CreatedBy, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { CreatedBy = user.ID });

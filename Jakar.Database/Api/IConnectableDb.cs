@@ -44,16 +44,16 @@ public interface IConnectableDb : IDbTable, IDbOptions
 
 public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
 {
-    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, Activity? activity, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction,  string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : IDbReaderMapping<T>;
-    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, Activity? activity, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction,  string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : struct;
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition GetCommand( Activity? activity, in SqlCommand sql, DbTransaction? transaction, CancellationToken token );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition GetCommand(  in SqlCommand sql, DbTransaction? transaction, CancellationToken token );
 
 
-    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, Activity? activity, SqlCommand sql, CancellationToken token );
+    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction,  SqlCommand sql, CancellationToken token );
 }
 
 
