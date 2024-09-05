@@ -3,20 +3,19 @@
 
 public partial class WebRequester
 {
-    public readonly record struct RetryPolicy( TimeSpan Delay, TimeSpan Scale, bool AllowRetries, uint MaxRetires )
+    [DefaultValue( nameof(Default) )]
+    public readonly record struct RetryPolicy( TimeSpan Delay, TimeSpan Scale, bool AllowRetries = true, ushort MaxRetires = 3 )
     {
-        private static readonly TimeSpan _time = TimeSpan.FromSeconds( 2 );
-
-        public RetryPolicy() : this( default, default, false, default ) { }
-        public RetryPolicy( bool     allowRetries ) : this( _time, _time, allowRetries, 3 ) { }
-        public RetryPolicy( bool     allowRetries, uint     maxRetires ) : this( _time, _time, allowRetries, maxRetires ) { }
-        public RetryPolicy( TimeSpan delay,        TimeSpan scale, uint maxRetires ) : this( delay, scale, true, maxRetires ) { }
+        private static readonly TimeSpan    _time = TimeSpan.FromSeconds( 2 );
+        public static           RetryPolicy Default => new(_time, _time);
 
 
-        public Task Wait( ref uint count, CancellationToken token = default )
+        public Task Wait( ref ushort count, CancellationToken token )
         {
-            TimeSpan time = Delay + Scale * count++;
-            return time.Delay( token );
+            if ( ++count > MaxRetires ) { count = MaxRetires; }
+
+            TimeSpan time = Delay + Scale * count;
+            return Task.Delay( time, token );
         }
     }
 }

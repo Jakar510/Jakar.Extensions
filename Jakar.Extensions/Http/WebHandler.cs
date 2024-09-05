@@ -32,6 +32,7 @@ public readonly record struct WebHandler : IDisposable
         Token       = token;
         RetryPolicy = retryPolicy;
     }
+    public void Dispose() => _request.Dispose();
 
 
     public async ValueTask<HttpResponseMessage> SendAsync()
@@ -72,22 +73,22 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
         await using MemoryStream stream = await AsStream( response );
-        using StreamReader                sr     = new StreamReader( stream, Encoding );
+        using StreamReader       sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-    #endif
-        using JsonReader reader = new JsonTextReader( sr );
+        #endif
+            using JsonReader reader = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
     public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
         await using MemoryStream stream = await AsStream( response );
-        using StreamReader                sr     = new StreamReader( stream, Encoding );
+        using StreamReader       sr     = new StreamReader( stream, Encoding );
     #if NET6_0_OR_GREATER
         await
-    #endif
-        using JsonReader reader = new JsonTextReader( sr );
+        #endif
+            using JsonReader reader = new JsonTextReader( sr );
 
         TResult? result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
@@ -202,9 +203,6 @@ public readonly record struct WebHandler : IDisposable
     public       ValueTask<WebResponse<MemoryStream>>         AsStream()                                   => WebResponse<MemoryStream>.Create( this, AsStream );
     public       ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory()                                   => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
     public       ValueTask<WebResponse<string>>               AsString()                                   => WebResponse<string>.Create( this, AsString );
-
-
-    public void Dispose() => _request.Dispose();
 
 
 #if NET6_0_OR_GREATER

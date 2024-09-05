@@ -139,7 +139,7 @@ public readonly record struct WebResponse<T>
 
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create( response, handler.Token ); }
+                if ( response.IsSuccessStatusCode is false ) { return await Create( response, handler.Token ); }
 
                 T result = await func( response, arg );
                 return new WebResponse<T>( response, result );
@@ -153,7 +153,7 @@ public readonly record struct WebResponse<T>
     {
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+            if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
             T result = await func( response );
             return new WebResponse<T>( response, result );
@@ -164,7 +164,7 @@ public readonly record struct WebResponse<T>
     {
         try
         {
-            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+            if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
             T result = await func( response, arg );
             return new WebResponse<T>( response, result );
@@ -175,14 +175,14 @@ public readonly record struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        uint        count      = 0;
+        ushort      count      = 0;
         Exception[] exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+                if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
                 T result = await func( response );
                 return new WebResponse<T>( response, result );
@@ -193,19 +193,19 @@ public readonly record struct WebResponse<T>
             await policy.Wait( ref count, token );
         }
 
-        try { throw new AggregateException( exceptions ); }
+        try { throw new AggregateException( exceptions[..count] ); }
         catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        uint        count      = 0;
+        ushort      count      = 0;
         Exception[] exceptions = new Exception[policy.MaxRetires];
 
         while ( count < policy.MaxRetires )
         {
             try
             {
-                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
+                if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
                 T result = await func( response, arg );
                 return new WebResponse<T>( response, result );
@@ -216,7 +216,7 @@ public readonly record struct WebResponse<T>
             await policy.Wait( ref count, token );
         }
 
-        try { throw new AggregateException( exceptions ); }
+        try { throw new AggregateException( exceptions[..count] ); }
         catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
 
