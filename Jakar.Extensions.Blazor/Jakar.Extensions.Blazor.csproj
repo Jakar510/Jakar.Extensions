@@ -57,7 +57,7 @@ Initial Release</PackageReleaseNotes>
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
 		<PackageReference Include="PanoramicData.Blazor" Version="8.0.91" />
 		<PackageReference Include="Radzen.Blazor" Version="5.1.10" />
-		<PackageReference Include="Jakar.Extensions" Version="8.12.4" />
+		<PackageReference Include="Jakar.Extensions" Version="8.13.0" />
 		<PackageReference Include="Hardware.Info" Version="100.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />

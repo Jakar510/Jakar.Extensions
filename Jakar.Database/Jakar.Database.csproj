@@ -10,7 +10,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<Version>7.0.0.28-beta</Version>
+		<Version>7.0.0.29-beta</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -71,7 +71,7 @@
 		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
 		<PackageReference Include="dbup-sqlserver" Version="5.0.41" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="5.2.0" />
-		<PackageReference Include="Jakar.Extensions" Version="8.12.4" />
+		<PackageReference Include="Jakar.Extensions" Version="8.13.0" />
 		<PackageReference Include="FluentMigrator" Version="5.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
 		<PackageReference Include="MailKit" Version="4.7.1.1" />
