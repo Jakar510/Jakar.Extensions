@@ -10,10 +10,12 @@ public interface IScreenShotAddress
 
 public interface IAppSettings : IDeviceID
 {
-    public     string     AppName       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public     AppVersion AppVersion    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public new Guid       DeviceID      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public     string     DeviceVersion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public string     AppName       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public AppVersion AppVersion    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public string     DeviceVersion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+
+
+    public void SetDeviceID( Guid id );
 }
 
 
@@ -49,6 +51,7 @@ public class AppSettings( string appName, AppVersion version, string deviceVersi
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
 
 
+    public            void SetDeviceID( Guid      id )       => DeviceID = id;
     protected virtual void OnSetDeviceID( in Guid deviceID ) { }
 }
 
@@ -60,6 +63,6 @@ public class AppSettings<TViewPage>( string appName, AppVersion version, string 
     private TViewPage? _currentViewPage;
 
     public virtual TViewPage? CurrentViewPage { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _currentViewPage; set => SetProperty( ref _currentViewPage, value ); }
-    
+
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
 }

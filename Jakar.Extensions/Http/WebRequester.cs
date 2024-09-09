@@ -1,11 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:35 AM
 
+using Microsoft.Extensions.DependencyInjection;
+
+
+
 namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public sealed partial class WebRequester( HttpClient client, IHostInfo host, Encoding encoding, ILogger? logger = default, RetryPolicy? retryPolicy = default ) : IDisposable
+public sealed partial class WebRequester( HttpClient client, IHostInfo host, Encoding encoding, ILogger? logger = null, RetryPolicy? retryPolicy = null ) : IDisposable
 {
     private readonly HttpClient   _client      = client;
     private readonly IHostInfo    _host        = host;
@@ -18,15 +22,26 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, Enc
     public TimeSpan           Timeout               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.Timeout; set => _client.Timeout = value; }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebRequester( HttpClient client, IHostInfo host, ILogger? logger = default, RetryPolicy? retryPolicy = default ) : this( client, host, Encoding.Default, logger, retryPolicy ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, RetryPolicy? retryPolicy = null ) : this( client, host, Encoding.Default, logger, retryPolicy ) { }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create<T>( IHttpClientFactory factory, IHostInfo host, ILogger? logger = default, RetryPolicy? retryPolicy = default )                                     => Create<T>( factory, host, Encoding.Default, logger, retryPolicy );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create<T>( IHttpClientFactory factory, IHostInfo host, Encoding encoding,         ILogger?     logger      = default, RetryPolicy? retryPolicy = default ) => Create( factory.CreateClient( typeof(T).Name ), host, encoding, logger, retryPolicy );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( IHttpClientFactory    factory, IHostInfo host, ILogger? logger = default, RetryPolicy? retryPolicy = default )                                     => Create( factory,                host, Encoding.Default, logger, retryPolicy );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( IHttpClientFactory    factory, IHostInfo host, Encoding encoding,         ILogger?     logger      = default, RetryPolicy? retryPolicy = default ) => Create( factory.CreateClient(), host, encoding,         logger, retryPolicy );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( HttpClient            client,  IHostInfo host, ILogger? logger = default, RetryPolicy? retryPolicy = default )                                     => new(client, host, logger, retryPolicy);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( HttpClient            client,  IHostInfo host, Encoding encoding,         ILogger?     logger      = default, RetryPolicy? retryPolicy = default ) => new(client, host, encoding, logger, retryPolicy);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static IServiceCollection AddSingleton( IServiceCollection collection, RetryPolicy? retryPolicy = null ) => collection.AddSingleton( provider => Create( provider, retryPolicy ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static IServiceCollection AddScoped( IServiceCollection    collection, RetryPolicy? retryPolicy = null ) => collection.AddScoped( provider => Create( provider,    retryPolicy ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester       Create( IServiceProvider         provider,   RetryPolicy? retryPolicy )        => Create( provider.GetRequiredService<IHttpClientFactory>(), provider.GetRequiredService<IHostInfo>(), provider.GetRequiredService<ILoggerFactory>().CreateLogger( nameof(WebRequester) ), retryPolicy );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static IServiceCollection AddSingleton<TClass>( IServiceCollection collection, RetryPolicy? retryPolicy = null ) => collection.AddSingleton( provider => Create<TClass>( provider, retryPolicy ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static IServiceCollection AddScoped<TClass>( IServiceCollection    collection, RetryPolicy? retryPolicy = null ) => collection.AddScoped( provider => Create<TClass>( provider,    retryPolicy ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester       Create<TClass>( IServiceProvider         provider,   RetryPolicy? retryPolicy )        => Create<TClass>( provider.GetRequiredService<IHttpClientFactory>(), provider.GetRequiredService<IHostInfo>(), provider.GetRequiredService<ILoggerFactory>().CreateLogger( nameof(WebRequester) ), retryPolicy );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create<TClass>( IHttpClientFactory factory, IHostInfo host, ILogger? logger = null, RetryPolicy? retryPolicy = null )                                  => Create<TClass>( factory, host, Encoding.Default, logger, retryPolicy );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create<TClass>( IHttpClientFactory factory, IHostInfo host, Encoding encoding,      ILogger?     logger      = null, RetryPolicy? retryPolicy = null ) => Create( factory.CreateClient( typeof(TClass).Name ), host, encoding, logger, retryPolicy );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( IHttpClientFactory         factory, IHostInfo host, ILogger? logger = null, RetryPolicy? retryPolicy = null )                                  => Create( factory,                host, Encoding.Default, logger, retryPolicy );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( IHttpClientFactory         factory, IHostInfo host, Encoding encoding,      ILogger?     logger      = null, RetryPolicy? retryPolicy = null ) => Create( factory.CreateClient(), host, encoding,         logger, retryPolicy );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( HttpClient                 client,  IHostInfo host, ILogger? logger = null, RetryPolicy? retryPolicy = null )                                  => new(client, host, logger, retryPolicy);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Create( HttpClient                 client,  IHostInfo host, Encoding encoding,      ILogger?     logger      = null, RetryPolicy? retryPolicy = null ) => new(client, host, encoding, logger, retryPolicy);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static WebRequester Get( IServiceProvider              provider ) => provider.GetRequiredService<WebRequester>();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);

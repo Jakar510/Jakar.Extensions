@@ -4,15 +4,20 @@
 public partial class WebRequester
 {
     [DefaultValue( nameof(Default) )]
-    public readonly record struct RetryPolicy( TimeSpan Delay, TimeSpan Scale, bool AllowRetries = true, ushort MaxRetires = 3 )
+    public readonly record struct RetryPolicy( TimeSpan Delay, TimeSpan Scale, ushort MaxRetires = 3 )
     {
-        private static readonly TimeSpan    _time = TimeSpan.FromSeconds( 2 );
-        public static           RetryPolicy Default => new(_time, _time);
+        public static readonly TimeSpan    Time = TimeSpan.FromSeconds( 2 );
+        public static          RetryPolicy Default      => new(Time, Time);
+        public static          RetryPolicy None         => new(TimeSpan.Zero, TimeSpan.Zero, 0);
+        public static          RetryPolicy Single       => new(TimeSpan.Zero, TimeSpan.Zero, 1);
+        public                 bool        AllowRetries => MaxRetires > 0;
+
+        public static RetryPolicy Create( ushort maxRetries ) => new(Time, Time, maxRetries);
 
 
         public Task Wait( ref ushort count, CancellationToken token )
         {
-            if ( ++count > MaxRetires ) { count = MaxRetires; }
+            if ( ++count > MaxRetires ) { return Task.CompletedTask; }
 
             TimeSpan time = Delay + Scale * count;
             return Task.Delay( time, token );

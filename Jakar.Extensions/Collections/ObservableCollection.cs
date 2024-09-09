@@ -454,7 +454,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
 
 
 #if NET6_0_OR_GREATER
-    protected internal ReadOnlySpan<T> AsSpan()                          => CollectionsMarshal.AsSpan( buffer );
+    public ReadOnlySpan<T> AsSpan()                          => CollectionsMarshal.AsSpan( buffer );
     public             void            EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
 #endif
 }
