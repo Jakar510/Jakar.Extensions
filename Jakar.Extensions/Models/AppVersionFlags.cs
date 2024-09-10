@@ -5,21 +5,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Stable) )]
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
-#if NET7_0_OR_GREATER
-    IEquatable<AppVersionFlags?>,
-    IComparable<AppVersionFlags>,
-    IComparable<AppVersionFlags?>,
-    ISpanParsable<AppVersionFlags>,
-    IComparable,
-    IFormattable
-#else
-    IEquatable<AppVersionFlags?>,
-    IComparable<AppVersionFlags>,
-    IComparable<AppVersionFlags?>,
-    IComparable,
-    IFormattable
-#endif
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, ISpanParsable<AppVersionFlags>, IComparable, IFormattable
 {
     private const string ALPHA          = "alpha";
     private const string BETA           = "beta";
@@ -49,9 +35,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) :
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
     {
         Debug.Assert( span.Length > Length );

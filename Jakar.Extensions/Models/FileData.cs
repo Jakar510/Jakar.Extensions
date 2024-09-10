@@ -5,15 +5,7 @@ namespace Jakar.Extensions;
 
 
 public interface IFileMetaData<out TID> : IUniqueID<TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
     string? FileDescription { get; }
     string? FileName        { get; }
@@ -23,15 +15,7 @@ public interface IFileMetaData<out TID> : IUniqueID<TID>
 
 
 public interface IFileData<out TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
     long                       FileSize { get; }
     string                     Hash     { get; }
@@ -68,20 +52,8 @@ public interface IFileData<out TID>
 
 
 public interface IFileData<out TID, out TMetaData> : IFileData<TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-#if NET8_0_OR_GREATER
     where TMetaData : IFileMetaData<TMetaData, TID>, IComparable<TMetaData>, IEquatable<TMetaData>
-#else
-    where TMetaData : IFileMetaData<TID>
-#endif
 {
     public new TMetaData? MetaData { get; }
 }
@@ -90,19 +62,10 @@ public interface IFileData<out TID, out TMetaData> : IFileData<TID>
 
 [SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
 public interface IFileData<TClass, TID, TMetaData> : IFileData<TID, TMetaData>, IComparable<TClass>, IEquatable<TClass>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     where TMetaData : IFileMetaData<TMetaData, TID>, IComparable<TMetaData>, IEquatable<TMetaData>
     where TClass : IFileData<TClass, TID, TMetaData>
 {
-#if NET8_0_OR_GREATER
     public abstract static TClass            Create( IFileData<TID, TMetaData>                                        data );
     public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID, TMetaData>? data );
     public abstract static ValueTask<TClass> Create( LocalFile                                                        file,   CancellationToken token                                              = default );
@@ -111,28 +74,17 @@ public interface IFileData<TClass, TID, TMetaData> : IFileData<TID, TMetaData>, 
     public abstract static TClass            Create( ReadOnlyMemory<byte>                                             data,   MimeType          mime, TMetaData? metaData );
     public abstract static TClass            Create( scoped in ReadOnlySpan<byte>                                     data,   MimeType          mime, TMetaData? metaData );
     public abstract static TClass            Create( string                                                           data,   MimeType          mime, TMetaData? metaData, Encoding? encoding = null );
-#endif
 }
 
 
 
 [SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
 public interface IFileMetaData<TClass, TID> : IFileMetaData<TID>, IComparable<TClass>, IEquatable<TClass>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     where TClass : IFileMetaData<TClass, TID>
 {
-#if NET8_0_OR_GREATER
     public abstract static TClass  Create( IFileMetaData<TID>                                        data );
     public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData<TID>? data );
-#endif
 }
 
 
@@ -140,15 +92,7 @@ public interface IFileMetaData<TClass, TID> : IFileMetaData<TID>, IComparable<TC
 [Serializable]
 [SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public abstract record FileMetaData<TClass, TID>( string? FileName, string? FileType, string? FileDescription = null, TID ID = default ) : BaseRecord<TClass, TID>( ID ), IFileMetaData<TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     where TClass : FileMetaData<TClass, TID>, IFileMetaData<TClass, TID>
 {
     [StringLength( UNICODE_CAPACITY )] public string? FileName        { get; init; } = FileName;
@@ -190,15 +134,7 @@ public abstract record FileMetaData<TClass, TID>( string? FileName, string? File
 [Serializable, SuppressMessage( "ReSharper", "InconsistentNaming" )]
 [SuppressMessage(               "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public abstract record FileData<TClass, TID, TMetaData>( MimeType MimeType, long FileSize, string Hash, string Payload, TMetaData? MetaData, TID ID = default ) : BaseRecord<TClass, TID>( ID ), IFileData<TID, TMetaData>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     where TClass : FileData<TClass, TID, TMetaData>, IFileData<TClass, TID, TMetaData>
     where TMetaData : class, IFileMetaData<TMetaData, TID>
 {
@@ -210,9 +146,7 @@ public abstract record FileData<TClass, TID, TMetaData>( MimeType MimeType, long
     public                                    TMetaData? MetaData { get; init; } = MetaData;
 
 
-#if NET8_0_OR_GREATER
     protected FileData( IFileData<TID, TMetaData> file ) : this( file, TMetaData.TryCreate( file.MetaData ) ) { }
-#endif
     protected FileData( IFileData<TID>               file,    TMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
     protected FileData( scoped in ReadOnlySpan<byte> content, MimeType   mime, TMetaData? metaData ) : this( mime, content.Length, Hashes.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
 
@@ -259,28 +193,11 @@ public static class FileDataExtensions
     }
 
     public static Stream GetStream<TID>( this IFileData<TID> data )
-#if NET8_0_OR_GREATER
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-        => data.GetStream( Encoding.Default );
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => data.GetStream( Encoding.Default );
 
 
     public static Stream GetStream<TID>( this IFileData<TID> data, Encoding encoding )
-#if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
     {
         OneOf<byte[], string> one = data.GetData();
 
@@ -291,16 +208,7 @@ public static class FileDataExtensions
 
 
     public static OneOf<byte[], string> GetData<TID>( this IFileData<TID> data )
-#if NET8_0_OR_GREATER
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-        => data.MimeType.IsText()
-               ? data.Payload
-               : data.Payload.TryGetData();
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => data.MimeType.IsText()
+                                                                                                                                                               ? data.Payload
+                                                                                                                                                               : data.Payload.TryGetData();
 }

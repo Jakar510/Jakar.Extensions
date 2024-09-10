@@ -94,11 +94,7 @@ public abstract class CollectionAlerts<T> : ObservableClass, ICollectionAlerts, 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         private void ThrowIfDisposed()
         {
-        #if NET7_0_OR_GREATER
         ObjectDisposedException.ThrowIf( _isDisposed, this );
-        #else
-            if ( _isDisposed ) { throw new ObjectDisposedException( nameof(Enumerator) ); }
-        #endif
         }
     }
     */

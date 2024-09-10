@@ -191,12 +191,7 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     }
     public async ValueTask SetBlockedPasswords( HttpClient client, Uri uri, CancellationToken token = default )
     {
-    #if NET6_0_OR_GREATER
         string content = await client.GetStringAsync( uri, token );
-    #else
-        string content = await client.GetStringAsync( uri );
-    #endif
-
         SetBlockedPasswords( content );
     }
     public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default ) => SetBlockedPasswords( await file.ReadAsync().AsString( token ) );

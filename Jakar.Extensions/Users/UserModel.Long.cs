@@ -10,13 +10,7 @@ namespace Jakar.Extensions.UserLong;
 
 
 [Serializable]
-public sealed record UserAddress :
-#if NET8_0_OR_GREATER
-    UserAddress<UserAddress, long>,
-    IAddress<UserAddress, long>
-#else
-    UserAddress<UserAddress, long>
-#endif
+public sealed record UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>
 {
     public UserAddress() { }
     public UserAddress( IAddress<long>               address ) : base( address ) { }
@@ -26,13 +20,7 @@ public sealed record UserAddress :
 
 
 [Serializable]
-public sealed record GroupModel :
-#if NET8_0_OR_GREATER
-    GroupModel<GroupModel, long>,
-    IGroupModel<GroupModel, long>
-#else
-    GroupModel<GroupModel, long>
-#endif
+public sealed record GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>
 {
     public GroupModel( string                          NameOfGroup, long? OwnerID, long? CreatedBy, long ID, string Rights ) : base( NameOfGroup, OwnerID, CreatedBy, ID, Rights ) { }
     public GroupModel( IGroupModel<long>               model ) : base( model ) { }
@@ -42,13 +30,7 @@ public sealed record GroupModel :
 
 
 [Serializable]
-public sealed record RoleModel :
-#if NET8_0_OR_GREATER
-    RoleModel<RoleModel, long>,
-    IRoleModel<RoleModel, long>
-#else
-    RoleModel<RoleModel, long>
-#endif
+public sealed record RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>
 {
     public RoleModel( string                         NameOfRole, string Rights, long ID ) : base( NameOfRole, Rights, ID ) { }
     public RoleModel( IRoleModel<long>               model ) : base( model ) { }
@@ -58,13 +40,7 @@ public sealed record RoleModel :
 
 
 [Serializable]
-public sealed class UserModel :
-#if NET8_0_OR_GREATER
-    UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>,
-    ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>
-#else
-    UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>
-#endif
+public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>
 {
     public UserModel() : base() { }
     public UserModel( IUserData<long> value ) : base( value ) { }
@@ -104,7 +80,7 @@ public sealed record FileData( MimeType MimeType, long FileSize, string Hash, st
 {
     public FileData( IFileData<long, FileMetaData> file ) : this( file, file.MetaData ) { }
     public FileData( IFileData<long>               file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, Hashes.GetHash( content ), Convert.ToBase64String( content ), metaData ) { }
+    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( string                        data,   MimeType mime, FileMetaData? metaData, Encoding? encoding = null ) => new(mime, data.Length, Hashes.Hash_SHA256( data, encoding ?? Encoding.Default ), data, metaData);

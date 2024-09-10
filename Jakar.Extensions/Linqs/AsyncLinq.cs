@@ -30,147 +30,136 @@ public static partial class AsyncLinq
     }
 
 
-    public static List<char> ToList( this    string                 sequence ) => ToList( sequence, sequence.Length );
-    public static List<T>    ToList<T>( this IReadOnlyCollection<T> sequence ) => ToList( sequence, sequence.Count );
-    public static List<T> ToList<T>( this IEnumerable<T> sequence, int count )
+    public static List<char>     ToList( this           string                        sequence ) => ToList( sequence, sequence.Length );
+    public static List<TElement> ToList<TElement>( this IReadOnlyCollection<TElement> sequence ) => ToList( sequence, sequence.Count );
+    public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int count )
     {
-        List<T> array = new(count);
-        foreach ( (int i, T item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
+        List<TElement> array = new(count);
+        foreach ( (int i, TElement item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
 
         return array;
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T[] GetArray<T>( int count )
+    public static TElement[] GetArray<TElement>( int count ) => count == 0
+                                                                    ? Array.Empty<TElement>()
+                                                                    : GC.AllocateUninitializedArray<TElement>( count );
+    public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int count )
     {
-        Guard.IsGreaterThanOrEqualTo( count, 0 );
-
-    #if NET6_0_OR_GREATER
-        return GC.AllocateUninitializedArray<T>( count );
-    #else
-        return new T[count];
-    #endif
-    }
-    public static async ValueTask<T[]> ToArray<T>( this IAsyncEnumerable<T> sequence, int count )
-    {
-        T[] array = GetArray<T>( count );
-        await foreach ( (int index, T? value) in sequence.Enumerate( 0 ) ) { array[index] = value; }
+        TElement[] array = GetArray<TElement>( count );
+        await foreach ( (int index, TElement? value) in sequence.Enumerate( 0 ) ) { array[index] = value; }
 
         return array;
     }
-    public static T[] ToArray<T>( IEnumerable<T> sequence )
-        where T : IEquatable<T>
+    public static TElement[] ToArray<TElement>( IEnumerable<TElement> sequence )
+        where TElement : IEquatable<TElement>
     {
         switch ( sequence )
         {
-            case List<T> list:
+            case List<TElement> list:
             {
-                T[] array = GetArray<T>( list.Count );
+                TElement[] array = GetArray<TElement>( list.Count );
                 list.CopyTo( array, 0 );
                 return array;
             }
 
-            case Collection<T> list:
+            case Collection<TElement> list:
             {
-                T[] array = GetArray<T>( list.Count );
+                TElement[] array = GetArray<TElement>( list.Count );
                 list.CopyTo( array, 0 );
                 return array;
             }
 
-            case T[] sourceArray:
+            case TElement[] sourceArray:
             {
-                T[] array = GetArray<T>( sourceArray.Length );
+                TElement[] array = GetArray<TElement>( sourceArray.Length );
                 Array.Copy( sourceArray, 0, array, 0, sourceArray.Length );
                 return array;
             }
 
-            case ImmutableArray<T> immutable:
+            case ImmutableArray<TElement> immutable:
             {
-                T[] array = GetArray<T>( immutable.Length );
+                TElement[] array = GetArray<TElement>( immutable.Length );
                 immutable.CopyTo( array, 0 );
                 return array;
             }
 
-            case IReadOnlyList<T> collection:
+            case IReadOnlyList<TElement> collection:
             {
-                T[] array = GetArray<T>( collection.Count );
+                TElement[] array = GetArray<TElement>( collection.Count );
                 for ( int i = 0; i < collection.Count; i++ ) { array[i] = collection[i]; }
 
                 return array;
             }
 
-            case IReadOnlyCollection<T> collection:
+            case IReadOnlyCollection<TElement> collection:
             {
-                T[] array = GetArray<T>( collection.Count );
-                foreach ( (int i, T item) in collection.Enumerate( 0 ) ) { array[i] = item; }
+                TElement[] array = GetArray<TElement>( collection.Count );
+                foreach ( (int i, TElement item) in collection.Enumerate( 0 ) ) { array[i] = item; }
 
                 return array;
             }
 
             default:
             {
-                using Buffer<T> builder = new Buffer<T>();
-                foreach ( T equatable in sequence ) { builder.Append( equatable ); }
+                using Buffer<TElement> builder = new Buffer<TElement>();
+                foreach ( TElement equatable in sequence ) { builder.Append( equatable ); }
 
                 return builder.Span.ToArray();
             }
         }
     }
-    public static char[] ToArray( this    string                 sequence ) => ToArray( sequence, sequence.Length );
-    public static T[]    ToArray<T>( this IReadOnlyCollection<T> sequence ) => ToArray( sequence, sequence.Count );
-    public static T[]    ToArray<T>( ICollection<T>              sequence ) => ToArray( sequence, sequence.Count );
-    public static T[] ToArray<T>( this IEnumerable<T> sequence, int count )
+    public static char[]     ToArray( this           string                        sequence ) => ToArray( sequence, sequence.Length );
+    public static TElement[] ToArray<TElement>( this IReadOnlyCollection<TElement> sequence ) => ToArray( sequence, sequence.Count );
+    public static TElement[] ToArray<TElement>( ICollection<TElement>              sequence ) => ToArray( sequence, sequence.Count );
+    public static TElement[] ToArray<TElement>( this IEnumerable<TElement> sequence, int count )
     {
-        T[] array = GetArray<T>( count );
-        foreach ( (int i, T item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
+        TElement[] array = GetArray<TElement>( count );
+        foreach ( (int i, TElement item) in sequence.Enumerate( 0 ) ) { array[i] = item; }
 
         return array;
     }
     public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
     {
-    #if NET6_0_OR_GREATER
-        TElement[] array = GC.AllocateUninitializedArray<TElement>( source.Count );
-    #else
-        TElement[] array = new TElement[source.Count];
-    #endif
+        TElement[] array = GetArray<TElement>( source.Count );
 
         for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
 
         return array;
     }
-    public static TResult[] ToArray<T, TResult>( this IEnumerable<T> sequence, Func<T, TResult> func )
+    public static TResult[] ToArray<TElement, TResult>( this IEnumerable<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
         using Buffer<TResult> buffer = new Buffer<TResult>();
-        foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
+        foreach ( TElement item in sequence ) { buffer.Append( func( item ) ); }
 
         return buffer.Span.ToArray();
     }
-    public static TResult[] ToArray<T, TResult>( this ReadOnlySpan<T> sequence, Func<T, TResult> func )
+    public static TResult[] ToArray<TElement, TResult>( this ReadOnlySpan<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
         using Buffer<TResult> buffer = new Buffer<TResult>();
-        foreach ( T item in sequence ) { buffer.Append( func( item ) ); }
+        foreach ( TElement item in sequence ) { buffer.Append( func( item ) ); }
 
         return buffer.Span.ToArray();
     }
 
 
-    public static T[] Sorted<T>( this T[] array )
-        where T : IComparable<T>
+    public static TElement[] Sorted<TElement>( this TElement[] array )
+        where TElement : IComparable<TElement>
     {
         Array.Sort( array );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, IComparer<T> comparer )
-        where T : IComparable<T>
+    public static TElement[] Sorted<TElement>( this TElement[] array, IComparer<TElement> comparer )
+        where TElement : IComparable<TElement>
     {
         Array.Sort( array, comparer );
         return array;
     }
-    public static T[] Sorted<T>( this T[] array, Comparison<T> comparer )
-        where T : IComparable<T>
+    public static TElement[] Sorted<TElement>( this TElement[] array, Comparison<TElement> comparer )
+        where TElement : IComparable<TElement>
     {
         Array.Sort( array, comparer );
         return array;

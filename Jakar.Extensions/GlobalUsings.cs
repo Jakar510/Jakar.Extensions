@@ -60,7 +60,6 @@ global using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
 /*
-#if NET6_0_OR_GREATER
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
@@ -70,5 +69,4 @@ global using MsJsonExtensionDataAttribute = System.Text.Json.Serialization.JsonE
 global using MsJsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using MsJsonSerializer = System.Text.Json.JsonSerializer;
 global using MsJsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
-#endif
 */

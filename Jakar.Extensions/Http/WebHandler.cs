@@ -74,10 +74,7 @@ public readonly record struct WebHandler : IDisposable
     {
         await using MemoryStream stream = await AsStream( response );
         using StreamReader       sr     = new StreamReader( stream, Encoding );
-    #if NET6_0_OR_GREATER
-        await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
+        await using JsonReader   reader = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
@@ -85,12 +82,8 @@ public readonly record struct WebHandler : IDisposable
     {
         await using MemoryStream stream = await AsStream( response );
         using StreamReader       sr     = new StreamReader( stream, Encoding );
-    #if NET6_0_OR_GREATER
-        await
-        #endif
-            using JsonReader reader = new JsonTextReader( sr );
-
-        TResult? result = serializer.Deserialize<TResult>( reader );
+        await using JsonReader   reader = new JsonTextReader( sr );
+        TResult?                 result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
@@ -146,15 +139,9 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
     {
         response.EnsureSuccessStatusCode();
-        HttpContent content = response.Content;
-
-    #if NETSTANDARD2_1
-        await using Stream stream = await content.ReadAsStreamAsync();
-    #else
-        await using Stream stream = await content.ReadAsStreamAsync( Token );
-    #endif
-
-        MemoryStream buffer = new MemoryStream( (int)stream.Length );
+        HttpContent        content = response.Content;
+        await using Stream stream  = await content.ReadAsStreamAsync( Token );
+        MemoryStream       buffer  = new MemoryStream( (int)stream.Length );
         await stream.CopyToAsync( buffer, Token );
 
         buffer.Seek( 0, SeekOrigin.Begin );
@@ -165,17 +152,11 @@ public readonly record struct WebHandler : IDisposable
     {
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
-
-    #if NETSTANDARD2_1
-        return await content.ReadAsStringAsync();
-    #else
         return await content.ReadAsStringAsync( Token );
-    #endif
     }
 
 
 /*
-#if NET6_0_OR_GREATER
 
     public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonTypeInfo<TResult> info )
     {
@@ -185,7 +166,6 @@ public readonly record struct WebHandler : IDisposable
         return result ?? throw new NullReferenceException( nameof(JsonSerializer.DeserializeAsync) );
     }
 
-#endif
 */
 
 
@@ -205,8 +185,6 @@ public readonly record struct WebHandler : IDisposable
     public       ValueTask<WebResponse<string>>               AsString()                                   => WebResponse<string>.Create( this, AsString );
 
 
-#if NET6_0_OR_GREATER
     public HttpVersionPolicy  VersionPolicy { get => _request.VersionPolicy; set => _request.VersionPolicy = value; }
     public HttpRequestOptions Options       => _request.Options;
-#endif
 }

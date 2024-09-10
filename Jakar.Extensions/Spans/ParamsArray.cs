@@ -101,7 +101,6 @@ public readonly ref struct ParamsArray
 
     [Pure] public static ParamsArray Create( params object?[] args ) => new ReadOnlySpan<object?>( args );
 
-#if NET6_0_OR_GREATER
     public static implicit operator ParamsArray( List<object?> args ) => new(args);
     [Pure]
     public static ParamsArray Create( List<object?> args )
@@ -109,7 +108,6 @@ public readonly ref struct ParamsArray
         ReadOnlySpan<object?> span = CollectionsMarshal.AsSpan( args );
         return MemoryMarshal.CreateReadOnlySpan( ref MemoryMarshal.GetReference( span ), span.Length );
     }
-#endif
 }
 
 
@@ -165,9 +163,7 @@ public readonly ref struct ParamsArray<T>
     [Pure] public static ParamsArray<T> Create( params T[] args ) => new(args);
 
 
-#if NET6_0_OR_GREATER
     public static implicit operator ParamsArray<T>( List<T> args ) => Create( args );
 
     [Pure] public static ParamsArray<T> Create( List<T> args ) => new(CollectionsMarshal.AsSpan( args ));
-#endif
 }

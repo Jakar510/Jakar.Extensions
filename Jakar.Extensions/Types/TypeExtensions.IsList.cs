@@ -3,21 +3,9 @@
 
 public static partial class TypeExtensions
 {
-    public static bool IsList(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this Type type
-    ) => type.HasInterface<IList>() || type.HasInterface( typeof(IList<>) );
+    public static bool IsList( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface<IList>() || type.HasInterface( typeof(IList<>) );
 
-    public static bool IsList(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type  classType,
-        [NotNullWhen( true )] out Type? itemType,
-        [NotNullWhen( true )] out bool? isBuiltInType
-    )
+    public static bool IsList( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType )
     {
         if ( classType.IsList( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -31,13 +19,7 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsList(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type  propertyType,
-        [NotNullWhen( true )] out Type? itemType
-    )
+    public static bool IsList( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type propertyType, [NotNullWhen( true )] out Type? itemType )
     {
         if ( propertyType.IsList( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -49,13 +31,7 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsList(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type                 classType,
-        [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes
-    )
+    public static bool IsList( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
     {
         if ( classType.IsGenericType && classType.IsList() )
         {

@@ -10,9 +10,7 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat( 100 );
 
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(WrapException) )]
-#endif
     public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
         where T : Exception
     {
@@ -57,12 +55,6 @@ public static class ConsoleExtensions
     public static string GetError( this   string self, string start = ERROR,       char c = '-', int padding = 40 ) => $"{start.Wrapper( c, padding )}  {self}";
 
 
-    /* Unmerged change from project 'Jakar.Extensions (netstandard2.1)'
-    Before:
-        public static string GetCount( this    string         self, int    count,               char    c      = '-', int    length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
-    After:
-        public static string GetCount(this string         self, int    count,               char    c      = '-', int    length  = 80 ) => $"{c.Repeat(length)}   {self}.Count: => {count}";
-    */
     public static string GetCount( this    string         self, int  count,   char c      = '-', int length = 80 ) => $"{c.Repeat( length )}   {self}.Count: => {count}";
     public static string GetCount( this    ICollection    self, char c = '-', int  length = 80 ) => $"{c.Repeat( length )}   {self.GetType().Name}.Count: => {self.Count}";
     public static string GetCount<T>( this ICollection<T> self, char c = '-', int  length = 80 ) => $"{c.Repeat( length )}   {self.GetType().Name}.Count: => {self.Count}";
@@ -99,69 +91,6 @@ public static class ConsoleExtensions
     }
 
 
-#if NETSTANDARD2_1
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Span<char> self, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine( $"{caller} '{self.ToString()}'" );
-        Debug.WriteLine( $"{caller} '{self.ToString()}'" );
-    }
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine( $"{caller} '{self.ToString()}'" );
-        Debug.WriteLine( $"{caller} '{self.ToString()}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this string self, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine( $"{caller} '{self}'" );
-        Debug.WriteLine( $"{caller} '{self}'" );
-    }
-
-
-    [Conditional( "DEBUG" )] public static void WriteToDebug( this StringBuilder self, [CallerMemberName] string? caller = default ) => self.ToString().WriteToDebug( caller );
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ValueStringBuilder self, [CallerMemberName] string? caller = default )
-    {
-        string str = self.Span.ToString();
-        Console.WriteLine( $"{caller} '{str}'" );
-        Debug.WriteLine( $"{caller} '{str}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Buffer<char> self, [CallerMemberName] string? caller = default )
-    {
-        string str = self.Span.ToString();
-        Console.WriteLine( $"{caller} '{str}'" );
-        Debug.WriteLine( $"{caller} '{str}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this object self, [CallerMemberName] string? caller = default )
-    {
-        Console.WriteLine( $"{caller} '{self}'" );
-        Debug.WriteLine( $"{caller} '{self}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug<T>( this T self, [CallerMemberName] string? caller = default )
-        where T : struct
-    {
-        Console.WriteLine( $"{caller} '{self}'" );
-        Debug.WriteLine( $"{caller} '{self}'" );
-    }
-
-
-#else
     [Conditional( "DEBUG" )]
     public static void WriteToDebug( this Span<char> self, [CallerArgumentExpression( "self" )] string? variable = default, [CallerMemberName] string? caller = default )
     {
@@ -218,6 +147,4 @@ public static class ConsoleExtensions
         Console.WriteLine( $"{caller} -> {variable} '{self}'" );
         Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
     }
-
-#endif
 }

@@ -229,17 +229,10 @@ public static partial class AsyncLinq
     }
     public static async Task<IReadOnlyCollection<TElement>> WhenAllParallelAsync<TElement>( IAsyncEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask<TElement>> action, CancellationToken token, int? maxDegreeOfParallelism = default, TaskScheduler? scheduler = default )
     {
-        ConcurrentBag<TElement>? results = new ConcurrentBag<TElement>();
-
+        ConcurrentBag<TElement>?      results = [];
         ExecutionDataflowBlockOptions options = new ExecutionDataflowBlockOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism ?? DataflowBlockOptions.Unbounded };
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
-
-        async Task AwaitItem( TElement item )
-        {
-            TElement result = await action( item, token );
-            results.Add( result );
-        }
 
         ActionBlock<TElement> block = new ActionBlock<TElement>( AwaitItem, options );
 
@@ -248,6 +241,12 @@ public static partial class AsyncLinq
         block.Complete();
         await block.Completion;
         return results;
+
+        async Task AwaitItem( TElement item )
+        {
+            TElement result = await action( item, token );
+            results.Add( result );
+        }
     }
     public static async ValueTask ForEachAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> action )
     {
@@ -273,16 +272,25 @@ public static partial class AsyncLinq
     /// <typeparam name="TElement"> </typeparam>
     public static void ForEach<TElement>( this IEnumerable<TElement> source, Action<TElement> action )
     {
-    #if NET6_0_OR_GREATER
-        if ( source is List<TElement> list )
+        switch ( source )
         {
-            foreach ( TElement x in CollectionsMarshal.AsSpan( list ) ) { action( x ); }
+            case List<TElement> list:
+                ForEach( CollectionsMarshal.AsSpan( list ), action );
+                return;
 
-            return;
+            case TElement[] array:
+                ForEach( array.AsSpan(), action );
+                return;
+
+            default:
+                foreach ( TElement item in source ) { action( item ); }
+
+                return;
         }
+    }
 
-    #endif
-
+    public static void ForEach<TElement>( this ReadOnlySpan<TElement> source, Action<TElement> action )
+    {
         foreach ( TElement item in source ) { action( item ); }
     }
 

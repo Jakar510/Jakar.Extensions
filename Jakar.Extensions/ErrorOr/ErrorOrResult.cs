@@ -11,20 +11,12 @@ namespace Jakar.Extensions;
 [Serializable, DefaultValue( nameof(Empty) ), SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public readonly record struct ErrorOrResult( in bool? Value, in Error[]? Errors )
 {
-    public static ErrorOrResult Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(default, null); }
+    public static ErrorOrResult Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(null, null); }
 
 
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Errors) ), MemberNotNullWhen( false, nameof(Value) )]
-#endif
-    public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out Error[]? _ ) is false; }
-
-
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Errors) )]
-#endif
-    public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out Error[]? _ ); }
-    public bool Passed { [MethodImpl(   MethodImplOptions.AggressiveInlining )] get => Value is true; }
+    [MemberNotNullWhen( true, nameof(Errors) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Errors?.Length is > 0; }
+    [MemberNotNullWhen( true, nameof(Value) )]  public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
+    [MemberNotNullWhen( true, nameof(Value) )]  public bool Passed    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is true; }
 
 
     public Status GetStatus() => Errors.GetStatus();
@@ -101,16 +93,8 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
     public static ErrorOrResult<T> Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(default, null); }
 
 
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Errors) ), MemberNotNullWhen( false, nameof(Value) )]
-#endif
-    public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
-
-
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Errors) )]
-#endif
-    public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
+    [MemberNotNullWhen( true, nameof(Errors) ), MemberNotNullWhen( false, nameof(Value) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Errors) )] public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
 
 
     public Status GetStatus() => Errors.GetStatus();

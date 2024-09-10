@@ -57,13 +57,5 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private void ThrowIfDisposed()
-    {
-    #if NET7_0_OR_GREATER
-        ObjectDisposedException.ThrowIf( _isDisposed, this );
-    #else
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
-    #endif
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, this );
 }

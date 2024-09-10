@@ -223,22 +223,11 @@ public static class Guids
     }
 
 
-#if NET7_0_OR_GREATER
     public static Guid AsGuid( this Int128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-
-    #if NET7_0
-        Span<char> chars = stackalloc char[SIZE * 2];
-
-        if ( value.TryFormat( chars, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
-
-        for ( int i = 0; i < bytesWritten; i++ ) { span[i] = (byte)chars[i]; }
-
-    #else
         if ( value.TryFormat( span, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
-    #endif
 
         return new Guid( span );
     }
@@ -246,17 +235,7 @@ public static class Guids
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-
-    #if NET7_0
-        Span<char> chars = stackalloc char[SIZE * 2];
-
-        if ( value.TryFormat( chars, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
-
-        for ( int i = 0; i < bytesWritten; i++ ) { span[i] = (byte)chars[i]; }
-
-    #else
         if ( value.TryFormat( span, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
-    #endif
 
         return new Guid( span );
     }
@@ -278,5 +257,4 @@ public static class Guids
                    ? new UInt128( BitConverter.ToUInt64( span[..SIZE] ), BitConverter.ToUInt64( span[SIZE..] ) )
                    : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
     }
-#endif
 }

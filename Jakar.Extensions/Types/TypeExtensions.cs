@@ -32,9 +32,7 @@ public static partial class TypeExtensions
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-#if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(Construct) )]
-#endif
     public static object? Construct( this Type target, params Type[] args )
     {
         Type type = target.MakeGenericType( args );

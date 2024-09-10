@@ -17,9 +17,9 @@ public sealed class ExceptionDetails
 
 
     public ExceptionDetails() { }
-#if NET6_0_OR_GREATER
+
+
     [RequiresUnreferencedCode( nameof(ExceptionDetails) )]
-#endif
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
         Message = e.Message;

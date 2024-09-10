@@ -168,69 +168,39 @@ public static partial class Spans
     }
     public static Span<T> Create<T>( T arg0 )
     {
-    #if NETSTANDARD2_1
-        Span<T> span = new T[1] { arg0 };
-    #else
         Span<T> span = [arg0];
 
-    #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
     public static Span<T> Create<T>( T arg0, T arg1 )
     {
-    #if NETSTANDARD2_1
-        Span<T> span = new T[2] { arg0, arg1 };
-    #else
         Span<T> span = [arg0, arg1];
-
-    #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
     public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
     {
-    #if NETSTANDARD2_1
-        Span<T> span = new T[3] { arg0, arg1, arg2 };
-    #else
         Span<T> span = [arg0, arg1, arg2];
-
-    #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
     public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
     {
-    #if NETSTANDARD2_1
-        Span<T> span = new T[4] { arg0, arg1, arg2, arg3 };
-    #else
         Span<T> span = [arg0, arg1, arg2, arg3];
-
-    #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
     public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
     {
-    #if NETSTANDARD2_1
-        Span<T> span = new T[5] { arg0, arg1, arg2, arg3, arg4 };
-    #else
         Span<T> span = [arg0, arg1, arg2, arg3, arg4];
-
-    #endif
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
 
 
-#if NET7_0_OR_GREATER
     [Pure]
     public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span )
         where TNumber : struct, INumber<TNumber> => Enumerate( span, TNumber.Zero );
     [Pure]
     public static EnumerateEnumerator<T, TNumber> Enumerate<T, TNumber>( this ReadOnlySpan<T> span, TNumber index )
         where TNumber : struct, INumber<TNumber> => new(span, index);
-#endif
 
-
-#if NETSTANDARD2_1
-    public static void Sort<T>( this Span<T> span, Comparison<T> comparison ) => QuickSort( ref span, comparison );
-#endif
 
     public static void QuickSort<T>( scoped ref Span<T> span, Comparison<T> comparison )
     {

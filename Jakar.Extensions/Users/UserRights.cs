@@ -53,15 +53,10 @@ public static class RightsExtensions
 public ref struct UserRights<TEnum>
     where TEnum : struct, Enum
 {
-    public const     char   VALID   = '+';
-    public const     char   INVALID = '-';
-    private readonly char[] _rights = ArrayPool<char>.Shared.Rent( _enumValues.Length );
-
-#if NET6_0_OR_GREATER
+    public const            char    VALID       = '+';
+    public const            char    INVALID     = '-';
     private static readonly TEnum[] _enumValues = Enum.GetValues<TEnum>();
-#else
-    private static readonly TEnum[] _enumValues = (TEnum[])Enum.GetValues( typeof(TEnum) );
-#endif
+    private readonly        char[]  _rights     = ArrayPool<char>.Shared.Rent( _enumValues.Length );
 
 
     internal readonly Span<char>        Span    => _rights;

@@ -807,12 +807,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     {
         await using FileStream file   = OpenRead();
         using var              stream = new StreamReader( file, FileEncoding );
-
-    #if NET7_0_OR_GREATER
         return await stream.ReadToEndAsync( token );
-    #else
-        return await stream.ReadToEndAsync();
-    #endif
     }
 
     async ValueTask<T> IAsyncReadHandler.AsJson<T>()
@@ -1146,7 +1141,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
 
-#if NET6_0_OR_GREATER
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
     public ValueTask<string> HashAsync_MD5() => HashAsync( MD5.Create() );
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
@@ -1169,5 +1163,4 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             return BitConverter.ToString( hash );
         }
     }
-#endif
 }

@@ -16,15 +16,7 @@ public static class UserData
 
 
     public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
-#if NET8_0_OR_GREATER
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    #elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-    #elif NET6_0
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-    #else
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-    #endif
         where TGroupModel : IGroupModel<TID>
         where TRoleModel : IRoleModel<TID>
         where TAddress : IAddress<TID>
@@ -73,21 +65,13 @@ public static class UserData
 
         if ( HasFlag( types, ClaimType.Group ) )
         {
-            foreach ( TGroupModel record in model.Groups
-                                              #if NET6_0_OR_GREATER
-                                                 .AsSpan()
-                 #endif
-                    ) { claims.Add( ClaimType.Group.ToClaim( record.NameOfGroup, issuer ) ); }
+            foreach ( TGroupModel record in model.Groups.AsSpan() ) { claims.Add( ClaimType.Group.ToClaim( record.NameOfGroup, issuer ) ); }
         }
 
 
         if ( HasFlag( types, ClaimType.Role ) )
         {
-            foreach ( TRoleModel record in model.Roles
-                                             #if NET6_0_OR_GREATER
-                                                .AsSpan()
-                 #endif
-                    ) { claims.Add( ClaimType.Role.ToClaim( record.NameOfRole, issuer ) ); }
+            foreach ( TRoleModel record in model.Roles.AsSpan() ) { claims.Add( ClaimType.Role.ToClaim( record.NameOfRole, issuer ) ); }
         }
 
         return [.. claims.Span];

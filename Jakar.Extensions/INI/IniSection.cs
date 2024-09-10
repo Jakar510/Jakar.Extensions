@@ -48,9 +48,7 @@ public partial class IniConfig
         }
 
 
-    #if NET6_0_OR_GREATER
         [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    #endif
         public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
         {
             Debug.Assert( destination.Length > Length );

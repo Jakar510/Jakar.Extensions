@@ -8,10 +8,6 @@ using Microsoft.Extensions.Configuration;
 namespace Jakar.Extensions;
 
 
-#if NET6_0_OR_GREATER
-
-
-
 public interface IDataProtectorProvider
 {
     public IDataProtector            GetProtector();
@@ -270,4 +266,3 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         await output.WriteAsync( result );
     }
 }
-#endif

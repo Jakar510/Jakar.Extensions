@@ -12,15 +12,7 @@ public record JsonModelRecord : ObservableRecord, JsonModels.IJsonModel
 [Serializable]
 public abstract record JsonModelRecord<TRecord, TID> : ObservableRecord<TRecord, TID>
     where TRecord : JsonModelRecord<TRecord, TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
     protected JsonModelRecord() : base() { }
     protected JsonModelRecord( TID ID ) : base( ID ) { }

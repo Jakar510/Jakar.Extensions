@@ -18,13 +18,6 @@ public static class PathExtensions
 
         return Path.Combine( results );
     }
-#if NETSTANDARD2_1
-    public static string Combine( this string path, params string[] subFolders )
-    {
-        ReadOnlySpan<string> span = subFolders.AsSpan();
-        return Combine( path, span );
-    }
-#endif
 
 
     public static string Combine( this    DirectoryInfo outputDirectory, in     string   fileName ) => Path.Combine( outputDirectory.FullName, fileName );

@@ -12,18 +12,11 @@ public static partial class Enums
     /// <typeparam name="TEnum"> </typeparam>
     /// <typeparam name="TValue"> </typeparam>
     /// <returns> </returns>
-#if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetEnumNamedValues) )]
-#endif
     public static FrozenDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>()
         where TEnum : struct, Enum
     {
-    #if NET6_0_OR_GREATER
         IEnumerable<TValue> values = Enum.GetValues<TEnum>().Cast<TValue>();
-    #else
-        IEnumerable<TValue> values = Enum.GetValues( typeof(TEnum) ).Cast<TValue>();
-    #endif
-
         return values.ToFrozenDictionary( KeySelector, ElementSelector );
 
         static string KeySelector( TValue item ) => Enum.GetName( typeof(TEnum), item ?? throw new ArgumentNullException( nameof(item) ) ) ?? throw new NullReferenceException( nameof(item) );
@@ -36,9 +29,7 @@ public static partial class Enums
         where TEnum : Enum => dictionary.First( pair => pair.Key == value.ToString() ).Value;
 
 
-#if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(GetEnumValue) )]
-#endif
     public static TValue GetEnumValue<TValue, TEnum>( this TEnum value )
         where TEnum : struct, Enum => GetEnumNamedValues<TEnum, TValue>().First( pair => pair.Key == value.ToString() ).Value;
 }

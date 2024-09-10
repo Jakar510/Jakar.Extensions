@@ -152,11 +152,7 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
     protected internal void InternalAdd( scoped in ReadOnlySpan<T> values )
     {
-    #if NET8_0_OR_GREATER
         buffer.AddRange( values );
-    #else
-        buffer.Add( values );
-    #endif
         Reset();
     }
 
@@ -453,8 +449,6 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-#if NET6_0_OR_GREATER
     public ReadOnlySpan<T> AsSpan()                          => CollectionsMarshal.AsSpan( buffer );
-    public             void            EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
-#endif
+    public void            EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
 }

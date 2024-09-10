@@ -318,9 +318,7 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET7_0_OR_GREATER
     [RequiresDynamicCode( nameof(ArrayExtensions.GetInternalArray) )]
-#endif
     public ValueStringBuilder AppendJoin( char separator, IEnumerable<string> enumerable )
     {
         ReadOnlySpan<string> span = enumerable.GetInternalArray();
@@ -372,9 +370,7 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public ValueStringBuilder AppendJoin<T>( char separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
     {
@@ -394,9 +390,7 @@ public ref struct ValueStringBuilder
         return this;
     }
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
     {
@@ -416,9 +410,7 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
     {
@@ -436,9 +428,8 @@ public ref struct ValueStringBuilder
         return this;
     }
 
-#if NET6_0_OR_GREATER
+
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
         where T : ISpanFormattable
     {
@@ -457,9 +448,7 @@ public ref struct ValueStringBuilder
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public ValueStringBuilder AppendSpanFormattable<T>( T value, scoped in ReadOnlySpan<char> format, IFormatProvider? provider = default )
         where T : ISpanFormattable
     {
@@ -674,7 +663,6 @@ public ref struct ValueStringBuilder
 
             if ( s == null )
             {
-            #if NET6_0_OR_GREATER
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -687,7 +675,7 @@ public ref struct ValueStringBuilder
                     // Continue to parse other characters.
                     continue;
                 }
-            #endif
+
 
                 // Otherwise, fallback to trying IFormattable or calling ToString.
                 if ( arg is IFormattable formattableArg )
@@ -917,7 +905,6 @@ public ref struct ValueStringBuilder
 
             if ( s == null )
             {
-            #if NET6_0_OR_GREATER
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
@@ -930,7 +917,7 @@ public ref struct ValueStringBuilder
                     // Continue to parse other characters.
                     continue;
                 }
-            #endif
+
 
                 // Otherwise, fallback to trying IFormattable or calling ToString.
                 if ( arg is IFormattable formattableArg )

@@ -27,10 +27,7 @@ public sealed class MethodDetails
 
 
     public MethodDetails() { }
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodDetails) )]
-#endif
-    public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
+    [RequiresUnreferencedCode( nameof(MethodDetails) )] public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
     public MethodDetails( MethodBase method )
     {
         DeclaringType       = method.MethodClass();

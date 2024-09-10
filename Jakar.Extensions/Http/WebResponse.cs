@@ -67,10 +67,7 @@ public readonly record struct WebResponse<T>
     }
 
 
-#if NET6_0_OR_GREATER
-    [MemberNotNullWhen( true, nameof(Payload) )]
-#endif
-    public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest && Payload is not null;
+    [MemberNotNullWhen( true, nameof(Payload) )] public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest && Payload is not null;
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode() ) { return; }
@@ -223,25 +220,15 @@ public readonly record struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, CancellationToken token )
     {
-    #if NETSTANDARD2_1
-        await using Stream? stream = await response.Content.ReadAsStreamAsync();
-    #else
         await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
-    #endif
-
-        string error;
+        string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader = new StreamReader( stream );
-
-        #if NET7_0_OR_GREATER
-            string errorMessage = await reader.ReadToEndAsync( token );
-        #else
-            string errorMessage = await reader.ReadToEndAsync();
-        #endif
+            using StreamReader reader       = new StreamReader( stream );
+            string             errorMessage = await reader.ReadToEndAsync( token );
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
 
@@ -252,25 +239,15 @@ public readonly record struct WebResponse<T>
     }
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
-    #if NETSTANDARD2_1
-        await using Stream? stream = await response.Content.ReadAsStreamAsync();
-    #else
         await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
-    #endif
-
-        string error;
+        string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader = new StreamReader( stream );
-
-        #if NET7_0_OR_GREATER
-            string errorMessage = await reader.ReadToEndAsync( token );
-        #else
-            string errorMessage = await reader.ReadToEndAsync();
-        #endif
+            using StreamReader reader       = new StreamReader( stream );
+            string             errorMessage = await reader.ReadToEndAsync( token );
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response, e ); }
 

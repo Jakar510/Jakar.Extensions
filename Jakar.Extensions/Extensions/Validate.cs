@@ -40,11 +40,8 @@ public static partial class Validate
     public static bool IsIPAddress( this ReadOnlySpan<char> value ) => value.ParseIPAddress() is not null;
 
 
-    public static bool IsEmailAddress( this string value ) => Re.Email.IsMatch( value );
-
-#if NET7_0_OR_GREATER
+    public static bool IsEmailAddress( this string             value ) => Re.Email.IsMatch( value );
     public static bool IsEmailAddress( this ReadOnlySpan<char> value ) => Re.Email.IsMatch( value );
-#endif
 
 
     public static bool IsValidPort( this string             value ) => int.TryParse( value, out int n ) && n.IsValidPort();

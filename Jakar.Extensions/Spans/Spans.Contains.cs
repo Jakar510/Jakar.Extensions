@@ -11,7 +11,6 @@ namespace Jakar.Extensions;
 /// </summary>
 public static partial class Spans
 {
-#if NET8_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool ContainsAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.ContainsAny( value );
@@ -35,53 +34,21 @@ public static partial class Spans
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static int LastIndexOfAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.LastIndexOfAnyExcept( value );
-#endif
 
 
     public static bool Contains( this Span<char>         span, scoped in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
     public static bool Contains( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
-    public static bool Contains<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        T value
-    )
+    public static bool Contains<T>( Span<T> span, T value )
         where T : IEquatable<T>
     {
-    #if NETSTANDARD2_1
-        foreach ( T item in span )
-        {
-            if ( item.Equals( value ) ) { return true; }
-        }
-
-        return false;
-    #else
         return span.Contains( value );
-    #endif
     }
-    public static bool Contains<T>(
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        T value
-    )
+    public static bool Contains<T>( ReadOnlySpan<T> span, T value )
         where T : IEquatable<T>
     {
-    #if NETSTANDARD2_1
-        foreach ( T item in span )
-        {
-            if ( item.Equals( value ) ) { return true; }
-        }
-
-        return false;
-    #else
         return span.Contains( value );
-    #endif
     }
 
 
@@ -115,22 +82,12 @@ public static partial class Spans
 
         if ( value.Length > span.Length ) { return false; }
 
-    #if NET6_0_OR_GREATER
         if ( value.Length == span.Length ) { return span.SequenceEqual( value, comparer ); }
-    #endif
 
         for ( int i = 0; i < span.Length || i + value.Length < span.Length; i++ )
         {
             ReadOnlySpan<T> raw = span.Slice( i, value.Length );
-
-        #if NET6_0_OR_GREATER
             if ( raw.SequenceEqual( value, comparer ) ) { return true; }
-        #else
-            for ( int j = 0; j < raw.Length; j++ )
-            {
-                if ( comparer.Equals( raw[j], value[j] ) ) { return true; }
-            }
-        #endif
         }
 
         return false;

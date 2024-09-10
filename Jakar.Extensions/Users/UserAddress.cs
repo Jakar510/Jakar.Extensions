@@ -4,26 +4,16 @@
 namespace Jakar.Extensions;
 
 
-#if NET8_0_OR_GREATER
 public interface IAddress<out TClass, TID> : IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public abstract static TClass Create( IAddress<TID> address );
 }
-#endif
 
 
 
 public interface IAddress<out TID> : IUniqueID<TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
     public            string? Address         { get; }
     public            string  City            { get; }
@@ -39,21 +29,9 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 [Serializable]
 public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress<TID>, JsonModels.IJsonModel
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-
-#if NET8_0_OR_GREATER
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
-#else
-    where TClass : UserAddress<TClass, TID>
-#endif
+
 {
     private bool                          _isPrimary;
     private IDictionary<string, JToken?>? _additionalData;
@@ -97,7 +75,7 @@ public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         get
         {
-            Span<char> span = [..Address];
+            Span<char> span = [..Address ?? string.Empty];
 
             for ( int i = 0; i < span.Length; i++ )
             {
@@ -201,22 +179,8 @@ public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress
 
 
 [Serializable]
-public sealed record UserAddress<TID>
-#if NET8_0_OR_GREATER
-    : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
-#else
-    : UserAddress<UserAddress<TID>, TID>
-#endif
-
-#if NET8_0_OR_GREATER
+public sealed record UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
     public UserAddress() { }
     public UserAddress( IAddress<TID>                    address ) : base( address ) { }

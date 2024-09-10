@@ -88,20 +88,16 @@ public static partial class Tasks
 
     public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
     {
-    #if NET6_0_OR_GREATER
         ParallelOptions options = new ParallelOptions
                                   {
-                                      CancellationToken = token,
+                                      CancellationToken      = token,
                                       MaxDegreeOfParallelism = Environment.ProcessorCount
                                   };
 
         await Parallel.ForEachAsync( funcs, options, ExecutorAsync );
+        return;
 
         static ValueTask ExecutorAsync( Func<CancellationToken, ValueTask> task, CancellationToken token ) => task( token );
-    #else
-        ValueTask[] tasks = funcs.ToArray( x => x( token ) );
-        await tasks.WhenAll();
-    #endif
     }
 
 
@@ -111,29 +107,24 @@ public static partial class Tasks
     /// <exception cref="AggregateException"> </exception>
     public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<Func<CancellationToken, ValueTask<TResult>>> funcs, CancellationToken token = default )
     {
-    #if NET8_0_OR_GREATER
         ParallelOptions options = new ParallelOptions
                                   {
-                                      CancellationToken = token,
+                                      CancellationToken      = token,
                                       MaxDegreeOfParallelism = Environment.ProcessorCount
                                   };
 
-        ConcurrentBag<TResult>? results = new ConcurrentBag<TResult>();
-        Func<CancellationToken, ValueTask<TResult>>[] tasks = funcs.ToArray();
+        ConcurrentBag<TResult>                        results = [];
+        Func<CancellationToken, ValueTask<TResult>>[] tasks   = funcs.ToArray();
         await Parallel.ForAsync( 0, tasks.Length, options, Executor );
 
         return results.ToArray();
 
-        async ValueTask Executor( int i, CancellationToken token )
+        async ValueTask Executor( int i, CancellationToken cancellationToken )
         {
-            Func<CancellationToken, ValueTask<TResult>> task = tasks[i];
-            TResult                                     result = await task( token );
+            Func<CancellationToken, ValueTask<TResult>> task   = tasks[i];
+            TResult                                     result = await task( cancellationToken );
             results.Add( result );
         }
-    #else
-        ValueTask<TResult>[] tasks = funcs.ToArray( x => x( token ) );
-        return await tasks.WhenAll();
-    #endif
     }
 
 
@@ -150,19 +141,9 @@ public static partial class Tasks
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TResult> AsTask<TResult>( this TResult           result ) => Task.FromResult( result );
 
 
-#if NETSTANDARD2_1
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          CancellationToken token )  => new(token.AsTask());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this CancellationToken token )  => new(token.AsTask<TResult>());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          Exception         e )      => new(e.AsTask());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this Exception         e )      => new(e.AsTask<TResult>());
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this TResult           result ) => new(result);
-
-#else
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this           CancellationToken token )  => ValueTask.FromCanceled( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this  CancellationToken token )  => ValueTask.FromCanceled<TResult>( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          CancellationToken token )  => ValueTask.FromCanceled( token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this CancellationToken token )  => ValueTask.FromCanceled<TResult>( token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask          AsValueTask( this          Exception         e )      => ValueTask.FromException( e );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this Exception         e )      => ValueTask.FromException<TResult>( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this    TResult           result ) => ValueTask.FromResult( result );
-
-#endif
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ValueTask<TResult> AsValueTask<TResult>( this TResult           result ) => ValueTask.FromResult( result );
 }

@@ -15,14 +15,9 @@ public class OneTimePassword<TApp>( string key )
     where TApp : IAppName
 {
     // ReSharper disable once StaticMemberInGenericType
-    protected static readonly string _issuer =
-    #if NET8_0_OR_GREATER
-        TApp.AppName;
-#else
-        typeof(TApp).Name;
-#endif
-    protected readonly byte[] _keyBytes   = Base32Encoding.ToBytes( key );
-    protected readonly string _secret_Key = key;
+    protected static readonly string _issuer     = TApp.AppName;
+    protected readonly        byte[] _keyBytes   = Base32Encoding.ToBytes( key );
+    protected readonly        string _secret_Key = key;
 
 
     public static OneTimePassword<TApp> Debug { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new(Randoms.GenerateToken());

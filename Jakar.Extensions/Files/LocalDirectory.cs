@@ -63,15 +63,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     public static LocalDirectory AppData( string subPath )
     {
-    #if __WINDOWS__
-        subPath = Environment.ExpandEnvironmentVariables($"%APPDATA%/{subPath}");
-    #elif __MACOS__
-        subPath = $"~/Library/{subPath}";
-    #elif __LINUX__
-        subPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), subPath);
-    #endif
+        if ( OperatingSystem.IsWindows() ) { subPath = $"%APPDATA%/{subPath}"; }
 
-        string path = Environment.ExpandEnvironmentVariables( subPath );
+        else if ( OperatingSystem.IsMacCatalyst() ) { subPath = $"~/Library/{subPath}"; }
+
+        else if ( OperatingSystem.IsMacOS() ) { subPath = $"~/Library/{subPath}"; }
+
+        else if ( OperatingSystem.IsLinux() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+
+        else if ( OperatingSystem.IsAndroid() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+
+        else if ( OperatingSystem.IsIOS() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+
+        string path = Path.GetFullPath( subPath );
         return path;
     }
     private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;

@@ -3,218 +3,34 @@
 
 public static partial class Spans
 {
-    public static Span<T> Trim<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start  = ClampStart( span, trimElement );
-        int length = ClampEnd( span, trimElement );
-        return span.Slice( start, length );
-    #else
-        return span.Trim( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> Trim<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start  = ClampStart( span, trimElement );
-        int length = ClampEnd( span, trimElement );
-        return span.Slice( start, length );
-    #else
-        return span.Trim( trimElement );
-    #endif
-    }
-    public static Span<T> Trim<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start  = ClampStart( span, trimElement );
-        int length = ClampEnd( span, trimElement );
-        return span.Slice( start, length );
-    #else
-        return span.Trim( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> Trim<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start  = ClampStart( span, trimElement );
-        int length = ClampEnd( span, trimElement );
-        return span.Slice( start, length );
-    #else
-        return span.Trim( trimElement );
-    #endif
-    }
+    public static Span<T> Trim<T>( scoped in Span<T> span, T trimElement )
+        where T : IEquatable<T> => span.Trim( trimElement );
+    public static ReadOnlySpan<T> Trim<T>( scoped in ReadOnlySpan<T> span, T trimElement )
+        where T : IEquatable<T> => span.Trim( trimElement );
+    public static Span<T> Trim<T>( scoped in Span<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.Trim( trimElement );
+    public static ReadOnlySpan<T> Trim<T>( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.Trim( trimElement );
 
 
-    public static Span<T> TrimEnd<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int length = ClampEnd( span, trimElement );
-        return span[.. length];
-    #else
-        return span.TrimEnd( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> TrimEnd<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int length = ClampEnd( span, trimElement );
-        return span[.. length];
-    #else
-        return span.TrimEnd( trimElement );
-    #endif
-    }
-    public static Span<T> TrimEnd<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int length = ClampEnd( span, trimElement );
-        return span[.. length];
-    #else
-        return span.TrimEnd( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> TrimEnd<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int length = ClampEnd( span, trimElement );
-        return span[.. length];
-    #else
-        return span.TrimEnd( trimElement );
-    #endif
-    }
+    public static Span<T> TrimEnd<T>( scoped in Span<T> span, T trimElement )
+        where T : IEquatable<T> => span.TrimEnd( trimElement );
+    public static ReadOnlySpan<T> TrimEnd<T>( scoped in ReadOnlySpan<T> span, T trimElement )
+        where T : IEquatable<T> => span.TrimEnd( trimElement );
+    public static Span<T> TrimEnd<T>( scoped in Span<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.TrimEnd( trimElement );
+    public static ReadOnlySpan<T> TrimEnd<T>( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.TrimEnd( trimElement );
 
 
-    public static Span<T> TrimStart<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start = ClampStart( span, trimElement );
-        return span[start..];
-    #else
-        return span.TrimStart( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> TrimStart<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        T trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start = ClampStart( span, trimElement );
-        return span[start..];
-    #else
-        return span.TrimStart( trimElement );
-    #endif
-    }
-    public static Span<T> TrimStart<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            Span<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start = ClampStart( span, trimElement );
-        return span[start..];
-    #else
-        return span.TrimStart( trimElement );
-    #endif
-    }
-    public static ReadOnlySpan<T> TrimStart<T>(
-
-    #if NETSTANDARD2_1
-        this
-        #endif
-            ReadOnlySpan<T> span,
-        scoped in ReadOnlySpan<T> trimElement
-    )
-        where T : IEquatable<T>
-    {
-    #if NETSTANDARD2_1
-        int start = ClampStart( span, trimElement );
-        return span[start..];
-    #else
-        return span.TrimStart( trimElement );
-    #endif
-    }
+    public static Span<T> TrimStart<T>( scoped in Span<T> span, T trimElement )
+        where T : IEquatable<T> => span.TrimStart( trimElement );
+    public static ReadOnlySpan<T> TrimStart<T>( scoped in ReadOnlySpan<T> span, T trimElement )
+        where T : IEquatable<T> => span.TrimStart( trimElement );
+    public static Span<T> TrimStart<T>( scoped in Span<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.TrimStart( trimElement );
+    public static ReadOnlySpan<T> TrimStart<T>( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> trimElement )
+        where T : IEquatable<T> => span.TrimStart( trimElement );
 
 
     public static int ClampStart<T>( this ReadOnlySpan<T> span, T trimElement )

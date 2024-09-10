@@ -2,13 +2,6 @@
 // 05/03/2022  9:01 AM
 
 
-#if NETSTANDARD2_1
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-#endif
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -21,42 +14,33 @@ public partial class WebRequester
 {
     public ref struct Builder( IHostInfo value )
     {
-        private readonly WebHeaders                 _headers                      = [];
-        private readonly IHostInfo                  _hostInfo                     = value;
-        private          Encoding                   _encoding                     = Encoding.Default;
-        private          bool?                      _useProxy                     = default;
-        private          IWebProxy?                 _proxy                        = default;
-        private          bool?                      _allowAutoRedirect            = default;
-        private          int?                       _maxAutomaticRedirections     = default;
-        private          ICredentials?              _defaultProxyCredentials      = default;
-        private          ICredentials?              _credentials                  = default;
-        private          bool?                      _preAuthenticate              = default;
-        private          bool?                      _useCookies                   = default;
-        private          CookieContainer?           _cookieContainer              = default;
-        private          int?                       _maxResponseHeadersLength     = default;
-        private          int?                       _maxConnectionsPerServer      = default;
-        private          AuthenticationHeaderValue? _authenticationHeader         = default;
-        private          TimeSpan?                  _connectTimeout               = default;
-        private          RetryPolicy?               _retryPolicy                  = default;
-        private          int?                       _maxResponseContentBufferSize = default;
-        private          ILogger?                   _logger                       = default;
-
-    #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols = default;
-        private ClientCertificateOption?   _clientCertificateOptions = default;
-        private X509CertificateCollection? _clientCertificates = default;
-        private DecompressionMethods?      _automaticDecompression = default;
-        private long?                      _maxRequestContentBufferSize = default;
-    #else
-        private SslClientAuthenticationOptions? _sslOptions                  = default;
-        private TimeSpan?                       _responseDrainTimeout        = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy         = default;
-        private TimeSpan?                       _keepAlivePingTimeout        = default;
-        private TimeSpan?                       _keepAlivePingDelay          = default;
-        private TimeSpan?                       _pooledConnectionLifetime    = default;
-        private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize        = default;
-    #endif
+        private readonly WebHeaders                      _headers                      = [];
+        private readonly IHostInfo                       _hostInfo                     = value;
+        private          Encoding                        _encoding                     = Encoding.Default;
+        private          bool?                           _useProxy                     = null;
+        private          IWebProxy?                      _proxy                        = null;
+        private          bool?                           _allowAutoRedirect            = null;
+        private          int?                            _maxAutomaticRedirections     = null;
+        private          ICredentials?                   _defaultProxyCredentials      = null;
+        private          ICredentials?                   _credentials                  = null;
+        private          bool?                           _preAuthenticate              = null;
+        private          bool?                           _useCookies                   = null;
+        private          CookieContainer?                _cookieContainer              = null;
+        private          int?                            _maxResponseHeadersLength     = null;
+        private          int?                            _maxConnectionsPerServer      = null;
+        private          AuthenticationHeaderValue?      _authenticationHeader         = null;
+        private          TimeSpan?                       _connectTimeout               = null;
+        private          RetryPolicy?                    _retryPolicy                  = null;
+        private          int?                            _maxResponseContentBufferSize = null;
+        private          ILogger?                        _logger                       = null;
+        private          SslClientAuthenticationOptions? _sslOptions                   = null;
+        private          TimeSpan?                       _responseDrainTimeout         = null;
+        private          HttpKeepAlivePingPolicy?        _keepAlivePingPolicy          = null;
+        private          TimeSpan?                       _keepAlivePingTimeout         = null;
+        private          TimeSpan?                       _keepAlivePingDelay           = null;
+        private          TimeSpan?                       _pooledConnectionLifetime     = null;
+        private          TimeSpan?                       _pooledConnectionIdleTimeout  = null;
+        private          int?                            _maxResponseDrainSize         = null;
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
@@ -82,23 +66,7 @@ public partial class WebRequester
         }
         private readonly HttpMessageHandler GetHandler()
         {
-        #if NETSTANDARD2_1
-            HttpClientHandler handler = new HttpClientHandler();
-
-
-            if ( _sslProtocols.HasValue ) { handler.SslProtocols = _sslProtocols.Value; }
-
-            if ( _maxRequestContentBufferSize.HasValue ) { handler.MaxRequestContentBufferSize = _maxRequestContentBufferSize.Value; }
-
-            if ( _automaticDecompression.HasValue ) { handler.AutomaticDecompression = _automaticDecompression.Value; }
-
-            if ( _clientCertificateOptions.HasValue ) { handler.ClientCertificateOptions = _clientCertificateOptions.Value; }
-
-            if ( _clientCertificates is not null ) { handler.ClientCertificates.AddRange( _clientCertificates ); }
-
-        #else
-            SocketsHttpHandler handler = new SocketsHttpHandler();
-
+            SocketsHttpHandler handler = new();
 
             if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }
 
@@ -117,8 +85,6 @@ public partial class WebRequester
             if ( _pooledConnectionLifetime.HasValue ) { handler.PooledConnectionLifetime = _pooledConnectionLifetime.Value; }
 
             if ( _pooledConnectionIdleTimeout.HasValue ) { handler.PooledConnectionIdleTimeout = _pooledConnectionIdleTimeout.Value; }
-
-        #endif
 
 
             if ( _maxResponseHeadersLength.HasValue ) { handler.MaxResponseHeadersLength = _maxResponseHeadersLength.Value; }
@@ -275,7 +241,6 @@ public partial class WebRequester
         }
 
 
-    #if NET6_0_OR_GREATER
         public Builder With_MaxResponseDrainSize( int value )
         {
             _maxResponseDrainSize = value;
@@ -333,59 +298,6 @@ public partial class WebRequester
             _responseDrainTimeout = value;
             return this;
         }
-
-    #else
-        public Builder With_MaxRequestContentBufferSize( int value )
-        {
-            _maxRequestContentBufferSize = value;
-            return this;
-        }
-
-
-        public Builder With_ClientCertificateOptions( ClientCertificateOption value )
-        {
-            _clientCertificateOptions = value;
-            return this;
-        }
-        public Builder With_ClientCertificates( X509Certificate value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            _clientCertificates.Add( value );
-            return this;
-        }
-        public Builder With_ClientCertificates( params X509Certificate[] value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            _clientCertificates.AddRange( value );
-            return this;
-        }
-        public Builder With_ClientCertificates( IEnumerable<X509Certificate> value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            foreach ( X509Certificate certificate in value ) { _clientCertificates.Add( certificate ); }
-
-            return this;
-        }
-        public Builder With_ClientCertificates( X509CertificateCollection value )
-        {
-            _clientCertificates = value;
-            return this;
-        }
-
-
-        public Builder With_AutomaticDecompression( DecompressionMethods value )
-        {
-            _automaticDecompression = value;
-            return this;
-        }
-
-
-        public Builder With_SSL( SslProtocols value )
-        {
-            _sslProtocols = value;
-            return this;
-        }
-    #endif
 
 
 

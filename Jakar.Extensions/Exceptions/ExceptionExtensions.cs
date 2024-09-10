@@ -3,9 +3,7 @@
 
 public static class ExceptionExtensions
 {
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(GetInnerExceptions) )]
-#endif
     private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException( nameof(e) ); }
@@ -20,9 +18,7 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(GetProperties) )]
-#endif
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         Dictionary<string, object?> dictionary = new();
@@ -33,20 +29,10 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(Details) )]
-#endif
-    public static ExceptionDetails Details( this Exception e ) => new(e);
+    [RequiresUnreferencedCode( nameof(Details) )]     public static ExceptionDetails Details( this     Exception e ) => new(e);
+    [RequiresUnreferencedCode( nameof(FullDetails) )] public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
 
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(FullDetails) )]
-#endif
-    public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
-
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(Frames) )]
-#endif
     public static IEnumerable<string> Frames( StackTrace trace )
     {
         foreach ( StackFrame frame in trace.GetFrames() )
@@ -70,29 +56,12 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodInfo) )]
-#endif
-    public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    [RequiresUnreferencedCode( nameof(MethodInfo) )] public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack( Exception       e ) => CallStack( new StackTrace( e ) );
+    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack()                    => CallStack( new StackTrace() );
+    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack( StackTrace trace )  => string.Join( "->", Frames( trace ) );
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack() => CallStack( new StackTrace() );
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
-
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(Frame) )]
-#endif
     public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
@@ -102,22 +71,13 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodClass) )]
-#endif
-    public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
+    [RequiresUnreferencedCode( nameof(MethodClass) )] public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-#endif
-    public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodSignature) )]
-#endif
-    public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
+    [RequiresUnreferencedCode( nameof(MethodSignature) )] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
     public static Dictionary<string, JToken?> GetData( this Exception e )
@@ -140,18 +100,14 @@ public static class ExceptionExtensions
         return data;
     }
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
         dict = new Dictionary<string, string?>( 10 );
         e.Details( dict );
     }
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
     public static void Details<T>( this Exception e, in T dict )
         where T : class, IDictionary<string, string?>
     {
@@ -165,9 +121,7 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
@@ -187,11 +141,7 @@ public static class ExceptionExtensions
 
         e.GetProperties( ref dict );
     }
-    public static void GetProperties<
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
-    #endif
-        T>( this T e, ref Dictionary<string, object?> dictionary )
+    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] T>( this T e, ref Dictionary<string, object?> dictionary )
         where T : Exception
     {
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
@@ -205,11 +155,7 @@ public static class ExceptionExtensions
     }
 
 
-    public static void GetProperties<
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
-    #endif
-        T>( this T e, ref Dictionary<string, JToken?> dictionary )
+    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] T>( this T e, ref Dictionary<string, JToken?> dictionary )
         where T : Exception
     {
         foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
@@ -228,9 +174,7 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
     [RequiresUnreferencedCode( nameof(Details) )]
-#endif
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, JToken?>
@@ -260,7 +204,6 @@ public static class ExceptionExtensions
 
 
 /*
-#if NET6_0_OR_GREATER
     public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JToken?> dictionary )
         where T : Exception
     {
@@ -299,6 +242,5 @@ public static class ExceptionExtensions
 
         e.GetProperties( ref dict );
     }
-#endif
 */
 }

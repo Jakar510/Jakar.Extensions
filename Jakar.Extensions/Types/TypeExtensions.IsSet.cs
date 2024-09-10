@@ -3,22 +3,10 @@
 
 public static partial class TypeExtensions
 {
-    public static bool IsSet(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this Type type
-    ) => type.HasInterface( typeof(ISet<>) );
+    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface( typeof(ISet<>) );
 
 
-    public static bool IsSet(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type  classType,
-        [NotNullWhen( true )] out Type? itemType,
-        [NotNullWhen( true )] out bool? isBuiltInType
-    )
+    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType )
     {
         if ( classType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -33,14 +21,7 @@ public static partial class TypeExtensions
     }
 
 
-    public static bool IsSet(
-
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type  propertyType,
-        [NotNullWhen( true )] out Type? itemType
-    )
+    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type propertyType, [NotNullWhen( true )] out Type? itemType )
     {
         if ( propertyType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
         {
@@ -52,13 +33,7 @@ public static partial class TypeExtensions
         return false;
     }
 
-    public static bool IsSet(
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )]
-    #endif
-        this                      Type                 classType,
-        [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes
-    )
+    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
     {
         if ( classType.IsGenericType && classType.IsSet() )
         {

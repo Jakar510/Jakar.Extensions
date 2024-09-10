@@ -8,9 +8,9 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
 {
     private const    int                       START_INDEX = 0;
     private readonly ILockedCollection<TValue> _collection = collection;
-    private          int                       _index      = START_INDEX;
-    private          ReadOnlyMemory<TValue>    _memory;
     private          bool                      _isDisposed;
+    private          int                       _index = START_INDEX;
+    private          ReadOnlyMemory<TValue>    _memory;
 
     public ref readonly TValue  Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[_index]; }
     TValue IEnumerator<TValue>. Current => Current;
@@ -47,13 +47,5 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private void ThrowIfDisposed()
-    {
-    #if NET7_0_OR_GREATER
-        ObjectDisposedException.ThrowIf( _isDisposed, this );
-    #else
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
-    #endif
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, this );
 }

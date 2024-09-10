@@ -3,23 +3,7 @@
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
 [Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ), JsonObject]
-public sealed class AppVersion :
-#if NET7_0_OR_GREATER
-    IComparable,
-    IComparable<AppVersion>,
-    IFuzzyEquals<AppVersion>,
-    IReadOnlyCollection<int>,
-    ICloneable,
-    ISpanFormattable,
-    ISpanParsable<AppVersion>
-#else
-    IComparable,
-    IComparable<AppVersion>,
-    IFuzzyEquals<AppVersion>,
-    IReadOnlyCollection<int>,
-    ICloneable,
-    ISpanFormattable
-#endif
+public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable, ISpanFormattable, ISpanParsable<AppVersion>
 {
     private const       char                       SEPARATOR = '.';
     private             string?                    _string;
@@ -57,6 +41,7 @@ public sealed class AppVersion :
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = flags;
     }
+    public AppVersion( List<int> span, AppVersionFlags flags = default ) : this( CollectionsMarshal.AsSpan( span ), flags ) { }
     public AppVersion( Version version )
     {
         Major         = version.Major;
@@ -119,65 +104,6 @@ public sealed class AppVersion :
     }
 
 
-#if NETSTANDARD2_1
-    public AppVersion( List<int> span, AppVersionFlags flags = default )
-    {
-        if ( span is null ) { throw new ArgumentNullException( nameof(span) ); }
-
-        Flags = flags;
-        Scheme = (Format)span.Count;
-
-        switch ( Scheme )
-        {
-            case Format.Singular:
-                Major = span[0];
-                return;
-
-            case Format.Minimal:
-                Major = span[0];
-                Minor = span[1];
-                return;
-
-            case Format.Typical:
-                Major = span[0];
-                Minor = span[1];
-                Build = span[2];
-                return;
-
-            case Format.Detailed:
-                Major = span[0];
-                Minor = span[1];
-                Maintenance = span[2];
-                Build = span[3];
-                return;
-
-            case Format.DetailedRevisions:
-                Major = span[0];
-                Minor = span[1];
-                Maintenance = span[2];
-                MajorRevision = span[3];
-                Build = span[4];
-                return;
-
-            case Format.Complete:
-                Major = span[0];
-                Minor = span[1];
-                Maintenance = span[2];
-                MajorRevision = span[3];
-                MinorRevision = span[4];
-                Build = span[5];
-                return;
-
-            default: throw new OutOfRangeException( nameof(Scheme), Scheme, "span doesn't have the correct length." );
-        }
-    }
-
-#else
-    public AppVersion( List<int> span, AppVersionFlags flags = default ) : this( CollectionsMarshal.AsSpan( span ), flags ) { }
-
-#endif
-
-
     public static implicit operator AppVersion( string            value ) => Parse( value );
     public static implicit operator AppVersion( Span<int>         value ) => new(value);
     public static implicit operator AppVersion( ReadOnlySpan<int> value ) => new(value);
@@ -219,9 +145,7 @@ public sealed class AppVersion :
             AppVersionFlags flags = AppVersionFlags.Parse( ref value );
             value.WriteToDebug();
 
-            int count = value.Count( SEPARATOR );
-
-
+            int                count      = value.Count( SEPARATOR );
             int                i          = 0;
             Span<int>          result     = stackalloc int[count + 1];
             ReadOnlySpan<char> separators = [SEPARATOR];
@@ -234,14 +158,7 @@ public sealed class AppVersion :
                 Debug.Assert( !span.Contains( SEPARATOR ) );
 
                 if ( int.TryParse( span, NumberStyles.Number, provider, out int n ) ) { result[i++] = n; }
-                else
-                {
-                #if NETSTANDARD2_1
-                    throw new FormatException( $"Cannot convert '{span.ToString()}' to an int." );
-                #else
-                    throw new FormatException( $"Cannot convert '{span}' to an int." );
-                #endif
-                }
+                else { throw new FormatException( $"Cannot convert '{span}' to an int." ); }
             }
 
             return new AppVersion( result, flags );
@@ -298,9 +215,7 @@ public sealed class AppVersion :
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
         Debug.Assert( span.Length > Length );

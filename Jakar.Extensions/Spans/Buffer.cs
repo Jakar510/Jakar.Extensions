@@ -171,23 +171,13 @@ public ref struct Buffer<T>
     {
         Debug.Assert( _comparer is not null );
         if ( value.Length > buffer.Length ) { return false; }
-    #if NET6_0_OR_GREATER
+
         if ( value.Length == buffer.Length ) { return buffer.SequenceEqual( value, _comparer ); }
-    #endif
 
         for ( int i = 0; i < buffer.Length || i + value.Length < buffer.Length; i++ )
         {
             ReadOnlySpan<T> span = buffer.Slice( i, value.Length );
-
-        #if NET6_0_OR_GREATER
             if ( span.SequenceEqual( value, _comparer ) ) { return true; }
-        #else
-            for ( int j = 0; j < span.Length; j++ )
-            {
-                if ( _comparer.Equals( span[j], value[j] ) ) { return true; }
-            }
-
-        #endif
         }
 
         return false;

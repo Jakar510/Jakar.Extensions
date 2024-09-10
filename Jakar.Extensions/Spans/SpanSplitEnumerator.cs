@@ -35,9 +35,7 @@ public ref struct SpanSplitEnumerator<T>
     public                   void                   Reset()         => _span = _originalString;
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public bool MoveNext()
     {
         ReadOnlySpan<T> span = _span;

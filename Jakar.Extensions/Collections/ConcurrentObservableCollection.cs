@@ -546,13 +546,8 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
 
     public AsyncLockerEnumerator<T>         GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
     IAsyncEnumerator<T> IAsyncEnumerable<T>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-
-#if NET6_0_OR_GREATER
-    public override LockerEnumerator<T> GetEnumerator() => Values;
-#else
-    public override IEnumerator<T> GetEnumerator() => Values;
-#endif
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public override LockerEnumerator<T>     GetEnumerator()                               => Values;
+    IEnumerator IEnumerable.                GetEnumerator()                               => GetEnumerator();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock()                                                                                     => locker.Enter();
@@ -561,7 +556,6 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<Closer> AcquireLockAsync( CancellationToken      token ) => locker.EnterAsync( token );
 
 
-#if NET6_0_OR_GREATER
     protected internal ReadOnlySpan<T> AsSpan( ref bool lockTaken )
     {
         using ( AcquireLock( ref lockTaken ) ) { return buffer.ToArray(); }
@@ -570,7 +564,6 @@ public class ConcurrentObservableCollection<T>( IComparer<T> comparer, IEquality
     {
         using ( AcquireLock( ref lockTaken ) ) { return buffer.ToArray(); }
     }
-#endif
 
 
     protected internal ReadOnlyMemory<T> Copy()

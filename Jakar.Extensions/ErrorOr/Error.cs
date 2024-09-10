@@ -42,16 +42,10 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
     public static Error Create( Status status, string          type,   string?                         title, string?             detail, string? instance, params string[]     errors ) => Create( status, type, title, detail, instance, new StringValues( errors ) );
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-#endif
-    public static Error Create( Exception e, in StringValues errors = default, Status status = Status.InternalServerError ) => Create( e.Source, e, e.MethodSignature(), errors, status );
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-#endif
-    public static Error Create( string? instance, Exception e, in StringValues errors = default, Status status = Status.InternalServerError ) => Create( instance, e, e.MethodSignature(), errors, status );
-    public static Error Create( Exception e,        string?   detail, in StringValues errors = default, Status          status = Status.InternalServerError )                          => Create( e.Source, e, detail, errors, status );
-    public static Error Create( string?   instance, Exception e,      string?         detail,           in StringValues errors = default, Status status = Status.InternalServerError ) => new(status, e.GetType().Name, e.Message, detail, instance, errors);
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( Exception e,        in StringValues errors = default, Status          status = Status.InternalServerError )                                                            => Create( e.Source, e, e.MethodSignature(), errors, status );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( string?   instance, Exception       e,                in StringValues errors = default, Status          status = Status.InternalServerError )                          => Create( instance, e, e.MethodSignature(), errors, status );
+    public static                                                                                        Error Create( Exception e,        string?         detail,           in StringValues errors = default, Status          status = Status.InternalServerError )                          => Create( e.Source, e, detail,              errors, status );
+    public static                                                                                        Error Create( string?   instance, Exception       e,                string?         detail,           in StringValues errors = default, Status status = Status.InternalServerError ) => new(status, e.GetType().Name, e.Message, detail, instance, errors);
 
 
     public static Error Unauthorized( string?                             instance, in StringValues errors   = default )                                                                            => Unauthorized( errors,             instance, title: Titles.InvalidCredentials );

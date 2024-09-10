@@ -1,15 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>
-                                    #if NET7_0_OR_GREATER
-                                        ,
-                                        ISpanParsable<IniConfig>
-                                    #endif
-                                    #if NET6_0_OR_GREATER
-                                        ,
-                                        ISpanFormattable
-#endif
+public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>, ISpanParsable<IniConfig>, ISpanFormattable
 {
     private readonly IEqualityComparer<string> _comparer;
     public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
@@ -126,12 +118,10 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
-#if NET7_0_OR_GREATER
     static IniConfig IParsable<IniConfig>.    Parse( string?               s,    IFormatProvider? provider )                                              => Parse( s, provider );
     static bool IParsable<IniConfig>.         TryParse( string?            s,    IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result ) => TryParse( s, provider, out result );
     static IniConfig ISpanParsable<IniConfig>.Parse( ReadOnlySpan<char>    span, IFormatProvider? provider )                                              => Parse( span, provider );
     static bool ISpanParsable<IniConfig>.     TryParse( ReadOnlySpan<char> span, IFormatProvider? provider, [NotNullWhen( true )] out IniConfig? result ) => TryParse( span, provider, out result );
-#endif
 
 
     /// <summary> Gets the <see cref="Section"/> with the <paramref name="sectionName"/> . If it doesn't exist, it is created, then returned. </summary>
@@ -182,9 +172,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         Debug.Assert( destination.Length >= Length );

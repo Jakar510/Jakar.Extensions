@@ -2,11 +2,6 @@
 // 06/06/2022  2:20 PM
 
 
-#if NET6_0_OR_GREATER
-#endif
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -21,8 +16,6 @@ public static class Hashes
         return hash.ToHashCode();
     }
 
-
-#if NET7_0_OR_GREATER
 
     [Pure]
     public static UInt128 Hash128( this ReadOnlySpan<bool> value, long seed = 0 )
@@ -276,10 +269,6 @@ public static class Hashes
         finally { ArrayPool<byte>.Shared.Return( buffer ); }
     }
 
-#endif
-
-
-#if NET6_0_OR_GREATER
 
     [Pure]
     public static ulong Hash( this ReadOnlySpan<Half> value, long seed = 0 )
@@ -534,15 +523,13 @@ public static class Hashes
         finally { ArrayPool<byte>.Shared.Return( buffer ); }
     }
 
-#endif
-
 
     public static string GetHash( this OneOf<byte[], string> data )
     {
         if ( data.IsT0 ) { return GetHash( data.AsT0 ); }
 
         if ( data.IsT1 ) { return GetHash( data.AsT1 ); }
-        
+
         throw new InvalidOperationException( "Invalid data type" );
     }
     public static string GetHash( this OneOf<ReadOnlyMemory<byte>, byte[], string> data )
@@ -555,9 +542,9 @@ public static class Hashes
 
         throw new InvalidOperationException( "Invalid data type" );
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( byte[]                       data )                    => GetHash( new ReadOnlySpan<byte>( data ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( byte[]                  data )                    => GetHash( new ReadOnlySpan<byte>( data ) );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( this ReadOnlySpan<byte> data )                    => data.Hash_SHA256();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( string                       data )                    => GetHash( data, Encoding.Default );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( string                  data )                    => GetHash( data, Encoding.Default );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string GetHash( this ReadOnlySpan<char> data, Encoding encoding ) { return data.Hash_SHA256( encoding ); }
 
 
@@ -671,7 +658,6 @@ public static class Hashes
     }
 
 
-#if NET6_0_OR_GREATER
     public static async ValueTask<string> HashAsync( this HashAlgorithm hasher, ReadOnlyMemory<byte> data )
     {
         await using MemoryStream stream = new MemoryStream();
@@ -749,10 +735,8 @@ public static class Hashes
         byte[]                   hash   = await hasher.ComputeHashAsync( stream );
         return BitConverter.ToString( hash );
     }
-#endif
 
 
-#if NET7_0_OR_GREATER
     public static UInt128 Hash( this string data ) => Hash( data, Encoding.Default );
     public static UInt128 Hash( this string data, Encoding encoding )
     {
@@ -771,5 +755,4 @@ public static class Hashes
         return Hash( span );
     }
     public static UInt128 Hash( this ReadOnlySpan<byte> data ) => XxHash128.HashToUInt128( data );
-#endif
 }
