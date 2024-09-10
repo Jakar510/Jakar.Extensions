@@ -118,9 +118,11 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     public const  string TABLE_NAME = "UserRecoveryCodes";
     public static string TableName => TABLE_NAME;
 
-    public UserRecoveryCodeRecord( UserRecord               owner, RecoveryCodeRecord           value ) : base( owner, value ) { }
-    public UserRecoveryCodeRecord( RecordID<UserRecord>     key,   RecordID<RecoveryCodeRecord> value, RecordID<UserRecoveryCodeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified = default ) : base( key, value, id, dateCreated, lastModified ) { }
-    public static UserRecoveryCodeRecord Create( UserRecord owner, RecoveryCodeRecord           value ) => new(owner, value);
+    public UserRecoveryCodeRecord( UserRecord                         key, RecoveryCodeRecord           value ) : base( key, value ) { }
+    public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value ) : base( key, value ) { }
+    public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value, RecordID<UserRecoveryCodeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified = default ) : base( key, value, id, dateCreated, lastModified ) { }
+    public static UserRecoveryCodeRecord Create( UserRecord           key, RecoveryCodeRecord           value ) => new(key, value);
+    public static UserRecoveryCodeRecord Create( RecordID<UserRecord> key, RecordID<RecoveryCodeRecord> value ) => new(key, value);
 
 
     public static UserRecoveryCodeRecord Create( DbDataReader reader )

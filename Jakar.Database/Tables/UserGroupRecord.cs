@@ -11,11 +11,13 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
-    public UserGroupRecord( UserRecord            owner, GroupRecord           value ) : base( owner, value ) { }
-    private UserGroupRecord( RecordID<UserRecord> key,   RecordID<GroupRecord> value, RecordID<UserGroupRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
+    public UserGroupRecord( UserRecord            key, GroupRecord           value ) : base( key, value ) { }
+    public UserGroupRecord( RecordID<UserRecord>  key, RecordID<GroupRecord> value ) : base( key, value ) { }
+    private UserGroupRecord( RecordID<UserRecord> key, RecordID<GroupRecord> value, RecordID<UserGroupRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified ) : base( key, value, id, dateCreated, lastModified ) { }
 
 
-    [Pure] public static UserGroupRecord Create( UserRecord owner, GroupRecord value ) => new(owner, value);
+    [Pure] public static UserGroupRecord Create( UserRecord           key, GroupRecord           value ) => new(key, value);
+    public static        UserGroupRecord Create( RecordID<UserRecord> key, RecordID<GroupRecord> value ) => new(key, value);
     [Pure]
     public static UserGroupRecord Create( DbDataReader reader )
     {
@@ -24,7 +26,7 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
         DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?           lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserGroupRecord> id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        UserGroupRecord                       record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
+        UserGroupRecord           record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
         record.Validate();
         return record;
     }
