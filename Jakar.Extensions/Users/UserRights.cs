@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 public interface IUserRights
 {
-    public const                      int    MAX_SIZE = BaseRecord.ANSI_CAPACITY;
+    public const                      int    MAX_SIZE = ANSI_CAPACITY;
     [StringLength( MAX_SIZE )] public string Rights { get; set; }
 }
 
@@ -77,7 +77,7 @@ public ref struct UserRights<TEnum>
 
     public UserRights()
     {
-        if ( _enumValues.Length > IUserRights.MAX_SIZE ) { throw new OutOfRangeException( nameof(TEnum), typeof(TEnum).Name, $"Max permission count is {IUserRights.MAX_SIZE}" ); }
+        if ( _enumValues.Length > IUserRights.MAX_SIZE ) { throw OutOfRangeException.Create( typeof(TEnum).Name, $"Max permission count is {IUserRights.MAX_SIZE}" ); }
 
         Span.Fill( INVALID );
     }

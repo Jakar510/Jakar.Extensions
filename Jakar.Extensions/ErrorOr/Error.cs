@@ -33,7 +33,7 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
     public static Error Create<T>( T details )
         where T : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
-    public static Error Create( Status status, in StringValues errors, [CallerMemberName] string       type = BaseRecord.EMPTY )                                                         => new(status, type, null, null, null, errors);
+    public static Error Create( Status status, in StringValues errors, [CallerMemberName] string       type = EMPTY )                                                         => new(status, type, null, null, null, errors);
     public static Error Create( Status status, string          type,   in                 StringValues errors )                                                                          => new(status, type, null, null, null, in errors);
     public static Error Create( Status status, string          type,   params             string[]     errors )                                                                          => Create( status, type, null, null, null, new StringValues( errors ) );
     public static Error Create( Status status, string          type,   string?                         title, in     StringValues errors )                                               => new(status, type, title, null, null, in errors);

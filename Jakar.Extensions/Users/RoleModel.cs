@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    [StringLength( BaseRecord.UNICODE_CAPACITY )] public string NameOfRole { get; }
+    [StringLength( UNICODE_CAPACITY )] public string NameOfRole { get; }
 }
 
 

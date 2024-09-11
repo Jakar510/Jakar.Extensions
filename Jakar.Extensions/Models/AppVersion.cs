@@ -99,7 +99,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
                 Build         = span[5];
                 return;
 
-            default: throw new OutOfRangeException( nameof(Scheme), Scheme, "value doesn't have the correct length." );
+            default: throw OutOfRangeException.Create( Scheme, "value doesn't have the correct length." );
         }
     }
 
@@ -119,7 +119,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
     public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
     public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? version )
     {
-        if ( !value.IsEmpty )
+        if ( value.IsEmpty is false )
         {
             try
             {
@@ -133,39 +133,6 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
         version = null;
         return false;
     }
-    public static AppVersion Parse( ReadOnlySpan<char> value )                            => Parse( value,     CultureInfo.CurrentCulture );
-    public static AppVersion Parse( ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( ref value, value, provider );
-    private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
-    {
-        try
-        {
-            if ( value.IsNullOrWhiteSpace() ) { throw new ArgumentNullException( nameof(value) ); }
-
-            value.WriteToDebug();
-            AppVersionFlags flags = AppVersionFlags.Parse( ref value );
-            value.WriteToDebug();
-
-            int                count      = value.Count( SEPARATOR );
-            int                i          = 0;
-            Span<int>          result     = stackalloc int[count + 1];
-            ReadOnlySpan<char> separators = [SEPARATOR];
-
-
-            foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
-            {
-                if ( span.IsEmpty ) { continue; }
-
-                Debug.Assert( !span.Contains( SEPARATOR ) );
-
-                if ( int.TryParse( span, NumberStyles.Number, provider, out int n ) ) { result[i++] = n; }
-                else { throw new FormatException( $"Cannot convert '{span}' to an int." ); }
-            }
-
-            return new AppVersion( result, flags );
-        }
-        catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original.ToString()}' into {nameof(AppVersion)}", nameof(value), e ); }
-    }
-    public static AppVersion Parse( string s, IFormatProvider? provider ) => Parse( s.AsSpan(), provider );
     public static bool TryParse( string? s, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? result )
     {
         if ( string.IsNullOrEmpty( s ) )
@@ -176,6 +143,39 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
         result = Parse( s, provider );
         return true;
+    }
+
+
+    public static AppVersion Parse( string                    s, IFormatProvider? provider ) => Parse( s.AsSpan(), provider );
+    public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse( value,     CultureInfo.CurrentUICulture );
+    public static AppVersion Parse( scoped ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( ref value, value, provider );
+    private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
+    {
+        try
+        {
+            if ( value.IsNullOrWhiteSpace() ) { throw new ArgumentNullException( nameof(value) ); }
+
+            if ( int.TryParse( value, NumberStyles.Integer, provider, out int n ) ) { return new AppVersion( n ); }
+
+            Debug.WriteLine( value.ToString() );
+            AppVersionFlags flags = AppVersionFlags.Parse( ref value );
+            Debug.WriteLine( value.ToString() );
+
+            int                count      = value.Count( SEPARATOR );
+            int                i          = 0;
+            Span<int>          result     = stackalloc int[count + 1];
+            ReadOnlySpan<char> separators = [SEPARATOR];
+
+            foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
+            {
+                if ( span.IsEmpty ) { continue; }
+
+                result[i++] = int.Parse( span, NumberStyles.Number, provider );
+            }
+
+            return new AppVersion( result, flags );
+        }
+        catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original}' into {nameof(AppVersion)}", nameof(value), e ); }
     }
 
 
@@ -261,7 +261,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
             Format.Detailed          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.DetailedRevisions => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
             Format.Complete          => new Version( Major, Minor ?? 0, Maintenance ?? 0, Build ?? 0 ),
-            _                        => throw new OutOfRangeException( nameof(Scheme), Scheme )
+            _                        => throw new OutOfRangeException( Scheme )
         };
 
 

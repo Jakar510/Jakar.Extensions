@@ -569,7 +569,7 @@ public static class Hashes
     public static string Hash( this HashAlgorithm hasher, scoped in ReadOnlySpan<char> data, Encoding? encoding = null ) => hasher.Hash( data.ToBytes( encoding ) );
     public static string Hash( this HashAlgorithm hasher, scoped in ReadOnlySpan<byte> data )
     {
-        using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( BaseRecord.UNICODE_CAPACITY );
+        using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( UNICODE_CAPACITY );
         Span<byte>               span   = buffer.Memory.Span;
         if ( hasher.TryComputeHash( data, span, out int bytesWritten ) is false ) { throw new InvalidOperationException( nameof(span) ); }
 

@@ -46,7 +46,7 @@ public static partial class Validate
 
     public static bool IsValidPort( this string             value ) => int.TryParse( value, out int n ) && n.IsValidPort();
     public static bool IsValidPort( this ReadOnlySpan<char> value ) => int.TryParse( value, out int n ) && n.IsValidPort();
-    public static bool IsValidPort( this int                value ) => value is > 0 and <= IPEndPoint.MaxPort;
+    public static bool IsValidPort( this int                value ) => value is > IPEndPoint.MinPort and <= IPEndPoint.MaxPort;
 
 
     public static bool IsWebAddress( this string value )

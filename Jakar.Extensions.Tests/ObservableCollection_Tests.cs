@@ -11,17 +11,18 @@ namespace Jakar.Extensions.Tests;
 [TestFixture, TestOf( typeof(ObservableCollection<>) )]
 public class ObservableCollection_Tests : Assert
 {
+    private static readonly ObservableCollection<int> _collection = [..Enumerable.Range( 0, 100 )];
+
     [Test, TestCase( 10 ), TestCase( 20 ), TestCase( 30 ), TestCase( 40 )]
     public void Indexes( int value )
     {
-        ObservableCollection<int> collection = [..Enumerable.Range( 0, 100 )];
-        this.AreEqual( value, collection.IndexOf( value ) );
-        this.AreEqual( value, collection.LastIndexOf( value ) );
-        this.AreEqual( value, collection.FindIndex( Match ) );
-        this.AreEqual( value, collection.Find( Match ) );
-        this.AreEqual( value, collection.FindLast( Match ) );
-        this.AreEqual( 1,     collection.FindAll( Match ).Length );
-        this.AreEqual( value, collection.FindAll( Match )[0] );
+        this.AreEqual( value, _collection.IndexOf( value ) );
+        this.AreEqual( value, _collection.LastIndexOf( value ) );
+        this.AreEqual( value, _collection.FindIndex( Match ) );
+        this.AreEqual( value, _collection.Find( Match ) );
+        this.AreEqual( value, _collection.FindLast( Match ) );
+        this.AreEqual( 1,     _collection.FindAll( Match ).Length );
+        this.AreEqual( value, _collection.FindAll( Match )[0] );
         return;
 
         bool Match( int x ) => x == value;
@@ -31,7 +32,7 @@ public class ObservableCollection_Tests : Assert
     [Test]
     public void Sort()
     {
-        int[] array  = [..Enumerable.Range( 0, 100 ).Select( static x => Random.Shared.Next( 1000 ) )];
+        int[] array  = [..Enumerable.Range( 0, 100 ).Select( static x => Randoms.Random.Next( 1000 ) )];
         int[] sorted = [..array];
         Array.Sort( sorted, ValueSorter<int>.Default );
 
@@ -51,8 +52,8 @@ public class ObservableCollection_Tests : Assert
     {
         ObservableCollection<T> collection = [];
         collection.Add( value );
-        this.False( collection.TryAdd( value ) );
         this.True( collection.Contains( value ) );
+        this.False( collection.TryAdd( value ) );
         this.True( collection.Remove( value ) );
         this.False( collection.Contains( value ) );
         collection.Add( value );

@@ -8,7 +8,7 @@ using static Jakar.Extensions.Randoms;
 
 
 
-namespace Jakar.Extensions.Tests.SpanAndMemory;
+namespace Jakar.Extensions.Tests;
 
 
 [TestFixture, TestOf( typeof(Spans) )]
