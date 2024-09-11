@@ -5,48 +5,48 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, ISet<T>, IReadOnlySet<T>
+public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAlerts<TValue>, ISet<TValue>, IReadOnlySet<TValue>
 {
-    protected internal readonly HashSet<T> buffer = values;
-    public sealed override      int        Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
-    bool ICollection<T>.                   IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)buffer).IsReadOnly; }
+    protected internal readonly HashSet<TValue> buffer = values;
+    public sealed override      int             Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
+    bool ICollection<TValue>.                   IsReadOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ((ICollection<TValue>)buffer).IsReadOnly; }
 
 
     public ObservableHashSet() : this( DEFAULT_CAPACITY ) { }
-    public ObservableHashSet( int            capacity ) : this( new HashSet<T>( capacity ) ) { }
-    public ObservableHashSet( IEnumerable<T> enumerable ) : this( [..enumerable] ) { }
+    public ObservableHashSet( int                 capacity ) : this( new HashSet<TValue>( capacity ) ) { }
+    public ObservableHashSet( IEnumerable<TValue> enumerable ) : this( [..enumerable] ) { }
 
 
-    public static implicit operator ObservableHashSet<T>( List<T>                 values ) => new(values);
-    public static implicit operator ObservableHashSet<T>( HashSet<T>              values ) => new(values);
-    public static implicit operator ObservableHashSet<T>( ConcurrentBag<T>        values ) => new(values);
-    public static implicit operator ObservableHashSet<T>( ObservableCollection<T> values ) => new(values);
-    public static implicit operator ObservableHashSet<T>( Collection<T>           values ) => new(values);
-    public static implicit operator ObservableHashSet<T>( T[]                     values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( List<TValue>                 values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( HashSet<TValue>              values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( ConcurrentBag<TValue>        values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( ObservableCollection<TValue> values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( Collection<TValue>           values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( TValue[]                     values ) => new(values);
 
 
-    public virtual bool IsProperSubsetOf( IEnumerable<T>   other ) => buffer.IsProperSubsetOf( other );
-    public virtual bool IsProperSupersetOf( IEnumerable<T> other ) => buffer.IsProperSupersetOf( other );
-    public virtual bool IsSubsetOf( IEnumerable<T>         other ) => buffer.IsSubsetOf( other );
-    public virtual bool IsSupersetOf( IEnumerable<T>       other ) => buffer.IsSupersetOf( other );
-    public virtual bool Overlaps( IEnumerable<T>           other ) => buffer.Overlaps( other );
-    public virtual bool SetEquals( IEnumerable<T>          other ) => buffer.SetEquals( other );
-    public virtual void ExceptWith( IEnumerable<T> other )
+    public virtual bool IsProperSubsetOf( IEnumerable<TValue>   other ) => buffer.IsProperSubsetOf( other );
+    public virtual bool IsProperSupersetOf( IEnumerable<TValue> other ) => buffer.IsProperSupersetOf( other );
+    public virtual bool IsSubsetOf( IEnumerable<TValue>         other ) => buffer.IsSubsetOf( other );
+    public virtual bool IsSupersetOf( IEnumerable<TValue>       other ) => buffer.IsSupersetOf( other );
+    public virtual bool Overlaps( IEnumerable<TValue>           other ) => buffer.Overlaps( other );
+    public virtual bool SetEquals( IEnumerable<TValue>          other ) => buffer.SetEquals( other );
+    public virtual void ExceptWith( IEnumerable<TValue> other )
     {
         buffer.ExceptWith( other );
         Reset();
     }
-    public virtual void IntersectWith( IEnumerable<T> other )
+    public virtual void IntersectWith( IEnumerable<TValue> other )
     {
         buffer.IntersectWith( other );
         Reset();
     }
-    public virtual void SymmetricExceptWith( IEnumerable<T> other )
+    public virtual void SymmetricExceptWith( IEnumerable<TValue> other )
     {
         buffer.SymmetricExceptWith( other );
         Reset();
     }
-    public virtual void UnionWith( IEnumerable<T> other )
+    public virtual void UnionWith( IEnumerable<TValue> other )
     {
         buffer.UnionWith( other );
         Reset();
@@ -60,8 +60,8 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     }
 
 
-    void ICollection<T>.Add( T value ) => Add( value );
-    public virtual bool Add( T value )
+    void ICollection<TValue>.Add( TValue value ) => Add( value );
+    public virtual bool Add( TValue value )
     {
         bool result = buffer.Add( value );
         if ( result ) { Added( value ); }
@@ -70,7 +70,7 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     }
 
 
-    public virtual bool Remove( T value )
+    public virtual bool Remove( TValue value )
     {
         bool result = buffer.Remove( value );
         if ( result ) { Removed( value ); }
@@ -79,22 +79,22 @@ public class ObservableHashSet<T>( HashSet<T> values ) : CollectionAlerts<T>, IS
     }
 
 
-    public virtual bool Contains( T value )                 => buffer.Contains( value );
-    public         void CopyTo( T[] array, int arrayIndex ) => buffer.CopyTo( array, arrayIndex );
+    public virtual bool Contains( TValue value )                 => buffer.Contains( value );
+    public         void CopyTo( TValue[] array, int arrayIndex ) => buffer.CopyTo( array, arrayIndex );
 
 
-    protected internal override ReadOnlyMemory<T> FilteredValues()
+    protected internal override FilterBuffer<TValue> FilteredValues()
     {
-        int             count  = buffer.Count;
-        using Buffer<T> values = new(count);
+        int                  count  = buffer.Count;
+        FilterBuffer<TValue> values = new(count);
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( T t in buffer )
+        foreach ( TValue t in buffer )
         {
             if ( Filter( t ) ) { values.Add( t ); }
         }
 
-        return values.ToArray();
+        return values;
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

@@ -10,19 +10,22 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
     private readonly ILockedCollection<TValue> _collection = collection;
     private          bool                      _isDisposed;
     private          int                       _index = START_INDEX;
-    private          ReadOnlyMemory<TValue>    _memory;
+    private          IMemoryOwner<TValue>?     _owner;
 
-    public ref readonly TValue  Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[_index]; }
-    TValue IEnumerator<TValue>. Current => Current;
-    object? IEnumerator.        Current => Current;
-    public int                  Length  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _memory.Length; }
-    public ReadOnlySpan<TValue> Span    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _memory.Span; }
+
+    private             ReadOnlyMemory<TValue> _Memory => _owner?.Memory ?? Memory<TValue>.Empty;
+    public ref readonly TValue                 Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[_index]; }
+    TValue IEnumerator<TValue>.                Current => Current;
+    object? IEnumerator.                       Current => Current;
+    public int                                 Length  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Memory.Length; }
+    public ReadOnlySpan<TValue>                Span    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Memory.Span; }
 
 
     public void Dispose()
     {
         _isDisposed = true;
-        _memory     = ReadOnlyMemory<TValue>.Empty;
+        _owner?.Dispose();
+        _owner = null;
         GC.SuppressFinalize( this );
     }
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
@@ -32,9 +35,9 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
     public bool MoveNext()
     {
         ThrowIfDisposed();
-        if ( _memory.IsEmpty ) { Reset(); }
+        if ( _Memory.IsEmpty ) { Reset(); }
 
-        if ( (uint)_index >= (uint)_memory.Length ) { return false; }
+        if ( (uint)_index >= (uint)_Memory.Length ) { return false; }
 
         _index++;
         return true;
@@ -42,8 +45,9 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
     public void Reset()
     {
         ThrowIfDisposed();
-        _memory = _collection.Copy();
-        _index  = START_INDEX;
+        _owner?.Dispose();
+        _owner = null;
+        _index = START_INDEX;
     }
 
 

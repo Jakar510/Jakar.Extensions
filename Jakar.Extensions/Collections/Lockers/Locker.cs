@@ -17,8 +17,8 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>, IAsync
     ValueTask<Closer> AcquireLockAsync( CancellationToken token );
 
 
-    ReadOnlyMemory<TValue>                               Copy();
-    ConfiguredValueTaskAwaitable<ReadOnlyMemory<TValue>> CopyAsync( CancellationToken token );
+    FilterBuffer<TValue>                               Copy();
+    ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
 }
 
 

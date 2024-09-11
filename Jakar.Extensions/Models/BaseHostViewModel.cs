@@ -41,7 +41,7 @@ public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
         {
             if ( !SetProperty( ref _hostInfo, value ) ) { return; }
 
-            SetProperty( ref _host, value?.OriginalString, nameof(Host) );
+            SetProperty( ref _host, value?.OriginalString, StringComparer.OrdinalIgnoreCase, nameof(Host) );
             OnPropertyChanged( nameof(IsValidHost) );
         }
     }

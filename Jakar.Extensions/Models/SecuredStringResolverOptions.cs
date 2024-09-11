@@ -38,6 +38,7 @@ public readonly struct SecuredStringResolverOptions
     public static implicit operator SecuredStringResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => new(value);
 
 
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token, string key = "Default", string section = "ConnectionStrings" )
     {
         if ( _value0 is not null ) { return await _value0( token ); }

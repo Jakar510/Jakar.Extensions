@@ -100,6 +100,7 @@ public static class JwtParserExtensions
     public const string JWT_KEY        = "JWT.key";
 
 
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
     {
         string? value = configuration.GetValue<string>( fileKey );

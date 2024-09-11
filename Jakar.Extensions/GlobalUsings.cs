@@ -53,6 +53,7 @@ global using NoAlloq;
 global using NoAlloq.Producers;
 global using OneOf;
 global using OneOf.Types;
+global using static Jakar.Extensions.BaseRecord;
 global using static Jakar.Extensions.Buffers;
 global using static Jakar.Extensions.Claims;
 global using static Jakar.Extensions.WebRequester;
