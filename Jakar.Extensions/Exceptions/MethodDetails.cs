@@ -27,7 +27,6 @@ public sealed class MethodDetails
 
 
     public MethodDetails() { }
-    [RequiresUnreferencedCode( nameof(MethodDetails) )] public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
     public MethodDetails( MethodBase method )
     {
         DeclaringType       = method.MethodClass();
@@ -48,4 +47,11 @@ public sealed class MethodDetails
         IsFamilyOrAssembly  = method.IsFamilyOrAssembly;
         Parameters          = ParameterDetails.Create( method );
     }
+
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
+    public static MethodDetails? TryCreate( MethodBase? method ) => method is not null
+                                                                        ? new MethodDetails( method )
+                                                                        : null;
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static MethodDetails? TryCreate( Exception e ) => TryCreate( e.TargetSite );
 }

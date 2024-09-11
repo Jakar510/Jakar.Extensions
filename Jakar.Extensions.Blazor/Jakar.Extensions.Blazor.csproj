@@ -8,7 +8,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>8.0.1</Version>
+		<Version>8.0.2</Version>
 		<PackageId>Jakar.Extensions.Blazor</PackageId>
 		<Company>Tyler Stegmaier</Company>
 		<Authors>Tyler Stegmaier</Authors>

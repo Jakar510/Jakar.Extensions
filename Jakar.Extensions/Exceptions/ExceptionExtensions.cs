@@ -3,7 +3,7 @@
 
 public static class ExceptionExtensions
 {
-    [RequiresUnreferencedCode( nameof(GetInnerExceptions) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException( nameof(e) ); }
@@ -18,7 +18,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(GetProperties) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         Dictionary<string, object?> dictionary = new();
@@ -29,10 +29,11 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(Details) )]     public static ExceptionDetails Details( this     Exception e ) => new(e);
-    [RequiresUnreferencedCode( nameof(FullDetails) )] public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static ExceptionDetails Details( this     Exception e ) => new(e);
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
 
-    [RequiresUnreferencedCode( nameof(Frames) )]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static IEnumerable<string> Frames( StackTrace trace )
     {
         foreach ( StackFrame frame in trace.GetFrames() )
@@ -56,12 +57,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(MethodInfo) )] public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
-    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack( Exception       e ) => CallStack( new StackTrace( e ) );
-    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack()                    => CallStack( new StackTrace() );
-    [RequiresUnreferencedCode( nameof(CallStack) )]  public static string         CallStack( StackTrace trace )  => string.Join( "->", Frames( trace ) );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string         CallStack( Exception       e ) => CallStack( new StackTrace( e ) );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string         CallStack()                    => CallStack( new StackTrace() );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string         CallStack( StackTrace trace )  => string.Join( "->", Frames( trace ) );
 
-    [RequiresUnreferencedCode( nameof(Frame) )]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
@@ -71,13 +73,9 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(MethodClass) )] public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
-
-
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
-
-
-    [RequiresUnreferencedCode( nameof(MethodSignature) )] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string? MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string? MethodName( this      Exception e ) => e.TargetSite?.MethodName();
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
     public static Dictionary<string, JToken?> GetData( this Exception e )
@@ -100,14 +98,16 @@ public static class ExceptionExtensions
         return data;
     }
 
-    [RequiresUnreferencedCode( nameof(CallStack) )]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
         dict = new Dictionary<string, string?>( 10 );
         e.Details( dict );
     }
 
-    [RequiresUnreferencedCode( nameof(CallStack) )]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details<T>( this Exception e, in T dict )
         where T : class, IDictionary<string, string?>
     {
@@ -121,7 +121,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(CallStack) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
@@ -141,6 +141,8 @@ public static class ExceptionExtensions
 
         e.GetProperties( ref dict );
     }
+
+
     public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] T>( this T e, ref Dictionary<string, object?> dictionary )
         where T : Exception
     {
@@ -174,7 +176,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode( nameof(Details) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, JToken?>
@@ -218,7 +220,8 @@ public static class ExceptionExtensions
         }
     }
 
-    [ RequiresUnreferencedCode( nameof(Details) ) ]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, JToken?>

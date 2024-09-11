@@ -137,44 +137,17 @@ public static class Telemetry
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void AddSessionID<TID>( this Activity activity, ISessionID<TID> record )
-#if NET8_0_OR_GREATER
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-        => activity.AddTag( Tags.SessionID, record.SessionID );
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => activity.AddTag( Tags.SessionID, record.SessionID );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void AddRoleID<TID>( this Activity activity, IUniqueID<TID> record )
-#if NET8_0_OR_GREATER
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-        => activity.AddTag( Tags.RoleID, record.ID );
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => activity.AddTag( Tags.RoleID, record.ID );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void AddGroupID<TID>( this Activity activity, IUniqueID<TID> record )
-#if NET8_0_OR_GREATER
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-        => activity.AddTag( Tags.GroupID, record.ID );
+        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => activity.AddTag( Tags.GroupID, record.ID );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddUserID( this              Activity activity, IUserID user )            => activity.AddTag( nameof(IUserID.UserID),      user.UserID );

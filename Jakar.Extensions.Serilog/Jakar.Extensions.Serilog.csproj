@@ -8,7 +8,7 @@
 	  <ImplicitUsings>disable</ImplicitUsings>
 	  <GenerateDocumentationFile>True</GenerateDocumentationFile>
 	  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-	  <Version>8.0.3</Version>
+	  <Version>8.0.4</Version>
 	  <PackageId>Jakar.Extensions.Serilog</PackageId>
 	  <Company></Company>
 	  <Authors>Tyler Stegmaier</Authors>

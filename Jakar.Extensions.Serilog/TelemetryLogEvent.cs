@@ -4,12 +4,13 @@
 namespace Jakar.Extensions.Serilog;
 
 
-public sealed record TelemetryLogEvent( DateTimeOffset TimeStamp, LogEventLevel Level, ExceptionDetails? Exception, MessageTemplate MessageTemplate, ReadOnlyDictionary<string, JToken?> Properties, [property: CLSCompliant( false )] ActivityTraceId? TraceID, [property: CLSCompliant( false )] ActivitySpanId? SpanID )
+public sealed record TelemetryLogEvent( DateTimeOffset TimeStamp, LogEventLevel Level, ExceptionDetails? Exception, MessageTemplate MessageTemplate, ReadOnlyDictionary<string, JToken?> Properties, ActivityTraceId? TraceID, ActivitySpanId? SpanID )
 {
-    public static implicit operator TelemetryLogEvent( LogEvent logEvent ) => Create( logEvent );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static implicit operator TelemetryLogEvent( LogEvent                                  logEvent ) => Create( logEvent );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static                   IEnumerable<TelemetryLogEvent> Create( IEnumerable<LogEvent> logEvent ) => logEvent.Select( Create );
 
 
-    public static IEnumerable<TelemetryLogEvent> Create( IEnumerable<LogEvent> logEvent ) => logEvent.Select( Create );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static TelemetryLogEvent Create( LogEvent logEvent )
     {
         Dictionary<string, JToken?> dictionary = new(logEvent.Properties.Count);

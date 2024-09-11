@@ -19,7 +19,7 @@ public sealed class ExceptionDetails
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode( nameof(ExceptionDetails) )]
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
         Message = e.Message;

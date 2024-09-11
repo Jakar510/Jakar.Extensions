@@ -9,8 +9,8 @@ public static class ConsoleExtensions
     public static bool   CanDebug => Debugger.IsAttached;
     public static string Header   { get; set; } = '='.Repeat( 100 );
 
-
-    [RequiresUnreferencedCode( nameof(WrapException) )]
+    
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
         where T : Exception
     {
