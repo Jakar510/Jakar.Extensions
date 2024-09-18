@@ -1,15 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Database
-// 01/29/2023  1:51 PM
+// 09/17/2024  21:09
 
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( RECOVERY_CODE )]
+[Migration( CREATE_USER_ADDRESS )]
 
 // ReSharper disable once InconsistentNaming
-public sealed class CreateTable_RecoveryCode : Migrate_RecoveryCodes
+public sealed class Create_UserAddress : Migrate_UserAddress
 {
-    public CreateTable_RecoveryCode() : base() { }
+    public Create_UserAddress() : base() { }
     public override void Up()   => CreateTable();
     public override void Down() => DeleteTable();
 }
