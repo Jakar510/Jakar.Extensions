@@ -21,7 +21,8 @@ internal sealed class TestDatabase : Database, IAppName
 
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
-
+    
+    [Experimental( "SqlTableBuilder" )]
     [Conditional( "DEBUG" )]
     public static async void TestAsync()
     {

@@ -60,6 +60,30 @@ public abstract class Migration<TRecord> : Migration
 
 
 
+[SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
+public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
+    where TRecord : Mapping<TRecord, TKey, TValue>, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, ICreateMapping<TRecord, TKey, TValue>
+    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
+    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
+{
+    public static readonly string KeyForeignKeyName   = $"{TRecord.TableName}-{TKey.TableName}.{nameof(SQL.ID)}";
+    public static readonly string ValueForeignKeyName = $"{TRecord.TableName}-{TValue.TableName}.{nameof(SQL.ID)}";
+    protected Migration() : base() { }
+
+
+    protected override ICreateTableWithColumnSyntax CreateTable()
+    {
+        ICreateTableWithColumnSyntax table = base.CreateTable();
+
+        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(SQL.ID) ).NotNullable();
+        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(SQL.ID) ).NotNullable();
+
+        return table;
+    }
+}
+
+
+
 public abstract class OwnedMigration<TRecord> : Migration<TRecord>
     where TRecord : IOwnedTableRecord, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {

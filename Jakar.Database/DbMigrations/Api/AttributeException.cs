@@ -12,16 +12,16 @@ public sealed class AttributeException : Exception
 
     private static string GetMessage( Type classType, PropertyInfo propInfo )
     {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new(64);
         sb.Append( '"' );
         sb.Append( classType.FullName );
         sb.Append( '.' );
         sb.Append( propInfo.Name );
         sb.Append( '"' );
 
-        if ( !propInfo.CanRead ) { sb.Append( " cannot be read from. It's of type " ); }
+        if ( propInfo.CanRead is false ) { sb.Append( " cannot be read from. It's of type " ); }
 
-        else if ( !propInfo.CanWrite ) { sb.Append( " cannot be written to. It's of type " ); }
+        else if ( propInfo.CanWrite is false ) { sb.Append( " cannot be written to. It's of type " ); }
 
         else { sb.Append( "  " ); }
 

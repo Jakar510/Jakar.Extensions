@@ -1,6 +1,9 @@
 ﻿using Jakar.Database;
 
 
+[assembly: Experimental( "SqlTableBuilder" )]
+
+
 try
 {
     "Hello World!".WriteToConsole();

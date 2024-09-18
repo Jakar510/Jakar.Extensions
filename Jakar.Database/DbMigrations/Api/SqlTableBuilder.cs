@@ -4,60 +4,6 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Flags]
-public enum ColumnOptions
-{
-    AlwaysIdentity  = 1 << 0,
-    DefaultIdentity = 1 << 1,
-    Indexed         = 1 << 2,
-    Unique          = 1 << 3,
-    PrimaryKey      = 1 << 4
-}
-
-
-
-public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
-
-
-
-public readonly record struct ColumnCheckMetaData( bool And, params string[] Checks )
-{
-    public static implicit operator ColumnCheckMetaData( string   check )  => new(true, check);
-    public static implicit operator ColumnCheckMetaData( string[] checks ) => new(true, checks);
-}
-
-
-
-public readonly record struct ColumnMetaData( string Name, DbType DbType, bool IsNullable, OneOf<uint, ColumnPrecisionMetaData> Length = default, ColumnCheckMetaData? Check = default, ColumnOptions Options = 0 )
-{
-    // public bool    IsForeignKey { get; init; }
-    // public bool   IsPrimaryKey   { get; init; }
-    // public string PrimaryKeyName { get; init; }
-
-    public string? IndexColumnName { get; init; }
-
-    public static ColumnMetaData Nullable( string    name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 ) => new(name, dbType, true, length, check, options);
-    public static ColumnMetaData NotNullable( string name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 ) => new(name, dbType, false, length, check, options);
-    public static ColumnMetaData Indexed( string     name, string indexName ) => new(name, DbType.Int64, false) { IndexColumnName = indexName };
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > SQL.DECIMAL_MAX_PRECISION, Scope: > SQL.DECIMAL_MAX_SCALE } };
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool IsValidLength() =>
-        Length.IsT0 &&
-        Length.AsT0 switch
-        {
-            0                                                                                    => false,
-            > SQL.ANSI_CAPACITY when DbType is DbType.AnsiString or DbType.AnsiStringFixedLength => false,
-            > SQL.UNICODE_CAPACITY when DbType is DbType.String or DbType.StringFixedLength      => false,
-            _                                                                                    => true
-        };
-}
-
-
-
 /*
  Numeric Types
 
@@ -103,6 +49,67 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
 
        POINT, LINESTRING, POLYGON, and more: These types are used for storing and manipulating spatial data, such as coordinates and shapes, especially in databases that support GIS (Geographic Information Systems).
  */
+
+
+
+[Experimental( "SqlTableBuilder" )]
+[Flags]
+public enum ColumnOptions
+{
+    AlwaysIdentity  = 1 << 0,
+    DefaultIdentity = 1 << 1,
+    Indexed         = 1 << 2,
+    Unique          = 1 << 3,
+    PrimaryKey      = 1 << 4
+}
+
+
+
+[Experimental( "SqlTableBuilder" )] public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
+
+
+
+[Experimental( "SqlTableBuilder" )]
+public readonly record struct ColumnCheckMetaData( bool And, params string[] Checks )
+{
+    public static implicit operator ColumnCheckMetaData( string   check )  => new(true, check);
+    public static implicit operator ColumnCheckMetaData( string[] checks ) => new(true, checks);
+}
+
+
+
+[Experimental( "SqlTableBuilder" )]
+public readonly record struct ColumnMetaData( string Name, DbType DbType, bool IsNullable, OneOf<uint, ColumnPrecisionMetaData> Length = default, ColumnCheckMetaData? Check = null, ColumnOptions Options = 0 )
+{
+    // public bool    IsForeignKey { get; init; }
+    // public bool   IsPrimaryKey   { get; init; }
+    // public string PrimaryKeyName { get; init; }
+
+    public string? IndexColumnName { get; init; }
+
+    public static ColumnMetaData Nullable( string    name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 ) => new(name, dbType, true, length, check, options);
+    public static ColumnMetaData NotNullable( string name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 ) => new(name, dbType, false, length, check, options);
+    public static ColumnMetaData Indexed( string     name, string indexName ) => new(name, DbType.Int64, false) { IndexColumnName = indexName };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > SQL.DECIMAL_MAX_PRECISION, Scope: > SQL.DECIMAL_MAX_SCALE } };
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public bool IsValidLength() =>
+        Length.IsT0 &&
+        Length.AsT0 switch
+        {
+            0                                                                                    => false,
+            > SQL.ANSI_CAPACITY when DbType is DbType.AnsiString or DbType.AnsiStringFixedLength => false,
+            > SQL.UNICODE_CAPACITY when DbType is DbType.String or DbType.StringFixedLength      => false,
+            _                                                                                    => true
+        };
+}
+
+
+
+[Experimental( "SqlTableBuilder" )]
 public ref struct SqlTableBuilder<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
@@ -121,7 +128,7 @@ public ref struct SqlTableBuilder<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = default, ColumnOptions options = 0 )
+    public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
     {
         DbType         dbType = GetDataType<T>( out bool isNullable, ref length );
         ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);

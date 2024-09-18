@@ -4,9 +4,10 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public sealed class CreateUserRecoveryCodeRecord : Migrate_UserRecoveryCodes
+[Migration( USER_RECOVERY_CODE )]
+public sealed class CreateUserRecoveryCode : Migrate_UserRecoveryCodes
 {
-    public CreateUserRecoveryCodeRecord() : base() { }
+    public CreateUserRecoveryCode() : base() { }
     public override void Up()   => CreateTable();
     public override void Down() => DeleteTable();
 }
