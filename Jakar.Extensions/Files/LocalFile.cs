@@ -939,8 +939,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
-        public ConcurrentCollection() : base( Sorter, Equalizer ) { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter, Equalizer ) { }
+        public ConcurrentCollection() : base( Sorter ) { }
+        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter ) { }
     }
 
 
@@ -1096,7 +1096,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         public event ErrorEventHandler? Error { add => _errorEventManager.AddEventHandler( x => value?.Invoke( this, x ) ); remove => _errorEventManager.RemoveEventHandler( x => value?.Invoke( this, x ) ); }
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter, Equalizer )
+        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter )
         {
             _watcher                     =  watcher;
             _watcher.Created             += OnCreated;

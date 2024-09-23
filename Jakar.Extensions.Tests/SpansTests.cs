@@ -288,7 +288,7 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void WhereValues( params double[] values )
     {
-        Span<double> results = Spans.WhereValues<double>( values, IsDevisableByTwo );
+        Span<double> results = Spans.Where<double>( values, IsDevisableByTwo );
         this.AreEqual<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
@@ -342,6 +342,7 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a1524dbz123", "1", "z", "Abc_az524dbzz23" ), TestCase( "Abc_a1524dbz123", "2", "4", "Abc_a1544dbz143" )]
     public void Replace( string value, string oldValue, string newValue, string expected )
     {
+        this.AreEqual( expected, value.Replace( oldValue, newValue ) );
         ReadOnlySpan<char> result = Spans.Replace<char>( value, oldValue, newValue );
         this.AreEqual( expected, result.ToString() );
     }

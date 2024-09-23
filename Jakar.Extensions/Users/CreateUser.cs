@@ -8,9 +8,9 @@ namespace Jakar.Extensions;
 [Serializable]
 public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TGroupModel : IGroupModel<TID>
-    where TRoleModel : IRoleModel<TID>
-    where TAddress : IAddress<TID>
+    where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
+    where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
+    where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
     private string _confirmPassword = string.Empty;

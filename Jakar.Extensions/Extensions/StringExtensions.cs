@@ -207,9 +207,9 @@ public static class StringExtensions
     {
         if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-
-        using ValueStringBuilder        builder          = new ValueStringBuilder( span.Length + Math.Max( 2, span.Length / 5 ) );
-        UnicodeCategory? previousCategory = default;
+        ;
+        StringBuilder    builder          = new(span.Length + span.Count( ' ' ) + span.Count( Randoms.UPPER_CASE ));
+        UnicodeCategory? previousCategory = null;
 
         for ( int currentIndex = 0; currentIndex < span.Length; currentIndex++ )
         {

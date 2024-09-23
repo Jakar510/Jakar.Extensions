@@ -17,12 +17,11 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     public ObservableHashSet( IEnumerable<TValue> enumerable ) : this( [..enumerable] ) { }
 
 
-    public static implicit operator ObservableHashSet<TValue>( List<TValue>                 values ) => new(values);
-    public static implicit operator ObservableHashSet<TValue>( HashSet<TValue>              values ) => new(values);
-    public static implicit operator ObservableHashSet<TValue>( ConcurrentBag<TValue>        values ) => new(values);
-    public static implicit operator ObservableHashSet<TValue>( ObservableCollection<TValue> values ) => new(values);
-    public static implicit operator ObservableHashSet<TValue>( Collection<TValue>           values ) => new(values);
-    public static implicit operator ObservableHashSet<TValue>( TValue[]                     values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( List<TValue>          values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( HashSet<TValue>       values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( ConcurrentBag<TValue> values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( Collection<TValue>    values ) => new(values);
+    public static implicit operator ObservableHashSet<TValue>( TValue[]              values ) => new(values);
 
 
     public virtual bool IsProperSubsetOf( IEnumerable<TValue>   other ) => buffer.IsProperSubsetOf( other );

@@ -1,7 +1,9 @@
 // Jakar.Extensions :: Jakar.Extensions.Tests
 // 3/27/2024  10:39
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 
 
@@ -11,44 +13,51 @@ namespace Jakar.Extensions.Tests;
 [TestFixture, TestOf( typeof(ObservableCollection<>) )]
 public class ObservableCollection_Tests : Assert
 {
-    private static readonly ObservableCollection<int> _collection = [..Enumerable.Range( 0, 100 )];
+    internal static ValueSorter<int> Sorter => ValueSorter<int>.Default;
+
 
     [Test, TestCase( 10 ), TestCase( 20 ), TestCase( 30 ), TestCase( 40 )]
     public void Indexes( int value )
     {
-        this.AreEqual( value, _collection.IndexOf( value ) );
-        this.AreEqual( value, _collection.LastIndexOf( value ) );
-        this.AreEqual( value, _collection.FindIndex( Match ) );
-        this.AreEqual( value, _collection.Find( Match ) );
-        this.AreEqual( value, _collection.FindLast( Match ) );
-        this.AreEqual( 1,     _collection.FindAll( Match ).Length );
-        this.AreEqual( value, _collection.FindAll( Match )[0] );
+        ObservableCollection<int> collection = new(Enumerable.Range( 0, 100 )) { IsReadOnly = true };
+        this.AreEqual( value, collection.IndexOf( value ) );
+        this.AreEqual( value, collection.LastIndexOf( value ) );
+        this.AreEqual( value, collection.Find( Match ) );
+        this.AreEqual( value, collection.FindLast( Match ) );
+        this.AreEqual( 1,     collection.FindAll( Match ).Length );
+        this.AreEqual( value, collection.FindAll( Match )[0] );
         return;
 
         bool Match( int x ) => x == value;
     }
 
-
+    
     [Test]
     public void Sort()
     {
-        int[] array  = [..Enumerable.Range( 0, 100 ).Select( static x => Randoms.Random.Next( 1000 ) )];
-        int[] sorted = [..array];
-        Array.Sort( sorted, ValueSorter<int>.Default );
+        ReadOnlyMemory<int> array  = new([..Enumerable.Range( 0, 100 ).Select( static x => Random.Shared.Next( 1000 ) )]);
+        ReadOnlyMemory<int> sorted = GetSorted( array.Span );
 
-        ObservableCollection<int> collection = new(array, ValueSorter<int>.Default, ValueEqualizer<int>.Default);
+        ObservableCollection<int> collection = new(array.Span, Sorter);
         collection.Sort();
-        this.AreEqual( sorted, collection.ToArray() );
+        this.AreEqual( sorted.Span, collection.ToArray() );
 
         collection.Clear();
         collection.Add( array );
-        collection.Sort( ValueSorter<int>.Default.Compare );
-        this.AreEqual( sorted, collection.ToArray() );
+        collection.Sort( Sorter );
+        this.AreEqual( sorted.Span, collection.ToArray() );
+    }
+    private static ReadOnlyMemory<T> GetSorted<T>( scoped in ReadOnlySpan<T> array )
+    {
+        T[] sorted = [.. array];
+        Array.Sort( sorted, Comparer<T>.Default );
+        return sorted;
     }
 
 
     [Test, TestCase( 1 ), TestCase( 2 ), TestCase( 3 ), TestCase( 4 ), TestCase( "1" ), TestCase( "2" ), TestCase( "3" ), TestCase( "4" )]
     public void Run<T>( T value )
+        where T : IEquatable<T>
     {
         ObservableCollection<T> collection = [];
         collection.Add( value );

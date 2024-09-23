@@ -10,11 +10,11 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     private readonly ILockedCollection<TValue> _collection = collection;
     private          bool                      _isDisposed;
     private          CancellationToken         _token = token;
-    private          FilterBuffer<TValue>?     _owner;
+    private          FilterBuffer<TValue>?     _buffer;
     private          int                       _index = START_INDEX;
 
 
-    private ReadOnlyMemory<TValue>  _Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _owner?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
+    private ReadOnlyMemory<TValue>  _Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
     TValue IAsyncEnumerator<TValue>.Current        => Current;
     public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _Memory.Span[_index]; }
     internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && (uint)_index < (uint)_Memory.Length; }
@@ -24,8 +24,8 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     {
         GC.SuppressFinalize( this );
         _isDisposed = true;
-        _owner?.Dispose();
-        _owner = null;
+        _buffer?.Dispose();
+        _buffer = null;
         return ValueTask.CompletedTask;
     }
 
@@ -36,9 +36,9 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
 
         if ( _Memory.IsEmpty )
         {
-            _owner?.Dispose();
-            _owner = await _collection.CopyAsync( _token );
-            _index = START_INDEX;
+            _buffer?.Dispose();
+            _buffer = await _collection.CopyAsync( _token );
+            _index  = START_INDEX;
         }
 
         if ( _token.IsCancellationRequested || (uint)_index >= (uint)_Memory.Length ) { return false; }
@@ -52,10 +52,10 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     public AsyncLockerEnumerator<TValue> GetAsyncEnumerator( CancellationToken token = default )
     {
         ThrowIfDisposed();
-        _owner?.Dispose();
-        _owner = null;
-        _index = START_INDEX;
-        _token = token;
+        _buffer?.Dispose();
+        _buffer = null;
+        _index  = START_INDEX;
+        _token  = token;
         return this;
     }
     public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";

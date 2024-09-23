@@ -4,53 +4,55 @@
 namespace Jakar.Extensions;
 
 
-public ref struct Buffer<T>
+/*
+public ref struct Buffer<TValue>
 {
-    private          T[]                   _arrayToReturnToPool;
-    internal         Span<T>               buffer = Span<T>.Empty;
-    private readonly IEqualityComparer<T>? _comparer;
-    private          int                   _length;
+    private  TValue[]                   _arrayToReturnToPool;
+    internal Span<TValue>               buffer = Span<TValue>.Empty;
+    private  IEqualityComparer<TValue>? _comparer;
+    private  int                        _length;
 
 
-    public readonly bool    IsEmpty    { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length == 0; }
-    public readonly bool    IsNotEmpty { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length > 0; }
-    public readonly int     Capacity   { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
-    public          int     Length     { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] readonly get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
-    public readonly Span<T> Next       { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer[Length..]; }
-    public readonly Span<T> Span       { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer[..Length]; }
-    public          bool    IsReadOnly { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get;                    init; } = false;
-    public          int     Index      { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] readonly get => Length; set => Length = Math.Max( Math.Min( Capacity, value ), 0 ); }
-    public readonly ref T this[ int     index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref buffer[index]; }
-    public readonly ref T this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref buffer[index]; }
-    public readonly Span<T> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => buffer[range]; }
-    public readonly Span<T> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Slice( start, length ); }
+    public readonly bool         IsEmpty    { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length == 0; }
+    public readonly bool         IsNotEmpty { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => Length > 0; }
+    public readonly int          Capacity   { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer.Length; }
+    public          int          Length     { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] readonly get => _length; set => _length = Math.Max( Math.Min( Capacity, value ), 0 ); }
+    public readonly Span<TValue> Next       { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer[Length..]; }
+    public readonly Span<TValue> Span       { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get => buffer[..Length]; }
+    public          bool         IsReadOnly { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] get;                    init; } = false;
+    public          int          Index      { [Pure, MethodImpl(                      MethodImplOptions.AggressiveInlining )] readonly get => Length; set => Length = Math.Max( Math.Min( Capacity, value ), 0 ); }
+    public readonly ref TValue this[ int     index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref buffer[index]; }
+    public readonly ref TValue this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => ref buffer[index]; }
+    public readonly Span<TValue> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get => buffer[range]; }
+    public readonly Span<TValue> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Slice( start, length ); }
 
 
     public Buffer() : this( DEFAULT_CAPACITY ) { }
-    public Buffer( int                       initialCapacity ) : this( EqualityComparer<T>.Default, initialCapacity ) { }
-    public Buffer( scoped in ReadOnlySpan<T> span ) : this( span, EqualityComparer<T>.Default ) => Append( span );
-    public Buffer( scoped in ReadOnlySpan<T> span, IEqualityComparer<T> comparer ) : this( comparer, span.Length ) => Append( span );
-    public Buffer( IEqualityComparer<T> comparer, int initialCapacity = DEFAULT_CAPACITY )
+    public Buffer( int                            initialCapacity ) : this( EqualityComparer<TValue>.Default, initialCapacity ) { }
+    public Buffer( scoped in ReadOnlySpan<TValue> span ) : this( span, EqualityComparer<TValue>.Default ) => Append( span );
+    public Buffer( scoped in ReadOnlySpan<TValue> span, IEqualityComparer<TValue> comparer ) : this( comparer, span.Length ) => Append( span );
+    public Buffer( IEqualityComparer<TValue> comparer, int initialCapacity = DEFAULT_CAPACITY )
     {
         _comparer = comparer;
-        buffer    = _arrayToReturnToPool = ArrayPool<T>.Shared.Rent( initialCapacity );
+        buffer    = _arrayToReturnToPool = ArrayPool<TValue>.Shared.Rent( initialCapacity );
     }
     public void Dispose()
     {
-        T[]? toReturn = _arrayToReturnToPool;
+        _comparer = null;
+        TValue[]? toReturn = _arrayToReturnToPool;
         this = default; // For safety, to avoid using pooled array if this instance is erroneously appended to again
-        if ( toReturn is not null ) { ArrayPool<T>.Shared.Return( toReturn ); }
+        if ( toReturn is not null ) { ArrayPool<TValue>.Shared.Return( toReturn ); }
     }
 
 
-    public readonly override string     ToString()      => $"{nameof(Buffer<T>)} ( {nameof(Capacity)}: {Capacity}, {nameof(Length)}: {Length}, {nameof(IsReadOnly)}: {IsReadOnly} )";
+    public readonly override string     ToString()      => $"{nameof(Buffer<TValue>)} ( {nameof(Capacity)}: {Capacity}, {nameof(Length)}: {Length}, {nameof(IsReadOnly)}: {IsReadOnly} )";
     public readonly          Enumerator GetEnumerator() => new(this);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private readonly void ThrowIfReadOnly()
     {
-        if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<T>)} is read only" ); }
+        if ( IsReadOnly ) { throw new InvalidOperationException( $"{nameof(Buffer<TValue>)} is read only" ); }
     }
 
 
@@ -68,38 +70,38 @@ public ref struct Buffer<T>
     private void Grow( in uint capacity, in uint requestedCapacity )
     {
         ThrowIfReadOnly();
-        int minimumLength = GetLength( capacity, requestedCapacity );
-        T[] array         = ArrayPool<T>.Shared.Rent( minimumLength );
-        new Span<T>( _arrayToReturnToPool ).CopyTo( array );
-        ArrayPool<T>.Shared.Return( _arrayToReturnToPool );
+        int      minimumLength = GetLength( capacity, requestedCapacity );
+        TValue[] array         = ArrayPool<TValue>.Shared.Rent( minimumLength );
+        new Span<TValue>( _arrayToReturnToPool ).CopyTo( array );
+        ArrayPool<TValue>.Shared.Return( _arrayToReturnToPool );
         _arrayToReturnToPool = array;
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly ref T GetPinnableReference() => ref buffer.GetPinnableReference();
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly ref TValue GetPinnableReference() => ref buffer.GetPinnableReference();
     [Pure]
-    public ref T GetPinnableReference( T terminate )
+    public ref TValue GetPinnableReference( TValue terminate )
     {
         Append( terminate );
         return ref GetPinnableReference();
     }
 
 
-    public T[] ToArray()
+    public TValue[] ToArray()
     {
-        T[] array = Span.ToArray();
+        TValue[] array = Span.ToArray();
         Dispose();
         return array;
     }
 
 
-    public Buffer<T> Clear()
+    public Buffer<TValue> Clear()
     {
         Length = 0;
         buffer.Clear();
         return this;
     }
-    public Buffer<T> Reset( T value )
+    public Buffer<TValue> Reset( TValue value )
     {
         Length = 0;
         buffer.Fill( value );
@@ -108,25 +110,24 @@ public ref struct Buffer<T>
 
 
     [Pure]
-    public ReadOnlySpan<T> AsSpan( T? terminate )
+    public ReadOnlySpan<TValue> AsSpan( TValue? terminate )
     {
         if ( terminate is null ) { return Span; }
 
         Append( terminate );
         return Span;
     }
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly Span<T> Slice( int start )             => Span[start..];
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly Span<T> Slice( int start, int length ) => Span.Slice( start, length );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly Span<TValue> Slice( int start )             => Span[start..];
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly Span<TValue> Slice( int start, int length ) => Span.Slice( start, length );
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly int IndexOf( T value, in int start = 0 ) => IndexOf( value, start, Length );
-    public readonly int IndexOf( T value, in int start, in int end )
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly int IndexOf( TValue value, in int start = 0 ) => IndexOf( value, start, Length );
+    public readonly int IndexOf( TValue value, in int start, in int end )
     {
         Trace.Assert( start >= 0 && start <= Length );
         Trace.Assert( end   >= 0 && end   <= Length );
         Trace.Assert( end >= start );
-
-        if ( _comparer is null ) { return NOT_FOUND; }
+        Debug.Assert( _comparer is not null );
 
         for ( int i = start; i < end; i++ )
         {
@@ -135,15 +136,14 @@ public ref struct Buffer<T>
 
         return NOT_FOUND;
     }
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly int LastIndexOf( T value, in int end = 0 ) => LastIndexOf( value, Length, end );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly int LastIndexOf( TValue value, in int end = 0 ) => LastIndexOf( value, Length, end );
     [Pure]
-    public readonly int LastIndexOf( T value, in int start, in int end )
+    public readonly int LastIndexOf( TValue value, in int start, in int end )
     {
         Trace.Assert( start >= 0 && start <= Length );
         Trace.Assert( end   >= 0 && end   <= Length );
         Trace.Assert( start >= end );
-
-        if ( _comparer is null ) { return NOT_FOUND; }
+        Debug.Assert( _comparer is not null );
 
         for ( int i = start; i < end; i-- )
         {
@@ -155,11 +155,11 @@ public ref struct Buffer<T>
 
 
     [Pure]
-    public readonly bool Contains( T value )
+    public readonly bool Contains( TValue value )
     {
         Debug.Assert( _comparer is not null );
 
-        foreach ( T x in buffer )
+        foreach ( TValue x in buffer )
         {
             if ( _comparer.Equals( x, value ) ) { return true; }
         }
@@ -167,7 +167,7 @@ public ref struct Buffer<T>
         return false;
     }
     [Pure]
-    public readonly bool Contains( scoped in ReadOnlySpan<T> value )
+    public readonly bool Contains( scoped in ReadOnlySpan<TValue> value )
     {
         Debug.Assert( _comparer is not null );
         if ( value.Length > buffer.Length ) { return false; }
@@ -176,7 +176,7 @@ public ref struct Buffer<T>
 
         for ( int i = 0; i < buffer.Length || i + value.Length < buffer.Length; i++ )
         {
-            ReadOnlySpan<T> span = buffer.Slice( i, value.Length );
+            ReadOnlySpan<TValue> span = buffer.Slice( i, value.Length );
             if ( span.SequenceEqual( value, _comparer ) ) { return true; }
         }
 
@@ -185,7 +185,7 @@ public ref struct Buffer<T>
 
 
     [Pure]
-    public readonly bool TryCopyTo( scoped in Span<T> destination, out int length )
+    public readonly bool TryCopyTo( scoped in Span<TValue> destination, out int length )
     {
         if ( Span.TryCopyTo( destination ) )
         {
@@ -198,7 +198,7 @@ public ref struct Buffer<T>
     }
 
 
-    public Buffer<T> Replace( int index, T value, int count = 1 )
+    public Buffer<TValue> Replace( int index, TValue value, int count = 1 )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
@@ -207,7 +207,7 @@ public ref struct Buffer<T>
 
         return this;
     }
-    public Buffer<T> Replace( int index, scoped in ReadOnlySpan<T> span )
+    public Buffer<TValue> Replace( int index, scoped in ReadOnlySpan<TValue> span )
     {
         ThrowIfReadOnly();
         EnsureCapacity( span.Length );
@@ -217,7 +217,7 @@ public ref struct Buffer<T>
     }
 
 
-    public Buffer<T> Insert( int index, T value, int count = 1 )
+    public Buffer<TValue> Insert( int index, TValue value, int count = 1 )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
@@ -231,7 +231,7 @@ public ref struct Buffer<T>
         Length += count;
         return this;
     }
-    public Buffer<T> Insert( int index, scoped in ReadOnlySpan<T> span )
+    public Buffer<TValue> Insert( int index, scoped in ReadOnlySpan<TValue> span )
     {
         ThrowIfReadOnly();
         EnsureCapacity( span.Length );
@@ -247,88 +247,150 @@ public ref struct Buffer<T>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( T                         value )        => Add( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( IEnumerable<T>            value )        => Add( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( scoped in ReadOnlySpan<T> span )         => Add( span );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<T> Append( T                         c, int count ) => Add( c, count );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<TValue> Append( TValue                         value )        => Add( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<TValue> Append( IEnumerable<TValue>            value )        => Add( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<TValue> Append( scoped in ReadOnlySpan<TValue> span )         => Add( span );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Buffer<TValue> Append( TValue                         c, int count ) => Add( c, count );
 
 
-    public Buffer<T> Add( T value )
+    public Buffer<TValue> Add( TValue value )
     {
         ThrowIfReadOnly();
         EnsureCapacity( 1 );
         buffer[Length++] = value;
         return this;
     }
-    public Buffer<T> Add( IEnumerable<T> values )
+    public Buffer<TValue> Add( TValue                         value, int count ) => AddRange( value, count );
+    public Buffer<TValue> Add( scoped in ReadOnlySpan<TValue> values )     => AddRange( values );
+    public Buffer<TValue> Add( IEnumerable<TValue>            enumerable ) => AddRange( enumerable );
+    public Buffer<TValue> AddRange( TValue value, int count )
     {
+        Guard.IsGreaterThanOrEqualTo( count, 0 );
         ThrowIfReadOnly();
+        EnsureCapacity( count );
+        Span<TValue> span = Next;
 
-        if ( values is ICollection<T> collection )
-        {
-            int count = collection.Count;
-            if ( count <= 0 ) { return this; }
+        for ( int i = 0; i < count; i++ ) { span[i] = value; }
 
-            EnsureCapacity( count );
-            collection.CopyTo( _arrayToReturnToPool, Length );
-            Length += count;
-        }
-        else
-        {
-            foreach ( T obj in values ) { Add( obj ); }
-        }
-
+        Length += count;
         return this;
     }
-    public Buffer<T> Add( scoped in ReadOnlySpan<T> span )
+    public Buffer<TValue> AddRange( scoped in ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
+        Span<TValue> span = Next;
 
-        switch ( span.Length )
+        switch ( values.Length )
         {
             case 0: return this;
 
-            case > 0 when Length + span.Length < Capacity:
+            // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
+            case 1 when span.Length > 1:
             {
-                Span<T> next = Next;
-                span.CopyTo( next );
-                Length += span.Length;
+                span[0] =  values[0];
+                Length  += 1;
+                return this;
+            }
+
+            case 2 when span.Length > 2:
+            {
+                span[0] =  values[0];
+                span[1] =  values[1];
+                Length  += 2;
+                return this;
+            }
+
+            case 3 when span.Length > 3:
+            {
+                span[0] =  values[0];
+                span[1] =  values[1];
+                span[2] =  values[2];
+                Length  += 3;
+                return this;
+            }
+
+            case > 0 when span.Length > values.Length:
+            {
+                values.CopyTo( span );
+                Length += values.Length;
                 return this;
             }
 
             default:
             {
-                EnsureCapacity( span.Length );
-
-                Span<T> next = Next;
-                span.CopyTo( next );
-                Length += span.Length;
+                EnsureCapacity( values.Length );
+                values.CopyTo( Next );
+                Length += values.Length;
                 return this;
             }
         }
     }
-    public Buffer<T> Add( T c, int count )
+    public Buffer<TValue> AddRange( IEnumerable<TValue> enumerable )
     {
         ThrowIfReadOnly();
-        EnsureCapacity( count );
-        Span<T> span = Next;
-        for ( int i = 0; i < count; i++ ) { span[i] = c; }
 
-        Length += count;
-        return this;
+        switch ( enumerable )
+        {
+            case TValue[] values:
+            {
+                int count = values.Length;
+                if ( count <= 0 ) { return this; }
+
+                EnsureCapacity( count );
+                new ReadOnlySpan<TValue>( values ).CopyTo( Next );
+                Length += count;
+                return this;
+            }
+
+            case List<TValue> list:
+            {
+                int count = list.Count;
+                if ( count <= 0 ) { return this; }
+
+                EnsureCapacity( count );
+                CollectionsMarshal.AsSpan( list ).CopyTo( Next );
+                Length += count;
+                return this;
+            }
+
+            case ICollection<TValue> collection:
+            {
+                int count = collection.Count;
+                if ( count <= 0 ) { return this; }
+
+                EnsureCapacity( count );
+                TValue[] array = _arrayToReturnToPool;
+                collection.CopyTo( array, Length );
+                Length += count;
+                return this;
+            }
+
+            default:
+            {
+                foreach ( TValue value in enumerable ) { Add( value ); }
+
+                return this;
+            }
+        }
     }
+
+
+    public void Sort( IComparer<TValue>  compare )                                         { }
+    public void Sort( Comparison<TValue> compare )                                         { }
+    public void Sort( int                compare, int length, IComparer<TValue> comparer ) { }
 
 
 
     [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public ref struct Enumerator( scoped in Buffer<T> buffer )
+    public ref struct Enumerator( scoped in Buffer<TValue> buffer )
     {
-        private readonly Buffer<T> _buffer = buffer;
-        private          int       _index  = NOT_FOUND;
+        private readonly Buffer<TValue> _buffer = buffer;
+        private          int            _index  = NOT_FOUND;
 
-        public readonly ref T Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
+        public readonly ref TValue Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
 
         [MethodImpl(       MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
-        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => ++_index < _buffer.Length;
+        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => (uint)++_index < (uint)_buffer.Length;
     }
 }
+*/

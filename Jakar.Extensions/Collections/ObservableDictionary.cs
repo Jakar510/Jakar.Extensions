@@ -58,7 +58,6 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public static implicit operator ObservableDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
     public static implicit operator ObservableDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>              items ) => new(items);
     public static implicit operator ObservableDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>>        items ) => new(items);
-    public static implicit operator ObservableDictionary<TKey, TValue>( ObservableCollection<KeyValuePair<TKey, TValue>> items ) => new(items);
     public static implicit operator ObservableDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>           items ) => new(items);
     public static implicit operator ObservableDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
 

@@ -2,6 +2,10 @@
 // 06/07/2022  3:25 PM
 
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -13,7 +17,7 @@ public ref struct ValueStringBuilder
     private Buffer<char> _chars;
 
 
-    public readonly bool       IsEmpty  { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Length == 0; }
+    public readonly bool       IsEmpty  { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.IsEmpty; }
     public readonly int        Capacity { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Capacity; }
     public readonly Span<char> Next     { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Next; }
     public readonly Span<char> Span     { [MethodImpl(            MethodImplOptions.AggressiveInlining )] get => _chars.Span; }
@@ -21,7 +25,8 @@ public ref struct ValueStringBuilder
     public ref char this[ Index            index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _chars[index]; }
     public ref char this[ int              index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _chars[index]; }
     public readonly ReadOnlySpan<char> Result { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => _chars.Span; }
-    public          int                Length { [MethodImpl(      MethodImplOptions.AggressiveInlining )] readonly get => _chars.Index; set => _chars.Index = value; }
+    public          int                Length { [MethodImpl(      MethodImplOptions.AggressiveInlining )] readonly get => _chars.Count; set => _chars.Count = value; }
+    public readonly ReadOnlySpan<char> Values => _chars.Values;
 
 
     public ValueStringBuilder() : this( 64 ) { }
@@ -34,8 +39,7 @@ public ref struct ValueStringBuilder
     // public ValueStringBuilder(  Buffer<char>       buffer ) => _chars = buffer;
 
 
-    public          void                    Dispose()       => _chars.Dispose();
-    public readonly Buffer<char>.Enumerator GetEnumerator() => _chars.GetEnumerator();
+    public void Dispose() => _chars.Dispose();
 
 
     public void EnsureCapacity<T>( scoped in ReadOnlySpan<char> format )
@@ -46,14 +50,14 @@ public ref struct ValueStringBuilder
         else if ( typeof(T) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
         else if ( typeof(T) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
 
-        _chars.EnsureCapacity( capacity );
+        Buffers.EnsureCapacity( ref _chars, capacity );
     }
-    public void EnsureCapacity( int capacity ) => _chars.EnsureCapacity( capacity );
+    public void EnsureCapacity( int capacity ) => Buffers.EnsureCapacity( ref _chars, capacity );
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public readonly ref char GetPinnableReference() => ref _chars.GetPinnableReference();
+    public readonly ref char GetPinnableReference() => ref _chars.Span.GetPinnableReference();
 
 
     /// <summary> Get a pinnable reference to the builder. </summary>
@@ -88,25 +92,26 @@ public ref struct ValueStringBuilder
     }
 
 
-    [Pure] public readonly ReadOnlySpan<char> AsSpan()                         => _chars.Span;
-    [Pure] public          ReadOnlySpan<char> AsSpan( char terminate )         => _chars.AsSpan( terminate );
-    [Pure] public readonly ReadOnlySpan<char> Slice( int   start )             => _chars[start..];
-    [Pure] public readonly ReadOnlySpan<char> Slice( int   start, int length ) => _chars.Slice( start, length );
+    [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => _chars.Span;
+    [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => _chars[start..];
+    [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => _chars.Span.Slice( start, length );
     public ValueStringBuilder Reset()
     {
-        _chars.Reset( '\0' );
+        _chars.Span.Fill( '\0' );
         return this;
     }
 
 
     public bool TryCopyTo( scoped in Span<char> destination, out int charsWritten )
     {
-        if ( _chars.TryCopyTo( destination, out charsWritten ) )
+        if ( _chars.Span.TryCopyTo( destination ) )
         {
+            charsWritten = _chars.Count;
             Dispose();
             return true;
         }
 
+        charsWritten = 0;
         Dispose();
         return false;
     }
@@ -146,17 +151,18 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder Replace( int index, char value )
     {
-        _chars.Replace( index, value );
+        _chars.Span[index] = value;
         return this;
     }
     public ValueStringBuilder Replace( int index, char value, int count )
     {
-        _chars.Replace( index, value, count );
+        for ( var i = 0; i < count; i++ ) { _chars.Span[index + i] = value; }
+
         return this;
     }
     public ValueStringBuilder Replace( int index, scoped in ReadOnlySpan<char> value )
     {
-        _chars.Replace( index, value );
+        value.CopyTo( _chars.Span[index..] );
         return this;
     }
 
@@ -180,29 +186,30 @@ public ref struct ValueStringBuilder
 
     public ValueStringBuilder Append( char c )
     {
-        _chars.Append( c );
+        _chars.Add( c );
         return this;
     }
     public ValueStringBuilder Append( IEnumerable<string> values )
     {
-        foreach ( string value in values ) { _chars.Append( value ); }
+        foreach ( string value in values ) { _chars.Add( value ); }
 
         return this;
     }
     public ValueStringBuilder Append( scoped in ReadOnlySpan<string> values )
     {
-        foreach ( string value in values ) { _chars.Append( value ); }
+        foreach ( string value in values ) { _chars.Add( value ); }
 
         return this;
     }
     public ValueStringBuilder Append( char c, int count )
     {
-        _chars.Append( c, count );
+        for ( var i = 0; i < count; i++ ) { _chars.Add( c ); }
+
         return this;
     }
     public ValueStringBuilder Append( scoped in ReadOnlySpan<char> value )
     {
-        _chars.Append( value );
+        _chars.Add( value );
         return this;
     }
 
@@ -340,12 +347,11 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            string current = enumerator.Current;
-            current.AsSpan().CopyTo( Next );
-            _chars.Index   += current.Length;
-            shouldContinue =  enumerator.MoveNext();
+            ReadOnlySpan<char> current = enumerator.Current;
+            _chars.Add( current );
+            shouldContinue = enumerator.MoveNext();
 
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -358,12 +364,11 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            string current = enumerator.Current;
-            current.AsSpan().CopyTo( Next );
-            _chars.Index   += current.Length;
-            shouldContinue =  enumerator.MoveNext();
+            ReadOnlySpan<char> current = enumerator.Current;
+            _chars.Add( current );
+            shouldContinue = enumerator.MoveNext();
 
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -379,12 +384,12 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            if ( !enumerator.Current.TryFormat( Next, out int charsWritten, format, provider ) ) { continue; }
+            if ( enumerator.Current.TryFormat( Next, out int charsWritten, format, provider ) is false ) { continue; }
 
-            _chars.Index   += charsWritten;
+            _chars.Count   += charsWritten;
             shouldContinue =  enumerator.MoveNext();
 
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -399,11 +404,11 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            if ( !enumerator.Current.TryFormat( Next, out int charsWritten, format, provider ) ) { continue; }
+            if ( enumerator.Current.TryFormat( Next, out int charsWritten, format, provider ) is false ) { continue; }
 
-            _chars.Index   += charsWritten;
+            _chars.Count   += charsWritten;
             shouldContinue =  enumerator.MoveNext();
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -422,7 +427,7 @@ public ref struct ValueStringBuilder
             if ( enumerator.Current is not null ) { AppendSpanFormattable( enumerator.Current, format, provider ); }
 
             shouldContinue = enumerator.MoveNext();
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -441,7 +446,7 @@ public ref struct ValueStringBuilder
             if ( enumerator.Current is not null ) { AppendSpanFormattable( enumerator.Current, format, provider ); }
 
             shouldContinue = enumerator.MoveNext();
-            if ( shouldContinue ) { _chars.Append( separator ); }
+            if ( shouldContinue ) { _chars.Add( separator ); }
         }
 
         return this;
@@ -454,7 +459,7 @@ public ref struct ValueStringBuilder
     {
         EnsureCapacity<T>( format );
 
-        if ( value.TryFormat( Next, out int charsWritten, format, provider ) ) { _chars.Index += charsWritten; }
+        if ( value.TryFormat( Next, out int charsWritten, format, provider ) ) { _chars.Count += charsWritten; }
 
         Debug.Assert( charsWritten > 0, $"No values added to {nameof(_chars)}" );
         return this;
@@ -470,7 +475,7 @@ public ref struct ValueStringBuilder
     /// <exception cref="FormatException"> </exception>
     internal void AppendFormatHelper( IFormatProvider? provider, scoped in ReadOnlySpan<char> format, scoped in ParamsArray args )
     {
-        // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
+        // Undocumented exclusive limits on the range for Argument Hole Count and Argument Hole Alignment.
         const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
         const int WIDTH_LIMIT = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
 
@@ -517,13 +522,13 @@ public ref struct ValueStringBuilder
 
             //
             // Start of parsing of Argument Hole.
-            // Argument Hole ::= { Index (, WS* Alignment WS*)? (: Formatting)? }
+            // Argument Hole ::= { Count (, WS* Alignment WS*)? (: Formatting)? }
             //
             if ( pos == format.Length ) { break; }
 
             //
-            //  Start of parsing required Index parameter.
-            //  Index ::= ('0'-'9')+ WS*
+            //  Start of parsing required Count parameter.
+            //  Count ::= ('0'-'9')+ WS*
             //
             pos++;
 
@@ -542,8 +547,8 @@ public ref struct ValueStringBuilder
             }
             while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
-            // If value of index is not within the range of the arguments passed  then error (Index out of range)
-            if ( index >= args.Length ) { throw new FormatException( "Format Index Out Of Range" ); }
+            // If value of index is not within the range of the arguments passed  then error (Count out of range)
+            if ( index >= args.Length ) { throw new FormatException( "Format Count Out Of Range" ); }
 
             // Consume optional whitespace.
             while ( pos < format.Length && (ch = format[pos]) == ' ' ) { pos++; }
@@ -666,7 +671,7 @@ public ref struct ValueStringBuilder
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
-                    _chars.Index += charsWritten;
+                    _chars.Count += charsWritten;
 
                     // Pad the end, if needed.
                     int padding = width - charsWritten;
@@ -711,7 +716,7 @@ public ref struct ValueStringBuilder
     internal void AppendFormatHelper<T>( IFormatProvider? provider, scoped in ReadOnlySpan<char> format, scoped in ParamsArray<T> args )
         where T : unmanaged, IEquatable<T>
     {
-        // Undocumented exclusive limits on the range for Argument Hole Index and Argument Hole Alignment.
+        // Undocumented exclusive limits on the range for Argument Hole Count and Argument Hole Alignment.
         const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
         const int WIDTH_LIMIT = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
 
@@ -758,13 +763,13 @@ public ref struct ValueStringBuilder
 
             //
             // Start of parsing of Argument Hole.
-            // Argument Hole ::= { Index (, WS* Alignment WS*)? (: Formatting)? }
+            // Argument Hole ::= { Count (, WS* Alignment WS*)? (: Formatting)? }
             //
             if ( pos == format.Length ) { break; }
 
             //
-            //  Start of parsing required Index parameter.
-            //  Index ::= ('0'-'9')+ WS*
+            //  Start of parsing required Count parameter.
+            //  Count ::= ('0'-'9')+ WS*
             //
             pos++;
 
@@ -783,8 +788,8 @@ public ref struct ValueStringBuilder
             }
             while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
-            // If value of index is not within the range of the arguments passed  then error (Index out of range)
-            if ( index >= args.Length ) { throw new FormatException( "Format Index Out Of Range" ); }
+            // If value of index is not within the range of the arguments passed  then error (Count out of range)
+            if ( index >= args.Length ) { throw new FormatException( "Format Count Out Of Range" ); }
 
             // Consume optional whitespace.
             while ( pos < format.Length && (ch = format[pos]) == ' ' ) { pos++; }
@@ -908,7 +913,7 @@ public ref struct ValueStringBuilder
                 // If arg is ISpanFormattable and the beginning doesn't need padding, try formatting it into the remaining current chunk.
                 if ( arg is ISpanFormattable spanFormattableArg && (leftJustify || width == 0) && spanFormattableArg.TryFormat( Next, out int charsWritten, itemFormatSpan, provider ) )
                 {
-                    _chars.Index += charsWritten;
+                    _chars.Count += charsWritten;
 
                     // Pad the end, if needed.
                     int padding = width - charsWritten;

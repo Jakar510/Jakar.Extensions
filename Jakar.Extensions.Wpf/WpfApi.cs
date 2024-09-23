@@ -118,7 +118,7 @@ public static partial class WpfApi
 
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Predicate<T> filter )
+    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Func<T, bool> filter )
         where TComparer : IComparer<T>, IComparer
     {
         bool Filter( object item ) => item is T value && filter( value );

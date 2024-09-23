@@ -5,10 +5,10 @@ namespace Jakar.Extensions;
 
 
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct SpanFilter<T>( scoped in ReadOnlySpan<T> span, Predicate<T> func )
+public ref struct SpanFilter<T>( scoped in ReadOnlySpan<T> span, Func<T, bool> func )
 {
     private readonly ReadOnlySpan<T> _span  = span;
-    private readonly Predicate<T>    _func  = func;
+    private readonly Func<T, bool>    _func  = func;
     private          int             _index = NOT_FOUND;
 
     public T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }

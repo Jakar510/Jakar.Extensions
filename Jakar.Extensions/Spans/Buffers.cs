@@ -7,6 +7,22 @@ public static class Buffers
     public const int DEFAULT_CAPACITY = 64;
 
 
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void EnsureCapacity<TValue>( ref Buffer<TValue> buffer, int additionalRequestedCapacity )
+        where TValue : IEquatable<TValue> => EnsureCapacity( ref buffer, (uint)additionalRequestedCapacity );
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void EnsureCapacity<TValue>( ref Buffer<TValue> buffer, uint additionalRequestedCapacity )
+        where TValue : IEquatable<TValue> => EnsureCapacity( ref buffer, (uint)buffer.Count, additionalRequestedCapacity );
+
+    internal static void EnsureCapacity<TValue>( ref Buffer<TValue> buffer, in uint count, in uint additionalRequestedCapacity )
+        where TValue : IEquatable<TValue>
+    {
+        buffer.ThrowIfReadOnly();
+        if ( count + additionalRequestedCapacity > buffer.Capacity ) { buffer = buffer.Grow( count + additionalRequestedCapacity ); }
+    }
+
+
     public static int GetLength( in ulong capacity, in ulong requestedCapacity )
     {
         Guard.IsGreaterThan( requestedCapacity, capacity );
@@ -14,50 +30,5 @@ public static class Buffers
 
         ulong result = Math.Max( requestedCapacity, capacity * 2 );
         return (int)Math.Min( result, int.MaxValue );
-    }
-
-
-    public static Buffer<T> AsBuffer<T>( this ReadOnlySpan<T> span ) => new(span);
-    public static void Trim<T>( this Buffer<T> buffer, scoped in T value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.Trim( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
-    }
-    public static void Trim<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.Trim( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
-    }
-    public static void TrimStart<T>( this Buffer<T> buffer, scoped in T value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.TrimStart( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
-    }
-    public static void TrimStart<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.TrimStart( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
-    }
-    public static void TrimEnd<T>( this Buffer<T> buffer, scoped in T value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.TrimEnd( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
-    }
-    public static void TrimEnd<T>( this Buffer<T> buffer, scoped in ReadOnlySpan<T> value )
-        where T : IEquatable<T>
-    {
-        ReadOnlySpan<T> span = buffer.buffer.TrimEnd( value );
-        buffer.Length = span.Length;
-        span.CopyTo( buffer.buffer );
     }
 }

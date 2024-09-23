@@ -168,14 +168,15 @@ public static partial class AsyncLinq
 
     public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        List<TElement> list = new List<TElement>();
+        List<TElement> list = [];
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
     }
     public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
     {
-        ObservableCollection<TElement> list = new ObservableCollection<TElement>();
+        ObservableCollection<TElement> list = [];
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;

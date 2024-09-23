@@ -88,7 +88,7 @@ public interface IUserData<TID> : IUserData, IImageID<TID>, IUniqueID<TID>, ICre
 
 public interface IUserData<TID, TAddress> : IUserData<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TAddress : IAddress<TID>
+    where TAddress : IAddress<TID>, IEquatable<TAddress>
 {
     public ObservableCollection<TAddress> Addresses { get; }
 }
@@ -97,9 +97,9 @@ public interface IUserData<TID, TAddress> : IUserData<TID>
 
 public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TGroupModel : IGroupModel<TID>
-    where TRoleModel : IRoleModel<TID>
-    where TAddress : IAddress<TID>
+    where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
+    where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
+    where TAddress : IAddress<TID>, IEquatable<TAddress>
 {
     public ObservableCollection<TGroupModel> Groups { get; }
     public ObservableCollection<TRoleModel>  Roles  { get; }
@@ -109,9 +109,9 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TGroupModel : IGroupModel<TID>
-    where TRoleModel : IRoleModel<TID>
-    where TAddress : IAddress<TID>
+    where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
+    where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
+    where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TClass : ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
 {
     public TClass With( IEnumerable<TAddress>               values );

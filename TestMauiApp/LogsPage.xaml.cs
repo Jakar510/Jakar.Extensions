@@ -37,7 +37,7 @@ public sealed partial class LogsPage : ContentPage
 
 
 
-public sealed class FileLogs( string fileName, string[] lines ) : ObservableCollection<string>( lines )
+public sealed class FileLogs( string fileName, string[] lines ) : ObservableCollection<string>( lines ), IEquatable<FileLogs>
 {
     private static readonly char[] _separator = ['\n', '\r'];
     public                  string Name { get; } = fileName;
@@ -48,4 +48,16 @@ public sealed class FileLogs( string fileName, string[] lines ) : ObservableColl
         string content = await file.ReadAsync().AsString( token );
         return new FileLogs( file.Name, content.Split( _separator, StringSplitOptions.RemoveEmptyEntries ) );
     }
+
+
+    public bool Equals( FileLogs? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return string.Equals( Name, other.Name, StringComparison.Ordinal );
+    }
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is FileLogs other && Equals( other );
+    public override int  GetHashCode()         => Name.GetHashCode();
 }

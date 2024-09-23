@@ -8,6 +8,7 @@ public static partial class AsyncLinq
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.Add( value ); }
     }
     public static async ValueTask Add<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
     {
         if ( collection is ConcurrentObservableCollection<TElement> list )
         {
@@ -18,6 +19,7 @@ public static partial class AsyncLinq
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.Add( value ); }
     }
     public static async ValueTask AddOrUpdate<TElement>( this IList<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
     {
         if ( collection is ConcurrentObservableCollection<TElement> list )
         {
@@ -28,6 +30,7 @@ public static partial class AsyncLinq
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.AddOrUpdate( value ); }
     }
     public static async ValueTask Remove<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
     {
         if ( collection is ConcurrentObservableCollection<TElement> list )
         {
@@ -38,6 +41,7 @@ public static partial class AsyncLinq
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.Remove( value ); }
     }
     public static async ValueTask TryAdd<TElement>( this ICollection<TElement> collection, IAsyncEnumerable<TElement> values, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
     {
         if ( collection is ConcurrentObservableCollection<TElement> list )
         {

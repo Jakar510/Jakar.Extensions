@@ -8,7 +8,7 @@ public interface ICollectionAlerts : INotifyCollectionChanged, IObservableObject
 
 
 
-public abstract class CollectionAlerts<TValue> : ObservableClass, ICollectionAlerts, IReadOnlyCollection<TValue>
+public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyCollection<TValue>, ICollectionAlerts
 {
     public abstract int Count { get; }
 

@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 [Serializable]
 public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TGroupModel : IGroupModel<TID>
-    where TRoleModel : IRoleModel<TID>
-    where TAddress : IAddress<TID>
+    where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
+    where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
+    where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";

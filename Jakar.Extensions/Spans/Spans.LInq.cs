@@ -8,13 +8,13 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
     [Pure]
-    public static T First<T>( this Span<T> values, Predicate<T> selector )
+    public static T First<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.First( selector );
     }
     [Pure]
-    public static T First<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static T First<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -24,13 +24,13 @@ public static partial class Spans
         throw new NotFoundException();
     }
     [Pure]
-    public static T? FirstOrDefault<T>( this Span<T> values, Predicate<T> selector )
+    public static T? FirstOrDefault<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.FirstOrDefault( selector );
     }
     [Pure]
-    public static T? FirstOrDefault<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static T? FirstOrDefault<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -42,13 +42,35 @@ public static partial class Spans
 
 
     [Pure]
-    public static bool All<T>( this Span<T> values, Predicate<T> selector )
+    public static T Last<T>( this ReadOnlySpan<T> span, Func<T, bool> predicate )
+    {
+        for ( int index = span.Length - 1; index >= 0; --index )
+        {
+            if ( predicate( span[index] ) ) return span[index];
+        }
+
+        throw new NotFoundException();
+    }
+    [Pure]
+    public static T? LastOrDefault<T>( this ReadOnlySpan<T> span, Func<T, bool> predicate )
+    {
+        for ( int index = span.Length - 1; index >= 0; --index )
+        {
+            if ( predicate( span[index] ) ) return span[index];
+        }
+
+        return default;
+    }
+
+
+    [Pure]
+    public static bool All<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.All( selector );
     }
     [Pure]
-    public static bool All<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static bool All<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -60,13 +82,13 @@ public static partial class Spans
 
 
     [Pure]
-    public static bool Any<T>( this Span<T> values, Predicate<T> selector )
+    public static bool Any<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.Any( selector );
     }
     [Pure]
-    public static bool Any<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static bool Any<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -78,13 +100,13 @@ public static partial class Spans
 
 
     [Pure]
-    public static T Single<T>( this Span<T> values, Predicate<T> selector )
+    public static T Single<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.Single( selector );
     }
     [Pure]
-    public static T Single<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static T Single<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -94,13 +116,13 @@ public static partial class Spans
         throw new NotFoundException();
     }
     [Pure]
-    public static T? SingleOrDefault<T>( this Span<T> values, Predicate<T> selector )
+    public static T? SingleOrDefault<T>( this Span<T> values, Func<T, bool> selector )
     {
         ReadOnlySpan<T> span = values;
         return span.SingleOrDefault( selector );
     }
     [Pure]
-    public static T? SingleOrDefault<T>( this ReadOnlySpan<T> values, Predicate<T> selector )
+    public static T? SingleOrDefault<T>( this ReadOnlySpan<T> values, Func<T, bool> selector )
     {
         foreach ( T value in values )
         {
@@ -112,7 +134,7 @@ public static partial class Spans
 
 
     [Pure]
-    public static Span<T> Where<T>( scoped in Span<T> values, Predicate<T> selector )
+    public static Span<T> Where<T>( scoped in Span<T> values, Func<T, bool> selector )
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -123,7 +145,8 @@ public static partial class Spans
         return new Span<T>( buffer, 0, length );
     }
     [Pure]
-    public static ReadOnlySpan<T> Where<T>( scoped in ReadOnlySpan<T> values, Predicate<T> selector )
+    public static ReadOnlySpan<T> Where<T>( scoped in ReadOnlySpan<T> values, Func<T, bool> selector )
+        where T : IEquatable<T>
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -136,62 +159,21 @@ public static partial class Spans
         }
         finally { buffer.Dispose(); }
     }
-    [Pure]
-    public static ReadOnlySpan<T> WhereValues<T>( scoped in ReadOnlySpan<T> values, Predicate<T> selector )
-        where T : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            default:
-            {
-                Buffer<T> buffer = new(values.Length);
-
-                try
-                {
-                    Where( values, ref buffer, selector );
-                    return buffer.ToArray();
-                }
-                finally { buffer.Dispose(); }
-            }
-        }
-    }
-    [Pure]
-    public static Span<T> WhereValues<T>( scoped in Span<T> values, Predicate<T> selector )
-        where T : unmanaged, IEquatable<T>
-    {
-        switch ( values.Length )
-        {
-            case 0: return default;
-
-            default:
-            {
-                Buffer<T> buffer = new(values.Length);
-
-                try
-                {
-                    Where( values, ref buffer, selector );
-                    return buffer.ToArray();
-                }
-                finally { buffer.Dispose(); }
-            }
-        }
-    }
 
 
-    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Buffer<T> span, Predicate<T> selector )
+    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Buffer<T> buffer, Func<T, bool> selector )
+        where T : IEquatable<T>
     {
         if ( values.IsEmpty ) { return false; }
 
         foreach ( T value in values )
         {
-            if ( selector( value ) ) { span.Add( value ); }
+            if ( selector( value ) ) { buffer.Add( value ); }
         }
 
-        return span.Length > 0;
+        return buffer.Count > 0;
     }
-    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Span<T> span, Predicate<T> selector, out int length )
+    public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Span<T> span, Func<T, bool> selector, out int length )
     {
         if ( values.IsEmpty )
         {
@@ -226,7 +208,7 @@ public static partial class Spans
 
         return length > 0;
     }
-    public static bool Where<T, TNext>( scoped in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Predicate<T> selector, Func<T, TNext> func, out int length )
+    public static bool Where<T, TNext>( scoped in ReadOnlySpan<T> values, scoped ref Span<TNext> span, Func<T, bool> selector, Func<T, TNext> func, out int length )
     {
         if ( values.IsEmpty )
         {
@@ -308,7 +290,7 @@ public static partial class Spans
 
 
     [Pure]
-    public static Span<TNext> Select<T, TNext>( scoped in Span<T> values, Predicate<T> selector, Func<T, TNext> func )
+    public static Span<TNext> Select<T, TNext>( scoped in Span<T> values, Func<T, bool> selector, Func<T, TNext> func )
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -319,7 +301,7 @@ public static partial class Spans
         return new Span<TNext>( buffer, 0, length );
     }
     [Pure]
-    public static ReadOnlySpan<TNext> Select<T, TNext>( scoped in ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
+    public static ReadOnlySpan<TNext> Select<T, TNext>( scoped in ReadOnlySpan<T> values, Func<T, bool> selector, Func<T, TNext> func )
     {
         if ( values.IsEmpty ) { return default; }
 
@@ -330,7 +312,7 @@ public static partial class Spans
         return new ReadOnlySpan<TNext>( buffer, 0, length );
     }
     [Pure]
-    public static Span<TNext> SelectValues<T, TNext>( scoped in Span<T> values, Predicate<T> selector, Func<T, TNext> func )
+    public static Span<TNext> SelectValues<T, TNext>( scoped in Span<T> values, Func<T, bool> selector, Func<T, TNext> func )
         where TNext : unmanaged, IEquatable<T>
     {
         switch ( values.Length )
@@ -348,7 +330,7 @@ public static partial class Spans
         }
     }
     [Pure]
-    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( scoped in ReadOnlySpan<T> values, Predicate<T> selector, Func<T, TNext> func )
+    public static ReadOnlySpan<TNext> SelectValues<T, TNext>( scoped in ReadOnlySpan<T> values, Func<T, bool> selector, Func<T, TNext> func )
         where TNext : unmanaged, IEquatable<T>
     {
         switch ( values.Length )
@@ -420,6 +402,7 @@ public static partial class Spans
     }
     [Pure]
     public static bool Join<T>( scoped in ReadOnlySpan<T> first, scoped in ReadOnlySpan<T> last, scoped ref Buffer<T> buffer )
+        where T : IEquatable<T>
     {
         buffer.Add( first );
         buffer.Add( last );
