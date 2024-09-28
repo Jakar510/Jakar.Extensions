@@ -17,7 +17,7 @@ public interface ISvSection : IValidator, IDisposable
 
 
 public interface ISvSection<T> : ISvSection
-    where T : ISvCellTitle
+    where T : ISvCellTitle, IEquatable<T>
 {
     public ObservableCollection<T> Cells { get; }
 }
@@ -28,7 +28,7 @@ public static class SvSectionExtensions
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool AreCellsValid<T>( this ISvSection<T> section )
-        where T : ISvCellTitle => section.Cells.AreCellsValid();
+        where T : ISvCellTitle, IEquatable<T> => section.Cells.AreCellsValid();
 
 
     public static bool AreCellsValid<T>( this IEnumerable<T> cells )
@@ -47,7 +47,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Add<T>( this ISvSection<T> section, T cell )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         section.Cells.Add( cell );
     }
@@ -55,7 +55,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Add<T>( this ISvSection<T> section, IEnumerable<T> cells )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         foreach ( T cell in cells ) { section.Cells.Add( cell ); }
     }
@@ -63,7 +63,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Add<T>( this ISvSection<T> section, params T[] cells )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         section.Add( cells.AsEnumerable() );
     }
@@ -71,7 +71,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Remove<T>( this ISvSection<T> section, T cell )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         section.Cells.Remove( cell );
     }
@@ -79,7 +79,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Remove<T>( this ISvSection<T> section, IEnumerable<T> cells )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         foreach ( T cell in cells ) { section.Cells.Remove( cell ); }
     }
@@ -87,7 +87,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Remove<T>( this ISvSection<T> section, params T[] cells )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         section.Remove( cells.AsEnumerable() );
     }
@@ -95,7 +95,7 @@ public static class SvSectionExtensions
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void Clear<T>( this ISvSection<T> section )
-        where T : ISvCellTitle
+        where T : ISvCellTitle, IEquatable<T>
     {
         section.Cells.Clear();
     }

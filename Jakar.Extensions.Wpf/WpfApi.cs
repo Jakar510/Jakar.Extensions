@@ -104,6 +104,7 @@ public static partial class WpfApi
 
 
     public static ListCollectionView ToCollectionView<T>( this ConcurrentObservableCollection<T> list )
+        where T : IEquatable<T>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
         ListCollectionView collection = new ListCollectionView( list );
@@ -111,6 +112,7 @@ public static partial class WpfApi
     }
     public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
         where TComparer : IComparer<T>, IComparer
+        where T : IEquatable<T>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
@@ -120,9 +122,8 @@ public static partial class WpfApi
     }
     public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Func<T, bool> filter )
         where TComparer : IComparer<T>, IComparer
+        where T : IEquatable<T>
     {
-        bool Filter( object item ) => item is T value && filter( value );
-
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
         ListCollectionView collection = new ListCollectionView( list )
@@ -132,6 +133,7 @@ public static partial class WpfApi
                                         };
 
         return collection;
+        bool Filter( object item ) => item is T value && filter( value );
     }
 
 

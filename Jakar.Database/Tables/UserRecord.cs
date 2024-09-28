@@ -530,9 +530,9 @@ public sealed record UserRecord( string                        UserName,
         where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>();
     public TClass ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>()
         where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
-        where TGroupModel : IGroupModel<TGroupModel, Guid>
-        where TRoleModel : IRoleModel<TRoleModel, Guid>
-        where TAddress : IAddress<TAddress, Guid> => TClass.Create( this );
+        where TGroupModel : IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
+        where TRoleModel : IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
+        where TAddress : IAddress<TAddress, Guid>, IEquatable<TAddress> => TClass.Create( this );
 
 
     public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, db, token );
@@ -540,9 +540,9 @@ public sealed record UserRecord( string                        UserName,
         where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, db, token );
     public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
         where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
-        where TGroupModel : IGroupModel<TGroupModel, Guid>
-        where TRoleModel : IRoleModel<TRoleModel, Guid>
-        where TAddress : IAddress<TAddress, Guid>
+        where TGroupModel : IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
+        where TRoleModel : IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
+        where TAddress : IAddress<TAddress, Guid>, IEquatable<TAddress>
     {
         TClass model = TClass.Create( this );
 

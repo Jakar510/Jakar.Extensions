@@ -54,16 +54,16 @@ Initial Release</PackageReleaseNotes>
 		<PackageReference Include="Blazored.Video" Version="1.0.1" />
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="8.0.0" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="PanoramicData.Blazor" Version="8.0.91" />
-		<PackageReference Include="Radzen.Blazor" Version="5.1.11" />
-		<PackageReference Include="Jakar.Extensions" Version="8.13.1" />
-		<PackageReference Include="Hardware.Info" Version="100.1.1" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+		<PackageReference Include="PanoramicData.Blazor" Version="8.0.110" />
+		<PackageReference Include="Radzen.Blazor" Version="5.2.4" />
+		<PackageReference Include="Jakar.Extensions" Version="8.13.3" />
+		<PackageReference Include="Hardware.Info" Version="101.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.7.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.7.3" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.8.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />

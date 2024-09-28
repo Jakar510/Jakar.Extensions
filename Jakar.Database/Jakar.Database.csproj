@@ -62,126 +62,66 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Dapper"
-						  Version="2.1.35" />
-		<PackageReference Include="Dapper.Contrib"
-						  Version="2.0.78" />
-		<PackageReference Include="dbup-postgresql"
-						  Version="5.0.40" />
-		<PackageReference Include="dbup-sqlserver"
-						  Version="5.0.41" />
-		<PackageReference Include="FluentMigrator.Abstractions"
-						  Version="5.2.0" />
-		<PackageReference Include="Jakar.Extensions"
-						  Version="8.13.1" />
-		<PackageReference Include="FluentMigrator"
-						  Version="5.2.0" />
-		<PackageReference Include="FluentMigrator.Runner"
-						  Version="5.2.0" />
-		<PackageReference Include="MailKit"
-						  Version="4.7.1.1" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp"
-						  Version="4.11.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.Identity.Client"
-						  Version="4.64.0" />
-		<PackageReference Include="Microsoft.Identity.Web"
-						  Version="3.1.0" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens"
-						  Version="8.0.2" />
-		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect"
-						  Version="8.0.2" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens"
-						  Version="8.0.2" />
-		<PackageReference Include="Npgsql"
-						  Version="8.0.4" />
-		<PackageReference Include="Npgsql.Json.NET"
-						  Version="8.0.4" />
-		<PackageReference Include="Npgsql.OpenTelemetry"
-						  Version="8.0.4" />
-		<PackageReference Include="OpenTelemetry"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Api"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.InMemory"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Zipkin"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore"
-						  Version="1.7.0-rc.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient"
-						  Version="1.7.0-beta.1" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Http"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime"
-						  Version="1.9.0" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting"
-						  Version="1.9.0" />
-		<PackageReference Include="prometheus-net.AspNetCore"
-						  Version="8.2.1" />
-		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks"
-						  Version="8.2.1" />
-		<PackageReference Include="prometheus-net.SystemMetrics"
-						  Version="3.1.0" />
-		<PackageReference Include="Otp.NET"
-						  Version="1.4.0" />
-		<PackageReference Include="Sigil"
-						  Version="5.0.0" />
-		<PackageReference Include="System.IO.Hashing"
-						  Version="8.0.0" />
-		<PackageReference Include="ZXing.Net"
-						  Version="0.16.9" />
-		<PackageReference Include="Hardware.Info"
-						  Version="100.1.1" />
-		<PackageReference Include="System.Security.Cryptography.Xml"
-						  Version="8.0.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore"
-						  Version="6.7.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations"
-						  Version="6.7.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft"
-						  Version="6.7.3" />
-		<PackageReference Include="Microsoft.Extensions.Hosting"
-						  Version="8.0.0" />
-		<PackageReference Include="Microsoft.NETCore.Platforms"
-						  Version="7.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"
-						  Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"
-						  Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd"
-						  Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices"
-						  Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi"
-						  Version="8.0.8" />
-		<PackageReference Include="Microsoft.Extensions.Http.Resilience"
-						  Version="8.9.1" />
-		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery"
-						  Version="8.2.0" />
+		<PackageReference Include="Dapper" Version="2.1.35" />
+		<PackageReference Include="Dapper.Contrib" Version="2.0.78" />
+		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
+		<PackageReference Include="dbup-sqlserver" Version="5.0.41" />
+		<PackageReference Include="FluentMigrator.Abstractions" Version="6.0.0" />
+		<PackageReference Include="Jakar.Extensions" Version="8.13.3" />
+		<PackageReference Include="FluentMigrator" Version="6.0.0" />
+		<PackageReference Include="FluentMigrator.Runner" Version="6.0.0" />
+		<PackageReference Include="MailKit" Version="4.7.1.1" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.11.0" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.65.0" />
+		<PackageReference Include="Microsoft.Identity.Web" Version="3.2.0" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.1.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.1.0" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.1.0" />
+		<PackageReference Include="Npgsql" Version="8.0.4" />
+		<PackageReference Include="Npgsql.Json.NET" Version="8.0.4" />
+		<PackageReference Include="Npgsql.OpenTelemetry" Version="8.0.4" />
+		<PackageReference Include="OpenTelemetry" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.InMemory" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Zipkin" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.7.0-rc.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.7.0-beta.1" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+		<PackageReference Include="prometheus-net.AspNetCore" Version="8.2.1" />
+		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
+		<PackageReference Include="prometheus-net.SystemMetrics" Version="3.1.0" />
+		<PackageReference Include="Otp.NET" Version="1.4.0" />
+		<PackageReference Include="Sigil" Version="5.0.0" />
+		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
+		<PackageReference Include="ZXing.Net" Version="0.16.9" />
+		<PackageReference Include="Hardware.Info" Version="101.0.0" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.8.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.9.1" />
+		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="8.2.1" />
 	</ItemGroup>
 
 	<!--

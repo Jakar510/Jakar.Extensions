@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Jakar.Database" Version="7.0.0.27-beta" />
-    <PackageReference Include="Jakar.Extensions.Blazor" Version="8.0.1" />
-    <PackageReference Include="Jakar.Extensions.Blazor.Syncfusion" Version="8.0.1" />
+    <PackageReference Include="Jakar.Extensions.Blazor" Version="8.0.2" />
+    <PackageReference Include="Jakar.Extensions.Blazor.Syncfusion" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>

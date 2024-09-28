@@ -10,7 +10,7 @@ namespace Jakar.SettingsView.Maui.Sv;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public class SvSection : ContentView, ISvSection<CellBase>
+public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection>
 {
     public static readonly BindableProperty CellsProperty       = BindableProperty.Create( nameof(Cells),       typeof(ObservableCollection<CellBase>), typeof(SvSection), defaultValueCreator: static bindable => new ObservableCollection<CellBase>() );
     public static readonly BindableProperty FooterProperty      = BindableProperty.Create( nameof(Footer),      typeof(HeaderBase),                     typeof(SvSection), defaultValueCreator: FooterBase.Default.Create );
@@ -73,6 +73,11 @@ public class SvSection : ContentView, ISvSection<CellBase>
     }
     public static void ClearGesture( View view ) => view.GestureRecognizers.Clear();
     public static void DoNothing()               { }
+
+
+    public          bool Equals( SvSection? other ) => ReferenceEquals( this, other );
+    public override bool Equals( object?    other ) => ReferenceEquals( this, other ) || other is SvSection section && Equals( section );
+    public override int  GetHashCode()              => base.GetHashCode();
 
 
 
