@@ -1,12 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Blazor
 // 08/14/2024  22:08
 
-using System.ComponentModel;
 using Jakar.SettingsView.Abstractions;
 
 
 
-namespace Jakar.SettingsView.Blazor.Controls;
+namespace Jakar.SettingsView.Blazor.Sv;
 
 
 public abstract class DescriptionCellBase : CellBase, ISvCellDescription

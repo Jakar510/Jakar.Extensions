@@ -6,7 +6,7 @@ using Radzen;
 
 
 
-namespace Jakar.SettingsView.Blazor.Controls;
+namespace Jakar.SettingsView.Blazor.Sv;
 
 
 public class Popup<TValue> : RadzenComponent

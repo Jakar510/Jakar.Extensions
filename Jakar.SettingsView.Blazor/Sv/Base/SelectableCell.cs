@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Blazor
 // 08/06/2024  17:08
 
-namespace Jakar.SettingsView.Blazor.Controls;
+namespace Jakar.SettingsView.Blazor.Sv;
 
 
 public abstract class SelectableCell : CellBase

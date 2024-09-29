@@ -1,7 +1,12 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Blazor
 // 08/05/2024  22:08
 
-namespace Jakar.SettingsView.Blazor.Controls;
+using System.Security.Cryptography;
+using Jakar.Extensions;
+
+
+
+namespace Jakar.SettingsView.Blazor.Sv;
 
 
 public static class SvConstants
@@ -27,6 +32,9 @@ public static class SvConstants
     public const string SV_SECTION_HEADER_ICON           = "sv-section-header-icon";
     public const string SV_SECTION_HEADER_ICON_COLLAPSED = "sv-section-header-icon-collapsed";
     public const string SV_SECTION_HEADER_ICON_EXPANDED  = "sv-section-header-icon-expanded";
+
+
+    public static string GetID() => Guid.NewGuid().ToBase64();
 
 
     public static async ValueTask Execute<T>( this EventCallback<T> callback, T? args = default )

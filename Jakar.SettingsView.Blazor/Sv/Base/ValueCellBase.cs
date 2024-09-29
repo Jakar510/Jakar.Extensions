@@ -5,7 +5,7 @@ using Jakar.SettingsView.Abstractions;
 
 
 
-namespace Jakar.SettingsView.Blazor.Controls;
+namespace Jakar.SettingsView.Blazor.Sv;
 
 
 public abstract class ValueCellBase<T> : DescriptionCellBase, ISvCellValue<T>
