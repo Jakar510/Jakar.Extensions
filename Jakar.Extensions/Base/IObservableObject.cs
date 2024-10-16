@@ -40,6 +40,20 @@ public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyCha
 
 public static class ObservableObjects
 {
+    public static readonly ConcurrentDictionary<string, PropertyChangedEventArgs>  PropertyChangedEventArgsCache  = new(StringComparer.Ordinal);
+    public static readonly ConcurrentDictionary<string, PropertyChangingEventArgs> PropertyChangingEventArgsCache = new(StringComparer.Ordinal);
+    public static PropertyChangedEventArgs GetPropertyChangedEventArgs( this string property )
+    {
+        if ( PropertyChangedEventArgsCache.TryGetValue( property, out PropertyChangedEventArgs? args ) is false ) { PropertyChangedEventArgsCache[property] = args = new PropertyChangedEventArgs( property ); }
+
+        return args;
+    }
+    public static PropertyChangingEventArgs GetPropertyChangingEventArgs( this string property )
+    {
+        if ( PropertyChangingEventArgsCache.TryGetValue( property, out PropertyChangingEventArgs? args ) is false ) { PropertyChangingEventArgsCache[property] = args = new PropertyChangingEventArgs( property ); }
+
+        return args;
+    }
     public static bool SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, in T minDate, IComparer<T> comparer, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         value = comparer.Compare( value, minDate ) < 0

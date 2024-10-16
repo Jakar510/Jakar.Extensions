@@ -535,6 +535,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void Clear()                                          => InternalClear();
 
 
+    [Pure, MustDisposeResource]
     protected internal override FilterBuffer<TValue> FilteredValues()
     {
         ReadOnlySpan<TValue> span   = AsSpan();

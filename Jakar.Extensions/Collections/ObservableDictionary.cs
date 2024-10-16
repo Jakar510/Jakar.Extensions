@@ -106,7 +106,9 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
         }
     }
 
+    
 
+    [Pure, MustDisposeResource]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;

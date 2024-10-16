@@ -576,12 +576,14 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     }
 
 
+    [Pure, MustDisposeResource]
     protected internal FilterBuffer<TValue> Copy()
     {
         using ( AcquireLock() ) { return FilteredValues(); }
     }
-    FilterBuffer<TValue> ILockedCollection<TValue>.                              Copy()                               => Copy();
-    ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    [Pure, MustDisposeResource] FilterBuffer<TValue> ILockedCollection<TValue>.                              Copy()                               => Copy();
+    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    [Pure, MustDisposeResource]
     protected async ValueTask<FilterBuffer<TValue>> CopyAsync( CancellationToken token )
     {
         using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return FilteredValues(); }

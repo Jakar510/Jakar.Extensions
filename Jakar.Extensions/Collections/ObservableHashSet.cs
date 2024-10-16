@@ -81,7 +81,9 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     public virtual bool Contains( TValue value )                 => buffer.Contains( value );
     public         void CopyTo( TValue[] array, int arrayIndex ) => buffer.CopyTo( array, arrayIndex );
 
+    
 
+    [Pure, MustDisposeResource]
     protected internal override FilterBuffer<TValue> FilteredValues()
     {
         int                  count  = buffer.Count;

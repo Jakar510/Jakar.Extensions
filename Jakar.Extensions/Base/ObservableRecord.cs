@@ -13,11 +13,11 @@
         public event PropertyChangingEventHandler? PropertyChanging;
 
 
-        [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( new PropertyChangedEventArgs( property ) );
+        [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property.GetPropertyChangedEventArgs() );
         [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property );
         [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs   e )                => OnPropertyChanged( e );
         [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs   e )                => PropertyChanged?.Invoke( this, e );
-        protected internal                                  void                   OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( new PropertyChangingEventArgs( property ) );
+        protected internal                                  void                   OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property.GetPropertyChangingEventArgs() );
         void IObservableObject.                                                    OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property );
         [NotifyPropertyChangedInvocator] void IObservableObject.                   OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging( e );
         protected internal               void                                      OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke( this, e );
