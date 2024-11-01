@@ -6,16 +6,16 @@ namespace Jakar.Extensions;
 
 public readonly struct StopWatch( string caller ) : IDisposable
 {
-    private readonly string   _caller = caller;
-    private readonly DateTime _start  = DateTime.Now;
+    private readonly string _caller = caller;
+    private readonly long   _start  = Stopwatch.GetTimestamp();
 
 
-    public TimeSpan Elapsed => DateTime.Now - _start;
+    public TimeSpan Elapsed { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start ); }
 
 
     public          void   Dispose()  => Console.WriteLine( ToString() );
     public override string ToString() => $"[{_caller}] {Elapsed}";
 
 
-    public static StopWatch Start( [CallerMemberName] string? caller = default ) => new(caller ?? string.Empty);
+    public static StopWatch Start( [CallerMemberName] string caller = EMPTY ) => new(caller);
 }

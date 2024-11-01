@@ -18,32 +18,32 @@ public interface IDataProtectorProvider
 
 public interface IDataProtector : IDisposable
 {
-    public bool              TryEncrypt( ReadOnlySpan<byte>        value, Span<byte> destination, out int bytesWritten );
-    public byte[]            Encrypt( scoped in ReadOnlySpan<byte> value );
-    public string            Encrypt( string                       value );
-    public string            Encrypt( string                       value, Encoding   encoding );
-    public void              Encrypt( LocalFile                    file,  string     value );
-    public void              Encrypt( LocalFile                    file,  string     value, Encoding encoding );
-    public void              Encrypt( LocalFile                    file,  byte[]     value );
-    public bool              TryDecrypt( ReadOnlySpan<byte>        value, Span<byte> destination, out int bytesWritten );
-    public byte[]            Decrypt( scoped in ReadOnlySpan<byte> value );
-    public string            Decrypt( string                       value );
-    public string            Decrypt( string                       value, Encoding encoding );
-    public byte[]            Decrypt( LocalFile                    file );
-    public string            Decrypt( LocalFile                    file,  Encoding                                                        encoding );
-    public T                 Decrypt<T>( LocalFile                 file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
-    public ValueTask<byte[]> DecryptAsync( LocalFile               file,  CancellationToken                                               token                             = default );
-    public ValueTask<string> DecryptAsync( LocalFile               file,  Encoding                                                        encoding, CancellationToken token = default );
-    public ValueTask<T>      DecryptAsync<T>( LocalFile            file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
-    public ValueTask         DecryptAsync( LocalFile               input, LocalFile                                                       output, CancellationToken token                             = default );
-    public ValueTask         DecryptAsync( LocalFile               input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile               file,  string                                                          value,  CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile               file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile               file,  byte[]                                                          value,  CancellationToken token = default );
-    public ValueTask<byte[]> EncryptAsync( LocalFile               value, CancellationToken                                               token                                                         = default );
-    public ValueTask<string> EncryptAsync( LocalFile               value, Encoding                                                        encoding, CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile               input, LocalFile                                                       output,   CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile               input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
+    public bool              TryEncrypt(scoped in ReadOnlySpan<byte> value,scoped ref  Span<byte> destination, out int bytesWritten );
+    public byte[]            Encrypt( scoped in   ReadOnlySpan<byte> value );
+    public string            Encrypt( string                         value );
+    public string            Encrypt( string                         value, Encoding              encoding );
+    public void              Encrypt( LocalFile                      file,  string                value );
+    public void              Encrypt( LocalFile                      file,  string                value, Encoding encoding );
+    public void              Encrypt( LocalFile                      file,  byte[]                value );
+    public bool              TryDecrypt(scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten );
+    public byte[]            Decrypt( scoped in   ReadOnlySpan<byte> value );
+    public string            Decrypt( string                         value );
+    public string            Decrypt( string                         value, Encoding encoding );
+    public byte[]            Decrypt( LocalFile                      file );
+    public string            Decrypt( LocalFile                      file,  Encoding                                                        encoding );
+    public T                 Decrypt<T>( LocalFile                   file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
+    public ValueTask<byte[]> DecryptAsync( LocalFile                 file,  CancellationToken                                               token                             = default );
+    public ValueTask<string> DecryptAsync( LocalFile                 file,  Encoding                                                        encoding, CancellationToken token = default );
+    public ValueTask<T>      DecryptAsync<T>( LocalFile              file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
+    public ValueTask         DecryptAsync( LocalFile                 input, LocalFile                                                       output, CancellationToken token                             = default );
+    public ValueTask         DecryptAsync( LocalFile                 input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                 file,  string                                                          value,  CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                 file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                 file,  byte[]                                                          value,  CancellationToken token = default );
+    public ValueTask<byte[]> EncryptAsync( LocalFile                 value, CancellationToken                                               token                                                         = default );
+    public ValueTask<string> EncryptAsync( LocalFile                 value, Encoding                                                        encoding, CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                 input, LocalFile                                                       output,   CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                 input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
 }
 
 
@@ -139,7 +139,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryDecrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
+    public bool TryDecrypt( scoped in ReadOnlySpan<byte> value,scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
         return _rsa.TryDecrypt( value, destination, _padding, out bytesWritten );
@@ -225,7 +225,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryEncrypt( ReadOnlySpan<byte> value, Span<byte> destination, out int bytesWritten )
+    public bool TryEncrypt(scoped in  ReadOnlySpan<byte> value,scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
         return _rsa.TryEncrypt( value, destination, _padding, out bytesWritten );
