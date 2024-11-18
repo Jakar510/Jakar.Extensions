@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 05/22/2023  11:38 AM
 
+using System;
+
+
+
 namespace Jakar.Database;
 
 
@@ -15,7 +19,7 @@ public static class WebAppExtensions
 
         return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null ).AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
     }
-    public static WebApplication UseUrls( this WebApplication app, params string[] urls )
+    public static WebApplication UseUrls( this WebApplication app, params ReadOnlySpan<string> urls )
     {
         foreach ( string url in urls ) { app.Urls.Add( url ); }
 

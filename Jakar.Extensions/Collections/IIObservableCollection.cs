@@ -57,7 +57,7 @@ public interface ICollectionAdd<TValue>
 {
     void Add( TValue                                                       value );
     void Add( TValue                                                       value, int count );
-    void Add( params    TValue[]                                           values );
+    void Add( params    ReadOnlySpan<TValue>                               values );
     void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values );
     void Add( scoped in ReadOnlyMemory<TValue>                             values );
     void Add( scoped in ImmutableArray<TValue>                             values );

@@ -17,11 +17,11 @@ public sealed class ApiMetric
         _histogram = meter.CreateHistogram<double>( $"{meterName}.Duration", "ms" );
     }
 
-    public void IncreaseRequestCount()                                        => _counter.Add( 1 );
-    public void IncreaseRequestCount( Tag          tag1 )                     => _counter.Add( 1, tag1 );
-    public void IncreaseRequestCount( Tag          tag1, Tag tag2 )           => _counter.Add( 1, tag1, tag2 );
-    public void IncreaseRequestCount( Tag          tag1, Tag tag2, Tag tag3 ) => _counter.Add( 1, tag1, tag2, tag3 );
-    public void IncreaseRequestCount( params Tag[] tags ) => _counter.Add( 1, Tag.Convert( tags ) );
+    public void IncreaseRequestCount()                                                    => _counter.Add( 1 );
+    public void IncreaseRequestCount( Tag                      tag1 )                     => _counter.Add( 1, tag1 );
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2 )           => _counter.Add( 1, tag1, tag2 );
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2, Tag tag3 ) => _counter.Add( 1, tag1, tag2, tag3 );
+    public void IncreaseRequestCount( params ReadOnlySpan<Tag> tags ) => _counter.Add( 1, Tag.Convert( in tags ) );
 
 
     public Duration MeasureRequestDuration() => new(_histogram);

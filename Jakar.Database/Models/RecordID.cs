@@ -16,7 +16,8 @@ public readonly record struct RecordID<TRecord>( Guid Value ) : IComparable<Reco
     public        string                            Key       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = $"{TRecord.TableName}:{Value}";
 
 
-    [Pure] public static RecordID<TRecord>  New()                                                           => Create( Guid.NewGuid() );
+    [Pure] public static RecordID<TRecord>  New()                                                           => New( DateTimeOffset.UtcNow );
+    [Pure] public static RecordID<TRecord>  New( DateTimeOffset                 timeStamp )                 => Create( Guid.CreateVersion7( timeStamp ) );
     [Pure] public static RecordID<TRecord>  Parse( scoped in ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
     [Pure] public static RecordID<TRecord>  ID( DbDataReader                    reader )                    => Create( reader, SQL.ID );
     [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader             reader )                    => TryCreate( reader, SQL.CREATED_BY );

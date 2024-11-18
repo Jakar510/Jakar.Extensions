@@ -34,13 +34,13 @@ public class AsyncLinqBenchmarks
     //     results.Count.WriteToConsole();
     //     return results;
     // }
-    [Benchmark] public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList();
+    [Benchmark] public ValueTask<List<long>> WhereValueTask() => _data.Where( static x => x > 0 ).Where( static x => x % 5 == 0 ).ToList();
 
 
     [GlobalSetup]
     public void Setup()
     {
-        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }
+        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.CreateVersion7(); }
     }
 
     // [Benchmark] public void Pairs() => _dict.ForEach(( KeyValuePair<long, Guid>           x ) => { });

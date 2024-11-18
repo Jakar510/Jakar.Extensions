@@ -115,55 +115,42 @@ public readonly ref struct ParamsArray
 /// <summary>
 ///     <para> Based on System.ParamsArray </para>
 /// </summary>
-public readonly ref struct ParamsArray<T>
+public readonly ref struct ParamsArray<T>( IMemoryOwner<T> owner, int length )
     where T : IEquatable<T>
 {
-    public ReadOnlySpan<T> Span    { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get; }
-    public int             Length  { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Span.Length; }
-    public bool            IsEmpty { [MethodImpl(          MethodImplOptions.AggressiveInlining )] get => Span.IsEmpty; }
-    public ref readonly T this[ int index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public int this[ T              value ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span.IndexOf( value ); }
+    private readonly IMemoryOwner<T> _owner = owner;
+    public readonly  ReadOnlySpan<T> span   = owner.Memory.Span[..length];
+    public readonly  int             length = length;
+    public           bool            IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => length <= 0 || span.IsEmpty; }
+    public ref readonly T this[ int index ] { [MethodImpl(  MethodImplOptions.AggressiveInlining )] get => ref span[index]; }
+    public int this[ T              value ] { [MethodImpl(  MethodImplOptions.AggressiveInlining )] get => span.IndexOf( value ); }
+    [Pure] public ReadOnlySpan<T>.Enumerator GetEnumerator() => span.GetEnumerator();
 
 
-    public ParamsArray( T[]                       args ) => Span = args;
-    public ParamsArray( scoped in ReadOnlySpan<T> args ) => Span = args;
+    public          void   Dispose()  => _owner.Dispose();
+    public override string ToString() => $"{nameof(ParamsArray<T>)}<{nameof(ReadOnlySpan<T>.Length)}: {length}>";
 
 
-    public static implicit operator ParamsArray<T>( Span<T>         args ) => new(args);
-    public static implicit operator ParamsArray<T>( ReadOnlySpan<T> args ) => new(args);
+    [Pure]
+    public static ParamsArray<T> Create( params ReadOnlySpan<T> args )
+    {
+        IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( args.Length );
+        args.CopyTo( owner.Memory.Span );
+        return new ParamsArray<T>( owner, args.Length );
+    }
+    [Pure]
+    public static ParamsArray<T> Create( List<T> args )
+    {
+        IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( 3 );
+        CollectionsMarshal.AsSpan( args ).CopyTo( owner.Memory.Span );
+        return new ParamsArray<T>();
+    }
+
+
+    public static implicit operator ParamsArray<T>( Span<T>         args ) => Create( args );
+    public static implicit operator ParamsArray<T>( ReadOnlySpan<T> args ) => Create( args );
     public static implicit operator ParamsArray<T>( T               args ) => Create( args );
     public static implicit operator ParamsArray<T>( T[]             args ) => Create( args );
-    public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.Span;
-
-
-    [Pure] public ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
-
-
-    public override string ToString() => $"{nameof(ParamsArray<T>)}<{nameof(Length)}: {Length}>";
-
-
-    [Pure]
-    public static ParamsArray<T> Create( T arg0 )
-    {
-        Span<T> span = [arg0];
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    [Pure]
-    public static ParamsArray<T> Create( T arg0, T arg1 )
-    {
-        Span<T> span = [arg0, arg1];
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    [Pure]
-    public static ParamsArray<T> Create( T arg0, T arg1, T arg2 )
-    {
-        Span<T> span = [arg0, arg1, arg2];
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-    }
-    [Pure] public static ParamsArray<T> Create( params T[] args ) => new(args);
-
-
-    public static implicit operator ParamsArray<T>( List<T> args ) => Create( args );
-
-    [Pure] public static ParamsArray<T> Create( List<T> args ) => new(CollectionsMarshal.AsSpan( args ));
+    public static implicit operator ParamsArray<T>( List<T>         args ) => Create( args );
+    public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.span;
 }

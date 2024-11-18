@@ -35,7 +35,7 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     public Memory<TValue>       Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
     public Span<TValue>         Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Count, Capacity); }
     public Span<TValue>         Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public ReadOnlySpan<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
+    public ReadOnlySpan<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Count); }
 
 
     public Buffer() : this( DEFAULT_CAPACITY ) { }

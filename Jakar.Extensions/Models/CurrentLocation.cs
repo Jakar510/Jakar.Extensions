@@ -83,7 +83,7 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
 
     // private CurrentLocation( Location? point )
     // {
-    //     InstanceID = Guid.NewGuid();
+    //     InstanceID = Guid.CreateVersion7();
     //     if ( point is null ) { return; }
     //
     //     Latitude                = point.Latitude;

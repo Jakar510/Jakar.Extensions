@@ -26,7 +26,7 @@
 					url="https://github.com/Jakar510/Jakar.Extensions"
 					branch="master" />
 		<dependencies>
-			<group targetFramework="net8.0">
+			<group targetFramework="net9.0">
 				<dependency id="Dapper" version="2.1.35" />
 				<dependency id="Dapper.Contrib" version="2.0.78" />
 				<dependency id="FluentMigrator.Abstractions" version="5.2.0" />
@@ -84,11 +84,11 @@
 
 		<file src="..\images\icon.png" />
 
-		<file src="../Jakar.DataBase/bin/Release/net8.0/Jakar.DataBase.dll"
-			  target="lib/net8.0" />
-		<file src="../Jakar.DataBase/bin/Release/net8.0/Jakar.DataBase.xml"
-			  target="net8.0" />
-		<file src="../Jakar.DataBase/bin/Release/net8.0/Jakar.DataBase.pdb"
-			  target="lib/net8.0" />
+		<file src="../Jakar.DataBase/bin/Release/net9.0/Jakar.DataBase.dll"
+			  target="lib/net9.0" />
+		<file src="../Jakar.DataBase/bin/Release/net9.0/Jakar.DataBase.xml"
+			  target="net9.0" />
+		<file src="../Jakar.DataBase/bin/Release/net9.0/Jakar.DataBase.pdb"
+			  target="lib/net9.0" />
 	</files>
 </package>

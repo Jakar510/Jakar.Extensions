@@ -276,25 +276,28 @@ public ref struct ValueStringBuilder
     public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = default )
         where T : unmanaged, IEquatable<T>
     {
-        AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0 ) );
+        ParamsArray<T> parameters = ParamsArray<T>.Create( arg0 );
+        AppendFormatHelper( provider, format, in parameters );
         return this;
     }
     public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = default )
         where T : unmanaged, IEquatable<T>
     {
-        AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0, arg1 ) );
+        ParamsArray<T> parameters = ParamsArray<T>.Create( arg0, arg1 );
+        AppendFormatHelper( provider, format, in parameters );
         return this;
     }
     public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = default )
         where T : unmanaged, IEquatable<T>
     {
-        AppendFormatHelper( provider, format, ParamsArray<T>.Create( arg0, arg1, arg2 ) );
+        ParamsArray<T> parameters = ParamsArray<T>.Create( arg0, arg1, arg2 );
+        AppendFormatHelper( provider, format, in parameters );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, IFormatProvider? provider = default, params T[] args )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, IFormatProvider? provider = default, params ReadOnlySpan<T> args )
         where T : unmanaged, IEquatable<T>
     {
-        if ( args is null )
+        if ( args.IsEmpty )
         {
             // To preserve the original exception behavior, throw an exception about format if both args and format are null. The actual null check for format is  AppendFormatHelper.
             string paramName = format.IsEmpty
@@ -304,7 +307,8 @@ public ref struct ValueStringBuilder
             throw new ArgumentNullException( paramName );
         }
 
-        AppendFormatHelper<T>( provider, format, args );
+        ParamsArray<T> parameters = ParamsArray<T>.Create( args );
+        AppendFormatHelper( provider, format, in parameters );
         return this;
     }
     public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, scoped in ReadOnlySpan<T> args, IFormatProvider? provider = default )
@@ -320,7 +324,8 @@ public ref struct ValueStringBuilder
             throw new ArgumentNullException( paramName );
         }
 
-        AppendFormatHelper<T>( provider, format, args );
+        ParamsArray<T> parameters = ParamsArray<T>.Create( args );
+        AppendFormatHelper( provider, format, in parameters );
         return this;
     }
 
@@ -713,7 +718,7 @@ public ref struct ValueStringBuilder
     /// <returns> </returns>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="FormatException"> </exception>
-    internal void AppendFormatHelper<T>( IFormatProvider? provider, scoped in ReadOnlySpan<char> format, scoped in ParamsArray<T> args )
+    internal void AppendFormatHelper<T>( IFormatProvider? provider, scoped in ReadOnlySpan<char> format, scoped ref readonly ParamsArray<T> args )
         where T : unmanaged, IEquatable<T>
     {
         // Undocumented exclusive limits on the range for Argument Hole Count and Argument Hole Alignment.
@@ -789,7 +794,7 @@ public ref struct ValueStringBuilder
             while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
             // If value of index is not within the range of the arguments passed  then error (Count out of range)
-            if ( index >= args.Length ) { throw new FormatException( "Format Count Out Of Range" ); }
+            if ( index >= args.length ) { throw new FormatException( "Format Count Out Of Range" ); }
 
             // Consume optional whitespace.
             while ( pos < format.Length && (ch = format[pos]) == ' ' ) { pos++; }

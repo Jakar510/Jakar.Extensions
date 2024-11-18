@@ -53,11 +53,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public LocalFile( Uri                          path ) : this( FromUri( path ) ) { }
     public LocalFile( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
     public LocalFile( FileInfo                     path ) : this( path.FullName ) { }
-    public LocalFile( string                       path, params string[] args ) : this( path, Encoding.Default, args ) { }
-    public LocalFile( string                       path, Encoding?       encoding, params string[] args ) : this( path.Combine( args ), encoding ) { }
-    public LocalFile( DirectoryInfo                path, string          fileName ) : this( path.Combine( fileName ) ) { }
-    public LocalFile( string                       path, string          fileName ) : this( new DirectoryInfo( path ), fileName ) { }
-    public LocalFile( string path, Encoding? encoding = default )
+    public LocalFile( string                       path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
+    public LocalFile( string                       path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
+    public LocalFile( DirectoryInfo                path, string                      fileName ) : this( path.Combine( fileName ) ) { }
+    public LocalFile( string                       path, string                      fileName ) : this( new DirectoryInfo( path ), fileName ) { }
+    public LocalFile( string path, Encoding? encoding = null )
     {
         this.SetNormal();
         FullPath     = Path.GetFullPath( path );
@@ -497,22 +497,34 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params string[]    args )  => ZipAsync( args,                                          token );
-    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken  token ) => ZipAsync( files.Select( item => new LocalFile( item ) ), token );
-    public ValueTask<LocalFile> ZipAsync( CancellationToken   token, params LocalFile[] files ) => ZipAsync( files,                                         token );
-    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> items, CancellationToken token = default )
+    public async ValueTask<LocalFile> ZipAsync( CancellationToken token, ReadOnlyMemory<LocalFile> files )
     {
-        if ( items is null ) { throw new ArgumentNullException( nameof(items) ); }
-
         await using FileStream zipToOpen = File.Create( FullPath );
-        using var              archive   = new ZipArchive( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
-        foreach ( LocalFile file in items )
+        for ( int i = 0; i < files.Length; i++ )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
-            await using Stream stream = entry.Open();
+            LocalFile            file   = files.Span[i];
+            ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
+            await using Stream   stream = entry.Open();
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            await stream.WriteAsync( data, token );
+        }
+
+        return this;
+    }
+    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token ) => ZipAsync( files.Select( static item => new LocalFile( item ) ), token );
+    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, CancellationToken token = default )
+    {
+        await using FileStream zipToOpen = File.Create( FullPath );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+
+        foreach ( LocalFile file in files )
+        {
+            ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
+            await using Stream   stream = entry.Open();
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
@@ -524,17 +536,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <summary> Decrypts a file that was encrypted by the current account using the <see cref="File.Encrypt(string)"/> method. </summary>
     public void Decrypt()
     {
-        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException( "Windows Only" ); }
+        if ( OperatingSystem.IsWindows() ) { File.Decrypt( FullPath ); }
 
-        File.Decrypt( FullPath );
+        throw new InvalidOperationException( "Windows Only" );
     }
 
     /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
     public void Encrypt()
     {
-        if ( !RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) ) { throw new InvalidOperationException( "Windows Only" ); }
+        if ( OperatingSystem.IsWindows() ) { File.Encrypt( FullPath ); }
 
-        File.Encrypt( FullPath );
+        throw new InvalidOperationException( "Windows Only" );
     }
 
 

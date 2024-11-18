@@ -1,4 +1,8 @@
-﻿namespace Jakar.SqlBuilder;
+﻿using System;
+
+
+
+namespace Jakar.SqlBuilder;
 
 
 public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
@@ -8,7 +12,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
 
     public readonly TNext Done() => _next;
 
-    
+
     public EasySqlBuilder From( string tableName, string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM ); }
@@ -19,14 +23,14 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     public EasySqlBuilder From<T>( T _, string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); } // TODO: Bug...?
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { _builder.Add( FROM,                                      typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
     }
     public EasySqlBuilder From<T>( string? alias )
     {
         if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { _builder.Add( FROM,                                      typeof(T).GetName(), AS, alias ); }
 
         return _builder.NewLine();
     }
@@ -62,7 +66,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     ///     to SELECT set
     /// </summary>
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
-    public SelectClauseBuilder<TNext> Next( params string[] columnNames )
+    public SelectClauseBuilder<TNext> Next( params ReadOnlySpan<string?> columnNames )
     {
         _builder.Begin().AddRange( ',', columnNames ).End();
 
@@ -70,7 +74,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     }
 
 
-    public SelectClauseBuilder<TNext> Next<T>( params string[] columnNames )
+    public SelectClauseBuilder<TNext> Next<T>( params ReadOnlySpan<string?> columnNames )
     {
         _builder.Begin().AddRange<T>( ',', columnNames ).End();
 
@@ -83,7 +87,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     ///     to SELECT set and setting it to the
     ///     <param name="alias"> </param>
     ///     variable </summary>
-    public SelectClauseBuilder<TNext> NextAs( string alias, params string[] columnNames )
+    public SelectClauseBuilder<TNext> NextAs( string alias, params ReadOnlySpan<string?> columnNames )
     {
         _builder.Begin().AddRange( ',', columnNames ).End().Add( AS, alias );
 
@@ -96,9 +100,8 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     ///     <param name="alias"> </param>
     ///     variable
     /// </summary>
-    public SelectClauseBuilder<TNext> NextAs<T>( string alias, params string[] columnNames )
+    public SelectClauseBuilder<TNext> NextAs<T>( string alias, params ReadOnlySpan<string?> columnNames )
     {
-        
         _builder.Begin().AddRange<T>( ',', columnNames ).End().Add( AS, alias );
 
         return this;

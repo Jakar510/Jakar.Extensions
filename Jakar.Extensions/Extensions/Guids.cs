@@ -96,6 +96,22 @@ public static class Guids
     }
 
 
+    public static string NewBase64( DateTimeOffset? timeStamp = null )
+    {
+        Guid id = timeStamp.HasValue
+                      ? Guid.CreateVersion7( timeStamp.Value )
+                      : Guid.NewGuid();
+
+        return NewBase64( id );
+    }
+    public static string NewBase64( Guid id )
+    {
+        Span<char> result = stackalloc char[22];
+        id.AsSpan( ref result );
+        return new string( result );
+    }
+
+
     /// <summary>
     ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
     /// </summary>

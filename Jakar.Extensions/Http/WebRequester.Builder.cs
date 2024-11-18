@@ -215,7 +215,7 @@ public partial class WebRequester
             _useCookies = true;
             return this;
         }
-        public Builder With_Cookie( params Cookie[] value )
+        public Builder With_Cookie( params ReadOnlySpan<Cookie> value )
         {
             CookieContainer container = _cookieContainer ??= new CookieContainer();
             foreach ( Cookie cookie in value ) { container.Add( cookie ); }

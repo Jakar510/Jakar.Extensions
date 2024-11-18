@@ -40,7 +40,7 @@ public class AsyncLinqBenchmarks
     [GlobalSetup]
     public void Setup()
     {
-        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }
+        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.CreateVersion7(); }
     }
 
     // [Benchmark] public void Pairs() => _dict.ForEach(( KeyValuePair<long, Guid>           x ) => { });

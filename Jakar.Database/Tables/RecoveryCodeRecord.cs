@@ -84,7 +84,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
         return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
     }
-    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create( user, Guid.NewGuid() );
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create( user, Guid.CreateVersion7() );
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => (code, new RecoveryCodeRecord( code, user ));
 

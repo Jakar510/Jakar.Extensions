@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 06/24/2024  19:06
 
+using System.Xml.Linq;
+
+
+
 namespace Jakar.Extensions.Telemetry;
 
 
@@ -78,7 +82,7 @@ public class Instrument : IInstrument
     protected void RecordMeasurement( JToken? measurement, params TelemetryTag[]? tags )
     {
         Reading reading = new(measurement, DateTimeOffset.UtcNow, tags);
-        Readings.Add( reading );
+        Readings.AddLast( reading );
         Meter.ReportMeasurement( reading );
     }
 }

@@ -49,19 +49,19 @@ public class Emailer
     }
 
 
-    public async Task VerifyEmail(  UserRecord user, ClaimType types, CancellationToken token )
+    public async Task VerifyEmail( UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateContent(  subject, user, types, token );
+        string content = await _tokenService.CreateContent( subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithBody( content );
 
         await SendAsync( builder, token );
     }
-    public async Task VerifyHTMLEmail(  UserRecord user, ClaimType types, CancellationToken token )
+    public async Task VerifyHTMLEmail( UserRecord user, ClaimType types, CancellationToken token )
     {
         string subject = _options.VerifySubject ?? _options.DefaultSubject;
-        string content = await _tokenService.CreateHTMLContent(  subject, user, types, token );
+        string content = await _tokenService.CreateHTMLContent( subject, user, types, token );
 
         EmailBuilder builder = EmailBuilder.From( _options.GetSender() ).To( MailboxAddress.Parse( user.Email ) ).WithSubject( subject ).WithHTML( content );
 
@@ -71,7 +71,7 @@ public class Emailer
 
     private ValueTask SendAsync( MimeMessage message, CancellationToken token = default )      => SendAsync( _Settings,                     message, token );
     public  ValueTask SendAsync( string?     email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, default );
-    public ValueTask SendAsync( MailboxAddress target, string subject, string body, CancellationToken token, params Attachment[] attachments ) =>
+    public ValueTask SendAsync( MailboxAddress target, string subject, string body, CancellationToken token, params ReadOnlySpan<Attachment> attachments ) =>
         SendAsync( EmailBuilder.From( _options.GetSender() ).To( target ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public async ValueTask SendAsync( EmailBuilder builder, CancellationToken token )
     {

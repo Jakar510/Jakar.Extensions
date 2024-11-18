@@ -30,7 +30,7 @@ public partial class MainPage : ContentPage, IDisposable
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.NewGuid().ToString() ).SetBaggage( "SessionID", _count.ToString() ).AddTag( "X", "Y" );
+        Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.CreateVersion7().ToString() ).SetBaggage( "SessionID", _count.ToString() ).AddTag( "X", "Y" );
         _logger.LogInformation( "{Event}", nameof(OnAppearing) );
     }
     protected override void OnDisappearing()

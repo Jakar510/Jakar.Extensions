@@ -26,18 +26,20 @@ public readonly ref struct JNode( in ReadOnlyMemory<char> span )
         public bool MoveNext()
         {
             _span = _span.Trim();
+            ReadOnlySpan<char> span = _span.Span;
 
-            if ( _span.Span.IsNullOrWhiteSpace() )
+            if ( span.IsNullOrWhiteSpace() )
             {
                 Current = default;
                 return false;
             }
 
-            if ( _span.Span.StartsWith( '{' ) && _span.Span.EndsWith( '}' ) )
+            if ( span.Contains( '{' ) && span.EndsWith( '}' ) )
             {
                 int start = _span.Span.IndexOf( '{' );
             }
-            else if ( _span.Span.StartsWith( '[' ) && _span.Span.EndsWith( ']' ) ) { }
+
+            // else if ( MemoryExtensions.EndsWith( span, '[' ) && MemoryExtensions.EndsWith( span, ']' ) ) { }
 
 
             return false;

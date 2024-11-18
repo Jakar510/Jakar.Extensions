@@ -51,7 +51,7 @@ public static partial class AsyncLinq
 
         await foreach ( TElement value in values.WithCancellation( token ) ) { collection.TryAdd( value ); }
     }
-    public static void Add<TElement>( this ConcurrentBag<TElement> collection, scoped in ReadOnlySpan<TElement> values )
+    public static void Add<TElement>( this ConcurrentBag<TElement> collection, params ReadOnlySpan<TElement> values )
     {
         foreach ( TElement value in values ) { collection.Add( value ); }
     }
@@ -61,11 +61,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static void Add<TElement>( this ICollection<TElement> collection, params TElement[] values )
-    {
-        foreach ( TElement value in values ) { collection.Add( value ); }
-    }
-    public static void Add<TElement>( this ICollection<TElement> collection, scoped in ReadOnlySpan<TElement> values )
+    public static void Add<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
     {
         foreach ( TElement value in values ) { collection.Add( value ); }
     }
@@ -79,14 +75,14 @@ public static partial class AsyncLinq
     {
         foreach ( TKey value in keys ) { dict.AddDefault( value ); }
     }
-    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, scoped in ReadOnlySpan<TKey> keys )
+    public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, params ReadOnlySpan<TKey> keys )
     {
         foreach ( TKey value in keys ) { dict.AddDefault( value ); }
     }
     public static void AddDefault<TKey, TElement>( this IDictionary<TKey, TElement?> dict, TKey key ) => dict.Add( key, default );
 
 
-    public static void AddOrUpdate<TElement>( this IList<TElement> collection, scoped in ReadOnlySpan<TElement> values )
+    public static void AddOrUpdate<TElement>( this IList<TElement> collection, params ReadOnlySpan<TElement> values )
     {
         foreach ( TElement value in values ) { collection.AddOrUpdate( value ); }
     }
@@ -103,7 +99,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static void Remove<TElement>( this ICollection<TElement> collection, scoped in ReadOnlySpan<TElement> values )
+    public static void Remove<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
     {
         foreach ( TElement value in values ) { collection.Remove( value ); }
     }
@@ -113,7 +109,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static void TryAdd<TElement>( this ICollection<TElement> collection, scoped in ReadOnlySpan<TElement> values )
+    public static void TryAdd<TElement>( this ICollection<TElement> collection, params ReadOnlySpan<TElement> values )
     {
         foreach ( TElement value in values ) { collection.TryAdd( value ); }
     }

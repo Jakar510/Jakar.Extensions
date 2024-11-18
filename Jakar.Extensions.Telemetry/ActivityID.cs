@@ -8,7 +8,7 @@ public readonly record struct ActivityID( string HexString ) : ISpanParsable<Act
     public override string     ToString() => HexString;
 
 
-    public static ActivityID Create()          => Create( Guid.NewGuid() );
+    public static ActivityID Create()          => Create( Guid.CreateVersion7() );
     public static ActivityID Create( Guid id ) => new(id.ToBase64());
     public static ActivityID? Create( [NotNullIfNotNull( nameof(id) )] Guid? id ) => id.HasValue
                                                                                          ? new ActivityID( id.Value.ToBase64() )

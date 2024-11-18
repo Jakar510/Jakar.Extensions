@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using System;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -28,7 +32,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public LocalDirectory() => FullPath = string.Empty;
     public LocalDirectory( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
     public LocalDirectory( DirectoryInfo                path ) : this( path.FullName ) { }
-    public LocalDirectory( string                       path, params string[] subFolders ) : this( path.Combine( subFolders ) ) { }
+    public LocalDirectory( string                       path, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ) ) { }
     public LocalDirectory( string                       path ) => FullPath = Path.GetFullPath( path );
     public void Dispose()
     {
@@ -87,21 +91,21 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public static LocalDirectory Create( LocalDirectory path, params string[] subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
+    public static LocalDirectory Create( LocalDirectory path, params ReadOnlySpan<string> subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
 
     /// <summary> Uses the <see cref="CurrentDirectory"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public static LocalDirectory Create( params string[] subFolders ) => Create( CurrentDirectory, subFolders );
+    public static LocalDirectory Create( params ReadOnlySpan<string> subFolders ) => Create( CurrentDirectory, subFolders );
 
     /// <summary> Uses <see cref="Path.GetTempPath"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public static LocalDirectory CreateTemp( params string[] subFolders )
+    public static LocalDirectory CreateTemp( params ReadOnlySpan<string> subFolders )
     {
         LocalDirectory d = Create( Path.GetTempPath().Combine( subFolders ) );
 
@@ -144,7 +148,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public LocalDirectory CreateSubDirectory( params string[] paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
+    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
     protected virtual LocalDirectory? GetParent()
     {
         DirectoryInfo? info = Info.Parent;
@@ -212,7 +216,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="string"/>
     /// </returns>
-    public string Combine( params string[] subPaths ) => Info.Combine( subPaths );
+    public string Combine( params ReadOnlySpan<string> subPaths ) => Info.Combine( subPaths );
 
 
     public sealed override string ToString() => FullPath;

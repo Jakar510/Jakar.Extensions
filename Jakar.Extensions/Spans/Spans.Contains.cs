@@ -163,9 +163,9 @@ public static partial class Spans
         return true;
     }
 
-    public static bool EndsWith<T>( this Span<T> span, T value )
+    public static bool EndsWith<T>( scoped ref readonly Span<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
-    public static bool EndsWith<T>( this ReadOnlySpan<T> span, T value )
+    public static bool EndsWith<T>( scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
     public static bool EndsWith<T>( this Span<T> span, in ReadOnlySpan<T> value )
         where T : IEquatable<T>
@@ -191,9 +191,9 @@ public static partial class Spans
     }
 
 
-    public static bool StartsWith<T>( this Span<T> span, T value )
+    public static bool StartsWith<T>( scoped ref readonly Span<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
-    public static bool StartsWith<T>( this ReadOnlySpan<T> span, T value )
+    public static bool StartsWith<T>( scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
     public static bool StartsWith<T>( this Span<T> span, scoped in ReadOnlySpan<T> value )
         where T : IEquatable<T>

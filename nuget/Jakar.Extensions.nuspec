@@ -131,7 +131,7 @@
 				<dependency id="System.IO.Hashing" version="8.0.0" />
 			</group>
 
-			<group targetFramework="net8.0">
+			<group targetFramework="net9.0">
 				<dependency id="CommunityToolkit.Diagnostics" version="8.2.2" />
 				<dependency id="JetBrains.Annotations" version="2023.3.0" />
 				<dependency id="Microsoft.CodeAnalysis.CSharp" version="4.9.2" />
@@ -203,11 +203,11 @@
 			  target="lib/net7.0" />
 
 		<!-- .net 8.0 -->
-		<file src="../Jakar.Extensions/bin/Release/net8.0/Jakar.Extensions.dll"
-			  target="lib/net8.0" />
-		<file src="../Jakar.Extensions/bin/Release/net8.0/Jakar.Extensions.xml"
-			  target="net8.0" />
-		<file src="../Jakar.Extensions/bin/Release/net8.0/Jakar.Extensions.pdb"
-			  target="lib/net8.0" />
+		<file src="../Jakar.Extensions/bin/Release/net9.0/Jakar.Extensions.dll"
+			  target="lib/net9.0" />
+		<file src="../Jakar.Extensions/bin/Release/net9.0/Jakar.Extensions.xml"
+			  target="net9.0" />
+		<file src="../Jakar.Extensions/bin/Release/net9.0/Jakar.Extensions.pdb"
+			  target="lib/net9.0" />
 	</files>
 </package>

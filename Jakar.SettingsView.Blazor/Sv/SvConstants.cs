@@ -34,7 +34,7 @@ public static class SvConstants
     public const string SV_SECTION_HEADER_ICON_EXPANDED  = "sv-section-header-icon-expanded";
 
 
-    public static string GetID() => Guid.NewGuid().ToBase64();
+    public static string GetID() => Guids.NewBase64();
 
 
     public static async ValueTask Execute<T>( this EventCallback<T> callback, T? args = default )

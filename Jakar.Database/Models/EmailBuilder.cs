@@ -6,14 +6,12 @@
 /// </summary>
 public sealed class EmailBuilder
 {
-    private readonly List<Attachment>     _attachments = new();
-    private readonly List<MailboxAddress> _recipients  = new();
-
-
-    private readonly MailboxAddress[] _senders;
-    private          string           _subject = string.Empty;
-    private          string?          _body;
-    private          string?          _html;
+    private readonly List<Attachment>     _attachments = new(Buffers.DEFAULT_CAPACITY);
+    private readonly List<MailboxAddress> _recipients  = new(Buffers.DEFAULT_CAPACITY);
+    private readonly MailboxAddress[]     _senders;
+    private          string               _subject = string.Empty;
+    private          string?              _body;
+    private          string?              _html;
 
 
     private EmailBuilder( MailboxAddress[] senders ) => _senders = senders;
@@ -32,7 +30,7 @@ public sealed class EmailBuilder
         _recipients.AddRange( recipients );
         return this;
     }
-    public EmailBuilder To( params MailboxAddress[] recipients )
+    public EmailBuilder To( params ReadOnlySpan<MailboxAddress> recipients )
     {
         _recipients.AddRange( recipients );
         return this;
@@ -49,7 +47,7 @@ public sealed class EmailBuilder
         _attachments.AddRange( attachments );
         return this;
     }
-    public EmailBuilder WithAttachment( params Attachment[] attachments )
+    public EmailBuilder WithAttachment( params ReadOnlySpan<Attachment> attachments )
     {
         _attachments.AddRange( attachments );
         return this;
@@ -77,7 +75,7 @@ public sealed class EmailBuilder
 
     public async ValueTask<MimeMessage> Create()
     {
-        BodyBuilder builder = new BodyBuilder
+        BodyBuilder builder = new()
                               {
                                   TextBody = _body,
                                   HtmlBody = _html

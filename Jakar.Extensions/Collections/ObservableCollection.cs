@@ -431,11 +431,11 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool TryAdd( TValue           value )            => InternalTryAdd( value );
-    public virtual void Add( TValue              value )            => InternalAdd( value );
-    public virtual void Add( TValue              value, int count ) => InternalAdd( value, count );
-    public virtual void Add( params TValue[]     values ) => Add( new ReadOnlySpan<TValue>( values ) );
-    public virtual void Add( IEnumerable<TValue> values ) => InternalAdd( values );
+    public virtual bool TryAdd( TValue                   value )            => InternalTryAdd( value );
+    public virtual void Add( TValue                      value )            => InternalAdd( value );
+    public virtual void Add( TValue                      value, int count ) => InternalAdd( value, count );
+    public virtual void Add( params ReadOnlySpan<TValue> values ) => InternalAdd( values );
+    public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd( values );
     public virtual void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
     {
         if ( values.KnownLength ) { EnsureCapacity( values.Length ); }

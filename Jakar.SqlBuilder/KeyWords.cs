@@ -1,4 +1,8 @@
-﻿namespace Jakar.SqlBuilder;
+﻿using System.Diagnostics.CodeAnalysis;
+
+
+
+namespace Jakar.SqlBuilder;
 
 
 public static class KeyWords
@@ -53,5 +57,10 @@ public static class KeyWords
     public static string GetName<T>( this T      _ )                     => typeof(T).GetTableName();
     public static string GetName<T>( this string columnName, T    _ )    => $"{typeof(T).GetTableName()}.{columnName}";
     public static string GetName( this    string columnName, Type type ) => $"{type.GetTableName()}.{columnName}";
-    public static string GetName<T>( this string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string? GetName<T>( [NotNullIfNotNull( nameof(columnName) )] this string? columnName )
+    {
+        return columnName is null
+                   ? null
+                   : $"{typeof(T).GetTableName()}.{columnName}";
+    }
 }

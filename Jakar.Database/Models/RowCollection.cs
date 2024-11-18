@@ -13,11 +13,16 @@ public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
 
 
     public RecordCollection() : base() { }
-    public RecordCollection( params TRecord[]     items ) : this() => Add( items );
-    public RecordCollection( IEnumerable<TRecord> items ) : this() => Add( items );
+    public RecordCollection( params ReadOnlySpan<TRecord> items ) : this() => Add( items );
+    public RecordCollection( IEnumerable<TRecord>         items ) : this() => Add( items );
 
 
-    public RecordCollection<TRecord> Add( params TRecord[] records ) => Add( records.AsEnumerable() );
+    public RecordCollection<TRecord> Add( params ReadOnlySpan<TRecord> records )
+    {
+        foreach ( TRecord record in records ) { Add( record ); }
+
+        return this;
+    }
     public RecordCollection<TRecord> Add( IEnumerable<TRecord> records )
     {
         foreach ( TRecord record in records ) { Add( record ); }
@@ -33,7 +38,7 @@ public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
         }
 
 
-        _records.Add( item.NewID( Guid.NewGuid() ) );
+        _records.Add( item.NewID( RecordID<TRecord>.New() ) );
 
         return this;
     }

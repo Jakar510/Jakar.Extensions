@@ -21,7 +21,7 @@ public static class LoggingExtensions
     public static IConfigurationBuilder AddCommandLine( this          WebApplicationBuilder builder, Action<CommandLineConfigurationSource> configureSource ) => builder.Configuration.AddCommandLine( configureSource );
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder )                => builder.Configuration.AddEnvironmentVariables();
     public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, string prefix ) => builder.Configuration.AddEnvironmentVariables( prefix );
-    public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, params string[] prefix )
+    public static IConfigurationBuilder AddEnvironmentVariables( this WebApplicationBuilder builder, params ReadOnlySpan<string> prefix )
     {
         foreach ( string s in prefix ) { builder.Configuration.AddEnvironmentVariables( s ); }
 

@@ -9,7 +9,7 @@ public readonly record struct Tag( string Name, object? Value )
     public static implicit operator KeyValuePair<string, object?>( Tag tag ) => new(tag.Name, tag.Value);
 
 
-    public static KeyValuePair<string, object?>[] Convert( Tag[] tags )
+    public static KeyValuePair<string, object?>[] Convert( scoped ref readonly ReadOnlySpan<Tag> tags )
     {
         KeyValuePair<string, object?>[] array = AsyncLinq.GetArray<KeyValuePair<string, object?>>( tags.Length );
 

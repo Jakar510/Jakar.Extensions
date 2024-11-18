@@ -1,4 +1,8 @@
-﻿namespace Jakar.SqlBuilder;
+﻿using System.Buffers;
+
+
+
+namespace Jakar.SqlBuilder;
 
 
 public struct InsertClauseBuilder( ref EasySqlBuilder builder )
@@ -6,37 +10,35 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
     private EasySqlBuilder _builder = builder;
 
 
-    public EasySqlBuilder Into<T>( string tableName, T obj )
+    public EasySqlBuilder Into<T>( string tableName, T value )
     {
-        _builder.Add( INSERT, INTO, tableName.GetName( obj ) );
-        return SetValues( obj );
+        _builder.Add( INSERT, INTO, tableName.GetName( value ) );
+        return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( T obj )
+    public EasySqlBuilder Into<T>( T value )
     {
         _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
-        return SetValues( obj );
+        return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( IEnumerable<T> obj )
+    public EasySqlBuilder Into<T>( IEnumerable<T> values )
     {
         _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
-        return SetValues( obj );
+        return SetValues( values );
     }
-    private EasySqlBuilder SetValues<T>( T obj )
+    private EasySqlBuilder SetValues<T>( T value )
     {
-        Dictionary<string, string> cache = new Dictionary<string, string>();
+        PropertyInfo[]             properties = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty );
+        Dictionary<string, string> cache      = new(properties.Length);
 
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ) )
+        foreach ( PropertyInfo info in properties )
         {
-            string value = info.GetValue( obj )?.ToString() ?? NULL;
-
-            cache[info.Name] = value;
+            string x = info.GetValue( value )?.ToString() ?? NULL;
+            cache[info.Name] = x;
         }
-
 
         _builder.Begin().AddRange( ',', cache.Keys ).End();
 
         _builder.Add( VALUES );
-
         _builder.Begin().AddRange( ',', cache.Values ).End();
 
         return _builder.NewLine();

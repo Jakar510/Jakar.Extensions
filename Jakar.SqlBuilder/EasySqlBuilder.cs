@@ -1,5 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using NoAlloq;
+using NoAlloq.Producers;
 
 
 
@@ -15,15 +18,31 @@ public record struct EasySqlBuilder()
     public string Result => ToString();
 
 
-    internal EasySqlBuilder AddRange<T>( char separator, IEnumerable<string> names ) => AddRange( separator, names.Select( KeyWords.GetName<T> ) );
-    internal EasySqlBuilder AddRange( char separator, IEnumerable<string> names )
+    internal EasySqlBuilder AddRange<T>( char separator, params ReadOnlySpan<string?> names )
+    {
+        using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
+        names.Select( KeyWords.GetName<T> ).ConsumeInto( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..names.Length] );
+    }
+    internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
     {
         _sb.AppendJoin( separator, names );
 
         return Space();
     }
-    internal EasySqlBuilder AddRange<T>( string separator, IEnumerable<string> names ) => AddRange( separator, names.Select( KeyWords.GetName<T> ) );
-    internal EasySqlBuilder AddRange( string separator, IEnumerable<string> names )
+    internal EasySqlBuilder AddRange( char separator, params ReadOnlySpan<string?> names )
+    {
+        _sb.AppendJoin( separator, names );
+
+        return Space();
+    }
+    internal EasySqlBuilder AddRange<T>( string separator, params ReadOnlySpan<string?> names )
+    {
+        using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
+        names.Select( KeyWords.GetName<T> ).ConsumeInto( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..names.Length] );
+    }
+    internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )
     {
         _sb.AppendJoin( separator, names );
         return Space();
@@ -40,8 +59,8 @@ public record struct EasySqlBuilder()
         _sb.Append( c );
         return this;
     }
-    internal EasySqlBuilder Add( string          value ) => Space().Append( value ).Space();
-    internal EasySqlBuilder Add( params string[] names ) => AddRange( ' ', names );
+    internal EasySqlBuilder Add( string                       value ) => Space().Append( value ).Space();
+    internal EasySqlBuilder Add( params ReadOnlySpan<string?> names ) => AddRange( ' ', names );
 
 
     internal EasySqlBuilder NewLine()

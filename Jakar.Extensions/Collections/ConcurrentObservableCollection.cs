@@ -200,7 +200,10 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() ) { return base.TryAdd( value ); }
     }
-    public override void Add( params TValue[] values ) => Add( new ReadOnlySpan<TValue>( values ) );
+    public override void Add( params ReadOnlySpan<TValue> values )
+    {
+        using ( AcquireLock() ) { base.Add( values ); }
+    }
     public override void Add( IEnumerable<TValue> values )
     {
         using ( AcquireLock() ) { base.Add( values ); }

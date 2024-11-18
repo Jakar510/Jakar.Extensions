@@ -27,7 +27,7 @@ public class IniConfig_Tests : Assert
         project[APP_NAME] = nameof(IniConfig_Tests);
         project.Add( nameof(DateTime),       DateTime.Now );
         project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
-        project.Add( nameof(Guid),           Guid.NewGuid() );
+        project.Add( nameof(Guid),           Guid.CreateVersion7() );
         project.Add( nameof(AppVersion),     new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Stable ) );
 
         IniConfig.Section server = ini[SERVER];

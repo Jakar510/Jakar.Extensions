@@ -69,7 +69,7 @@ finally { "Bye".WriteToConsole(); }
 //
 // project.Add( nameof(DateTime),       DateTime.Now );
 // project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
-// project.Add( nameof(Guid),           Guid.NewGuid() );
+// project.Add( nameof(Guid),           Guid.CreateVersion7() );
 //
 // project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
 //
@@ -185,7 +185,7 @@ finally { "Bye".WriteToConsole(); }
 // await Test_HttpBuilder();
 
 
-// var id = Guid.NewGuid();
+// var id = Guid.CreateVersion7();
 // id.WriteToConsole();
 //
 // var b64 = id.ToBase64();
