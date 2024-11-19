@@ -22,10 +22,12 @@ public sealed class TypeNameComparer : IComparer<Type>
     /// <returns> </returns>
     public int Compare( Type? x, Type? y )
     {
-        int result = string.CompareOrdinal( x?.FullName, y?.FullName );
+        int fullNameComparison = string.CompareOrdinal( x?.FullName, y?.FullName );
+        if ( fullNameComparison != 0 ) { return fullNameComparison; }
 
-        return result != 0
-                   ? result
-                   : string.CompareOrdinal( x?.Assembly.FullName, y?.Assembly.FullName );
+        int nameComparison = string.CompareOrdinal( x?.Name, y?.Name );
+        if ( nameComparison != 0 ) { return nameComparison; }
+
+        return string.CompareOrdinal( x?.Assembly.FullName, y?.Assembly.FullName );
     }
 }

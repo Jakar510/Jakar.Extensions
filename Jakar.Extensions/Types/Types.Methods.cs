@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static partial class TypeExtensions
+public static partial class Types
 {
     public static MethodDetails    MethodInfo( this       MethodBase    method )    => new(method);
     public static ParameterDetails GetParameterInfo( this ParameterInfo parameter ) => new(parameter);

@@ -6,7 +6,6 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     private readonly IEqualityComparer<string> _comparer;
     public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
 
-
     public int Length
     {
         get
@@ -17,6 +16,8 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         }
     }
 
+    public AlternateLookup<ReadOnlySpan<char>> Lookup => GetAlternateLookup<ReadOnlySpan<char>>();
+
 
     public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }
     public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) => _comparer = comparer;
@@ -25,6 +26,10 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => _comparer = comparer;
     public IniConfig( IEnumerable<Section> sections ) : this()
+    {
+        foreach ( Section section in sections ) { Add( section ); }
+    }
+    public IniConfig( params ReadOnlySpan<Section> sections ) : this()
     {
         foreach ( Section section in sections ) { Add( section ); }
     }
@@ -142,7 +147,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
-    public IniConfig Add( scoped in ReadOnlySpan<Section> values )
+    public IniConfig Add( params ReadOnlySpan<Section> values )
     {
         foreach ( Section section in values ) { Add( section ); }
 

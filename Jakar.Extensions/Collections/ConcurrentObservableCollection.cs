@@ -39,11 +39,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public ConcurrentObservableCollection( TValue[]                         values, IComparer<TValue> comparer ) : base( values, comparer ) { }
 
 
-    public override void Dispose()
-    {
-        locker.Dispose();
-        GC.SuppressFinalize( this );
-    }
+    public override void Dispose() { GC.SuppressFinalize( this ); }
 
 
     public static implicit operator ConcurrentObservableCollection<TValue>( Buffer<TValue>                                              values ) => new(values);

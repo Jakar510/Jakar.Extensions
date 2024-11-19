@@ -90,7 +90,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                                                                                               => WithKey( await resources.GetResourceTextAsync( name ) );
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string                       password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString                password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredStringResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( resources, name, await password.GetSecuredStringAsync( configuration, token ) );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString.ResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( resources, name, await password.GetSecuredStringAsync( configuration, token ) );
 
 
     public       DataProtector            WithKeyFile( LocalFile  pem )                                                                                                  => WithKey( pem.Read().AsString() );
@@ -99,7 +99,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken            token                             = default )                        => WithKey( await pem.ReadAsync().AsString( token ) );
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
     public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredStringResolverOptions password, IConfiguration    configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ), token );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString.ResolverOptions password, IConfiguration    configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ), token );
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )

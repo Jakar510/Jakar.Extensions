@@ -1,25 +1,39 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class ConcurrentDeque<T>( int capacity, Locker? locker = null ) : IQueue<T>
+public class ConcurrentDeque<T>( int capacity, Lock? locker = null ) : IQueue<T>
 {
     protected readonly Deque<T> _queue = new(capacity);
-    protected readonly Locker   _lock  = locker ?? Locker.Default;
+    protected readonly Lock     _lock  = locker ?? new Lock();
 
 
-    public int  Count   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _queue.Count; }
-    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _queue.IsEmpty(); }
+    public int Count
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        get
+        {
+            lock (_lock) { return _queue.Count; }
+        }
+    }
+    public bool IsEmpty
+    {
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+        get
+        {
+            lock (_lock) { return _queue.IsEmpty(); }
+        }
+    }
     public T Next
     {
         get
         {
-            using ( _lock.Enter() ) { return _queue[^1]; }
+            lock (_lock) { return _queue[^1]; }
         }
     }
 
 
-    public ConcurrentDeque( Locker? locker = null ) : this( 10, locker ) { }
-    public ConcurrentDeque( IEnumerable<T> enumerable, Locker? locker = null ) : this( 10, locker )
+    public ConcurrentDeque( Lock? locker = null ) : this( DEFAULT_CAPACITY, locker ) { }
+    public ConcurrentDeque( IEnumerable<T> enumerable, Lock? locker = null ) : this( DEFAULT_CAPACITY, locker )
     {
         foreach ( T x in enumerable ) { _queue.AddToBack( x ); }
     }
@@ -27,17 +41,19 @@ public class ConcurrentDeque<T>( int capacity, Locker? locker = null ) : IQueue<
 
     public virtual void Add( T value )
     {
-        using ( _lock.Enter() ) { _queue.AddToBack( value ); }
+        lock (_lock) { _queue.AddToBack( value ); }
     }
-    public virtual async ValueTask AddAsync( T value )
+    public virtual ValueTask AddAsync( T value )
     {
-        using ( await _lock.EnterAsync().ConfigureAwait( false ) ) { _queue.AddToBack( value ); }
+        lock (_lock) { _queue.AddToBack( value ); }
+
+        return ValueTask.CompletedTask;
     }
 
 
     public virtual bool Remove( [NotNullWhen( true )] out T? value )
     {
-        using ( _lock.Enter() )
+        lock (_lock)
         {
             if ( _queue.Count > 0 )
             {
@@ -54,44 +70,49 @@ public class ConcurrentDeque<T>( int capacity, Locker? locker = null ) : IQueue<
         value = default;
         return false;
     }
-    public virtual async ValueTask<T?> RemoveAsync()
+    public virtual ValueTask<T?> RemoveAsync()
     {
-        using ( await _lock.EnterAsync().ConfigureAwait( false ) )
+        T? value = default;
+
+        lock (_lock)
         {
-            if ( _queue.Count <= 0 ) { return default; }
+            if ( _queue.Count > 0 )
+            {
+                T t = _queue.RemoveFromBack();
 
-            T t = _queue.RemoveFromBack();
-
-            if ( t is not null ) { return t; }
+                if ( t is not null ) { value = t; }
+            }
         }
 
-        return default;
+        return ValueTask.FromResult( value );
     }
 
 
     public virtual void Clear()
     {
-        using ( _lock.Enter() ) { _queue.Clear(); }
+        lock (_lock) { _queue.Clear(); }
     }
-    public virtual async ValueTask ClearAsync()
+    public virtual ValueTask ClearAsync()
     {
-        using ( await _lock.EnterAsync().ConfigureAwait( false ) ) { _queue.Clear(); }
+        lock (_lock) { _queue.Clear(); }
+
+        return ValueTask.CompletedTask;
     }
 
 
     public virtual bool Contains( T obj )
     {
-        using ( _lock.Enter() ) { return _queue.Contains( obj ); }
+        lock (_lock) { return _queue.Contains( obj ); }
     }
-    public virtual async ValueTask<bool> ContainsAsync( T obj )
+    public virtual ValueTask<bool> ContainsAsync( T obj )
     {
-        using ( await _lock.EnterAsync().ConfigureAwait( false ) ) { return _queue.Contains( obj ); }
+        lock (_lock) { return ValueTask.FromResult( _queue.Contains( obj ) ); }
     }
 
 
     public IEnumerator<T> GetEnumerator()
     {
-        using ( _lock.Enter() ) { return _queue.GetEnumerator(); }
+        lock (_lock) { return _queue.GetEnumerator(); }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

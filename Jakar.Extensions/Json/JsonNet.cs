@@ -56,6 +56,30 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TResult FromJson<TResult>( this string             value, params JsonConverter[]  converters ) => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, converters ) );
 
 
+    public static string ToJson<T>( this ReadOnlySpan<T> values )
+    {
+        T[] array = ArrayPool<T>.Shared.Rent( values.Length );
+
+        try
+        {
+            values.CopyTo( array );
+            return array.ToJson();
+        }
+        finally { ArrayPool<T>.Shared.Return( array ); }
+    }
+    public static string ToPrettyJson<T>( this ReadOnlySpan<T> values )
+    {
+        T[] array = ArrayPool<T>.Shared.Rent( values.Length );
+
+        try
+        {
+            values.CopyTo( array );
+            return array.ToPrettyJson();
+        }
+        finally { ArrayPool<T>.Shared.Return( array ); }
+    }
+
+
     [Conditional( "DEBUG" )]
     public static void SaveDebug<T>( this T value, [CallerMemberName] string? caller = default, [CallerArgumentExpression( "value" )] string? variableName = default )
         where T : notnull =>

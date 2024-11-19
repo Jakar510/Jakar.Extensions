@@ -69,7 +69,7 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
         {
             DistanceUnit.Kilometers => UnitConverters.CoordinatesToKilometers( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
             DistanceUnit.Miles      => UnitConverters.CoordinatesToMiles( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
-            _                       => throw new OutOfRangeException( nameof(unit), unit )
+            _                       => throw new OutOfRangeException(  unit )
         };
     public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
     public override bool Equals( object? obj )

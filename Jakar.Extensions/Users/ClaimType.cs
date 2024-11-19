@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 [Flags]
-public enum ClaimType : long
+public enum ClaimType : ulong
 {
     None                                                                         = 1 << 0,
     [Display( Description = ClaimTypes.Sid )]             UserID                 = 1 << 1,
@@ -30,7 +30,7 @@ public enum ClaimType : long
     [Display( Description = ClaimTypes.Webpage )]         WebSite                = 1 << 17,
     [Display( Description = ClaimTypes.GroupSid )]        Group                  = 1 << 18,
     [Display( Description = ClaimTypes.Role )]            Role                   = 1 << 19,
-    All                                                                          = ~0
+    All                                                                          = ~0ul
 }
 
 
@@ -206,14 +206,14 @@ public static class Claims
                                                                     ClaimType.Group                  => ClaimTypes.GroupSid,
                                                                     ClaimType.Role                   => ClaimTypes.Role,
                                                                     ClaimType.All                    => ALL,
-                                                                    _                                => throw new OutOfRangeException( nameof(type), type )
+                                                                    _                                => throw new OutOfRangeException( type )
                                                                 };
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ClaimType? FromClaimTypes( this string type ) => type switch
                                                                    {
-                                                                       ""                         => ClaimType.None,
+                                                                       EMPTY                      => ClaimType.None,
                                                                        ClaimTypes.Sid             => ClaimType.UserID,
                                                                        ClaimTypes.NameIdentifier  => ClaimType.UserName,
                                                                        ClaimTypes.GivenName       => ClaimType.FirstName,

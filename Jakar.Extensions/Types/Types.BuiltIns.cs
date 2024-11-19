@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static partial class TypeExtensions
+public static partial class Types
 {
     public static bool IsAnyBuiltInType( this Type type ) => type.IsBuiltInType() || type.IsBuiltInNullableType();
 

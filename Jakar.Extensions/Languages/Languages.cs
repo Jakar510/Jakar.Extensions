@@ -58,7 +58,7 @@ public static class Languages
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
                                                                                 SupportedLanguage.Unspecified => string.Empty,
-                                                                                _                             => throw new OutOfRangeException( nameof(language), language )
+                                                                                _                             => throw new OutOfRangeException( language )
                                                                             };
 
     public static string ToStringFast( this SupportedLanguage language ) => language switch
@@ -78,7 +78,7 @@ public static class Languages
                                                                                 SupportedLanguage.Dutch       => nameof(SupportedLanguage.Dutch),
                                                                                 SupportedLanguage.Korean      => nameof(SupportedLanguage.Korean),
                                                                                 SupportedLanguage.Arabic      => nameof(SupportedLanguage.Arabic),
-                                                                                _                             => throw new ArgumentOutOfRangeException( nameof(language), language, null )
+                                                                                _                             => throw new OutOfRangeException( language )
                                                                             };
     public static string? ToStringFast( this SupportedLanguage? language ) => language?.ToStringFast();
 

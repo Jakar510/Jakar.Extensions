@@ -44,9 +44,22 @@ public interface ILocker
 
 
 
-public readonly record struct Closer( ILocker Locker ) : IDisposable
+[DefaultValue( nameof(Empty) )]
+public readonly struct Closer( ILocker? locker ) : IDisposable
 {
-    public void Dispose() => Locker.Exit();
+    public static readonly Closer   Empty   = new(null);
+    private readonly       ILocker? _locker = locker;
+    public                 void     Dispose() => _locker?.Exit();
+}
+
+
+
+[DefaultValue( nameof(Empty) )]
+public readonly struct LockCloser( Lock? locker ) : IDisposable
+{
+    public static readonly LockCloser Empty   = new(null);
+    private readonly       Lock?      _locker = locker;
+    public                 void       Dispose() => _locker?.Exit();
 }
 
 
@@ -65,11 +78,12 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Semaphore?            _semaphore;
     private readonly SemaphoreSlim?        _semaphoreSlim;
     private readonly SpinLock?             _spinLock;
+    private readonly Lock?                 _lock;
     private readonly Type                  _index;
     private          bool                  _isTaken;
 
 
-    public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(new SemaphoreSlim( 1, 1 )); }
+    public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new SemaphoreSlim( 1, 1 ); }
     public        bool      IsTaken { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
     public        TimeSpan? TimeOut { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
 
@@ -87,6 +101,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     public Locker( ManualResetEventSlim value ) : this( Type.ManualResetEventSlim ) => _manualResetEventSlim = value;
     public Locker( Barrier              value ) : this( Type.Barrier ) => _barrier = value;
     public Locker( CountdownEvent       value ) : this( Type.CountdownEvent ) => _countdownEvent = value;
+    public Locker( Lock                 value ) : this( Type.ThreadingLock ) => _lock = value;
 
 
     public static implicit operator Locker( SemaphoreSlim        value ) => new(value);
@@ -399,6 +414,18 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 return new Closer( this );
             }
 
+
+            case Type.ThreadingLock:
+            {
+                Debug.Assert( _lock is not null, $"{nameof(_lock)} is not null" );
+
+                _isTaken = TimeOut.HasValue
+                               ? _lock.TryEnter( TimeOut.Value )
+                               : _lock.TryEnter( Timeout.Infinite );
+
+                return new Closer( this );
+            }
+
             default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
         }
     }
@@ -470,6 +497,11 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
             case Type.CountdownEvent:
                 Debug.Assert( _countdownEvent is not null, nameof(_countdownEvent) + " is not null" );
                 _countdownEvent.Reset();
+                return;
+
+            case Type.ThreadingLock:
+                Debug.Assert( _lock is not null, nameof(_lock) + " is not null" );
+                _lock.Exit();
                 return;
 
             default: throw new OutOfRangeException( _index );
@@ -631,6 +663,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         ManualResetEvent,
         ManualResetEventSlim,
         Barrier,
-        CountdownEvent
+        CountdownEvent,
+        ThreadingLock
     }
 }
