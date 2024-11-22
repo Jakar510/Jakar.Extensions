@@ -40,7 +40,7 @@ public class EmbeddedResources<T>
     public string GetResourceText( string fileName, Encoding encoding )
     {
         using Stream       stream = GetResourceStream( fileName );
-        using StreamReader reader = new StreamReader( stream, encoding );
+        using StreamReader reader = new(stream, encoding);
         string             text   = reader.ReadToEnd();
         return text;
     }

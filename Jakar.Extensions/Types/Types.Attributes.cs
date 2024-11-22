@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static partial class TypeExtensions
+public static partial class Types
 {
     public static bool                   GetJsonIsRequired( this PropertyInfo propInfo ) => GetJsonProperty( propInfo )?.Required is Required.Always or Required.AllowNull;
     public static JsonPropertyAttribute? GetJsonProperty( this   PropertyInfo propInfo ) => propInfo.GetCustomAttribute<JsonPropertyAttribute>();

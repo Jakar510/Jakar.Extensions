@@ -14,6 +14,6 @@ public sealed class NullableShortConverter : JsonConverter<short?>
             string s => short.TryParse( s, out short n )
                             ? n
                             : null,
-            _ => throw new OutOfRangeException( nameof(reader.Value), reader.Value )
+            _ => throw new OutOfRangeException( reader.Value )
         };
 }

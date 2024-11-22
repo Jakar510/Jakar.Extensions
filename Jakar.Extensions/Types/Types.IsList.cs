@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static partial class TypeExtensions
+public static partial class Types
 {
     public static bool IsList( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface<IList>() || type.HasInterface( typeof(IList<>) );
 

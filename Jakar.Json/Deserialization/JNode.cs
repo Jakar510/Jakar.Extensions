@@ -34,7 +34,7 @@ public readonly ref struct JNode( in ReadOnlyMemory<char> span )
                 return false;
             }
 
-            if ( span.Contains( '{' ) && span.EndsWith( '}' ) )
+            if ( span.Contains( '{' ) && MemoryExtensions.EndsWith( span, '}' ) )
             {
                 int start = _span.Span.IndexOf( '{' );
             }

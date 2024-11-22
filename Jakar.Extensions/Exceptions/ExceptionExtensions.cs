@@ -39,7 +39,7 @@ public static class ExceptionExtensions
         foreach ( StackFrame frame in trace.GetFrames() )
         {
             MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(Types.MethodClass) );
 
 
             switch ( method.Name )
@@ -67,7 +67,7 @@ public static class ExceptionExtensions
     public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(Types.MethodClass) );
 
         return $"{className}::{method.Name}";
     }

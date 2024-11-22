@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture, TestOf( typeof(TypeExtensions) )]
+[TestFixture, TestOf( typeof(Types) )]
 
 // ReSharper disable once InconsistentNaming
 public class IsList_Tests : Assert

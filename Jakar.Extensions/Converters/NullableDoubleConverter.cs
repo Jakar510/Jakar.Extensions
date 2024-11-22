@@ -16,6 +16,6 @@ public sealed class NullableDoubleConverter : JsonConverter<double?>
             string s => double.TryParse( s, out double n )
                             ? n
                             : null,
-            _ => throw new OutOfRangeException( nameof(reader.Value), reader.Value )
+            _ => throw new OutOfRangeException( reader.Value )
         };
 }
