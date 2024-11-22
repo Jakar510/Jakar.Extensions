@@ -1,10 +1,15 @@
 ﻿namespace Jakar.Extensions;
 
 
-public static class StringExtensions
+public static class Strings
 {
     private static readonly char[] _ends = ['\n', '\r'];
-
+    public static readonly ImmutableDictionary<char, char> _bracketPairs = new Dictionary<char, char>
+                                                                           {
+                                                                               { '(', ')' },
+                                                                               { '{', '}' },
+                                                                               { '[', ']' }
+                                                                           }.ToImmutableDictionary();
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
     public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
@@ -29,46 +34,63 @@ public static class StringExtensions
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
     /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = default ) // TODO: ReadOnlySpan<char>
-    {
-        bracketPairs ??= new Dictionary<char, char>
-                         {
-                             { '(', ')' },
-                             { '{', '}' },
-                             { '[', ']' }
-                         };
+    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = default ) => input.AsSpan().IsBalanced( bracketPairs ); // TODO: ReadOnlySpan<char>
 
-        Stack<char> brackets = new Stack<char>();
+
+    /// <summary>
+    ///     <seealso href="https://www.codeproject.com/Tips/1175562/Check-for-Balanced-Parenthesis-in-a-String"/>
+    ///     <para>
+    ///         <paramref name="bracketPairs"/> defaults to matching: <br/>
+    ///         <list type="bullet">
+    ///             <item>
+    ///                 <term> ( ) </term> <description> Parenthesis </description>
+    ///             </item>
+    ///             <item>
+    ///                 <term> [ ] </term> <description> Square Brackets </description>
+    ///             </item>
+    ///             <item>
+    ///                 <term> { } </term> <description> Curly Braces </description>
+    ///             </item>
+    ///         </list>
+    ///     </para>
+    ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
+    /// </summary>
+    /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
+    public static bool IsBalanced( this ReadOnlySpan<char> input, IReadOnlyDictionary<char, char>? bracketPairs = default ) // TODO: ReadOnlySpan<char>
+    {
+        bracketPairs ??= _bracketPairs;
+        using IMemoryOwner<char> buffer = MemoryPool<char>.Shared.Rent( bracketPairs.Count );
+        foreach ( (int i, char item) in bracketPairs.Values.Enumerate( 0 ) ) { buffer.Memory.Span[i] = item; }
+
+        ReadOnlySpan<char> values   = buffer.Memory.Span[..bracketPairs.Count];
+        Stack<char>        brackets = new(input.Length);
 
         try
         {
             // Iterate through each character in the input string
             foreach ( char c in input )
             {
-                // check if the character is one of the 'opening' brackets
-                if ( bracketPairs.Keys.Contains( c ) )
+                // Check if the character is one of the 'opening' brackets. If yes, push to stack
+                if ( bracketPairs.ContainsKey( c ) ) { brackets.Push( c ); }
+                else if ( values.Contains( c ) ) // check if the character is one of the 'closing' brackets
                 {
-                    // if yes, push to stack
-                    brackets.Push( c );
-                }
-                else if ( bracketPairs.Values.Contains( c ) ) // check if the character is one of the 'closing' brackets
-                {
-                    // check if the closing bracket matches the 'latest' 'opening' bracket
-                    if ( c == bracketPairs[brackets.First()] ) { brackets.Pop(); }
-                    else { return false; } // if not, its an unbalanced string
+                    // Check if the closing bracket matches the 'latest' 'opening' bracket 
+                    if ( c == bracketPairs[brackets.Peek()] ) { brackets.Pop(); }
+                    else { return false; } // if not, it's an unbalanced string
                 }
 
-                // continue looking
+                // Continue looking
             }
         }
-        catch
+        catch ( Exception e )
         {
-            // an exception will be caught in case a closing bracket is found, before any opening bracket. that implies, the string is not balanced. Return false
+            // An exception will be caught in case a closing bracket is found, before any opening bracket. that implies, the string is not balanced. Return false
+            Console.WriteLine( e );
             return false;
         }
 
         // Ensure all brackets are closed
-        return !brackets.Any();
+        return brackets.Count == 0;
     }
 
 
@@ -102,7 +124,7 @@ public static class StringExtensions
     {
         fixed (char* token = &value.GetPinnableReference())
         {
-            SecureString secure = new SecureString( token, value.Length );
+            SecureString secure = new(token, value.Length);
             if ( makeReadonly ) { secure.MakeReadOnly(); }
 
             return secure;
@@ -169,8 +191,8 @@ public static class StringExtensions
     public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding encoding ) => value.Span.ConvertToString( encoding );
 
 
-    public static string RemoveAll( this string source, string old ) => source.Replace( old,                  string.Empty, StringComparison.Ordinal );
-    public static string RemoveAll( this string source, char   old ) => source.Replace( new string( old, 1 ), string.Empty );
+    public static string RemoveAll( this string source, string old ) => source.Replace( old,             string.Empty, StringComparison.Ordinal );
+    public static string RemoveAll( this string source, char   old ) => source.Replace( old.Repeat( 1 ), string.Empty );
 
 
     /// <summary>
@@ -207,7 +229,6 @@ public static class StringExtensions
     {
         if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-        ;
         StringBuilder    builder          = new(span.Length + span.Count( ' ' ) + span.Count( Randoms.UPPER_CASE ));
         UnicodeCategory? previousCategory = null;
 
@@ -264,8 +285,7 @@ public static class StringExtensions
 
         static bool IsSpaceOrLower( in UnicodeCategory? category ) => category is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter;
 
-        static bool IsNextLower( in UnicodeCategory? category, in int index, scoped in ReadOnlySpan<char> span ) =>
-            category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower( span[index + 1] );
+        static bool IsNextLower( in UnicodeCategory? category, in int index, scoped ref readonly ReadOnlySpan<char> span ) => category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower( span[index + 1] );
     }
 
 

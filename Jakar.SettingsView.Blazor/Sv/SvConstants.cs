@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SettingsView.Blazor
 // 08/05/2024  22:08
 
-using System.Security.Cryptography;
 using Jakar.Extensions;
 
 
