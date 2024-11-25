@@ -2,9 +2,9 @@
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
-		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
 		<Nullable>enable</Nullable>
-		<LangVersion>12.0</LangVersion>
+		<LangVersion>latest</LangVersion>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
@@ -19,8 +19,7 @@
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReleaseNotes>Jakar.Extensions.Blazor 8.0.0
-Initial Release</PackageReleaseNotes>
+		<PackageReleaseNotes>Jakar.Extensions.Blazor 9.0.0</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Jakar.Extensions.Blazor</Title>

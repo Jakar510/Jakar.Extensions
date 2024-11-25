@@ -5,7 +5,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
-		<NoWarn>$(NoWarn);CA1416</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<OutputType>library</OutputType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<SupportedOSPlatform>windows</SupportedOSPlatform>
