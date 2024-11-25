@@ -15,12 +15,12 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<Version>9.0.0</Version>
-		<PackageId>Jakar.Extensions.Blazor</PackageId>
+		<PackageId>Jakar.Extensions.Maui</PackageId>
 		<Company>Tyler Stegmaier</Company>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
 		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
-		<PackageTags>Blazor</PackageTags>
+		<PackageTags>Maui Android iOS MacOSX Maccatalyst Windows</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
@@ -28,7 +28,7 @@
 		<PackageReleaseNotes>Jakar.Extensions.Maui 9.0.0</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Title>Jakar.Extensions.Blazor</Title>
+		<Title>Jakar.Extensions.Maui</Title>
 		<NeutralLanguage>en</NeutralLanguage>
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>

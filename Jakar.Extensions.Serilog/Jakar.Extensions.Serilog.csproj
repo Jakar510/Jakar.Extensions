@@ -29,11 +29,12 @@
 	  <IsAotCompatible>true</IsAotCompatible>
 	  <OptimizationPreference>Speed</OptimizationPreference>
 	  <EventSourceSupport>true</EventSourceSupport>
-	  <Title>Jakar.Extensions</Title>
+	  <Title>Jakar.Extensions.Serilog</Title>
 	  <IncludeSymbols>True</IncludeSymbols>
 	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	  <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <Product>Jakar.Extensions.Serilog</Product>
   </PropertyGroup>
 
   <ItemGroup>

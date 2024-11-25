@@ -30,6 +30,8 @@
 		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<Title>Jakar.Database</Title>
+		<Product>Jakar.Database</Product>
 	</PropertyGroup>
 
 	<ItemGroup>
