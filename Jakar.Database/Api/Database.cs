@@ -8,40 +8,40 @@ using Status = Jakar.Extensions.Status;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" )]
+[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType               DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
-    protected readonly ConcurrentBag<IDbTable> _tables             = [];
-    protected readonly ISqlCacheFactory        _sqlCacheFactory;
-    protected readonly ITableCache             _tableCache;
-    protected          ActivitySource?         _activitySource;
-    protected          Meter?                  _meter;
-    protected          string?                 _className;
+    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
+    protected readonly ConcurrentBag<IDbTable>         _tables             = [];
+    public readonly    DbOptions                       Settings;
+    public readonly    DbTable<AddressRecord>          Addresses;
+    public readonly    DbTable<FileRecord>             Files;
+    public readonly    DbTable<GroupRecord>            Groups;
+    public readonly    DbTable<RecoveryCodeRecord>     RecoveryCodes;
+    public readonly    DbTable<RoleRecord>             Roles;
+    public readonly    DbTable<UserAddressRecord>      UserAddresses;
+    public readonly    DbTable<UserGroupRecord>        UserGroups;
+    public readonly    DbTable<UserLoginInfoRecord>    UserLogins;
+    public readonly    DbTable<UserRecord>             Users;
+    public readonly    DbTable<UserRecoveryCodeRecord> UserRecoveryCodes;
+    public readonly    DbTable<UserRoleRecord>         UserRoles;
+    public readonly    IConfiguration                  Configuration;
+    protected readonly ISqlCacheFactory                _sqlCacheFactory;
+    protected readonly ITableCache                     _tableCache;
+    protected          ActivitySource?                 _activitySource;
+    protected          Meter?                          _meter;
+    protected          string?                         _className;
 
 
-    public static      Database?                       Current                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static      DataProtector                   DataProtector             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             IsolationLevel                  TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IsolationLevel.RepeatableRead;
-    public             DbTable<AddressRecord>          Addresses                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             string                          ClassName                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
-    public             int?                            CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
-    public             IConfiguration                  Configuration             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    protected internal SecuredString?                  ConnectionString          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public             DbTypeInstance                  DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
-    public             DbTable<FileRecord>             Files                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<GroupRecord>            Groups                    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             PasswordValidator               PasswordValidator         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
-    public             DbTable<RecoveryCodeRecord>     RecoveryCodes             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<RoleRecord>             Roles                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbOptions                       Settings                  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserAddressRecord>      UserAddresses             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserGroupRecord>        UserGroups                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserLoginInfoRecord>    UserLogins                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRecoveryCodeRecord> UserRecoveryCodes         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRoleRecord>         UserRoles                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             DbTable<UserRecord>             Users                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public             AppVersion                      Version                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
+    public static      Database?         Current                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static      DataProtector     DataProtector             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public             string            ClassName                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
+    public             int?              CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
+    protected internal SecuredString?    ConnectionString          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public             DbTypeInstance    DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
+    public             PasswordValidator PasswordValidator         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
+    public             IsolationLevel    TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion        Version                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
 
 
     static Database()

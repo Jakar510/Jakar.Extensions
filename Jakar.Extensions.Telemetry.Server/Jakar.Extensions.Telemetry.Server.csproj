@@ -11,6 +11,8 @@
     <PackageReference Include="Jakar.Extensions.Blazor" Version="8.0.2" />
     <PackageReference Include="Jakar.Extensions.Blazor.Syncfusion" Version="8.0.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
+    <PackageReference Include="MimeKit" Version="4.8.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
