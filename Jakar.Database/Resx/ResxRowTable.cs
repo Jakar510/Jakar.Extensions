@@ -234,8 +234,8 @@ public sealed record ResxRowRecord( long                    KeyID,
                                                                    SupportedLanguage.Dutch       => Dutch,
                                                                    SupportedLanguage.Korean      => Korean,
                                                                    SupportedLanguage.Arabic      => Arabic,
-                                                                   SupportedLanguage.Unspecified => throw new OutOfRangeException( nameof(language), language ),
-                                                                   _                             => throw new OutOfRangeException( nameof(language), language )
+                                                                   SupportedLanguage.Unspecified => throw new OutOfRangeException( language ),
+                                                                   _                             => throw new OutOfRangeException( language )
                                                                } ??
                                                                Neutral;
     public bool Equals( ResxRowRecord? other )

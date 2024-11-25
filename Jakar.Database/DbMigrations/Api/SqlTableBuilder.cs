@@ -323,7 +323,7 @@ public ref struct SqlTableBuilder<TRecord>
         {
             DbTypeInstance.MsSql    => GetDataTypeSqlServer( column ),
             DbTypeInstance.Postgres => GetDataTypePostgresSql( column ),
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -331,9 +331,9 @@ public ref struct SqlTableBuilder<TRecord>
     private static string GetDataTypePostgresSql( scoped in ColumnMetaData column ) =>
         column.DbType switch
         {
-            DbType.String or DbType.StringFixedLength when column.IsValidLength() is false                                => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when column.IsValidLength() is false                        => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision() => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
+            DbType.String or DbType.StringFixedLength when column.IsValidLength() is false                                => throw new OutOfRangeException( column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when column.IsValidLength() is false                        => throw new OutOfRangeException( column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
+            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision() => throw new OutOfRangeException( column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
 
             _ => column.DbType switch
                  {
@@ -371,7 +371,7 @@ public ref struct SqlTableBuilder<TRecord>
                      DbType.Currency                           => "money",
                      DbType.Object                             => "json",
                      DbType.Xml                                => "xml",
-                     _                                         => throw new OutOfRangeException( nameof(column.DbType), column.DbType )
+                     _                                         => throw new OutOfRangeException( column.DbType )
                  }
         };
 
@@ -380,9 +380,9 @@ public ref struct SqlTableBuilder<TRecord>
     private static string GetDataTypeSqlServer( scoped in ColumnMetaData column ) =>
         column.DbType switch
         {
-            DbType.String or DbType.StringFixedLength when column.Length is { IsT0        : true, AsT0: > SQL.UNICODE_CAPACITY } => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when column.Length is { IsT0: true, AsT0: > SQL.ANSI_CAPACITY }    => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision()        => throw new OutOfRangeException( nameof(column.Length), column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
+            DbType.String or DbType.StringFixedLength when column.Length is { IsT0        : true, AsT0: > SQL.UNICODE_CAPACITY } => throw new OutOfRangeException( column.Length, $"Max length for Unicode strings is {SQL.UNICODE_CAPACITY}" ),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when column.Length is { IsT0: true, AsT0: > SQL.ANSI_CAPACITY }    => throw new OutOfRangeException( column.Length, $"Max length for ANSI strings is {SQL.ANSI_CAPACITY}" ),
+            DbType.VarNumeric when column.Length.IsT0 || column.Length.IsT1 is false || column.IsInvalidScopedPrecision()        => throw new OutOfRangeException( column.Length, $"Max deciamal scale is {SQL.DECIMAL_MAX_SCALE}. Max deciamal precision is {SQL.DECIMAL_MAX_PRECISION}" ),
             _ => column.DbType switch
                  {
                      DbType.Binary => column.Length.IsT0
@@ -419,7 +419,7 @@ public ref struct SqlTableBuilder<TRecord>
                      DbType.Currency                           => "MONEY",
                      DbType.Object                             => "JSON",
                      DbType.Xml                                => "XML",
-                     _                                         => throw new OutOfRangeException( nameof(column.DbType), column.DbType )
+                     _                                         => throw new OutOfRangeException( column.DbType )
                  }
         };
 

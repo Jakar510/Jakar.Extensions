@@ -21,6 +21,6 @@ public sealed class SqlCacheFactory : ISqlCacheFactory
         {
             DbTypeInstance.MsSql    => new MsSqlServer<TRecord>(),
             DbTypeInstance.Postgres => new PostgresSql<TRecord>(),
-            _                   => throw new OutOfRangeException( nameof(dbRoot.DbTypeInstance), dbRoot.DbTypeInstance )
+            _                       => throw new OutOfRangeException( dbRoot.DbTypeInstance )
         };
 }

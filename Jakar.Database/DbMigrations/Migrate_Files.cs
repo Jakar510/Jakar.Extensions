@@ -23,7 +23,7 @@ public abstract class Migrate_Files : Migration<FileRecord>
 
         table.WithColumn( nameof(FileRecord.Hash) ).AsString( UNICODE_CAPACITY ).NotNullable();
 
-        table.WithColumn( nameof(FileRecord.MimeType) ).AsString( MimeTypes.Names.Values.Max( static x => x.Length ) ).NotNullable();
+        table.WithColumn( nameof(FileRecord.MimeType) ).AsString( MimeTypes.Names.Values.AsSpan().Max( static x => x.Length, 0 ) ).NotNullable();
 
         table.WithColumn( nameof(FileRecord.Payload) ).AsString( BINARY_CAPACITY ).NotNullable();
 

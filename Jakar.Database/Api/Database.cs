@@ -197,7 +197,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new OutOfRangeException( nameof(connection.State), connection.State )
+                       _                          => throw new OutOfRangeException( connection.State )
                    };
         }
         catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message, e ); }

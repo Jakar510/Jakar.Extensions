@@ -49,7 +49,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{CREATED_BY}{QUOTE}",
             DbTypeInstance.MsSql    => CREATED_BY,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -59,7 +59,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{ID}{QUOTE}",
             DbTypeInstance.MsSql    => ID,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -69,7 +69,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{LAST_MODIFIED}{QUOTE}",
             DbTypeInstance.MsSql    => LAST_MODIFIED,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -80,7 +80,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{TRecord.TableName}{QUOTE}",
             DbTypeInstance.MsSql    => TRecord.TableName,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -90,7 +90,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.MsSql    => "NEWID()",
             DbTypeInstance.Postgres => "RANDOM()",
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
@@ -100,7 +100,7 @@ public static class SQL // TODO: move to Jakar.Extensions.Sizes
         {
             DbTypeInstance.Postgres => $"{QUOTE}{DATE_CREATED}{QUOTE}",
             DbTypeInstance.MsSql    => DATE_CREATED,
-            _                       => throw new OutOfRangeException( nameof(instance), instance )
+            _                       => throw new OutOfRangeException( instance )
         };
 
 
