@@ -56,14 +56,14 @@ Initial Release</PackageReleaseNotes>
 		<PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
 		<PackageReference Include="PanoramicData.Blazor" Version="9.0.1" />
-		<PackageReference Include="Radzen.Blazor" Version="5.6.3" />
-		<PackageReference Include="Jakar.Extensions" Version="8.13.3" />
+		<PackageReference Include="Radzen.Blazor" Version="5.6.7" />
+		<PackageReference Include="Jakar.Extensions" Version="9.0.0" />
 		<PackageReference Include="Hardware.Info" Version="101.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.0.0" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="7.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="7.1.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="7.1.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0" />
