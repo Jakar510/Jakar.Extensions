@@ -41,7 +41,7 @@ public readonly record struct ActivityID( string HexString ) : ISpanParsable<Act
                                                                                                                                                                  {
                                                                                                                                                                      Guid id  => Create( id ),
                                                                                                                                                                      string s => Create( s.AsGuid() ) ?? existingValue,
-                                                                                                                                                                     _        => throw new ExpectedValueTypeException( nameof(reader.Value), reader.Value, typeof(Guid), typeof(string) )
+                                                                                                                                                                     _        => throw new ExpectedValueTypeException( nameof(reader.Value), reader.Value, [typeof(Guid), typeof(string)] )
                                                                                                                                                                  };
     }
 
@@ -54,7 +54,7 @@ public readonly record struct ActivityID( string HexString ) : ISpanParsable<Act
                                                                                                                                                                    {
                                                                                                                                                                        Guid id  => Create( id ),
                                                                                                                                                                        string s => Create( s.AsGuid() ) ?? existingValue,
-                                                                                                                                                                       _        => throw new ExpectedValueTypeException( nameof(reader.Value), reader.Value, typeof(Guid), typeof(string) )
+                                                                                                                                                                       _        => throw new ExpectedValueTypeException( nameof(reader.Value), reader.Value, [typeof(Guid), typeof(string)] )
                                                                                                                                                                    };
     }
 }

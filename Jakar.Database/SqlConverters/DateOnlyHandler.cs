@@ -14,7 +14,7 @@ public class DateOnlyHandler : SqlConverter<DateOnlyHandler, DateOnly>
             string item when DateOnly.TryParse( item, out DateOnly offset )             => offset,
             string item when DateTime.TryParse( item, out DateTime offset )             => Get( offset ),
             string item when DateTimeOffset.TryParse( item, out DateTimeOffset offset ) => Get( offset ),
-            _                                                                           => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateOnly), typeof(string) )
+            _                                                                           => throw new ExpectedValueTypeException( nameof(value), value, [typeof(DateOnly), typeof(string)] )
         };
     public override void SetValue( IDbDataParameter parameter, DateOnly value )
     {

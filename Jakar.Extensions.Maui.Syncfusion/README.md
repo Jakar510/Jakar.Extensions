@@ -1,0 +1,1 @@
+# Jakar.Extensions.Maui.Syncfusion

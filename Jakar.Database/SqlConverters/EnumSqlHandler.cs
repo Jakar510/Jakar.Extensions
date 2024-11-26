@@ -32,15 +32,17 @@ public class EnumSqlHandler<T> : SqlConverter<EnumSqlHandler<T>, T>
                                                     long item  => Longs[item],
                                                     _ => throw new ExpectedValueTypeException( nameof(value),
                                                                                                value,
-                                                                                               typeof(byte),
-                                                                                               typeof(sbyte),
-                                                                                               typeof(short),
-                                                                                               typeof(ushort),
-                                                                                               typeof(int),
-                                                                                               typeof(uint),
-                                                                                               typeof(long),
-                                                                                               typeof(ulong),
-                                                                                               typeof(string) )
+                                                                                               [
+                                                                                                   typeof(byte),
+                                                                                                   typeof(sbyte),
+                                                                                                   typeof(short),
+                                                                                                   typeof(ushort),
+                                                                                                   typeof(int),
+                                                                                                   typeof(uint),
+                                                                                                   typeof(long),
+                                                                                                   typeof(ulong),
+                                                                                                   typeof(string)
+                                                                                               ] )
                                                 };
 
     public override void SetValue( IDbDataParameter parameter, T value )

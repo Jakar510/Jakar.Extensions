@@ -51,7 +51,21 @@ public static partial class Migrations
 
         else if ( enumType.IsOneOf( [typeof(uint), typeof(long), typeof(ulong)] ) ) { item = col.AsInt64(); }
 
-        else { throw new ExpectedValueTypeException( nameof(enumType), enumType, typeof(byte), typeof(sbyte), typeof(ushort), typeof(short), typeof(int), typeof(uint), typeof(long), typeof(ulong) ); }
+        else
+        {
+            throw new ExpectedValueTypeException( nameof(enumType),
+                                                  enumType,
+                                                  [
+                                                      typeof(byte),
+                                                      typeof(sbyte),
+                                                      typeof(ushort),
+                                                      typeof(short),
+                                                      typeof(int),
+                                                      typeof(uint),
+                                                      typeof(long),
+                                                      typeof(ulong)
+                                                  ] );
+        }
 
 
         // migration.CreateEnumTable(propertyType);
@@ -233,7 +247,7 @@ public static partial class Migrations
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
     {
-        if ( !propertyInfo.PropertyType.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>) ); }
+        if ( propertyInfo.PropertyType.IsList( out Type? itemType ) is false ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, [typeof(IList<>)] ); }
 
         return parent.GetMappingTableName( propertyInfo, itemType );
     }
@@ -334,29 +348,31 @@ public static partial class Migrations
 
         throw new ExpectedValueTypeException( key,
                                               prop.PropertyType,
-                                              typeof(string),
-                                              typeof(bool),
-                                              typeof(byte),
-                                              typeof(byte[]),
-                                              typeof(ReadOnlyMemory<byte>),
-                                              typeof(short),
-                                              typeof(int),
-                                              typeof(long),
-                                              typeof(double),
-                                              typeof(decimal),
-                                              typeof(Guid),
-                                              typeof(DateTime),
-                                              typeof(DateTimeOffset),
-                                              typeof(TimeSpan),
-                                              typeof(Enum),
-                                              typeof(JObject),
-                                              typeof(JToken),
-                                              typeof(List<JObject>),
-                                              typeof(List<JObject?>),
-                                              typeof(IDictionary<string, JToken?>),
-                                              typeof(IDictionary<string, JToken>),
-                                              typeof(IDictionary),
-                                              typeof(IList) );
+                                              [
+                                                  typeof(string),
+                                                  typeof(bool),
+                                                  typeof(byte),
+                                                  typeof(byte[]),
+                                                  typeof(ReadOnlyMemory<byte>),
+                                                  typeof(short),
+                                                  typeof(int),
+                                                  typeof(long),
+                                                  typeof(double),
+                                                  typeof(decimal),
+                                                  typeof(Guid),
+                                                  typeof(DateTime),
+                                                  typeof(DateTimeOffset),
+                                                  typeof(TimeSpan),
+                                                  typeof(Enum),
+                                                  typeof(JObject),
+                                                  typeof(JToken),
+                                                  typeof(List<JObject>),
+                                                  typeof(List<JObject?>),
+                                                  typeof(IDictionary<string, JToken?>),
+                                                  typeof(IDictionary<string, JToken>),
+                                                  typeof(IDictionary),
+                                                  typeof(IList)
+                                              ] );
     }
 
 

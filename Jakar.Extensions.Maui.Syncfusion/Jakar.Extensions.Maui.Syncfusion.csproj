@@ -45,6 +45,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="..\images\icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\LICENSE.txt">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.10" />
 		<PackageReference Include="Syncfusion.Maui.Charts" Version="27.2.3" />
 		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.2" />
@@ -76,6 +87,13 @@
 		<PackageReference Include="Syncfusion.Maui.RadialMenu" Version="27.2.3" />
 		<PackageReference Include="Syncfusion.Maui.TreeMap" Version="27.2.3" />
 		<PackageReference Include="Syncfusion.Maui.Kanban" Version="27.2.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
 
 </Project>

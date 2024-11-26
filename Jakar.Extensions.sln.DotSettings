@@ -683,6 +683,7 @@ ${CurrentDate.Month}/${CurrentDate.Day}/${CurrentDate.Year}  ${CurrentDate.Hour}
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Stannate/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=startswith/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=staticmethod/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/UserDictionary/Words/=Syncfusions/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=Templated/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=troz/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=TRUECHEM/@EntryIndexedValue">True</s:Boolean>

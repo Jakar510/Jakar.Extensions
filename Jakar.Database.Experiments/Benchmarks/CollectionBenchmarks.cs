@@ -64,75 +64,60 @@ public class CollectionBenchmarks
 
     static CollectionBenchmarks()
     {
-        _list = new Dictionary<int, List<double>>
-                {
-                    GetList( 10 ),
-                    GetList( 1000 ),
-                    GetList( 10_000 )
-                }.ToFrozenDictionary();
+        Dictionary<int, List<double>> list = new(3);
+        list.Add( [GetList( 10 ), GetList( 1000 ), GetList( 10_000 )] );
+        _list = list.ToFrozenDictionary();
 
-        _array = new Dictionary<int, double[]>
-                 {
-                     GetArray( 10 ),
-                     GetArray( 1000 ),
-                     GetArray( 10_000 )
-                 }.ToFrozenDictionary();
+        Dictionary<int, double[]> array = new(3);
+        array.Add( [GetArray( 10 ), GetArray( 1000 ), GetArray( 10_000 )] );
+        _array = array.ToFrozenDictionary();
 
-        _immutableArray = new Dictionary<int, ImmutableArray<double>>
-                          {
-                              GetImmutableArray( 10 ),
-                              GetImmutableArray( 1000 ),
-                              GetImmutableArray( 10_000 )
-                          }.ToFrozenDictionary();
+        Dictionary<int, ImmutableArray<double>> immutableArray = new(3);
+        immutableArray.Add( [GetImmutableArray( 10 ), GetImmutableArray( 1000 ), GetImmutableArray( 10_000 )] );
+        _immutableArray = immutableArray.ToFrozenDictionary();
 
-        _immutableList = new Dictionary<int, ImmutableList<double>>
-                         {
-                             GetImmutableList( 10 ),
-                             GetImmutableList( 1000 ),
-                             GetImmutableList( 10_000 )
-                         }.ToFrozenDictionary();
+        Dictionary<int, ImmutableList<double>> immutableList = new(3);
+        immutableList.Add( [GetImmutableList( 10 ), GetImmutableList( 1000 ), GetImmutableList( 10_000 )] );
+        _immutableList = immutableList.ToFrozenDictionary();
 
-        _set = new Dictionary<int, FrozenSet<double>>
-               {
-                   GetFrozenSet( 10 ),
-                   GetFrozenSet( 1000 ),
-                   GetFrozenSet( 10_000 )
-               }.ToFrozenDictionary();
+        Dictionary<int, FrozenSet<double>> set = new(3);
+        set.Add( [GetFrozenSet( 10 ), GetFrozenSet( 1000 ), GetFrozenSet( 10_000 )] );
+        _set = set.ToFrozenDictionary();
     }
 
     private static KeyValuePair<int, double[]> GetArray( int size )
     {
-        double[] array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToArray();
+        double[] array = [.. Enumerable.Range( 0, size ).Select( i => _random.NextDouble() )];
         return new KeyValuePair<int, double[]>( size, array );
     }
     private static KeyValuePair<int, List<double>> GetList( int size )
     {
-        List<double> array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToList();
+        List<double> array = [..Enumerable.Range( 0, size ).Select( i => _random.NextDouble() )];
         return new KeyValuePair<int, List<double>>( size, array );
     }
     private static KeyValuePair<int, ImmutableArray<double>> GetImmutableArray( int size )
     {
-        ImmutableArray<double> array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToImmutableArray();
+        ImmutableArray<double> array = [..Enumerable.Range( 0, size ).Select( i => _random.NextDouble() )];
         return new KeyValuePair<int, ImmutableArray<double>>( size, array );
     }
     private static KeyValuePair<int, ImmutableList<double>> GetImmutableList( int size )
     {
-        ImmutableList<double> array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToImmutableList();
+        ImmutableList<double> array = [.. Enumerable.Range( 0, size ).Select( i => _random.NextDouble() )];
         return new KeyValuePair<int, ImmutableList<double>>( size, array );
     }
     private static KeyValuePair<int, FrozenSet<double>> GetFrozenSet( int size )
     {
-        FrozenSet<double> array = Enumerable.Range( 0, size ).Select( i => _random.NextDouble() ).ToFrozenSet();
+        FrozenSet<double> array = [.. Enumerable.Range( 0, size ).Select( i => _random.NextDouble() )];
         return new KeyValuePair<int, FrozenSet<double>>( size, array );
     }
 
 
-    [BenchmarkCategory( "Construct" ), Benchmark]  public double[]               GetArray()          => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToArray();
-    [BenchmarkCategory( "Construct" ), Benchmark]  public double[]               GetSizedArray()     => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToArray( Size );
-    [BenchmarkCategory( "Construct" ), Benchmark]  public ImmutableArray<double> GetImmutableArray() => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToImmutableArray();
-    [BenchmarkCategory( "Construct" ), Benchmark]  public ImmutableList<double>  GetImmutableList()  => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToImmutableList();
-    [BenchmarkCategory( "Construct" ), Benchmark]  public FrozenSet<double>      GetFrozenSet()      => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToFrozenSet();
-    [BenchmarkCategory( "Construct" ), Benchmark]  public List<double>           GetList()           => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToList();
+    [BenchmarkCategory( "Construct" ), Benchmark] public double[]               GetArray()          => [.. Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() )];
+    [BenchmarkCategory( "Construct" ), Benchmark] public double[]               GetSizedArray()     => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToArray( Size );
+    [BenchmarkCategory( "Construct" ), Benchmark] public ImmutableArray<double> GetImmutableArray() => [..Enumerable.Range( 0,  Size ).Select( i => _random.NextDouble() )];
+    [BenchmarkCategory( "Construct" ), Benchmark] public ImmutableList<double>  GetImmutableList()  => [.. Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() )];
+    [BenchmarkCategory( "Construct" ), Benchmark] public FrozenSet<double>      GetFrozenSet()      => [.. Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() )];
+    [BenchmarkCategory( "Construct" ), Benchmark] public List<double>           GetList()           => [.. Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() )];
 
     // [ BenchmarkCategory( "Construct" ), Benchmark ] public List<double>           GetSizedList()      => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToList( Size );
 
