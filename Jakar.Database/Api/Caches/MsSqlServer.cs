@@ -31,7 +31,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         _sql[SqlCacheType.Random] = sql = $"SELECT * FROM {TableName} ORDER BY {RandomMethod} LIMIT 1";
         return sql;
     }
-    public override SqlCommand Random( in int count )
+    public override SqlCommand Random( int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
@@ -40,7 +40,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( scoped in Guid? userID, in int count )
+    public override SqlCommand Random( Guid? userID, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count),  count );
@@ -50,7 +50,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( scoped in RecordID<UserRecord> id, in int count )
+    public override SqlCommand Random( RecordID<UserRecord> id, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
@@ -60,7 +60,7 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Insert( in TRecord record )
+    public override SqlCommand Insert( TRecord record )
     {
         DynamicParameters parameters = record.ToDynamicParameters();
 
@@ -76,9 +76,9 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    public override SqlCommand TryInsert( TRecord record, bool matchAll, DynamicParameters parameters )
     {
-        Key key   = Key.Create( matchAll, parameters );
+        SqlKey            key   = SqlKey.Create( matchAll, parameters );
         DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams( parameters );
 
@@ -107,10 +107,10 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, param );
     }
-    public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    public override SqlCommand InsertOrUpdate( TRecord record, bool matchAll, DynamicParameters parameters )
     {
-        Key               key   = Key.Create( matchAll, parameters );
-        DynamicParameters               param = new DynamicParameters( record );
+        SqlKey            key   = SqlKey.Create( matchAll, parameters );
+        DynamicParameters param = new DynamicParameters( record );
         RecordID<TRecord> id    = record.ID;
         param.Add( nameof(id), id );
         param.AddDynamicParams( parameters );

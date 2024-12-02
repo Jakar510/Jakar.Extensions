@@ -47,7 +47,7 @@ public sealed class AsyncKeyGenerator<TRecord>( DbTable<TRecord> table, Cancella
             _generator = default;
         }
 
-        return Current.Value != Guid.Empty;
+        return Current.value != Guid.Empty;
     }
 
 

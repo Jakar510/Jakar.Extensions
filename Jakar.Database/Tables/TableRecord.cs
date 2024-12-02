@@ -32,7 +32,7 @@ public interface ITableRecord : IRecordPair
 public interface ITableRecord<TRecord> : ITableRecord
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    Guid IUniqueID<Guid>.          ID => ID.Value;
+    Guid IUniqueID<Guid>.          ID => ID.value;
     public new RecordID<TRecord>   ID { get; }
     public     RecordPair<TRecord> ToPair();
     public     TRecord             NewID( in RecordID<TRecord> id );
@@ -87,14 +87,14 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
     public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(ID), id.Value );
+        parameters.Add( nameof(ID), id.value );
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(ID),           ID.Value );
+        parameters.Add( nameof(ID),           ID.value );
         parameters.Add( nameof(DateCreated),  DateCreated );
         parameters.Add( nameof(LastModified), LastModified );
         return parameters;
@@ -158,7 +158,7 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedB
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(CreatedBy), user.ID.Value );
+        parameters.Add( nameof(CreatedBy), user.ID.value );
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TRecord> record )

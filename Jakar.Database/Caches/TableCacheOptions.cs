@@ -4,6 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
+/*
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" ), SuppressMessage( "ReSharper", "ConvertToPrimaryConstructor" )]
 public sealed class TableCacheOptions : IOptions<TableCacheOptions>
 {
@@ -26,3 +27,4 @@ public sealed class TableCacheOptions : IOptions<TableCacheOptions>
         return builder;
     }
 }
+*/

@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using Microsoft.Extensions.Caching.Hybrid;
 using Status = Jakar.Extensions.Status;
 
 
@@ -27,7 +28,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly    DbTable<UserRoleRecord>         UserRoles;
     public readonly    IConfiguration                  Configuration;
     protected readonly ISqlCacheFactory                _sqlCacheFactory;
-    protected readonly ITableCache                     _tableCache;
+    protected readonly HybridCache                     _cache;
     protected          ActivitySource?                 _activitySource;
     protected          Meter?                          _meter;
     protected          string?                         _className;
@@ -66,10 +67,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
         RecordID<UserAddressRecord>.RegisterDapperTypeHandlers();
     }
-    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base()
+    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, HybridCache cache ) : base()
     {
         _sqlCacheFactory  = sqlCacheFactory;
-        _tableCache       = tableCache;
+        _cache            = cache;
         Configuration     = configuration;
         Settings          = options.Value;
         Users             = Create<UserRecord>();
@@ -97,8 +98,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    Task IHostedService.StartAsync( CancellationToken cancellationToken ) => _tableCache.StartAsync( cancellationToken );
-    Task IHostedService.StopAsync( CancellationToken  cancellationToken ) => _tableCache.StopAsync( cancellationToken );
+    // Task IHostedService.StartAsync( CancellationToken cancellationToken ) => _tableCache.StartAsync( cancellationToken );
+    // Task IHostedService.StopAsync( CancellationToken  cancellationToken ) => _tableCache.StopAsync( cancellationToken );
 
 
     protected async Task InitDataProtector()
@@ -126,7 +127,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected virtual DbTable<TRecord> Create<TRecord>()
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
-        var table = new DbTable<TRecord>( this, _sqlCacheFactory );
+        DbTable<TRecord> table = new(this, _sqlCacheFactory, _cache);
         return AddDisposable( table );
     }
 
@@ -146,40 +147,33 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ITableCache<TRecord> GetCache<TRecord>( DbTable<TRecord> table )
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord> => _tableCache.GetCache( table );
-
-
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition GetCommand( in SqlCommand sql, DbTransaction? transaction, CancellationToken token )
+    public CommandDefinition GetCommand( SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return sql.ToCommandDefinition( transaction, token, CommandTimeout );
     }
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public SqlCommand.Definition GetCommand( SqlCommand sql, DbConnection connection, DbTransaction? transaction, CancellationToken token )
+    {
+        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
+        return sql.ToCommandDefinition( connection, transaction, token, CommandTimeout );
+    }
+
+
     public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
     {
         try
         {
-            /*
-            DbCommand dbCommand = connection.CreateCommand();
-            dbCommand.CommandTimeout = CommandTimeout;
-            if ( commandType.HasValue ) { dbCommand.CommandType = commandType.Value; }
-
-            // BindByName - bool
-            // InitialLONGFetchSize - int
-            // FetchSize - long
-            if ( dbCommand is SqlCommand msSql ) { }
-
-            else if ( dbCommand is not NpgsqlCommand postgres ) { }
-
-            DbDataReader temp = await dbCommand.ExecuteReaderAsync( CommandBehavior.SequentialAccess, token );
-            */
-
             CommandDefinition command = GetCommand( sql, transaction, token );
-            DbDataReader      reader  = await connection.ExecuteReaderAsync( command );
-            return reader;
+            return await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
+    }
+    public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition  )
+    {
+        try { return await definition.connection.ExecuteReaderAsync( definition ); }
+        catch ( Exception e ) { throw new SqlException( definition.command.CommandText, definition.command.Parameters as DynamicParameters, e ); }
     }
 
 

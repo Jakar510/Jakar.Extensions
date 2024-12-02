@@ -31,33 +31,41 @@ public enum SqlCacheType
 public interface ISqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
+    public string         CreatedBy    { get; }
+    public string         DateCreated  { get; }
+    public string         IdColumnName { get; }
+    public DbTypeInstance Instance     { get; }
+    public string         LastModified { get; }
+    public string         RandomMethod { get; }
+
+
     void       Reset();
     SqlCommand All();
     SqlCommand First();
     SqlCommand Last();
     SqlCommand SortedIDs();
-    SqlCommand Delete( scoped in RecordID<TRecord>              id );
-    SqlCommand Delete( in        IEnumerable<RecordID<TRecord>> ids );
-    SqlCommand Delete( in        bool                           matchAll, in DynamicParameters parameters );
-    SqlCommand Next( scoped in   RecordPair<TRecord>            pair );
-    SqlCommand Next( scoped in   RecordID<TRecord>              id, scoped in DateTimeOffset dateCreated );
-    SqlCommand NextID( scoped in RecordPair<TRecord>            pair );
-    SqlCommand NextID( scoped in RecordID<TRecord>              id, scoped in DateTimeOffset dateCreated );
+    SqlCommand Delete( ref readonly RecordID<TRecord>              id );
+    SqlCommand Delete( ref readonly IEnumerable<RecordID<TRecord>> ids );
+    SqlCommand Delete( ref readonly bool                           matchAll, ref readonly DynamicParameters parameters );
+    SqlCommand Next( ref readonly   RecordPair<TRecord>            pair );
+    SqlCommand Next( ref readonly   RecordID<TRecord>              id, ref readonly DateTimeOffset dateCreated );
+    SqlCommand NextID( ref readonly RecordPair<TRecord>            pair );
+    SqlCommand NextID( ref readonly RecordID<TRecord>              id, ref readonly DateTimeOffset dateCreated );
     SqlCommand Count();
     SqlCommand Random();
-    SqlCommand Random( in          int                            count );
-    SqlCommand Random( scoped in   Guid?                          userID, in int count );
-    SqlCommand Random( scoped in   RecordID<UserRecord>           id,     in int count );
-    SqlCommand Single( scoped in   RecordID<TRecord>              id );
-    SqlCommand Insert( in          TRecord                        record );
-    SqlCommand TryInsert( in       TRecord                        record, in bool matchAll, in DynamicParameters parameters );
-    SqlCommand InsertOrUpdate( in  TRecord                        record, in bool matchAll, in DynamicParameters parameters );
-    SqlCommand Update( in          TRecord                        record );
-    SqlCommand Where<TValue>( in   string                         columnName, in TValue?           value );
-    SqlCommand Where( in           bool                           matchAll,   in DynamicParameters parameters );
-    SqlCommand WhereID<TValue>( in string                         columnName, in TValue?           value );
-    SqlCommand Exists( in          bool                           matchAll,   in DynamicParameters parameters );
-    SqlCommand Get( in             bool                           matchAll,   in DynamicParameters parameters );
-    SqlCommand Get( scoped in      RecordID<TRecord>              id );
-    SqlCommand Get( in             IEnumerable<RecordID<TRecord>> ids );
+    SqlCommand Random( ref readonly          int                            count );
+    SqlCommand Random( ref readonly          Guid?                          userID, ref readonly int count );
+    SqlCommand Random( ref readonly          RecordID<UserRecord>           id,     ref readonly int count );
+    SqlCommand Single( ref readonly          RecordID<TRecord>              id );
+    SqlCommand Insert( ref readonly          TRecord                        record );
+    SqlCommand TryInsert( ref readonly       TRecord                        record, ref readonly bool matchAll, ref readonly DynamicParameters parameters );
+    SqlCommand InsertOrUpdate( ref readonly  TRecord                        record, ref readonly bool matchAll, ref readonly DynamicParameters parameters );
+    SqlCommand Update( ref readonly          TRecord                        record );
+    SqlCommand Where<TValue>( ref readonly   string                         columnName, ref readonly TValue?           value );
+    SqlCommand Where( ref readonly           bool                           matchAll,   ref readonly DynamicParameters parameters );
+    SqlCommand WhereID<TValue>( ref readonly string                         columnName, ref readonly TValue?           value );
+    SqlCommand Exists( ref readonly          bool                           matchAll,   ref readonly DynamicParameters parameters );
+    SqlCommand Get( ref readonly             bool                           matchAll,   ref readonly DynamicParameters parameters );
+    SqlCommand Get( ref readonly             RecordID<TRecord>              id );
+    SqlCommand Get( ref readonly             IEnumerable<RecordID<TRecord>> ids );
 }

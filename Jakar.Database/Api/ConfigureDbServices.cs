@@ -1,21 +1,23 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 06/02/2024  15:06
 
+using Microsoft.Extensions.Caching.Hybrid;
+
+
+
 namespace Jakar.Database;
 
 
-public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>
+public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     where TApp : IAppName
     where TDatabase : Database
     where TSqlCacheFactory : class, ISqlCacheFactory
-    where TTableCacheFactory : class, ITableCache
-    where T : ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory, TTableCacheFactory>, new()
+    where T : ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>, new()
 {
     public          string            AppName                         { get; }       = TApp.AppName;
     public          string            AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
     public          string            AuthenticationSchemeDisplayName { get; init; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
     public          DbOptions         DbOptions                       { get; init; } = new();
-    public          TableCacheOptions TableCacheOptions               { get; init; } = TableCacheOptions.Default;
     public abstract bool              UseApplicationCookie            { get; }
     public abstract bool              UseAuth                         { get; }
     public abstract bool              UseAuthCookie                   { get; }
@@ -64,14 +66,14 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory, 
         builder.Services.AddSingleton( DbOptions );
         builder.Services.AddTransient( DbOptions.Get );
 
-        builder.Services.AddSingleton( TableCacheOptions );
-        builder.Services.AddTransient( TableCacheOptions.Get );
-
         builder.Services.AddStackExchangeRedisCache( Redis );
         builder.Services.AddMemoryCache( MemoryCache );
 
+    #pragma warning disable EXTEXP0018 // <- Add this line
+        builder.Services.AddHybridCache();
+    #pragma warning restore EXTEXP0018 // <- Add this line
+
         builder.Services.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
-        builder.Services.AddSingleton<ITableCache, TTableCacheFactory>();
 
         builder.Services.AddSingleton<TDatabase>();
         builder.Services.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );

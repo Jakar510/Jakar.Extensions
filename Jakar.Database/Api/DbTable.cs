@@ -2,6 +2,10 @@
 // 10/16/2022  4:54 PM
 
 
+using Microsoft.Extensions.Caching.Hybrid;
+
+
+
 namespace Jakar.Database;
 
 
@@ -9,9 +13,9 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord> : IConnectableDb
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected readonly IConnectableDbRoot   _database;
-    protected readonly ISqlCache<TRecord>   _sqlCache;
-    protected readonly ITableCache<TRecord> _tableCache;
+    protected readonly IConnectableDbRoot    _database;
+    protected readonly BaseSqlCache<TRecord> _sqlCache;
+    protected readonly HybridCache           _cache;
 
 
     public static TRecord[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
@@ -21,13 +25,14 @@ public partial class DbTable<TRecord> : IConnectableDb
     public        int?                     CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
     public        DbTypeInstance           DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
     public        RecordGenerator<TRecord> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public        HybridCacheEntryOptions? Options                   { get; set; }
 
 
-    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory )
+    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory, HybridCache cache )
     {
-        _database   = database;
-        _tableCache = database.GetCache( this );
-        _sqlCache   = sqlCacheFactory.GetSqlCache<TRecord>( _database );
+        _database = database;
+        _cache    = cache;
+        _sqlCache = sqlCacheFactory.GetSqlCache<TRecord>( _database );
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
@@ -36,24 +41,20 @@ public partial class DbTable<TRecord> : IConnectableDb
         return default;
     }
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
-    public void ResetCaches()
-    {
-        _sqlCache.Reset();
-        _tableCache.Reset();
-    }
+    public void                    ResetCaches()                                     { _sqlCache.Reset(); }
 
 
-    public IAsyncEnumerable<TRecord> All(  CancellationToken token = default ) => this.Call( All,  token );
-    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction,  [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
+    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               sql    = _sqlCache.All();
-        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction,  sql, token );
+        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
 
-    public ValueTask<TResult> Call<TResult>(  string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call,  sql, parameters, func, token );
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction,  string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public ValueTask<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, sql, parameters, func, token );
+    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
@@ -64,12 +65,12 @@ public partial class DbTable<TRecord> : IConnectableDb
     }
 
 
-    public ValueTask<TResult> Call<TResult>(  SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call,  sql, func, token );
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction,  SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public ValueTask<TResult> Call<TResult>( SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall( Call, sql, func, token );
+    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
-            await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction,  sql, token );
+            await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
             return await func( reader, token );
         }
         catch ( Exception e ) { throw new SqlException( sql.SQL, sql.Parameters, e ); }

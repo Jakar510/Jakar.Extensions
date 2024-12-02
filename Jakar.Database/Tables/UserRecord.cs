@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database;
+﻿using Microsoft.Extensions.Primitives;
+using Status = Jakar.Extensions.Status;
+
+
+
+namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
@@ -57,17 +62,17 @@ public sealed record UserRecord( string                        UserName,
     public                                                                                       int?                          BadLogins              { get;                    set; } = BadLogins;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public                         string                        Company                { get;                    set; } = Company;
     [StringLength(                        SQL.ANSI_CAPACITY )]    public                         string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => CreatedBy?.Value;
+    Guid? ICreatedByUser<Guid>.                                                                                                CreatedBy              => CreatedBy?.value;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Department             { get; set; } = Department;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Description            { get; set; } = Description;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Email                  { get; set; } = Email;
     public                                                               RecordID<UserRecord>?                                 EscalateTo             { get; set; } = EscalateTo;
-    Guid? IEscalateToUser<Guid>.                                                                                               EscalateTo             => EscalateTo?.Value;
+    Guid? IEscalateToUser<Guid>.                                                                                               EscalateTo             => EscalateTo?.value;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Ext                    { get; set; } = Ext;
     [ProtectedPersonalData, StringLength( 2000 )]                 public string                                                FirstName              { get; set; } = FirstName;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                FullName               { get; set; } = FullName;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Gender                 { get; set; } = Gender;
-    Guid? IImageID<Guid>.                                                                                                      ImageID                => ImageID?.Value;
+    Guid? IImageID<Guid>.                                                                                                      ImageID                => ImageID?.value;
     public   RecordID<FileRecord>?                                                                                             ImageID                { get; set; } = ImageID;
     public   bool                                                                                                              IsActive               { get; set; } = IsActive;
     public   bool                                                                                                              IsDisabled             { get; set; } = IsDisabled;
@@ -93,7 +98,7 @@ public sealed record UserRecord( string                        UserName,
     public                                                                      DateTimeOffset?                                SubscriptionExpires    { get; set; } = SubscriptionExpires;
     public                                                                      Guid?                                          SubscriptionID         { get; set; } = SubscriptionID;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public        string                                         Title                  { get; set; } = Title;
-    Guid IUserID<Guid>.                                                                                                        UserID                 => ID.Value;
+    Guid IUserID<Guid>.                                                                                                        UserID                 => ID.value;
     [ProtectedPersonalData, StringLength( SQL.UNICODE_CAPACITY )] public string                                                Website                { get;                  set; } = Website;
     DateTimeOffset? IUserRecord<Guid>.                                                                                         LastModified           { get => _lastModified; set => _lastModified = value; }
 
@@ -133,7 +138,7 @@ public sealed record UserRecord( string                        UserName,
         parameters.Add( nameof(IsDisabled),             IsDisabled );
         parameters.Add( nameof(SecurityStamp),          SecurityStamp );
         parameters.Add( nameof(ConcurrencyStamp),       ConcurrencyStamp );
-        parameters.Add( nameof(EscalateTo),             EscalateTo?.Value );
+        parameters.Add( nameof(EscalateTo),             EscalateTo?.value );
         parameters.Add( nameof(AuthenticatorKey),       AuthenticatorKey );
         parameters.Add( nameof(AdditionalData),         AdditionalData );
         return parameters;
@@ -602,9 +607,10 @@ public sealed record UserRecord( string                        UserName,
 
     #region Owners
 
-    public async ValueTask<UserRecord?> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => EscalateTo.HasValue
-                                                                                                                                                    ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
-                                                                                                                                                    : null;
+    public async ValueTask<ErrorOrResult<UserRecord>> GetBoss( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+        EscalateTo.HasValue
+            ? await db.Users.Get( connection, transaction, EscalateTo.Value, token )
+            : Error.Create( Status.Gone, StringValues.Empty );
 
 
     public bool DoesNotOwn<TRecord>( TRecord record )
@@ -836,9 +842,9 @@ public sealed record UserRecord( string                        UserName,
 
     #region Claims
 
-    public async  ValueTask<Claim[]>     GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, db, token )).GetClaims( types );
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
-    public static ValueTask<UserRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
+    public async  ValueTask<Claim[]>                   GetUserClaims( DbConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => (await ToUserModel( connection, transaction, db, token )).GetClaims( types );
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( DbConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims( connection, transaction, db, principal.Claims.ToArray(), types, token );
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(ID), Guid.Parse( claims.Single( Claims.IsUserID ).Value ) );
@@ -865,37 +871,21 @@ public sealed record UserRecord( string                        UserName,
 
         switch ( claim.Type )
         {
-            case ClaimTypes.NameIdentifier:
-                parameters.Add( nameof(UserName), claim.Value );
-                break;
+            case ClaimTypes.NameIdentifier: parameters.Add( nameof(UserName), claim.Value ); break;
 
-            case ClaimTypes.Sid:
-                parameters.Add( nameof(ID), Guid.Parse( claim.Value ) );
-                break;
+            case ClaimTypes.Sid: parameters.Add( nameof(ID), Guid.Parse( claim.Value ) ); break;
 
-            case ClaimTypes.GivenName:
-                parameters.Add( nameof(FirstName), claim.Value );
-                break;
+            case ClaimTypes.GivenName: parameters.Add( nameof(FirstName), claim.Value ); break;
 
-            case ClaimTypes.Surname:
-                parameters.Add( nameof(LastName), claim.Value );
-                break;
+            case ClaimTypes.Surname: parameters.Add( nameof(LastName), claim.Value ); break;
 
-            case ClaimTypes.Name:
-                parameters.Add( nameof(FullName), claim.Value );
-                break;
+            case ClaimTypes.Name: parameters.Add( nameof(FullName), claim.Value ); break;
 
-            case ClaimTypes.Email:
-                parameters.Add( nameof(Email), claim.Value );
-                break;
+            case ClaimTypes.Email: parameters.Add( nameof(Email), claim.Value ); break;
 
-            case ClaimTypes.MobilePhone:
-                parameters.Add( nameof(PhoneNumber), claim.Value );
-                break;
+            case ClaimTypes.MobilePhone: parameters.Add( nameof(PhoneNumber), claim.Value ); break;
 
-            case ClaimTypes.Webpage:
-                parameters.Add( nameof(Website), claim.Value );
-                break;
+            case ClaimTypes.Webpage: parameters.Add( nameof(Website), claim.Value ); break;
         }
 
         await foreach ( UserRecord record in db.Users.Where( connection, transaction, true, parameters, token ) ) { yield return record; }

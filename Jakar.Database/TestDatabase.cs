@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
+using Microsoft.Extensions.Caching.Hybrid;
 using Npgsql;
 
 
@@ -8,7 +9,7 @@ using Npgsql;
 namespace Jakar.Database;
 
 
-internal sealed class TestDatabase : Database, IAppName
+internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, HybridCache cache ) : Database( configuration, sqlCacheFactory, options, cache ), IAppName
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
@@ -17,11 +18,9 @@ internal sealed class TestDatabase : Database, IAppName
     public static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
 
 
-    internal TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, ITableCache tableCache, IOptions<DbOptions> options ) : base( configuration, sqlCacheFactory, tableCache, options ) { }
-
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure );
 
-    
+
     [Experimental( "SqlTableBuilder" )]
     [Conditional( "DEBUG" )]
     public static async void TestAsync()
@@ -73,7 +72,7 @@ internal sealed class TestDatabase : Database, IAppName
 
         using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.Insert" ) )
         {
-            await foreach ( UserRecord record in db.Users.Insert(  users, token ) ) { results.Add( record ); }
+            await foreach ( UserRecord record in db.Users.Insert( users, token ) ) { results.Add( record ); }
 
             Debug.Assert( users.Length == results.Count );
         }
@@ -81,7 +80,7 @@ internal sealed class TestDatabase : Database, IAppName
         using ( Activity? activity = Telemetry.DbSource.StartActivity( "Users.All" ) )
         {
             results.Clear();
-            await foreach ( UserRecord record in db.Users.All(  token ) ) { results.Add( record ); }
+            await foreach ( UserRecord record in db.Users.All( token ) ) { results.Add( record ); }
 
             Debug.Assert( users.Length == results.Count );
         }
@@ -99,7 +98,7 @@ internal sealed class TestDatabase : Database, IAppName
 
 
 
-    internal sealed class ConfigureDbServices : ConfigureDbServices<ConfigureDbServices, TestDatabase, TestDatabase, SqlCacheFactory, TableCacheFactory>
+    internal sealed class ConfigureDbServices : ConfigureDbServices<ConfigureDbServices, TestDatabase, TestDatabase, SqlCacheFactory>
     {
         public override bool UseApplicationCookie => false;
         public override bool UseAuth              => false;

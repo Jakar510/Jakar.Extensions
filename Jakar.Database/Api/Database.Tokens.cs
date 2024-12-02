@@ -165,7 +165,7 @@ public abstract partial class Database
 
         record = record.WithRefreshToken( refresh, refreshExpires );
         await Users.Update( connection, transaction, record, token );
-        return new Tokens( record.ID.Value, record.FullName, Version, accessToken, refresh );
+        return new Tokens( record.ID.value, record.FullName, Version, accessToken, refresh );
     }
 
 
@@ -199,7 +199,7 @@ public abstract partial class Database
 
 
         string accessToken = DbTokenHandler.Instance.CreateToken( descriptor );
-        return new Tokens( record.ID.Value, record.FullName, Version, accessToken, refreshToken );
+        return new Tokens( record.ID.value, record.FullName, Version, accessToken, refreshToken );
     }
 
 
@@ -227,10 +227,9 @@ public abstract partial class Database
             return Error.Create( Status.InternalServerError, e.GetType().Name, e.Message, e.Source, e.MethodName() );
         }
 
-        Claim[]     claims = validationResult.ClaimsIdentity.Claims.ToArray();
-        UserRecord? record = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
-        if ( record is null ) { return Error.NotFound(); }
-
+        Claim[]                   claims = validationResult.ClaimsIdentity.Claims.ToArray();
+        ErrorOrResult<UserRecord> result = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
+        if ( result.TryGetValue( out UserRecord? record, out Error[]? errors ) is false ) { return errors; }
 
         record.LastLogin = DateTimeOffset.UtcNow;
         await Users.Update( connection, transaction, record, token );

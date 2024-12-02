@@ -7,13 +7,13 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    public ValueTask<TRecord?>       Random(  CancellationToken token                                                                                                     = default ) => this.Call( Random,  token );
+    public ValueTask<ErrorOrResult<TRecord>>       Random(  CancellationToken token                                                                                                     = default ) => this.Call( Random,  token );
     public IAsyncEnumerable<TRecord> Random(  int               count, [EnumeratorCancellation] CancellationToken token                                                   = default ) => this.Call( Random,  count, token );
     public IAsyncEnumerable<TRecord> Random(  UserRecord        user,  int                                        count, [EnumeratorCancellation] CancellationToken token = default ) => this.Call( Random,  user,  count, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Random( DbConnection connection, DbTransaction? transaction,  CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TRecord>> Random( DbConnection connection, DbTransaction? transaction,  CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Random();
 
@@ -29,7 +29,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction,  UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Random( user.ID.Value, count );
+        SqlCommand sql = _sqlCache.Random( user.ID.value, count );
         return Where( connection, transaction,  sql, token );
     }
 

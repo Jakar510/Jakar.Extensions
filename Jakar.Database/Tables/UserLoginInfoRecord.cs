@@ -56,7 +56,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(CreatedBy), user.ID.Value );
+        parameters.Add( nameof(CreatedBy), user.ID.value );
         parameters.Add( nameof(Value),       value );
         return parameters;
     }
@@ -83,7 +83,7 @@ public sealed record UserLoginInfoRecord( [property: StringLength(              
                                                                                               };
     public static implicit operator IdentityUserToken<Guid>( UserLoginInfoRecord value ) => new()
                                                                                             {
-                                                                                                UserId        = value.CreatedBy?.Value ?? Guid.Empty,
+                                                                                                UserId        = value.CreatedBy?.value ?? Guid.Empty,
                                                                                                 LoginProvider = value.LoginProvider,
                                                                                                 Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                 Value         = value.ProviderKey

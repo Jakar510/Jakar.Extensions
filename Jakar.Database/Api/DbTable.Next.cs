@@ -7,13 +7,13 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    public ValueTask<TRecord?>                         Next(  RecordPair<TRecord> pair, CancellationToken token = default ) => this.Call( Next,    pair, token );
+    public ValueTask<ErrorOrResult<TRecord>>                         Next(  RecordPair<TRecord> pair, CancellationToken token = default ) => this.Call( Next,    pair, token );
     public ValueTask<Guid?>                            NextID(  RecordPair<TRecord> pair, CancellationToken token = default ) => this.Call( NextID,  pair, token );
     public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs(  CancellationToken   token = default ) => this.Call( SortedIDs,  token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction,  RecordPair<TRecord> pair, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TRecord>> Next( DbConnection connection, DbTransaction? transaction,  RecordPair<TRecord> pair, CancellationToken token = default )
     {
         SqlCommand sql = _sqlCache.Next( pair );
 

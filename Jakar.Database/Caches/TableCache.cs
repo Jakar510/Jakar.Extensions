@@ -4,6 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
+/*
 public interface ITableCacheService : IHostedService, IAsyncDisposable;
 
 
@@ -13,8 +14,8 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, ITableCacheSe
 {
     public int  Count      { get; }
     public bool HasChanged { get; }
-    public TRecord? this[ RecordPair<TRecord> id ] { get; }
-    public TRecord? this[ RecordID<TRecord>   id ] { get; }
+    public ErrorOrResult<TRecord> this[ RecordPair<TRecord> id ] { get; }
+    public ErrorOrResult<TRecord> this[ RecordID<TRecord>   id ] { get; }
     public IEnumerable<RecordID<TRecord>> ChangedOrExpired { get; }
     public IEnumerable<RecordID<TRecord>> Keys             { get; }
     public IEnumerable<TRecord>           RecordsChanged   { get; }
@@ -24,12 +25,12 @@ public interface ITableCache<TRecord> : IAsyncEnumerable<TRecord>, ITableCacheSe
     public bool                           Contains( RecordID<TRecord>      id );
     public bool                           Contains( TRecord                record );
     public void                           AddOrUpdate( TRecord             record );
-    public bool                           TryGetValue( RecordPair<TRecord> id,   [NotNullWhen( true )] out TRecord? record );
-    public bool                           TryGetValue( RecordID<TRecord>   id,   [NotNullWhen( true )] out TRecord? record );
-    public ValueTask<TRecord?>            TryGetValue( RecordPair<TRecord> pair, CancellationToken                  token );
-    public ValueTask<TRecord?>            TryGetValue( RecordID<TRecord>   pair, CancellationToken                  token );
-    public ValueTask<TRecord?>            TryRemove( RecordPair<TRecord>   id,   CancellationToken                  token = default );
-    public ValueTask<TRecord?>            TryRemove( RecordID<TRecord>     id,   CancellationToken                  token = default );
+    public bool                           TryGetValue( RecordPair<TRecord> id,   [NotNullWhen( true )] out ErrorOrResult<TRecord> record );
+    public bool                           TryGetValue( RecordID<TRecord>   id,   [NotNullWhen( true )] out ErrorOrResult<TRecord> record );
+    public ValueTask<ErrorOrResult<TRecord>>            TryGetValue( RecordPair<TRecord> pair, CancellationToken                  token );
+    public ValueTask<ErrorOrResult<TRecord>>            TryGetValue( RecordID<TRecord>   pair, CancellationToken                  token );
+    public ValueTask<ErrorOrResult<TRecord>>            TryRemove( RecordPair<TRecord>   id,   CancellationToken                  token = default );
+    public ValueTask<ErrorOrResult<TRecord>>            TryRemove( RecordID<TRecord>     id,   CancellationToken                  token = default );
     public ValueTask                      RefreshAsync( CancellationToken  token );
     public ValueTask                      RefreshAsync( DbConnection       connection, DbTransaction transaction, CancellationToken token = default );
 }
@@ -146,11 +147,11 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
 
     public int  Count      { [MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => _records.Count; }
     public bool HasChanged { [MethodImpl(                         MethodImplOptions.AggressiveInlining )] get => _records.Values.Any( static x => x.HasChanged ); }
-    public TRecord? this[ RecordPair<TRecord> id ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => this[id.ID]; }
-    public TRecord? this[ RecordID<TRecord> id ]
+    public ErrorOrResult<TRecord> this[ RecordPair<TRecord> id ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => this[id.ID]; }
+    public ErrorOrResult<TRecord> this[ RecordID<TRecord> id ]
     {
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        get => TryGetValue( id, out TRecord? value )
+        get => TryGetValue( id, out ErrorOrResult<TRecord> value )
                    ? value
                    : default;
     }
@@ -176,7 +177,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
             {
                 if ( entry.HasChanged is false ) { continue; }
 
-                TRecord? record = entry.TryGetValue( _options );
+                ErrorOrResult<TRecord> record = entry.TryGetValue( _options );
                 if ( record is not null ) { yield return record; }
             }
         }
@@ -188,7 +189,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach ( CacheEntry<TRecord> entry in _records.Values )
             {
-                TRecord? record = entry.TryGetValue( _options );
+                ErrorOrResult<TRecord> record = entry.TryGetValue( _options );
                 if ( record is not null ) { yield return record; }
             }
         }
@@ -216,19 +217,19 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
     }
 
 
-    public ValueTask<TRecord?> TryGetValue( RecordPair<TRecord> pair, CancellationToken token ) => TryGetValue( pair.ID, token );
-    public async ValueTask<TRecord?> TryGetValue( RecordID<TRecord> id, CancellationToken token )
+    public ValueTask<ErrorOrResult<TRecord>> TryGetValue( RecordPair<TRecord> pair, CancellationToken token ) => TryGetValue( pair.ID, token );
+    public async ValueTask<ErrorOrResult<TRecord>> TryGetValue( RecordID<TRecord> id, CancellationToken token )
     {
         if ( _records.TryGetValue( id, out CacheEntry<TRecord>? entry ) is false ) { return default; }
 
-        TRecord? record = await entry.TryGetValue( _table, _options, token );
+        ErrorOrResult<TRecord> record = await entry.TryGetValue( _table, _options, token );
         if ( record is not null ) { return record; }
 
         _records.TryRemove( id, out _ );
         return null;
     }
-    public bool TryGetValue( RecordPair<TRecord> id, [NotNullWhen( true )] out TRecord? record ) => TryGetValue( id.ID, out record );
-    public bool TryGetValue( RecordID<TRecord> id, [NotNullWhen( true )] out TRecord? record )
+    public bool TryGetValue( RecordPair<TRecord> id, [NotNullWhen( true )] out ErrorOrResult<TRecord> record ) => TryGetValue( id.ID, out record );
+    public bool TryGetValue( RecordID<TRecord> id, [NotNullWhen( true )] out ErrorOrResult<TRecord> record )
     {
         if ( _records.TryGetValue( id, out CacheEntry<TRecord>? entry ) )
         {
@@ -241,8 +242,8 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
     }
 
 
-    public ValueTask<TRecord?> TryRemove( RecordPair<TRecord> id, CancellationToken token = default ) => TryRemove( id.ID, token );
-    public async ValueTask<TRecord?> TryRemove( RecordID<TRecord> id, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<TRecord>> TryRemove( RecordPair<TRecord> id, CancellationToken token = default ) => TryRemove( id.ID, token );
+    public async ValueTask<ErrorOrResult<TRecord>> TryRemove( RecordID<TRecord> id, CancellationToken token = default )
     {
         if ( _records.TryRemove( id, out CacheEntry<TRecord>? entry ) ) { return await entry.TryGetValue( _table, _options, token ); }
 
@@ -259,7 +260,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
 
             foreach ( RecordID<TRecord> id in ids )
             {
-                TRecord? record = await _table.Get( connection, transaction, id, token );
+                ErrorOrResult<TRecord> record = await _table.Get( connection, transaction, id, token );
                 if ( record is null ) { continue; }
 
                 AddOrUpdate( record );
@@ -319,7 +320,7 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
         private          int                                 _index = START_INDEX;
         private          ReadOnlyMemory<RecordPair<TRecord>> _pairs;
         private          RecordPair<TRecord>                 _pair;
-        private          TRecord?                            _current;
+        private          ErrorOrResult<TRecord>                            _current;
 
 
         public   TRecord Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
@@ -374,3 +375,4 @@ public sealed class TableCache<TRecord>( DbTable<TRecord> table, ILogger<TableCa
         public override string ToString() => $"AsyncEnumerator<{typeof(TRecord).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
     }
 }
+*/

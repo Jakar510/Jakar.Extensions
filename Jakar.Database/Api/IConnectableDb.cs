@@ -42,25 +42,18 @@ public interface IConnectableDb : IDbTable, IDbOptions
 
 
 
-public interface IConnectableDbRoot : IConnectableDb, ITableCacheFactory
+public interface IConnectableDbRoot : IConnectableDb
 {
-    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction,  string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : IDbReaderMapping<T>;
-    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction,  string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where T : struct;
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition GetCommand(  in SqlCommand sql, DbTransaction? transaction, CancellationToken token );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition     GetCommand( SqlCommand sql, DbTransaction? transaction, CancellationToken token );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public SqlCommand.Definition GetCommand( SqlCommand sql, DbConnection   connection,  DbTransaction?    transaction, CancellationToken token );
 
 
-    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction,  SqlCommand sql, CancellationToken token );
-}
-
-
-
-public readonly record struct SqlCommand( string SQL, DynamicParameters? Parameters = null, CommandType? CommandType = null, CommandFlags Flags = CommandFlags.None )
-{
-    public static implicit operator SqlCommand( string sql ) => new(sql);
-
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, CancellationToken token, int? timeout = null ) => new(SQL, Parameters, transaction, timeout, CommandType, Flags, token);
+    public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection          connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token );
+    public ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition );
 }

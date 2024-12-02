@@ -25,8 +25,8 @@ public static class ErrorOrResults
     public static JsonResult<Error[]> ToJsonResult( this    Error[] value ) => new(value, value.GetStatus());
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized( id.Value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized( id.Value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized( id.value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsAuthorized( this ClaimsIdentity  principal, RecordID<UserRecord> id ) => principal.IsAuthorized( id.value );
 
 
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;

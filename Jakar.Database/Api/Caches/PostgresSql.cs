@@ -33,7 +33,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
         _sql[SqlCacheType.Random] = sql = $"SELECT TOP 1 * FROM {TableName} ORDER BY {RandomMethod}";
         return sql;
     }
-    public override SqlCommand Random( in int count )
+    public override SqlCommand Random( int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
@@ -42,7 +42,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random(  scoped in Guid? userID, in int count )
+    public override SqlCommand Random( Guid? userID, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count),  count );
@@ -52,7 +52,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random(  scoped in RecordID<UserRecord> id, in int count )
+    public override SqlCommand Random( RecordID<UserRecord> id, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
@@ -62,7 +62,7 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Insert( in TRecord record )
+    public override SqlCommand Insert( TRecord record )
     {
         DynamicParameters param = new DynamicParameters( record );
 
@@ -80,9 +80,9 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, param );
     }
-    public override SqlCommand TryInsert( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    public override SqlCommand TryInsert( TRecord record, bool matchAll, DynamicParameters parameters )
     {
-        Key key   = Key.Create( matchAll, parameters );
+        SqlKey            key   = SqlKey.Create( matchAll, parameters );
         DynamicParameters param = new DynamicParameters( record );
         param.AddDynamicParams( parameters );
 
@@ -111,10 +111,10 @@ public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
 
         return new SqlCommand( sql, param );
     }
-    public override SqlCommand InsertOrUpdate( in TRecord record, in bool matchAll, in DynamicParameters parameters )
+    public override SqlCommand InsertOrUpdate( TRecord record, bool matchAll, DynamicParameters parameters )
     {
-        Key               key   = Key.Create( matchAll, parameters );
-        DynamicParameters               param = new DynamicParameters( record );
+        SqlKey            key   = SqlKey.Create( matchAll, parameters );
+        DynamicParameters param = new DynamicParameters( record );
         RecordID<TRecord> id    = record.ID;
         param.Add( nameof(id), id );
         param.AddDynamicParams( parameters );

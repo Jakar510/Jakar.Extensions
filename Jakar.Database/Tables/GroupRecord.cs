@@ -7,8 +7,8 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
     public const  int                                    MAX_SIZE   = 1024;
     public const  string                                 TABLE_NAME = "Groups";
     public static string                                 TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    Guid? ICreatedByUser<Guid>.                          CreatedBy => CreatedBy?.Value;
-    Guid? IGroupModel<Guid>.                             OwnerID   => CreatedBy?.Value;
+    Guid? ICreatedByUser<Guid>.                          CreatedBy => CreatedBy?.value;
+    Guid? IGroupModel<Guid>.                             OwnerID   => CreatedBy?.value;
     [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
 
 

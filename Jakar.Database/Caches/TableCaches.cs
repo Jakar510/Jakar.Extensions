@@ -1,6 +1,7 @@
 ﻿namespace Jakar.Database.Caches;
 
 
+/*
 public static class TableCaches
 {
     private const string RECORD_ID = "Record.ID cannot be empty";
@@ -19,7 +20,7 @@ public static class TableCaches
     {
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(id) ); }
 
-        return RefreshAsync( cache, id.Key, token );
+        return RefreshAsync( cache, id.key, token );
     }
     public static Task RefreshAsync( this ITableCache cache, string key, CancellationToken token )
     {
@@ -34,7 +35,7 @@ public static class TableCaches
     {
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(id) ); }
 
-        return cache.RemoveAsync( id.Key, token );
+        return cache.RemoveAsync( id.key, token );
     }
     public static Task RemoveAsync( this ITableCache cache, string key, CancellationToken token )
     {
@@ -50,7 +51,7 @@ public static class TableCaches
     {
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(id) ); }
 
-        return cache.TryGet<T>( id.Key, token );
+        return cache.TryGet<T>( id.key, token );
     }
     public static async ValueTask<T?> TryGet<T>( this ITableCache cache, string key, CancellationToken token )
         where T : notnull
@@ -73,7 +74,7 @@ public static class TableCaches
         RecordID<T> id = record.ID;
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(record.ID) ); }
 
-        cache.AddOrUpdate( id.Key, record, options );
+        cache.AddOrUpdate( id.key, record, options );
     }
     public static void AddOrUpdate<T>( this ITableCache cache, string key, T record, MemoryCacheEntryOptions? options = null )
     {
@@ -92,7 +93,7 @@ public static class TableCaches
         RecordID<T> id = record.ID;
         if ( id.IsNotValid() ) { throw new ArgumentException( RECORD_ID, nameof(record.ID) ); }
 
-        return cache.AddOrUpdate( id.Key, record, token, options );
+        return cache.AddOrUpdate( id.key, record, token, options );
     }
     public static Task AddOrUpdate<T>( this ITableCache cache, string key, T record, CancellationToken token, DistributedCacheEntryOptions? options = null )
         where T : notnull
@@ -103,3 +104,4 @@ public static class TableCaches
         return cache.SetAsync( key, data, options ?? RedisOptions, token );
     }
 }
+*/

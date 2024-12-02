@@ -4,6 +4,7 @@
 namespace Jakar.Database.Caches;
 
 
+/*
 public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClass, IRecordPair, IEquatable<TRecord>, IEquatable<CacheEntry<TRecord>>, IComparable<CacheEntry<TRecord>>, IComparable
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
@@ -18,15 +19,15 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     public        DateTimeOffset                 DateCreated  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
     public        bool                           HasValueSet  { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _lastUpdated.HasValue; }
     public        bool                           HasChanged   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _hash == GetHash( _json ); }
-    Guid IUniqueID<Guid>.                        ID           => ID.Value;
+    Guid IUniqueID<Guid>.                        ID           => ID.value;
     public RecordID<TRecord>                     ID           { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = id;
     public DateTimeOffset?                       LastModified { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
 
 
     [Pure]
-    public async ValueTask<TRecord?> TryGetValue( DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
+    public async ValueTask<ErrorOrResult<TRecord>> TryGetValue( DbTable<TRecord> table, TableCacheOptions options, CancellationToken token )
     {
-        TRecord? record = TryGetValue( options );
+        ErrorOrResult<TRecord> record = TryGetValue( options );
         if ( record is not null ) { return record; }
 
         record = await table.Get( ID, token );
@@ -38,7 +39,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
 
     [Pure]
-    public TRecord? TryGetValue( TableCacheOptions options )
+    public ErrorOrResult<TRecord> TryGetValue( TableCacheOptions options )
     {
         lock (this)
         {
@@ -53,6 +54,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     public void SetValue( ref readonly TRecord record )
     {
         if ( ID != record.ID ) { throw new ArgumentException( "ID mismatch" ); }
+         
 
         lock (this)
         {
@@ -101,7 +103,7 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
 
         return ID.Equals( other.ID ) && string.Equals( _json, other._json, StringComparison.Ordinal );
     }
-    public          bool Equals( TRecord? other ) => _json.FromJson<TRecord>().Equals( other );
+    public          bool Equals( ErrorOrResult<TRecord> other ) => _json.FromJson<TRecord>().Equals( other );
     public override bool Equals( object?  obj )   => ReferenceEquals( this, obj ) || obj is CacheEntry<TRecord> other && Equals( other );
     public override int  GetHashCode()            => ID.GetHashCode();
 
@@ -113,3 +115,4 @@ public sealed class CacheEntry<TRecord>( RecordID<TRecord> id ) : ObservableClas
     public static bool operator <( CacheEntry<TRecord>?  left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator <=( CacheEntry<TRecord>? left, CacheEntry<TRecord>? right ) => Sorter.Compare( left, right ) <= 0;
 }
+*/
