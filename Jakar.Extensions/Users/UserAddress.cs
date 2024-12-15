@@ -4,10 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public interface IAddress<out TClass, TID> : IAddress<TID>
+public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    where TClass : IAddress<TClass, TID>
 {
     public abstract static TClass Create( IAddress<TID> address );
+    public abstract static TClass Create( string        line1, string line2, string city, string postalCode, string country );
 }
 
 
@@ -28,7 +30,7 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 [Serializable]
-public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress<TID>, JsonModels.IJsonModel
+public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress<TID>, JsonModels.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
 
@@ -129,8 +131,8 @@ public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress
     }
 
 
-    public UserAddress() { }
-    public UserAddress( IAddress<TID> address ) : base( address.ID )
+    protected UserAddress() { }
+    protected UserAddress( IAddress<TID> address ) : base( address.ID )
     {
         Address         = address.Address;
         Line1           = address.Line1;
@@ -140,6 +142,15 @@ public record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress
         Country         = address.Country;
         PostalCode      = address.PostalCode;
         IsPrimary       = address.IsPrimary;
+    }
+    protected UserAddress( Match match ) : this( match.Groups["StreetName"].Value, match.Groups["Apt"].Value, match.Groups["City"].Value, match.Groups["ZipCode"].Value, match.Groups["Country"].Value ) { }
+    protected UserAddress( string line1, string line2, string city, string postalCode, string country )
+    {
+        Line1      = line1;
+        Line2      = line2;
+        City       = city;
+        PostalCode = postalCode;
+        Country    = country;
     }
 
 
@@ -183,6 +194,30 @@ public sealed record UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAdd
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public UserAddress() { }
+    public UserAddress( Match                            match ) : base( match ) { }
     public UserAddress( IAddress<TID>                    address ) : base( address ) { }
-    public static UserAddress<TID> Create( IAddress<TID> address ) => new(address);
+    public UserAddress( string                           line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
+    public static UserAddress<TID> Create( IAddress<TID> address )                                                             => new(address);
+    public static UserAddress<TID> Create( string        line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
+    public static UserAddress<TID> Parse( string value, IFormatProvider? provider )
+    {
+        Match match = Validate.Re.Address.Match( value );
+        return new UserAddress<TID>( match );
+    }
+    public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress<TID>? result )
+    {
+        try
+        {
+            result = string.IsNullOrWhiteSpace( value ) is false
+                         ? Parse( value, provider )
+                         : null;
+
+            return result is not null;
+        }
+        catch ( Exception )
+        {
+            result = null;
+            return false;
+        }
+    }
 }

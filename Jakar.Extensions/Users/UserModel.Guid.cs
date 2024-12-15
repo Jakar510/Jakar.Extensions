@@ -12,9 +12,33 @@ namespace Jakar.Extensions.UserGuid;
 [Serializable]
 public sealed record UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>
 {
-    public UserAddress() { }
+    public UserAddress() : base() { }
+    public UserAddress( Match                        match ) : base( match ) { }
     public UserAddress( IAddress<Guid>               address ) : base( address ) { }
-    public static UserAddress Create( IAddress<Guid> address ) => new(address);
+    public UserAddress( string                       line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
+    public static UserAddress Create( IAddress<Guid> address )                                                             => new(address);
+    public static UserAddress Create( string         line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
+    public static UserAddress Parse( string value, IFormatProvider? provider )
+    {
+        Match match = Validate.Re.Address.Match( value );
+        return new UserAddress( match );
+    }
+    public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress? result )
+    {
+        try
+        {
+            result = string.IsNullOrWhiteSpace( value ) is false
+                         ? Parse( value, provider )
+                         : null;
+
+            return result is not null;
+        }
+        catch ( Exception )
+        {
+            result = null;
+            return false;
+        }
+    }
 }
 
 
