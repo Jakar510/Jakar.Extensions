@@ -16,6 +16,7 @@ public sealed record UserAddress : UserAddress<UserAddress, Guid>, IAddress<User
     public UserAddress( Match                        match ) : base( match ) { }
     public UserAddress( IAddress<Guid>               address ) : base( address ) { }
     public UserAddress( string                       line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
+    public static UserAddress Create( Match          match )                                                               => new(match);
     public static UserAddress Create( IAddress<Guid> address )                                                             => new(address);
     public static UserAddress Create( string         line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
     public static UserAddress Parse( string value, IFormatProvider? provider )

@@ -8,6 +8,7 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : IAddress<TClass, TID>
 {
+    public abstract static TClass Create( Match         match );
     public abstract static TClass Create( IAddress<TID> address );
     public abstract static TClass Create( string        line1, string line2, string city, string postalCode, string country );
 }
@@ -197,6 +198,7 @@ public sealed record UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAdd
     public UserAddress( Match                            match ) : base( match ) { }
     public UserAddress( IAddress<TID>                    address ) : base( address ) { }
     public UserAddress( string                           line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
+    public static UserAddress<TID> Create( Match         match  )                                                              => new(match);
     public static UserAddress<TID> Create( IAddress<TID> address )                                                             => new(address);
     public static UserAddress<TID> Create( string        line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
     public static UserAddress<TID> Parse( string value, IFormatProvider? provider )
