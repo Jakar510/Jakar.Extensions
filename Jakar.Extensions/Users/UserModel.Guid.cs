@@ -10,7 +10,7 @@ namespace Jakar.Extensions.UserGuid;
 
 
 [Serializable]
-public sealed record UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>
+public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>
 {
     public UserAddress() : base() { }
     public UserAddress( Match                        match ) : base( match ) { }

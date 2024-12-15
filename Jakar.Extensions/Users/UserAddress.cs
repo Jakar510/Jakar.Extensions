@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>
+public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEquatable<TClass>, IComparable<TClass>, IComparable
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : IAddress<TClass, TID>
 {
@@ -31,7 +31,7 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 [Serializable]
-public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>, IAddress<TID>, JsonModels.IJsonModel
+public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, JsonModels.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
 
@@ -45,10 +45,12 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
     private string                        _postalCode      = string.Empty;
     private string                        _stateOrProvince = string.Empty;
     private string?                       _address;
+    private TID                           _id;
 
 
     [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData { get => _additionalData;         set => SetProperty( ref _additionalData, value ); }
     [StringLength( UNICODE_CAPACITY )] public string?                       Address        { get => _address ??= ToString(); set => SetProperty( ref _address,        value ); }
+
 
     [StringLength( UNICODE_CAPACITY )]
     public string City
@@ -60,6 +62,7 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         }
     }
 
+
     [StringLength( UNICODE_CAPACITY )]
     public string Country
     {
@@ -70,26 +73,31 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         }
     }
 
+
+    public TID  ID        { get => _id;        init => SetProperty( ref _id,       value ); }
     public bool IsPrimary { get => _isPrimary; set => SetProperty( ref _isPrimary, value ); }
+
 
     [JsonIgnore]
     public bool IsValidAddress
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         get
         {
-            Span<char> span = [..Address ?? string.Empty];
+            ReadOnlySpan<char> address = Address;
+            if ( address.IsEmpty ) { return false; }
+
+            Span<char> span = stackalloc char[address.Length];
+            address.CopyTo( span );
 
             for ( int i = 0; i < span.Length; i++ )
             {
-                if ( char.IsLetterOrDigit( span[i] ) ) { continue; }
-
-                span[i] = ' ';
+                if ( char.IsLetterOrDigit( span[i] ) is false || char.IsPunctuation( span[i] ) ) { span[i] = ' '; }
             }
 
             return span.IsNullOrWhiteSpace();
         }
     }
+
 
     [StringLength( UNICODE_CAPACITY )]
     public string Line1
@@ -101,6 +109,7 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         }
     }
 
+
     [StringLength( UNICODE_CAPACITY )]
     public string Line2
     {
@@ -111,6 +120,7 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         }
     }
 
+
     [Required, StringLength( UNICODE_CAPACITY )]
     public string PostalCode
     {
@@ -120,6 +130,7 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
             if ( SetProperty( ref _postalCode, value ) ) { Address = null; }
         }
     }
+
 
     [StringLength( UNICODE_CAPACITY )]
     public string StateOrProvince
@@ -133,8 +144,9 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
 
 
     protected UserAddress() { }
-    protected UserAddress( IAddress<TID> address ) : base( address.ID )
+    protected UserAddress( IAddress<TID> address ) : base()
     {
+        ID              = address.ID;
         Address         = address.Address;
         Line1           = address.Line1;
         Line2           = address.Line2;
@@ -145,8 +157,9 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         IsPrimary       = address.IsPrimary;
     }
     protected UserAddress( Match match ) : this( match.Groups["StreetName"].Value, match.Groups["Apt"].Value, match.Groups["City"].Value, match.Groups["ZipCode"].Value, match.Groups["Country"].Value ) { }
-    protected UserAddress( string line1, string line2, string city, string postalCode, string country )
+    protected UserAddress( string line1, string line2, string city, string postalCode, string country, TID id = default )
     {
+        ID         = id;
         Line1      = line1;
         Line2      = line2;
         City       = city;
@@ -159,20 +172,24 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
                                              ? $"{Line1}. {City}, {StateOrProvince}. {Country}. {PostalCode}"
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
+
     public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        int addressComparison = string.Compare( _address, other._address, StringComparison.Ordinal );
-        if ( addressComparison != 0 ) { return addressComparison; }
+        int countryComparison = string.Compare( _country, other._country, StringComparison.Ordinal );
+        if ( countryComparison != 0 ) { return countryComparison; }
+
+        int stateOrProvinceComparison = string.Compare( _stateOrProvince, other._stateOrProvince, StringComparison.Ordinal );
+        if ( stateOrProvinceComparison != 0 ) { return stateOrProvinceComparison; }
 
         int cityComparison = string.Compare( _city, other._city, StringComparison.Ordinal );
         if ( cityComparison != 0 ) { return cityComparison; }
 
-        int countryComparison = string.Compare( _country, other._country, StringComparison.Ordinal );
-        if ( countryComparison != 0 ) { return countryComparison; }
+        int postalCodeComparison = string.Compare( _postalCode, other._postalCode, StringComparison.Ordinal );
+        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
 
         int line1Comparison = string.Compare( _line1, other._line1, StringComparison.Ordinal );
         if ( line1Comparison != 0 ) { return line1Comparison; }
@@ -180,25 +197,27 @@ public abstract record UserAddress<TClass, TID> : ObservableRecord<TClass, TID>,
         int line2Comparison = string.Compare( _line2, other._line2, StringComparison.Ordinal );
         if ( line2Comparison != 0 ) { return line2Comparison; }
 
-        int postalCodeComparison = string.Compare( _postalCode, other._postalCode, StringComparison.Ordinal );
-        if ( postalCodeComparison != 0 ) { return postalCodeComparison; }
-
-        return string.Compare( _stateOrProvince, other._stateOrProvince, StringComparison.Ordinal );
+        return 0;
     }
-    public override bool Equals( TClass? other ) => false;
+    public override bool Equals( TClass? other )
+    {
+        if ( other is null ) { return false; }
+
+        return ReferenceEquals( this, other ) || string.Equals( Line1, other.Line1, StringComparison.Ordinal ) && string.Equals( Line2, other.Line2, StringComparison.Ordinal ) && string.Equals( City, other.City, StringComparison.Ordinal ) && string.Equals( PostalCode, other.PostalCode, StringComparison.Ordinal ) && string.Equals( StateOrProvince, other.StateOrProvince, StringComparison.Ordinal );
+    }
 }
 
 
 
 [Serializable]
-public sealed record UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
+public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public UserAddress() { }
     public UserAddress( Match                            match ) : base( match ) { }
     public UserAddress( IAddress<TID>                    address ) : base( address ) { }
     public UserAddress( string                           line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
-    public static UserAddress<TID> Create( Match         match  )                                                              => new(match);
+    public static UserAddress<TID> Create( Match         match )                                                               => new(match);
     public static UserAddress<TID> Create( IAddress<TID> address )                                                             => new(address);
     public static UserAddress<TID> Create( string        line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
     public static UserAddress<TID> Parse( string value, IFormatProvider? provider )
