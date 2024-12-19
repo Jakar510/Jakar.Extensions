@@ -1,10 +1,14 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class ConcurrentDeque<T>( int capacity, Lock? locker = null ) : IQueue<T>
+public class ConcurrentDeque<T> : IQueue<T>
 {
-    protected readonly Deque<T> _queue = new(capacity);
-    protected readonly Lock     _lock  = locker ?? new Lock();
+    protected readonly Deque<T> _queue;
+#if NET8_0
+    protected readonly object _lock;
+#else
+    protected readonly Lock _lock;
+#endif
 
 
     public int Count
@@ -31,11 +35,29 @@ public class ConcurrentDeque<T>( int capacity, Lock? locker = null ) : IQueue<T>
         }
     }
 
-
-    public ConcurrentDeque( Lock? locker = null ) : this( DEFAULT_CAPACITY, locker ) { }
-    public ConcurrentDeque( IEnumerable<T> enumerable, Lock? locker = null ) : this( DEFAULT_CAPACITY, locker )
+    public ConcurrentDeque() : this( null ) { }
+    public ConcurrentDeque( IEnumerable<T>? enumerable,
+                            int             capacity = DEFAULT_CAPACITY,
+                        #if NET8_0
+                            object? locker = null
+                        #else
+                            Lock? locker = null
+#endif
+    )
     {
-        foreach ( T x in enumerable ) { _queue.AddToBack( x ); }
+        _queue = new Deque<T>( capacity );
+
+        _lock = locker ??
+            #if NET8_0
+                new object();
+            #else
+                new Lock();
+    #endif
+
+        if ( enumerable is not null )
+        {
+            foreach ( T x in enumerable ) { _queue.AddToBack( x ); }
+        }
     }
 
 

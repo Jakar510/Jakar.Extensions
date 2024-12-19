@@ -54,6 +54,7 @@ public readonly struct Closer( ILocker? locker ) : IDisposable
 
 
 
+#if NET9_0_OR_GREATER
 [DefaultValue( nameof(Empty) )]
 public readonly struct LockCloser( Lock? locker ) : IDisposable
 {
@@ -61,6 +62,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     private readonly       Lock?      _locker = locker;
     public                 void       Dispose() => _locker?.Exit();
 }
+#endif
 
 
 
@@ -78,10 +80,11 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Semaphore?            _semaphore;
     private readonly SemaphoreSlim?        _semaphoreSlim;
     private readonly SpinLock?             _spinLock;
-    private readonly Lock?                 _lock;
     private readonly Type                  _index;
     private          bool                  _isTaken;
-
+#if NET9_0_OR_GREATER
+    private readonly Lock? _lock;
+#endif
 
     public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new SemaphoreSlim( 1, 1 ); }
     public        bool      IsTaken { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
@@ -101,7 +104,9 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     public Locker( ManualResetEventSlim value ) : this( Type.ManualResetEventSlim ) => _manualResetEventSlim = value;
     public Locker( Barrier              value ) : this( Type.Barrier ) => _barrier = value;
     public Locker( CountdownEvent       value ) : this( Type.CountdownEvent ) => _countdownEvent = value;
-    public Locker( Lock                 value ) : this( Type.ThreadingLock ) => _lock = value;
+#if NET9_0_OR_GREATER
+    public Locker( Lock value ) : this( Type.ThreadingLock ) => _lock = value;
+#endif
 
 
     public static implicit operator Locker( SemaphoreSlim        value ) => new(value);
@@ -414,7 +419,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 return new Closer( this );
             }
 
-
+        #if NET9_0_OR_GREATER
             case Type.ThreadingLock:
             {
                 Debug.Assert( _lock is not null, $"{nameof(_lock)} is not null" );
@@ -425,7 +430,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
 
                 return new Closer( this );
             }
-
+        #endif
             default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
         }
     }
@@ -499,11 +504,12 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 _countdownEvent.Reset();
                 return;
 
+        #if NET9_0_OR_GREATER
             case Type.ThreadingLock:
                 Debug.Assert( _lock is not null, nameof(_lock) + " is not null" );
                 _lock.Exit();
                 return;
-
+        #endif
             default: throw new OutOfRangeException( _index );
         }
     }
@@ -597,7 +603,10 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
             Type.ManualResetEventSlim => _manualResetEventSlim?.ToString(),
             Type.Barrier              => _barrier?.ToString(),
             Type.CountdownEvent       => _countdownEvent?.ToString(),
-            _                         => throw new OutOfRangeException( _index )
+        #if NET9_0_OR_GREATER
+            Type.ThreadingLock => _lock?.ToString(),
+        #endif
+            _ => throw new OutOfRangeException( _index )
         } ??
         string.Empty;
     public override int GetHashCode()
@@ -615,7 +624,10 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                             Type.ManualResetEventSlim => _manualResetEventSlim?.GetHashCode(),
                             Type.Barrier              => _barrier?.GetHashCode(),
                             Type.CountdownEvent       => _countdownEvent?.GetHashCode(),
-                            _                         => null
+                        #if NET9_0_OR_GREATER
+                            Type.ThreadingLock => _lock?.GetHashCode(),
+                        #endif
+                            _ => null
                         };
 
         return (nullable.GetValueOrDefault( 0 ) * 397) ^ _index.GetHashCode();
@@ -642,7 +654,12 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                          Type.ManualResetEventSlim => Equals( _manualResetEventSlim, other._manualResetEventSlim ),
                          Type.Barrier              => Equals( _barrier,              other._barrier ),
                          Type.CountdownEvent       => Equals( _countdownEvent,       other._countdownEvent ),
-                         _                         => false
+                     #if NET9_0_OR_GREATER
+                     #pragma warning disable CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
+                         Type.ThreadingLock => Equals( _lock, other._lock ),
+                     #pragma warning restore CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
+                     #endif
+                         _ => false
                      };
 
         return check;
@@ -664,6 +681,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         ManualResetEventSlim,
         Barrier,
         CountdownEvent,
+    #if NET9_0_OR_GREATER
         ThreadingLock
+    #endif
     }
 }

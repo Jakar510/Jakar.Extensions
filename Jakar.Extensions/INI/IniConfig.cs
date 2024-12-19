@@ -16,8 +16,9 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         }
     }
 
+#if NET9_0_OR_GREATER
     public AlternateLookup<ReadOnlySpan<char>> Lookup => GetAlternateLookup<ReadOnlySpan<char>>();
-
+#endif
 
     public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }
     public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) => _comparer = comparer;

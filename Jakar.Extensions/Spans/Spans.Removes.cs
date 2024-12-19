@@ -57,7 +57,7 @@ public static partial class Spans
     }
 
 
-    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> old, scoped in ReadOnlySpan<T> value, scoped in T startValue, scoped in T endValue, scoped ref Span<T> result, out int length )
+    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> old, scoped in ReadOnlySpan<T> value, T startValue, T endValue, scoped ref Span<T> result, out int length )
         where T : unmanaged, IEquatable<T>
     {
         Guard.IsInRangeFor( source.Length + value.Length - 1, result, nameof(result) );
@@ -74,9 +74,9 @@ public static partial class Spans
             int start = source.IndexOf( old );
             int end   = start + old.Length;
 
-            if ( old.StartsWith( startValue ) is false && start > 0 ) { start--; }
+            if ( old[0].Equals( startValue ) is false && start > 0 ) { start--; }
 
-            if ( old.EndsWith( endValue ) is false ) { end++; }
+            if ( old[^1].Equals( endValue ) is false ) { end++; }
 
             Guard.IsInRangeFor( start, source, nameof(source) );
             ReadOnlySpan<T> sourceStart  = source[..start];

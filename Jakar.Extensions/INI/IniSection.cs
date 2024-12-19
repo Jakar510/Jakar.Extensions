@@ -23,10 +23,11 @@ public partial class IniConfig
                 return result;
             }
         }
-        internal int                                 Longest => Keys.Max( static item => item.Length );
+        internal int    Longest => Keys.Max( static item => item.Length );
+        public   string Name    { get; }
+    #if NET9_0_OR_GREATER
         public   AlternateLookup<ReadOnlySpan<char>> Lookup  => GetAlternateLookup<ReadOnlySpan<char>>();
-        public   string                              Name    { get; }
-
+    #endif
 
         public Section( string sectionName ) : this( sectionName, StringComparer.OrdinalIgnoreCase ) { }
         public Section( string sectionName, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = sectionName;

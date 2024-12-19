@@ -95,7 +95,7 @@ public static class Guids
                    : default;
     }
 
-
+#if NET9_0_OR_GREATER
     public static string NewBase64( DateTimeOffset? timeStamp = null )
     {
         Guid id = timeStamp.HasValue
@@ -104,6 +104,13 @@ public static class Guids
 
         return NewBase64( id );
     }
+#else
+    public static string NewBase64()
+    {
+        Guid id = Guid.NewGuid();
+        return NewBase64( id );
+    }
+#endif
     public static string NewBase64( Guid id )
     {
         Span<char> result = stackalloc char[22];
