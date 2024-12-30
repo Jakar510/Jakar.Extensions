@@ -63,7 +63,7 @@ public readonly record struct WebHandler : IDisposable
 
         return Guid.TryParse( content, out Guid result )
                    ? result
-                   : default;
+                   : Guid.Empty;
     }
     public async ValueTask<byte[]> AsBytes( HttpResponseMessage response )
     {

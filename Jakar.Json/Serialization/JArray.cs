@@ -166,13 +166,13 @@ public ref struct JArray
         where T : ISpanFormattable => Add( value, CultureInfo.CurrentCulture );
     public readonly JArray Add<T>( T? value, IFormatProvider? culture )
         where T : ISpanFormattable => Add( value, default, culture );
-    public readonly JArray Add<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray Add<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         _writer.Append( value, format, provider );
         return this;
     }
-    public readonly JArray Add<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray Add<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         if ( value is not null ) { _writer.Append( value, format, bufferSize, provider ).Next(); }
@@ -185,14 +185,14 @@ public ref struct JArray
         where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
     public readonly JArray AddNumber<T>( T? value, IFormatProvider? culture )
         where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, default, culture );
-    public readonly JArray AddNumber<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray AddNumber<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : struct, INumber<T>, ISpanFormattable
     {
         if ( value is null ) { return this; }
 
         return AddNumber( value.Value, format, provider );
     }
-    public readonly JArray AddNumber<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray AddNumber<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : struct, INumber<T>, ISpanFormattable
     {
         if ( value is null ) { return this; }
@@ -205,13 +205,13 @@ public ref struct JArray
         where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
     public readonly JArray AddNumber<T>( T value, IFormatProvider? culture )
         where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, default, culture );
-    public readonly JArray AddNumber<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray AddNumber<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : struct, INumber<T>, ISpanFormattable
     {
         _writer.Append( value, format, provider );
         return this;
     }
-    public readonly JArray AddNumber<T>( T value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public readonly JArray AddNumber<T>( T value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : struct, INumber<T>, ISpanFormattable
     {
         _writer.AppendValue( value, format, bufferSize, provider ).Next();

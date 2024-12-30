@@ -86,7 +86,7 @@ public partial class DbTable<TRecord>
     }
 
 
-    public virtual async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) => await Get( connection, transaction, true, Database.GetParameters( value, default, columnName ), token );
+    public virtual async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) => await Get( connection, transaction, true, Database.GetParameters( value, null, columnName ), token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]

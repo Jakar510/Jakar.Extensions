@@ -71,7 +71,7 @@ public static partial class Xmlizer
                                   typeof(double),
                                   typeof(decimal),
                                   typeof(TimeSpan) );
-    public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
+    public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = null ) => Serialize( obj, attributes );
 
 
     public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes )
@@ -90,7 +90,7 @@ public static partial class Xmlizer
         foreach ( Type type in types ) { Register( type ); }
     }
 
-    public static void Register( Type type, string? nodeName = default )
+    public static void Register( Type type, string? nodeName = null )
     {
         if ( nameToType.Values.Contains( type ) ) { return; }
 

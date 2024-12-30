@@ -2,7 +2,7 @@
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<GroupRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
+public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<GroupRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
     public const  int                                    MAX_SIZE   = 1024;
     public const  string                                 TABLE_NAME = "Groups";
@@ -47,8 +47,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         RecordID<UserRecord>? ownerUserID  = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
         GroupRecord           record       = new GroupRecord( customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified );
-        record.Validate();
-        return record;
+        return record.Validate();
     }
     [Pure]
     public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )

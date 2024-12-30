@@ -34,7 +34,7 @@ public static class Strings
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
     /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = default ) => input.AsSpan().IsBalanced( bracketPairs ); // TODO: ReadOnlySpan<char>
+    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = null ) => input.AsSpan().IsBalanced( bracketPairs ); // TODO: ReadOnlySpan<char>
 
 
     /// <summary>
@@ -56,7 +56,7 @@ public static class Strings
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
     /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-    public static bool IsBalanced( this ReadOnlySpan<char> input, IReadOnlyDictionary<char, char>? bracketPairs = default ) // TODO: ReadOnlySpan<char>
+    public static bool IsBalanced( this ReadOnlySpan<char> input, IReadOnlyDictionary<char, char>? bracketPairs = null ) // TODO: ReadOnlySpan<char>
     {
         bracketPairs ??= _bracketPairs;
         using IMemoryOwner<char> buffer = MemoryPool<char>.Shared.Rent( bracketPairs.Count );
@@ -94,7 +94,7 @@ public static class Strings
     }
 
 
-    public static byte[]             ToByteArray( this string value, Encoding? encoding = default ) => (encoding ?? Encoding.Default).GetBytes( value );
+    public static byte[]             ToByteArray( this string value, Encoding? encoding = null ) => (encoding ?? Encoding.Default).GetBytes( value );
     public static ReadOnlySpan<byte> AsSpanBytes( this string value, Encoding  encoding )           => AsSpanBytes( value.AsSpan(), encoding );
     public static unsafe ReadOnlySpan<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
@@ -110,9 +110,9 @@ public static class Strings
 
     public static string[]             SplitLines( this       string value, char      separator = '\n' )   => value.Split( separator );
     public static string[]             SplitLines( this       string value, string    separator )          => value.Split( separator );
-    public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = default ) => value.ToByteArray( encoding ?? Encoding.Default ).AsMemory();
+    public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = null ) => value.ToByteArray( encoding ?? Encoding.Default ).AsMemory();
     public static object               ConvertTo( this        string value, Type      target )             => Convert.ChangeType( value, target );
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = default ) => value.ToMemory( encoding ?? Encoding.Default );
+    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = null ) => value.ToMemory( encoding ?? Encoding.Default );
 
 
     public static SecureString ToSecureString( this ReadOnlySpan<byte>   value, bool makeReadonly = true ) => Convert.ToBase64String( value ).AsSpan().ToSecureString( makeReadonly );

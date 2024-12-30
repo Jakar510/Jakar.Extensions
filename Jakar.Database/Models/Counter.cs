@@ -12,9 +12,9 @@ public record struct Counter : IEnumerator<long>
 
 
     public Counter() { }
-    public void Dispose() => Current = default;
+    public void Dispose() => Current = 0;
 
 
     public bool MoveNext() => (++Current).IsValidID();
-    public void Reset()    => Current = default;
+    public void Reset()    => Current = 0;
 }

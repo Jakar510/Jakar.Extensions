@@ -15,7 +15,7 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
-                                 DateTimeOffset?      LastModified = default ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>, IFileMetaData<Guid>, IFileData<Guid>
+                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>, IFileMetaData<Guid>, IFileData<Guid>
 {
     public const  string                TABLE_NAME = "Files";
     public static string                TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -126,20 +126,19 @@ public sealed record FileRecord( string?              FileName,
         var                  lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<FileRecord> id           = RecordID<FileRecord>.ID( reader );
 
-        var record = new FileRecord( name,
-                                     description,
-                                     fileType,
-                                     size,
-                                     hash,
-                                     mime,
-                                     payload,
-                                     fullPath,
-                                     id,
-                                     dateCreated,
-                                     lastModified );
+        FileRecord record = new(name,
+                                description,
+                                fileType,
+                                size,
+                                hash,
+                                mime,
+                                payload,
+                                fullPath,
+                                id,
+                                dateCreated,
+                                lastModified);
 
-        record.Validate();
-        return record;
+        return record.Validate();
     }
 
 

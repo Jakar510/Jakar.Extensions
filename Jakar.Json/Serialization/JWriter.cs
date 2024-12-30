@@ -97,7 +97,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+    public readonly JWriter Append<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         if ( value is null ) { return Null(); }
@@ -117,7 +117,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
         value is null
             ? Null()
             : AppendValue( value.Value, format, provider );
-    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+    public readonly JWriter AppendValue<T>( T? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = null )
         where T : struct, ISpanFormattable =>
         value is null
             ? Null()
@@ -134,7 +134,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
         _sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
-    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = default )
+    public readonly JWriter AppendValue<T>( T value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = null )
         where T : struct, ISpanFormattable
     {
         _sb.EnsureCapacity( bufferSize );

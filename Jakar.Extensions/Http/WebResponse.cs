@@ -33,7 +33,7 @@ public readonly record struct WebResponse<T>
 
     public WebResponse( HttpResponseMessage response, in string error ) : this( response, default, null, error ) { }
     public WebResponse( HttpResponseMessage response, Exception e, in string error ) : this( response, default, e, error ) { }
-    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = default, in string? error = null )
+    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = null, in string? error = null )
     {
         Error             = ParseError( error ?? exception?.Message );
         Payload           = payload;

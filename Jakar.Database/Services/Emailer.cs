@@ -70,7 +70,7 @@ public class Emailer
 
 
     private ValueTask SendAsync( MimeMessage message, CancellationToken token = default )      => SendAsync( _Settings,                     message, token );
-    public  ValueTask SendAsync( string?     email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, default );
+    public  ValueTask SendAsync( string?     email,   string            subject, string body ) => SendAsync( MailboxAddress.Parse( email ), subject, body, CancellationToken.None );
     public ValueTask SendAsync( MailboxAddress target, string subject, string body, CancellationToken token, params ReadOnlySpan<Attachment> attachments ) =>
         SendAsync( EmailBuilder.From( _options.GetSender() ).To( target ).WithAttachment( attachments ).WithSubject( subject ).WithBody( body ), token );
     public async ValueTask SendAsync( EmailBuilder builder, CancellationToken token )

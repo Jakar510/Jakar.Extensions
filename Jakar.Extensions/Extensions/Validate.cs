@@ -61,7 +61,7 @@ public static partial class Validate
     public static IPAddress? ParseIPAddress( this string? value ) => value?.AsSpan().ParseIPAddress();
     public static IPAddress? ParseIPAddress( this ReadOnlySpan<char> value )
     {
-        if ( value.IsEmpty ) { return default; }
+        if ( value.IsEmpty ) { return null; }
 
         if ( IPAddress.TryParse( value, out IPAddress? address ) ) { return address; }
 
@@ -73,9 +73,9 @@ public static partial class Validate
         {
             foreach ( ReadOnlySpan<char> line in value.SplitOn( ':' ) )
             {
-                if ( i >= 16 ) { return default; }
+                if ( i >= 16 ) { return null; }
 
-                if ( !byte.TryParse( line, out byte n ) ) { return default; }
+                if ( !byte.TryParse( line, out byte n ) ) { return null; }
 
                 ip[i++] = n;
             }
@@ -84,9 +84,9 @@ public static partial class Validate
         {
             foreach ( ReadOnlySpan<char> line in value.SplitOn( '.' ) )
             {
-                if ( i >= 16 ) { return default; }
+                if ( i >= 16 ) { return null; }
 
-                if ( !byte.TryParse( line, out byte n ) ) { return default; }
+                if ( !byte.TryParse( line, out byte n ) ) { return null; }
 
                 ip[i++] = n;
             }
@@ -98,7 +98,7 @@ public static partial class Validate
 
     public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate( value, UriKind.Absolute, out Uri? uriResult )
                                                                    ? uriResult
-                                                                   : default;
+                                                                   : null;
 
 
     public static string SetDemo( string value )
@@ -110,10 +110,10 @@ public static partial class Validate
 
 
     // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => value ?? throw new ArgumentNullException( name, caller );
+    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => value ?? throw new ArgumentNullException( name, caller );
 
 
-    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
-                                                                                                                                                                        ? throw new ArgumentNullException( name, caller )
-                                                                                                                                                                        : value;
+    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace( value )
+                                                                                                                                                                  ? throw new ArgumentNullException( name, caller )
+                                                                                                                                                                  : value;
 }

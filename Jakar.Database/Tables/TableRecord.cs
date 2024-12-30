@@ -52,8 +52,9 @@ public interface IOwnedTableRecord
 public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTimeOffset DateCreated, in DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private   RecordID<TRecord> _id           = ID;
-    protected DateTimeOffset?   _lastModified = LastModified;
+    protected internal static readonly PropertyInfo[]    Properties    = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+    private                            RecordID<TRecord> _id           = ID;
+    protected                          DateTimeOffset?   _lastModified = LastModified;
 
 
     public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
@@ -63,19 +64,20 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
     [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
-    [Conditional( "DEBUG" )]
-    public void Validate()
+    [Pure]
+    protected internal TRecord Validate()
     {
-        PropertyInfo[]    properties = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+        if ( Debugger.IsAttached is false ) { return (TRecord)this; }
+
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
-        if ( length == properties.Length ) { return; }
+        if ( length == Properties.Length ) { return (TRecord)this; }
 
-        HashSet<string> missing = [..properties.Select( static x => x.Name )];
+        HashSet<string> missing = [..Properties.Select( static x => x.Name )];
         missing.ExceptWith( parameters.ParameterNames );
 
         string message = $"""
-                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(properties)}.Length ({properties.Length})
+                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(Properties)}.Length ({Properties.Length})
                           {missing.ToPrettyJson()}
                           """;
 

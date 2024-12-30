@@ -81,7 +81,7 @@ public static class JsonNet
 
 
     [Conditional( "DEBUG" )]
-    public static void SaveDebug<T>( this T value, [CallerMemberName] string? caller = default, [CallerArgumentExpression( "value" )] string? variableName = default )
+    public static void SaveDebug<T>( this T value, [CallerMemberName] string? caller = null, [CallerArgumentExpression( "value" )] string? variableName = null )
         where T : notnull =>
         Task.Run( async () =>
                   {

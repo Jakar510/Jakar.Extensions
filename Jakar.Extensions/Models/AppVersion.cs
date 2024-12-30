@@ -7,19 +7,19 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 {
     private const       char                       SEPARATOR = '.';
     private             string?                    _string;
-    public static       Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
-    public static       Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
-    public static       FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public static       AppVersion                 Default               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new();
-    public              Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    [JsonIgnore] public int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    public static readonly AppVersion                 Default               = new();
+    public static       Equalizer<AppVersion>      Equalizer             { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
+    public static       Sorter<AppVersion>         Sorter                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public static       FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public              Format                     Scheme                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int                        Major                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Minor                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Maintenance           { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       MajorRevision         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       MinorRevision         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                       Build                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              AppVersionFlags            Flags                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    [JsonIgnore] public int                        Length                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
 
 
     static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );

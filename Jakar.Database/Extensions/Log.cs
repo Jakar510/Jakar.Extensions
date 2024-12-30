@@ -38,9 +38,9 @@ public static class Log
     {
         if ( logger.IsEnabled( LogLevel.Critical ) ) { _serviceStoppedCallback( logger, serviceName, isCancelled, className, caller, e ); }
     }
-    public static void ServiceStopped<T, TService>( ILogger logger, CancellationToken token, Exception? e = default, [CallerMemberName] string caller = EMPTY )
+    public static void ServiceStopped<T, TService>( ILogger logger, CancellationToken token, Exception? e = null, [CallerMemberName] string caller = EMPTY )
         where T : notnull => ServiceStopped( logger, typeof(T).Name, token.IsCancellationRequested, typeof(TService).FullName ?? typeof(TService).Name, e, caller );
-    public static void ServiceStopped<T, TService>( ILogger logger, T t, TService cls, CancellationToken token, Exception? e = default, [CallerMemberName] string caller = EMPTY )
+    public static void ServiceStopped<T, TService>( ILogger logger, T t, TService cls, CancellationToken token, Exception? e = null, [CallerMemberName] string caller = EMPTY )
         where T : notnull
         where TService : notnull => ServiceStopped( logger, t.GetType().Name, token.IsCancellationRequested, cls.GetType().FullName ?? cls.GetType().Name, e, caller );
 

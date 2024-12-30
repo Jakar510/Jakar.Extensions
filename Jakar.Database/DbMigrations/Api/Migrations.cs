@@ -137,7 +137,7 @@ public static partial class Migrations
             return true;
         }
 
-        dbType = default;
+        dbType = null;
         return false;
     }
 
@@ -316,7 +316,7 @@ public static partial class Migrations
 
         await app.MigrateDown();
     }
-    public static async ValueTask MigrateUp( this IHost app, long? version = default )
+    public static async ValueTask MigrateUp( this IHost app, long? version = null )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();

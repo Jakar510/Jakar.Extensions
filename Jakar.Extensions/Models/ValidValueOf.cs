@@ -22,7 +22,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
         thisValue = self.IsValid()
                         ? self
-                        : default;
+                        : null;
 
         return thisValue is not null;
     }

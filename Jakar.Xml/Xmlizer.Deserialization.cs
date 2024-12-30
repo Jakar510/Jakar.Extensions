@@ -12,7 +12,7 @@ namespace Jakar.Xml;
 
 public static partial class Xmlizer
 {
-    public static string Serialize<T>( T obj, in IDictionary<string, string>? attributes = default )
+    public static string Serialize<T>( T obj, in IDictionary<string, string>? attributes = null )
     {
         if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
 

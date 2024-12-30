@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="9.0.0" />
+    <PackageReference Include="Jakar.Extensions" Version="9.0.3" />
 	<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
 	<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 	<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />

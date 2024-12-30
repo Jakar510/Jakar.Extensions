@@ -44,8 +44,8 @@ public readonly ref struct ParamsArray
     public ParamsArray( object? arg0 )
     {
         _arg0 = arg0;
-        _arg1 = default;
-        _arg2 = default;
+        _arg1 = null;
+        _arg2 = null;
 
         // Always assign this.args to make use of its "Length" property
         _args = _oneArgArray;
@@ -54,7 +54,7 @@ public readonly ref struct ParamsArray
     {
         _arg0 = arg0;
         _arg1 = arg1;
-        _arg2 = default;
+        _arg2 = null;
 
         // Always assign this.args to make use of its "Length" property
         _args = _twoArgArray;
@@ -74,15 +74,15 @@ public readonly ref struct ParamsArray
 
         _arg0 = len > 0
                     ? args[0]
-                    : default;
+                    : null;
 
         _arg1 = len > 1
                     ? args[1]
-                    : default;
+                    : null;
 
         _arg2 = len > 2
                     ? args[2]
-                    : default;
+                    : null;
 
         _args = args;
     }

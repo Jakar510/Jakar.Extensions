@@ -20,7 +20,7 @@ public static class UniqueIDs
             return id.IsValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
 
@@ -33,7 +33,7 @@ public static class UniqueIDs
             return id.IsNotValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    int  value ) => value > 0;
@@ -50,7 +50,7 @@ public static class UniqueIDs
             return id.IsValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
 
@@ -63,7 +63,7 @@ public static class UniqueIDs
             return id.IsNotValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    long  value ) => value > 0;
@@ -80,7 +80,7 @@ public static class UniqueIDs
             return id.IsValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
 
@@ -93,7 +93,7 @@ public static class UniqueIDs
             return id.IsNotValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    Guid  value ) => Guid.Empty.Equals( value ) is false;
@@ -111,7 +111,7 @@ public static class UniqueIDs
             return id.IsValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
 
@@ -125,7 +125,7 @@ public static class UniqueIDs
             return id.IsNotValidID();
         }
 
-        id = default;
+        id = null;
         return false;
     }
 

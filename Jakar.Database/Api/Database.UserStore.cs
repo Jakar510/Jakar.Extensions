@@ -34,26 +34,26 @@ public partial class Database
 
     #region User Auth Providers
 
-    public IAsyncEnumerable<UserLoginInfoRecord> GetLoginsAsync<TRecord>( TRecord record, [EnumeratorCancellation] CancellationToken token )
+    public IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TRecord>( TRecord record, [EnumeratorCancellation] CancellationToken token )
         where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => this.TryCall( GetLoginsAsync, record, token );
-    public virtual IAsyncEnumerable<UserLoginInfoRecord> GetLoginsAsync<TRecord>( DbConnection connection, DbTransaction transaction, TRecord record, [EnumeratorCancellation] CancellationToken token )
+    public virtual IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TRecord>( DbConnection connection, DbTransaction transaction, TRecord record, [EnumeratorCancellation] CancellationToken token )
         where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => UserLogins.Where( connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token );
 
 
-    public ValueTask<ErrorOrResult<UserLoginInfoRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
-    public virtual async ValueTask<ErrorOrResult<UserLoginInfoRecord>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
+    public ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall( AddLoginAsync, user, login, token );
+    public virtual async ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
     {
-        UserLoginInfoRecord? record = await UserLogins.Get( connection, transaction, true, UserLoginInfoRecord.GetDynamicParameters( user, login ), token );
+        UserLoginProviderRecord? record = await UserLogins.Get( connection, transaction, true, UserLoginProviderRecord.GetDynamicParameters( user, login ), token );
 
         if ( record is not null )
         {
-            Error provider = Error.NotFound( nameof(UserLoginInfoRecord.LoginProvider), login.LoginProvider );
-            Error key      = Error.NotFound( nameof(UserLoginInfoRecord.ProviderKey),   login.ProviderKey );
-            Error userID   = Error.NotFound( nameof(UserLoginInfoRecord.CreatedBy),     user.ID.value.ToString() );
-            return ErrorOrResult<UserLoginInfoRecord>.Create( provider, key, userID );
+            Error provider = Error.NotFound( nameof(UserLoginProviderRecord.LoginProvider), login.LoginProvider );
+            Error key      = Error.NotFound( nameof(UserLoginProviderRecord.ProviderKey),   login.ProviderKey );
+            Error userID   = Error.NotFound( nameof(UserLoginProviderRecord.CreatedBy),     user.ID.value.ToString() );
+            return ErrorOrResult<UserLoginProviderRecord>.Create( provider, key, userID );
         }
 
-        record = new UserLoginInfoRecord( user, login );
+        record = new UserLoginProviderRecord( user, login );
         record = await UserLogins.Insert( connection, transaction, record, token );
         await SetAuthenticatorKeyAsync( connection, transaction, user, record.ProviderKey, token );
         return record;
@@ -64,8 +64,8 @@ public partial class Database
     public virtual async ValueTask<UserRecord?> FindByLoginAsync( DbConnection connection, DbTransaction transaction, string loginProvider, string providerKey, CancellationToken token )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(UserLoginInfoRecord.LoginProvider), loginProvider );
-        parameters.Add( nameof(UserLoginInfoRecord.ProviderKey),   providerKey );
+        parameters.Add( nameof(UserLoginProviderRecord.LoginProvider), loginProvider );
+        parameters.Add( nameof(UserLoginProviderRecord.ProviderKey),   providerKey );
         return await Users.Get( connection, transaction, true, parameters, token );
     }
 
@@ -73,9 +73,9 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( RemoveLoginAsync, user, loginProvider, providerKey, token );
     public virtual async ValueTask RemoveLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        DynamicParameters                     parameters = UserLoginInfoRecord.GetDynamicParameters( user, loginProvider, providerKey );
-        IAsyncEnumerable<UserLoginInfoRecord> records    = UserLogins.Where( connection, transaction, true, parameters, token );
-        await foreach ( UserLoginInfoRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
+        DynamicParameters                     parameters = UserLoginProviderRecord.GetDynamicParameters( user, loginProvider, providerKey );
+        IAsyncEnumerable<UserLoginProviderRecord> records    = UserLogins.Where( connection, transaction, true, parameters, token );
+        await foreach ( UserLoginProviderRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
     }
 
 

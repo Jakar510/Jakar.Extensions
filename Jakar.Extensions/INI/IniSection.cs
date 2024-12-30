@@ -39,7 +39,7 @@ public partial class IniConfig
         public static implicit operator Section( string sectionName ) => new(sectionName);
 
 
-        public override string ToString() => ToString( default, CultureInfo.CurrentCulture );
+        public override string ToString() => ToString( null, CultureInfo.CurrentCulture );
         public string ToString( string? format, IFormatProvider? formatProvider )
         {
             Span<char> span = stackalloc char[Length + 1];
@@ -124,7 +124,7 @@ public partial class IniConfig
                 return true;
             }
 
-            value = default;
+            value = null;
             return false;
         }
         public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, string separator )
@@ -137,7 +137,7 @@ public partial class IniConfig
                 return true;
             }
 
-            value = default;
+            value = null;
             return false;
         }
 
@@ -178,17 +178,17 @@ public partial class IniConfig
         public void Add( string    key, string?             value ) => this[key] = value;
 
 
-        public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = default ) =>
+        public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
                             ? value.ToString()
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
-        public void Add( string key, DateTime value, string? format, CultureInfo? culture = default ) =>
+        public void Add( string key, DateTime value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
                             ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
 
-        public void Add( string key, DateTimeOffset value, string? format, CultureInfo? culture = default ) =>
+        public void Add( string key, DateTimeOffset value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
                             ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
                             : value.ToString( format, culture ?? CultureInfo.CurrentCulture );

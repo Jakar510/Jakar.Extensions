@@ -16,7 +16,7 @@ public ref struct XWriter( bool shouldIndent )
     public const      string        NULL         = "null";
     private readonly  StringBuilder _sb          = new(); // TODO: System.Text.ValueStringBuilder
     internal readonly bool          shouldIndent = shouldIndent;
-    internal          int           indentLevel  = default;
+    internal          int           indentLevel  = 0;
 
 
     public XWriter() : this( true ) { }

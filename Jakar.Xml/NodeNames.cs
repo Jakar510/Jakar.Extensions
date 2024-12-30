@@ -80,7 +80,7 @@ public static class NodeNames
     }
 
 
-    public static void RegisterNodeName( Type type, string? nodeName = default )
+    public static void RegisterNodeName( Type type, string? nodeName = null )
     {
         ReadOnlySpan<char> name = nodeName ??
                                   (type.IsArray

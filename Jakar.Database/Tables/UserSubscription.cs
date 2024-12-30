@@ -11,7 +11,7 @@ public interface IUserSubscription : IUniqueID<Guid>
 
 
 
-public abstract record UserSubscription<TRecord>( DateTimeOffset? SubscriptionExpires, RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<TRecord>( CreatedBy, ID, DateCreated, LastModified ), IUserSubscription
+public abstract record UserSubscription<TRecord>( DateTimeOffset? SubscriptionExpires, RecordID<TRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TRecord>( CreatedBy, ID, DateCreated, LastModified ), IUserSubscription
     where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord>
 {
     [Pure]

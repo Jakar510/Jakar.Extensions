@@ -22,7 +22,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly    DbTable<RoleRecord>             Roles;
     public readonly    DbTable<UserAddressRecord>      UserAddresses;
     public readonly    DbTable<UserGroupRecord>        UserGroups;
-    public readonly    DbTable<UserLoginInfoRecord>    UserLogins;
+    public readonly    DbTable<UserLoginProviderRecord>    UserLogins;
     public readonly    DbTable<UserRecord>             Users;
     public readonly    DbTable<UserRecoveryCodeRecord> UserRecoveryCodes;
     public readonly    DbTable<UserRoleRecord>         UserRoles;
@@ -61,7 +61,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         RecordID<GroupRecord>.RegisterDapperTypeHandlers();
         RecordID<RoleRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRecord>.RegisterDapperTypeHandlers();
-        RecordID<UserLoginInfoRecord>.RegisterDapperTypeHandlers();
+        RecordID<UserLoginProviderRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRecoveryCodeRecord>.RegisterDapperTypeHandlers();
         RecordID<UserGroupRecord>.RegisterDapperTypeHandlers();
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
@@ -79,7 +79,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserGroups        = Create<UserGroupRecord>();
         Groups            = Create<GroupRecord>();
         RecoveryCodes     = Create<RecoveryCodeRecord>();
-        UserLogins        = Create<UserLoginInfoRecord>();
+        UserLogins        = Create<UserLoginProviderRecord>();
         UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
         Addresses         = Create<AddressRecord>();
         UserAddresses     = Create<UserAddressRecord>();
@@ -212,7 +212,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = default, [CallerArgumentExpression( nameof(value) )] string? variableName = default )
+    public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression( nameof(value) )] string? variableName = null )
     {
         ArgumentNullException.ThrowIfNull( variableName );
         var parameters = new DynamicParameters( template );

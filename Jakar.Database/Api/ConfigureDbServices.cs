@@ -1,7 +1,9 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 06/02/2024  15:06
 
-using Microsoft.Extensions.Caching.Hybrid;
+using Npgsql;
+using OpenTelemetry;
+using ZiggyCreatures.Caching.Fusion;
 
 
 
@@ -14,35 +16,20 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     where TSqlCacheFactory : class, ISqlCacheFactory
     where T : ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>, new()
 {
-    public          string            AppName                         { get; }       = TApp.AppName;
-    public          string            AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
-    public          string            AuthenticationSchemeDisplayName { get; init; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
-    public          DbOptions         DbOptions                       { get; init; } = new();
-    public abstract bool              UseApplicationCookie            { get; }
-    public abstract bool              UseAuth                         { get; }
-    public abstract bool              UseAuthCookie                   { get; }
-    public abstract bool              UseExternalCookie               { get; }
-    public abstract bool              UseGoogleAccount                { get; }
-    public virtual  bool              UseMemoryCache                  => true;
-    public abstract bool              UseMicrosoftAccount             { get; }
-    public abstract bool              UseOpenIdConnect                { get; }
-    public abstract bool              UseRedis                        { get; }
-
-
-    public virtual void Redis( RedisCacheOptions                       options ) { }
-    public virtual void Jwt( JwtBearerOptions                          options ) { }
-    public virtual void Authentication( AuthenticationOptions          options ) { }
-    public virtual void AuthCookie( CookieAuthenticationOptions        options ) { }
-    public virtual void ApplicationCookie( CookieAuthenticationOptions options ) { }
-    public virtual void ExternalCookie( CookieAuthenticationOptions    options ) { }
-    public virtual void OpenIdConnect( OpenIdConnectOptions            options ) { }
-    public virtual void MicrosoftAccount( MicrosoftAccountOptions      options ) { }
-    public virtual void Google( GoogleOptions                          options ) { }
-    public virtual void MemoryCache( MemoryCacheOptions                options ) { }
-    public virtual void Identity( IdentityOptions                      options ) { }
-    public virtual void Migration( IMigrationRunnerBuilder             options ) { }
-    public virtual void Metrics( MeterProviderBuilder                  metrics ) { }
-    public virtual void Tracing( TracerProviderBuilder                 tracing ) { }
+    public          string                  AppName                         { get; }       = TApp.AppName;
+    public          string                  AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
+    public          string                  AuthenticationSchemeDisplayName { get; init; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
+    public          DbOptions               DbOptions                       { get; init; } = new();
+    public virtual  FusionCacheEntryOptions FusionCacheEntryOptions         { get; }       = new() { Duration = TimeSpan.FromMinutes( 2 ) };
+    public abstract bool                    UseApplicationCookie            { get; }
+    public abstract bool                    UseAuth                         { get; }
+    public abstract bool                    UseAuthCookie                   { get; }
+    public abstract bool                    UseExternalCookie               { get; }
+    public abstract bool                    UseGoogleAccount                { get; }
+    public virtual  bool                    UseMemoryCache                  => true;
+    public abstract bool                    UseMicrosoftAccount             { get; }
+    public abstract bool                    UseOpenIdConnect                { get; }
+    public abstract bool                    UseRedis                        { get; }
 
 
     public DbOptions GetDbOptions()
@@ -61,13 +48,14 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     }
     protected internal virtual WebApplicationBuilder Configure( WebApplicationBuilder builder )
     {
+        builder.Services.AddOpenTelemetry().WithMetrics( Configure ).WithTracing( Configure ).WithLogging();
+
+        Configure( builder.Services.AddFusionCache() );
+
         builder.Services.AddInMemoryTokenCaches();
 
         builder.Services.AddSingleton( DbOptions );
         builder.Services.AddTransient( DbOptions.Get );
-
-        builder.Services.AddStackExchangeRedisCache( Redis );
-        builder.Services.AddMemoryCache( MemoryCache );
 
     #pragma warning disable EXTEXP0018 // <- Add this line
         builder.Services.AddHybridCache();
@@ -79,9 +67,9 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
         builder.Services.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );
         builder.Services.AddHealthCheck<TDatabase>();
 
-        builder.Services.AddFluentMigratorCore().ConfigureRunner( Migration );
+        builder.Services.AddFluentMigratorCore().ConfigureRunner( Configure );
 
-        builder.Services.AddIdentityServices( Identity );
+        builder.Services.AddIdentityServices( Configure );
         builder.Services.AddDataProtection();
         builder.Services.AddIdentityServices();
         builder.Services.AddPasswordValidator();
@@ -95,40 +83,66 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     }
 
 
-    private void ConfigureAuthentication( AuthenticationOptions options )
+    protected virtual void Configure( JwtBearerOptions options, WebApplicationBuilder application )
+    {
+        options.TokenHandlers.Add( DbTokenHandler.Instance );
+        options.Audience                   = AppName;
+        options.Authority                  = AppName;
+        options.UseSecurityTokenValidators = true;
+        options.TokenValidationParameters  = application.GetTokenValidationParameters( DbOptions );
+    }
+    protected virtual void Configure( IFusionCacheBuilder builder )
+    {
+        builder.WithDefaultEntryOptions( FusionCacheEntryOptions );
+        builder.WithStackExchangeRedisBackplane();
+        builder.WithMemoryBackplane();
+        builder.WithLogger( static provider => provider.GetRequiredService<ILoggerFactory>().CreateLogger<FusionCache>() );
+    }
+    protected virtual void Configure( TracerProviderBuilder builder )
+    {
+        builder.AddAspNetCoreInstrumentation();
+        builder.AddHttpClientInstrumentation();
+        builder.AddFusionCacheInstrumentation();
+    }
+    protected virtual void Configure( MeterProviderBuilder builder )
+    {
+        builder.AddAspNetCoreInstrumentation();
+        builder.AddHttpClientInstrumentation();
+        builder.AddFusionCacheInstrumentation();
+        builder.AddRuntimeInstrumentation();
+        builder.AddNpgsqlInstrumentation();
+    }
+    protected virtual void Configure( AuthenticationOptions options )
     {
         options.DefaultAuthenticateScheme = AuthenticationScheme;
         options.DefaultScheme             = AuthenticationScheme;
-        Authentication( options );
     }
     private void AddAuthentication( WebApplicationBuilder application )
     {
-        AuthenticationBuilder builder = application.Services.AddAuthentication( ConfigureAuthentication );
+        AuthenticationBuilder builder = application.Services.AddAuthentication( Configure );
 
-        builder.AddJwtBearer( AuthenticationScheme, AuthenticationSchemeDisplayName, ConfigureOptions );
+        builder.AddJwtBearer( AuthenticationScheme, AuthenticationSchemeDisplayName, x => Configure( x, application ) );
 
-        if ( UseAuthCookie ) { builder.AddCookie( AuthenticationScheme, IdentityConstants.BearerScheme, AuthCookie ); }
+        if ( UseAuthCookie ) { builder.AddCookie( AuthenticationScheme, IdentityConstants.BearerScheme, Configure ); }
 
-        if ( UseApplicationCookie ) { builder.AddCookie( IdentityConstants.ApplicationScheme, ApplicationCookie ); }
+        if ( UseApplicationCookie ) { builder.AddCookie( IdentityConstants.ApplicationScheme, ConfigureApplicationCookie ); }
 
-        if ( UseExternalCookie ) { builder.AddCookie( IdentityConstants.ExternalScheme, ExternalCookie ); }
+        if ( UseExternalCookie ) { builder.AddCookie( IdentityConstants.ExternalScheme, ConfigureExternalCookie ); }
 
-        if ( UseMicrosoftAccount ) { builder.AddMicrosoftAccount( MicrosoftAccount ); }
+        if ( UseMicrosoftAccount ) { builder.AddMicrosoftAccount( Configure ); }
 
-        if ( UseGoogleAccount ) { builder.AddGoogle( Google ); }
+        if ( UseGoogleAccount ) { builder.AddGoogle( Configure ); }
 
-        if ( UseOpenIdConnect ) { builder.AddOpenIdConnect( OpenIdConnect ); }
-
-        return;
-
-        void ConfigureOptions( JwtBearerOptions bearer )
-        {
-            bearer.TokenHandlers.Add( DbTokenHandler.Instance );
-            bearer.Audience                   = AppName;
-            bearer.Authority                  = AppName;
-            bearer.UseSecurityTokenValidators = true;
-            bearer.TokenValidationParameters  = application.GetTokenValidationParameters( DbOptions );
-            Jwt( bearer );
-        }
+        if ( UseOpenIdConnect ) { builder.AddOpenIdConnect( Configure ); }
     }
+
+
+    protected virtual void Configure( CookieAuthenticationOptions                  options ) { }
+    protected virtual void ConfigureApplicationCookie( CookieAuthenticationOptions options ) { }
+    protected virtual void ConfigureExternalCookie( CookieAuthenticationOptions    options ) { }
+    protected virtual void Configure( OpenIdConnectOptions                         options ) { }
+    protected virtual void Configure( MicrosoftAccountOptions                      options ) { }
+    protected virtual void Configure( GoogleOptions                                options ) { }
+    protected virtual void Configure( IdentityOptions                              options ) { }
+    protected virtual void Configure( IMigrationRunnerBuilder                      options ) { }
 }

@@ -72,7 +72,7 @@ public static class XmlExtensions
             if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string  key   = string.Empty;
-            object? value = default;
+            object? value = null;
 
             for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -111,7 +111,7 @@ public static class XmlExtensions
     public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
-    public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = default )
+    public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = null )
     {
         settings ??= new XmlWriterSettings
                      {

@@ -32,6 +32,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<Title>Jakar.Database</Title>
 		<Product>Jakar.Database</Product>
+		<UserSecretsId>f0c1e38f-9f87-44b2-907a-a77b41066866</UserSecretsId>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -69,7 +70,8 @@
 		<PackageReference Include="dbup-postgresql" Version="5.0.40" />
 		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="6.2.0" />
-		<PackageReference Include="Jakar.Extensions" Version="9.0.0" />
+		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
+		<PackageReference Include="Jakar.Extensions" Version="9.0.3" />
 		<PackageReference Include="FluentMigrator" Version="6.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="6.2.0" />
 		<PackageReference Include="MailKit" Version="4.9.0" />
@@ -102,6 +104,10 @@
 		<PackageReference Include="Otp.NET" Version="1.4.0" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
 		<PackageReference Include="System.IO.Hashing" Version="9.0.0" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="1.4.1" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="1.4.1" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="1.4.1" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="1.4.1" />
 		<PackageReference Include="ZXing.Net" Version="0.16.9" />
 		<PackageReference Include="Hardware.Info" Version="101.0.0" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.0" />

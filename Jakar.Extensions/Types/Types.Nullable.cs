@@ -72,7 +72,7 @@ public static partial class Types
             }
         }
 
-        result = default;
+        result = null;
         return false;
     }
 }

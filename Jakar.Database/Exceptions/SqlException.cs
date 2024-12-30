@@ -30,7 +30,7 @@ public sealed class SqlException : Exception
     }
 
 
-    private static string GetMessage( string sql, DynamicParameters? dynamicParameters = default )
+    private static string GetMessage( string sql, DynamicParameters? dynamicParameters = null )
     {
         string parameters = dynamicParameters is null
                                 ? "NULL"

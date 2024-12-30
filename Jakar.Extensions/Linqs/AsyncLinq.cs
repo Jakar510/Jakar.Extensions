@@ -23,7 +23,7 @@ public static partial class AsyncLinq
     public static                                                      ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
     public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
     {
-        HashSet<TElement> list = new HashSet<TElement>( comparer );
+        HashSet<TElement> list = new(comparer);
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }
 
         return list;
@@ -103,8 +103,8 @@ public static partial class AsyncLinq
 
             default:
             {
-                using Buffer<TElement> builder = new Buffer<TElement>();
-                foreach ( TElement equatable in sequence ) { builder.Append( equatable ); }
+                using Buffer<TElement> builder = new();
+                foreach ( TElement equatable in sequence ) { builder.Add( equatable ); }
 
                 return builder.Span.ToArray();
             }
@@ -131,16 +131,16 @@ public static partial class AsyncLinq
     public static TResult[] ToArray<TElement, TResult>( this IEnumerable<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using Buffer<TResult> buffer = new Buffer<TResult>();
-        foreach ( TElement item in sequence ) { buffer.Append( func( item ) ); }
+        using Buffer<TResult> buffer = new();
+        foreach ( TElement item in sequence ) { buffer.Add( func( item ) ); }
 
         return buffer.Span.ToArray();
     }
     public static TResult[] ToArray<TElement, TResult>( this ReadOnlySpan<TElement> sequence, Func<TElement, TResult> func )
         where TResult : IEquatable<TResult>
     {
-        using Buffer<TResult> buffer = new Buffer<TResult>();
-        foreach ( TElement item in sequence ) { buffer.Append( func( item ) ); }
+        using Buffer<TResult> buffer = new(sequence.Length);
+        foreach ( TElement item in sequence ) { buffer.Add( func( item ) ); }
 
         return buffer.Span.ToArray();
     }

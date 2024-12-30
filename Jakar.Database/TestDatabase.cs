@@ -3,6 +3,7 @@
 
 using Microsoft.Extensions.Caching.Hybrid;
 using Npgsql;
+using ZiggyCreatures.Caching.Fusion;
 
 
 
@@ -125,10 +126,12 @@ internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFacto
                             Version                  = AppVersion
                         }.WithAppName<TestDatabase>();
         }
-        public override void Redis( RedisCacheOptions options )
+        protected override void Configure( IFusionCacheBuilder builder )
         {
-            options.InstanceName  = TestDatabase.AppName;
-            options.Configuration = "192.168.2.50:6379";
+            base.Configure( builder );
+
+            // builder.builder.InstanceName = TestDatabase.AppName;
+            // builder.Configuration        = "192.168.2.50:6379";
         }
     }
 }

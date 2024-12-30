@@ -45,7 +45,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         {
             if ( !SetProperty( ref _company, value ) ) { return; }
 
-            _description = default;
+            _description = null;
             OnPropertyChanged( nameof(Description) );
         }
     }
@@ -60,7 +60,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         {
             if ( !SetProperty( ref _department, value ) ) { return; }
 
-            _description = default;
+            _description = null;
             OnPropertyChanged( nameof(Description) );
         }
     }
@@ -78,7 +78,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         {
             if ( !SetProperty( ref _firstName, value ) ) { return; }
 
-            _fullName = default;
+            _fullName = null;
             OnPropertyChanged( nameof(FullName) );
         }
     }
@@ -105,7 +105,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         {
             if ( !SetProperty( ref _lastName, value ) ) { return; }
 
-            _fullName = default;
+            _fullName = null;
             OnPropertyChanged( nameof(FullName) );
         }
     }
@@ -124,7 +124,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         {
             if ( !SetProperty( ref _title, value ) ) { return; }
 
-            _description = default;
+            _description = null;
             OnPropertyChanged( nameof(Description) );
         }
     }

@@ -75,7 +75,7 @@ public record struct EasySqlBuilder()
         _sb.Append( func );
         return Space();
     }
-    internal EasySqlBuilder AggregateFunction( string func, string? columnName = default )
+    internal EasySqlBuilder AggregateFunction( string func, string? columnName = null )
     {
         _sb.Append( func );
         Begin();

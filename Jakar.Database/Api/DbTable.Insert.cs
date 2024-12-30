@@ -57,7 +57,7 @@ public partial class DbTable<TRecord>
 
             return id.HasValue
                        ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
-                       : default;
+                       : null;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
@@ -75,7 +75,7 @@ public partial class DbTable<TRecord>
 
             return id.HasValue
                        ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
-                       : default;
+                       : null;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }

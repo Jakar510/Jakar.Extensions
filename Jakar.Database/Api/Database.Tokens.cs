@@ -237,9 +237,9 @@ public abstract partial class Database
     }
 
 
-    public async ValueTask<UserLoginInfoRecord[]> GetUserLoginInfoRecords( string purpose, UserRecord user, CancellationToken token )
+    public async ValueTask<UserLoginProviderRecord[]> GetUserLoginInfoRecords( string purpose, UserRecord user, CancellationToken token )
     {
-        HashSet<UserLoginInfoRecord> list = await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user, purpose ), token ).ToHashSet( token );
+        HashSet<UserLoginProviderRecord> list = await UserLogins.Where( true, UserLoginProviderRecord.GetDynamicParameters( user, purpose ), token ).ToHashSet( token );
         return [..list];
     }
 
@@ -280,6 +280,6 @@ public abstract partial class Database
     {
         if ( user.IsValidID() is false || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
 
-        return await UserLogins.Where( true, UserLoginInfoRecord.GetDynamicParameters( user ), token ).Any( token );
+        return await UserLogins.Where( true, UserLoginProviderRecord.GetDynamicParameters( user ), token ).Any( token );
     }
 }

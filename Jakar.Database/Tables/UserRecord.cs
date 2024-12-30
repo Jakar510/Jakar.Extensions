@@ -53,7 +53,7 @@ public sealed record UserRecord( string                        UserName,
     public const                                                                                 int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                 int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
     public const                                                                                 int                           MAX_PASSWORD_SIZE                   = 250;
-    public const                                                                                 string                        TABLE_NAME                          = "Users";
+    public const                                                                                 string                        TABLE_NAME                          = "users";
     public static readonly                                                                       TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
     private                                                                                      IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
     public static                                                                                string                        TableName              { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -234,8 +234,7 @@ public sealed record UserRecord( string                        UserName,
                                             dateCreated,
                                             lastModified );
 
-        record.Validate();
-        return record;
+        return record.Validate();
     }
 
 
@@ -451,9 +450,9 @@ public sealed record UserRecord( string                        UserName,
     public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall( ReplaceCodes, db, recoveryCodes, token );
     public async ValueTask<string[]> ReplaceCodes( DbConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        IAsyncEnumerable<RecoveryCodeRecord>           old        = Codes( connection, transaction, db, token );
-        ReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
-        string[]                                       codes      = [.. dictionary.Keys];
+        IAsyncEnumerable<RecoveryCodeRecord> old        = Codes( connection, transaction, db, token );
+        RecoveryCodeRecord.Codes             dictionary = RecoveryCodeRecord.Create( this, recoveryCodes );
+        string[]                             codes      = [.. dictionary.Keys];
 
 
         await db.RecoveryCodes.Delete( connection, transaction, old, token );

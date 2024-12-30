@@ -23,8 +23,8 @@ public class OneTimePassword<TApp>( string key )
     public static OneTimePassword<TApp> Debug { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = new(Randoms.GenerateToken());
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool ValidateToken( string token, VerificationWindow? window = default ) => ValidateToken( token, out long _, window );
-    public bool ValidateToken( string token, out long timeStepMatched, VerificationWindow? window = default )
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool ValidateToken( string token, VerificationWindow? window = null ) => ValidateToken( token, out long _, window );
+    public bool ValidateToken( string token, out long timeStepMatched, VerificationWindow? window = null )
     {
         Totp totp = new(_keyBytes);
         return totp.VerifyTotp( token, out timeStepMatched, window );

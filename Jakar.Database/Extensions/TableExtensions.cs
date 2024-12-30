@@ -12,7 +12,7 @@ public static class TableExtensions
     public static T? GetData<T>( this DbDataReader reader, string propertyName )
         where T : class => reader.GetFieldValue<object?>( propertyName ) is string json
                                ? json.FromJson<T>()
-                               : default;
+                               : null;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

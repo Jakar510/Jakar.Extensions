@@ -8,7 +8,7 @@ public class CredentialsException : Exception
     public CredentialsException( string? message, Exception? inner ) : base( message, inner ) { }
 
 
-    public static CredentialsException Create( string? user, Exception? inner = default ) => new($"User: '{user ?? "null"}'", inner);
+    public static CredentialsException Create( string? user, Exception? inner = null ) => new($"User: '{user ?? "null"}'", inner);
 
 
     public static bool IsValid( [NotNullWhen(        true )] string? user, [NotNullWhen( true )] string? password ) => IsInvalid( user, password ) is false;

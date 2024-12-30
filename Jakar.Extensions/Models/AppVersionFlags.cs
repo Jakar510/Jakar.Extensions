@@ -36,7 +36,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
         Debug.Assert( span.Length > Length );
 

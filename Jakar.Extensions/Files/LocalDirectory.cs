@@ -154,7 +154,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         DirectoryInfo? info = Info.Parent;
 
         return info is null
-                   ? default(LocalDirectory)
+                   ? null
                    : info;
     }
 

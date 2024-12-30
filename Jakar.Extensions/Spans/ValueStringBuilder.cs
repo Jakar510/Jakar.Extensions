@@ -226,17 +226,17 @@ public ref struct ValueStringBuilder
     // }
 
 
-    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, IFormatProvider? provider = null )
     {
         AppendFormatHelper( provider, format, new ParamsArray( arg0 ) );
         return this;
     }
-    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, object? arg1, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, object? arg1, IFormatProvider? provider = null )
     {
         AppendFormatHelper( provider, format, new ParamsArray( arg0, arg1 ) );
         return this;
     }
-    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, object? arg1, object? arg2, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, object? arg0, object? arg1, object? arg2, IFormatProvider? provider = null )
     {
         AppendFormatHelper( provider, format, new ParamsArray( arg0, arg1, arg2 ) );
         return this;
@@ -256,7 +256,7 @@ public ref struct ValueStringBuilder
         AppendFormatHelper( provider, format, args );
         return this;
     }
-    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, scoped in ReadOnlySpan<object?> args, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat( scoped in ReadOnlySpan<char> format, scoped in ReadOnlySpan<object?> args, IFormatProvider? provider = null )
     {
         if ( args.IsEmpty )
         {
@@ -273,28 +273,28 @@ public ref struct ValueStringBuilder
     }
 
 
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = null )
         where T : unmanaged, IEquatable<T>
     {
         ParamsArray<T> parameters = ParamsArray<T>.Create( arg0 );
         AppendFormatHelper( provider, format, in parameters );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = null )
         where T : unmanaged, IEquatable<T>
     {
         ParamsArray<T> parameters = ParamsArray<T>.Create( arg0, arg1 );
         AppendFormatHelper( provider, format, in parameters );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = null )
         where T : unmanaged, IEquatable<T>
     {
         ParamsArray<T> parameters = ParamsArray<T>.Create( arg0, arg1, arg2 );
         AppendFormatHelper( provider, format, in parameters );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, IFormatProvider? provider = default, params ReadOnlySpan<T> args )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, IFormatProvider? provider = null, params ReadOnlySpan<T> args )
         where T : unmanaged, IEquatable<T>
     {
         if ( args.IsEmpty )
@@ -311,7 +311,7 @@ public ref struct ValueStringBuilder
         AppendFormatHelper( provider, format, in parameters );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, scoped in ReadOnlySpan<T> args, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendFormat<T>( scoped in ReadOnlySpan<char> format, scoped in ReadOnlySpan<T> args, IFormatProvider? provider = null )
         where T : unmanaged, IEquatable<T>
     {
         if ( args.IsEmpty )
@@ -381,7 +381,7 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( char separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendJoin<T>( char separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
@@ -401,7 +401,7 @@ public ref struct ValueStringBuilder
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, scoped in ReadOnlySpan<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
@@ -421,7 +421,7 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
@@ -440,7 +440,7 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendJoin<T>( scoped in ReadOnlySpan<char> separator, IEnumerable<T> enumerable, scoped in ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
@@ -459,7 +459,7 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendSpanFormattable<T>( T value, scoped in ReadOnlySpan<char> format, IFormatProvider? provider = default )
+    public ValueStringBuilder AppendSpanFormattable<T>( T value, scoped in ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where T : ISpanFormattable
     {
         EnsureCapacity<T>( format );

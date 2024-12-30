@@ -127,7 +127,7 @@ public abstract partial class Database
         record = await Users.Insert( connection, transaction,  record, token );
         return await GetToken( connection, transaction,  record, DEFAULT_CLAIM_TYPES, token );
     }
-    protected virtual UserRecord CreateNewUser<TUser>( ILoginRequest<TUser> request, UserRecord? caller = default )
+    protected virtual UserRecord CreateNewUser<TUser>( ILoginRequest<TUser> request, UserRecord? caller = null )
         where TUser : class, IUserData<Guid> => UserRecord.Create( request, request.Data.Rights, caller );
 
 

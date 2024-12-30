@@ -5,9 +5,9 @@ namespace Jakar.Database;
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default ) : OwnedTableRecord<RecoveryCodeRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
+public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<RecoveryCodeRecord>
 {
-    public const            string                             TABLE_NAME = "Codes";
+    public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> _hasher    = new();
     public static           string                             TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
@@ -18,7 +18,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(Code), Code );
         return parameters;
     }
@@ -26,13 +26,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     public static RecoveryCodeRecord Create( DbDataReader reader )
     {
         string                       code         = reader.GetFieldValue<string>( nameof(Code) );
-        DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?              lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        var                          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>?        ownerUserID  = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID( reader );
-        RecoveryCodeRecord           record       = new RecoveryCodeRecord( code, id, ownerUserID, dateCreated, lastModified );
-        record.Validate();
-        return record;
+        RecoveryCodeRecord           record       = new(code, id, ownerUserID, dateCreated, lastModified);
+        return record.Validate();
     }
     [Pure]
     public static async IAsyncEnumerable<RecoveryCodeRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
@@ -41,14 +40,14 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create( user, recoveryCodes.GetInternalArray() );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, List<string>                     recoveryCodes ) => Create( user, CollectionsMarshal.AsSpan( recoveryCodes ) );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create( user, recoveryCodes.Span );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create( user, recoveryCodes.GetInternalArray() );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create( user, CollectionsMarshal.AsSpan( recoveryCodes ) );
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create( user, recoveryCodes.Span );
 
     [Pure]
-    public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
+    public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
     {
-        RecoveryCodeMapping codes = new(recoveryCodes.Length);
+        Codes codes = new(recoveryCodes.Length);
 
         foreach ( string recoveryCode in recoveryCodes )
         {
@@ -56,12 +55,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             codes[code]                              = record;
         }
 
-        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
+        return codes;
     }
     [Pure]
-    public static async ValueTask<ReadOnlyDictionary<string, RecoveryCodeRecord>> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes, CancellationToken token = default )
+    public static async ValueTask<Codes> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
-        RecoveryCodeMapping codes = new(10);
+        Codes codes = new(10);
 
         await foreach ( string recoveryCode in recoveryCodes.WithCancellation( token ) )
         {
@@ -69,12 +68,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             codes[code]                              = record;
         }
 
-        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
+        return codes;
     }
     [Pure]
-    public static ReadOnlyDictionary<string, RecoveryCodeRecord> Create( UserRecord user, int count )
+    public static Codes Create( UserRecord user, int count )
     {
-        RecoveryCodeMapping codes = new(count);
+        Codes codes = new(count);
 
         for ( int i = 0; i < count; i++ )
         {
@@ -82,11 +81,11 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
             codes[code]                              = record;
         }
 
-        return new ReadOnlyDictionary<string, RecoveryCodeRecord>( codes );
+        return codes;
     }
-    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create( user, Guid.CreateVersion7() );
-    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
-    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => (code, new RecoveryCodeRecord( code, user ));
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create( user, Guid.CreateVersion7() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create( user, code.ToBase64() );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => (code, new RecoveryCodeRecord( code, user ));
 
     [Pure]
     public static bool IsValid( string code, ref RecoveryCodeRecord record )
@@ -107,7 +106,18 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
 
 
-    public sealed class RecoveryCodeMapping( int count ) : Dictionary<string, RecoveryCodeRecord>( count, StringComparer.Ordinal );
+    public sealed class Codes( int count ) : IReadOnlyDictionary<string, RecoveryCodeRecord>
+    {
+        private readonly Dictionary<string, RecoveryCodeRecord> _codes = new(count, StringComparer.Ordinal);
+        public           int                                    Count => _codes.Count;
+        public RecoveryCodeRecord this[ string key ] { get => _codes[key]; internal set => _codes[key] = value; }
+        public IEnumerable<string>                                   Keys                                                                             => _codes.Keys;
+        public IEnumerable<RecoveryCodeRecord>                       Values                                                                           => _codes.Values;
+        public IEnumerator<KeyValuePair<string, RecoveryCodeRecord>> GetEnumerator()                                                                  => _codes.GetEnumerator();
+        IEnumerator IEnumerable.                                     GetEnumerator()                                                                  => ((IEnumerable)_codes).GetEnumerator();
+        public bool                                                  ContainsKey( string key )                                                        => _codes.ContainsKey( key );
+        public bool                                                  TryGetValue( string key, [MaybeNullWhen( false )] out RecoveryCodeRecord value ) => _codes.TryGetValue( key, out value );
+    }
 }
 
 
@@ -120,18 +130,18 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
 
     public UserRecoveryCodeRecord( UserRecord                         key, RecoveryCodeRecord           value ) : base( key, value ) { }
     public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value ) : base( key, value ) { }
-    public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value, RecordID<UserRecoveryCodeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified = default ) : base( key, value, id, dateCreated, lastModified ) { }
+    public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value, RecordID<UserRecoveryCodeRecord> id, DateTimeOffset dateCreated, DateTimeOffset? lastModified = null ) : base( key, value, id, dateCreated, lastModified ) { }
     public static UserRecoveryCodeRecord Create( UserRecord           key, RecoveryCodeRecord           value ) => new(key, value);
     public static UserRecoveryCodeRecord Create( RecordID<UserRecord> key, RecordID<RecoveryCodeRecord> value ) => new(key, value);
 
 
     public static UserRecoveryCodeRecord Create( DbDataReader reader )
     {
-        RecordID<UserRecord>             key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        RecordID<RecoveryCodeRecord>     value        = new RecordID<RecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        DateTimeOffset                   dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?                  lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRecoveryCodeRecord> id           = new RecordID<UserRecoveryCodeRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        var                              key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<RecoveryCodeRecord>     value        = new(reader.GetFieldValue<Guid>( nameof(KeyID) ));
+        var                              dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
+        var                              lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
+        RecordID<UserRecoveryCodeRecord> id           = new(reader.GetFieldValue<Guid>( nameof(ID) ));
         return new UserRecoveryCodeRecord( key, value, id, dateCreated, lastModified );
     }
     public static async IAsyncEnumerable<UserRecoveryCodeRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )

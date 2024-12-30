@@ -159,7 +159,7 @@ public static partial class WpfApi
 
         return result is DialogResult.OK or DialogResult.Yes
                    ? new LocalDirectory( dialog.SelectedPath )
-                   : default;
+                   : null;
     }
 
     public static LocalFile? PickFile( string title, params string[] filters )
@@ -179,7 +179,7 @@ public static partial class WpfApi
 
         return result is DialogResult.OK or DialogResult.Yes
                    ? new LocalFile( file.FileName )
-                   : default;
+                   : null;
     }
     public static void SetContent( this ContentControl control, object? value )
     {

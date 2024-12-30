@@ -14,10 +14,10 @@ public record struct CounterAsync : IAsyncEnumerator<long>
 
 
     public CounterAsync() { }
-    public void Reset() => _current = default;
+    public void Reset() => _current = null;
     public ValueTask DisposeAsync()
     {
-        _current = default;
+        _current = null;
         return ValueTask.CompletedTask;
     }
 

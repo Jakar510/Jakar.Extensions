@@ -34,7 +34,7 @@ public readonly struct OneTimePassword
     }
 
 
-    public bool ValidateToken( string token, VerificationWindow? window = default )
+    public bool ValidateToken( string token, VerificationWindow? window = null )
     {
         Totp totp = new Totp( _key );
         return totp.VerifyTotp( token, out long _, window );

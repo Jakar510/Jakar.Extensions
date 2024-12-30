@@ -32,14 +32,14 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
     {
         if ( token.IsCancellationRequested )
         {
-            _current = default;
+            _current = null;
             return false;
         }
 
         if ( await _generator.MoveNextAsync( connection, transaction, token ) ) { _current = await _table.Get( connection, transaction, _generator.Current, token ); }
         else
         {
-            _current = default;
+            _current = null;
             _generator.Reset();
         }
 

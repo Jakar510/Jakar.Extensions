@@ -36,12 +36,12 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
-    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = default )
+    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null )
     {
         string content = file.Read().AsString();
         return Parse( content, provider );
     }
-    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = default, CancellationToken token = default )
+    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, CancellationToken token = default )
     {
         string content = await file.ReadAsync().AsString( token );
         return Parse( content, provider );
@@ -118,7 +118,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         }
         catch ( Exception )
         {
-            result = default;
+            result = null;
             return false;
         }
     }
@@ -167,7 +167,7 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     }
 
 
-    public override string ToString() => ToString( default, CultureInfo.InvariantCulture );
+    public override string ToString() => ToString( null, CultureInfo.InvariantCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         Span<char> span = stackalloc char[Length + 10];

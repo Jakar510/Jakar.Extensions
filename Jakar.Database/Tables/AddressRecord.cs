@@ -17,7 +17,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                                     RecordID<AddressRecord>                  ID,
                                     RecordID<UserRecord>?                    CreatedBy,
                                     DateTimeOffset                           DateCreated,
-                                    DateTimeOffset?                          LastModified = default ) : OwnedTableRecord<AddressRecord>( CreatedBy, ID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                          LastModified = null ) : OwnedTableRecord<AddressRecord>( CreatedBy, ID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -55,22 +55,21 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
         DateTimeOffset                dateCreated     = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?               lastModified    = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
 
-        AddressRecord record = new AddressRecord( line1,
-                                                  line2,
-                                                  city,
-                                                  stateOrProvince,
-                                                  country,
-                                                  postalCode,
-                                                  address,
-                                                  isPrimary,
-                                                  additionalData,
-                                                  id,
-                                                  ownerUserID,
-                                                  dateCreated,
-                                                  lastModified );
+        AddressRecord record = new(line1,
+                                   line2,
+                                   city,
+                                   stateOrProvince,
+                                   country,
+                                   postalCode,
+                                   address,
+                                   isPrimary,
+                                   additionalData,
+                                   id,
+                                   ownerUserID,
+                                   dateCreated,
+                                   lastModified);
 
-        record.Validate();
-        return record;
+        return record.Validate();
     }
     [Pure]
     public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
@@ -80,7 +79,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
 
     [Pure]
-    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction,  Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
+    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
         if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), claims.Span.Single( static x => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
@@ -93,40 +92,30 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
         if ( HasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), claims.Span.Single( static x => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
 
-        return await db.Addresses.Get( connection, transaction,  true, parameters, token );
+        return await db.Addresses.Get( connection, transaction, true, parameters, token );
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
         static bool HasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
     }
     [Pure]
-    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction,  Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
+    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         DynamicParameters parameters = new();
 
         switch ( claim.Type )
         {
-            case ClaimTypes.StreetAddress:
-                parameters.Add( nameof(Line1), claim.Value );
-                break;
+            case ClaimTypes.StreetAddress: parameters.Add( nameof(Line1), claim.Value ); break;
 
-            case ClaimTypes.Locality:
-                parameters.Add( nameof(Line2), claim.Value );
-                break;
+            case ClaimTypes.Locality: parameters.Add( nameof(Line2), claim.Value ); break;
 
-            case ClaimTypes.StateOrProvince:
-                parameters.Add( nameof(StateOrProvince), claim.Value );
-                break;
+            case ClaimTypes.StateOrProvince: parameters.Add( nameof(StateOrProvince), claim.Value ); break;
 
-            case ClaimTypes.Country:
-                parameters.Add( nameof(Country), claim.Value );
-                break;
+            case ClaimTypes.Country: parameters.Add( nameof(Country), claim.Value ); break;
 
-            case ClaimTypes.PostalCode:
-                parameters.Add( nameof(PostalCode), claim.Value );
-                break;
+            case ClaimTypes.PostalCode: parameters.Add( nameof(PostalCode), claim.Value ); break;
         }
 
-        await foreach ( AddressRecord record in db.Addresses.Where( connection, transaction,  true, parameters, token ) ) { yield return record; }
+        await foreach ( AddressRecord record in db.Addresses.Where( connection, transaction, true, parameters, token ) ) { yield return record; }
     }
 
 

@@ -44,7 +44,7 @@ public static class JsonModels
 
     public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonModel model ) => model.AdditionalData;
     public static IDictionary<string, JToken?>? GetAdditionalData( this IJsonStringModel model ) => string.IsNullOrWhiteSpace( model.AdditionalData )
-                                                                                                        ? default
+                                                                                                        ? null
                                                                                                         : model.AdditionalData.FromJson<Dictionary<string, JToken?>>();
 
 

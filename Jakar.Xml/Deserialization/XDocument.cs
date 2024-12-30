@@ -12,8 +12,8 @@ public ref struct XDocument
 {
     private readonly ReadOnlySpan<char> _xml;
     private          ReadOnlySpan<char> _span;
-    private          long               _startIndex = default;
-    private          long               _endIndex   = default;
+    private          long               _startIndex = 0;
+    private          long               _endIndex   = 0;
     public           XNode              Current { get; } = default;
 
 

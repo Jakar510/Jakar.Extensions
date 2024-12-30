@@ -92,7 +92,7 @@ public static class Guids
 
         return Convert.TryFromBase64Chars( base64Chars, idBytes, out int bytesWritten )
                    ? new Guid( idBytes[..bytesWritten] )
-                   : default;
+                   : Guid.Empty;
     }
 
 #if NET9_0_OR_GREATER
@@ -184,8 +184,8 @@ public static class Guids
             return true;
         }
 
-        lower = default;
-        upper = default;
+        lower = 0;
+        upper = 0;
         return false;
     }
     public static bool AsLong( this Guid value, out ulong lower, out ulong upper )
@@ -200,8 +200,8 @@ public static class Guids
             return true;
         }
 
-        lower = default;
-        upper = default;
+        lower = 0;
+        upper = 0;
         return false;
     }
 

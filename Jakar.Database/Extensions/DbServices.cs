@@ -168,7 +168,7 @@ public static class DbServices
     ///     </para>
     /// </summary>
     /// <returns> </returns>
-    public static IdentityBuilder AddIdentityServices( this IServiceCollection services, Action<IdentityOptions>? options = default )
+    public static IdentityBuilder AddIdentityServices( this IServiceCollection services, Action<IdentityOptions>? options = null )
     {
         services.AddOptions<IdentityOptions>().Configure( options ?? IdentityOptions );
 

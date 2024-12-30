@@ -88,7 +88,7 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed record FileMetaData( string? FileName, string? FileType, string? FileDescription = null, long ID = default ) : FileMetaData<FileMetaData, long>( FileName, FileType, FileDescription, ID ), IFileMetaData<FileMetaData, long>
+public sealed record FileMetaData( string? FileName, string? FileType, string? FileDescription = null, long ID = 0 ) : FileMetaData<FileMetaData, long>( FileName, FileType, FileDescription, ID ), IFileMetaData<FileMetaData, long>
 {
     public FileMetaData( IFileMetaData<long>               file ) : this( file.FileName, file.FileType, file.FileDescription, file.ID ) { }
     public FileMetaData( LocalFile                         file ) : this( file.Name, file.ContentType ) { }
@@ -101,7 +101,7 @@ public sealed record FileMetaData( string? FileName, string? FileType, string? F
 
 
 [Serializable]
-public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, long ID = default ) : FileData<FileData, long, FileMetaData>( MimeType, FileSize, Hash, Payload, MetaData, ID ), IFileData<FileData, long, FileMetaData>
+public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, long ID = 0 ) : FileData<FileData, long, FileMetaData>( MimeType, FileSize, Hash, Payload, MetaData, ID ), IFileData<FileData, long, FileMetaData>
 {
     public FileData( IFileData<long, FileMetaData> file ) : this( file, file.MetaData ) { }
     public FileData( IFileData<long>               file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }

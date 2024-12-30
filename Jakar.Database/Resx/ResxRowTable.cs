@@ -22,7 +22,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     string                  Thai,
                                     RecordID<ResxRowRecord> ID,
                                     DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = default ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
+                                    DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public const  string TABLE_NAME = "Resx";
     public static string TableName => TABLE_NAME;

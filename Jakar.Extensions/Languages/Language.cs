@@ -18,7 +18,7 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     public        SupportedLanguage?  Version          { get; init; }
 
 
-    public Language( CultureInfo culture, SupportedLanguage? version = default )
+    public Language( CultureInfo culture, SupportedLanguage? version = null )
     {
         _culture         = culture;
         Name             = culture.Name;

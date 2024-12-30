@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-public abstract class Migrate_UserLoginInfos : OwnedMigration<UserLoginInfoRecord>
+public abstract class Migrate_UserLoginInfos : OwnedMigration<UserLoginProviderRecord>
 {
     protected Migrate_UserLoginInfos() : base() { }
 
@@ -13,13 +13,13 @@ public abstract class Migrate_UserLoginInfos : OwnedMigration<UserLoginInfoRecor
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(UserLoginInfoRecord.LoginProvider) ).AsString( int.MaxValue ).NotNullable();
+        table.WithColumn( nameof(UserLoginProviderRecord.LoginProvider) ).AsString( int.MaxValue ).NotNullable();
 
-        table.WithColumn( nameof(UserLoginInfoRecord.ProviderKey) ).AsString( int.MaxValue ).NotNullable();
+        table.WithColumn( nameof(UserLoginProviderRecord.ProviderKey) ).AsString( int.MaxValue ).NotNullable();
 
-        table.WithColumn( nameof(UserLoginInfoRecord.ProviderDisplayName) ).AsString( int.MaxValue ).Nullable();
+        table.WithColumn( nameof(UserLoginProviderRecord.ProviderDisplayName) ).AsString( int.MaxValue ).Nullable();
 
-        table.WithColumn( nameof(UserLoginInfoRecord.Value) ).AsString( int.MaxValue ).Nullable();
+        table.WithColumn( nameof(UserLoginProviderRecord.Value) ).AsString( int.MaxValue ).Nullable();
 
         return table;
     }

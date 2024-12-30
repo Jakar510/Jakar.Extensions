@@ -42,7 +42,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
             DirectoryInfo? parent = Directory.GetParent( FullPath );
 
             return parent is null
-                       ? default
+                       ? null
                        : new LocalDirectory( parent );
         }
     }

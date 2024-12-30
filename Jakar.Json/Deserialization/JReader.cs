@@ -9,8 +9,8 @@ public ref struct JReader
 {
     private readonly ReadOnlyMemory<char> _json;
     private          ReadOnlyMemory<char> _span;
-    private          long                 _startIndex = default;
-    private          long                 _endIndex   = default;
+    private          long                 _startIndex = 0;
+    private          long                 _endIndex   = 0;
     public           JNode                Current { get; private set; } = default;
 
 

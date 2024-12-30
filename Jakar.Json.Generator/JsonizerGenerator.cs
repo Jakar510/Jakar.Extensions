@@ -49,7 +49,7 @@ public class JsonizerGenerator : ISourceGenerator
 
         if ( !classSymbol.ContainingSymbol.Equals( classSymbol.ContainingNamespace, SymbolEqualityComparer.Default ) )
         {
-            return default; //TODO: issue a diagnostic that it must be top level
+            return null; //TODO: issue a diagnostic that it must be top level
         }
 
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();

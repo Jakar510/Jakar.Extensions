@@ -7,7 +7,7 @@ namespace Jakar.Database;
 [Serializable, Table( TABLE_NAME )]
 public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, AddressRecord>, ICreateMapping<UserAddressRecord, UserRecord, AddressRecord>, IDbReaderMapping<UserAddressRecord>
 {
-    public const  string TABLE_NAME = "UserAdreesses";
+    public const  string TABLE_NAME = "user_adreesses";
     public static string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
@@ -27,8 +27,7 @@ public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, 
         DateTimeOffset?             lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserAddressRecord> id           = new RecordID<UserAddressRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
         UserAddressRecord           record       = new UserAddressRecord( key, value, id, dateCreated, lastModified );
-        record.Validate();
-        return record;
+        return record.Validate();
     }
     [Pure]
     public static async IAsyncEnumerable<UserAddressRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )

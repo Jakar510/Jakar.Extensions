@@ -54,9 +54,9 @@
 		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
 		<PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="PanoramicData.Blazor" Version="9.0.8" />
-		<PackageReference Include="Radzen.Blazor" Version="5.6.15" />
-		<PackageReference Include="Jakar.Extensions" Version="9.0.0" />
+		<PackageReference Include="PanoramicData.Blazor" Version="9.0.13" />
+		<PackageReference Include="Radzen.Blazor" Version="5.7.2" />
+		<PackageReference Include="Jakar.Extensions" Version="9.0.3" />
 		<PackageReference Include="Hardware.Info" Version="101.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />

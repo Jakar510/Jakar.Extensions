@@ -46,14 +46,14 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
     [StackTraceHidden, DoesNotReturn]
 #endif
 
-    protected virtual void ThrowDisabled( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
+    protected virtual void ThrowDisabled( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
 
 
 #if NET6_0_OR_GREATER
     [StackTraceHidden, DoesNotReturn]
 #endif
 
-    protected void ThrowDisposed( Exception? inner = default, [CallerMemberName] string? caller = default ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+    protected void ThrowDisposed( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
 }
 
 
@@ -145,7 +145,7 @@ public static class HostedServiceExtensions
                     IsAlive = true;
 
                     try { await _service.StartAsync( _source.Token ).ConfigureAwait( false ); }
-                    finally { await _service.StopAsync( default ).ConfigureAwait( false ); }
+                    finally { await _service.StopAsync( CancellationToken.None ).ConfigureAwait( false ); }
                 }
                 catch ( TaskCanceledException ) { }
                 catch ( Exception e ) { Log.ServiceError( _logger, e, this, _service ); }
@@ -153,7 +153,7 @@ public static class HostedServiceExtensions
                 {
                     Log.ServiceStopped( _logger, this, _service, _token );
                     IsAlive = false;
-                    _source = default;
+                    _source = null;
                 }
             }
         }

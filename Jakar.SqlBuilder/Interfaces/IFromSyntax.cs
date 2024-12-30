@@ -7,7 +7,7 @@ public interface IFromSyntax<out TNext>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext From( string tableName, string? alias = default );
+    public TNext From( string tableName, string? alias = null );
 
     /// <summary>
     ///     <para>
@@ -18,7 +18,7 @@ public interface IFromSyntax<out TNext>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext From<T>( T obj, string? alias = default );
+    public TNext From<T>( T obj, string? alias = null );
 
     /// <summary>
     ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
@@ -27,6 +27,6 @@ public interface IFromSyntax<out TNext>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext From<T>( string? alias = default )
+    public TNext From<T>( string? alias = null )
         where T : class;
 }
