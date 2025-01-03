@@ -23,7 +23,7 @@ public class AppContextEnricher<TApp>() : ILogEventEnricher
     public virtual void Enrich( LogEvent log, ILogEventPropertyFactory factory, Thread thread )
     {
         log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppName),              TApp.AppName ) );
-        log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppID),                TApp.AppID ) );
+        log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppID),                TApp.AppID.ToString() ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( nameof(TApp.AppVersion),           TApp.AppVersion.ToString() ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( TOTAL_MEMORY,                      GC.GetTotalMemory( false ) ) );
         log.AddPropertyIfAbsent( factory.CreateProperty( TOTAL_PAUSE_DURATION,              GC.GetTotalPauseDuration() ) );

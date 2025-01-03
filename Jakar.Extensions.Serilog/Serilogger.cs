@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog.Configuration;
+using Serilog.Enrichers.Span;
 using Serilog.Extensions.Logging;
 using Serilog.Formatting;
 using Serilog.Formatting.Json;
@@ -34,45 +35,35 @@ public class Serilogger<TApp> : IOptions<Serilogger<TApp>>, ILoggerProvider, ILo
     private          Logger?               _logger;
 
 
-    public bool                ApplyThemeToRedirectedOutput    { get; init; }
-    public bool                BlockWhenFull                   { get; init; } = false;
-    public bool                Buffered                        { get; init; }
-    public int                 BufferSize                      { get; init; } = BUFFER_SIZE;
-    public string              ConsoleOutputTemplate           { get; init; } = CONSOLE_DEFAULT_OUTPUT_TEMPLATE;
-    public LogEventLevel       ConsoleRestrictedToMinimumLevel { get; init; } = LevelAlias.Minimum;
-    public CultureInfo         CultureInfo                     { get; init; } = CultureInfo.InvariantCulture;
-    public string              DebugOutputTemplate             { get; init; } = DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE;
-    public LogEventLevel       DebugRestrictedToMinimumLevel   { get; init; } = LevelAlias.Minimum;
-    public Encoding?           Encoding                        { get; init; } = Encoding.Default;
-    public long?               FileSizeLimitBytes              { get; init; } = DEFAULT_FILE_SIZE_LIMIT_BYTES;
-    public TimeSpan?           FlushToDiskInterval             { get; init; }
-    public ITextFormatter      Formatter                       { get; init; } = new JsonFormatter();
-    public FileLifecycleHooks? Hooks                           { get; init; }
-    public LoggingLevelSwitch? LevelSwitch                     { get; init; }
-    public Logger Logger
-    {
-        get
-        {
-            if ( _logger is not null ) { return _logger; }
-
-            _logger    = GetLogger();
-            Log.Logger = _logger;
-            return _logger;
-        }
-    }
-    public LocalDirectory                       LogsDirectory            { get; init; }
-    public LocalFile                            LogsFile                 { get; init; }
-    public IAsyncLogEventSinkMonitor?           Monitor                  { get; init; }
-    public LogEventLevel                        RestrictedToMinimumLevel { get; init; } = LevelAlias.Minimum;
-    public int?                                 RetainedFileCountLimit   { get; init; } = DEFAULT_RETAINED_FILE_COUNT_LIMIT;
-    public TimeSpan?                            RetainedFileTimeLimit    { get; init; }
-    public RollingInterval                      RollingInterval          { get; init; } = RollingInterval.Day;
-    public bool                                 RollOnFileSizeLimit      { get; init; } = true;
-    public bool                                 Shared                   { get; init; }
-    public LogEventLevel?                       StandardErrorFromLevel   { get; init; }
-    public object?                              SyncRoot                 { get; init; }
-    public ConsoleTheme?                        Theme                    { get; init; }
-    Serilogger<TApp> IOptions<Serilogger<TApp>>.Value                    => this;
+    public bool                                 ApplyThemeToRedirectedOutput    { get; init; }
+    public bool                                 BlockWhenFull                   { get; init; } = true;
+    public bool                                 Buffered                        { get; init; }
+    public int                                  BufferSize                      { get; init; } = BUFFER_SIZE;
+    public string                               ConsoleOutputTemplate           { get; init; } = CONSOLE_DEFAULT_OUTPUT_TEMPLATE;
+    public LogEventLevel                        ConsoleRestrictedToMinimumLevel { get; init; } = LevelAlias.Minimum;
+    public CultureInfo                          CultureInfo                     { get; init; } = CultureInfo.InvariantCulture;
+    public string                               DebugOutputTemplate             { get; init; } = DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE;
+    public LogEventLevel                        DebugRestrictedToMinimumLevel   { get; init; } = LevelAlias.Minimum;
+    public Encoding?                            Encoding                        { get; init; } = Encoding.Default;
+    public long?                                FileSizeLimitBytes              { get; init; } = DEFAULT_FILE_SIZE_LIMIT_BYTES;
+    public TimeSpan?                            FlushToDiskInterval             { get; init; }
+    public ITextFormatter                       Formatter                       { get; init; } = new JsonFormatter();
+    public FileLifecycleHooks?                  Hooks                           { get; init; }
+    public LoggingLevelSwitch?                  LevelSwitch                     { get; init; }
+    public Logger                               Logger                          => _logger ??= GetLogger();
+    public LocalDirectory                       LogsDirectory                   { get; init; }
+    public LocalFile                            LogsFile                        { get; init; }
+    public IAsyncLogEventSinkMonitor?           Monitor                         { get; init; }
+    public LogEventLevel                        RestrictedToMinimumLevel        { get; init; } = LevelAlias.Minimum;
+    public int?                                 RetainedFileCountLimit          { get; init; } = DEFAULT_RETAINED_FILE_COUNT_LIMIT;
+    public TimeSpan?                            RetainedFileTimeLimit           { get; init; }
+    public RollingInterval                      RollingInterval                 { get; init; } = RollingInterval.Day;
+    public bool                                 RollOnFileSizeLimit             { get; init; } = true;
+    public bool                                 Shared                          { get; init; }
+    public LogEventLevel?                       StandardErrorFromLevel          { get; init; }
+    public object?                              SyncRoot                        { get; init; }
+    public ConsoleTheme?                        Theme                           { get; init; }
+    Serilogger<TApp> IOptions<Serilogger<TApp>>.Value                           => this;
 
 
     public Serilogger() : this( LocalDirectory.CurrentDirectory ) { }
@@ -81,6 +72,7 @@ public class Serilogger<TApp> : IOptions<Serilogger<TApp>>, ILoggerProvider, ILo
         LogsDirectory = directory.Combine( LOGS_DIRECTORY );
         LogsFile      = LogsDirectory.Join( LOGS_FILE );
         _provider     = new SerilogLoggerProvider( this, true );
+        Log.Logger    = Logger;
     }
     public void Dispose()
     {
@@ -102,11 +94,18 @@ public class Serilogger<TApp> : IOptions<Serilogger<TApp>>, ILoggerProvider, ILo
         builder.MinimumLevel.Verbose();
         builder.MinimumLevel.Override( nameof(Microsoft), LogEventLevel.Warning );
         builder.MinimumLevel.Override( nameof(System),    LogEventLevel.Warning );
+        builder.Enrich.WithProcessId();
+        builder.Enrich.WithThreadId();
+        builder.Enrich.WithThreadName();
+        builder.Enrich.WithSpan();
         builder.Enrich.FromLogContext();
         builder.Enrich.With<AppContextEnricher<TApp>>();
         builder.WriteTo.Console( ConsoleRestrictedToMinimumLevel, ConsoleOutputTemplate, CultureInfo, LevelSwitch, StandardErrorFromLevel, Theme, ApplyThemeToRedirectedOutput, SyncRoot );
         builder.WriteTo.Debug( DebugRestrictedToMinimumLevel, DebugOutputTemplate, CultureInfo, LevelSwitch );
         builder.WriteTo.Async( Configure, BufferSize, BlockWhenFull, Monitor );
+        builder.WriteTo.Seq( "http://localhost:5341/ingest/otlp/v1/logs" );
+
+        // builder.WriteTo.OpenTelemetry();
         return builder.CreateLogger();
     }
     public ILoggingBuilder Configure( ILoggingBuilder builder, string? category = null, LogLevel level = LogLevel.Trace )

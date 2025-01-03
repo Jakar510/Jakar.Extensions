@@ -7,7 +7,7 @@ namespace Jakar.Extensions.Telemetry;
 public readonly record struct TelemetryEvent( string ID, DateTimeOffset Timestamp, params TelemetryTag[]? Tags )
 {
     public TelemetryEvent( string id ) : this( id, DateTimeOffset.UtcNow, null ) { }
-    public TelemetryEvent( string id, params TelemetryTag[] tags ) : this( id, DateTimeOffset.UtcNow, tags ) { }
+    public TelemetryEvent( string id, params TelemetryTag[]? tags ) : this( id, DateTimeOffset.UtcNow, tags ) { }
 }
 
 
