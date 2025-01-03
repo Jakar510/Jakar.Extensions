@@ -9,42 +9,42 @@ public class AppVersion_Tests : Assert
     [Test, TestCase( 1, 0, 0, 0, 0, 0, "1.0.0.0.0.0" )]
     public void Construct_Complete( int major, int? minor, int? maintenance, int? majorRevision, int? minorRevision, int? build, string expected )
     {
-        AppVersion version = new AppVersion( major, minor, maintenance, majorRevision, minorRevision, build );
+        AppVersion version = new( major, minor, maintenance, majorRevision, minorRevision, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, 0, 0, "1.0.0.0.0" )]
     public void Construct_DetailedRevisions( int major, int minor, int maintenance, int majorRevision, int build, string expected )
     {
-        AppVersion version = new AppVersion( major, minor, maintenance, majorRevision, build );
+        AppVersion version = new( major, minor, maintenance, majorRevision, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, 0, "1.0.0.0" )]
     public void Construct_Detailed( int major, int minor, int maintenance, int build, string expected )
     {
-        AppVersion version = new AppVersion( major, minor, maintenance, build );
+        AppVersion version = new( major, minor, maintenance, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, 0, "1.0.0" )]
     public void Construct_Typical( int major, int minor, int build, string expected )
     {
-        AppVersion version = new AppVersion( major, minor, build );
+        AppVersion version = new( major, minor, build );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, 0, "1.0" )]
     public void Construct_Minimal( int major, int minor, string expected )
     {
-        AppVersion version = new AppVersion( major, minor );
+        AppVersion version = new( major, minor );
         this.AreEqual( expected, version.ToString() );
     }
 
     [Test, TestCase( 1, "1" )]
     public void Construct_Singular( int major, string expected )
     {
-        AppVersion version = new AppVersion( major );
+        AppVersion version = new( major );
         this.AreEqual( expected, version.ToString() );
     }
 

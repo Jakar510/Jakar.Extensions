@@ -1,4 +1,5 @@
-﻿// Jakar.Extensions :: Jakar.Database
+﻿/*
+// Jakar.Extensions :: Jakar.Database
 // 10/20/2023  7:15 PM
 
 namespace Jakar.Database;
@@ -7,9 +8,6 @@ namespace Jakar.Database;
 public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbTypeInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbTypeInstance.MsSql; }
-
-
     public override SqlCommand First()
     {
         if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
@@ -66,13 +64,13 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
 
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
+        StringBuilder keys = new(1000);
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
+        StringBuilder values = new(1000);
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
-        _sql[SqlCacheType.Insert] = sql = $"SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )";
+        _sql[SqlCacheType.Insert] = sql = $"SET NOCOUNT ON INSERT INTO {TableName} ( {keys} ) OUTPUT INSERTED.ID values ( {values} )";
 
         return new SqlCommand( sql, parameters );
     }
@@ -84,19 +82,19 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
 
         if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
 
-        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+        StringBuilder buffer = new(parameters.ParameterNames.Sum( x => x.Length ) * 2);
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters, TODO ) );
 
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
+        StringBuilder keys = new(1000);
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
+        StringBuilder values = new(1000);
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
         _tryInsert[key] = sql = $"""
-                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer})
                                  BEGIN
-                                     SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )
+                                     SET NOCOUNT ON INSERT INTO {TableName} ( {keys} ) OUTPUT INSERTED.ID values ( {values} )
                                  END
 
                                  ELSE
@@ -110,34 +108,34 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
     public override SqlCommand InsertOrUpdate( TRecord record, bool matchAll, DynamicParameters parameters )
     {
         SqlKey            key   = SqlKey.Create( matchAll, parameters );
-        DynamicParameters param = new DynamicParameters( record );
+        DynamicParameters param = new(record);
         RecordID<TRecord> id    = record.ID;
         param.Add( nameof(id), id );
         param.AddDynamicParams( parameters );
 
         if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
 
-        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
+        StringBuilder buffer = new(parameters.ParameterNames.Sum( x => x.Length ) * 2);
+        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters, TODO ) );
 
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
+        StringBuilder keys = new(1000);
         keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
 
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
+        StringBuilder values = new(1000);
         values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
 
-        using ValueStringBuilder keyValuePairs = new ValueStringBuilder( 1000 );
+        StringBuilder keyValuePairs = new(1000);
         keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
 
         _insertOrUpdate[key] = sql = $"""
-                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
+                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer})
                                       BEGIN
-                                          SET NOCOUNT ON INSERT INTO {TableName} ( {keys.Span} ) OUTPUT INSERTED.ID values ( {values.Span} )
+                                          SET NOCOUNT ON INSERT INTO {TableName} ( {keys} ) OUTPUT INSERTED.ID values ( {values} )
                                       END
 
                                       ELSE
                                       BEGIN
-                                          UPDATE {TableName} SET {keyValuePairs.Span} WHERE {IdColumnName} = @{nameof(id)};
+                                          UPDATE {TableName} SET {keyValuePairs} WHERE {IdColumnName} = @{nameof(id)};
                                       
                                           SELECT {IdColumnName} FROM {TableName} WHERE @where LIMIT 1
                                       END
@@ -146,3 +144,4 @@ public sealed class MsSqlServer<TRecord> : BaseSqlCache<TRecord>
         return new SqlCommand( sql, param );
     }
 }
+*/

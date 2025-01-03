@@ -54,7 +54,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        RoleRecord            record           = new RoleRecord( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
+        RoleRecord            record           = new( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
         return record.Validate();
     }
     [Pure]

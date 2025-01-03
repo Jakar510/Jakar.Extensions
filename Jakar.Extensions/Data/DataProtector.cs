@@ -154,7 +154,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         if ( encrypted.Length <= BLOCK ) { return _rsa.Decrypt( encrypted, _padding ); }
 
 
-        using MemoryStream stream    = new MemoryStream( encrypted.Length );
+        using MemoryStream stream    = new( encrypted.Length );
         Span<byte>         partition = stackalloc byte[DATA + 1];
 
         for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
@@ -239,7 +239,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         if ( value.Length <= DATA ) { return _rsa.Encrypt( value, _padding ); }
 
 
-        using MemoryStream stream    = new MemoryStream( value.Length * 2 );
+        using MemoryStream stream    = new( value.Length * 2 );
         Span<byte>         partition = stackalloc byte[DATA + 1];
 
         for ( int i = 0; i <= value.Length / DATA; i++ )

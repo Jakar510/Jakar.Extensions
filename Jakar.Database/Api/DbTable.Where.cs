@@ -14,10 +14,11 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TRecord> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Where( matchAll, parameters );
-        return Where( connection, transaction, sql, token );
+        SqlCommand               command     = TRecord.SQL.Get(matchAll, parameters);
+        await using DbDataReader reader      = await _database.ExecuteReaderAsync( connection, transaction, command, token );
+        await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
 
@@ -36,7 +37,10 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual IAsyncEnumerable<TRecord> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Where( columnName, value );
+        DynamicParameters parameters = new();
+        parameters.Add( nameof(value), value );
+
+        SqlCommand sql = new($"SELECT * FROM {TRecord.TableName} WHERE {columnName} = @{nameof(value)};", parameters);
         return Where( connection, transaction, sql, token );
     }
 }

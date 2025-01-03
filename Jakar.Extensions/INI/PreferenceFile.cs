@@ -37,14 +37,14 @@ public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add wat
     public static PreferenceFile Create() => new();
     public static async ValueTask<PreferenceFile> CreateAsync()
     {
-        PreferenceFile result = new PreferenceFile();
+        PreferenceFile result = new();
         await result.LoadAsync();
         return result;
     }
     public static PreferenceFile Create( LocalFile file ) => new(file);
     public static async ValueTask<PreferenceFile> CreateAsync( LocalFile file )
     {
-        PreferenceFile result = new PreferenceFile( file );
+        PreferenceFile result = new( file );
         await result.LoadAsync();
         return result;
     }

@@ -45,6 +45,8 @@ global using FluentMigrator.Infrastructure;
 global using FluentMigrator.Infrastructure.Extensions;
 global using FluentMigrator.Runner;
 global using FluentMigrator.SqlServer;
+global using InterpolatedSql.Dapper;
+global using InterpolatedSql.Dapper.SqlBuilders;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using Swashbuckle.AspNetCore.SwaggerGen;

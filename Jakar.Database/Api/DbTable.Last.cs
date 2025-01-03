@@ -7,35 +7,39 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public partial class DbTable<TRecord>
 {
-    public ValueTask<ErrorOrResult<TRecord>> Last(  CancellationToken token = default ) => this.Call( Last,  token );
+    public ValueTask<ErrorOrResult<TRecord>> Last( CancellationToken token = default ) => this.Call( Last, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> Last( DbConnection connection, DbTransaction? transaction,  CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TRecord>> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Last();
+        SqlCommand sql = TRecord.SQL.last;
 
         try
         {
-            CommandDefinition command = _database.GetCommand(  sql, transaction, token );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
             return await connection.QueryFirstAsync<TRecord>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
-    public ValueTask<ErrorOrResult<TRecord>> LastOrDefault(  CancellationToken token = default ) => this.Call( LastOrDefault,  token );
+    public ValueTask<ErrorOrResult<TRecord>> LastOrDefault( CancellationToken token = default ) => this.Call( LastOrDefault, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> LastOrDefault( DbConnection connection, DbTransaction? transaction,  CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TRecord>> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Last();
+        SqlCommand sql = TRecord.SQL.last;
 
         try
         {
-            CommandDefinition command = _database.GetCommand(  sql, transaction, token );
-            return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand( sql, transaction, token );
+            var               record  = await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+
+            return record is null
+                       ? Error.NotFound()
+                       : record;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }

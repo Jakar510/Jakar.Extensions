@@ -227,7 +227,7 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new StreamReader( stream );
+            using StreamReader reader       = new( stream );
             string             errorMessage = await reader.ReadToEndAsync( token );
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
@@ -246,7 +246,7 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new StreamReader( stream );
+            using StreamReader reader       = new( stream );
             string             errorMessage = await reader.ReadToEndAsync( token );
 
             if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response, e ); }

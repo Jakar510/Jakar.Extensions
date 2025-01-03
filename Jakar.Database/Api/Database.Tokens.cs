@@ -25,7 +25,7 @@ public abstract partial class Database
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials( token );
-        JwtSecurityToken   security          = new JwtSecurityToken( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        JwtSecurityToken   security          = new( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )

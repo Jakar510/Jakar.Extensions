@@ -1,4 +1,5 @@
-﻿// Jakar.Extensions :: Jakar.Database
+﻿/*
+// Jakar.Extensions :: Jakar.Database
 // 10/16/2023  9:11 PM
 
 namespace Jakar.Database;
@@ -34,7 +35,6 @@ public interface ISqlCache<TRecord>
     public string         CreatedBy    { get; }
     public string         DateCreated  { get; }
     public string         IdColumnName { get; }
-    public DbTypeInstance Instance     { get; }
     public string         LastModified { get; }
     public string         RandomMethod { get; }
 
@@ -48,9 +48,9 @@ public interface ISqlCache<TRecord>
     SqlCommand Delete( ref readonly IEnumerable<RecordID<TRecord>> ids );
     SqlCommand Delete( ref readonly bool                           matchAll, ref readonly DynamicParameters parameters );
     SqlCommand Next( ref readonly   RecordPair<TRecord>            pair );
-    SqlCommand Next( ref readonly   RecordID<TRecord>              id, ref readonly DateTimeOffset dateCreated );
+    SqlCommand Next( ref readonly   RecordID<TRecord>              id, ref readonly DateTimeOffset DATE_CREATED );
     SqlCommand NextID( ref readonly RecordPair<TRecord>            pair );
-    SqlCommand NextID( ref readonly RecordID<TRecord>              id, ref readonly DateTimeOffset dateCreated );
+    SqlCommand NextID( ref readonly RecordID<TRecord>              id, ref readonly DateTimeOffset DATE_CREATED );
     SqlCommand Count();
     SqlCommand Random();
     SqlCommand Random( ref readonly          int                            count );
@@ -69,3 +69,4 @@ public interface ISqlCache<TRecord>
     SqlCommand Get( ref readonly             RecordID<TRecord>              id );
     SqlCommand Get( ref readonly             IEnumerable<RecordID<TRecord>> ids );
 }
+*/

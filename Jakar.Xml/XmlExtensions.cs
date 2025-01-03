@@ -23,7 +23,7 @@ public static class XmlExtensions
     public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes )
         where TValue : IConvertible
     {
-        List<TValue> results = new List<TValue>();
+        List<TValue> results = new();
 
         XmlNode? root = document.ChildNodes[0];
 
@@ -122,7 +122,7 @@ public static class XmlExtensions
                          IndentChars         = new string( ' ', 4 )
                      };
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         XmlWriter     writer  = XmlWriter.Create( builder, settings );
         document.Save( writer );
         return builder.ToString();
@@ -154,7 +154,7 @@ public static class XmlExtensions
     {
         if ( string.IsNullOrWhiteSpace( xml ) ) { return default; }
 
-        XmlDocument doc = new XmlDocument();
+        XmlDocument doc = new();
         doc.LoadXml( xml );
 
         string json = JsonConvert.SerializeXmlNode( doc );
@@ -163,7 +163,7 @@ public static class XmlExtensions
 
     public static XmlDocument ToRawXml( this string xml )
     {
-        XmlDocument document = new XmlDocument();
+        XmlDocument document = new();
         document.LoadXml( xml );
 
         return document;

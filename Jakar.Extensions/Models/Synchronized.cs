@@ -12,19 +12,20 @@ namespace Jakar.Extensions;
 ///     <seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces"/>
 /// </summary>
 /// <typeparam name="TValue"> The value type. </typeparam>
-public sealed class Synchronized<TValue>( TValue value )
+public sealed class Synchronized<TValue>( TValue value ) 
 {
+    private readonly Lock _lock = new();
     private TValue _value = value;
 
     public TValue Value
     {
         get
         {
-            lock (this) { return _value; }
+            lock (_lock ) { return _value; }
         }
         set
         {
-            lock (this) { _value = value; }
+            lock (_lock ) { _value = value; }
         }
     }
 

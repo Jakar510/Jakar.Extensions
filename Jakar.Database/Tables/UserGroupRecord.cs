@@ -21,12 +21,12 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     [Pure]
     public static UserGroupRecord Create( DbDataReader reader )
     {
-        RecordID<UserRecord>      key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        RecordID<GroupRecord>     value        = new RecordID<GroupRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<UserRecord>      key          = new( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<GroupRecord>     value        = new( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
         DateTimeOffset            dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?           lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserGroupRecord> id           = new RecordID<UserGroupRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        UserGroupRecord           record       = new UserGroupRecord( key, value, id, dateCreated, lastModified );
+        RecordID<UserGroupRecord> id           = new( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        UserGroupRecord           record       = new( key, value, id, dateCreated, lastModified );
         return record.Validate();
     }
     [Pure]

@@ -88,7 +88,7 @@ public static partial class Tasks
 
     public static async ValueTask WhenAll( this IEnumerable<Func<CancellationToken, ValueTask>> funcs, CancellationToken token = default )
     {
-        ParallelOptions options = new ParallelOptions
+        ParallelOptions options = new()
                                   {
                                       CancellationToken      = token,
                                       MaxDegreeOfParallelism = Environment.ProcessorCount
@@ -107,7 +107,7 @@ public static partial class Tasks
     /// <exception cref="AggregateException"> </exception>
     public static async ValueTask<TResult[]> WhenAll<TResult>( this IEnumerable<Func<CancellationToken, ValueTask<TResult>>> funcs, CancellationToken token = default )
     {
-        ParallelOptions options = new ParallelOptions
+        ParallelOptions options = new()
                                   {
                                       CancellationToken      = token,
                                       MaxDegreeOfParallelism = Environment.ProcessorCount

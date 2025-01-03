@@ -3,18 +3,21 @@
 
 using Npgsql;
 using OpenTelemetry;
+using OpenTelemetry.Metrics;
 using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
+using ZiggyCreatures.Caching.Fusion.OpenTelemetry;
 
 
 
 namespace Jakar.Database;
 
 
-public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
+public abstract class ConfigureDbServices<T, TApp, TDatabase>
     where TApp : IAppName
     where TDatabase : Database
-    where TSqlCacheFactory : class, ISqlCacheFactory
-    where T : ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>, new()
+    where T : ConfigureDbServices<T, TApp, TDatabase>, new()
 {
     public          string                  AppName                         { get; }       = TApp.AppName;
     public          string                  AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
@@ -60,9 +63,7 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     #pragma warning disable EXTEXP0018 // <- Add this line
         builder.Services.AddHybridCache();
     #pragma warning restore EXTEXP0018 // <- Add this line
-
-        builder.Services.AddSingleton<ISqlCacheFactory, TSqlCacheFactory>();
-
+        
         builder.Services.AddSingleton<TDatabase>();
         builder.Services.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );
         builder.Services.AddHealthCheck<TDatabase>();
@@ -91,11 +92,15 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
         options.UseSecurityTokenValidators = true;
         options.TokenValidationParameters  = application.GetTokenValidationParameters( DbOptions );
     }
+    protected virtual void Configure( RedisBackplaneOptions                    options ) { }
+    protected virtual void Configure( MemoryBackplaneOptions                   options ) { }
+    protected virtual void Configure( NpgsqlMetricsOptions                     options ) { }
+    protected virtual void Configure( FusionCacheMetricsInstrumentationOptions options ) { }
     protected virtual void Configure( IFusionCacheBuilder builder )
     {
         builder.WithDefaultEntryOptions( FusionCacheEntryOptions );
-        builder.WithStackExchangeRedisBackplane();
-        builder.WithMemoryBackplane();
+        builder.WithStackExchangeRedisBackplane( Configure );
+        builder.WithMemoryBackplane( Configure );
         builder.WithLogger( static provider => provider.GetRequiredService<ILoggerFactory>().CreateLogger<FusionCache>() );
     }
     protected virtual void Configure( TracerProviderBuilder builder )
@@ -106,12 +111,14 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase, TSqlCacheFactory>
     }
     protected virtual void Configure( MeterProviderBuilder builder )
     {
+        builder.AddRuntimeInstrumentation();
         builder.AddAspNetCoreInstrumentation();
         builder.AddHttpClientInstrumentation();
-        builder.AddFusionCacheInstrumentation();
-        builder.AddRuntimeInstrumentation();
-        builder.AddNpgsqlInstrumentation();
+        builder.AddFusionCacheInstrumentation( Configure );
+        builder.AddNpgsqlInstrumentation( Configure );
     }
+
+
     protected virtual void Configure( AuthenticationOptions options )
     {
         options.DefaultAuthenticateScheme = AuthenticationScheme;

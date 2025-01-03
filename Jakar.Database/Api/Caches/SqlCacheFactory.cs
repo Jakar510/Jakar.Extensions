@@ -4,23 +4,4 @@
 
 namespace Jakar.Database;
 
-
-public interface ISqlCacheFactory
-{
-    public BaseSqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>;
-}
-
-
-
-public sealed class SqlCacheFactory : ISqlCacheFactory
-{
-    public BaseSqlCache<TRecord> GetSqlCache<TRecord>( IConnectableDbRoot dbRoot )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> =>
-        dbRoot.DbTypeInstance switch
-        {
-            DbTypeInstance.MsSql    => new MsSqlServer<TRecord>(),
-            DbTypeInstance.Postgres => new PostgresSql<TRecord>(),
-            _                       => throw new OutOfRangeException( dbRoot.DbTypeInstance )
-        };
-}
+ 

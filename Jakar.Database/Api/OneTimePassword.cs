@@ -36,7 +36,7 @@ public readonly struct OneTimePassword
 
     public bool ValidateToken( string token, VerificationWindow? window = null )
     {
-        Totp totp = new Totp( _key );
+        Totp totp = new( _key );
         return totp.VerifyTotp( token, out long _, window );
     }
 
@@ -47,7 +47,7 @@ public readonly struct OneTimePassword
     public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode( record, size, size, format );
     public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
-        BarcodeWriterSvg writer = new BarcodeWriterSvg
+        BarcodeWriterSvg writer = new()
                                   {
                                       Format = format,
                                       Options = new QrCodeEncodingOptions

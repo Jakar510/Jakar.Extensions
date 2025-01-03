@@ -21,12 +21,12 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     [Pure]
     public static UserRoleRecord Create( DbDataReader reader )
     {
-        RecordID<UserRecord>     key          = new RecordID<UserRecord>( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        RecordID<RoleRecord>     value        = new RecordID<RoleRecord>( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
+        RecordID<UserRecord>     key          = new( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
+        RecordID<RoleRecord>     value        = new( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
         DateTimeOffset           dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?          lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRoleRecord> id           = new RecordID<UserRoleRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        UserRoleRecord           record       = new UserRoleRecord( key, value, id, dateCreated, lastModified );
+        RecordID<UserRoleRecord> id           = new( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        UserRoleRecord           record       = new( key, value, id, dateCreated, lastModified );
         return record.Validate();
     }
     [Pure]

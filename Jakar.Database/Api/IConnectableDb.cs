@@ -6,8 +6,7 @@ namespace Jakar.Database;
 
 public interface IDbOptions
 {
-    public int?           CommandTimeout { get; }
-    public DbTypeInstance DbTypeInstance { get; }
+    public int? CommandTimeout { get; }
 
     // public string                                                  AppName                  { get; }
     // public string                                                  AuthenticationType       { get; }
@@ -26,10 +25,7 @@ public interface IDbOptions
 
 
 
-public interface IDbTable : IAsyncDisposable
-{
-    public void ResetCaches();
-}
+public interface IDbTable : IAsyncDisposable;
 
 
 
@@ -50,10 +46,15 @@ public interface IConnectableDbRoot : IConnectableDb
         where T : struct;
 
 
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public CommandDefinition GetCommand<T>( T command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+        where T : IDapperSqlCommand;
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition     GetCommand( SqlCommand sql, DbTransaction? transaction, CancellationToken token );
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public SqlCommand.Definition GetCommand( SqlCommand sql, DbConnection   connection,  DbTransaction?    transaction, CancellationToken token );
 
 
+    public ValueTask<DbDataReader> ExecuteReaderAsync<T>( DbConnection connection, DbTransaction? transaction, T command, CancellationToken token )
+        where T : IDapperSqlCommand;
     public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection          connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token );
     public ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition );
 }

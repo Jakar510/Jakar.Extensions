@@ -20,8 +20,8 @@ public sealed class SqlException : Exception
     }
     public SqlException( string        sql, Exception? inner ) : this( sql, null, GetMessage( sql ), inner ) => SQL = sql;
     public SqlException( string        sql, string     message, Exception? inner ) : this( sql, null, message, inner ) { }
-    public SqlException( in SqlCommand sql ) : this( sql.SQL, sql.Parameters, GetMessage( sql.SQL,                                      sql.Parameters ) ) { }
-    public SqlException( in SqlCommand sql, Exception?         inner ) : this( sql.SQL, sql.Parameters, GetMessage( sql.SQL,            sql.Parameters ), inner ) { }
+    public SqlException( in SqlCommand sql ) : this( sql.sql, sql.parameters, GetMessage( sql.sql,                                      sql.parameters ) ) { }
+    public SqlException( in SqlCommand sql, Exception?         inner ) : this( sql.sql, sql.parameters, GetMessage( sql.sql,            sql.parameters ), inner ) { }
     public SqlException( string        sql, DynamicParameters? parameters, Exception? inner ) : this( sql, parameters, GetMessage( sql, parameters ), inner ) { }
     public SqlException( string sql, DynamicParameters? parameters, string message, Exception? inner ) : base( message, inner )
     {

@@ -14,7 +14,7 @@ public static class ConsoleExtensions
     public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
         where T : Exception
     {
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine( " Exception Start ".Wrapper( c, padding ) );
         builder.AppendLine();
         builder.AppendLine( typeof(T).FullName );
@@ -35,7 +35,7 @@ public static class ConsoleExtensions
     {
         string wrapper = c.Repeat( length );
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine();
         builder.AppendLine( wrapper );
         builder.AppendLine( typeof(T).FullName );

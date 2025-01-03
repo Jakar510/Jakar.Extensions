@@ -18,7 +18,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     public static bool TryCreate( TValue value, [NotNullWhen( true )] out TThis? thisValue )
     {
-        TThis self = new TThis { Value = value };
+        TThis self = new() { Value = value };
 
         thisValue = self.IsValid()
                         ? self
@@ -30,7 +30,7 @@ public abstract class ValidValueOf<TValue, TThis> : IComparable<ValidValueOf<TVa
 
     public static TThis Create( TValue item )
     {
-        TThis self = new TThis { Value = item };
+        TThis self = new() { Value = item };
 
         self.Validate();
         return self;

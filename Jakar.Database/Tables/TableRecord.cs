@@ -12,7 +12,7 @@ public interface IRecordPair : IUniqueID<Guid>
 
 
 public interface IDbReaderMapping<out TRecord>
-    where TRecord : IDbReaderMapping<TRecord>
+    where TRecord : IDbReaderMapping<TRecord>, IRecordPair
 {
     public abstract static        string                    TableName { [Pure] get; }
     [Pure] public abstract static TRecord                   Create( DbDataReader      reader );
@@ -29,21 +29,22 @@ public interface ITableRecord : IRecordPair
 
 
 
-public interface ITableRecord<TRecord> : ITableRecord
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface IOwnedTableRecord : ITableRecord
 {
-    Guid IUniqueID<Guid>.          ID => ID.value;
-    public new RecordID<TRecord>   ID { get; }
-    public     RecordPair<TRecord> ToPair();
-    public     TRecord             NewID( in RecordID<TRecord> id );
-    public     UInt128             GetHash();
+    public RecordID<UserRecord>? CreatedBy { get; }
 }
 
 
 
-public interface IOwnedTableRecord
+public interface ITableRecord<TRecord> : ITableRecord
+    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public RecordID<UserRecord>? CreatedBy { get; }
+    public abstract static SqlCache<TRecord> SQL { get; }
+    Guid IUniqueID<Guid>.                    ID  => ID.value;
+    public new RecordID<TRecord>             ID  { get; }
+    public     RecordPair<TRecord>           ToPair();
+    public     TRecord                       NewID( in RecordID<TRecord> id );
+    public     UInt128                       GetHash();
 }
 
 
@@ -53,12 +54,14 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected internal static readonly PropertyInfo[]    Properties    = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
-    private                            RecordID<TRecord> _id           = ID;
+    public static readonly             SqlCache<TRecord> SQLCache      = new();
     protected                          DateTimeOffset?   _lastModified = LastModified;
+    private                            RecordID<TRecord> _id           = ID;
 
 
-    public       DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
-    [Key] public RecordID<TRecord> ID           { get => _id;           init => _id = value; }
+    public static SqlCache<TRecord> SQL          => SQLCache;
+    [Key] public  RecordID<TRecord> ID           { get => _id;           init => _id = value; }
+    public        DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
 
 
     [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
@@ -172,7 +175,7 @@ public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedB
 
     public override DynamicParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        var parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CreatedBy), CreatedBy );
         return parameters;
     }

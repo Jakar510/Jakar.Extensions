@@ -20,16 +20,17 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Count();
+        SqlCommand sql = TRecord.SQL.count;
 
-        try { return await connection.QueryFirstAsync<long>( sql.SQL, sql.Parameters, transaction ); }
+        try { return await connection.QueryFirstAsync<long>( sql.sql, sql.parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
+
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand sql = _sqlCache.Exists( matchAll, parameters );
+        SqlCommand sql = TRecord.SQL.Exists( matchAll, parameters );
 
         try
         {
@@ -37,7 +38,7 @@ public partial class DbTable<TRecord>
             IEnumerable<string> results = await connection.QueryAsync<string>( command );
             return results.Any();
         }
-        catch ( Exception e ) { throw new SqlException( sql.SQL, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.sql, parameters, e ); }
     }
 
 
@@ -51,7 +52,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual IAsyncEnumerable<TRecord> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TRecord>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Get( ids );
+        SqlCommand sql = TRecord.SQL.Get( ids );
         return Where( connection, transaction, sql, token );
     }
 
@@ -61,7 +62,7 @@ public partial class DbTable<TRecord>
                                                                                                                                                                                : Error.NotFound();
     public async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand.Definition definition = _database.GetCommand( _sqlCache.Get( id ), connection, transaction, token );
+        SqlCommand.Definition definition = _database.GetCommand( TRecord.SQL.Get( id ), connection, transaction, token );
         return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options, null, token );
 
         async ValueTask<ErrorOrResult<TRecord>> Factory( SqlCommand.Definition sql, CancellationToken cancellationToken )
@@ -92,7 +93,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Get( matchAll, parameters );
+        SqlCommand sql = TRecord.SQL.Get( matchAll, parameters );
 
         try
         {

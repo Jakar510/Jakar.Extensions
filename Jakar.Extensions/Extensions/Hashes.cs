@@ -10,7 +10,7 @@ public static class Hashes
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static int GetHash<T>( this IEnumerable<T> values )
     {
-        HashCode hash = new HashCode();
+        HashCode hash = new();
         foreach ( T value in values ) { hash.Add( value ); }
 
         return hash.ToHashCode();
@@ -28,7 +28,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -70,7 +70,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -91,7 +91,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -112,7 +112,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -133,7 +133,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -154,7 +154,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -175,7 +175,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -196,7 +196,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -217,7 +217,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -238,7 +238,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -259,7 +259,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -281,7 +281,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -303,7 +303,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -345,7 +345,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -366,7 +366,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -387,7 +387,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -408,7 +408,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -429,7 +429,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -450,7 +450,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -471,7 +471,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -492,7 +492,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -513,7 +513,7 @@ public static class Hashes
             for ( int i = 0; i < value.Length; i++ )
             {
                 int        start = i * SIZE;
-                Range      range = new Range( start, start + SIZE );
+                Range      range = new( start, start + SIZE );
                 Span<byte> span  = buffer.AsSpan( range );
                 if ( BitConverter.TryWriteBytes( span, value[i] ) is false ) { throw new InvalidOperationException( nameof(BitConverter.TryWriteBytes) ); }
             }
@@ -660,7 +660,7 @@ public static class Hashes
 
     public static async ValueTask<string> HashAsync( this HashAlgorithm hasher, ReadOnlyMemory<byte> data )
     {
-        await using MemoryStream stream = new MemoryStream();
+        await using MemoryStream stream = new();
         await stream.WriteAsync( data );
         stream.Seek( 0, SeekOrigin.Begin );
         byte[] hash = await hasher.ComputeHashAsync( stream );
@@ -731,7 +731,7 @@ public static class Hashes
     }
     public static async ValueTask<string> HashAsync( this byte[] data, HashAlgorithm hasher )
     {
-        await using MemoryStream stream = new MemoryStream( data );
+        await using MemoryStream stream = new( data );
         byte[]                   hash   = await hasher.ComputeHashAsync( stream );
         return BitConverter.ToString( hash );
     }

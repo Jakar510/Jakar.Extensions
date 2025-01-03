@@ -56,7 +56,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider )
     {
-        using CancellationTokenSource source = new CancellationTokenSource( TimeSpan.FromMinutes( 5 ) );
+        using CancellationTokenSource source = new( TimeSpan.FromMinutes( 5 ) );
         return await GetConnectionStringAsync( provider, source.Token );
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )

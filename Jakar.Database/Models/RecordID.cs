@@ -82,7 +82,7 @@ public readonly struct RecordID<TRecord>( Guid value ) : IEquatable<RecordID<TRe
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
-        parameters.Add( SQL.ID, value );
+        parameters.Add( nameof(IRecordPair.ID), value );
         return parameters;
     }
 

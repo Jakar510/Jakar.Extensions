@@ -195,7 +195,7 @@ public static class Controllers
         state.TryGetValue( nameof(ProblemDetails.Title),    out ModelStateEntry? title );
         state.TryGetValue( nameof(ProblemDetails.Type),     out ModelStateEntry? type );
 
-        ProblemDetails problem = new ProblemDetails
+        ProblemDetails problem = new()
                                  {
                                      Detail   = detail?.AttemptedValue,
                                      Instance = instance?.AttemptedValue,

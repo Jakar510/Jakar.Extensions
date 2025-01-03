@@ -13,9 +13,8 @@ namespace Jakar.Database;
 public partial class DbTable<TRecord> : IConnectableDb
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    protected readonly IConnectableDbRoot    _database;
-    protected readonly BaseSqlCache<TRecord> _sqlCache;
-    protected readonly HybridCache           _cache;
+    protected readonly IConnectableDbRoot _database;
+    protected readonly HybridCache        _cache;
 
 
     public static TRecord[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
@@ -23,16 +22,14 @@ public partial class DbTable<TRecord> : IConnectableDb
     public static ImmutableArray<TRecord>  EmptyArray                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
     public static FrozenSet<TRecord>       Set                       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
     public        int?                     CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
-    public        DbTypeInstance           DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.DbTypeInstance; }
     public        RecordGenerator<TRecord> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
     public        HybridCacheEntryOptions? Options                   { get; set; }
 
 
-    public DbTable( IConnectableDbRoot database, ISqlCacheFactory sqlCacheFactory, HybridCache cache )
+    public DbTable( IConnectableDbRoot database, HybridCache cache )
     {
         _database = database;
         _cache    = cache;
-        _sqlCache = sqlCacheFactory.GetSqlCache<TRecord>( _database );
         if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
@@ -40,15 +37,16 @@ public partial class DbTable<TRecord> : IConnectableDb
         GC.SuppressFinalize( this );
         return default;
     }
+
+
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
-    public void                    ResetCaches()                                     { _sqlCache.Reset(); }
 
 
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand               sql    = _sqlCache.All();
-        await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
+        SqlCommand               command = new(TRecord.SQL.all);
+        await using DbDataReader reader  = await _database.ExecuteReaderAsync( connection, transaction, command, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }
 
@@ -73,7 +71,7 @@ public partial class DbTable<TRecord> : IConnectableDb
             await using DbDataReader reader = await _database.ExecuteReaderAsync( connection, transaction, sql, token );
             return await func( reader, token );
         }
-        catch ( Exception e ) { throw new SqlException( sql.SQL, sql.Parameters, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.sql, sql.parameters, e ); }
     }
 
 

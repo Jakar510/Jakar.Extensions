@@ -16,7 +16,7 @@ public readonly record struct Tag( string Name, object? Value )
         for ( int i = 0; i < tags.Length; i++ )
         {
             Tag tag = tags[i];
-            array[i] = new KeyValuePair<string, object?>( tag.Name, tag.Value );
+            array[i] = new KeyValuePair<string, object>( tag.Name, tag.Value );
         }
 
         return array;

@@ -57,14 +57,14 @@ public class EmbeddedResources<T>
     public byte[] GetResourceBytes( string fileName )
     {
         using Stream       stream = GetResourceStream( fileName );
-        using MemoryStream memory = new MemoryStream( (int)stream.Length );
+        using MemoryStream memory = new( (int)stream.Length );
         stream.CopyTo( memory );
         return memory.GetBuffer();
     }
     public async ValueTask<byte[]> GetResourceBytesAsync( string fileName )
     {
         await using Stream       stream = GetResourceStream( fileName );
-        await using MemoryStream reader = new MemoryStream();
+        await using MemoryStream reader = new();
         await stream.CopyToAsync( stream );
         return reader.GetBuffer();
     }
@@ -74,7 +74,7 @@ public class EmbeddedResources<T>
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
         await using Stream stream = GetResourceStream( fileName );
-        using StreamReader reader = new StreamReader( stream, encoding );
+        using StreamReader reader = new( stream, encoding );
         return await reader.ReadToEndAsync();
     }
 

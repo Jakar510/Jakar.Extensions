@@ -47,14 +47,14 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public void Test_ValueStringBuilder()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder();
+        using ValueStringBuilder sb = new();
     }
 
 
     [Benchmark]
     public void Test_Join()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder();
+        using ValueStringBuilder sb = new();
         sb.AppendJoin( ", ", ids );
     }
 
@@ -69,7 +69,7 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public ReadOnlySpan<char> Test_VSB()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder( "DELETE FROM " );
+        using ValueStringBuilder sb = new( "DELETE FROM " );
         sb.Append( TableName );
         sb.Append( "WHERE ID in ( " );
         sb.AppendJoin( ", ", ids );

@@ -105,7 +105,7 @@ public sealed record ResxRowRecord( long                    KeyID,
         string                  arabic       = reader.GetFieldValue<string>( nameof(Arabic) );
         DateTimeOffset          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?         lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<ResxRowRecord> id           = new RecordID<ResxRowRecord>( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        RecordID<ResxRowRecord> id           = new( reader.GetFieldValue<Guid>( nameof(ID) ) );
 
         return new ResxRowRecord( keyID,
                                   key,
@@ -146,7 +146,7 @@ public sealed record ResxRowRecord( long                    KeyID,
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add( base.GetHashCode() );
         hashCode.Add( Neutral );
         hashCode.Add( English );

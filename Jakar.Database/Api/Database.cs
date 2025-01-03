@@ -1,7 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using System.Transactions;
 using Microsoft.Extensions.Caching.Hybrid;
+using ZXing.Aztec.Internal;
+using IsolationLevel = System.Data.IsolationLevel;
 using Status = Jakar.Extensions.Status;
 
 
@@ -12,26 +15,25 @@ namespace Jakar.Database;
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "InconsistentNaming" )]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType                       DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
-    protected readonly ConcurrentBag<IDbTable>         _tables             = [];
-    public readonly    DbOptions                       Settings;
-    public readonly    DbTable<AddressRecord>          Addresses;
-    public readonly    DbTable<FileRecord>             Files;
-    public readonly    DbTable<GroupRecord>            Groups;
-    public readonly    DbTable<RecoveryCodeRecord>     RecoveryCodes;
-    public readonly    DbTable<RoleRecord>             Roles;
-    public readonly    DbTable<UserAddressRecord>      UserAddresses;
-    public readonly    DbTable<UserGroupRecord>        UserGroups;
-    public readonly    DbTable<UserLoginProviderRecord>    UserLogins;
-    public readonly    DbTable<UserRecord>             Users;
-    public readonly    DbTable<UserRecoveryCodeRecord> UserRecoveryCodes;
-    public readonly    DbTable<UserRoleRecord>         UserRoles;
-    public readonly    IConfiguration                  Configuration;
-    protected readonly ISqlCacheFactory                _sqlCacheFactory;
-    protected readonly HybridCache                     _cache;
-    protected          ActivitySource?                 _activitySource;
-    protected          Meter?                          _meter;
-    protected          string?                         _className;
+    public const       ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
+    protected readonly ConcurrentBag<IDbTable>          _tables             = [];
+    public readonly    DbOptions                        Settings;
+    public readonly    DbTable<AddressRecord>           Addresses;
+    public readonly    DbTable<FileRecord>              Files;
+    public readonly    DbTable<GroupRecord>             Groups;
+    public readonly    DbTable<RecoveryCodeRecord>      RecoveryCodes;
+    public readonly    DbTable<RoleRecord>              Roles;
+    public readonly    DbTable<UserAddressRecord>       UserAddresses;
+    public readonly    DbTable<UserGroupRecord>         UserGroups;
+    public readonly    DbTable<UserLoginProviderRecord> UserLogins;
+    public readonly    DbTable<UserRecord>              Users;
+    public readonly    DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
+    public readonly    DbTable<UserRoleRecord>          UserRoles;
+    public readonly    IConfiguration                   Configuration;
+    protected readonly HybridCache                      _cache;
+    protected          ActivitySource?                  _activitySource;
+    protected          Meter?                           _meter;
+    protected          string?                          _className;
 
 
     public static      Database?         Current                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
@@ -39,7 +41,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public             string            ClassName                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
     public             int?              CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
     protected internal SecuredString?    ConnectionString          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public             DbTypeInstance    DbTypeInstance            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.DbTypeInstance; }
     public             PasswordValidator PasswordValidator         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
     public             IsolationLevel    TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IsolationLevel.RepeatableRead;
     public             AppVersion        Version                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
@@ -67,9 +68,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
         RecordID<UserAddressRecord>.RegisterDapperTypeHandlers();
     }
-    protected Database( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, HybridCache cache ) : base()
+    protected Database( IConfiguration configuration, IOptions<DbOptions> options, HybridCache cache ) : base()
     {
-        _sqlCacheFactory  = sqlCacheFactory;
         _cache            = cache;
         Configuration     = configuration;
         Settings          = options.Value;
@@ -127,7 +127,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected virtual DbTable<TRecord> Create<TRecord>()
         where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
     {
-        DbTable<TRecord> table = new(this, _sqlCacheFactory, _cache);
+        DbTable<TRecord> table = new(this, _cache);
         return AddDisposable( table );
     }
 
@@ -141,12 +141,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public void ResetCaches()
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public CommandDefinition GetCommand<T>( T command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+        where T : IDapperSqlCommand
     {
-        foreach ( IDbTable table in _tables ) { table.ResetCaches(); }
+        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
+        return new CommandDefinition( command.Sql, ParametersDictionary.LoadFrom( command ), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token );
     }
-
-
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
     public CommandDefinition GetCommand( SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
@@ -161,6 +162,16 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
+    public async ValueTask<DbDataReader> ExecuteReaderAsync<T>( DbConnection connection, DbTransaction? transaction, T command, CancellationToken token )
+        where T : IDapperSqlCommand
+    {
+        try
+        {
+            CommandDefinition definition = GetCommand( command, transaction, token );
+            return await connection.ExecuteReaderAsync( definition );
+        }
+        catch ( Exception e ) { throw new SqlException( command.Sql, e ); }
+    }
     public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
     {
         try
@@ -168,9 +179,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
             CommandDefinition command = GetCommand( sql, transaction, token );
             return await connection.ExecuteReaderAsync( command );
         }
-        catch ( Exception e ) { throw new SqlException( sql.SQL, e ); }
+        catch ( Exception e ) { throw new SqlException( sql.sql, e ); }
     }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition  )
+    public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition )
     {
         try { return await definition.connection.ExecuteReaderAsync( definition ); }
         catch ( Exception e ) { throw new SqlException( definition.command.CommandText, definition.command.Parameters as DynamicParameters, e ); }

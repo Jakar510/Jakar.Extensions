@@ -55,16 +55,16 @@ public class JsonizerGenerator : ISourceGenerator
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        StringBuilder sb = new StringBuilder( $$"""
+        StringBuilder sb = new( $$"""
 
-                                                #nullable enable
-                                                namespace {{namespaceName}};
+                                  #nullable enable
+                                  namespace {{namespaceName}};
 
 
-                                                public partial class {{classSymbol.Name}} 
-                                                {
+                                  public partial class {{classSymbol.Name}} 
+                                  {
 
-                                                """ );
+                                  """ );
 
         // if the class doesn't implement INotifyPropertyChanged already, add it
         // if ( !classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default) ) { source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;"); }
@@ -198,7 +198,7 @@ public class JsonSerializationGenerator : ISourceGenerator
     {
         List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine( $"namespace {namespaceName}" );
         builder.AppendLine( "{" );
         builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );

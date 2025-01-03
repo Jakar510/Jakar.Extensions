@@ -19,7 +19,7 @@ public readonly ref struct PasswordValidator
     public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( password, Requirements );
     public static bool Check( scoped in ReadOnlySpan<char> password, scoped in Requirements requirements )
     {
-        PasswordValidator validator = new PasswordValidator( requirements );
+        PasswordValidator validator = new( requirements );
         return validator.Validate( password );
     }
 

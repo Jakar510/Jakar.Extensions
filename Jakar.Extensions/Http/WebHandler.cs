@@ -73,7 +73,7 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
         await using MemoryStream stream = await AsStream( response );
-        using StreamReader       sr     = new StreamReader( stream, Encoding );
+        using StreamReader       sr     = new( stream, Encoding );
         await using JsonReader   reader = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
@@ -81,7 +81,7 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
         await using MemoryStream stream = await AsStream( response );
-        using StreamReader       sr     = new StreamReader( stream, Encoding );
+        using StreamReader       sr     = new( stream, Encoding );
         await using JsonReader   reader = new JsonTextReader( sr );
         TResult?                 result = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
@@ -120,7 +120,7 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
     {
-        LocalFile file = new LocalFile( path );
+        LocalFile file = new( path );
         return await AsFile( response, file );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
@@ -141,7 +141,7 @@ public readonly record struct WebHandler : IDisposable
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync( Token );
-        MemoryStream       buffer  = new MemoryStream( (int)stream.Length );
+        MemoryStream       buffer  = new( (int)stream.Length );
         await stream.CopyToAsync( buffer, Token );
 
         buffer.Seek( 0, SeekOrigin.Begin );

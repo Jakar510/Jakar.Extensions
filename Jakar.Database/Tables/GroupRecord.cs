@@ -46,7 +46,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>? ownerUserID  = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
-        GroupRecord           record       = new GroupRecord( customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified );
+        GroupRecord           record       = new( customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified );
         return record.Validate();
     }
     [Pure]

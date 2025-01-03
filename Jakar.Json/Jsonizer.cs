@@ -24,7 +24,7 @@ public static class Jsonizer
 
     public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented )
     {
-        JWriter writer = new JWriter( value.JsonSize(), formatting );
+        JWriter writer = new( value.JsonSize(), formatting );
 
         try
         {

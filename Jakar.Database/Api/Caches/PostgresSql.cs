@@ -1,151 +1,64 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/15/2023  1:20 PM
 
+using NoAlloq;
+
+
+
 namespace Jakar.Database;
 
 
-public sealed class PostgresSql<TRecord> : BaseSqlCache<TRecord>
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public sealed class PostgresSql<TRecord>
+    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    public override DbTypeInstance Instance { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DbTypeInstance.Postgres; }
+    public SqlCommand NextID( RecordPair<TRecord> pair ) => NextID( pair.id, pair.dateCreated );
+    public SqlCommand NextID( RecordID<TRecord> id, DateTimeOffset dateCreated )
+    {
+        DynamicParameters parameters = new();
+        parameters.Add( nameof(id),          id );
+        parameters.Add( nameof(dateCreated), dateCreated );
 
-    public override string TableName { get; } = $"\"{TRecord.TableName}\"";
+        if ( _sql.TryGetValue( SqlCacheType.NextID, out string? sql ) ) { return new SqlCommand( sql, parameters ); }
+
+        sql = @$"SELECT {ID} FROM {TRecord.TableName} WHERE ( id = IFNULL((SELECT MIN({ID}) FROM {TRecord.TableName} WHERE {DATE_CREATED} > @{nameof(dateCreated)}), 0) )";
+        return new SqlCommand( sql, parameters );
+    }
 
 
-    public override SqlCommand First()
+    public SqlCommand Random()
     {
         if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
 
-        _sql[SqlCacheType.First] = sql = $"SELECT TOP 1 * FROM {TableName} ORDER BY {DateCreated} ASC";
+        _sql[SqlCacheType.Random] = sql = $"SELECT TOP 1 * FROM {TRecord.TableName} ORDER BY {RandomMethod}";
         return sql;
     }
-    public override SqlCommand Last()
-    {
-        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
-
-        _sql[SqlCacheType.First] = sql = $"SELECT TOP 1 * FROM {TableName} ORDER BY {DateCreated} DESC";
-        return sql;
-    }
-    public override SqlCommand Random()
-    {
-        if ( _sql.TryGetValue( SqlCacheType.Random, out string? sql ) ) { return sql; }
-
-        _sql[SqlCacheType.Random] = sql = $"SELECT TOP 1 * FROM {TableName} ORDER BY {RandomMethod}";
-        return sql;
-    }
-    public override SqlCommand Random( int count )
+    public SqlCommand Random( int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomCount] = sql = $"SELECT TOP @{nameof(count)} * FROM {TableName} ORDER BY {RandomMethod}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomCount] = sql = $"SELECT TOP @{nameof(count)} * FROM {TRecord.TableName} ORDER BY {RandomMethod}"; }
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( Guid? userID, int count )
+    public SqlCommand Random( Guid? userID, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count),  count );
         parameters.Add( nameof(userID), userID );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(userID)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserIDCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserIDCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TRecord.TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(userID)}"; }
 
         return new SqlCommand( sql, parameters );
     }
-    public override SqlCommand Random( RecordID<UserRecord> id, int count )
+    public SqlCommand Random( RecordID<UserRecord> id, int count )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(count), count );
         parameters.Add( nameof(id),    id );
 
-        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)}"; }
+        if ( _sql.TryGetValue( SqlCacheType.RandomUserCount, out string? sql ) is false ) { _sql[SqlCacheType.RandomUserCount] = sql = @$"SELECT TOP @{nameof(count)} * FROM {TRecord.TableName} WHERE {nameof(IOwnedTableRecord.CreatedBy)} = @{nameof(id)}"; }
 
         return new SqlCommand( sql, parameters );
-    }
-    public override SqlCommand Insert( TRecord record )
-    {
-        DynamicParameters param = new DynamicParameters( record );
-
-        if ( _sql.TryGetValue( SqlCacheType.Insert, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        _sql[SqlCacheType.Insert] = sql = $"""
-                                             INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
-                                           """;
-
-        return new SqlCommand( sql, param );
-    }
-    public override SqlCommand TryInsert( TRecord record, bool matchAll, DynamicParameters parameters )
-    {
-        SqlKey            key   = SqlKey.Create( matchAll, parameters );
-        DynamicParameters param = new DynamicParameters( record );
-        param.AddDynamicParams( parameters );
-
-        if ( _tryInsert.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
-
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        _tryInsert[key] = sql = $"""
-                                 IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
-                                 BEGIN
-                                     INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
-                                 END
-
-                                 ELSE
-                                 BEGIN
-                                     SELECT {IdColumnName} = NULL
-                                 END
-                                 """;
-
-        return new SqlCommand( sql, param );
-    }
-    public override SqlCommand InsertOrUpdate( TRecord record, bool matchAll, DynamicParameters parameters )
-    {
-        SqlKey            key   = SqlKey.Create( matchAll, parameters );
-        DynamicParameters param = new DynamicParameters( record );
-        RecordID<TRecord> id    = record.ID;
-        param.Add( nameof(id), id );
-        param.AddDynamicParams( parameters );
-
-        if ( _insertOrUpdate.TryGetValue( key, out string? sql ) ) { return new SqlCommand( sql, param ); }
-
-        using ValueStringBuilder buffer = new ValueStringBuilder( parameters.ParameterNames.Sum( x => x.Length ) * 2 );
-        buffer.AppendJoin( matchAll.GetAndOr(), GetKeyValuePairs( parameters ) );
-
-        using ValueStringBuilder keys = new ValueStringBuilder( 1000 );
-        keys.AppendJoin( ',', _Properties.Values.Select( x => x.ColumnName ) );
-
-        using ValueStringBuilder values = new ValueStringBuilder( 1000 );
-        values.AppendJoin( ',', _Properties.Values.Select( x => x.VariableName ) );
-
-        using ValueStringBuilder keyValuePairs = new ValueStringBuilder( 1000 );
-        keyValuePairs.AppendJoin( ',', _Properties.Values.Select( x => x.KeyValuePair ) );
-
-        _insertOrUpdate[key] = sql = $"""
-                                      IF NOT EXISTS(SELECT * FROM {TableName} WHERE {buffer.Span})
-                                      BEGIN
-                                          INSERT INTO {TableName} ({keys.Span}) values ({values.Span}) RETURNING {IdColumnName};
-                                      END
-
-                                      ELSE
-                                      BEGIN
-                                          UPDATE {TableName} SET {keyValuePairs.Span} WHERE {IdColumnName} = @{nameof(id)};
-                                          SELECT @{nameof(id)};
-                                      END
-                                      """;
-
-        return new SqlCommand( sql, param );
     }
 }

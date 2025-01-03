@@ -42,7 +42,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         DateTimeOffset?               lastModified        = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>?         ownerUserID         = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<UserLoginProviderRecord> id                  = RecordID<UserLoginProviderRecord>.ID( reader );
-        UserLoginProviderRecord           record              = new UserLoginProviderRecord( loginProvider, providerDisplayName, providerKey, value, id, ownerUserID, dateCreated, lastModified );
+        UserLoginProviderRecord           record              = new( loginProvider, providerDisplayName, providerKey, value, id, ownerUserID, dateCreated, lastModified );
         return record.Validate();
     }
 

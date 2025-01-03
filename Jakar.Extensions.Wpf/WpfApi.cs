@@ -86,10 +86,10 @@ public static partial class WpfApi
     /// </returns>
     public static ImageSource ConvertImage( this Bitmap image )
     {
-        using MemoryStream stream = new MemoryStream();
+        using MemoryStream stream = new();
         image.Save( stream, ImageFormat.Png );
 
-        BitmapImage photo = new BitmapImage();
+        BitmapImage photo = new();
 
         photo.BeginInit();
         photo.CacheOption  = BitmapCacheOption.OnLoad;
@@ -107,7 +107,7 @@ public static partial class WpfApi
         where T : IEquatable<T>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
-        ListCollectionView collection = new ListCollectionView( list );
+        ListCollectionView collection = new( list );
         return collection;
     }
     public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
@@ -116,7 +116,7 @@ public static partial class WpfApi
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        ListCollectionView collection = new ListCollectionView( list ) { CustomSort = comparer };
+        ListCollectionView collection = new( list ) { CustomSort = comparer };
 
         return collection;
     }
@@ -126,7 +126,7 @@ public static partial class WpfApi
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
-        ListCollectionView collection = new ListCollectionView( list )
+        ListCollectionView collection = new( list )
                                         {
                                             Filter     = Filter,
                                             CustomSort = comparer
@@ -147,7 +147,7 @@ public static partial class WpfApi
     /// <returns> </returns>
     public static LocalDirectory? PickFolder( string title )
     {
-        using FolderBrowserDialog dialog = new FolderBrowserDialog
+        using FolderBrowserDialog dialog = new()
                                            {
                                                Description            = title,
                                                UseDescriptionForTitle = true,
@@ -164,7 +164,7 @@ public static partial class WpfApi
 
     public static LocalFile? PickFile( string title, params string[] filters )
     {
-        OpenFileDialog file = new OpenFileDialog
+        OpenFileDialog file = new()
                               {
                                   Title            = title,
                                   Multiselect      = false,
