@@ -8,7 +8,7 @@
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public class Telemetry( ActivityCollection collection, IEnumerable<ILoggerProvider> providers, IOptionsMonitor<LoggerFilterOptions> filterOption, IOptions<LoggerFactoryOptions>? options = null, IExternalScopeProvider? scopeProvider = null ) : LoggerFactory( providers, filterOption, options, scopeProvider )
 {
-    public Activity           RootActivity { get; } = collection.StartActivity( collection.Context.AppName );
+    public Activity           RootActivity { get; } = collection.StartActivity( collection.Context.Name );
     public ActivityCollection Source       { get; } = collection;
 
 

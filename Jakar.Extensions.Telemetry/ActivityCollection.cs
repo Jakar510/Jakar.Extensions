@@ -14,9 +14,9 @@ public sealed class ActivityCollection : ConcurrentDictionary<string, Activity>,
     public ActivityCollection( IDictionary<string, Activity>               values ) : base( values, StringComparer.Ordinal ) { }
 
 
-    public Activity CreateActivity( string operationName, ActivityTraceId? traceID = null, ActivitySpanId? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
+    public Activity CreateActivity( string operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
         this[operationName] = Activity.Create( operationName, TelemetryContext.Create( Context, traceID, spanID ), kind );
-    public Activity StartActivity( string operationName, ActivityTraceId? traceID = null, ActivitySpanId? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
+    public Activity StartActivity( string operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
         CreateActivity( operationName, traceID, spanID, kind ).Start();
 
 

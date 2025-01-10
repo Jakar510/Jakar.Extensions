@@ -1,20 +1,18 @@
 ﻿namespace Jakar.Extensions.Telemetry;
 
 
-
-
-public readonly record struct AppContext( string AppName, Guid AppID, AppVersion AppVersion )
+public sealed class TelemetryContext()
 {
-    public static AppContext Create<TApp>()
-        where TApp : IAppID => Create( TApp.AppName, TApp.AppID, TApp.AppVersion );
-    public static AppContext Create( string appName, Guid appID, AppVersion appVersion ) => new(appName, appID, appVersion);
-}
+    public required AppContext      AppContext { get; init; }
+    public required ActivityTraceID TraceID    { get; init; }
+    public required ActivitySpanID  SpanID     { get; init; }
 
-
-
-public readonly record struct TelemetryContext( AppContext AppContext, ActivityTraceId? TraceID = null, ActivitySpanId? SpanID = null )
-{
-    public static TelemetryContext Create<TApp>( ActivityTraceId? traceID = null, ActivitySpanId? spanID = null )
+    public static TelemetryContext Create<TApp>( ActivityTraceID? traceID = null, ActivitySpanID? spanID = null )
         where TApp : IAppID => Create( AppContext.Create<TApp>(), traceID, spanID );
-    public static TelemetryContext Create( AppContext context, ActivityTraceId? traceID = null, ActivitySpanId? spanID = null ) => new(context, traceID, spanID);
+    public static TelemetryContext Create( AppContext context, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null ) => new()
+                                                                                                                                   {
+                                                                                                                                       AppContext = context,
+                                                                                                                                       TraceID    = traceID ?? ActivityTraceID.CreateRandom(),
+                                                                                                                                       SpanID     = spanID  ?? ActivitySpanID.CreateRandom()
+                                                                                                                                   };
 }
