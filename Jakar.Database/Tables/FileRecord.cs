@@ -15,18 +15,21 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
-                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>, IFileMetaData<Guid>, IFileData<Guid>
+                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>, IFileData<Guid>, IFileMetaData
 {
-    public const  string                TABLE_NAME = "Files";
-    public static string                TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    IFileMetaData<Guid> IFileData<Guid>.MetaData  => FileMetaData.Create( this );
+    public const               string                        TABLE_NAME = "Files";
+    public static              string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 
 
-    public FileRecord( IFileData<Guid>               data, LocalFile?           file                      = null ) : this( data, data.MetaData, file ) { }
-    private FileRecord( IFileData<Guid>              data, IFileMetaData<Guid>? metaData, LocalFile? file = null ) : this( metaData?.FileName, metaData?.FileDescription, metaData?.FileType, data.FileSize, data.Hash, data.MimeType, data.Payload, file?.FullPath, RecordID<FileRecord>.New(), DateTimeOffset.UtcNow ) { }
-    public static FileRecord Create( IFileData<Guid> data, LocalFile?           file = null ) => new(data, file);
+    public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?     file                      = null ) : this( data, data.MetaData, file ) { }
+    private FileRecord( IFileData<Guid>                            data, IFileMetaData? metaData, LocalFile? file = null ) : this( metaData?.FileName, metaData?.FileDescription, metaData?.FileType, data.FileSize, data.Hash, data.MimeType, data.Payload, file?.FullPath, RecordID<FileRecord>.New(), DateTimeOffset.UtcNow ) { }
+    public static FileRecord Create( IFileData<Guid, FileMetaData> data, LocalFile?     file = null ) => new(data, file);
     public static FileRecord Create<TFileMetaData>( IFileData<Guid, TFileMetaData> data, LocalFile? file = null )
-        where TFileMetaData : IFileMetaData<TFileMetaData, Guid> => new(data, data.MetaData, file);
+        where TFileMetaData : class, IFileMetaData<TFileMetaData> => new(data, data.MetaData, file);
+    public TFileData ToFileData<TFileData, TFileMetaData>()
+        where TFileData : IFileData<TFileData, Guid, TFileMetaData>
+        where TFileMetaData : class, IFileMetaData<TFileMetaData> => TFileData.Create( this, TFileMetaData.Create( this ) );
 
 
     [Pure]

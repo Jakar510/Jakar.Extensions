@@ -20,7 +20,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.count;
+        SqlCommand sql = TRecord.SQL.Count();
 
         try { return await connection.QueryFirstAsync<long>( sql.sql, sql.parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

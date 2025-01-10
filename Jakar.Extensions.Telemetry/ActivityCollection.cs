@@ -4,25 +4,28 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-public sealed class ActivityCollection : ConcurrentDictionary<string, Activity>, IDisposable
+public sealed class ActivityCollection() : ConcurrentDictionary<string, Activity>( Environment.ProcessorCount, Buffers.DEFAULT_CAPACITY, StringComparer.Ordinal ), IDisposable
 {
-    public required AppContext Context { get; init; }
+    public required AppContext AppContext { get; init; }
 
 
-    public ActivityCollection() : base( Environment.ProcessorCount, 64, StringComparer.Ordinal ) { }
-    public ActivityCollection( IEnumerable<KeyValuePair<string, Activity>> values ) : base( values, StringComparer.Ordinal ) { }
-    public ActivityCollection( IDictionary<string, Activity>               values ) : base( values, StringComparer.Ordinal ) { }
+    public ActivityCollection( IEnumerable<KeyValuePair<string, Activity>> values ) : this()
+    {
+        foreach ( (string? key, Activity? value) in values ) { GetOrAdd( key, value ); }
+    }
+    public ActivityCollection( IDictionary<string, Activity> values ) : this()
+    {
+        foreach ( (string? key, Activity? value) in values ) { GetOrAdd( key, value ); }
+    }
 
 
-    public Activity CreateActivity( string operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
-        this[operationName] = Activity.Create( operationName, TelemetryContext.Create( Context, traceID, spanID ), kind );
-    public Activity StartActivity( string operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) =>
-        CreateActivity( operationName, traceID, spanID, kind ).Start();
+    public Activity CreateActivity( string operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) => this[operationName] = Activity.Create( operationName, TelemetryContext.Create( operationName, AppContext, traceID, spanID ), kind );
+    public Activity StartActivity( string  operationName, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null, ActivityKind kind = ActivityKind.Internal ) => CreateActivity( operationName, traceID, spanID, kind ).Start();
 
 
     public static ActivityCollection Create<TApp>()
         where TApp : IAppID => Create( AppContext.Create<TApp>() );
-    public static ActivityCollection Create( AppContext context ) => new() { Context = context };
+    public static ActivityCollection Create( AppContext context ) => new() { AppContext = context };
     public void Dispose()
     {
         foreach ( Activity activity in Values ) { activity.Dispose(); }

@@ -45,7 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="9.0.3" />
+    <PackageReference Include="Jakar.Extensions" Version="9.0.5" />
 	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
 	<PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="1.9.0" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />

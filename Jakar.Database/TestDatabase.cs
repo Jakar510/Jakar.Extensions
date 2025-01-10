@@ -10,7 +10,7 @@ using ZiggyCreatures.Caching.Fusion;
 namespace Jakar.Database;
 
 
-internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFactory sqlCacheFactory, IOptions<DbOptions> options, HybridCache cache ) : Database( configuration, sqlCacheFactory, options, cache ), IAppName
+internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptions> options, HybridCache cache ) : Database( configuration, options, cache ), IAppName
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
@@ -26,10 +26,7 @@ internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFacto
     [Conditional( "DEBUG" )]
     public static async void TestAsync()
     {
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.Postgres ) );
-        Console.WriteLine();
-
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build( DbTypeInstance.MsSql ) );
+        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build() );
         Console.WriteLine();
 
         try { await InternalTestAsync(); }
@@ -99,7 +96,7 @@ internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFacto
 
 
 
-    internal sealed class ConfigureDbServices : ConfigureDbServices<ConfigureDbServices, TestDatabase, TestDatabase, SqlCacheFactory>
+    internal sealed class ConfigureDbServices : ConfigureDbServices<ConfigureDbServices, TestDatabase, TestDatabase>
     {
         public override bool UseApplicationCookie => false;
         public override bool UseAuth              => false;
@@ -118,7 +115,6 @@ internal sealed class TestDatabase( IConfiguration configuration, ISqlCacheFacto
             DbOptions = new DbOptions
                         {
                             ConnectionStringResolver = connectionString,
-                            DbTypeInstance           = DbTypeInstance.Postgres,
                             CommandTimeout           = 30,
                             TokenIssuer              = AppName,
                             TokenAudience            = AppName,

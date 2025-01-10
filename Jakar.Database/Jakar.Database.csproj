@@ -71,14 +71,14 @@
 		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="6.2.0" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.3.0" />
-		<PackageReference Include="Jakar.Extensions" Version="9.0.3" />
+		<PackageReference Include="Jakar.Extensions" Version="9.0.5" />
 		<PackageReference Include="FluentMigrator" Version="6.2.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="6.2.0" />
 		<PackageReference Include="MailKit" Version="4.9.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.0.0-preview.9.24556.5" />
 		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.0" />
-		<PackageReference Include="Microsoft.Identity.Client" Version="4.66.2" />
+		<PackageReference Include="Microsoft.Identity.Client" Version="4.67.1" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.3.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.3.0" />

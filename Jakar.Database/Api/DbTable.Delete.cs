@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand        sql     = new(TRecord.SQL.deleteID, id.ToDynamicParameters());
+        SqlCommand        sql     = TRecord.SQL.DeleteID( id );
         CommandDefinition command = _database.GetCommand( sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }

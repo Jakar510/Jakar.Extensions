@@ -6,14 +6,13 @@ namespace Jakar.Database;
 
 public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
 {
-    public static readonly Uri                       Local_433           = new("https://localhost:443");
-    public static readonly Uri                       Local_80            = new("http://localhost:80");
-    public const           string                    AUTHENTICATION_TYPE = JwtBearerDefaults.AuthenticationScheme;
-    public const           int                       COMMAND_TIMEOUT     = 300;
-    public const           string                    JWT_ALGORITHM       = SecurityAlgorithms.HmacSha512Signature;
-    public const           string                    JWT_KEY             = "JWT";
-    public const           string                    USER_EXISTS         = "User Exists";
-    public static readonly FrozenSet<DbTypeInstance> Instances           = Enum.GetValues<DbTypeInstance>().ToFrozenSet();
+    public static readonly Uri    Local_433           = new("https://localhost:443");
+    public static readonly Uri    Local_80            = new("http://localhost:80");
+    public const           string AUTHENTICATION_TYPE = JwtBearerDefaults.AuthenticationScheme;
+    public const           int    COMMAND_TIMEOUT     = 300;
+    public const           string JWT_ALGORITHM       = SecurityAlgorithms.HmacSha512Signature;
+    public const           string JWT_KEY             = "JWT";
+    public const           string USER_EXISTS         = "User Exists";
 
 
     public static DbOptions                                               Default                  => new();
@@ -22,7 +21,6 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     public        TimeSpan                                                ClockSkew                { get;                                 set; } = TimeSpan.FromMinutes( 1 );
     public        int?                                                    CommandTimeout           { get;                                 set; } = COMMAND_TIMEOUT;
     public        SecuredStringResolverOptions                            ConnectionStringResolver { get;                                 set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
-    public        DbTypeInstance                                          DbTypeInstance           { get;                                 set; } = DbTypeInstance.Postgres;
     public        Uri                                                     Domain                   { get;                                 set; } = Local_433;
     public        string                                                  JWTAlgorithm             { get;                                 set; } = JWT_ALGORITHM;
     public        string                                                  JWTKey                   { get;                                 set; } = JWT_KEY;
@@ -56,7 +54,7 @@ public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider )
     {
-        using CancellationTokenSource source = new( TimeSpan.FromMinutes( 5 ) );
+        using CancellationTokenSource source = new(TimeSpan.FromMinutes( 5 ));
         return await GetConnectionStringAsync( provider, source.Token );
     }
     public static async ValueTask<SecuredString> GetConnectionStringAsync( IServiceProvider provider, CancellationToken token )

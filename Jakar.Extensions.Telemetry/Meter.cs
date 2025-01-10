@@ -45,6 +45,27 @@ public class Meter : IDisposable
         Instruments.Clear();
         GC.SuppressFinalize( this );
     }
+
+
+
+    public sealed class Collection() : ConcurrentDictionary<string, Meter>( Environment.ProcessorCount, Buffers.DEFAULT_CAPACITY, StringComparer.Ordinal ), IDisposable
+    {
+        public static Collection Create() => new();
+        public Collection( IEnumerable<KeyValuePair<string, Meter>> values ) : this()
+        {
+            foreach ( (string? key, Meter? value) in values ) { GetOrAdd( key, value ); }
+        }
+        public Collection( IDictionary<string, Meter> values ) : this()
+        {
+            foreach ( (string? key, Meter? value) in values ) { GetOrAdd( key, value ); }
+        }
+        public void Dispose()
+        {
+            foreach ( Meter meter in Values ) { meter.Dispose(); }
+
+            Clear();
+        }
+    }
 }
 
 

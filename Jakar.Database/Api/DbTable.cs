@@ -45,7 +45,7 @@ public partial class DbTable<TRecord> : IConnectableDb
     public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
     public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand               command = new(TRecord.SQL.all);
+        SqlCommand               command = TRecord.SQL.GetAll();
         await using DbDataReader reader  = await _database.ExecuteReaderAsync( connection, transaction, command, token );
         await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
     }

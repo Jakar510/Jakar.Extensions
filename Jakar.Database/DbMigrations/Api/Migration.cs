@@ -66,8 +66,8 @@ public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
     where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
 {
-    public static readonly string KeyForeignKeyName   = $"{TRecord.TableName}-{TKey.TableName}.{nameof(SQL.ID)}";
-    public static readonly string ValueForeignKeyName = $"{TRecord.TableName}-{TValue.TableName}.{nameof(SQL.ID)}";
+    public static readonly string KeyForeignKeyName   = $"{TRecord.TableName}-{TKey.TableName}.{nameof(IRecordPair.ID)}";
+    public static readonly string ValueForeignKeyName = $"{TRecord.TableName}-{TValue.TableName}.{nameof(IRecordPair.ID)}";
     protected Migration() : base() { }
 
 
@@ -75,8 +75,8 @@ public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(SQL.ID) ).NotNullable();
-        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(SQL.ID) ).NotNullable();
+        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID) ).NotNullable();
+        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID) ).NotNullable();
 
         return table;
     }

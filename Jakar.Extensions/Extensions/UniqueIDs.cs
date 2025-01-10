@@ -96,11 +96,14 @@ public static class UniqueIDs
         id = null;
         return false;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    Guid  value ) => Guid.Empty.Equals( value ) is false;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    Guid  value ) => value.IsNotValidID() is false;
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsValidID( this    Guid? value ) => value.HasValue && value.Value.IsValidID();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid  value ) => Guid.Empty.Equals( value );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid? value ) => value.HasValue && value.Value.IsValidID();
-
+#if NET9_0_OR_GREATER
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid  value ) => Guid.Empty.Equals( value ) || Guid.AllBitsSet.Equals( value );
+#else
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsNotValidID( this Guid value ) => Guid.Empty.Equals( value );
+#endif
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsValidID( this Guid? value, [NotNullWhen( true )] out Guid? id )

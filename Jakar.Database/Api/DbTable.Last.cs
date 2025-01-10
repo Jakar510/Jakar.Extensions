@@ -13,7 +13,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<ErrorOrResult<TRecord>> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.last;
+        SqlCommand sql = TRecord.SQL.GetLast();
 
         try
         {
@@ -30,7 +30,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<ErrorOrResult<TRecord>> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.last;
+        SqlCommand sql = TRecord.SQL.GetLast();
 
         try
         {

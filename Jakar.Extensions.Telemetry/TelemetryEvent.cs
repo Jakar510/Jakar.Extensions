@@ -4,18 +4,19 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-public sealed record TelemetryEvent( string ID, DateTimeOffset Timestamp, params TelemetryTag[]? Tags )
+public sealed record TelemetryEvent( string EventID, DateTimeOffset Timestamp, params TelemetryTag[]? Tags )
 {
-    public TelemetryEvent( string id ) : this( id, DateTimeOffset.UtcNow, null ) { }
-    public TelemetryEvent( string id, params TelemetryTag[]? tags ) : this( id, DateTimeOffset.UtcNow, tags ) { }
-}
+    public TelemetryEvent( string eventID) : this( eventID, DateTimeOffset.UtcNow, null ) { }
+    public TelemetryEvent( string eventID, params TelemetryTag[]? tags ) : this( eventID, DateTimeOffset.UtcNow, tags ) { }
 
 
 
-public readonly record struct TelemetryTag( string Key, string? Value )
-{
-    public static implicit operator KeyValuePair<string, string?>( TelemetryTag tag ) => new(tag.Key, tag.Value);
-    public static implicit operator (string Key, string? Value)( TelemetryTag   tag ) => new(tag.Key, tag.Value);
-    public static implicit operator TelemetryTag( KeyValuePair<string, string?> tag ) => new(tag.Key, tag.Value);
-    public static implicit operator TelemetryTag( (string Key, string? Value)   tag ) => new(tag.Key, tag.Value);
+    public sealed class Collection() : LinkedList<TelemetryEvent>()
+    {
+        public static Collection Create() => new();
+        public Collection( IEnumerable<TelemetryEvent> values ) : this()
+        {
+            foreach ( var tag in values ) { AddLast( tag ); }
+        }
+    }
 }

@@ -33,7 +33,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.sortedIDs;
+        SqlCommand sql = TRecord.SQL.SortedID();
 
         try
         {

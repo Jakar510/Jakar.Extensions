@@ -4,11 +4,20 @@
 namespace Jakar.Extensions;
 
 
-public interface IFileMetaData
+public interface IFileMetaData : JsonModels.IJsonModel
 {
     string? FileDescription { get; }
     string? FileName        { get; }
     string? FileType        { get; }
+}
+
+
+
+public interface IFileMetaData<TClass> : IFileMetaData, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : IFileMetaData<TClass>
+{
+    public abstract static TClass  Create( IFileMetaData                                        data );
+    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
 }
 
 
@@ -51,7 +60,7 @@ public interface IFileData<out TID>
 
 public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData, IComparable<TFileMetaData>, IEquatable<TFileMetaData>
+    where TFileMetaData : IFileMetaData<TFileMetaData>
 {
     public TFileMetaData? MetaData { get; }
 }
@@ -61,7 +70,7 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 [SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
 public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<TClass>, IEquatable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData, IComparable<TFileMetaData>, IEquatable<TFileMetaData>
+    where TFileMetaData : IFileMetaData<TFileMetaData>
     where TClass : IFileData<TClass, TID, TFileMetaData>
 {
     public abstract static TClass            Create( IFileData<TID, TFileMetaData>                                        data );
@@ -82,7 +91,7 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
 [SuppressMessage(               "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public abstract record FileData<TClass, TID, TFileMetaData>( MimeType MimeType, long FileSize, string Hash, string Payload, TID ID, TFileMetaData? MetaData ) : BaseRecord<TClass, TID>( ID ), IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData, IComparable<TFileMetaData>, IEquatable<TFileMetaData>
+    where TFileMetaData : IFileMetaData<TFileMetaData>
     where TClass : FileData<TClass, TID, TFileMetaData>, IFileData<TClass, TID, TFileMetaData>
 {
     public                                    MimeType       MimeType { get; init; } = MimeType;
@@ -163,15 +172,19 @@ public static class FileDataExtensions
 
 [Serializable]
 [SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
-public sealed class FileMetaData( string? fileName, string? fileType, string? fileDescription = null ) : IFileMetaData, IEquatable<FileMetaData>, IComparable<FileMetaData>, IComparable
+public sealed class FileMetaData( string? fileName, string? fileType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
 {
-    [StringLength( UNICODE_CAPACITY )] public string? FileName        { get; init; } = fileName;
-    [StringLength( UNICODE_CAPACITY )] public string? FileType        { get; init; } = fileType;
-    [StringLength( UNICODE_CAPACITY )] public string? FileDescription { get; init; } = fileDescription;
+    [StringLength( UNICODE_CAPACITY )] public string?                       FileName        { get; init; } = fileName;
+    [StringLength( UNICODE_CAPACITY )] public string?                       FileType        { get; init; } = fileType;
+    [StringLength( UNICODE_CAPACITY )] public string?                       FileDescription { get; init; } = fileDescription;
+    [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData  { get; set; }
 
 
-    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription ) { }
-    public FileMetaData( LocalFile     value ) : this( value.Name, value.ContentType ) { }
+    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription )
+    {
+        if ( value.AdditionalData is not null ) { AdditionalData = new Dictionary<string, JToken?>( value.AdditionalData ); }
+    }
+    public FileMetaData( LocalFile value ) : this( value.Name, value.ContentType ) { }
 
     public static FileMetaData Create( IFileMetaData data ) => new(data);
     public static FileMetaData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data ) => data is null

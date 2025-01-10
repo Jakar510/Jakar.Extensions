@@ -23,8 +23,8 @@ public readonly struct RecordID<TRecord>( Guid value ) : IEquatable<RecordID<TRe
     [Pure] public static RecordID<TRecord>  New( DateTimeOffset                           timeStamp )                 => Create( Guid.CreateVersion7( timeStamp ) );
     [Pure] public static RecordID<TRecord>  Parse( string                                 value )                     => Create( Guid.Parse( value ) );
     [Pure] public static RecordID<TRecord>  Parse( scoped ref readonly ReadOnlySpan<char> value )                     => Create( Guid.Parse( value ) );
-    [Pure] public static RecordID<TRecord>  ID( DbDataReader                              reader )                    => Create( reader, SQL.ID );
-    [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader                       reader )                    => TryCreate( reader, SQL.CREATED_BY );
+    [Pure] public static RecordID<TRecord>  ID( DbDataReader                              reader )                    => Create( reader, nameof(IRecordPair.ID) );
+    [Pure] public static RecordID<TRecord>? CreatedBy( DbDataReader                       reader )                    => TryCreate( reader, nameof(IOwnedTableRecord.CreatedBy) );
     [Pure] public static RecordID<TRecord>? TryCreate( DbDataReader                       reader, string columnName ) => TryCreate( reader.GetFieldValue<Guid?>( columnName ) );
     [Pure]
     public static RecordID<TRecord>? TryCreate( [NotNullIfNotNull( nameof(id) )] Guid? id ) => id.HasValue
@@ -87,14 +87,15 @@ public readonly struct RecordID<TRecord>( Guid value ) : IEquatable<RecordID<TRe
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          bool   IsValid()                                                                                                                       => Guid.Empty.Equals( value ) is false;
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          bool   IsNotValid()                                                                                                                    => Guid.Empty.Equals( value );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public override string ToString()                                                                                                                      => value.ToString();
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          string ToString( string?            format,      IFormatProvider? formatProvider )                                                     => value.ToString( format, formatProvider );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          bool   TryFormat( Span<char>        destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => value.TryFormat( destination, out charsWritten, format );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          bool   Equals( RecordID<TRecord>    other ) => value.Equals( other.value );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public          int    CompareTo( RecordID<TRecord> other ) => value.CompareTo( other.value );
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public override int    GetHashCode()                        => value.GetHashCode();
+    public          bool   IsValid()                                                                                                                       => Guid.Empty.Equals( value ) is false;
+    public          bool   IsNotValid()                                                                                                                    => Guid.Empty.Equals( value );
+    public override string ToString()                                                                                                                      => value.ToString();
+    public          string ToString( string?            format,      IFormatProvider? formatProvider )                                                     => value.ToString( format, formatProvider );
+    public          bool   TryFormat( Span<char>        destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => value.TryFormat( destination, out charsWritten, format );
+    public          bool   Equals( RecordID<TRecord>    other )          => value.Equals( other.value );
+    public          int    CompareTo( RecordID<TRecord> other )          => value.CompareTo( other.value );
+    public override int    GetHashCode()                                 => value.GetHashCode();
+    public override bool   Equals( [NotNullWhen( true )] object? other ) => other is RecordID<TRecord> id && Equals( id );
 
 
     public static bool operator true( RecordID<TRecord>  recordID )               => recordID.IsValid();

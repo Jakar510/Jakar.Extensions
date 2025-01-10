@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public static class SQL // TODO: move to Jakar.Extensions.Sizes
+public static class Constants // TODO: move to Jakar.Extensions.Sizes
 {
     public const string AND                   = " AND ";
     public const int    ANSI_CAPACITY         = 8000;

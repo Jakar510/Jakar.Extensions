@@ -13,7 +13,7 @@ public partial class DbTable<TRecord>
 
     public virtual async ValueTask<ErrorOrResult<TRecord>> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.first;
+        SqlCommand sql = TRecord.SQL.GetFirst();
 
         try
         {
@@ -24,7 +24,7 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask<ErrorOrResult<TRecord>> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.first;
+        SqlCommand sql = TRecord.SQL.GetFirst();
 
         try
         {

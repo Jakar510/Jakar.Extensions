@@ -58,9 +58,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.21" />
-		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.21" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.21" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.22" />
+		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.22" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.22" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="10.0.0" />
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="5.0.0" />
@@ -91,9 +91,9 @@
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="4.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" Version="4.0.0" />
 		<PackageReference Include="AiForms.Maui.SettingsView" Version="1.0.16" />
-		<PackageReference Include="Jakar.Extensions" Version="9.0.3" />
+		<PackageReference Include="Jakar.Extensions" Version="9.0.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="WifiManager.Maui" Version="2.0.0" />
+		<PackageReference Include="WifiManager.Maui" Version="2.0.2" />
 		<PackageReference Include="Xam.Plugin.Media" Version="6.0.2" />
 	</ItemGroup>
 </Project>

@@ -233,7 +233,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T : IDbReaderMapping<T>
+        where T : IDbReaderMapping<T>, IRecordPair
     {
         DbDataReader reader;
 

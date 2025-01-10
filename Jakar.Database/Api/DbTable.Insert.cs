@@ -34,7 +34,7 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
     {
-        SqlCommand sql = new(TRecord.SQL.insert, record.ToDynamicParameters());
+        SqlCommand sql = TRecord.SQL.Insert( record );
 
         try
         {
