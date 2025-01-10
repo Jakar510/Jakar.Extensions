@@ -10,7 +10,7 @@ public abstract class BaseFileSystemApi : IFilePaths
     public             LocalFile      AppStateFile      { get; }
     public             LocalDirectory CacheDirectory    { get; }
     public             LocalFile      DebugFile         { get; }
-    public             LocalFile      FeedBackFile      { get; }
+    public             LocalFile      FeedbackFile      { get; }
     public             LocalFile      IncomingFile      { get; }
     public             LocalFile      OutgoingFile      { get; }
     public             LocalFile      ScreenShot        { get; }
@@ -25,7 +25,7 @@ public abstract class BaseFileSystemApi : IFilePaths
         ZipFile          = AppDataDirectory.Join( "AppData.zip" );
         AppStateFile     = CacheDirectory.Join( "AppState.json" );
         DebugFile        = CacheDirectory.Join( "debug.txt" );
-        FeedBackFile     = CacheDirectory.Join( "feedback.json" );
+        FeedbackFile     = CacheDirectory.Join( "feedback.json" );
         IncomingFile     = CacheDirectory.Join( "Incoming.json" );
         OutgoingFile     = CacheDirectory.Join( "Outgoing.json" );
         ScreenShot       = CacheDirectory.Join( "ScreenShot.png" );
@@ -34,7 +34,6 @@ public abstract class BaseFileSystemApi : IFilePaths
     {
         foreach ( LocalFile file in CacheDirectory.GetFiles() ) { file.Delete(); }
     }
-
 
 
     public async ValueTask<LocalFile> SaveFileAsync( string filename, Stream stream, CancellationToken token )

@@ -1,22 +1,31 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add watcher to update if file changes
+public abstract class PreferenceFile<TClass> : ObservableClass, IAsyncDisposable
+    where TClass : PreferenceFile<TClass>, new()
 {
-    private readonly object     _lock = new();
-    protected        DateTime   _lastWriteTimeUtc;
-    private          IniConfig? _config;
-    protected        LocalFile? _file;
-    public IniConfig Config
+#if NET9_0_OR_GREATER
+    private readonly Lock _lock = new();
+#else
+    private readonly object _lock = new();
+#endif
+    protected        DateTime                _lastWriteTimeUtc;
+    protected        IniConfig?              _config;
+    private readonly LocalFile               _file = $"{typeof(TClass).Name}.ini";
+    protected        LocalDirectory.Watcher? _watcher;
+
+
+    public virtual IniConfig Config
     {
         get
         {
             lock (_lock)
             {
-                if ( LastWriteTimeUtc <= _lastWriteTimeUtc ) { return _config ??= IniConfig.ReadFromFile( File ); }
+                if ( _config is not null && LastWriteTimeUtc > _lastWriteTimeUtc ) { return _config; }
 
+                _config           = IniConfig.ReadFromFile( _file );
                 _lastWriteTimeUtc = LastWriteTimeUtc;
-                return _config = IniConfig.ReadFromFile( File );
+                return _config;
             }
         }
         protected set
@@ -24,40 +33,60 @@ public class PreferenceFile : ObservableClass, IAsyncDisposable // TODO: Add wat
             lock (_lock) { SetProperty( ref _config, value ); }
         }
     }
-    public LocalFile File => _file ??= $"{GetType().Name}.ini";
-
-
-    protected internal DateTime LastWriteTimeUtc => File.Info.LastWriteTimeUtc;
-
-
-    public PreferenceFile() { }
-    public PreferenceFile( LocalFile file ) => _file = file;
-
-
-    public static PreferenceFile Create() => new();
-    public static async ValueTask<PreferenceFile> CreateAsync()
+    public LocalFile File
     {
-        PreferenceFile result = new();
-        await result.LoadAsync();
-        return result;
+        get => _file;
+        init
+        {
+            _file = value;
+            if ( string.IsNullOrWhiteSpace( _file.DirectoryName ) ) { return; }
+
+            _watcher         =  new LocalDirectory.Watcher( _file.DirectoryName );
+            _watcher.Changed += WatcherOnChanged;
+        }
     }
-    public static PreferenceFile Create( LocalFile file ) => new(file);
-    public static async ValueTask<PreferenceFile> CreateAsync( LocalFile file )
-    {
-        PreferenceFile result = new( file );
-        await result.LoadAsync();
-        return result;
-    }
-    protected ValueTask SaveAsync() => Config.WriteToFile( File );
 
 
-    protected async ValueTask<IniConfig> LoadAsync() => Config = await IniConfig.ReadFromFileAsync( File );
+    protected internal DateTime LastWriteTimeUtc => _file.Info.LastWriteTimeUtc;
 
-
+    protected PreferenceFile() { }
     public virtual async ValueTask DisposeAsync()
     {
+        if ( _watcher is not null )
+        {
+            _watcher.Changed -= WatcherOnChanged;
+            _watcher.Dispose();
+            _watcher = null;
+        }
+
         await SaveAsync();
-        _file?.Dispose();
-        _file = null;
+        GC.SuppressFinalize( this );
+    }
+
+
+    public virtual async    Task SaveAsync() => await Config.WriteToFile( _file );
+    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync( _file );
+    protected virtual void WatcherOnChanged( object sender, FileSystemEventArgs e )
+    {
+        if ( string.Equals( e.Name, _file.Name, StringComparison.Ordinal ) is false ) { return; }
+
+        _ = LoadAsync();
+    }
+
+
+    public static TClass Create()                   => new();
+    public static TClass Create( IniConfig config ) => new() { Config = config };
+    public static async ValueTask<TClass> CreateAsync()
+    {
+        TClass result = new();
+        await result.LoadAsync();
+        return result;
+    }
+    public static TClass Create( LocalFile file ) => new() { File = file };
+    public static async ValueTask<TClass> CreateAsync( LocalFile file )
+    {
+        TClass result = Create( file );
+        await result.LoadAsync();
+        return result;
     }
 }

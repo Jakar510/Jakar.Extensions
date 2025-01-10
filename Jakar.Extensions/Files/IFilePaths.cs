@@ -8,7 +8,7 @@ public interface IFilePaths
     public LocalFile      AppStateFile     { get; }
     public LocalDirectory CacheDirectory   { get; }
     public LocalFile      DebugFile        { get; }
-    public LocalFile      FeedBackFile     { get; }
+    public LocalFile      FeedbackFile     { get; }
     public LocalFile      IncomingFile     { get; }
     public LocalFile      OutgoingFile     { get; }
     public LocalFile      ScreenShot       { get; }
