@@ -1,10 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 06/12/2024  11:06
 
+using Microsoft.AspNetCore.Authorization;
+
+
+
 namespace Jakar.Extensions.Blazor;
 
 
-public interface ILoginUserState : ICascadingValueName, INotifyPropertyChanged
+public interface ILoginUserState : ICascadingValueName, INotifyPropertyChanged, IAuthorizationHandler
 {
     UserModel?                Model      { get; set; }
     Guid?                     UserID     { get; set; }
@@ -40,14 +44,18 @@ public class LoginUserState( HttpContext context, IAuthenticationService authent
     public static LoginUserState Get( IServiceProvider provider ) => provider.GetRequiredService<LoginUserState>();
 
 
+    public async Task HandleAsync( AuthorizationHandlerContext context ) { await Login( context.User, Properties ); }
+
+
     public virtual Task Login( UserModel model, AuthenticationProperties? properties = null )
     {
-        Model = model;
+        Model  = model;
+        UserID = model.ID;
         return Login( new ClaimsIdentity( model.GetClaims(), AuthenticationScheme ), properties );
     }
-    public virtual Task Login( ClaimsIdentity  model, AuthenticationProperties? properties = null ) => Login( new ClaimsPrincipal( model ), properties );
-    public virtual Task Login( ClaimsPrincipal model, AuthenticationProperties? properties = null ) => _authentication.SignInAsync( _context, AuthenticationScheme, model, Properties = properties );
-    public virtual Task Logout() => _authentication.SignOutAsync( _context, AuthenticationScheme, Properties );
+    public virtual       Task Login( ClaimsIdentity  model, AuthenticationProperties? properties = null ) => Login( new ClaimsPrincipal( model ), properties );
+    public virtual async Task Login( ClaimsPrincipal model, AuthenticationProperties? properties = null ) => await _authentication.SignInAsync( _context, AuthenticationScheme, model, Properties = properties );
+    public virtual async Task Logout() => await _authentication.SignOutAsync( _context, AuthenticationScheme, Properties );
 }
 
 
@@ -57,3 +65,7 @@ public interface ILoginState<T>
 {
     [CascadingParameter( Name = LoginUserState.KEY )] public T User { get; set; }
 }
+
+
+
+public interface ILoginState : ILoginState<LoginUserState>;

@@ -1,4 +1,15 @@
-﻿namespace Jakar.Extensions.Blazor;
+﻿using Blazored.LocalStorage;
+using Blazored.LocalStorage.StorageOptions;
+using Blazored.Modal;
+using Blazored.SessionStorage;
+using Blazored.SessionStorage.StorageOptions;
+using Blazored.Toast;
+using MudBlazor.Services;
+using Radzen;
+
+
+
+namespace Jakar.Extensions.Blazor;
 
 
 /// <summary>
@@ -20,19 +31,24 @@
 /// </summary>
 public static class BlazorBuilder
 {
-    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null ) =>
-        services.AddBlazorServices<LoginUserState, ModelErrorState>( configureLocal, configureSession );
-    public static IServiceCollection AddBlazorServices<TLoginState, TErrorState>( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null )
-        where TLoginState : class, ILoginUserState
-        where TErrorState : class, IModelErrorState
+    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null, Action<MudServicesConfiguration>? mudConfiguration = null, string defaultAuthenticationScheme = JwtBearerDefaults.AuthenticationScheme )
     {
-        services.AddAuthentication();
+        services.AddAuthentication( defaultAuthenticationScheme );
         services.AddAuthorization();
-        services.TryAddCascadingValueScopedNamed<TLoginState>();
-        services.TryAddCascadingValueScopedNamed<TErrorState>();
-        services.AddBlazoredModal().AddBlazoredToast().AddBlazoredLocalStorage( configureLocal ).AddBlazoredSessionStorage( configureSession );
+        services.TryAddCascadingValueScopedNamed<LoginUserState>();
+        services.TryAddCascadingValueScopedNamed<ModelErrorState>();
+
+        if ( mudConfiguration is not null ) { services.AddMudServices( mudConfiguration ); }
+        else { services.AddMudServices(); }
+
+        services.AddBlazoredModal();
+        services.AddBlazoredToast();
+        services.AddBlazoredLocalStorage( configureLocal );
+        services.AddBlazoredSessionStorage( configureSession );
         services.AddRadzenComponents();
-        services.TryAddScoped<BlazorServices>();
+        services.AddRadzenCookieThemeService();
+        services.AddRadzenQueryStringThemeService();
+        services.TryAddScoped( BlazorServices.Create );
         return services;
     }
 }

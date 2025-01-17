@@ -10,9 +10,10 @@
     <PackageReference Include="Jakar.Database" Version="7.0.0.27-beta" />
     <PackageReference Include="Jakar.Extensions.Blazor" Version="9.0.0" />
     <PackageReference Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
     <PackageReference Include="MimeKit" Version="4.9.0" />
-    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="MudBlazor" Version="8.0.0-rc.2" />
+    <PackageReference Include="System.Text.Json" Version="9.0.1" />
   </ItemGroup>
 
   <ItemGroup>

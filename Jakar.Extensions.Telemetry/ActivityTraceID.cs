@@ -97,7 +97,9 @@ public readonly struct ActivityTraceID : IEquatable<ActivityTraceID>
         return isNonZero;
     }
 
-    public static string Collate( IEnumerable<ActivityTraceID> spans ) => string.Join( '|', spans.Select( static x => x._hexString ) );
+
+    public static string Collate( IEnumerable<ActivityTraceID> spans ) => $"|{string.Join( '|', spans.Select( static x => x._hexString ) )}";
+
 
     public static bool operator ==( ActivityTraceID traceId1, ActivityTraceID traceId2 ) => traceId1._hexString == traceId2._hexString;
     public static bool operator !=( ActivityTraceID traceId1, ActivityTraceID traceId2 ) => traceId1._hexString != traceId2._hexString;

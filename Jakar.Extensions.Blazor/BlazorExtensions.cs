@@ -79,7 +79,7 @@ public static class BlazorExtensions
     public static IServiceCollection TryAddCascadingValueSingleton<TClass>( this IServiceCollection services )
         where TClass : class, INotifyPropertyChanged
     {
-        services.AddSingleton<TClass>();
+        services.TryAddSingleton<TClass>();
 
         services.TryAddCascadingValue( static provider =>
                                        {
@@ -95,7 +95,7 @@ public static class BlazorExtensions
     public static IServiceCollection TryAddCascadingValueSingleton<TClass>( this IServiceCollection services, TClass instance )
         where TClass : class, INotifyPropertyChanged
     {
-        services.AddSingleton( instance );
+        services.TryAddSingleton( instance );
 
         services.TryAddCascadingValue( static provider =>
                                        {
@@ -114,7 +114,7 @@ public static class BlazorExtensions
         where TInterface : class, INotifyPropertyChanged
         where TClass : class, TInterface
     {
-        services.AddSingleton<TInterface, TClass>();
+        services.TryAddSingleton<TInterface, TClass>();
 
         services.TryAddCascadingValue( static provider =>
                                        {
@@ -131,7 +131,7 @@ public static class BlazorExtensions
         where TInterface : class, INotifyPropertyChanged
         where TClass : class, TInterface
     {
-        services.AddSingleton<TInterface>( instance );
+        services.TryAddSingleton<TInterface>( instance );
 
         services.TryAddCascadingValue( static provider =>
                                        {
@@ -149,7 +149,7 @@ public static class BlazorExtensions
     public static IServiceCollection TryAddCascadingValueSingletonNamed<TClass>( this IServiceCollection services )
         where TClass : class, INotifyPropertyChanged, ICascadingValueName
     {
-        services.AddSingleton<TClass>();
+        services.TryAddSingleton<TClass>();
 
         services.TryAddCascadingValue( static provider =>
                                        {
@@ -165,7 +165,7 @@ public static class BlazorExtensions
     public static IServiceCollection TryAddCascadingValueSingletonNamed<TClass>( this IServiceCollection services, TClass instance )
         where TClass : class, INotifyPropertyChanged, ICascadingValueName
     {
-        services.AddSingleton( instance );
+        services.TryAddSingleton( instance );
 
         services.TryAddCascadingValue( static provider =>
                                        {

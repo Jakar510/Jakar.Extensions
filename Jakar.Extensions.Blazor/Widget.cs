@@ -5,25 +5,19 @@ namespace Jakar.Extensions.Blazor;
 
 
 public interface IWidget<TLoginState, TErrorState> : IModelState<TErrorState>, ILoginState<TLoginState>
-    where TLoginState :  ILoginUserState
-    where TErrorState :  IModelErrorState;
+    where TLoginState : ILoginUserState
+    where TErrorState : IModelErrorState;
 
 
 
+public interface IWidget : IWidget<LoginUserState, ModelErrorState>, IModelState, ILoginState;
 
 
 
-public abstract class Widget<TLoginState, TErrorState> : ComponentBase, IWidget<TLoginState, TErrorState>
-    where TLoginState :  ILoginUserState
-    where TErrorState :  IModelErrorState
+public abstract class Widget : ComponentBase, IWidget
 {
-    [CascadingParameter( Name = ModelErrorState.KEY )] public required TErrorState State { get; set; }
-    [CascadingParameter( Name = LoginUserState.KEY )]  public required TLoginState User  { get; set; }
-
+    [CascadingParameter( Name = ModelErrorState.KEY )] public required ModelErrorState State { get; set; }
+    [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
 
     // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
 }
-
-
-
-public abstract class Widget : Widget<LoginUserState, ModelErrorState> { }

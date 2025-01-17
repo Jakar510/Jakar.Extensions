@@ -42,7 +42,7 @@ public class ModelErrorState : ObservableClass, IModelErrorState
             if ( SetProperty( ref _errorText, value ) ) { OnPropertyChanged( nameof(HasError) ); }
         }
     }
-    public virtual bool HasError => !string.IsNullOrEmpty( ErrorText ) || State.ErrorCount > 0;
+    public virtual bool HasError => string.IsNullOrEmpty( ErrorText ) is false || _state.ErrorCount > 0;
     public virtual ModelStateDictionary State
     {
         get => _state;
@@ -58,72 +58,72 @@ public class ModelErrorState : ObservableClass, IModelErrorState
 
     public virtual bool TryAddModelException( string key, Exception exception )
     {
-        bool result = State.TryAddModelException( key, exception );
-        OnPropertyChanged( nameof(State) );
+        bool result = _state.TryAddModelException( key, exception );
+        OnPropertyChanged( nameof(_state) );
         return result;
     }
     public virtual void AddModelError( string key, Exception exception, ModelMetadata metadata )
     {
-        State.AddModelError( key, exception, metadata );
-        OnPropertyChanged( nameof(State) );
+        _state.AddModelError( key, exception, metadata );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual bool TryAddModelError( string key, Exception exception, ModelMetadata metadata )
     {
-        bool result = State.TryAddModelError( key, exception, metadata );
-        OnPropertyChanged( nameof(State) );
+        bool result = _state.TryAddModelError( key, exception, metadata );
+        OnPropertyChanged( nameof(_state) );
         return result;
     }
     public virtual void AddModelError( string key, string errorMessage )
     {
-        State.AddModelError( key, errorMessage );
-        OnPropertyChanged( nameof(State) );
+        _state.AddModelError( key, errorMessage );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual bool TryAddModelError( string key, string errorMessage )
     {
-        bool result = State.TryAddModelError( key, errorMessage );
-        OnPropertyChanged( nameof(State) );
+        bool result = _state.TryAddModelError( key, errorMessage );
+        OnPropertyChanged( nameof(_state) );
         return result;
     }
     public virtual void MarkFieldValid( string key )
     {
-        State.MarkFieldValid( key );
-        OnPropertyChanged( nameof(State) );
+        _state.MarkFieldValid( key );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void MarkFieldSkipped( string key )
     {
-        State.MarkFieldSkipped( key );
-        OnPropertyChanged( nameof(State) );
+        _state.MarkFieldSkipped( key );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void Merge( ModelStateDictionary dictionary )
     {
-        State.Merge( dictionary );
-        OnPropertyChanged( nameof(State) );
+        _state.Merge( dictionary );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void SetModelValue( string key, object? rawValue, string? attemptedValue )
     {
-        State.SetModelValue( key, rawValue, attemptedValue );
-        OnPropertyChanged( nameof(State) );
+        _state.SetModelValue( key, rawValue, attemptedValue );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void SetModelValue( string key, ValueProviderResult valueProviderResult )
     {
-        State.SetModelValue( key, valueProviderResult );
-        OnPropertyChanged( nameof(State) );
+        _state.SetModelValue( key, valueProviderResult );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void ClearValidationState( string key )
     {
-        State.ClearValidationState( key );
-        OnPropertyChanged( nameof(State) );
+        _state.ClearValidationState( key );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void Remove( string key )
     {
-        State.Remove( key );
-        OnPropertyChanged( nameof(State) );
+        _state.Remove( key );
+        OnPropertyChanged( nameof(_state) );
     }
     public virtual void Clear()
     {
         ErrorText = null;
-        State.Clear();
-        OnPropertyChanged( nameof(State) );
+        _state.Clear();
+        OnPropertyChanged( nameof(_state) );
     }
 }
 
@@ -134,3 +134,7 @@ public interface IModelState<T>
 {
     [CascadingParameter( Name = ModelErrorState.KEY )] public T State { get; set; }
 }
+
+
+
+public interface IModelState : IModelState<ModelErrorState>;

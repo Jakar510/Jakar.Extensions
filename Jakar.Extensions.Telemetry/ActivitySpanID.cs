@@ -65,7 +65,9 @@ public readonly struct ActivitySpanID : IEquatable<ActivitySpanID>
     public bool CopyTo( Span<byte> destination )                       => Convert.FromHexString( _hexString, destination, out _, out _ ) is OperationStatus.Done;
     public bool CopyTo( Span<byte> destination, out int bytesWritten ) => Convert.FromHexString( _hexString, destination, out _, out bytesWritten ) is OperationStatus.Done;
 
-    public static string Collate( IEnumerable<ActivitySpanID> spans ) => string.Join( '|', spans.Select( static x => x._hexString ) );
+
+    public static string Collate( IEnumerable<ActivitySpanID> spans ) => $"|{string.Join( '|', spans.Select( static x => x._hexString ) )}";
+
 
     public static bool operator ==( ActivitySpanID left, ActivitySpanID right ) => left._hexString == right._hexString;
     public static bool operator !=( ActivitySpanID left, ActivitySpanID right ) => left._hexString != right._hexString;

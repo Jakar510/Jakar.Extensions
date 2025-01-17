@@ -1,16 +1,48 @@
-﻿namespace Jakar.Extensions.Telemetry;
+﻿using System.Text;
 
 
-public readonly struct TelemetryContext( string name, AppContext appContext, ActivityTraceID traceID, ActivitySpanID spanID )
+
+namespace Jakar.Extensions.Telemetry;
+
+
+public interface ITelemetryContext
 {
-    public string          Name       { get; } = name;
-    public AppContext      AppContext { get; } = appContext;
-    public ActivityTraceID TraceID    { get; } = traceID;
-    public ActivitySpanID  SpanID     { get; } = spanID;
+    string     CategoryName { get; }
+    AppContext AppContext   { get; }
+    string     TraceID      { get; }
+    string     SpanID       { get; }
+}
 
 
-    public TelemetryContext CreateChild( string name ) => new(name, AppContext, TraceID, ActivitySpanID.CreateRandom());
 
+public sealed class TelemetryContext( string categoryName, AppContext appContext, ActivityTraceID traceID, ActivitySpanID spanID ) : ITelemetryContext
+{
+    public string            CategoryName { get; init; } = categoryName;
+    public AppContext        AppContext   { get; init; } = appContext;
+    public ActivityTraceID   TraceID      { get; init; } = traceID;
+    public ActivitySpanID    SpanID       { get; init; } = spanID;
+    string ITelemetryContext.TraceID      => TraceID.ToString();
+    string ITelemetryContext.SpanID       => SpanID.ToString();
+    public TelemetryContext? Parent       { get; init; }
+
+
+    public TelemetryContext CreateChild( string name ) => new(name, AppContext, TraceID, ActivitySpanID.CreateRandom()) { Parent = this };
+
+    public string GetSpanID()
+    {
+        StringBuilder sb = new(1024);
+        sb.Append( '|' );
+        ActivitySpanID? spanID = SpanID;
+
+        while ( spanID.HasValue )
+        {
+            sb.Append( spanID.Value.ToString() );
+            spanID = Parent?.SpanID;
+            if ( spanID.HasValue ) { sb.Append( '|' ); }
+        }
+
+        return sb.ToString();
+    }
 
     public static TelemetryContext Create<TApp>( ActivityTraceID? traceID = null, ActivitySpanID? spanID = null )
         where TApp : IAppID => Create( TApp.AppName, AppContext.Create<TApp>(), traceID, spanID );

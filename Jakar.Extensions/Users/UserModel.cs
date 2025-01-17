@@ -144,7 +144,11 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
 
     protected UserModel() : base() { }
-    protected UserModel( IUserData<TID> value ) : base( value.ID ) => With( value );
+    protected UserModel( IUserData<TID> value ) : base( value.ID )
+    {
+        With( value );
+        if ( value is IUserData<Guid> data ) { UserID = data.ID; }
+    }
     protected UserModel( string firstName, string lastName )
     {
         _firstName = firstName;
