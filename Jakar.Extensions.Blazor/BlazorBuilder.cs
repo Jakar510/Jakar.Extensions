@@ -4,6 +4,7 @@ using Blazored.Modal;
 using Blazored.SessionStorage;
 using Blazored.SessionStorage.StorageOptions;
 using Blazored.Toast;
+using Microsoft.AspNetCore.Authorization;
 using MudBlazor.Services;
 using Radzen;
 
@@ -13,6 +14,12 @@ namespace Jakar.Extensions.Blazor;
 
 
 /// <summary>
+///     <para>
+///         <see href="https://github.com/syncfusion/maui-toolkit"/>
+///     </para>
+///     <para>
+///         <see href="https://github.com/MudBlazor/MudBlazor"/>
+///     </para>
 ///     <para>
 ///         <see href="https://blazor.radzen.com/get-started"/>
 ///     </para>
@@ -31,10 +38,17 @@ namespace Jakar.Extensions.Blazor;
 /// </summary>
 public static class BlazorBuilder
 {
-    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null, Action<MudServicesConfiguration>? mudConfiguration = null, string defaultAuthenticationScheme = JwtBearerDefaults.AuthenticationScheme )
+    public static IServiceCollection AddBlazorServices( this IServiceCollection services, Action<AuthorizationOptions>? authorization = null, Action<AuthenticationOptions>? authentication = null, Action<LocalStorageOptions>? configureLocal = null, Action<SessionStorageOptions>? configureSession = null, Action<MudServicesConfiguration>? mudConfiguration = null )
     {
-        services.AddAuthentication( defaultAuthenticationScheme );
-        services.AddAuthorization();
+        services.AddAuthentication( x =>
+                                    {
+                                        x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                                        authentication?.Invoke( x );
+                                    } );
+
+        if ( authorization is not null ) { services.AddAuthorization( authorization ); }
+        else { services.AddAuthorization(); }
+
         services.TryAddCascadingValueScopedNamed<LoginUserState>();
         services.TryAddCascadingValueScopedNamed<ModelErrorState>();
 

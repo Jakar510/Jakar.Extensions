@@ -211,10 +211,6 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
             foreach ( TValue value in values ) { base.Add( value ); }
         }
     }
-    public override void Add( scoped in ReadOnlySpan<TValue> values )
-    {
-        using ( AcquireLock() ) { base.Add( values ); }
-    }
 
 
     public override void AddOrUpdate( TValue value )

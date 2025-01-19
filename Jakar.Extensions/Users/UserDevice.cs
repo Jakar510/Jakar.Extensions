@@ -8,6 +8,13 @@ public interface IDeviceID
 
 
 
+public interface IDeviceName
+{
+    public string DeviceName { get; }
+}
+
+
+
 public interface IUserDevice<out TID> : IUniqueID<TID>, IDeviceID
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {

@@ -4,7 +4,14 @@
 namespace Jakar.Extensions.Blazor;
 
 
-public static class BlazorExtensions
+public interface ICascadingValueName
+{
+    public abstract static string CascadingName { get; }
+}
+
+
+
+public static class CascadingValueNameExtensions
 {
     public static IServiceCollection TryAddCascadingValueScoped<TClass>( this IServiceCollection services )
         where TClass : class, INotifyPropertyChanged

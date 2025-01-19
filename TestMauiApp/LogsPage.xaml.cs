@@ -17,7 +17,7 @@ public sealed partial class LogsPage : ContentPage
         InitializeComponent();
         BindingContext = this;
         RefreshCommand = new AsyncRelayCommand( RefreshAsync );
-        _logger        = App.Serilogger.CreateLogger<LogsPage>();
+        _logger        = App.Logger.CreateLogger<LogsPage>();
     }
     protected override void OnAppearing()    => RefreshCommand.Execute( null );
     protected override void OnDisappearing() => Files.Clear();
@@ -29,7 +29,7 @@ public sealed partial class LogsPage : ContentPage
         {
             IsBusy = true;
             Files.Clear();
-            foreach ( LocalFile file in App.Serilogger.LogsDirectory.GetFiles() ) { Files.Add( await FileLogs.Create( file, token ) ); }
+            foreach ( LocalFile file in App.Logger.Paths.Logs.GetFiles() ) { Files.Add( await FileLogs.Create( file, token ) ); }
         }
         finally { IsBusy = false; }
     }

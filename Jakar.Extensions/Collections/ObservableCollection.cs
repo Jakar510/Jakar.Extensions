@@ -442,9 +442,8 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
         foreach ( TValue value in values ) { InternalAdd( value ); }
     }
-    public virtual void Add( scoped in ReadOnlySpan<TValue>   values ) => InternalAdd( values );
-    public         void Add( scoped in ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
-    public         void Add( scoped in ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
+    public void Add( scoped in ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
+    public void Add( scoped in ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 
 
     public virtual void AddOrUpdate( TValue value ) { InternalAddOrUpdate( value ); }

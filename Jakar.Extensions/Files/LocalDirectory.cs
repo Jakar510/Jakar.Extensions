@@ -289,7 +289,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     }
 
 
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
@@ -306,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return zipFilePath;
     }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
@@ -323,7 +323,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return zipFilePath;
     }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
@@ -340,7 +340,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return zipFilePath;
     }
-    public async ValueTask<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );

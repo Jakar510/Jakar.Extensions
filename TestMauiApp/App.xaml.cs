@@ -7,8 +7,8 @@ namespace TestMauiApp;
 
 public sealed partial class App : Application, IDisposable
 {
-    public static     Serilogger<TestMauiApp> Serilogger { get; } = new(FileSystem.AppDataDirectory);
-    public new static App                     Current    => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public static     Serilogger Logger  { get; } = Serilogger.Create<TestMauiApp, DebugSettings>( new FilePaths( FileSystem.AppDataDirectory, FileSystem.CacheDirectory ) );
+    public new static App        Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
 
 
     public App() : base()
@@ -26,7 +26,6 @@ public sealed partial class App : Application, IDisposable
     public void Dispose()
     {
         Log.CloseAndFlush();
-        Serilogger.Dispose();
-        GC.SuppressFinalize( this );
+        Logger.Dispose();
     }
 }

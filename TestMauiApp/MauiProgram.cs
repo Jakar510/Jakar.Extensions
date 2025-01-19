@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Maui;
+using Serilog;
 
 
 
@@ -24,7 +25,7 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
 
-        App.Serilogger.Configure( builder.Logging );
+        builder.Logging.AddSerilog( App.Logger );
         return builder.Build();
     }
 }

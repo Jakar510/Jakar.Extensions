@@ -61,7 +61,6 @@ public interface ICollectionAdd<TValue>
     void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values );
     void Add( scoped in ReadOnlyMemory<TValue>                             values );
     void Add( scoped in ImmutableArray<TValue>                             values );
-    void Add( scoped in ReadOnlySpan<TValue>                               values );
     void Add( IEnumerable<TValue>                                          enumerable );
     bool TryAdd( TValue                                                    value );
     void AddOrUpdate( TValue                                               value );

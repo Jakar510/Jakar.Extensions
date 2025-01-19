@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 09/26/2022  10:09 AM
 
+using Blazored.Modal;
+
+
+
 namespace Jakar.Extensions.Blazor;
 
 
