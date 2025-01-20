@@ -7,7 +7,7 @@ namespace TestMauiApp;
 
 public sealed partial class App : Application, IDisposable
 {
-    public static     Serilogger Logger  { get; } = Serilogger.Create<TestMauiApp, DebugSettings>( new FilePaths( FileSystem.AppDataDirectory, FileSystem.CacheDirectory ) );
+    public static     Serilogger Logger  { get; } = Serilogger.Create<TestMauiApp>( new FilePaths( FileSystem.AppDataDirectory, FileSystem.CacheDirectory ) );
     public new static App        Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
 
 

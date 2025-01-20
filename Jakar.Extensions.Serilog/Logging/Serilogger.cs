@@ -20,35 +20,36 @@ namespace Jakar.Extensions.Serilog;
 
 
 [SuppressMessage( "ReSharper", "AsyncVoidLambda" ), SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Local" )]
-public sealed class Serilogger : ISerilogger, IAsyncDisposable
+public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger, IAsyncDisposable
+    where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings>, ICreateSerilogger<TSerilogger>
+    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
 {
-    public const            string                CONSOLE_DEFAULT_OUTPUT_TEMPLATE     = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public const            string                DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public const            long                  DEFAULT_FILE_SIZE_LIMIT_BYTES       = 1L * 1024 * 1024 * 1024; // 1GB
-    public const            int                   DEFAULT_RETAINED_FILE_COUNT_LIMIT   = 31;                      // A long month of logs
-    public const            string                SEQ_API_KEY                         = "EhpGe4rqAbSEph5OpA4j";
-    public const            string                SEQ_API_KEY_NAME                    = "X-Seq-ApiKey";
-    public const            string                SEQ_API_URL                         = "http://192.168.2.12:5341";
-    public const            string                SEQ_API_URL_FULL                    = $"{SEQ_API_URL}/ingest/otlp";
-    public const            string                SEQ_BUFFER_DIRECTORY                = "SeqBuffer";
-    public const            string                SHARED_NAME                         = "Serilogger";
-    private static          Guid?                 _deviceID;
-    private static          long?                 _deviceIDLong;
-    private static readonly object[]              _noPropertyValues = [];
-    public static readonly  Guid                  DebugID           = Guid.Parse( "5C2064EF-F418-48AB-9C3D-536DADCE6E88" );
-    public static readonly  FileData[]            Empty             = [];
-    private readonly        SerilogLoggerProvider _provider;
-    private                 bool                  _canDebug = true;
-    private                 IDebugSettings        _settings;
-    private                 LocalFile?            _screenShotAddress;
+    public const            string                            CONSOLE_DEFAULT_OUTPUT_TEMPLATE     = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public const            string                            DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
+    public const            long                              DEFAULT_FILE_SIZE_LIMIT_BYTES       = 1L * 1024 * 1024 * 1024; // 1GB
+    public const            int                               DEFAULT_RETAINED_FILE_COUNT_LIMIT   = 31;                      // A long month of logs
+    public const            string                            SEQ_API_KEY                         = "EhpGe4rqAbSEph5OpA4j";
+    public const            string                            SEQ_API_KEY_NAME                    = "X-Seq-ApiKey";
+    public const            string                            SEQ_API_URL                         = "http://192.168.2.12:5341";
+    public const            string                            SEQ_API_URL_FULL                    = $"{SEQ_API_URL}/ingest/otlp";
+    public const            string                            SEQ_BUFFER_DIRECTORY                = "SeqBuffer";
+    public const            string                            SHARED_NAME                         = "Serilogger";
+    private static          Guid?                             _deviceID;
+    private static          long?                             _deviceIDLong;
+    private static readonly object[]                          _noPropertyValues = [];
+    public static readonly  FileData[]                        Empty             = [];
+    private readonly        SerilogLoggerProvider             _provider;
+    private readonly        Synchronized<TSeriloggerSettings> _settings;
+    private                 LocalFile?                        _screenShotAddress;
 
 
     public static bool ApplyThemeToRedirectedOutput { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static Guid DebugID                      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = Guid.NewGuid();
     public static Guid DeviceID
     {
         get
         {
-            if ( Instance?.CanDebug is true ) { return DebugID; }
+            if ( Instance?.Settings.IsDebuggable is true ) { return DebugID; }
 
             if ( _deviceID.HasValue ) { return _deviceID.Value; }
 
@@ -80,45 +81,29 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
             Activity.Current?.SetTag( nameof(DeviceIDLong), value.ToString() );
         }
     }
-    public static   string                     DeviceName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = string.Empty;
-    public static   FileLifecycleHooks?        Hooks        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static   Serilogger?                Instance     { get;                                                      private set; }
-    public static   LoggingLevelSwitch         LoggingLevel { get; } = new(LogEventLevel.Verbose);
-    public static   IAsyncLogEventSinkMonitor? Monitor      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static   object?                    SyncRoot     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static   ConsoleTheme?              Theme        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public          Activity                   Activity     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public required Guid                       AppID        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Guid.Empty;
-    public required string                     AppName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = string.Empty;
-    public required AppVersion                 AppVersion   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public bool CanDebug
-    {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _canDebug;
-        set
-        {
-            _canDebug = value;
-
-            LoggingLevel.MinimumLevel = value
-                                            ? LogEventLevel.Verbose
-                                            : LogEventLevel.Information;
-        }
-    }
-    public bool                     CannotDebug       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = Debugger.IsAttached is false;
-    Guid IDeviceID.                 DeviceID          => DeviceID;
-    string IDeviceName.             DeviceName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DeviceName; }
-    public bool                     Disabled          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Enabled is false; }
-    public bool                     Enabled           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.EnableApi; }
-    public bool                     EnableDebugEvents { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public DebugLogEvent.Collection Events            { get; } = [];
-    public bool                     IsValid           => DeviceID.IsValidID() || DeviceIDLong != 0;
-    public Logger                   Logger            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public MessageEvent.Collection  Messages          { get; } = [];
-
-
-    public required FilePaths Paths { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static   string                     DeviceName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = string.Empty;
+    public static   FileLifecycleHooks?        Hooks             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static   TSerilogger?               Instance          { get;                                                      private set; }
+    public static   IAsyncLogEventSinkMonitor? Monitor           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static   object?                    SyncRoot          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public static   ConsoleTheme?              Theme             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public          Activity                   Activity          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public required Guid                       AppID             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Guid.Empty;
+    public required string                     AppName           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = string.Empty;
+    public required AppVersion                 AppVersion        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public          bool                       CannotDebug       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.EnableApi is false; }
+    Guid IDeviceID.                            DeviceID          => DeviceID;
+    string IDeviceName.                        DeviceName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => DeviceName; }
+    public bool                                Disabled          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Enabled is false; }
+    public bool                                Enabled           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.EnableApi; }
+    public bool                                EnableDebugEvents { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public DebugLogEvent.Collection            Events            { get; } = [];
+    public bool                                IsValid           => DeviceID.IsValidID() || DeviceIDLong != 0;
+    public Logger                              Logger            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public MessageEvent.Collection             Messages          { get; } = [];
     public LocalFile? ScreenShotAddress
     {
-        get => _screenShotAddress ??= Paths.Cache.Join( IFilePaths.SCREEN_SHOT_FILE );
+        get => _screenShotAddress ??= Settings.Paths.Cache.Join( IFilePaths.SCREEN_SHOT_FILE );
         set
         {
             _screenShotAddress?.Dispose();
@@ -126,33 +111,73 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
         }
     }
     public          ReadOnlyMemory<byte>                                     ScreenShotData     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;              internal set; }
-    public          IDebugSettings                                           Settings           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _settings; init => _settings = value; }
+    public          TSeriloggerSettings                                      Settings           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _settings; set => _settings.Value = value; }
     public required Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;              init; }
     public required Func<EventDetails, EventDetails>                         UpdateEventDetails { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;              init; }
+
+
     static Serilogger() => SelfLog.Enable( static message =>
                                            {
                                                // System.Diagnostics.Debug.WriteLine( message );
                                                // Console.WriteLine( message );
                                                Console.Error.WriteLine( message );
                                            } );
-    private static ValueTask<ReadOnlyMemory<byte>> TakeEmptyScreenShot( CancellationToken  arg )     => new(ReadOnlyMemory<byte>.Empty);
-    private static EventDetails                    DefaultUpdateEventDetails( EventDetails details ) => details;
-    public static Serilogger Create<TApp, TDebugSettings>( LocalDirectory? currentDirectory, Action<LoggerConfiguration>? addNativeLogs = null )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
-        where TApp : IAppID => Create<TApp, TDebugSettings>( currentDirectory, DefaultUpdateEventDetails, addNativeLogs );
-    public static Serilogger Create<TApp, TDebugSettings>( LocalDirectory? currentDirectory, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
-        where TApp : IAppID => Create<TApp, TDebugSettings>( currentDirectory, TakeEmptyScreenShot, updateEventDetails, addNativeLogs );
-    public static Serilogger Create<TApp, TDebugSettings>( LocalDirectory? currentDirectory, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
+    protected Serilogger( Activity activity, Logger logger, FilePaths paths )
+    {
+        Activity.Current = Activity = activity;
+        Log.Logger       = Logger   = logger;
+        _settings        = new Synchronized<TSeriloggerSettings>( paths.FromPreferences<TSeriloggerSettings>() );
+        _provider        = new SerilogLoggerProvider( this, true );
+        System.Diagnostics.Debug.Assert( IsValid, $"{SHARED_NAME} is invalid" );
+        Instance = (TSerilogger)this;
+    }
+    public void Dispose()
+    {
+        ScreenShotData = ReadOnlyMemory<byte>.Empty;
+        Events.Dispose();
+        _provider.Dispose();
+        _screenShotAddress?.Dispose();
+        Settings.Paths.Dispose();
+        Activity.Dispose();
+        Logger.Dispose();
+
+        GC.SuppressFinalize( this );
+    }
+    public async ValueTask DisposeAsync()
+    {
+        ScreenShotData = ReadOnlyMemory<byte>.Empty;
+        await CastAndDispose( Events );
+        await _provider.DisposeAsync();
+        if ( _screenShotAddress is not null ) { await CastAndDispose( _screenShotAddress ); }
+
+        Settings.Paths.Dispose();
+        Activity.Dispose();
+        await Logger.DisposeAsync();
+
+        GC.SuppressFinalize( this );
+        return;
+
+        static async ValueTask CastAndDispose( IDisposable resource )
+        {
+            if ( resource is IAsyncDisposable resourceAsyncDisposable ) { await resourceAsyncDisposable.DisposeAsync(); }
+            else { resource.Dispose(); }
+        }
+    }
+
+    protected static ValueTask<ReadOnlyMemory<byte>> TakeEmptyScreenShot( CancellationToken  arg )     => new(ReadOnlyMemory<byte>.Empty);
+    protected static EventDetails                    DefaultUpdateEventDetails( EventDetails details ) => details;
+    public static TSerilogger Create<TApp>( LocalDirectory? currentDirectory, Action<LoggerConfiguration>? addNativeLogs = null )
+        where TApp : IAppID => Create<TApp>( currentDirectory, DefaultUpdateEventDetails, addNativeLogs );
+    public static TSerilogger Create<TApp>( LocalDirectory? currentDirectory, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
+        where TApp : IAppID => Create<TApp>( currentDirectory, TakeEmptyScreenShot, updateEventDetails, addNativeLogs );
+    public static TSerilogger Create<TApp>( LocalDirectory? currentDirectory, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
         where TApp : IAppID
     {
         currentDirectory ??= Environment.CurrentDirectory;
         FilePaths paths = new(currentDirectory);
-        return Create<TApp, TDebugSettings>( paths, takeScreenShot, updateEventDetails, addNativeLogs );
+        return Create<TApp>( paths, takeScreenShot, updateEventDetails, addNativeLogs );
     }
-    public static Serilogger Create<TApp, TDebugSettings>( FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
+    public static TSerilogger Create<TApp>( FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
         where TApp : IAppID
     {
         LoggerConfiguration builder = new();
@@ -220,16 +245,7 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
         activity.Start();
 
 
-        Serilogger logger = new(activity, builder.CreateLogger(), TDebugSettings.FromPreferences())
-                            {
-                                TakeScreenShot     = takeScreenShot,
-                                UpdateEventDetails = updateEventDetails,
-                                AppName            = TApp.AppName,
-                                AppVersion         = TApp.AppVersion,
-                                AppID              = TApp.AppID,
-                                Paths              = paths,
-                                CanDebug           = Debugger.IsAttached
-                            };
+        TSerilogger logger = TSerilogger.Create<TApp>( activity, builder.CreateLogger(), paths, takeScreenShot, updateEventDetails );
 
         return logger.ClearCache();
 
@@ -248,57 +264,19 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
                                                                              Hooks,
                                                                              TimeSpan.FromDays( 90 ) );
     }
-    private Serilogger( Activity activity, Logger logger, IDebugSettings settings )
-    {
-        Activity.Current = Activity = activity;
-        _settings        = settings;
-        Log.Logger       = Logger = logger;
-        _provider        = new SerilogLoggerProvider( this, true );
-        System.Diagnostics.Debug.Assert( IsValid, $"{SHARED_NAME} is invalid" );
-        Instance = (Serilogger)this;
-    }
-    public void Dispose()
-    {
-        ScreenShotData = ReadOnlyMemory<byte>.Empty;
-        Events.Dispose();
-        _provider.Dispose();
-        _screenShotAddress?.Dispose();
-        Paths.Dispose();
-        Activity.Dispose();
-        Logger.Dispose();
-    }
-    public async ValueTask DisposeAsync()
-    {
-        ScreenShotData = ReadOnlyMemory<byte>.Empty;
-        await CastAndDispose( Events );
-        await _provider.DisposeAsync();
-        if ( _screenShotAddress is not null ) { await CastAndDispose( _screenShotAddress ); }
-
-        Paths.Dispose();
-        Activity.Dispose();
-        await Logger.DisposeAsync();
-
-        return;
-
-        static async ValueTask CastAndDispose( IDisposable resource )
-        {
-            if ( resource is IAsyncDisposable resourceAsyncDisposable ) { await resourceAsyncDisposable.DisposeAsync(); }
-            else { resource.Dispose(); }
-        }
-    }
 
 
     public static void ConfigureConsoleSink( LoggerSinkConfiguration sink ) => sink.Console( LogEventLevel.Information, CONSOLE_DEFAULT_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture, null, LogEventLevel.Error, Theme, ApplyThemeToRedirectedOutput, SyncRoot );
     public static void ConfigureDebugSink( LoggerSinkConfiguration   sink ) => sink.Debug( LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture );
-    public Serilogger ClearCache()
+    public TSerilogger ClearCache()
     {
-        foreach ( LocalFile file in Paths.Cache.GetFiles() ) { file.Delete(); }
+        foreach ( LocalFile file in Settings.Paths.Cache.GetFiles() ) { file.Delete(); }
 
-        return (Serilogger)this;
+        return (TSerilogger)this;
     }
 
 
-    public static Serilogger      Get( IServiceProvider         provider )                                                         => Instance ?? provider.GetRequiredService<Serilogger>();
+    public static TSerilogger     Get( IServiceProvider         provider )                                                         => Instance ?? provider.GetRequiredService<TSerilogger>();
     public static ILoggerProvider GetProvider( IServiceProvider provider )                                                         => Get( provider );
     void ILoggerFactory.          AddProvider( ILoggerProvider  provider )                                                         { }
     public ILogger                CreateLogger( string          categoryName )                                                     => _provider.CreateLogger( categoryName );
@@ -315,10 +293,8 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
 
         if ( exception is OperationCanceledException or CredentialsException ) { return; }
 
-        Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> takeScreenShot = TakeScreenShot;
-
         ScreenShotData = Settings.TakeScreenshotOnError
-                             ? await takeScreenShot( CancellationToken.None )
+                             ? await TakeScreenShot( CancellationToken.None )
                              : ReadOnlyMemory<byte>.Empty;
 
         TrackError( _, exception, AppState(), attachments );
@@ -394,23 +370,17 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
         Dictionary<string, object?> result = new() { [key] = feedback };
         if ( Settings.IncludeAppStateOnError ) { EventDetails.AddAppState( in result, AppName ); }
 
-        await Paths.FeedbackFile.WriteAsync( result.ToPrettyJson() );
+        await Settings.Paths.FeedbackFile.WriteAsync( result.ToPrettyJson() );
     }
-    public EventDetails AppState()
-    {
-        Func<EventDetails, EventDetails> updateEventDetails = UpdateEventDetails;
-        return updateEventDetails( EventDetails.AppState( AppName ) );
-    }
+    public EventDetails AppState() => UpdateEventDetails( EventDetails.AppState( AppName ) );
     public async ValueTask<bool> BufferScreenShot( CancellationToken token = default )
     {
-        Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> takeScreenShot = TakeScreenShot;
-        ReadOnlyMemory<byte>                                     data           = ScreenShotData = await takeScreenShot( token );
+        ReadOnlyMemory<byte> data = ScreenShotData = await TakeScreenShot( token );
         return data.IsEmpty is false;
     }
     public async ValueTask<LocalFile?> GetScreenShot( CancellationToken token = default )
     {
-        Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> takeScreenShot = TakeScreenShot;
-        ReadOnlyMemory<byte>                                     screenShot     = await takeScreenShot( token );
+        ReadOnlyMemory<byte> screenShot = await TakeScreenShot( token );
         return await WriteScreenShot( screenShot, token );
     }
     public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );
@@ -418,21 +388,20 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
     {
         if ( memory.IsEmpty ) { return null; }
 
-        LocalFile file = Paths.ScreenShot;
+        LocalFile file = Settings.Paths.ScreenShot;
         await file.WriteAsync( memory, token );
         return file;
     }
     public static void SetDeviceID( Guid deviceID ) => DeviceID = deviceID;
     public static void SetDeviceID( long deviceID ) => DeviceIDLong = deviceID;
-    public void SetSettings<TDebugSettings>( TDebugSettings settings )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
+    public void SetSettings( TSeriloggerSettings settings )
     {
-        _settings = settings.Clone();
-        _settings.SetPreferences();
+        Settings = settings.Clone();
+        Settings.SetPreferences();
     }
     public static async Task<LocalFile?> ZipLogsToFile()
     {
-        LocalFile? file = Instance?.Paths.ZipLogsFile.SetTemporary();
+        LocalFile? file = Instance?.Settings.Paths.ZipLogsFile.SetTemporary();
         if ( file is null ) { return null; }
 
         ReadOnlyMemory<byte> data = await ZipLogsAsync();
@@ -441,7 +410,7 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
     }
     public static async Task<LocalFile?> ZipCacheToFile()
     {
-        LocalFile? file = Instance?.Paths.AppCacheZipFile.SetTemporary();
+        LocalFile? file = Instance?.Settings.Paths.AppCacheZipFile.SetTemporary();
         if ( file is null ) { return null; }
 
         ReadOnlyMemory<byte> data = await ZipCacheAsync();
@@ -450,18 +419,18 @@ public sealed class Serilogger : ISerilogger, IAsyncDisposable
     }
     public static async Task<LocalFile?> ZipDataToFile()
     {
-        LocalFile? file = Instance?.Paths.AppDataZipFile.SetTemporary();
+        LocalFile? file = Instance?.Settings.Paths.AppDataZipFile.SetTemporary();
         if ( file is null ) { return null; }
 
         ReadOnlyMemory<byte> data = await ZipCacheAsync();
         await file.WriteAsync( data );
         return file;
     }
-    public static ReadOnlyMemory<byte>       ZipLogs()       => Zip( Instance?.Paths.Logs );
+    public static ReadOnlyMemory<byte>       ZipLogs()       => Zip( Instance?.Settings.Paths.Logs );
     public static Task<ReadOnlyMemory<byte>> ZipLogsAsync()  => Task.Run( ZipLogs );
-    public static ReadOnlyMemory<byte>       ZipCache()      => Zip( Instance?.Paths.Cache );
+    public static ReadOnlyMemory<byte>       ZipCache()      => Zip( Instance?.Settings.Paths.Cache );
     public static Task<ReadOnlyMemory<byte>> ZipCacheAsync() => Task.Run( ZipCache );
-    public static ReadOnlyMemory<byte>       ZipData()       => Zip( Instance?.Paths.AppData );
+    public static ReadOnlyMemory<byte>       ZipData()       => Zip( Instance?.Settings.Paths.AppData );
     public static Task<ReadOnlyMemory<byte>> ZipDataAsync()  => Task.Run( ZipData );
     public static ReadOnlyMemory<byte> Zip( LocalDirectory? directory )
     {
@@ -1329,4 +1298,23 @@ private static unsafe string EntryFromPath( ReadOnlySpan<char> path, bool append
     public void Fatal( Exception? exception, [StructuredMessageTemplate] string messageTemplate, params object?[]? propertyValues ) => Write( LogEventLevel.Fatal, exception, messageTemplate, propertyValues );
 
     #endregion
+}
+
+
+
+public sealed class Serilogger : Serilogger<Serilogger, SeriloggerSettings>, ICreateSerilogger<Serilogger>
+{
+    private Serilogger( Activity activity, Logger logger, FilePaths paths ) : base( activity, logger, paths ) { }
+    public static Serilogger Create<TApp>( Activity activity, Logger logger, FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
+        where TApp : IAppID
+    {
+        return new Serilogger( activity, logger, paths )
+               {
+                   TakeScreenShot     = takeScreenShot     ?? TakeEmptyScreenShot,
+                   UpdateEventDetails = updateEventDetails ?? DefaultUpdateEventDetails,
+                   AppName            = TApp.AppName,
+                   AppVersion         = TApp.AppVersion,
+                   AppID              = TApp.AppID,
+               };
+    }
 }

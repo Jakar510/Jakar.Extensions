@@ -19,9 +19,9 @@ public sealed class FilePathsEnricher() : ILogEventEnricher
             if ( logEvent.Level < LogEventLevel.Error ) { return; }
 
             using Disposables disposables = new();
-            List<Task>        tasks       = new(10);
+            List<Task>        tasks       = new(20);
 
-            if ( _Logger.Settings.TakeScreenshotOnError )
+            if ( _Logger.Settings.Screenshot )
             {
                 tasks.Add( Handle( disposables, _Logger.ScreenShotAddress ) );
 
@@ -29,16 +29,16 @@ public sealed class FilePathsEnricher() : ILogEventEnricher
                 if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( IFilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
-            if ( _Logger.Settings.IncludeAppStateOnError )
+            if ( _Logger.Settings.AppState )
             {
-                tasks.Add( Handle( disposables, _Logger.Paths.FeedbackFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.AppStateFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.CrashFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.IncomingFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.OutgoingFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.AppDataZipFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.AppCacheZipFile ) );
-                tasks.Add( Handle( disposables, _Logger.Paths.ZipLogsFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.FeedbackFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppStateFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.CrashFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.IncomingFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.OutgoingFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppDataZipFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppCacheZipFile ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.ZipLogsFile ) );
             }
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();

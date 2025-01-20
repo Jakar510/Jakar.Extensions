@@ -11,7 +11,6 @@ namespace Jakar.Extensions.Serilog;
 
 public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEventSink, ISupportExternalScope, Jakar.Extensions.IExceptionHandler, IValidator, IDeviceName, IDeviceID
 {
-    public FilePaths                Paths    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public DebugLogEvent.Collection Events   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public MessageEvent.Collection  Messages { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
     public bool                     Enabled  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
@@ -20,4 +19,13 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
 
 
     public Logger<T> CreateLogger<T>();
+}
+
+
+
+public interface ICreateSerilogger<out TSerilogger>
+    where TSerilogger : class, ISerilogger
+{
+    public abstract static TSerilogger Create<TApp>( Activity activity, Logger logger, FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
+        where TApp : IAppID;
 }

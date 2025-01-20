@@ -45,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Jakar.Extensions" Version="9.0.5" />
 	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
 	<PackageReference Include="OpenTelemetry.AutoInstrumentation" Version="1.9.0" />

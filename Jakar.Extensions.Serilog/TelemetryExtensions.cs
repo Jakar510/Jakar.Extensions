@@ -10,9 +10,9 @@ namespace Jakar.Extensions.Serilog;
 
 public static class TelemetryExtensions
 {
-    public static ILoggingBuilder AddTelemetry<TApp, TDebugSettings>( this ILoggingBuilder builder, LocalDirectory currentDirectory, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> takeScreenShot, Func<EventDetails, EventDetails> updateEventDetails )
-        where TDebugSettings : class, IDebugSettings<TDebugSettings>, IDebugSettings
-        where TApp : IAppID => builder.AddTelemetry( Serilogger.Create<TApp, TDebugSettings>( new FilePaths(LocalDirectory.CurrentDirectory) ) );
+    public static ILoggingBuilder AddTelemetry<TApp, TSeriloggerSettings>( this ILoggingBuilder builder, FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> takeScreenShot, Func<EventDetails, EventDetails> updateEventDetails )
+        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>, ISeriloggerSettings
+        where TApp : IAppID => builder.AddTelemetry( Serilogger.Create<TApp>( paths, takeScreenShot, updateEventDetails ) );
     public static ILoggingBuilder AddTelemetry( this ILoggingBuilder builder, Serilogger logger ) => builder.AddSerilog( logger );
 
 
