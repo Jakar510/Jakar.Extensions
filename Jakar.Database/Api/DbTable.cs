@@ -3,6 +3,7 @@
 
 
 using Microsoft.Extensions.Caching.Hybrid;
+using ZiggyCreatures.Caching.Fusion;
 
 
 
@@ -14,7 +15,7 @@ public partial class DbTable<TRecord> : IConnectableDb
     where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected readonly IConnectableDbRoot _database;
-    protected readonly HybridCache        _cache;
+    protected readonly FusionCache        _cache;
 
 
     public static TRecord[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
@@ -23,10 +24,10 @@ public partial class DbTable<TRecord> : IConnectableDb
     public static FrozenSet<TRecord>       Set                       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
     public        int?                     CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
     public        RecordGenerator<TRecord> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
-    public        HybridCacheEntryOptions? Options                   { get; set; }
+    public        FusionCacheEntryOptions? Options                   { get; set; }
 
 
-    public DbTable( IConnectableDbRoot database, HybridCache cache )
+    public DbTable( IConnectableDbRoot database, FusionCache cache )
     {
         _database = database;
         _cache    = cache;

@@ -3,6 +3,7 @@
 
 using System.Transactions;
 using Microsoft.Extensions.Caching.Hybrid;
+using ZiggyCreatures.Caching.Fusion;
 using ZXing.Aztec.Internal;
 using IsolationLevel = System.Data.IsolationLevel;
 using Status = Jakar.Extensions.Status;
@@ -30,7 +31,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly    DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
     public readonly    DbTable<UserRoleRecord>          UserRoles;
     public readonly    IConfiguration                   Configuration;
-    protected readonly HybridCache                      _cache;
+    protected readonly FusionCache                      _cache;
     protected          ActivitySource?                  _activitySource;
     protected          Meter?                           _meter;
     protected          string?                          _className;
@@ -68,7 +69,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         RecordID<UserRoleRecord>.RegisterDapperTypeHandlers();
         RecordID<UserAddressRecord>.RegisterDapperTypeHandlers();
     }
-    protected Database( IConfiguration configuration, IOptions<DbOptions> options, HybridCache cache ) : base()
+    protected Database( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base()
     {
         _cache            = cache;
         Configuration     = configuration;

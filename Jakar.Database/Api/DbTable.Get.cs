@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:07 PM
 
+using Microsoft.Extensions.Caching.Hybrid;
+
+
+
 namespace Jakar.Database;
 
 
@@ -63,7 +67,7 @@ public partial class DbTable<TRecord>
     public async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
         SqlCommand.Definition definition = _database.GetCommand( TRecord.SQL.Get( id ), connection, transaction, token );
-        return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options, null, token );
+        return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options,  token );
 
         async ValueTask<ErrorOrResult<TRecord>> Factory( SqlCommand.Definition sql, CancellationToken cancellationToken )
         {

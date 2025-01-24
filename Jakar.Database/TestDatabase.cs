@@ -1,16 +1,17 @@
 ﻿// Jakar.Extensions :: Experiments
 // 09/28/2023  10:02 AM
 
-using Microsoft.Extensions.Caching.Hybrid;
 using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
+using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
+using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 
 
 namespace Jakar.Database;
 
 
-internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptions> options, HybridCache cache ) : Database( configuration, options, cache ), IAppName
+internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : Database( configuration, options, cache ), IAppName
 {
     // private const string CONNECTION_STRING = "Server=localhost;Database=Experiments;User Id=tester;Password=tester;Encrypt=True;TrustServerCertificate=True";
 
@@ -26,13 +27,14 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     [Conditional( "DEBUG" )]
     public static async void TestAsync()
     {
-        Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build() );
-        Console.WriteLine();
-
-        try { await InternalTestAsync(); }
-        catch ( Exception e ) { Console.WriteLine( e ); }
-
-        Console.ReadKey();
+        try
+        {
+            Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build() );
+            Console.WriteLine();
+            await InternalTestAsync();
+            Console.ReadKey();
+        }
+        catch ( Exception e ) { Console.Error.WriteLine( e ); }
     }
     private static async Task InternalTestAsync()
     {
@@ -122,6 +124,8 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
                             Version                  = AppVersion
                         }.WithAppName<TestDatabase>();
         }
+        protected override void Configure( RedisBackplaneOptions  options ) { }
+        protected override void Configure( MemoryBackplaneOptions options ) { }
         protected override void Configure( IFusionCacheBuilder builder )
         {
             base.Configure( builder );

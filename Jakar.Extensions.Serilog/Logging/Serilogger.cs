@@ -388,7 +388,7 @@ public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger
     {
         if ( memory.IsEmpty ) { return null; }
 
-        LocalFile file = Settings.Paths.ScreenShot;
+        LocalFile file = Settings.Paths.Screenshot;
         await file.WriteAsync( memory, token );
         return file;
     }

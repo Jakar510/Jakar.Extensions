@@ -60,10 +60,6 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase>
         builder.Services.AddSingleton( DbOptions );
         builder.Services.AddTransient( DbOptions.Get );
 
-    #pragma warning disable EXTEXP0018 // <- Add this line
-        builder.Services.AddHybridCache();
-    #pragma warning restore EXTEXP0018 // <- Add this line
-        
         builder.Services.AddSingleton<TDatabase>();
         builder.Services.AddTransient<Database>( static provider => provider.GetRequiredService<TDatabase>() );
         builder.Services.AddHealthCheck<TDatabase>();
@@ -92,10 +88,10 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase>
         options.UseSecurityTokenValidators = true;
         options.TokenValidationParameters  = application.GetTokenValidationParameters( DbOptions );
     }
-    protected virtual void Configure( RedisBackplaneOptions                    options ) { }
-    protected virtual void Configure( MemoryBackplaneOptions                   options ) { }
-    protected virtual void Configure( NpgsqlMetricsOptions                     options ) { }
-    protected virtual void Configure( FusionCacheMetricsInstrumentationOptions options ) { }
+
+
+    protected abstract void Configure( RedisBackplaneOptions  options );
+    protected abstract void Configure( MemoryBackplaneOptions options );
     protected virtual void Configure( IFusionCacheBuilder builder )
     {
         builder.WithDefaultEntryOptions( FusionCacheEntryOptions );
@@ -103,6 +99,10 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase>
         builder.WithMemoryBackplane( Configure );
         builder.WithLogger( static provider => provider.GetRequiredService<ILoggerFactory>().CreateLogger<FusionCache>() );
     }
+
+    
+    protected virtual void Configure( NpgsqlMetricsOptions                     options ) { }
+    protected virtual void Configure( FusionCacheMetricsInstrumentationOptions options ) { }
     protected virtual void Configure( TracerProviderBuilder builder )
     {
         builder.AddAspNetCoreInstrumentation();
