@@ -31,7 +31,7 @@ public interface IHeader : INotifyPropertyChanged, INotifyPropertyChanging
 public interface IHeaderContext : IHeader
 {
     public HeaderData? Data                  { get; set; }
-    public ICommand?   ExpandCollapseCommand { get; }
+    public ICommand    ExpandCollapseCommand { get; }
     public bool        IsExpanded            { get; set; }
     public bool        IsVisible             { get; set; }
 }

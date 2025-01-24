@@ -4,27 +4,29 @@
 namespace Jakar.Extensions;
 
 
-
-/*
-public sealed class EnumToStringConverter<TEnum>() : JsonConverter<TEnum>() where TEnum : struct, Enum
+public abstract class EnumToStringConverter<TEnum>() : JsonConverter<TEnum>()
+    where TEnum : struct, Enum
 {
-    private static readonly Dictionary<TEnum, string> _dictionary = Enum.GetValues<TEnum>()
-                                                                        .ToDictionary( x => x, x => x.ToString() );
-
-    public override bool CanRead  => true;
-    public override bool CanWrite => true;
+    protected static readonly FrozenDictionary<TEnum, string> _enumToString = Enum.GetValues<TEnum>().ToFrozenDictionary( Self,     ToString );
+    protected static readonly FrozenDictionary<string, TEnum> _stringToEnum = Enum.GetValues<TEnum>().ToFrozenDictionary( ToString, Self );
 
 
-    public override void WriteJson( JsonWriter writer, TEnum value, JsonSerializer serializer ) => writer.WriteRaw( _dictionary[value] );
+    public override bool   CanRead             => true;
+    public override bool   CanWrite            => true;
+    private static  TEnum  Self( TEnum     x ) => x;
+    private static  string ToString( TEnum x ) => x.ToString();
 
 
+    public override void WriteJson( JsonWriter writer, TEnum value, JsonSerializer serializer ) => writer.WriteRaw( _enumToString[value] );
     public override TEnum ReadJson( JsonReader reader, Type objectType, TEnum existingValue, bool hasExistingValue, JsonSerializer serializer )
     {
         string? value = reader.ReadAsString();
+        if ( string.IsNullOrWhiteSpace( value ) ) { return existingValue; }
 
-       return Enum.TryParse( value, true, out TEnum result )
-                  ? result
-                  : existingValue;
+        if ( _stringToEnum.TryGetValue( value, out TEnum t ) ) { return t; }
+
+        return Enum.TryParse( value, true, out TEnum result )
+                   ? result
+                   : existingValue;
     }
 }
-*/

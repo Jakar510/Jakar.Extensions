@@ -122,7 +122,7 @@ public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger
                                                // Console.WriteLine( message );
                                                Console.Error.WriteLine( message );
                                            } );
-    protected Serilogger( Activity activity, Logger logger, FilePaths paths )
+    protected Serilogger( Activity activity, Logger logger, IFilePaths paths )
     {
         Activity.Current = Activity = activity;
         Log.Logger       = Logger   = logger;
@@ -137,7 +137,7 @@ public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger
         Events.Dispose();
         _provider.Dispose();
         _screenShotAddress?.Dispose();
-        Settings.Paths.Dispose();
+        Settings.Dispose();
         Activity.Dispose();
         Logger.Dispose();
 
@@ -150,7 +150,7 @@ public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger
         await _provider.DisposeAsync();
         if ( _screenShotAddress is not null ) { await CastAndDispose( _screenShotAddress ); }
 
-        Settings.Paths.Dispose();
+        Settings.Dispose();
         Activity.Dispose();
         await Logger.DisposeAsync();
 
@@ -177,7 +177,7 @@ public abstract class Serilogger<TSerilogger, TSeriloggerSettings> : ISerilogger
         FilePaths paths = new(currentDirectory);
         return Create<TApp>( paths, takeScreenShot, updateEventDetails, addNativeLogs );
     }
-    public static TSerilogger Create<TApp>( FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
+    public static TSerilogger Create<TApp>( IFilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot = null, Func<EventDetails, EventDetails>? updateEventDetails = null, Action<LoggerConfiguration>? addNativeLogs = null )
         where TApp : IAppID
     {
         LoggerConfiguration builder = new();
@@ -1304,8 +1304,8 @@ private static unsafe string EntryFromPath( ReadOnlySpan<char> path, bool append
 
 public sealed class Serilogger : Serilogger<Serilogger, SeriloggerSettings>, ICreateSerilogger<Serilogger>
 {
-    private Serilogger( Activity activity, Logger logger, FilePaths paths ) : base( activity, logger, paths ) { }
-    public static Serilogger Create<TApp>( Activity activity, Logger logger, FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
+    private Serilogger( Activity activity, Logger logger, IFilePaths paths ) : base( activity, logger, paths ) { }
+    public static Serilogger Create<TApp>( Activity activity, Logger logger, IFilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
         where TApp : IAppID
     {
         return new Serilogger( activity, logger, paths )

@@ -3,7 +3,6 @@
 
 
 using System.ComponentModel;
-using System.Formats.Asn1;
 using OneOf;
 
 
@@ -11,7 +10,7 @@ using OneOf;
 namespace Jakar.Extensions.Serilog;
 
 
-public interface ISeriloggerSettings : IDeviceName, INotifyPropertyChanged, INotifyPropertyChanging
+public interface ISeriloggerSettings : IDeviceName, INotifyPropertyChanged, INotifyPropertyChanging, IDisposable
 {
     public bool               EnableAnalytics        { get; }
     public bool               EnableApi              { get; }
@@ -21,7 +20,7 @@ public interface ISeriloggerSettings : IDeviceName, INotifyPropertyChanged, INot
     public bool               TakeScreenshotOnError  { get; }
     public Guid               DebugID                { get; }
     public bool               IsDebuggable           { get; set; }
-    public FilePaths          Paths                  { get; }
+    public IFilePaths         Paths                  { get; }
 
 
     public        ISeriloggerSettings Clone();
@@ -47,8 +46,8 @@ public interface ICreateSeriloggerSettings<out TSeriloggerSettings> : ISerilogge
     public abstract static string                                   SharedKey { get; }
     public abstract static OneOf<Func<ValueTask<bool>>, Func<bool>> CanDebug  { get; set; }
     public new             TSeriloggerSettings                      Clone();
-    public abstract static TSeriloggerSettings                      Create( FilePaths paths, ISeriloggerSettings settings );
-    public abstract static TSeriloggerSettings                      Create( FilePaths paths, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError );
+    public abstract static TSeriloggerSettings                      Create( IFilePaths paths, ISeriloggerSettings settings );
+    public abstract static TSeriloggerSettings                      Create( IFilePaths paths, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError );
 }
 
 
@@ -65,7 +64,7 @@ public static class CreateSeriloggerSettings
         sharedKey.SetPreference( nameof(ISeriloggerSettings.EnableApi),              value.EnableApi );
         sharedKey.SetPreference( nameof(ISeriloggerSettings.EnableCrashes),          value.EnableCrashes );
     }
-    public static TSeriloggerSettings FromPreferences<TSeriloggerSettings>( this FilePaths paths )
+    public static TSeriloggerSettings FromPreferences<TSeriloggerSettings>( this IFilePaths paths )
         where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
     {
         string sharedKey              = TSeriloggerSettings.SharedKey;

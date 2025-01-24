@@ -26,6 +26,6 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
 public interface ICreateSerilogger<out TSerilogger>
     where TSerilogger : class, ISerilogger
 {
-    public abstract static TSerilogger Create<TApp>( Activity activity, Logger logger, FilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
+    public abstract static TSerilogger Create<TApp>( Activity activity, Logger logger, IFilePaths paths, Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>>? takeScreenShot, Func<EventDetails, EventDetails>? updateEventDetails )
         where TApp : IAppID;
 }

@@ -56,10 +56,10 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="MudBlazor" Version="8.0.0" />
 		<PackageReference Include="MudBlazor.Markdown" Version="7.14.0" />
-		<PackageReference Include="MudBlazor.ThemeManager" Version="2.1.0" />
-		<PackageReference Include="PanoramicData.Blazor" Version="9.0.36" />
-		<PackageReference Include="Radzen.Blazor" Version="5.7.9" />
-		<PackageReference Include="Jakar.Extensions" Version="9.0.5" />
+		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
+		<PackageReference Include="PanoramicData.Blazor" Version="9.0.38" />
+		<PackageReference Include="Radzen.Blazor" Version="5.8.0" />
+		<PackageReference Include="Jakar.Extensions" Version="9.1.1" />
 		<PackageReference Include="Hardware.Info" Version="101.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />

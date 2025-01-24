@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions.Blazor" Version="9.0.0" />
+    <PackageReference Include="Jakar.Extensions.Blazor" Version="9.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.1" />
     <PackageReference Include="System.Formats.Asn1" Version="9.0.1" />

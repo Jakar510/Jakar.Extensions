@@ -11,12 +11,12 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class SeriloggerSettings : SeriloggerSettings<SeriloggerSettings, IHeaderContext>, ICreateSeriloggerSettings<SeriloggerSettings>
 {
-    public SeriloggerSettings( FilePaths               paths, ISeriloggerSettings settings ) : base( paths, settings ) { }
-    public SeriloggerSettings( FilePaths               paths, bool                enabled ) : base( paths, enabled ) { }
-    public SeriloggerSettings( FilePaths               paths, bool                enableApi, bool    enableCrashes, bool    enableAnalytics, bool    includeAppStateOnError, bool    takeScreenshotOnError ) : base( paths, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError ) { }
-    public SeriloggerSettings( FilePaths               paths, Setting             enableApi, Setting crashes,       Setting analytics,       Setting appState,               Setting screenshot ) : base( paths, enableApi, crashes, analytics, appState, screenshot ) { }
-    public static SeriloggerSettings Create( FilePaths paths, ISeriloggerSettings settings )                                                                                                     => null;
-    public static SeriloggerSettings Create( FilePaths paths, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError ) => null;
+    public SeriloggerSettings( IFilePaths               paths, ISeriloggerSettings settings ) : base( paths, settings ) { }
+    public SeriloggerSettings( IFilePaths               paths, bool                enabled ) : base( paths, enabled ) { }
+    public SeriloggerSettings( IFilePaths               paths, bool                enableApi, bool    enableCrashes, bool    enableAnalytics, bool    includeAppStateOnError, bool    takeScreenshotOnError ) : base( paths, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError ) { }
+    public SeriloggerSettings( IFilePaths               paths, Setting             enableApi, Setting crashes,       Setting analytics,       Setting appState,               Setting screenshot ) : base( paths, enableApi, crashes, analytics, appState, screenshot ) { }
+    public static SeriloggerSettings Create( IFilePaths paths, ISeriloggerSettings settings )                                                                                                     => null;
+    public static SeriloggerSettings Create( IFilePaths paths, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError ) => null;
 }
 
 
@@ -58,14 +58,14 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
         }
     }
     public LoggingLevelSwitch LoggingLevel          { get; } = new(LogEventLevel.Verbose);
-    public FilePaths          Paths                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public IFilePaths         Paths                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
     public Setting            Screenshot            { get; }
     bool ISeriloggerSettings. TakeScreenshotOnError => Screenshot.Value;
 
 
-    protected SeriloggerSettings( FilePaths paths, ISeriloggerSettings settings ) : this( paths, settings.EnableApi, settings.EnableCrashes, settings.EnableAnalytics, settings.IncludeAppStateOnError, settings.TakeScreenshotOnError ) { }
-    protected SeriloggerSettings( FilePaths paths, bool                enabled ) : this( paths, enabled, enabled, enabled, enabled, enabled ) { }
-    protected SeriloggerSettings( FilePaths paths, bool enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError )
+    protected SeriloggerSettings( IFilePaths paths, ISeriloggerSettings settings ) : this( paths, settings.EnableApi, settings.EnableCrashes, settings.EnableAnalytics, settings.IncludeAppStateOnError, settings.TakeScreenshotOnError ) { }
+    protected SeriloggerSettings( IFilePaths paths, bool                enabled ) : this( paths, enabled, enabled, enabled, enabled, enabled ) { }
+    protected SeriloggerSettings( IFilePaths paths, bool enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError )
     {
         Crashes    = new Setting( enableCrashes,          GetHint );
         Analytics  = new Setting( enableAnalytics,        GetHint );
@@ -74,7 +74,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
         EnableApi  = new Setting( enableApi,              GetApiHint, SetAll );
         Paths      = paths;
     }
-    protected SeriloggerSettings( FilePaths paths, Setting enableApi, Setting crashes, Setting analytics, Setting appState, Setting screenshot )
+    protected SeriloggerSettings( IFilePaths paths, Setting enableApi, Setting crashes, Setting analytics, Setting appState, Setting screenshot )
     {
         Crashes    = crashes;
         Analytics  = analytics;
@@ -83,6 +83,13 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
         EnableApi  = enableApi;
         Paths      = paths;
     }
+    public virtual void Dispose()
+    {
+        Paths.Dispose();
+        GC.SuppressFinalize( this );
+    }
+
+
     public virtual void OnAppearing()
     {
         if ( Header is not null ) { Header.Title = "Telemetry"; }
@@ -102,7 +109,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
 
     ISeriloggerSettings ISeriloggerSettings.Clone() => Clone();
     public TClass                           Clone() => Clone( Paths, this );
-    public static TClass Clone( FilePaths paths, ISeriloggerSettings settings )
+    public static TClass Clone( IFilePaths paths, ISeriloggerSettings settings )
     {
         var result = TClass.Create( paths, settings );
         Debug.Assert( ReferenceEquals( settings, result ) is false );
