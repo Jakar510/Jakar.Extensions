@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 /*
-public sealed class EnumToStringConverter<TEnum> : JsonConverter<TEnum> where TEnum : struct, Enum
+public sealed class EnumToStringConverter<TEnum>() : JsonConverter<TEnum>() where TEnum : struct, Enum
 {
     private static readonly Dictionary<TEnum, string> _dictionary = Enum.GetValues<TEnum>()
                                                                         .ToDictionary( x => x, x => x.ToString() );

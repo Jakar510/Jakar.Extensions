@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class NullableDoubleConverter : JsonConverter<double?>
+public sealed class NullableDoubleConverter() : JsonConverter<double?>()
 {
     public override void WriteJson( JsonWriter writer, double? value, JsonSerializer serializer ) => writer.WriteValue( value );
     public override double? ReadJson( JsonReader reader, Type objectType, double? existingValue, bool hasExistingValue, JsonSerializer serializer ) =>
