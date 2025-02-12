@@ -18,7 +18,7 @@ public readonly record struct TelemetryTag( string Key, string? Value )
         public static Collection Create() => new();
         public Collection( IEnumerable<TelemetryTag> values ) : this()
         {
-            foreach ( var tag in values ) { AddLast( tag ); }
+            foreach ( TelemetryTag tag in values ) { AddLast( tag ); }
         }
     }
 }

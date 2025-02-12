@@ -46,11 +46,11 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Jakar.Extensions" Version="9.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.1" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.10.0" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.10.0" />
+    <PackageReference Include="Jakar.Extensions" Version="9.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.2" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.2" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.0" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.0" />
 	<PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
 	<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
 	<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />

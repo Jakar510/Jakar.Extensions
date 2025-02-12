@@ -14,15 +14,21 @@ public interface IFileMetaData : JsonModels.IJsonModel
 
 
 public interface IFileMetaData<TClass> : IFileMetaData, IEquatable<TClass>, IComparable<TClass>, IComparable
-    where TClass : IFileMetaData<TClass>
+    where TClass : class, IFileMetaData<TClass>
 {
-    public abstract static TClass  Create( IFileMetaData                                        data );
-    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
+    public abstract static Sorter<TClass>    Sorter    { get; }
+    public abstract static Equalizer<TClass> Equalizer { get; }
+
+
+    public abstract static TClass            Create( IFileMetaData                                        data );
+    public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
+    public abstract static TClass            Create( LocalFile                                            file );
+    public abstract static TClass            Create( string?                                              fileName, string? fileType, string? fileDescription = null );
 }
 
 
 
-public interface IFileData<out TID>
+public interface IFileData<out TID> : IUniqueID<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     long     FileSize { get; }
@@ -60,7 +66,7 @@ public interface IFileData<out TID>
 
 public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData<TFileMetaData>
+    where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public TFileMetaData? MetaData { get; }
 }
@@ -70,19 +76,26 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 [SuppressMessage( "ReSharper", "TypeParameterCanBeVariant" )]
 public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<TClass>, IEquatable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData<TFileMetaData>
-    where TClass : IFileData<TClass, TID, TFileMetaData>
+    where TFileMetaData : class, IFileMetaData<TFileMetaData>
+    where TClass : class, IFileData<TClass, TID, TFileMetaData>
 {
-    public abstract static TClass            Create( IFileData<TID, TFileMetaData>                                        data );
-    public abstract static TClass            Create( IFileData<TID>                                                       data, TFileMetaData? metaData );
-    public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID, TFileMetaData>? data );
-    public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID>?                data,   TFileMetaData?    metaData );
-    public abstract static ValueTask<TClass> Create( LocalFile                                                            file,   CancellationToken token                                                 = default );
-    public abstract static ValueTask<TClass> Create( Stream                                                               stream, MimeType          mime, FileMetaData? metaData, CancellationToken token = default );
-    public abstract static TClass            Create( MemoryStream                                                         stream, MimeType          mime, FileMetaData? metaData );
-    public abstract static TClass            Create( ReadOnlyMemory<byte>                                                 data,   MimeType          mime, FileMetaData? metaData );
-    public abstract static TClass            Create( scoped in ReadOnlySpan<byte>                                         data,   MimeType          mime, FileMetaData? metaData );
-    public abstract static TClass            Create( string                                                               data,   MimeType          mime, FileMetaData? metaData, Encoding? encoding = null );
+    public abstract static Sorter<TClass>    Sorter    { get; }
+    public abstract static Equalizer<TClass> Equalizer { get; }
+
+
+    public abstract static TClass  Create( IFileData<TID, TFileMetaData>                                        data );
+    public abstract static TClass  Create( IFileData<TID>                                                       data, TFileMetaData? metaData );
+    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID, TFileMetaData>? data );
+    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID>?                data, TFileMetaData? metaData );
+
+
+    public abstract static ValueTask<TClass> Create( LocalFile file, CancellationToken token                                                                        = default );
+    public abstract static ValueTask<TClass> Create( MimeType  mime, FileMetaData?     metaData, Stream                            content, CancellationToken token = default );
+    public abstract static TClass            Create( MimeType  mime, FileMetaData?     metaData, MemoryStream                      content );
+    public abstract static TClass            Create( MimeType  mime, FileMetaData?     metaData, ref readonly ReadOnlyMemory<byte> content );
+    public abstract static TClass            Create( MimeType  mime, FileMetaData?     metaData, params       ReadOnlySpan<byte>   content );
+    public abstract static TClass            Create( MimeType  mime, FileMetaData?     metaData, string                            content, Encoding? encoding = null );
+    public abstract static TClass            Create( MimeType  mime, long              fileSize, string                            hash,    string    payload, TID id, TFileMetaData? metaData );
 }
 
 
@@ -91,19 +104,42 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
 [SuppressMessage(               "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public abstract record FileData<TClass, TID, TFileMetaData>( MimeType MimeType, long FileSize, string Hash, string Payload, TID ID, TFileMetaData? MetaData ) : BaseRecord<TClass, TID>( ID ), IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TFileMetaData : IFileMetaData<TFileMetaData>
+    where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : FileData<TClass, TID, TFileMetaData>, IFileData<TClass, TID, TFileMetaData>
 {
-    public                                    MimeType       MimeType { get; init; } = MimeType;
-    public                                    long           FileSize { get; init; } = FileSize;
-    [StringLength( UNICODE_CAPACITY )] public string         Hash     { get; init; } = Hash;
-    [StringLength( UNICODE_CAPACITY )] public string         Payload  { get; init; } = Payload;
-    public                                    TFileMetaData? MetaData { get; init; } = MetaData;
+    public                                    MimeType          MimeType  { get; init; } = MimeType;
+    public                                    long              FileSize  { get; init; } = FileSize;
+    [StringLength( UNICODE_CAPACITY )] public string            Hash      { get; init; } = Hash;
+    [StringLength( UNICODE_CAPACITY )] public string            Payload   { get; init; } = Payload;
+    public                                    TFileMetaData?    MetaData  { get; init; } = MetaData;
 
 
-    protected FileData( IFileData<TID, TFileMetaData> file ) : this( file, file.MetaData ) { }
-    protected FileData( IFileData<TID>                file,    TFileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, default, metaData ) { }
-    protected FileData( scoped in ReadOnlySpan<byte>  content, MimeType       mime, TFileMetaData? metaData ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), default, metaData ) { }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID, TFileMetaData> data )                                                                                                => Create( data, data.MetaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID>                data, TFileMetaData? metaData )                                                                       => TClass.Create( data.MimeType, data.FileSize, data.Hash, data.Payload, data.ID, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, MemoryStream                      stream )                             => Create( mime, metaData, stream.AsReadOnlyMemory().Span );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create( mime, metaData, content.Span );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, params       ReadOnlySpan<byte>   content )                            => TClass.Create( mime, content.Length, content.Hash_SHA256(),                                       Convert.ToBase64String( content ), default, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, string                            content, Encoding? encoding = null ) => TClass.Create( mime, content.Length, Hashes.Hash_SHA256( content, encoding ?? Encoding.Default ), content,                           default, metaData );
+
+
+    public static TClass? TryCreate( [NotNullIfNotNull( nameof(content) )] IFileData<TID, TFileMetaData>? content ) => content is not null
+                                                                                                                           ? Create( content )
+                                                                                                                           : null;
+    public static TClass? TryCreate( [NotNullIfNotNull( nameof(content) )] IFileData<TID>? content, TFileMetaData? metaData ) => content is not null
+                                                                                                                                     ? Create( content, metaData )
+                                                                                                                                     : null;
+    public static async ValueTask<TClass> Create( LocalFile file, CancellationToken token = default )
+    {
+        ReadOnlyMemory<byte> content = await file.ReadAsync().AsMemory( token );
+        return Create( file.Mime, TFileMetaData.Create( file ), content.Span );
+    }
+    public static async ValueTask<TClass> Create( MimeType mime, TFileMetaData? metaData, Stream stream, CancellationToken token = default )
+    {
+        stream.Seek( 0, SeekOrigin.Begin );
+        using MemoryStream memory = new((int)stream.Length);
+        await stream.CopyToAsync( memory, token );
+        return Create( mime, metaData, memory );
+    }
 
 
     public override int CompareTo( TClass? other )
@@ -174,6 +210,8 @@ public static class FileDataExtensions
 [SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public sealed class FileMetaData( string? fileName, string? fileType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
 {
+    public static                             Sorter<FileMetaData>          Sorter          => Sorter<FileMetaData>.Default;
+    public static                             Equalizer<FileMetaData>       Equalizer       => Equalizer<FileMetaData>.Default;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileName        { get; init; } = fileName;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileType        { get; init; } = fileType;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileDescription { get; init; } = fileDescription;
@@ -186,16 +224,23 @@ public sealed class FileMetaData( string? fileName, string? fileType, string? fi
     }
     public FileMetaData( LocalFile value ) : this( value.Name, value.ContentType ) { }
 
-    public static FileMetaData Create( IFileMetaData data ) => new(data);
+    public static FileMetaData Create( IFileMetaData data )                                                       => new(data);
+    public static FileMetaData Create( LocalFile     file )                                                       => new(file.Name, file.ContentType);
+    public static FileMetaData Create( string?       fileName, string? fileType, string? fileDescription = null ) => new(fileName, fileType, fileDescription);
     public static FileMetaData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data ) => data is null
                                                                                                            ? null
                                                                                                            : new FileMetaData( data );
-
     public static FileMetaData? TryCreate( [NotNullIfNotNull( nameof(data) )] LocalFile? data ) => data is null
                                                                                                        ? null
                                                                                                        : new FileMetaData( data );
 
 
+    public override bool Equals( object? other )
+    {
+        if ( other is null ) { return false; }
+
+        return ReferenceEquals( this, other ) || other is FileMetaData data && Equals( data );
+    }
     public bool Equals( FileMetaData? other )
     {
         if ( other is null ) { return false; }
@@ -204,7 +249,6 @@ public sealed class FileMetaData( string? fileName, string? fileType, string? fi
 
         return FileName == other.FileName && FileType == other.FileType && FileDescription == other.FileDescription;
     }
-    public override int GetHashCode() => HashCode.Combine( FileName, FileType, FileDescription );
     public int CompareTo( FileMetaData? other )
     {
         if ( other is null ) { return 1; }
@@ -227,8 +271,13 @@ public sealed class FileMetaData( string? fileName, string? fileType, string? fi
                    ? CompareTo( other )
                    : throw new ArgumentException( $"Object must be of type {nameof(FileMetaData)}" );
     }
-    public static bool operator <( FileMetaData  left, FileMetaData right ) => left.CompareTo( right ) < 0;
-    public static bool operator >( FileMetaData  left, FileMetaData right ) => left.CompareTo( right ) > 0;
-    public static bool operator <=( FileMetaData left, FileMetaData right ) => left.CompareTo( right ) <= 0;
-    public static bool operator >=( FileMetaData left, FileMetaData right ) => left.CompareTo( right ) >= 0;
+    public override int GetHashCode() => HashCode.Combine( FileName, FileType, FileDescription );
+
+
+    public static bool operator <( FileMetaData  left, FileMetaData right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator >( FileMetaData  left, FileMetaData right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator <=( FileMetaData left, FileMetaData right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator >=( FileMetaData left, FileMetaData right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator ==( FileMetaData left, FileMetaData right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( FileMetaData left, FileMetaData right ) => Equalizer.Equals( left, right ) is false;
 }

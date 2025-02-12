@@ -90,37 +90,10 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
 [Serializable]
 public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, Guid ID = default ) : FileData<FileData, Guid, FileMetaData>( MimeType, FileSize, Hash, Payload, ID, MetaData ), IFileData<FileData, Guid, FileMetaData>
 {
-    public FileData( IFileData<Guid, FileMetaData>   file ) : this( file, file.MetaData ) { }
-    public FileData( IFileData<Guid>                 file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    public FileData( ref readonly ReadOnlySpan<byte> content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
+    public FileData( IFileData<Guid, FileMetaData> file ) : this( file, file.MetaData ) { }
+    public FileData( IFileData<Guid>               file, FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
+    public FileData( MimeType                      mime, FileMetaData? metaData, params ReadOnlySpan<byte> content ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( string                        data,   MimeType mime, FileMetaData? metaData, Encoding? encoding = null ) => new(mime, data.Length, Hashes.Hash_SHA256( data, encoding ?? Encoding.Default ), data, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( MemoryStream                  stream, MimeType mime, FileMetaData? metaData ) => Create( stream.AsReadOnlyMemory(), mime, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlyMemory<byte>          data,   MimeType mime, FileMetaData? metaData ) => Create( data.Span,                 mime, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( scoped in ReadOnlySpan<byte>  data,   MimeType mime, FileMetaData? metaData ) => new(in data, mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<Guid, FileMetaData> data )                        => new(data, data.MetaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<Guid>               data, FileMetaData metaData ) => new(data, metaData);
-
-
-    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<Guid, FileMetaData>? data ) => data is not null
-                                                                                                                       ? Create( data )
-                                                                                                                       : null;
-
-    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<Guid>? data, FileMetaData metaData ) => data is not null
-                                                                                                                                ? Create( data, metaData )
-                                                                                                                                : null;
-    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
-    {
-        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
-        ReadOnlySpan<byte>   span    = content.Span;
-        return new FileData( in span, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
-    }
-    public static async ValueTask<FileData> Create( Stream stream, MimeType mime, FileMetaData? metaData, CancellationToken token = default )
-    {
-        stream.Seek( 0, SeekOrigin.Begin );
-        using MemoryStream memory = new((int)stream.Length);
-        await stream.CopyToAsync( memory, token );
-        return Create( memory, mime, metaData );
-    }
+    public static FileData Create( MimeType mime, long fileSize, string hash, string payload, Guid id, FileMetaData? metaData ) => new(mime, fileSize, hash, payload, metaData, id);
 }

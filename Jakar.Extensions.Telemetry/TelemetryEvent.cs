@@ -16,7 +16,7 @@ public sealed record TelemetryEvent( string EventID, DateTimeOffset Timestamp, p
         public static Collection Create() => new();
         public Collection( IEnumerable<TelemetryEvent> values ) : this()
         {
-            foreach ( var tag in values ) { AddLast( tag ); }
+            foreach ( TelemetryEvent tag in values ) { AddLast( tag ); }
         }
     }
 }

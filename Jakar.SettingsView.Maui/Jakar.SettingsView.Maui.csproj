@@ -20,9 +20,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="9.1.1" />
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.30" />
+		<PackageReference Include="Jakar.Extensions" Version="9.2.0" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.40" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.40" />
 	</ItemGroup>
 
 	<ItemGroup>

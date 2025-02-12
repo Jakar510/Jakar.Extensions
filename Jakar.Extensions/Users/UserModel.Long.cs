@@ -91,34 +91,9 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, long ID = 0 ) : FileData<FileData, long, FileMetaData>( MimeType, FileSize, Hash, Payload, ID, MetaData ), IFileData<FileData, long, FileMetaData>
 {
     public FileData( IFileData<long, FileMetaData> file ) : this( file, file.MetaData ) { }
-    public FileData( IFileData<long>               file,    FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    public FileData( scoped in ReadOnlySpan<byte>  content, MimeType      mime, FileMetaData? metaData ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
+    public FileData( IFileData<long>               file, FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
+    public FileData( MimeType                      mime, FileMetaData? metaData, params ReadOnlySpan<byte> content ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( string                        data,   MimeType mime, FileMetaData? metaData, Encoding? encoding = null ) => new(mime, data.Length, Hashes.Hash_SHA256( data, encoding ?? Encoding.Default ), data, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( MemoryStream                  stream, MimeType mime, FileMetaData? metaData ) => Create( stream.AsReadOnlyMemory(), mime, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( ReadOnlyMemory<byte>          data,   MimeType mime, FileMetaData? metaData ) => Create( data.Span,                 mime, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( scoped in ReadOnlySpan<byte>  data,   MimeType mime, FileMetaData? metaData ) => new(data, mime, metaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<long, FileMetaData> data )                        => new(data, data.MetaData);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static FileData Create( IFileData<long>               data, FileMetaData metaData ) => new(data, metaData);
-
-
-    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<long, FileMetaData>? data ) => data is not null
-                                                                                                                       ? Create( data )
-                                                                                                                       : null;
-    public static FileData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<long>? data, FileMetaData metaData ) => data is not null
-                                                                                                                                ? Create( data, metaData )
-                                                                                                                                : null;
-    public static async ValueTask<FileData> Create( LocalFile file, CancellationToken token = default )
-    {
-        ReadOnlyMemory<byte> content = await file.ReadAsync().AsBytes( token );
-        return new FileData( content.Span, file.Mime, new FileMetaData( null, file.Name, file.ContentType ) );
-    }
-    public static async ValueTask<FileData> Create( Stream stream, MimeType mime, FileMetaData? metaData, CancellationToken token = default )
-    {
-        stream.Seek( 0, SeekOrigin.Begin );
-        using MemoryStream memory = new((int)stream.Length);
-        await stream.CopyToAsync( memory, token );
-        return Create( memory, mime, metaData );
-    }
+    public static FileData Create( MimeType mime, long fileSize, string hash, string payload, long id, FileMetaData? metaData ) => new(mime, fileSize, hash, payload, metaData, id);
 }

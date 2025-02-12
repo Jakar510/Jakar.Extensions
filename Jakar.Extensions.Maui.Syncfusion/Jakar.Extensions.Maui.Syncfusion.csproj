@@ -56,37 +56,37 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.30" />
-		<PackageReference Include="Syncfusion.Maui.Charts" Version="28.1.41" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.40" />
+		<PackageReference Include="Syncfusion.Maui.Charts" Version="28.2.5" />
 		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.3" />
-		<PackageReference Include="Syncfusion.Maui.TreeView" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Scheduler" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Picker" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Expander" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.PdfToImageConverter" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.PdfViewer" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.ProgressBar" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Buttons" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Popup" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.TabView" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Inputs" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.ListView" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.DataForm" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Barcode" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.DataGrid" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.DataGridExport" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Maps" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.PullToRefresh" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Backdrop" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Carousel" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.NavigationDrawer" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Rotator" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Cards" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Chat" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.SunburstChart" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.RadialMenu" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.TreeMap" Version="28.1.41" />
-		<PackageReference Include="Syncfusion.Maui.Kanban" Version="28.1.41" />
+		<PackageReference Include="Syncfusion.Maui.TreeView" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Scheduler" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Picker" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Expander" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.PdfToImageConverter" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.PdfViewer" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.ProgressBar" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Buttons" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Popup" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.TabView" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Inputs" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.ListView" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.DataForm" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Barcode" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.DataGrid" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.DataGridExport" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Maps" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.PullToRefresh" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Backdrop" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Carousel" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.NavigationDrawer" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Rotator" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Cards" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Chat" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.SunburstChart" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.RadialMenu" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.TreeMap" Version="28.2.5" />
+		<PackageReference Include="Syncfusion.Maui.Kanban" Version="28.2.5" />
 	</ItemGroup>
 
 	<ItemGroup>
