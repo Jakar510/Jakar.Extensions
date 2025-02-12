@@ -41,10 +41,7 @@ public static partial class AsyncLinq
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static TElement[] GetArray<TElement>( int count ) => count == 0
-                                                                    ? Array.Empty<TElement>()
-                                                                    : GC.AllocateUninitializedArray<TElement>( count );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TElement[] GetArray<TElement>( int count ) => GC.AllocateUninitializedArray<TElement>( count );
     public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int count )
     {
         TElement[] array = GetArray<TElement>( count );

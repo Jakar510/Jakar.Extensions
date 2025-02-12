@@ -51,7 +51,7 @@ public sealed class BlazoredServices( IModalService modal, IToastService toasts,
 
 
 
-public sealed class RadzenServices( ContextMenuService contextMenus, TooltipService tooltips, NotificationService notifications, Radzen.DialogService dialogs )
+public sealed class RadzenServices( ContextMenuService contextMenus, TooltipService tooltips, NotificationService notifications, DialogService dialogs )
 {
     public readonly ContextMenuService  contextMenus  = contextMenus;
     public readonly TooltipService      tooltips      = tooltips;
@@ -59,7 +59,7 @@ public sealed class RadzenServices( ContextMenuService contextMenus, TooltipServ
     public readonly DialogService       dialogs       = dialogs;
 
 
-    public static   RadzenServices      Create( IServiceProvider provider ) => new(provider.GetRequiredService<ContextMenuService>(), provider.GetRequiredService<TooltipService>(), provider.GetRequiredService<NotificationService>(), provider.GetRequiredService<Radzen.DialogService>());
+    public static   RadzenServices      Create( IServiceProvider provider ) => new(provider.GetRequiredService<ContextMenuService>(), provider.GetRequiredService<TooltipService>(), provider.GetRequiredService<NotificationService>(), provider.GetRequiredService<DialogService>());
 }
 
 
@@ -68,7 +68,7 @@ public sealed class MudServices( CookieThemeService                cookieTheme,
                                  QueryStringThemeService           queryStringTheme,
                                  IDialogService                    mudDialogs,
                                  ISnackbar                         snackbar,
-                                 MudBlazor.IBrowserViewportService browserViewport,
+                                 IBrowserViewportService browserViewport,
                                  IResizeObserver                   resizeObserver,
                                  IKeyInterceptorService            keyInterceptor,
                                  IJsEventFactory                   jsEventFactory,
@@ -103,7 +103,7 @@ public sealed class MudServices( CookieThemeService                cookieTheme,
                                                                          provider.GetRequiredService<QueryStringThemeService>(),
                                                                          provider.GetRequiredService<IDialogService>(),
                                                                          provider.GetRequiredService<ISnackbar>(),
-                                                                         provider.GetRequiredService<MudBlazor.IBrowserViewportService>(),
+                                                                         provider.GetRequiredService<IBrowserViewportService>(),
                                                                          provider.GetRequiredService<IResizeObserver>(),
                                                                          provider.GetRequiredService<IKeyInterceptorService>(),
                                                                          provider.GetRequiredService<IJsEventFactory>(),

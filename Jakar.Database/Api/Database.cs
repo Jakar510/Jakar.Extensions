@@ -144,19 +144,19 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
     public CommandDefinition GetCommand<T>( T command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where T : IDapperSqlCommand
+        where T : class, IDapperSqlCommand
     {
         Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return new CommandDefinition( command.Sql, ParametersDictionary.LoadFrom( command ), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token );
     }
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition GetCommand( SqlCommand sql, DbTransaction? transaction, CancellationToken token )
+    public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return sql.ToCommandDefinition( transaction, token, CommandTimeout );
     }
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public SqlCommand.Definition GetCommand( SqlCommand sql, DbConnection connection, DbTransaction? transaction, CancellationToken token )
+    public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return sql.ToCommandDefinition( connection, transaction, token, CommandTimeout );
@@ -164,7 +164,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public async ValueTask<DbDataReader> ExecuteReaderAsync<T>( DbConnection connection, DbTransaction? transaction, T command, CancellationToken token )
-        where T : IDapperSqlCommand
+        where T : class, IDapperSqlCommand
     {
         try
         {
@@ -177,7 +177,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         try
         {
-            CommandDefinition command = GetCommand( sql, transaction, token );
+            CommandDefinition command = GetCommand( in sql, transaction, token );
             return await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql.sql, e ); }
@@ -216,7 +216,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.NotFound( request.UserName ); }
 
-        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Unauthorized( results ); }
+        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Unauthorized( in results ); }
 
         record = UserRecord.Create( request, rights );
         record = await Users.Insert( connection, transaction, record, token );
@@ -240,7 +240,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            CommandDefinition command = GetCommand( new SqlCommand( sql, parameters ), transaction, token );
+            SqlCommand        sqlCommand = new SqlCommand( sql, parameters );
+            CommandDefinition command    = GetCommand( in sqlCommand, transaction, token );
             reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
@@ -254,7 +255,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            CommandDefinition command = GetCommand( new SqlCommand( sql, parameters ), transaction, token );
+            SqlCommand        sqlCommand = new SqlCommand( sql, parameters );
+            CommandDefinition command    = GetCommand( in sqlCommand, transaction, token );
             await connection.QueryAsync<T>( command );
 
             reader = await connection.ExecuteReaderAsync( command );

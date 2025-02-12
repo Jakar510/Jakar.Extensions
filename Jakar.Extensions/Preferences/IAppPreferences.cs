@@ -3,6 +3,21 @@
 
 namespace Jakar.Extensions;
 
+public static class AppPreferenceExtensions
+{
+    private static readonly ShareKeyCollection _sharedKeys = new();
+    public static           string             GetSharedKey( this string sharedName, string key ) => _sharedKeys.GetOrAdd( sharedName, key );
+
+
+
+    /// <summary> A collection of sharedName -> key -> $"{sharedName}.{key}". </summary>
+    private sealed class ShareKeyCollection : ConcurrentDictionary<(string SharedName, string Key), string>
+    {
+        private static string CreateKey( (string SharedName, string Key) pair )                   => $"{pair.SharedName}.{pair.Key}";
+        public         string GetOrAdd( string                           sharedName, string key ) => GetOrAdd( (sharedName, key), CreateKey );
+    }
+}
+
 
 public interface IAppPreferences
 {
@@ -21,7 +36,7 @@ public interface IAppPreferences
 
     T Get<T>( string key, T defaultValue, string sharedName, string? oldKey = null )
         where T : IParsable<T>, IFormattable;
-    string Get( string key, string sharedName,   string? oldKey = null, string  defaultValue = BaseRecord.EMPTY );
+    string Get( string key, string sharedName,   string? oldKey = null, string  defaultValue = EMPTY );
     Uri    Get( string key, Uri    defaultValue, string  sharedName,    string? oldKey       = null );
     bool   Get( string key, bool   defaultValue, string  sharedName,    string? oldKey       = null );
     bool?  Get( string key, bool?  defaultValue, string  sharedName,    string? oldKey       = null );

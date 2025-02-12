@@ -38,7 +38,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition   command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition   command = _database.GetCommand( in sql, transaction, token );
             IEnumerable<string> results = await connection.QueryAsync<string>( command );
             return results.Any();
         }
@@ -66,8 +66,9 @@ public partial class DbTable<TRecord>
                                                                                                                                                                                : Error.NotFound();
     public async ValueTask<ErrorOrResult<TRecord>> Get( DbConnection connection, DbTransaction? transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand.Definition definition = _database.GetCommand( TRecord.SQL.Get( id ), connection, transaction, token );
-        return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options,  token );
+        SqlCommand            command    = TRecord.SQL.Get( in id );
+        SqlCommand.Definition definition = _database.GetCommand( in command, connection, transaction, token );
+        return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options, token );
 
         async ValueTask<ErrorOrResult<TRecord>> Factory( SqlCommand.Definition sql, CancellationToken cancellationToken )
         {
@@ -101,7 +102,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            SqlCommand.Definition definition = _database.GetCommand( sql, connection, transaction, token );
+            SqlCommand.Definition definition = _database.GetCommand( in sql, connection, transaction, token );
             TRecord?              result     = null;
 
             await foreach ( TRecord record in Where( definition, token ) )

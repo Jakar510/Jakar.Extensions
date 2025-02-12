@@ -23,12 +23,12 @@ if ( app.Environment.IsDevelopment() is false )
 }
 
 app.UseHttpsRedirection();
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAntiforgery();
 app.UseAuthorization();
+app.UseAuthorization();
+
 
 app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 

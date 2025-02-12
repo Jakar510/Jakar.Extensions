@@ -11,7 +11,7 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class FilePathsEnricher() : ILogEventEnricher
 {
-    private static Serilogger _Logger => Serilogger.Instance ?? throw new InvalidOperationException( $"{nameof(Serilogger)} has not been created" );
+    private static ISerilogger _Logger => ISerilogger.Instance ?? throw new InvalidOperationException( $"{nameof(ISerilogger)} has not been created" );
     void ILogEventEnricher.Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
     {
         try
@@ -21,15 +21,15 @@ public sealed class FilePathsEnricher() : ILogEventEnricher
             using Disposables disposables = new();
             List<Task>        tasks       = new(20);
 
-            if ( _Logger.Settings.Screenshot )
+            if ( _Logger.Settings.IncludeAppStateOnError )
             {
-                tasks.Add( Handle( disposables, _Logger.ScreenShotAddress ) );
+                tasks.Add( Handle( disposables, _Logger.Settings.Paths.ScreenShotAddress ) );
 
                 ReadOnlyMemory<byte> data = _Logger.ScreenShotData;
                 if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( IFilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
-            if ( _Logger.Settings.AppState )
+            if ( _Logger.Settings.IncludeAppStateOnError )
             {
                 tasks.Add( Handle( disposables, _Logger.Settings.Paths.FeedbackFile ) );
                 tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppStateFile ) );

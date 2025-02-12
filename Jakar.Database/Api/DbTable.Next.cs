@@ -15,11 +15,11 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<ErrorOrResult<TRecord>> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Next( pair );
+        SqlCommand sql = TRecord.SQL.Next( in pair );
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
             var               record  = await connection.ExecuteScalarAsync<TRecord>( command );
 
             return record is null
@@ -37,7 +37,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition                command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition                command = _database.GetCommand( in sql, transaction, token );
             IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
             return pairs;
         }
@@ -48,11 +48,11 @@ public partial class DbTable<TRecord>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.NextID( pair );
+        SqlCommand sql = TRecord.SQL.NextID( in pair );
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
             return await connection.ExecuteScalarAsync<Guid>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

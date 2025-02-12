@@ -30,8 +30,8 @@ public partial class DbTable<TRecord>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TRecord> id, CancellationToken token = default )
     {
-        SqlCommand        sql     = TRecord.SQL.DeleteID( id );
-        CommandDefinition command = _database.GetCommand( sql, transaction, token );
+        SqlCommand        sql     = TRecord.SQL.DeleteID( in id );
+        CommandDefinition command = _database.GetCommand( in sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 
@@ -43,7 +43,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -52,7 +52,7 @@ public partial class DbTable<TRecord>
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
         SqlCommand        sql     = TRecord.SQL.Delete( matchAll, parameters );
-        CommandDefinition command = _database.GetCommand( sql, transaction, token );
+        CommandDefinition command = _database.GetCommand( in sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
 }

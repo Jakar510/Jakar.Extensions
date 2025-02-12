@@ -123,7 +123,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         ReadOnlyMemory<int> array  = new([..Enumerable.Range( 0, 100 ).Select( static x => Random.Shared.Next( 1000 ) )]);
         ReadOnlyMemory<int> sorted = GetSorted( array.Span );
 
-        ConcurrentObservableCollection<int> collection = new(array.Span, Sorter);
+        ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
         this.AreEqual( sorted.Span, collection.ToArray() );
 
@@ -139,7 +139,7 @@ public class ConcurrentObservableCollection_Tests : Assert
         ReadOnlyMemory<int> array  = new([..Enumerable.Range( 0, 100 ).Select( static x => Random.Shared.Next( 1000 ) )]);
         ReadOnlyMemory<int> sorted = GetSorted( array.Span );
 
-        ConcurrentObservableCollection<int> collection = new(array.Span, Sorter);
+        ConcurrentObservableCollection<int> collection = new(Sorter, array.Span);
         await collection.SortAsync();
         this.AreEqual( sorted.Span, collection.ToArray() );
 

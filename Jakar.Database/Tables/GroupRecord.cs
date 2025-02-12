@@ -2,7 +2,7 @@
 
 
 [Serializable, Table( TABLE_NAME )]
-public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<GroupRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
+public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<GroupRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
     public const  int                                    MAX_SIZE   = 1024;
     public const  string                                 TABLE_NAME = "Groups";
@@ -32,7 +32,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CustomerID),  CustomerID );
         parameters.Add( nameof(NameOfGroup), NameOfGroup );
-        parameters.Add( nameof(CreatedBy), CreatedBy );
+        parameters.Add( nameof(CreatedBy),   CreatedBy );
         parameters.Add( nameof(Rights),      Rights );
         return parameters;
     }
@@ -46,7 +46,7 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>? ownerUserID  = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
-        GroupRecord           record       = new( customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified );
+        GroupRecord           record       = new(customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
     }
     [Pure]
@@ -55,6 +55,6 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => await db.Users.Get( connection, transaction,  CreatedBy, token );
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction,  Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction,  db.Users, this, token );
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.Users, this, token );
 }

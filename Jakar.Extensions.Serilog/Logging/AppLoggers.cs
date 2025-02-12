@@ -13,12 +13,12 @@ namespace Jakar.Extensions.Serilog;
 [SuppressMessage( "ReSharper", "CollectionNeverQueried.Local" )]
 public static class AppLoggers
 {
-    public static void TrackError<T>( this T _, Exception                 exception, IEnumerable<FileData>?    attachments, [CallerMemberName] string caller                                        = BaseRecord.EMPTY ) => TrackError( _, exception, Serilogger.Instance?.AppState(), attachments, caller );
-    public static void TrackError<T>( this T _, Exception                 exception, EventDetails              details,     IEnumerable<FileData>?    attachments, [CallerMemberName] string caller = BaseRecord.EMPTY ) => Serilogger.Instance?.TrackError( _, exception, details, attachments, caller );
-    public static void TrackError<T>( this T _, Exception                 exception, [CallerMemberName] string caller = BaseRecord.EMPTY ) => Serilogger.Instance?.TrackError( _, exception, caller );
-    public static void TrackEvent<T>( this T _, [CallerMemberName] string eventType                                                                          = BaseRecord.EMPTY ) => Serilogger.Instance?.TrackEvent( _, eventType );
-    public static void TrackEvent<T>( this T _, EventDetails              properties, [CallerMemberName] string eventType                                    = BaseRecord.EMPTY ) => Serilogger.Instance?.TrackEvent( _, properties, eventType );
-    public static void TrackEvent<T>( this T _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY ) => Serilogger.Instance?.TrackEvent( _, eventType,  properties, caller );
+    public static void TrackError<T>( this T _, Exception                 exception, IEnumerable<FileData>?    attachments, [CallerMemberName] string caller                                        = BaseRecord.EMPTY ) => TrackError( _, exception, ISerilogger.Instance?.AppState(), attachments, caller );
+    public static void TrackError<T>( this T _, Exception                 exception, EventDetails?             details,     IEnumerable<FileData>?    attachments, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, details, attachments, caller );
+    public static void TrackError<T>( this T _, Exception                 exception, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, caller );
+    public static void TrackEvent<T>( this T _, [CallerMemberName] string eventType                                                                          = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType );
+    public static void TrackEvent<T>( this T _, EventDetails              properties, [CallerMemberName] string eventType                                    = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, properties, eventType );
+    public static void TrackEvent<T>( this T _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType,  properties, caller );
 
 
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]

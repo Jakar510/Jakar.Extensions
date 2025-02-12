@@ -11,28 +11,28 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValue>, IList, ILockedCollection<TValue, AsyncLockerEnumerator<TValue>, LockerEnumerator<TValue>>
+public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
     where TValue : IEquatable<TValue>
 {
-    protected internal readonly Locker locker = Locker.Default;
+    protected internal readonly Lock locker = new();
 
 
-    public AsyncLockerEnumerator<TValue> AsyncValues    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
-    public Locker                        Lock           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
-    object ICollection.                  SyncRoot       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; }
-    bool ICollection.                    IsSynchronized { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => true; }
-    public LockerEnumerator<TValue>      Values         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public AsyncLockerEnumerator<TValue, LockCloser> AsyncValues    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public Lock                                      Lock           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
+    object ICollection.                              SyncRoot       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; }
+    bool ICollection.                                IsSynchronized { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => true; }
+    public LockerEnumerator<TValue, LockCloser>      Values         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
 
 
     public ConcurrentObservableCollection() : base() { }
     public ConcurrentObservableCollection( IComparer<TValue>                comparer, int capacity = DEFAULT_CAPACITY ) : base( comparer, capacity ) { }
     public ConcurrentObservableCollection( int                              capacity ) : base( capacity ) { }
-    public ConcurrentObservableCollection( scoped in ImmutableArray<TValue> values ) : base( values ) { }
-    public ConcurrentObservableCollection( scoped in ImmutableArray<TValue> values, IComparer<TValue> comparer ) : base( values, comparer ) { }
-    public ConcurrentObservableCollection( scoped in ReadOnlyMemory<TValue> values ) : base( values ) { }
-    public ConcurrentObservableCollection( scoped in ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : base( values, comparer ) { }
-    public ConcurrentObservableCollection( scoped in ReadOnlySpan<TValue>   values ) : base( values ) { }
-    public ConcurrentObservableCollection( scoped in ReadOnlySpan<TValue>   values, IComparer<TValue> comparer ) : base( values, comparer ) { }
+    public ConcurrentObservableCollection( scoped in ImmutableArray<TValue> values ) : base( in values ) { }
+    public ConcurrentObservableCollection( scoped in ImmutableArray<TValue> values, IComparer<TValue> comparer ) : base( in values, comparer ) { }
+    public ConcurrentObservableCollection( scoped in ReadOnlyMemory<TValue> values ) : base( in values ) { }
+    public ConcurrentObservableCollection( scoped in ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : base( in values, comparer ) { }
+    public ConcurrentObservableCollection( params    ReadOnlySpan<TValue>   values ) : base( values ) { }
+    public ConcurrentObservableCollection( IComparer<TValue>                comparer, params ReadOnlySpan<TValue> values ) : base( comparer, values ) { }
     public ConcurrentObservableCollection( IEnumerable<TValue>              values ) : base( values ) { }
     public ConcurrentObservableCollection( IEnumerable<TValue>              values, IComparer<TValue> comparer ) : base( comparer ) { }
     public ConcurrentObservableCollection( TValue[]                         values ) : base( values ) { }
@@ -204,7 +204,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() ) { base.Add( values ); }
     }
-    public override void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
+    public override void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
     {
         using ( AcquireLock() )
         {
@@ -224,7 +224,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
             foreach ( TValue value in values ) { base.AddOrUpdate( value ); }
         }
     }
-    public override void AddOrUpdate( scoped in ReadOnlySpan<TValue> values )
+    public override void AddOrUpdate( params ReadOnlySpan<TValue> values )
     {
         using ( AcquireLock() )
         {
@@ -309,7 +309,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() ) { base.Insert( index, collection ); }
     }
-    public override void Insert( int index, scoped in ReadOnlySpan<TValue> collection )
+    public override void Insert( int index, params ReadOnlySpan<TValue> collection )
     {
         using ( AcquireLock() ) { base.Insert( index, collection ); }
     }
@@ -542,20 +542,25 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     }
 
 
-    public AsyncLockerEnumerator<TValue>              GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
-    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-    public override LockerEnumerator<TValue>          GetEnumerator()                               => Values;
-    IEnumerator IEnumerable.                          GetEnumerator()                               => GetEnumerator();
+    public AsyncLockerEnumerator<TValue, LockCloser>     GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
+    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.   GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+    public override LockerEnumerator<TValue, LockCloser> GetEnumerator()                               => Values;
+    IEnumerator IEnumerable.                             GetEnumerator()                               => GetEnumerator();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock()                               => locker.Enter();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Closer            AcquireLock( CancellationToken      token ) => locker.Enter( token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<Closer> AcquireLockAsync( CancellationToken token ) => locker.EnterAsync( token );
+    [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public LockCloser AcquireLock()
+    {
+        locker.Enter();
+        return new LockCloser( locker );
+    }
+    [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )] public LockCloser            AcquireLock( CancellationToken      token ) => LockCloser.Enter( locker, token );
+    [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<LockCloser> AcquireLockAsync( CancellationToken token ) => LockCloser.EnterAsync( locker, token );
 
 
     public sealed override void TrimExcess()
     {
-        if ( locker.IsTaken is false )
+        if ( locker.TryEnter() is false )
         {
             using ( AcquireLock() ) { base.TrimExcess(); }
         }
@@ -563,7 +568,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     }
     public sealed override void EnsureCapacity( int capacity )
     {
-        if ( locker.IsTaken is false )
+        if ( locker.IsHeldByCurrentThread is false )
         {
             using ( AcquireLock() ) { base.EnsureCapacity( capacity ); }
         }
@@ -576,8 +581,8 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() ) { return FilteredValues(); }
     }
-    [Pure, MustDisposeResource] FilterBuffer<TValue> ILockedCollection<TValue>.                              Copy()                               => Copy();
-    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    [Pure, MustDisposeResource] FilterBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
+    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
     [Pure, MustDisposeResource]
     protected async ValueTask<FilterBuffer<TValue>> CopyAsync( CancellationToken token )
     {

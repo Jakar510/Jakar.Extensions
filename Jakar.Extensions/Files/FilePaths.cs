@@ -35,7 +35,7 @@ public interface IFilePaths : IScreenShotAddress, IDisposable
     public LocalFile      ZipLogsFile     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
 
 
-    public IEnumerable<LocalFile> GetFiles();
+    public IEnumerable<LocalFile> GetFiles( bool overrideIfExists = false );
     public IEnumerable<LocalFile> GetFiles( bool includeLogs, bool includeCache, bool includeData, bool includeScreenshot, bool includeState );
 }
 
@@ -43,25 +43,34 @@ public interface IFilePaths : IScreenShotAddress, IDisposable
 
 public class FilePaths : IFilePaths
 {
-    public LocalFile      AccountsFile      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      AppCacheZipFile   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalDirectory AppData           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      AppDataZipFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      AppStateFile      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalDirectory Cache             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      CrashFile         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      FeedbackFile      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      IncomingFile      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalDirectory Logs              { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      LogsFile          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      OutgoingFile      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      Screenshot        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile      ZipLogsFile       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public LocalFile?     ScreenShotAddress { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    private LocalFile?     _screenShotAddress;
+    public  LocalFile      AccountsFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      AppCacheZipFile { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalDirectory AppData         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      AppDataZipFile  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      AppStateFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalDirectory Cache           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      CrashFile       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      FeedbackFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      IncomingFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalDirectory Logs            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      LogsFile        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      OutgoingFile    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      Screenshot      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public  LocalFile      ZipLogsFile     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public LocalFile? ScreenShotAddress
+    {
+        get => _screenShotAddress ??= Cache.Join( IFilePaths.SCREEN_SHOT_FILE );
+        set
+        {
+            _screenShotAddress?.Dispose();
+            _screenShotAddress = value?.SetTemporary();
+        }
+    }
 
 
     public FilePaths() : this( LocalDirectory.CurrentDirectory ) { }
-    public FilePaths( LocalDirectory currentDirectory ) : this( Path.Join( currentDirectory, IFilePaths.APP_DATA_DIRECTORY ), Path.Join( currentDirectory, IFilePaths.CACHE_DIRECTORY ) ) { }
+    public FilePaths( LocalDirectory currentDirectory ) : this( currentDirectory.Combine( IFilePaths.APP_DATA_DIRECTORY ), currentDirectory.Combine( IFilePaths.CACHE_DIRECTORY ) ) { }
     public FilePaths( LocalDirectory appData, LocalDirectory cache )
     {
         AppData         = appData;
@@ -81,6 +90,7 @@ public class FilePaths : IFilePaths
         Directory.CreateDirectory( cache );
         Directory.CreateDirectory( appData );
     }
+
     protected virtual void Dispose( bool disposing )
     {
         if ( disposing is false ) { return; }
@@ -114,6 +124,24 @@ public class FilePaths : IFilePaths
     }
 
 
+    public ReadOnlyMemory<byte>       ZipLogs()       => Zip( Logs );
+    public Task<ReadOnlyMemory<byte>> ZipLogsAsync()  => Task.Run( ZipLogs );
+    public ReadOnlyMemory<byte>       ZipCache()      => Zip( Cache );
+    public Task<ReadOnlyMemory<byte>> ZipCacheAsync() => Task.Run( ZipCache );
+    public ReadOnlyMemory<byte>       ZipData()       => Zip( AppData );
+    public Task<ReadOnlyMemory<byte>> ZipDataAsync()  => Task.Run( ZipData );
+    public static ReadOnlyMemory<byte> Zip( LocalDirectory? directory )
+    {
+        if ( directory is null || directory.DoesNotExist ) { return ReadOnlyMemory<byte>.Empty; }
+
+        System.Diagnostics.Debug.Assert( directory.Exists );
+        using MemoryStream destination = new(1024);
+        ZipFile.CreateFromDirectory( directory.FullPath, destination, CompressionLevel.SmallestSize, true, Encoding.Default );
+
+        return destination.ToArray();
+    }
+
+
     public async ValueTask<LocalFile> SaveFileAsync( string fileName, Stream stream, CancellationToken token )
     {
         LocalFile file = Cache.Join( fileName );
@@ -128,13 +156,37 @@ public class FilePaths : IFilePaths
     }
 
 
-    public virtual Task<LocalFile> ZipCache()                                                                       => Zip( Cache,   AppCacheZipFile );
-    public virtual Task<LocalFile> ZipData()                                                                        => Zip( AppData, AppDataZipFile );
-    public static  Task<LocalFile> Zip( LocalDirectory input, LocalFile output, CancellationToken token = default ) => input.ZipAsync( output, token );
+    public        Task<LocalFile> ZipLogsToFile()                                                                  => Zip( Logs,    ZipLogsFile );
+    public        Task<LocalFile> ZipCacheToFile()                                                                 => Zip( Cache,   AppCacheZipFile );
+    public        Task<LocalFile> ZipDataToFile()                                                                  => Zip( AppData, AppDataZipFile );
+    public static Task<LocalFile> Zip( LocalDirectory input, LocalFile output, CancellationToken token = default ) => input.ZipAsync( output, token );
 
 
-    public IEnumerable<LocalFile> GetFiles() => GetFiles( true, true, true, true, true );
-    public IEnumerable<LocalFile> GetFiles( bool includeLogs, bool includeCache, bool includeData, bool includeScreenshot, bool includeState )
+    public virtual IEnumerable<LocalFile> GetFiles( bool overrideIfExists = false )
+    {
+        if ( overrideIfExists || FeedbackFile.Exists ) { yield return FeedbackFile; }
+
+        if ( overrideIfExists || IncomingFile.Exists ) { yield return IncomingFile; }
+
+        if ( overrideIfExists || OutgoingFile.Exists ) { yield return OutgoingFile; }
+
+        if ( overrideIfExists || AccountsFile.Exists ) { yield return AccountsFile; }
+
+        if ( overrideIfExists || AppStateFile.Exists ) { yield return AppStateFile; }
+
+        if ( overrideIfExists || LogsFile.Exists ) { yield return LogsFile; }
+
+        if ( overrideIfExists || ZipLogsFile.Exists ) { yield return ZipLogsFile; }
+
+        if ( overrideIfExists || Screenshot.Exists ) { yield return Screenshot; }
+
+        if ( overrideIfExists || AppDataZipFile.Exists ) { yield return AppDataZipFile; }
+
+        if ( overrideIfExists || AppCacheZipFile.Exists ) { yield return AppCacheZipFile; }
+
+        if ( overrideIfExists || CrashFile.Exists ) { yield return CrashFile; }
+    }
+    public virtual IEnumerable<LocalFile> GetFiles( bool includeLogs, bool includeCache, bool includeData, bool includeScreenshot, bool includeState )
     {
         if ( includeState )
         {

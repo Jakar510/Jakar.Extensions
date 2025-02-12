@@ -36,7 +36,7 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
+            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
             await connection.ExecuteScalarAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }

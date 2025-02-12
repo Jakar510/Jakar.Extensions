@@ -4,8 +4,10 @@
 namespace Jakar.Extensions;
 
 
-public sealed class Disposables() : List<IDisposable>( Buffers.DEFAULT_CAPACITY ), IDisposable
+public sealed class Disposables : ConcurrentBag<IDisposable>, IDisposable
 {
+    public Disposables() : base() { }
+    public Disposables( IEnumerable<IDisposable> enumerable ) : base( enumerable ) { }
     public void Dispose()
     {
         foreach ( IDisposable disposable in this ) { disposable.Dispose(); }
@@ -16,8 +18,10 @@ public sealed class Disposables() : List<IDisposable>( Buffers.DEFAULT_CAPACITY 
 
 
 
-public sealed class AsyncDisposables() : List<IAsyncDisposable>( Buffers.DEFAULT_CAPACITY ), IAsyncDisposable
+public sealed class AsyncDisposables : ConcurrentBag<IAsyncDisposable>, IAsyncDisposable
 {
+    public AsyncDisposables() : base() { }
+    public AsyncDisposables( IEnumerable<IAsyncDisposable> enumerable ) : base( enumerable ) { }
     public async ValueTask DisposeAsync()
     {
         foreach ( IAsyncDisposable disposable in this ) { await disposable.DisposeAsync().ConfigureAwait( false ); }

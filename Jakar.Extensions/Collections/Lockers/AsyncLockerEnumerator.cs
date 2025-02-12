@@ -4,14 +4,15 @@
 namespace Jakar.Extensions;
 
 
-public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+    where TCloser : IDisposable
 {
-    private const    int                       START_INDEX = 0;
-    private readonly ILockedCollection<TValue> _collection = collection;
-    private          bool                      _isDisposed;
-    private          CancellationToken         _token = token;
-    private          FilterBuffer<TValue>?     _buffer;
-    private          int                       _index = START_INDEX;
+    private const    int                                START_INDEX = 0;
+    private readonly ILockedCollection<TValue, TCloser> _collection = collection;
+    private          bool                               _isDisposed;
+    private          CancellationToken                  _token = token;
+    private          FilterBuffer<TValue>?              _buffer;
+    private          int                                _index = START_INDEX;
 
 
     private ReadOnlyMemory<TValue>  _Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
@@ -49,7 +50,7 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
 
 
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-    public AsyncLockerEnumerator<TValue> GetAsyncEnumerator( CancellationToken token = default )
+    public AsyncLockerEnumerator<TValue, TCloser> GetAsyncEnumerator( CancellationToken token = default )
     {
         ThrowIfDisposed();
         _buffer?.Dispose();

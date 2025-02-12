@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
+using Microsoft.Extensions.Primitives;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -12,30 +16,30 @@ public readonly record struct WebResponse<T>
     public const string UNKNOWN_ERROR = "Unknown Error";
 
 
-    public              List<string>                Allow             { get; init; } = [];
-    public              List<string>                ContentEncoding   { get; init; } = [];
-    public              long?                       ContentLength     { get; init; } = null;
-    public              string?                     ContentType       { get; init; } = null;
-    [JsonIgnore] public OneOf<JToken, string, None> Error             { get; init; } = new None();
-    public              string?                     ErrorMessage      => Error.Match<string?>( x => x.ToString( Formatting.Indented ), x => x, x => null );
-    [JsonIgnore] public Exception?                  Exception         { get; init; } = null;
-    public              DateTimeOffset?             Expires           { get; init; } = null;
-    public              DateTimeOffset?             LastModified      { get; init; } = null;
-    public              Uri?                        Location          { get; init; } = null;
-    public              string?                     Method            { get; init; } = null;
-    public              T?                          Payload           { get; init; } = default;
-    public              string?                     Sender            { get; init; } = null;
-    public              string?                     Server            { get; init; } = null;
-    public              Status                      StatusCode        { get; init; } = Status.NotSet;
-    public              string?                     StatusDescription { get; init; } = null;
-    public              Uri?                        URL               { get; init; } = null;
+    public              List<string>                         Allow             { get; init; } = [];
+    public              List<string>                         ContentEncoding   { get; init; } = [];
+    public              long?                                ContentLength     { get; init; } = null;
+    public              string?                              ContentType       { get; init; } = null;
+    [JsonIgnore] public OneOf<JToken, string, Error[], None> Errors            { get; init; } = new None();
+    public              string?                              ErrorMessage      => Errors.Match<string?>( static x => x.ToString( Formatting.Indented ), static x => x, static x => x.GetMessage(), static x => null );
+    [JsonIgnore] public Exception?                           Exception         { get; init; } = null;
+    public              DateTimeOffset?                      Expires           { get; init; } = null;
+    public              DateTimeOffset?                      LastModified      { get; init; } = null;
+    public              Uri?                                 Location          { get; init; } = null;
+    public              string?                              Method            { get; init; } = null;
+    public              T?                                   Payload           { get; init; } = default;
+    public              string?                              Sender            { get; init; } = null;
+    public              string?                              Server            { get; init; } = null;
+    public              Status                               StatusCode        { get; init; } = Status.NotSet;
+    public              string?                              StatusDescription { get; init; } = null;
+    public              Uri?                                 URL               { get; init; } = null;
 
 
-    public WebResponse( HttpResponseMessage response, in string error ) : this( response, default, null, error ) { }
-    public WebResponse( HttpResponseMessage response, Exception e, in string error ) : this( response, default, e, error ) { }
-    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = null, in string? error = null )
+    public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, null, error ) { }
+    public WebResponse( HttpResponseMessage response, Exception e, string error ) : this( response, default, e, error ) { }
+    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = null, string? error = null )
     {
-        Error             = ParseError( error ?? exception?.Message );
+        Errors            = ParseError( error ?? exception?.Message );
         Payload           = payload;
         Exception         = exception;
         StatusCode        = response.StatusCode.ToStatus();
@@ -67,7 +71,30 @@ public readonly record struct WebResponse<T>
     }
 
 
-    [MemberNotNullWhen( true, nameof(Payload) )] public bool IsSuccessStatusCode() => StatusCode < Status.BadRequest && Payload is not null;
+    public ErrorOrResult<T> TryGetPayload()
+    {
+        return TryGetValue( out T? payload, out Error? error )
+                   ? payload
+                   : error.Value;
+    }
+
+    
+    public bool TryGetValue( [NotNullWhen( true )] out T? payload, [NotNullWhen( false )] out Error? errorMessage )
+    {
+        if ( IsSuccessStatusCode() )
+        {
+            payload      = Payload;
+            errorMessage = null;
+            return payload is not null;
+        }
+
+        payload      = default;
+        errorMessage = GetError();
+        return false;
+    }
+    public  bool  HasPayload()          => Payload is not null;
+    private Error GetError()            => Error.Create( Exception, ErrorMessage, URL?.OriginalString, StringValues.Empty, status: StatusCode );
+    public  bool  IsSuccessStatusCode() => StatusCode < Status.BadRequest;
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode() ) { return; }
@@ -79,13 +106,22 @@ public readonly record struct WebResponse<T>
 
     internal static WebResponse<T> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
     internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
-    public static OneOf<JToken, string, None> ParseError( in string? error )
+    public static OneOf<JToken, string, Error[], None> ParseError( string? error )
     {
-        if ( string.IsNullOrWhiteSpace( error ) ) { return new None(); }
+        if ( string.IsNullOrWhiteSpace( error ) ) { return UNKNOWN_ERROR; }
 
-        try { return error.Replace( @"\""", @"""" ).FromJson(); }
-        catch ( Exception ) { return error; }
+        const string ESCAPED_QUOTE                   = @"\""";
+        const string QUOTE                           = @"""";
+        if ( error.Contains( ESCAPED_QUOTE ) ) error = error.Replace( ESCAPED_QUOTE, QUOTE );
+
+        try { return error.FromJson<Error[]>(); }
+        catch ( Exception )
+        {
+            try { return error.FromJson(); }
+            catch ( Exception ) { return error; }
+        }
     }
+
 
     /*
     public static JToken? ParseError( ReadOnlySpan<char> error )
@@ -227,10 +263,10 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new( stream );
+            using StreamReader reader       = new(stream);
             string             errorMessage = await reader.ReadToEndAsync( token );
 
-            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<T>( response, errorMessage ); }
 
             error = errorMessage;
         }
@@ -246,10 +282,10 @@ public readonly record struct WebResponse<T>
         if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
-            using StreamReader reader       = new( stream );
+            using StreamReader reader       = new(stream);
             string             errorMessage = await reader.ReadToEndAsync( token );
 
-            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return None( response, e ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<T>( response, errorMessage ); }
 
             error = errorMessage;
         }

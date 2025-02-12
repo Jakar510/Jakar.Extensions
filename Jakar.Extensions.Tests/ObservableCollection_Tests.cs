@@ -31,14 +31,14 @@ public class ObservableCollection_Tests : Assert
         bool Match( int x ) => x == value;
     }
 
-    
+
     [Test]
     public void Sort()
     {
         ReadOnlyMemory<int> array  = new([..Enumerable.Range( 0, 100 ).Select( static x => Random.Shared.Next( 1000 ) )]);
         ReadOnlyMemory<int> sorted = GetSorted( array.Span );
 
-        ObservableCollection<int> collection = new(array.Span, Sorter);
+        ObservableCollection<int> collection = new(Sorter, array.Span);
         collection.Sort();
         this.AreEqual( sorted.Span, collection.ToArray() );
 

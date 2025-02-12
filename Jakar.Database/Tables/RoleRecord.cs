@@ -9,7 +9,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
                                  RecordID<RoleRecord>                    ID,
                                  RecordID<UserRecord>?                   CreatedBy,
                                  DateTimeOffset                          DateCreated,
-                                 DateTimeOffset?                         LastModified = null ) : OwnedTableRecord<RoleRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
+                                 DateTimeOffset?                         LastModified = null ) : OwnedTableRecord<RoleRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
 {
     public const                                  string TABLE_NAME = "roles";
     public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
@@ -54,7 +54,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
         DateTimeOffset?       lastModified     = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
         RecordID<UserRecord>? ownerUserID      = RecordID<UserRecord>.CreatedBy( reader );
         RecordID<RoleRecord>  id               = RecordID<RoleRecord>.ID( reader );
-        RoleRecord            record           = new( name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified );
+        RoleRecord            record           = new(name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
     }
     [Pure]

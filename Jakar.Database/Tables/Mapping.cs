@@ -13,7 +13,7 @@ public interface ICreateMapping<out TSelf, TKey, TValue>
 
 
 [Serializable]
-public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : TableRecord<TSelf>( ID, DateCreated, LastModified )
+public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : TableRecord<TSelf>( in ID, in DateCreated, in LastModified )
     where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
     where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>

@@ -22,7 +22,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     string                  Thai,
                                     RecordID<ResxRowRecord> ID,
                                     DateTimeOffset          DateCreated,
-                                    DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<ResxRowRecord>
+                                    DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>( in ID, in DateCreated, in LastModified ), IDbReaderMapping<ResxRowRecord>
 {
     public const  string TABLE_NAME = "Resx";
     public static string TableName => TABLE_NAME;
@@ -105,7 +105,7 @@ public sealed record ResxRowRecord( long                    KeyID,
         string                  arabic       = reader.GetFieldValue<string>( nameof(Arabic) );
         DateTimeOffset          dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?         lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<ResxRowRecord> id           = new( reader.GetFieldValue<Guid>( nameof(ID) ) );
+        RecordID<ResxRowRecord> id           = new(reader.GetFieldValue<Guid>( nameof(ID) ));
 
         return new ResxRowRecord( keyID,
                                   key,

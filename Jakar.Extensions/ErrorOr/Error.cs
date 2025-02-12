@@ -17,7 +17,7 @@ namespace Jakar.Extensions;
 /// <param name="Instance"> </param>
 /// <param name="Errors"> </param>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct Error( Status? StatusCode, string? Type, string? Title, string? Detail, string? Instance, StringValues Errors ) : IErrorDetails
+public readonly record struct Error( [property: JsonRequired] Status? StatusCode, [property: JsonRequired] string? Type, [property: JsonRequired] string? Title, [property: JsonRequired] string? Detail, [property: JsonRequired] string? Instance, [property: JsonRequired] StringValues Errors ) : IErrorDetails
 {
     public static readonly Error        Empty = new(null, null, null, null, null, StringValues.Empty);
     public static          IErrorTitles Titles { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
@@ -34,19 +34,18 @@ public readonly record struct Error( Status? StatusCode, string? Type, string? T
 
     public static Error Create<T>( T details )
         where T : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
-    public static Error Create( Status    status,   StringValues errors, [CallerMemberName] string type = EMPTY )                                                                       => new(status, type, null, null, null, errors);
-    public static Error Create( Status    status,   string       type,   StringValues              errors )                                                                             => new(status, type, null, null, null, errors);
-    public static Error Create( Status    status,   string       type,   params string[]           errors )                                                                             => Create( status, type, null, null, null, new StringValues( errors ) );
-    public static Error Create( Status    status,   string       type,   string?                   title,            StringValues    errors )                                           => new(status, type, title, null, null, errors);
-    public static Error Create( Status    status,   string       type,   string?                   title,            params string[] errors )                                           => Create( status, type, title, null, null, new StringValues( errors ) );
-    public static Error Create( Status    status,   string       type,   string?                   title,            string?         detail, string? instance, StringValues    errors ) => new(status, type, title, detail, instance, errors);
-    public static Error Create( Status    status,   string       type,   string?                   title,            string?         detail, string? instance, params string[] errors ) => Create( status, type, title, detail, instance, new StringValues( errors ) );
-    public static Error Create( Exception e,        string?      detail, StringValues              errors = default, Status          status = Status.InternalServerError )                          => Create( e.Source, e, detail, errors, status );
-    public static Error Create( string?   instance, Exception    e,      string?                   detail,           StringValues    errors = default, Status status = Status.InternalServerError ) => new(status, e.GetType().Name, e.Message, detail, instance, errors);
+    public static Error Create( Status     status, StringValues errors, [CallerMemberName] string type = EMPTY )                                                               => new(status, type, null, null, null, errors);
+    public static Error Create( Status     status, string       type,   StringValues              errors )                                                                     => new(status, type, null, null, null, errors);
+    public static Error Create( Status     status, string       type,   params string[]           errors )                                                                     => Create( status, type, null, null, null, new StringValues( errors ) );
+    public static Error Create( Status     status, string       type,   string?                   title,    StringValues    errors )                                           => new(status, type, title, null, null, errors);
+    public static Error Create( Status     status, string       type,   string?                   title,    params string[] errors )                                           => Create( status, type, title, null, null, new StringValues( errors ) );
+    public static Error Create( Status     status, string       type,   string?                   title,    string?         detail, string? instance, StringValues    errors ) => new(status, type, title, detail, instance, errors);
+    public static Error Create( Status     status, string       type,   string?                   title,    string?         detail, string? instance, params string[] errors ) => Create( status, type, title, detail, instance, new StringValues( errors ) );
+    public static Error Create( Exception? e,      string?      detail, StringValues              errors,   Status          status = Status.InternalServerError )                          => Create( e, detail, e?.Source, errors, status );
+    public static Error Create( Exception? e,      string?      detail, string?                   instance, StringValues    errors = default, Status status = Status.InternalServerError ) => new(status, e?.GetType().Name, e?.Message, detail, instance, errors);
 
 
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( Exception e,        StringValues errors = default, Status       status = Status.InternalServerError )                          => Create( e.Source, e, e.MethodSignature(), errors, status );
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( string?   instance, Exception    e,                StringValues errors = default, Status status = Status.InternalServerError ) => Create( instance, e, e.MethodSignature(), errors, status );
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( Exception e, StringValues errors = default, Status status = Status.InternalServerError ) => Create( e, e.MethodSignature(), e.Source, errors, status );
 
 
     public static Error Unauthorized( scoped ref readonly PasswordValidator.Results results,  string?      instance                 = null, string? detail = null, string type = PASSWORD_VALIDATION_TYPE ) => Unauthorized( results.ToValues(), instance, detail, Titles.PasswordValidation, type );

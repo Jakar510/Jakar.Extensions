@@ -18,7 +18,7 @@ public sealed record MessageEvent( string Message, LogEventLevel Level, TimeSpan
                                           };
     public MessageEvent TrackEvent()
     {
-        Serilogger.Instance?.TrackEvent( this, Message, ToDictionary() );
+        ISerilogger.Instance?.TrackEvent( this, Message, ToDictionary() );
         return this;
     }
     public override string ToString() => $"[{Level}] {TimeStamp} -> {Message}";

@@ -7,7 +7,7 @@ public static class AppPreference
     public const string FALSE = "false";
     public const string TRUE  = "true";
 #if NET9_0_OR_GREATER
-    private static readonly Lock             _lock = new();
+    private static readonly Lock _lock = new();
 #else
     private static readonly object _lock = new();
 #endif
@@ -21,8 +21,8 @@ public static class AppPreference
             lock (_lock)
             {
                 const string LINE = $"{nameof(AppPreference)}.{nameof(Source)} is not set";
-                Console.Error.WriteLine( LINE );
-                return _source ??= AppPreferenceFile.Create( Language );
+                Console.Error.WriteLine( $"{LINE}\n{new StackTrace().ToString()}" );
+                return _source ??= AppPreferenceFile.Create();
             }
         }
         set
@@ -30,17 +30,16 @@ public static class AppPreference
             lock (_lock) { _source = value; }
         }
     }
-    public static LanguageApi Language { get; set; } = new();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool? GetBool( this string value ) => value switch
                                                         {
-                                                            null            => null,
-                                                            BaseRecord.NULL => null,
-                                                            TRUE            => true,
-                                                            FALSE           => false,
-                                                            _               => false
+                                                            null  => null,
+                                                            NULL  => null,
+                                                            TRUE  => true,
+                                                            FALSE => false,
+                                                            _     => false
                                                         };
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -51,16 +50,16 @@ public static class AppPreference
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static string GetString( this bool? value ) => value.HasValue
                                                               ? value.Value.GetString()
-                                                              : BaseRecord.NULL;
+                                                              : NULL;
 
 
-    public static string GetPreference( this string sharedName, string key, string? oldKey = null, string defaultValue = BaseRecord.EMPTY ) => Source.Get( key, sharedName, oldKey, defaultValue );
+    public static string GetPreference( this string sharedName, string key, string? oldKey = null, string defaultValue = EMPTY ) => Source.Get( key, sharedName, oldKey, defaultValue );
     public static T GetPreference<T>( this string sharedName, string key, T defaultValue, in string? oldKey = null )
         where T : IParsable<T>, IFormattable
     {
-        string value = Source.Get( key, sharedName, oldKey, defaultValue.ToString( null, Language.CurrentCulture ) );
+        string value = Source.Get( key, sharedName, oldKey, defaultValue.ToString( null, CultureInfo.CurrentCulture ) );
 
-        return T.TryParse( value, Language.CurrentCulture, out T? result )
+        return T.TryParse( value, CultureInfo.CurrentCulture, out T? result )
                    ? result
                    : defaultValue;
     }

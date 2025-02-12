@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.10.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Jakar.Database\Jakar.Database.csproj" />
+    <ProjectReference Include="..\Jakar.Extensions.Blazor\Jakar.Extensions.Blazor.csproj" />
+    <ProjectReference Include="..\Jakar.Extensions.Serilog\Jakar.Extensions.Serilog.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\DbMigrations\" />
+  </ItemGroup>
+
+</Project>

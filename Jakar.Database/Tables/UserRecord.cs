@@ -48,7 +48,7 @@ public sealed record UserRecord( string                        UserName,
                                  RecordID<UserRecord>          ID,
                                  RecordID<UserRecord>?         CreatedBy,
                                  DateTimeOffset                DateCreated,
-                                 DateTimeOffset?               LastModified = null ) : OwnedTableRecord<UserRecord>( CreatedBy, ID, DateCreated, LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
+                                 DateTimeOffset?               LastModified = null ) : OwnedTableRecord<UserRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
 {
     public const                                                                                       int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                       int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;

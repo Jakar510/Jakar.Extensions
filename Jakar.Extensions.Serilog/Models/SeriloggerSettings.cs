@@ -30,21 +30,21 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
     private bool _isDebuggable = true;
 
 
-    public static  OneOf<Func<ValueTask<bool>>, Func<bool>> CanDebug               { get; set; } = new Func<bool>( ISeriloggerSettings.GetDebuggerIsAttached );
-    public static  string                                   SharedKey              { get; }      = typeof(TClass).Name;
-    public         Setting                                  Analytics              { get; }
-    public         Setting                                  AppState               { get; }
-    public         Setting                                  Crashes                { get; }
-    public virtual Guid                                     DebugID                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Serilogger.DebugID; }
-    public virtual Guid                                     DeviceID               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Serilogger.DeviceID; }
-    public virtual long                                     DeviceIDLong           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Serilogger.DeviceIDLong; }
-    public virtual string                                   DeviceName             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Serilogger.DeviceName; }
-    bool ISeriloggerSettings.                               EnableAnalytics        => Analytics.Value;
-    bool ISeriloggerSettings.                               EnableApi              => EnableApi.Value;
-    public Setting                                          EnableApi              { get; }
-    bool ISeriloggerSettings.                               EnableCrashes          => Crashes.Value;
-    public THeaderContext?                                  Header                 { get; set; }
-    bool ISeriloggerSettings.                               IncludeAppStateOnError => AppState.Value;
+    public static   OneOf<Func<ValueTask<bool>>, Func<bool>> CanDebug               { get; set; } = new Func<bool>( ISeriloggerSettings.GetDebuggerIsAttached );
+    public static   string                                   SharedKey              { get; }      = typeof(TClass).Name;
+    public          Setting                                  Analytics              { get; }
+    public          Setting                                  AppState               { get; }
+    public          Setting                                  Crashes                { get; }
+    public required Guid                                     DebugID                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public required Guid                                     DeviceID               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public required long                                     DeviceIDLong           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public required string                                   DeviceName             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    bool ISeriloggerSettings.                                EnableAnalytics        => Analytics.Value;
+    bool ISeriloggerSettings.                                EnableApi              => EnableApi.Value;
+    public Setting                                           EnableApi              { get; }
+    bool ISeriloggerSettings.                                EnableCrashes          => Crashes.Value;
+    public THeaderContext?                                   Header                 { get; set; }
+    bool ISeriloggerSettings.                                IncludeAppStateOnError => AppState.Value;
     public bool IsDebuggable
     {
         [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isDebuggable;

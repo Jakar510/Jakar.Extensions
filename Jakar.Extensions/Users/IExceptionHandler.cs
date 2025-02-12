@@ -13,10 +13,10 @@ public interface IExceptionHandler<in TFileData, TID, TFileMetaData>
     where TFileMetaData : IFileMetaData<TFileMetaData>
     where TFileData : class, IFileData<TFileData, TID, TFileMetaData>
 {
-    public void      HandleException<T>( T      _, Exception e );
-    public void      HandleException<T>( T      _, Exception e, params TFileData[] attachmentLogs );
-    public ValueTask HandleExceptionAsync<T>( T _, Exception e );
-    public ValueTask HandleExceptionAsync<T>( T _, Exception e, params TFileData[] attachmentLogs );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void      HandleException<T>( T      _, Exception e );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void      HandleException<T>( T      _, Exception e, params TFileData[] attachmentLogs );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask HandleExceptionAsync<T>( T _, Exception e );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask HandleExceptionAsync<T>( T _, Exception e, params TFileData[] attachmentLogs );
 }
 
 

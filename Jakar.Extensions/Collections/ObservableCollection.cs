@@ -39,17 +39,17 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
 
     public ObservableCollection() : this( Comparer<TValue>.Default ) { }
-    public ObservableCollection( int                              capacity ) : this( Comparer<TValue>.Default, capacity ) { }
-    public ObservableCollection( scoped in ImmutableArray<TValue> values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
-    public ObservableCollection( scoped in ImmutableArray<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.AsSpan() );
-    public ObservableCollection( scoped in ReadOnlyMemory<TValue> values ) : this( values.Length ) => InternalAdd( values.Span );
-    public ObservableCollection( scoped in ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.Span );
-    public ObservableCollection( scoped in ReadOnlySpan<TValue>   values ) : this( values.Length ) => InternalAdd( values );
-    public ObservableCollection( scoped in ReadOnlySpan<TValue>   values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values );
-    public ObservableCollection( TValue[]                         values ) : this( values.Length ) => InternalAdd( new ReadOnlySpan<TValue>( values ) );
-    public ObservableCollection( TValue[]                         values, IComparer<TValue> comparer ) : this( new ReadOnlySpan<TValue>( values ), comparer ) { }
-    public ObservableCollection( IEnumerable<TValue>              values ) : this( values, Comparer<TValue>.Default ) { }
-    public ObservableCollection( IEnumerable<TValue>              values, IComparer<TValue> comparer ) : this( comparer ) => InternalAdd( values );
+    public ObservableCollection( int                                 capacity ) : this( Comparer<TValue>.Default, capacity ) { }
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.AsSpan() );
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this( values.Length ) => InternalAdd( values.Span );
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.Span );
+    public ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this( values.Length ) => InternalAdd( values );
+    public ObservableCollection( IComparer<TValue>                   comparer, params ReadOnlySpan<TValue> values ) : this( comparer, values.Length ) => InternalAdd( values );
+    public ObservableCollection( TValue[]                            values ) : this( values.Length ) => InternalAdd( new ReadOnlySpan<TValue>( values ) );
+    public ObservableCollection( TValue[]                            values, IComparer<TValue> comparer ) : this( comparer, new ReadOnlySpan<TValue>( values ) ) { }
+    public ObservableCollection( IEnumerable<TValue>                 values ) : this( values, Comparer<TValue>.Default ) { }
+    public ObservableCollection( IEnumerable<TValue>                 values, IComparer<TValue> comparer ) : this( comparer ) => InternalAdd( values );
     public virtual void Dispose()
     {
         buffer.Clear();
@@ -64,15 +64,15 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values ) => new(values);
     public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values ) => new(values);
     public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(in values);
     public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
 
 
     public TValue[] ToArray() => buffer.ToArray();
 
 
-    protected internal void InternalInsert( int i, in TValue value )
+    protected internal void InternalInsert( int i, ref readonly TValue value )
     {
         ThrowIfReadOnly();
         EnsureCapacity( 1 );
@@ -82,23 +82,23 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     protected internal void InternalInsert( int index, IEnumerable<TValue> collection )
     {
         ThrowIfReadOnly();
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
+        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, in value ); }
     }
-    protected internal void InternalInsert( int index, scoped in ReadOnlySpan<TValue> collection )
+    protected internal void InternalInsert( int index, params ReadOnlySpan<TValue> collection )
     {
         ThrowIfReadOnly();
         EnsureCapacity( collection.Length );
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
+        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, in value ); }
     }
-    private void InternalInsert( int index, TValue collection, int count )
+    private void InternalInsert( int index, ref readonly TValue value, int count )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
-        for ( int i = 0; i < count; i++ ) { InternalInsert( index + i, collection ); }
+        for ( int i = 0; i < count; i++ ) { InternalInsert( index + i, in value ); }
     }
 
 
-    private void InternalReplace( int index, in TValue value, int count )
+    private void InternalReplace( int index, ref readonly TValue value, int count )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
@@ -106,7 +106,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
         Reset();
     }
-    protected internal void InternalReplace( int index, scoped in ReadOnlySpan<TValue> value )
+    protected internal void InternalReplace( int index, params ReadOnlySpan<TValue> value )
     {
         ThrowIfReadOnly();
         EnsureCapacity( value.Length );
@@ -130,7 +130,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    protected internal bool InternalRemove( in TValue value )
+    protected internal bool InternalRemove( ref readonly TValue value )
     {
         ThrowIfReadOnly();
         bool result = buffer.Remove( value );
@@ -176,27 +176,27 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         Removed( value, index );
         return true;
     }
-    protected internal bool InternalTryAdd( in TValue value )
+    protected internal bool InternalTryAdd( ref readonly TValue value )
     {
         ThrowIfReadOnly();
         if ( buffer.Contains( value ) ) { return false; }
 
-        InternalAdd( value );
+        InternalAdd( in value );
         return true;
     }
 
 
-    protected internal void InternalAdd( in TValue value )
+    protected internal void InternalAdd( ref readonly TValue value )
     {
         ThrowIfReadOnly();
         buffer.Add( value );
         Added( value, Count - 1 );
     }
-    protected internal void InternalAdd( in TValue value, int count )
+    protected internal void InternalAdd( ref readonly TValue value, int count )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
-        for ( int i = 0; i < count; i++ ) { InternalAdd( value ); }
+        for ( int i = 0; i < count; i++ ) { InternalAdd( in value ); }
     }
     protected internal void InternalAdd( IEnumerable<TValue> values )
     {
@@ -204,7 +204,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         buffer.AddRange( values );
         Reset();
     }
-    protected internal void InternalAdd( scoped in ReadOnlySpan<TValue> values )
+    protected internal void InternalAdd( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         EnsureCapacity( values.Length );
@@ -213,13 +213,13 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    protected internal void InternalAddOrUpdate( in TValue value )
+    protected internal void InternalAddOrUpdate( ref readonly TValue value )
     {
         ThrowIfReadOnly();
         int index = buffer.IndexOf( value );
 
-        if ( index >= 0 ) { InternalSet( index, value ); }
-        else { InternalAdd( value ); }
+        if ( index >= 0 ) { InternalSet( index, in value ); }
+        else { InternalAdd( in value ); }
     }
 
 
@@ -251,14 +251,14 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
-            if ( InternalRemove( value ) is false ) { continue; }
+            if ( InternalRemove( in value ) is false ) { continue; }
 
             results++;
         }
 
         return results;
     }
-    protected internal int InternalRemove( scoped in ReadOnlySpan<TValue> values )
+    protected internal int InternalRemove( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         int results = 0;
@@ -266,7 +266,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
-            if ( InternalRemove( value ) is false ) { continue; }
+            if ( InternalRemove( in value ) is false ) { continue; }
 
             results++;
         }
@@ -305,7 +305,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         TValue result = buffer[index];
         return result;
     }
-    protected internal void InternalSet( int index, TValue value )
+    protected internal void InternalSet( int index, ref readonly TValue value )
     {
         ThrowIfReadOnly();
 
@@ -320,7 +320,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
 
     public virtual TValue Get( int index )               => InternalGet( index );
-    public virtual void   Set( int index, TValue value ) => InternalSet( index, value );
+    public virtual void   Set( int index, TValue value ) => InternalSet( index, in value );
 
 
     public virtual bool Exists( Func<TValue, bool> match ) => FindIndex( match ) >= 0;
@@ -431,35 +431,35 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool TryAdd( TValue                   value )            => InternalTryAdd( value );
-    public virtual void Add( TValue                      value )            => InternalAdd( value );
-    public virtual void Add( TValue                      value, int count ) => InternalAdd( value, count );
+    public virtual bool TryAdd( TValue                   value )            => InternalTryAdd( in value );
+    public virtual void Add( TValue                      value )            => InternalAdd( in value );
+    public virtual void Add( TValue                      value, int count ) => InternalAdd( in value, count );
     public virtual void Add( params ReadOnlySpan<TValue> values ) => InternalAdd( values );
     public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd( values );
-    public virtual void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
+    public virtual void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
     {
         if ( values.KnownLength ) { EnsureCapacity( values.Length ); }
 
-        foreach ( TValue value in values ) { InternalAdd( value ); }
+        foreach ( TValue value in values ) { InternalAdd( in value ); }
     }
-    public void Add( scoped in ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
-    public void Add( scoped in ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
+    public void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
+    public void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 
 
-    public virtual void AddOrUpdate( TValue value ) { InternalAddOrUpdate( value ); }
+    public virtual void AddOrUpdate( TValue value ) { InternalAddOrUpdate( in value ); }
     public virtual void AddOrUpdate( IEnumerable<TValue> values )
     {
-        foreach ( TValue value in values ) { InternalAddOrUpdate( value ); }
+        foreach ( TValue value in values ) { InternalAddOrUpdate( in value ); }
     }
-    public void AddOrUpdate( scoped in ReadOnlyMemory<TValue> values ) => AddOrUpdate( values.Span );
-    public void AddOrUpdate( scoped in ImmutableArray<TValue> values ) => AddOrUpdate( values.AsSpan() );
-    public virtual void AddOrUpdate( scoped in ReadOnlySpan<TValue> values )
+    public void AddOrUpdate( ref readonly ReadOnlyMemory<TValue> values ) => AddOrUpdate( values.Span );
+    public void AddOrUpdate( ref readonly ImmutableArray<TValue> values ) => AddOrUpdate( values.AsSpan() );
+    public virtual void AddOrUpdate( params ReadOnlySpan<TValue> values )
     {
         Sort();
-        foreach ( TValue value in values ) { InternalAddOrUpdate( value ); }
+        foreach ( TValue value in values ) { InternalAddOrUpdate( in value ); }
     }
-    public virtual void AddRange( TValue                      value, int count ) => InternalAdd( value, count );
-    public virtual void AddRange( scoped ReadOnlySpan<TValue> values )     => InternalAdd( values );
+    public virtual void AddRange( TValue                      value, int count ) => InternalAdd( in value, count );
+    public virtual void AddRange( params ReadOnlySpan<TValue> values )     => InternalAdd( values );
     public virtual void AddRange( IEnumerable<TValue>         enumerable ) => InternalAdd( enumerable );
 
 
@@ -468,29 +468,29 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void CopyTo( TValue[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 ) => buffer.CopyTo( sourceStartIndex, array, length, destinationStartIndex );
 
 
-    public virtual void Insert( int index, TValue                           value )            => InternalInsert( index, value );
-    public virtual void Insert( int index, TValue                           value, int count ) => InternalInsert( index, value, count );
-    public virtual void Insert( int index, IEnumerable<TValue>              collection ) => InternalInsert( index, collection );
-    public virtual void Insert( int index, scoped in ReadOnlySpan<TValue>   values )     => InternalInsert( index, values );
-    public virtual void Insert( int index, scoped in ReadOnlyMemory<TValue> collection ) => Insert( index, collection.Span );
-    public virtual void Insert( int index, scoped in ImmutableArray<TValue> collection ) => Insert( index, collection.AsSpan() );
+    public virtual void Insert( int index, TValue                              value )            => InternalInsert( index, in value );
+    public virtual void Insert( int index, TValue                              value, int count ) => InternalInsert( index, in value, count );
+    public virtual void Insert( int index, IEnumerable<TValue>                 collection ) => InternalInsert( index, collection );
+    public virtual void Insert( int index, params       ReadOnlySpan<TValue>   values )     => InternalInsert( index, values );
+    public virtual void Insert( int index, ref readonly ReadOnlyMemory<TValue> collection ) => Insert( index, collection.Span );
+    public virtual void Insert( int index, ref readonly ImmutableArray<TValue> collection ) => Insert( index, collection.AsSpan() );
 
 
-    public         void Replace( int     index, TValue                         value, int count = 1 ) => InternalReplace( index, value, count );
-    public         void Replace( int     index, scoped in ReadOnlySpan<TValue> values ) => InternalReplace( index, values );
-    public virtual void RemoveRange( int start, int                            count )  => InternalRemove( start, count );
+    public         void Replace( int     index, TValue                      value, int count = 1 ) => InternalReplace( index, in value, count );
+    public         void Replace( int     index, params ReadOnlySpan<TValue> values ) => InternalReplace( index, values );
+    public virtual void RemoveRange( int start, int                         count )  => InternalRemove( start, count );
 
 
-    public virtual int  Remove( Func<TValue, bool>               match )                                          => InternalRemove( match );
-    public virtual bool Remove( TValue                           value )                                          => InternalRemove( value );
-    public virtual int  Remove( IEnumerable<TValue>              values )                                         => InternalRemove( values );
-    public virtual int  Remove( scoped in ReadOnlySpan<TValue>   values )                                         => InternalRemove( values );
-    public         int  Remove( scoped in ReadOnlyMemory<TValue> values )                                         => Remove( values.Span );
-    public         int  Remove( scoped in ImmutableArray<TValue> values )                                         => Remove( values.AsSpan() );
-    void IList<TValue>. RemoveAt( int                            index )                                          => RemoveAt( index );
-    void IList.         RemoveAt( int                            index )                                          => RemoveAt( index );
-    public virtual bool RemoveAt( int                            index )                                          => InternalRemoveAt( index, out _ );
-    public virtual bool RemoveAt( int                            index, [NotNullWhen( true )] out TValue? value ) => InternalRemoveAt( index, out value );
+    public virtual int  Remove( Func<TValue, bool>                  match )                                          => InternalRemove( match );
+    public virtual bool Remove( TValue                              value )                                          => InternalRemove( in value );
+    public virtual int  Remove( IEnumerable<TValue>                 values )                                         => InternalRemove( values );
+    public virtual int  Remove( params       ReadOnlySpan<TValue>   values )                                         => InternalRemove( values );
+    public         int  Remove( ref readonly ReadOnlyMemory<TValue> values )                                         => Remove( values.Span );
+    public         int  Remove( ref readonly ImmutableArray<TValue> values )                                         => Remove( values.AsSpan() );
+    void IList<TValue>. RemoveAt( int                               index )                                          => RemoveAt( index );
+    void IList.         RemoveAt( int                               index )                                          => RemoveAt( index );
+    public virtual bool RemoveAt( int                               index )                                          => InternalRemoveAt( index, out _ );
+    public virtual bool RemoveAt( int                               index, [NotNullWhen( true )] out TValue? value ) => InternalRemoveAt( index, out value );
 
 
     public virtual void Reverse()                       => InternalReverse();
@@ -529,9 +529,9 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool Contains( TValue                         value ) => buffer.Contains( value );
-    public         bool Contains( scoped in ReadOnlySpan<TValue> value ) => AsSpan().Contains( value );
-    public virtual void Clear()                                          => InternalClear();
+    public virtual bool Contains( TValue                            value ) => buffer.Contains( value );
+    public         bool Contains( ref readonly ReadOnlySpan<TValue> value ) => AsSpan().Contains( value );
+    public virtual void Clear()                                             => InternalClear();
 
 
     [Pure, MustDisposeResource]

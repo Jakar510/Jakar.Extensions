@@ -38,9 +38,9 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            Guid              id      = await connection.ExecuteScalarAsync<Guid>( command );
-            return record.NewID( RecordID<TRecord>.Create( id ) );
+            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
+            RecordID<TRecord> id      = RecordID<TRecord>.Create( await connection.ExecuteScalarAsync<Guid>( command ) );
+            return record.NewID( id );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
@@ -52,12 +52,11 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            Guid?             id      = await connection.ExecuteScalarAsync<Guid?>( command );
+            CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
+            RecordID<TRecord>? id      = RecordID<TRecord>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            if ( id is null ) { return Error.NotFound(); }
 
-            return id.HasValue
-                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
-                       : Error.NotFound();
+            return record.NewID( id.Value );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
@@ -70,12 +69,11 @@ public partial class DbTable<TRecord>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            Guid?             id      = await connection.ExecuteScalarAsync<Guid?>( command );
+            CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
+            RecordID<TRecord>? id      = RecordID<TRecord>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            if ( id is null ) { return Error.NotFound(); }
 
-            return id.HasValue
-                       ? record.NewID( RecordID<TRecord>.Create( id.Value ) )
-                       : Error.NotFound();
+            return record.NewID( id.Value );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }

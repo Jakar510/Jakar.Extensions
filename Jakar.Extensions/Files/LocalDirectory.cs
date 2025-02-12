@@ -65,6 +65,16 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
 
 
+    public static LocalDirectory Create( DirectoryInfo      file ) => file;
+    public static LocalDirectory Create( string             file ) => file;
+    public static LocalDirectory Create( ReadOnlySpan<char> file ) => file;
+    public static LocalDirectory? TryCreate( [NotNullIfNotNull( nameof(info) )] DirectoryInfo? info ) => info is not null
+                                                                                                             ? Create( info )
+                                                                                                             : null;
+    public static LocalDirectory? TryCreate( [NotNullIfNotNull( nameof(info) )] string? info ) => info is not null
+                                                                                                      ? Create( info )
+                                                                                                      : null;
+
     public static LocalDirectory AppData( string subPath )
     {
         if ( OperatingSystem.IsWindows() ) { subPath = $"%APPDATA%/{subPath}"; }
@@ -82,7 +92,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         string path = Path.GetFullPath( subPath );
         return path;
     }
-    private static LocalDirectory ConvertDirectory( DirectoryInfo file ) => file;
 
 
     /// <summary> Uses the <paramref name="path"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
@@ -112,8 +121,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         return d.SetTemporary();
     }
 
-    private static LocalFile ConvertFile( FileInfo file ) => file;
-
 
     // public static implicit operator LocalFile.Watcher( LocalDirectory  directory ) => new(new Watcher( directory ));
 
@@ -121,19 +128,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public IEnumerable<LocalDirectory> GetSubFolders()                                                              => Info.EnumerateDirectories().Select( ConvertDirectory );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories( searchPattern ).Select( ConvertDirectory );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories( searchPattern, searchOption ).Select( ConvertDirectory );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions ).Select( ConvertDirectory );
+    public IEnumerable<LocalDirectory> GetSubFolders()                                                              => Info.EnumerateDirectories().Select( Create );
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories( searchPattern ).Select( Create );
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories( searchPattern, searchOption ).Select( Create );
+    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions ).Select( Create );
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public IEnumerable<LocalFile> GetFiles()                                                              => Info.EnumerateFiles().Select( ConvertFile );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( ConvertFile );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( ConvertFile );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( ConvertFile );
+    public IEnumerable<LocalFile> GetFiles()                                                              => Info.EnumerateFiles().Select( LocalFile.Create );
+    public IEnumerable<LocalFile> GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( LocalFile.Create );
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( LocalFile.Create );
+    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( LocalFile.Create );
 
 
     /// <summary> Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/> </summary>
@@ -148,15 +155,8 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory( FullPath.Combine( paths ) );
-    protected virtual LocalDirectory? GetParent()
-    {
-        DirectoryInfo? info = Info.Parent;
-
-        return info is null
-                   ? null
-                   : info;
-    }
+    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory( Path.Combine( paths ) );
+    protected virtual LocalDirectory? GetParent() => TryCreate( Info.Parent );
 
 
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
@@ -292,16 +292,15 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles() )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
+            using MemoryStream data   = await file.ReadAsync().AsStream( token );
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
-
-            await stream.WriteAsync( data, token );
+            await data.CopyToAsync( stream, token );
         }
 
         return zipFilePath;
@@ -309,7 +308,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
@@ -326,7 +325,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
@@ -343,7 +342,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
     {
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new( zipToOpen, ZipArchiveMode.Update );
+        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {

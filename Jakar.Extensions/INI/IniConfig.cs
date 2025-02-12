@@ -1,31 +1,41 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.Section>, ISpanParsable<IniConfig>, ISpanFormattable
+public sealed partial class IniConfig( IEqualityComparer<string> comparer, int capacity = DEFAULT_CAPACITY ) : IReadOnlyDictionary<string, IniConfig.Section>, ISpanParsable<IniConfig>, ISpanFormattable
 {
-    private readonly IEqualityComparer<string> _comparer;
-    public new Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => base[sectionName] = value; }
+    private readonly IEqualityComparer<string>             _comparer   = comparer;
+    private readonly ConcurrentDictionary<string, Section> _dictionary = new(Environment.ProcessorCount, capacity, comparer);
 
+
+    public Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => _dictionary[sectionName] = value; }
+    public IEnumerable<string>  Keys   => _dictionary.Keys;
+    public IEnumerable<Section> Values => _dictionary.Values;
     public int Length
     {
         get
         {
-            int values = Values.Sum( x => x.Length );
-            int result = values + Keys.Count;
+            int values = _dictionary.Values.Sum( x => x.Length );
+            int result = values + _dictionary.Keys.Count;
             return result;
         }
     }
 
-#if NET9_0_OR_GREATER
-    public AlternateLookup<ReadOnlySpan<char>> Lookup => GetAlternateLookup<ReadOnlySpan<char>>();
-#endif
+    public int                                                                       Count      => _dictionary.Count;
+    public bool                                                                      IsReadOnly => ((ICollection<KeyValuePair<string, Section>>)_dictionary).IsReadOnly;
+    public ConcurrentDictionary<string, Section>.AlternateLookup<ReadOnlySpan<char>> Lookup     => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+
 
     public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IEqualityComparer<string>                  comparer ) : base( comparer ) => _comparer = comparer;
     public IniConfig( IDictionary<string, Section>               dictionary ) : this( dictionary, StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IDictionary<string, Section>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => _comparer = comparer;
     public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection ) : this( collection, StringComparer.OrdinalIgnoreCase ) { }
-    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => _comparer = comparer;
+    public IniConfig( IEnumerable<KeyValuePair<string, Section>> collection, IEqualityComparer<string> comparer ) : this( comparer )
+    {
+        foreach ( (string? key, Section? value) in collection ) { _dictionary[key] = value; }
+    }
+    public IniConfig( IDictionary<string, Section> dictionary, IEqualityComparer<string> comparer ) : this( comparer, dictionary.Count )
+    {
+        foreach ( (string? key, Section? value) in dictionary ) { _dictionary[key] = value; }
+    }
     public IniConfig( IEnumerable<Section> sections ) : this()
     {
         foreach ( Section section in sections ) { Add( section ); }
@@ -137,14 +147,14 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
     /// </returns>
     public Section GetOrAdd( string sectionName )
     {
-        if ( string.IsNullOrEmpty( sectionName ) ) { throw new ArgumentNullException( nameof(sectionName) ); }
+        ArgumentException.ThrowIfNullOrWhiteSpace( sectionName );
 
-        foreach ( string key in Keys )
+        foreach ( string key in _dictionary.Keys )
         {
-            if ( _comparer.Equals( key, sectionName ) ) { return base[key]; }
+            if ( _comparer.Equals( key, sectionName ) ) { return _dictionary[key]; }
         }
 
-        return base[sectionName] = new Section( sectionName );
+        return _dictionary[sectionName] = new Section( sectionName );
     }
 
 
@@ -165,9 +175,28 @@ public sealed partial class IniConfig : ConcurrentDictionary<string, IniConfig.S
         this[value.Name] = value;
         return this;
     }
+    public IniConfig Add( KeyValuePair<string, Section> pair )
+    {
+        _dictionary.Add( pair );
+        return this;
+    }
+    public IniConfig Add( string key, Section value )
+    {
+        _dictionary[key] = value;
+        return this;
+    }
+    public bool Contains( KeyValuePair<string, Section> pair )                  => _dictionary.Contains( pair );
+    public void CopyTo( KeyValuePair<string, Section>[] array, int arrayIndex ) => ((ICollection<KeyValuePair<string, Section>>)_dictionary).CopyTo( array, arrayIndex );
+    public bool Remove( KeyValuePair<string, Section>   pair )                      => _dictionary.TryRemove( pair );
+    public bool Remove( string                          key )                       => _dictionary.TryRemove( key, out _ );
+    public bool ContainsKey( string                     key )                       => _dictionary.ContainsKey( key );
+    public void Clear()                                                             => _dictionary.Clear();
+    public bool TryGetValue( string key, [NotNullWhen( true )] out Section? value ) => _dictionary.TryGetValue( key, out value );
 
 
-    public override string ToString() => ToString( null, CultureInfo.InvariantCulture );
+    IEnumerator IEnumerable.                                   GetEnumerator() => GetEnumerator();
+    public          IEnumerator<KeyValuePair<string, Section>> GetEnumerator() => _dictionary.GetEnumerator();
+    public override string                                     ToString()      => ToString( null, CultureInfo.InvariantCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         Span<char> span = stackalloc char[Length + 10];

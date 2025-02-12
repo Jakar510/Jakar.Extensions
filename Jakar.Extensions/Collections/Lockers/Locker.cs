@@ -10,11 +10,12 @@
 namespace Jakar.Extensions;
 
 
-public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
+public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
+    where TCloser : IDisposable
 {
-    Closer            AcquireLock();
-    Closer            AcquireLock( CancellationToken      token );
-    ValueTask<Closer> AcquireLockAsync( CancellationToken token );
+    TCloser            AcquireLock();
+    TCloser            AcquireLock( CancellationToken      token );
+    ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
     [Pure, MustDisposeResource] FilterBuffer<TValue>                               Copy();
@@ -23,9 +24,10 @@ public interface ILockedCollection<TValue> : IReadOnlyCollection<TValue>, IAsync
 
 
 
-public interface ILockedCollection<TValue, out TAsyncLockerEnumerator, out TLockerEnumerator> : ILockedCollection<TValue>
+public interface ILockedCollection<TValue, TCloser, out TAsyncLockerEnumerator, out TLockerEnumerator> : ILockedCollection<TValue, TCloser>
     where TAsyncLockerEnumerator : IAsyncDisposable
     where TLockerEnumerator : IDisposable
+    where TCloser : IDisposable
 {
     TAsyncLockerEnumerator AsyncValues { get; }
     TLockerEnumerator      Values      { get; }
@@ -45,24 +47,37 @@ public interface ILocker
 
 
 [DefaultValue( nameof(Empty) )]
+public readonly struct LockCloser( Lock? locker ) : IDisposable
+{
+    private static readonly TimeSpan _timeOut = TimeSpan.FromMicroseconds( 10 );
+    public static readonly  Closer   Empty    = new(null);
+    private readonly        Lock?    _locker  = locker;
+    public                  void     Dispose() => _locker?.EnterScope();
+
+
+    public static LockCloser Enter( Lock locker, CancellationToken token )
+    {
+        while ( locker.TryEnter( _timeOut ) is false ) { }
+
+        return new LockCloser( locker );
+    }
+    public static ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token )
+    {
+        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { }
+
+        return new ValueTask<LockCloser>( new LockCloser( locker ) );
+    }
+}
+
+
+
+[DefaultValue( nameof(Empty) )]
 public readonly struct Closer( ILocker? locker ) : IDisposable
 {
     public static readonly Closer   Empty   = new(null);
     private readonly       ILocker? _locker = locker;
     public                 void     Dispose() => _locker?.Exit();
 }
-
-
-
-#if NET9_0_OR_GREATER
-[DefaultValue( nameof(Empty) )]
-public readonly struct LockCloser( Lock? locker ) : IDisposable
-{
-    public static readonly LockCloser Empty   = new(null);
-    private readonly       Lock?      _locker = locker;
-    public                 void       Dispose() => _locker?.Exit();
-}
-#endif
 
 
 

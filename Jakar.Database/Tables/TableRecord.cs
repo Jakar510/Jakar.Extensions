@@ -42,15 +42,17 @@ public interface ITableRecord<TRecord> : ITableRecord
     public abstract static SqlCache<TRecord> SQL { get; }
     Guid IUniqueID<Guid>.                    ID  => ID.value;
     public new RecordID<TRecord>             ID  { get; }
-    public     RecordPair<TRecord>           ToPair();
-    public     TRecord                       NewID( in RecordID<TRecord> id );
-    public     UInt128                       GetHash();
+
+
+    [Pure] public RecordPair<TRecord> ToPair();
+    [Pure] public UInt128             GetHash();
+    public        TRecord             NewID( RecordID<TRecord> id );
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTimeOffset DateCreated, in DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
+public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     protected internal static readonly PropertyInfo[]    Properties    = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
@@ -64,6 +66,22 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
     public        DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
 
 
+    [Pure]
+    public UInt128 GetHash()
+    {
+        string json = this.ToJson();
+        return Hashes.Hash128( json );
+    }
+    public TRecord Modified()
+    {
+        _lastModified = DateTimeOffset.UtcNow;
+        return (TRecord)this;
+    }
+    public TRecord NewID( RecordID<TRecord> id )
+    {
+        _id = id;
+        return (TRecord)this;
+    }
     [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
 
 
@@ -88,8 +106,8 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
     }
 
 
-    public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( record.ID );
-    public static DynamicParameters GetDynamicParameters( in RecordID<TRecord> id )
+    public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( in record._id );
+    public static DynamicParameters GetDynamicParameters( ref readonly RecordID<TRecord> id )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(ID), id.value );
@@ -107,34 +125,10 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
 
 
     [Pure]
-    protected static T TryGet<T>( DbDataReader reader, in string key )
+    protected static T TryGet<T>( DbDataReader reader, string key )
     {
         int index = reader.GetOrdinal( key );
         return (T)reader.GetValue( index );
-    }
-
-
-    [Pure]
-    public TRecord Modified()
-    {
-        _lastModified = DateTimeOffset.UtcNow;
-        return (TRecord)this;
-    }
-
-
-    [Pure]
-    public TRecord NewID( in RecordID<TRecord> id )
-    {
-        _id = id;
-        return (TRecord)this;
-    }
-
-
-    [Pure]
-    public UInt128 GetHash()
-    {
-        string json = this.ToJson();
-        return Hashes.Hash128( json );
     }
 
 
@@ -149,12 +143,21 @@ public abstract record TableRecord<TRecord>( in RecordID<TRecord> ID, in DateTim
 
         return DateCreated.CompareTo( other.DateCreated );
     }
+
+
+
+    [Serializable]
+    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TRecord>( capacity )
+    {
+        public RecordCollection( params ReadOnlySpan<TRecord> values ) : this() => Add( values );
+        public RecordCollection( IEnumerable<TRecord>         values ) : this() => Add( values );
+    }
 }
 
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TRecord>( RecordID<UserRecord>? CreatedBy, RecordID<TRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified ) : TableRecord<TRecord>( ID, DateCreated, LastModified ), IOwnedTableRecord
+public abstract record OwnedTableRecord<TRecord>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TRecord> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TRecord>( in ID, in DateCreated, in LastModified ), IOwnedTableRecord
     where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;

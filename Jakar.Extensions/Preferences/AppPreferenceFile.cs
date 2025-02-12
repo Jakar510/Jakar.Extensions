@@ -4,17 +4,18 @@
 namespace Jakar.Extensions;
 
 
-public sealed class AppPreferenceFile( LocalFile file, LanguageApi language ) : IAppPreferences, IAsyncDisposable // TODO: Add watcher to update if file changes
+public sealed class AppPreferenceFile( LocalFile file ) : IAppPreferences, IAsyncDisposable // TODO: Add watcher to update if file changes
 {
-    private readonly IniConfig   _config   = IniConfig.ReadFromFile( file );
-    private readonly LocalFile   _file     = file;
-    private readonly LanguageApi _language = language;
+    public const     string    DEFAULT_FILE_NAME = "Settings.ini";
+    private readonly IniConfig _config           = IniConfig.ReadFromFile( file );
+    private readonly LocalFile _file             = file;
 
 
-    public static AppPreferenceFile Create( LanguageApi    language )                        => Create( LocalDirectory.CurrentDirectory, language );
-    public static AppPreferenceFile Create( LocalDirectory directory, LanguageApi language ) => new(directory.Join( "Settings.ini" ), language);
-    public async  ValueTask         DisposeAsync() => await SaveAsync();
-    private async Task              SaveAsync()    => await _config.WriteToFile( _file );
+    public static AppPreferenceFile Create()                           => Create( LocalDirectory.CurrentDirectory );
+    public static AppPreferenceFile Create( LocalDirectory directory ) => Create( directory.Join( DEFAULT_FILE_NAME ) );
+    public static AppPreferenceFile Create( LocalFile      file )      => new(file);
+    public async  ValueTask         DisposeAsync()                     => await SaveAsync();
+    private async Task              SaveAsync()                        => await _config.WriteToFile( _file );
 
 
     public bool ContainsKey( string key, string sharedName ) => _config[sharedName].ContainsKey( key );
@@ -43,7 +44,7 @@ public sealed class AppPreferenceFile( LocalFile file, LanguageApi language ) : 
     public void Set<T>( string key, T value, string sharedName )
         where T : IParsable<T>, IFormattable
     {
-        _config[sharedName][key] = value.ToString( null, _language.CurrentCulture );
+        _config[sharedName][key] = value.ToString( null, CultureInfo.CurrentCulture );
         _                        = SaveAsync();
     }
 
@@ -51,9 +52,9 @@ public sealed class AppPreferenceFile( LocalFile file, LanguageApi language ) : 
     public T Get<T>( string key, T defaultValue, string sharedName, string? oldKey = null )
         where T : IParsable<T>, IFormattable
     {
-        string? value = Get( key, sharedName, oldKey, defaultValue.ToString( null, _language.CurrentCulture ) );
+        string? value = Get( key, sharedName, oldKey, defaultValue.ToString( null, CultureInfo.CurrentCulture ) );
 
-        return T.TryParse( value, _language.CurrentCulture, out T? result )
+        return T.TryParse( value, CultureInfo.CurrentCulture, out T? result )
                    ? result
                    : defaultValue;
     }
@@ -62,7 +63,7 @@ public sealed class AppPreferenceFile( LocalFile file, LanguageApi language ) : 
                                                                                                     : defaultValue;
     public bool  Get( string key, bool  defaultValue, string sharedName, string? oldKey = null ) => Get( key, sharedName ).GetBool() is true;
     public bool? Get( string key, bool? defaultValue, string sharedName, string? oldKey = null ) => Get( key, sharedName ).GetBool();
-    public string Get( string key, string sharedName, string? oldKey = null, string defaultValue = BaseRecord.EMPTY )
+    public string Get( string key, string sharedName, string? oldKey = null, string defaultValue = EMPTY )
     {
         IniConfig.Section section = _config[sharedName];
 

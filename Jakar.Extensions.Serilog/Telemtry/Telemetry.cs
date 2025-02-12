@@ -150,7 +150,7 @@ public static class Telemetry
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => activity.AddTag( Tags.GroupID, record.ID );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddUserID( this              Activity activity, IUserID user )            => activity.AddTag( nameof(IUserID.UserID),      user.UserID );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddUserID( this              Activity activity, IUserID user )         => activity.AddTag( nameof(IUserID.UserID),      user.UserID );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroup( this               Activity activity, string? value = null ) => activity.AddTag( Tags.AddGroup,               value );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroup( this               Activity activity, object? value = null ) => activity.AddTag( Tags.AddGroup,               value );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddGroupRights( this         Activity activity, string? value = null ) => activity.AddTag( Tags.AddGroupRights,         value );

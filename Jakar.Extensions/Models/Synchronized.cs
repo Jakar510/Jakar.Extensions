@@ -14,12 +14,9 @@ namespace Jakar.Extensions;
 /// <typeparam name="TValue"> The value type. </typeparam>
 public sealed class Synchronized<TValue>( TValue value )
 {
-#if NET9_0_OR_GREATER
-    private readonly Lock _lock = new();
-#else
-    private readonly object _lock = new();
-#endif
-    private TValue _value = value;
+    private readonly Lock   _lock  = new();
+    private          TValue _value = value;
+
 
     public TValue Value
     {

@@ -100,7 +100,7 @@ public static class Errors
     public static string GetMessage<T>( this T errors )
         where T : IEnumerable<Error> => string.Join( '\n', errors.Select( GetMessage ) );
     public static string GetMessage( this Error error ) => GetMessage( error.Title, error.Errors );
-    public static string GetMessage( in string? title, in StringValues values )
+    public static string GetMessage( string? title, StringValues values )
     {
         switch ( values.Count )
         {
@@ -117,7 +117,8 @@ public static class Errors
 
         return builder.ToString();
     }
-
+    
+    
 
     public static Status GetStatus<T>( this T? errors )
         where T : IEnumerable<Error> => errors?.Max( static x => x.GetStatus() ) ?? Status.Ok;

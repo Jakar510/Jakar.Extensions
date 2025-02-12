@@ -79,6 +79,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static implicit operator LocalFile( Uri                info ) => new(info);
     public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
 
+
+    public static LocalFile Create( FileInfo file ) => file;
+    public static LocalFile Create( string   file ) => new(file);
+    public static LocalFile Create( Uri      file ) => new(file);
+
+
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -93,7 +99,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns> </returns>
     protected static FileInfo FromUri( Uri uri )
     {
-        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+        if ( uri.IsFile is false ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
 
         return new FileInfo( uri.AbsolutePath );
     }
@@ -854,12 +860,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return stream;
     }
 
-    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines()
+    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines( [EnumeratorCancellation] CancellationToken token = default )
     {
         await using FileStream file   = OpenRead();
-        using var              stream = new StreamReader( file, FileEncoding );
+        using StreamReader     stream = new(file, FileEncoding);
 
-        while ( !stream.EndOfStream ) { yield return await stream.ReadLineAsync() ?? string.Empty; }
+        while ( token.ShouldContinue() && stream.EndOfStream is false ) { yield return await stream.ReadLineAsync( token ) ?? string.Empty; }
     }
 
 
@@ -981,7 +987,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     public interface IAsyncReadHandler
     {
-        IAsyncEnumerable<string> AsLines();
+        IAsyncEnumerable<string> AsLines( CancellationToken token = default );
         /// <summary> Reads the contents of the file as a byte array. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>

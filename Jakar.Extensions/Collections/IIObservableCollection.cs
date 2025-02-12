@@ -39,44 +39,43 @@ public interface IBuffer<TValue> : ICollection<TValue>, IDisposable
 
 public interface ICollectionRemove<TValue>
 {
-    bool RemoveAt( int                            index );
-    void Replace( int                             index, TValue                         value, int count = 1 );
-    void Replace( int                             index, scoped in ReadOnlySpan<TValue> values );
-    void RemoveRange( int                         start, int                            count );
-    int  Remove( Func<TValue, bool>               match );
-    int  Remove( IEnumerable<TValue>              values );
-    int  Remove( scoped in ReadOnlySpan<TValue>   values );
-    int  Remove( scoped in ReadOnlyMemory<TValue> values );
-    int  Remove( scoped in ImmutableArray<TValue> values );
-    bool RemoveAt( int                            index, [NotNullWhen( true )] out TValue? value );
+    bool RemoveAt( int                               index );
+    void Replace( int                                index, TValue                      value, int count = 1 );
+    void Replace( int                                index, params ReadOnlySpan<TValue> values );
+    void RemoveRange( int                            start, int                         count );
+    int  Remove( Func<TValue, bool>                  match );
+    int  Remove( IEnumerable<TValue>                 values );
+    int  Remove( params       ReadOnlySpan<TValue>   values );
+    int  Remove( ref readonly ReadOnlyMemory<TValue> values );
+    int  Remove( ref readonly ImmutableArray<TValue> values );
+    bool RemoveAt( int                               index, [NotNullWhen( true )] out TValue? value );
 }
 
 
 
 public interface ICollectionAdd<TValue>
 {
-    void Add( TValue                                                       value );
-    void Add( TValue                                                       value, int count );
-    void Add( params    ReadOnlySpan<TValue>                               values );
-    void Add( scoped in SpanEnumerable<TValue, EnumerableProducer<TValue>> values );
-    void Add( scoped in ReadOnlyMemory<TValue>                             values );
-    void Add( scoped in ImmutableArray<TValue>                             values );
-    void Add( IEnumerable<TValue>                                          enumerable );
-    bool TryAdd( TValue                                                    value );
-    void AddOrUpdate( TValue                                               value );
-    void AddOrUpdate( IEnumerable<TValue>                                  values );
-    void AddOrUpdate( scoped in ReadOnlyMemory<TValue>                     values );
-    void AddOrUpdate( scoped in ImmutableArray<TValue>                     values );
-    void AddOrUpdate( scoped in ReadOnlySpan<TValue>                       values );
-    void AddRange( TValue                                                  value, int count );
-    void AddRange( scoped ReadOnlySpan<TValue>                             values );
-    void AddRange( IEnumerable<TValue>                                     enumerable );
-    void Insert( int                                                       index, TValue                           value, int count = 1 );
-    void Insert( int                                                       index, IEnumerable<TValue>              collection );
-    void Insert( int                                                       index, scoped in ReadOnlySpan<TValue>   collection );
-    void Insert( int                                                       index, scoped in ReadOnlyMemory<TValue> collection );
-    void Insert( int                                                       index, scoped in ImmutableArray<TValue> collection );
-    bool Exists( Func<TValue, bool>                                        match );
+    void Add( TValue                                                          value );
+    void Add( TValue                                                          value, int count );
+    void Add( params       ReadOnlySpan<TValue>                               values );
+    void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values );
+    void Add( ref readonly ReadOnlyMemory<TValue>                             values );
+    void Add( ref readonly ImmutableArray<TValue>                             values );
+    void Add( IEnumerable<TValue>                                             enumerable );
+    bool TryAdd( TValue                                                       value );
+    void AddOrUpdate( TValue                                                  value );
+    void AddOrUpdate( IEnumerable<TValue>                                     values );
+    void AddOrUpdate( ref readonly ReadOnlyMemory<TValue>                     values );
+    void AddOrUpdate( ref readonly ImmutableArray<TValue>                     values );
+    void AddOrUpdate( params       ReadOnlySpan<TValue>                       values );
+    void AddRange( TValue                                                     value, int count );
+    void AddRange( IEnumerable<TValue>                                        enumerable );
+    void Insert( int                                                          index, TValue                              value, int count = 1 );
+    void Insert( int                                                          index, IEnumerable<TValue>                 collection );
+    void Insert( int                                                          index, params       ReadOnlySpan<TValue>   collection );
+    void Insert( int                                                          index, ref readonly ReadOnlyMemory<TValue> collection );
+    void Insert( int                                                          index, ref readonly ImmutableArray<TValue> collection );
+    bool Exists( Func<TValue, bool>                                           match );
 }
 
 
@@ -95,28 +94,28 @@ public interface ICollectionSort<out TValue>
 public interface ICollectionSearch<TValue>
 {
     void     Reverse();
-    void     Reverse( int                             start, int length );
-    int      IndexOf( TValue                          value, int start );
-    int      IndexOf( TValue                          value, int start, int endInclusive );
-    int      FindIndex( Func<TValue, bool>            match, int start );
-    int      FindIndex( Func<TValue, bool>            match, int start, int endInclusive );
-    int      LastIndexOf( TValue                      value );
-    int      LastIndexOf( TValue                      value, int endInclusive );
-    int      LastIndexOf( TValue                      value, int start, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>        match, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>        match, int start, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>             match );
-    TValue?  FindLast( Func<TValue, bool>             match, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>             match, int start, int endInclusive );
-    TValue?  Find( Func<TValue, bool>                 match );
-    TValue?  Find( Func<TValue, bool>                 match, int start );
-    TValue?  Find( Func<TValue, bool>                 match, int start, int endInclusive );
-    TValue[] FindAll( Func<TValue, bool>              match );
-    TValue[] FindAll( Func<TValue, bool>              match, int start );
-    TValue[] FindAll( Func<TValue, bool>              match, int start, int endInclusive );
-    int      FindCount( Func<TValue, bool>            match );
-    bool     Contains( TValue                         value );
-    bool     Contains( scoped in ReadOnlySpan<TValue> value );
+    void     Reverse( int                                start, int length );
+    int      IndexOf( TValue                             value, int start );
+    int      IndexOf( TValue                             value, int start, int endInclusive );
+    int      FindIndex( Func<TValue, bool>               match, int start );
+    int      FindIndex( Func<TValue, bool>               match, int start, int endInclusive );
+    int      LastIndexOf( TValue                         value );
+    int      LastIndexOf( TValue                         value, int endInclusive );
+    int      LastIndexOf( TValue                         value, int start, int endInclusive );
+    int      FindLastIndex( Func<TValue, bool>           match, int endInclusive );
+    int      FindLastIndex( Func<TValue, bool>           match, int start, int endInclusive );
+    TValue?  FindLast( Func<TValue, bool>                match );
+    TValue?  FindLast( Func<TValue, bool>                match, int endInclusive );
+    TValue?  FindLast( Func<TValue, bool>                match, int start, int endInclusive );
+    TValue?  Find( Func<TValue, bool>                    match );
+    TValue?  Find( Func<TValue, bool>                    match, int start );
+    TValue?  Find( Func<TValue, bool>                    match, int start, int endInclusive );
+    TValue[] FindAll( Func<TValue, bool>                 match );
+    TValue[] FindAll( Func<TValue, bool>                 match, int start );
+    TValue[] FindAll( Func<TValue, bool>                 match, int start, int endInclusive );
+    int      FindCount( Func<TValue, bool>               match );
+    bool     Contains( TValue                            value );
+    bool     Contains( ref readonly ReadOnlySpan<TValue> value );
 }
 
 

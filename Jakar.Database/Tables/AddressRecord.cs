@@ -17,7 +17,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
                                     RecordID<AddressRecord>                  ID,
                                     RecordID<UserRecord>?                    CreatedBy,
                                     DateTimeOffset                           DateCreated,
-                                    DateTimeOffset?                          LastModified = null ) : OwnedTableRecord<AddressRecord>( CreatedBy, ID, DateCreated, LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                          LastModified = null ) : OwnedTableRecord<AddressRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }

@@ -2,43 +2,42 @@
 
 
 [Serializable]
-public sealed class RecordCollection<TRecord> : IReadOnlyList<TRecord>
+public class RecordCollection<TRecord>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TRecord>
     where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
 {
-    private readonly List<TRecord> _records = new();
-    public           int           Count => _records.Count;
+    private readonly List<TRecord> _records = new(capacity);
 
 
+    public int Count => _records.Count;
     public TRecord this[ int index ] => _records[index];
 
 
-    public RecordCollection() : base() { }
-    public RecordCollection( params ReadOnlySpan<TRecord> items ) : this() => Add( items );
-    public RecordCollection( IEnumerable<TRecord>         items ) : this() => Add( items );
+    public RecordCollection( params ReadOnlySpan<TRecord> values ) : this() => Add( values );
+    public RecordCollection( IEnumerable<TRecord>         values ) : this() => Add( values );
 
 
-    public RecordCollection<TRecord> Add( params ReadOnlySpan<TRecord> records )
+    public RecordCollection<TRecord> Add( params ReadOnlySpan<TRecord> values )
     {
-        foreach ( TRecord record in records ) { Add( record ); }
+        foreach ( TRecord value in values ) { Add( value ); }
 
         return this;
     }
-    public RecordCollection<TRecord> Add( IEnumerable<TRecord> records )
+    public RecordCollection<TRecord> Add( IEnumerable<TRecord> values )
     {
-        foreach ( TRecord record in records ) { Add( record ); }
+        foreach ( TRecord value in values ) { Add( value ); }
 
         return this;
     }
-    public RecordCollection<TRecord> Add( TRecord item )
+    public RecordCollection<TRecord> Add( TRecord value )
     {
-        if ( item.IsValidID() )
+        if ( value.IsValidID() )
         {
-            _records.Add( item );
+            _records.Add( value );
             return this;
         }
 
 
-        _records.Add( item.NewID( RecordID<TRecord>.New() ) );
+        _records.Add( value.NewID( RecordID<TRecord>.New() ) );
 
         return this;
     }

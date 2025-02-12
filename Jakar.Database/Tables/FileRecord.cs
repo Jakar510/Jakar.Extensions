@@ -15,7 +15,7 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
-                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>( ID, DateCreated, LastModified ), IDbReaderMapping<FileRecord>, IFileData<Guid>, IFileMetaData
+                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>( in ID, in DateCreated, in LastModified ), IDbReaderMapping<FileRecord>, IFileData<Guid>, IFileMetaData
 {
     public const               string                        TABLE_NAME = "Files";
     public static              string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
