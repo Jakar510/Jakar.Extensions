@@ -54,11 +54,11 @@ public class Telemetry<TApp> : ILoggerFactory, ILoggerProvider
 
     public ILogger CreateLogger( string categoryName )
     {
-        TelemetryLogger logger = _telemetryLoggers.GetOrAdd( categoryName, CreateTelemetryLogger );
-        logger.Loggers = GetLoggerInformation( categoryName );
+        TelemetryLogger logger = _telemetryLoggers.GetOrAdd( categoryName, TelemetryLogger.Create );
+        if ( logger.Loggers.Length != _loggerProviders.Count ) { logger.Loggers = GetLoggerInformation( categoryName ); }
+
         return logger;
     }
-    protected TelemetryLogger CreateTelemetryLogger( string categoryName ) => TelemetryLogger.Create( categoryName, GetLoggerInformation( categoryName ) );
     public void AddProvider( ILoggerProvider provider )
     {
         _loggerProviders.Add( provider );
@@ -124,16 +124,17 @@ public readonly struct ScopeLogger( ILogger logger, IExternalScopeProvider? exte
 
 
 [DebuggerDisplay( "{DebuggerToString(),nq}" ), DebuggerTypeProxy( typeof(LoggerDebugView) ), SuppressMessage( "ReSharper", "ForCanBeConvertedToForeach" )]
-public sealed class TelemetryLogger( string categoryName, params LoggerInformation[] loggers ) : ILogger
+public sealed class TelemetryLogger( string categoryName ) : ILogger
 {
     private readonly string _categoryName = categoryName;
 
-    public LoggerInformation[] Loggers        { get; set; } = loggers;
+    public LoggerInformation[] Loggers        { get; set; } = [];
     public MessageLogger[]?    MessageLoggers { get; set; }
     public ScopeLogger[]?      ScopeLoggers   { get; set; }
 
 
-    public static TelemetryLogger Create( string categoryName, params LoggerInformation[] loggers ) => new(categoryName, loggers);
+    public static TelemetryLogger Create( string categoryName )                                     => new(categoryName);
+    public static TelemetryLogger Create( string categoryName, params LoggerInformation[] loggers ) => new(categoryName) { Loggers = loggers };
 
 
     public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
@@ -235,15 +236,17 @@ public sealed class TelemetryLogger( string categoryName, params LoggerInformati
         public           List<object?>?                 Scopes    => _scopes ??= GetScopes();
 
 
-        protected List<object?>? GetScopes()
+        public List<object?>? GetScopes()
         {
             ReadOnlySpan<ScopeLogger> span          = _logger.ScopeLoggers;
             IExternalScopeProvider?   scopeProvider = span.FirstOrDefault( static x => true ).externalScopeProvider;
             if ( scopeProvider is null ) { return null; }
 
             List<object?> scopes = [];
-            scopeProvider.ForEachScope( static ( scope, scopes ) => scopes.Add( scope ), scopes );
+            scopeProvider.ForEachScope( Callback, scopes );
             return scopes;
+
+            static void Callback( object? scope, List<object?> scopes ) => scopes.Add( scope );
         }
         public List<LoggerProviderDebugView> GetProviders()
         {
