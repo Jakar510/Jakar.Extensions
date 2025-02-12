@@ -54,7 +54,5 @@ public interface ICreateSerilogger<out TSerilogger>
     public abstract static ILoggerProvider GetProvider( IServiceProvider provider );
     public abstract static TSerilogger     Get( IServiceProvider         provider );
     public abstract static TSerilogger     Create( IServiceProvider      provider );
-    public abstract static TSerilogger     Create(  SeriloggerOptions options );
-    public abstract static TSerilogger     Create( ActivitySource        source, SeriloggerOptions options );
-    public abstract static TSerilogger     Create( ActivitySource        source, Logger            logger, SeriloggerOptions options );
+    public abstract static TSerilogger     Create( SeriloggerOptions     options );
 }

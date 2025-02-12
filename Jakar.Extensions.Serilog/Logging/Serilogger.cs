@@ -26,6 +26,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
     where TApp : IAppID
 {
+    protected readonly      SeriloggerOptions                 _options;
     public const            string                            CONSOLE_DEFAULT_OUTPUT_TEMPLATE     = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
     public const            string                            DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
     public const            long                              DEFAULT_FILE_SIZE_LIMIT_BYTES       = 1L * 1024 * 1024 * 1024; // 1GB
@@ -109,11 +110,11 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
             _screenShotAddress = value?.SetTemporary();
         }
     }
-    public          ReadOnlyMemory<byte>                                     ScreenShotData     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;                    protected internal set; }
-    public          TSeriloggerSettings                                      Settings           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _settings.Value; set => _settings.Value = value; }
-    public required Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;                    init; }
-    public required Func<EventDetails, EventDetails>                         UpdateEventDetails { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;                    init; }
-    ISeriloggerSettings ISerilogger.                                         Settings           => Settings;
+    public ReadOnlyMemory<byte>                                     ScreenShotData     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;                    protected internal set; }
+    public TSeriloggerSettings                                      Settings           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _settings.Value; set => _settings.Value = value; }
+    public Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _options.TakeScreenShot; }
+    public Func<EventDetails, EventDetails>                         UpdateEventDetails { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _options.UpdateEventDetails; }
+    ISeriloggerSettings ISerilogger.                                Settings           => Settings;
 
 
     static Serilogger() => SelfLog.Enable( static message =>
@@ -122,16 +123,51 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
                                                // Console.WriteLine( message );
                                                Console.Error.WriteLine( message );
                                            } );
-    protected Serilogger( ActivitySource source, Logger logger, IFilePaths paths )
+    protected Serilogger( SeriloggerOptions options )
     {
+        _options = options;
+        ActivitySource      source  = options.ActivitySource ??= new ActivitySource( AppName, AppVersion.ToString() );
+        LoggerConfiguration builder = new();
+
+        builder.MinimumLevel.Verbose();
+        builder.MinimumLevel.Override( nameof(Microsoft), LogEventLevel.Warning );
+        builder.MinimumLevel.Override( nameof(System),    LogEventLevel.Warning );
+
+        builder.Enrich.WithProperty( Constants.SourceContextPropertyName, AppName );
+        builder.Enrich.WithProperty( nameof(AppID),                       AppID.ToString() );
+        builder.Enrich.WithProperty( nameof(AppVersion),                  AppVersion.ToString() );
+        builder.Enrich.FromLogContext();
+        builder.Enrich.With<AppContextEnricher>();
+        builder.Enrich.With<FilePathsEnricher>();
+
+        builder.Enrich.WithSpan( new SpanOptions
+                                 {
+                                     IncludeBaggage       = true,
+                                     IncludeOperationName = true,
+                                     IncludeTags          = true,
+                                     IncludeTraceFlags    = true
+                                 } );
+
+        // builder.WriteTo.Async( ConfigureFileSink, 10000, true, Monitor );
+
+        ConfigureDebugSink( builder.WriteTo );
+
+        options.AddNativeLogs?.Invoke( builder );
+
+        if ( options.RemoteLogServer is not null ) { builder.WriteTo.Sink( RemoteLogger.Create( options.RemoteLogServer ) ); }
+
+        if ( options.SeqLogServer is not null ) { builder.WriteTo.Seq( options.SeqLogServer.OriginalString, apiKey: options.SeqApiKey, formatProvider: CultureInfo.CurrentCulture ); }
+
+
         ActivitySource = source;
         ActivitySource.AddActivityListener( GetActivityListener() );
         Activity   = GetActivity( AppName );
-        Log.Logger = Logger = logger;
-        _settings  = new Synchronized<TSeriloggerSettings>( paths.FromPreferences<TSeriloggerSettings>() );
+        Log.Logger = Logger = builder.CreateLogger();
+        _settings  = new Synchronized<TSeriloggerSettings>( options.Paths.FromPreferences<TSeriloggerSettings>() );
         _provider  = new SerilogLoggerProvider( this, true );
         System.Diagnostics.Debug.Assert( IsValid, $"{SharedName} is invalid" );
         ISerilogger.Instance = this;
+        ClearCache();
     }
     public void Dispose()
     {
@@ -167,67 +203,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     }
 
 
-    public static TSerilogger Create( IServiceProvider provider ) => Create( provider.GetRequiredService<IOptions<SeriloggerOptions>>().Value );
-    public static TSerilogger Create( SeriloggerOptions options )
-    {
-        ActivitySource source = options.ActivitySource ??= new ActivitySource( TApp.AppName, TApp.AppVersion.ToString() );
-        return Create( source, options );
-    }
-    public static TSerilogger Create( ActivitySource source, SeriloggerOptions options )
-    {
-        LoggerConfiguration builder = new();
-
-        builder.MinimumLevel.Verbose();
-        builder.MinimumLevel.Override( nameof(Microsoft), LogEventLevel.Warning );
-        builder.MinimumLevel.Override( nameof(System),    LogEventLevel.Warning );
-
-        builder.Enrich.WithProperty( Constants.SourceContextPropertyName, TApp.AppName );
-        builder.Enrich.WithProperty( nameof(TApp.AppID),                  TApp.AppID.ToString() );
-        builder.Enrich.WithProperty( nameof(TApp.AppVersion),             TApp.AppVersion.ToString() );
-        builder.Enrich.FromLogContext();
-        builder.Enrich.With<AppContextEnricher>();
-        builder.Enrich.With<FilePathsEnricher>();
-
-        builder.Enrich.WithSpan( new SpanOptions
-                                 {
-                                     IncludeBaggage       = true,
-                                     IncludeOperationName = true,
-                                     IncludeTags          = true,
-                                     IncludeTraceFlags    = true
-                                 } );
-
-        // builder.WriteTo.Async( ConfigureFileSink, 10000, true, Monitor );
-
-        ConfigureDebugSink( builder.WriteTo );
-
-        options.AddNativeLogs?.Invoke( builder );
-
-        if ( options.RemoteLogServer is not null ) { builder.WriteTo.Sink( RemoteLogger.Create( options.RemoteLogServer ) ); }
-
-        if ( options.SeqLogServer is not null ) { builder.WriteTo.Seq( options.SeqLogServer.OriginalString, apiKey: options.SeqApiKey, formatProvider: CultureInfo.CurrentCulture ); }
-
-        TSerilogger logger = TSerilogger.Create( source, builder.CreateLogger(), options );
-
-
-        return logger.ClearCache();
-
-        /*
-        void ConfigureFileSink( LoggerSinkConfiguration sink ) => sink.File( new CompactJsonFormatter(),
-                                                                             options.Paths.LogsFile.FullPath,
-                                                                             LogEventLevel.Verbose,
-                                                                             DEFAULT_FILE_SIZE_LIMIT_BYTES,
-                                                                             null,
-                                                                             false,
-                                                                             false,
-                                                                             null,
-                                                                             RollingInterval.Day,
-                                                                             true,
-                                                                             DEFAULT_RETAINED_FILE_COUNT_LIMIT,
-                                                                             Encoding.Default,
-                                                                             Hooks,
-                                                                             TimeSpan.FromDays( 90 ) );
-                                                                             */
-    }
+    public static TSerilogger Create( IServiceProvider provider ) => TSerilogger.Create( provider.GetRequiredService<IOptions<SeriloggerOptions>>().Value );
 
 
     public static void ConfigureConsoleSink( LoggerSinkConfiguration sink ) => sink.Console( LogEventLevel.Information, CONSOLE_DEFAULT_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture, null, LogEventLevel.Error, Theme, ApplyThemeToRedirectedOutput, SyncRoot );
@@ -278,11 +254,11 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
                                                      };
 
 
-    protected virtual bool                   ShouldListenTo( ActivitySource                                    source )   => true;
-    protected virtual ActivitySamplingResult SampleUsingParentId( ref ActivityCreationOptions<string>          options )  => ActivitySamplingResult.None;
-    protected virtual ActivitySamplingResult Sample( ref              ActivityCreationOptions<ActivityContext> options )  => ActivitySamplingResult.None;
-    protected virtual void                   ActivityStarted( Activity                                         activity ) { TrackEvent( activity.DisplayName ); }
-    protected virtual void                   ActivityStopped( Activity                                         activity ) { TrackEvent( activity.DisplayName ); }
+    protected virtual bool                   ShouldListenTo( ActivitySource                                    source )   => string.Equals( source.Name, AppName, StringComparison.Ordinal );
+    protected virtual ActivitySamplingResult SampleUsingParentId( ref ActivityCreationOptions<string>          options )  => ActivitySamplingResult.AllData;
+    protected virtual ActivitySamplingResult Sample( ref              ActivityCreationOptions<ActivityContext> options )  => ActivitySamplingResult.AllData;
+    protected virtual void                   ActivityStarted( Activity                                         activity ) { TrackEvent( activity, $"{nameof(ActivityStarted)}.{activity.DisplayName}" ); }
+    protected virtual void                   ActivityStopped( Activity                                         activity ) { TrackEvent( activity, $"{nameof(ActivityStopped)}.{activity.DisplayName}" ); }
     protected virtual void ExceptionRecorder( Activity activity, Exception exception, ref TagList tags )
     {
         Dictionary<string, object?> dictionary = new(tags.Count);
@@ -525,6 +501,6 @@ private static unsafe string EntryFromPath( ReadOnlySpan<char> path, bool append
 
 
 
-public abstract class Serilogger<TClass, TApp>( ActivitySource source, Logger logger, IFilePaths paths ) : Serilogger<TClass, SeriloggerSettings, TApp>( source, logger, paths )
+public abstract class Serilogger<TClass, TApp>( SeriloggerOptions options ) : Serilogger<TClass, SeriloggerSettings, TApp>( options )
     where TApp : IAppID
     where TClass : Serilogger<TClass, SeriloggerSettings, TApp>, ICreateSerilogger<TClass>;
