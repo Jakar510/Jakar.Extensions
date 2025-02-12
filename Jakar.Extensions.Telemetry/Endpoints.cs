@@ -7,5 +7,5 @@ namespace Jakar.Extensions.Telemetry;
 
 public static class Endpoints
 {
-    public const string SAVE_ACTIVITY = "/SaveActivity";
+    public const string INGEST = "/ingest/logs";
 }

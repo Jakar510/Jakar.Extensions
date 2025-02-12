@@ -92,30 +92,30 @@ public static class AppLoggers
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = new(fileName, MimeTypeNames.Application.JSON);
-        return FileData.Create( value?.ToPrettyJson() ?? string.Empty, MimeType.Text, data, Encoding.Default );
+        return FileData.Create( MimeType.Text, data, value?.ToPrettyJson() ?? string.Empty, Encoding.Default );
     }
     public static FileData GetAttachment( this EventDetails value, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = new(fileName, MimeTypeNames.Application.JSON);
-        return FileData.Create( value.ToPrettyJson(), MimeType.Text, data, Encoding.Default );
+        return FileData.Create( MimeType.Text, data, value.ToPrettyJson(), Encoding.Default );
     }
     public static FileData GetAttachment( this string text, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = new(fileName, MimeTypeNames.Text.PLAIN);
-        return FileData.Create( text, MimeType.Text, data, Encoding.Default );
+        return FileData.Create( MimeType.Text, data, text, Encoding.Default );
     }
     public static FileData GetAttachment( this byte[] bytes, string fileName, string contentType )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = new(fileName, contentType);
-        return FileData.Create( bytes, contentType.ToMimeType(), data );
+        return FileData.Create( contentType.ToMimeType(), data, bytes );
     }
     public static FileData GetAttachment( this ReadOnlyMemory<byte> bytes, string fileName, string contentType )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = new(fileName, contentType);
-        return FileData.Create( bytes, contentType.ToMimeType(), data );
+        return FileData.Create( contentType.ToMimeType(), data, bytes.Span );
     }
 }

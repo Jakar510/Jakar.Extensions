@@ -28,7 +28,7 @@ public sealed record FileRecord( string?              FileName,
     public static FileRecord Create<TFileMetaData>( IFileData<Guid, TFileMetaData> data, LocalFile? file = null )
         where TFileMetaData : class, IFileMetaData<TFileMetaData> => new(data, data.MetaData, file);
     public TFileData ToFileData<TFileData, TFileMetaData>()
-        where TFileData : IFileData<TFileData, Guid, TFileMetaData>
+        where TFileData : class, IFileData<TFileData, Guid, TFileMetaData>
         where TFileMetaData : class, IFileMetaData<TFileMetaData> => TFileData.Create( this, TFileMetaData.Create( this ) );
 
 

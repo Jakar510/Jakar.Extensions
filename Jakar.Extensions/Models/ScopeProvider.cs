@@ -1,17 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Serilog
 // 02/11/2025  11:02
 
-using Microsoft.Extensions.Logging;
-
-
-
-namespace Jakar.Extensions.Serilog;
+namespace Jakar.Extensions;
 
 
 public sealed class ScopeProvider : IExternalScopeProvider
 {
-    private readonly AsyncLocal<Scope?> _currentScope = new();
-
+    private static readonly Lazy<ScopeProvider> _service      = new(static () => new ScopeProvider());
+    private readonly        AsyncLocal<Scope?>  _currentScope = new();
+    public static           ScopeProvider       Current => _service.Value;
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
@@ -40,10 +37,10 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
     private sealed class Scope( ScopeProvider provider, object? state, Scope? parent ) : IDisposable
     {
+        public readonly  object?       state     = state;
+        public readonly  Scope?        parent    = parent;
         private readonly ScopeProvider _provider = provider;
         private          bool          _isDisposed;
-        public readonly  Scope?        parent = parent;
-        public readonly  object?       state  = state;
 
         public override string? ToString() => state?.ToString();
         public void Dispose()
@@ -60,8 +57,9 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
 public sealed class ScopeProvider<T> : IExternalScopeProvider
 {
-    private readonly AsyncLocal<Scope?> _currentScope = new();
-
+    private static readonly Lazy<ScopeProvider<T>> _service      = new(static () => new ScopeProvider<T>());
+    private readonly        AsyncLocal<Scope?>     _currentScope = new();
+    public static           ScopeProvider<T>       Current => _service.Value;
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
@@ -92,9 +90,9 @@ public sealed class ScopeProvider<T> : IExternalScopeProvider
     private sealed class Scope( ScopeProvider<T> provider, T? state, Scope? parent ) : IDisposable
     {
         private readonly ScopeProvider<T> _provider = provider;
+        public readonly  Scope?           parent    = parent;
+        public readonly  T?               state     = state;
         private          bool             _isDisposed;
-        public readonly  Scope?           parent = parent;
-        public readonly  T?               state  = state;
 
 
         public override string? ToString() => state?.ToString();

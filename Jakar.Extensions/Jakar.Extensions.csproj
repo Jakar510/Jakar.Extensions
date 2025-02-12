@@ -8,7 +8,7 @@
 		<ImplicitUsings>disable</ImplicitUsings>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>9.2.1</Version>
+		<Version>9.2.2</Version>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
