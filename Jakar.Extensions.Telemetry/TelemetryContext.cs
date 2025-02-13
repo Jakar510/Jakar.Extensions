@@ -1,50 +1,41 @@
-﻿using System.Text;
+﻿using System.Diagnostics.Contracts;
+using System.Runtime.CompilerServices;
 
 
 
 namespace Jakar.Extensions.Telemetry;
 
 
-public interface ITelemetryContext
+public interface ITelemetryActivityContext
 {
-    string     CategoryName { get; }
-    AppContext AppContext   { get; }
-    string     TraceID      { get; }
-    string     SpanID       { get; }
+    string OperationName { get; }
+    string SpanID        { get; }
+    string TraceID       { get; }
 }
 
 
 
-public sealed class TelemetryContext( string categoryName, AppContext appContext, ActivityTraceID traceID, ActivitySpanID spanID ) : ITelemetryContext
+public readonly struct TelemetryActivityContext : ITelemetryActivityContext
 {
-    public string            CategoryName { get; init; } = categoryName;
-    public AppContext        AppContext   { get; init; } = appContext;
-    public ActivityTraceID   TraceID      { get; init; } = traceID;
-    public ActivitySpanID    SpanID       { get; init; } = spanID;
-    string ITelemetryContext.TraceID      => TraceID.ToString();
-    string ITelemetryContext.SpanID       => SpanID.ToString();
-    public TelemetryContext? Parent       { get; init; }
+    public readonly TelemetryActivitySpanID  spanID;
+    public readonly TelemetryActivityTraceID traceID;
 
 
-    public TelemetryContext CreateChild( string name ) => new(name, AppContext, TraceID, ActivitySpanID.CreateRandom()) { Parent = this };
+    public required string                   OperationName { get;           init; }
+    public required TelemetryActivitySpanID  SpanID        { get => spanID; init => spanID = value; }
+    string ITelemetryActivityContext.        SpanID        => spanID.ToString();
+    string ITelemetryActivityContext.        TraceID       => traceID.ToString();
+    public required TelemetryActivityTraceID TraceID       { get => traceID; init => traceID = value; }
 
-    public string GetSpanID()
+
+    [SetsRequiredMembers, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public TelemetryActivityContext( string operationName, TelemetryActivityTraceID traceID, TelemetryActivitySpanID spanID ) : this()
     {
-        StringBuilder sb = new(1024);
-        sb.Append( '|' );
-        ActivitySpanID? spanID = SpanID;
-
-        while ( spanID.HasValue )
-        {
-            sb.Append( spanID.Value.ToString() );
-            spanID = Parent?.SpanID;
-            if ( spanID.HasValue ) { sb.Append( '|' ); }
-        }
-
-        return sb.ToString();
+        SpanID        = spanID;
+        TraceID       = traceID;
+        OperationName = operationName;
     }
-
-    public static TelemetryContext Create<TApp>( ActivityTraceID? traceID = null, ActivitySpanID? spanID = null )
-        where TApp : IAppID => Create( TApp.AppName, AppContext.Create<TApp>(), traceID, spanID );
-    public static TelemetryContext Create( string name, AppContext context, ActivityTraceID? traceID = null, ActivitySpanID? spanID = null ) => new(name, context, traceID ?? ActivityTraceID.CreateRandom(), spanID ?? ActivitySpanID.CreateRandom());
+    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public        TelemetryActivityContext CreateChild( string operationName )                                                                   => new(operationName, traceID, TelemetryActivitySpanID.CreateRandom());
+    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public static TelemetryActivityContext Create( string      operationName )                                                                   => Create( operationName, TelemetryActivityTraceID.CreateRandom(), TelemetryActivitySpanID.CreateRandom() );
+    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public static TelemetryActivityContext Create( string      operationName, TelemetryActivityTraceID traceID, TelemetryActivitySpanID spanID ) => new(operationName, traceID, spanID);
 }

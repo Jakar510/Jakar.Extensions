@@ -6,9 +6,15 @@ namespace Jakar.Extensions.Telemetry;
 
 public readonly struct AppContext : IEquatable<AppContext>
 {
-    public required string     Name    { get; init; }
-    public required Guid       ID      { get; init; }
-    public required AppVersion Version { get; init; }
+    internal readonly string     name;
+    internal readonly Guid       id;
+    internal readonly AppVersion version;
+
+
+    public required string     Name    { get => name;    [MemberNotNull( nameof(name) )] init => name = value; }
+    public required Guid       ID      { get => id;      init => id = value; }
+    public required AppVersion Version { get => version; [MemberNotNull( nameof(version) )] init => version = value; }
+
 
     public static AppContext Create<TApp>()
         where TApp : IAppID => Create( TApp.AppName, TApp.AppID, TApp.AppVersion );
@@ -20,9 +26,11 @@ public readonly struct AppContext : IEquatable<AppContext>
                                                                                             };
 
 
-    public          bool Equals( AppContext other )                       => Name == other.Name      && ID.Equals( other.ID ) && Version.Equals( other.Version );
-    public override bool Equals( object?    other )                       => other is AppContext app && Equals( app );
-    public override int  GetHashCode()                                    => HashCode.Combine( Name, ID, Version );
-    public static   bool operator ==( AppContext left, AppContext right ) => left.Equals( right );
-    public static   bool operator !=( AppContext left, AppContext right ) => !left.Equals( right );
+    public          bool Equals( AppContext other ) => Name == other.Name      && ID.Equals( other.ID ) && Version.Equals( other.Version );
+    public override bool Equals( object?    other ) => other is AppContext app && Equals( app );
+    public override int  GetHashCode()              => HashCode.Combine( Name, ID, Version );
+
+
+    public static bool operator ==( AppContext left, AppContext right ) => left.Equals( right );
+    public static bool operator !=( AppContext left, AppContext right ) => !left.Equals( right );
 }

@@ -13,18 +13,18 @@ using System.Security.Cryptography;
 namespace Jakar.Extensions.Telemetry;
 
 
-public readonly struct ActivityTraceID : IEquatable<ActivityTraceID>
+public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTraceID>
 {
     public const            int            SIZE       = sizeof(ulong) * 2;
     public const            int            LENGTH     = sizeof(ulong) * 4;
     private static readonly string         _empty     = new('0', LENGTH);
     private readonly        string         _hexString = _empty;
     private readonly        int            _hash      = _empty.GetHashCode();
-    public static readonly  ActivitySpanID Empty      = new(_empty);
+    public static readonly  TelemetryActivitySpanID Empty      = new(_empty);
 
 
-    internal ActivityTraceID( string hexString ) => _hexString = hexString;
-    private ActivityTraceID( ReadOnlySpan<byte> idData )
+    internal TelemetryActivityTraceID( string hexString ) => _hexString = hexString;
+    private TelemetryActivityTraceID( ReadOnlySpan<byte> idData )
     {
         if ( idData.Length != 32 ) { throw new ArgumentOutOfRangeException( nameof(idData) ); }
 
@@ -53,20 +53,20 @@ public readonly struct ActivityTraceID : IEquatable<ActivityTraceID>
         _hexString = Convert.ToHexStringLower( MemoryMarshal.AsBytes( span ) );
     }
 
-    public static ActivityTraceID CreateRandom()                                    => new(CreateRandom( SIZE ));
-    public static ActivityTraceID CreateFromUtf8String( ReadOnlySpan<byte> idData ) => new(idData);
-    public static ActivityTraceID CreateFromBytes( ReadOnlySpan<byte> idData ) => idData.Length != SIZE
+    public static TelemetryActivityTraceID CreateRandom()                                    => new(CreateRandom( SIZE ));
+    public static TelemetryActivityTraceID CreateFromUtf8String( ReadOnlySpan<byte> idData ) => new(idData);
+    public static TelemetryActivityTraceID CreateFromBytes( ReadOnlySpan<byte> idData ) => idData.Length != SIZE
                                                                                       ? throw new ArgumentOutOfRangeException( nameof(idData) )
-                                                                                      : new ActivityTraceID( Convert.ToHexStringLower( idData ) );
-    public static ActivityTraceID CreateFromString( ReadOnlySpan<char> idData ) => idData.Length != LENGTH || IsLowerCaseHexAndNotAllZeros( idData ) is false
+                                                                                      : new TelemetryActivityTraceID( Convert.ToHexStringLower( idData ) );
+    public static TelemetryActivityTraceID CreateFromString( ReadOnlySpan<char> idData ) => idData.Length != LENGTH || IsLowerCaseHexAndNotAllZeros( idData ) is false
                                                                                        ? throw new ArgumentOutOfRangeException( nameof(idData) )
-                                                                                       : new ActivityTraceID( idData.ToString() );
+                                                                                       : new TelemetryActivityTraceID( idData.ToString() );
     public override string ToString() => _hexString;
 
-    public bool Equals( ActivityTraceID traceId ) => _hexString == traceId._hexString;
+    public bool Equals( TelemetryActivityTraceID traceId ) => _hexString == traceId._hexString;
     public override bool Equals( [NotNullWhen( true )] object? obj )
     {
-        if ( obj is ActivityTraceID traceId ) { return _hexString == traceId._hexString; }
+        if ( obj is TelemetryActivityTraceID traceId ) { return _hexString == traceId._hexString; }
 
         return false;
     }
@@ -98,9 +98,9 @@ public readonly struct ActivityTraceID : IEquatable<ActivityTraceID>
     }
 
 
-    public static string Collate( IEnumerable<ActivityTraceID> spans ) => $"|{string.Join( '|', spans.Select( static x => x._hexString ) )}";
+    public static string Collate( IEnumerable<TelemetryActivityTraceID> spans ) => $"|{string.Join( '|', spans.Select( static x => x._hexString ) )}";
 
 
-    public static bool operator ==( ActivityTraceID traceId1, ActivityTraceID traceId2 ) => traceId1._hexString == traceId2._hexString;
-    public static bool operator !=( ActivityTraceID traceId1, ActivityTraceID traceId2 ) => traceId1._hexString != traceId2._hexString;
+    public static bool operator ==( TelemetryActivityTraceID traceId1, TelemetryActivityTraceID traceId2 ) => traceId1._hexString == traceId2._hexString;
+    public static bool operator !=( TelemetryActivityTraceID traceId1, TelemetryActivityTraceID traceId2 ) => traceId1._hexString != traceId2._hexString;
 }
