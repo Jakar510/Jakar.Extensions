@@ -1,15 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 01/09/2025  16:01
 
-using System.Buffers;
-using System.Buffers.Binary;
-using System.Buffers.Text;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-
-
-
 namespace Jakar.Extensions.Telemetry;
 
 

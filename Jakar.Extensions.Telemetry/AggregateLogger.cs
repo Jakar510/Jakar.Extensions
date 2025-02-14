@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 02/13/2025  15:02
 
-using System.Runtime.InteropServices;
-
-
-
 namespace Jakar.Extensions.Telemetry;
 
 

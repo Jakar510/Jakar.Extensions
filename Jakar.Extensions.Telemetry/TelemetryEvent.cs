@@ -4,19 +4,39 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-public sealed record TelemetryEvent( string EventID, DateTimeOffset Timestamp, params TelemetryTag[]? Tags )
+public readonly struct TelemetryEvent( string eventID, DateTimeOffset timestamp, params Pair[]? tags ) : IEquatable<TelemetryEvent>, IComparable<TelemetryEvent>, IComparable
 {
-    public TelemetryEvent( string eventID) : this( eventID, DateTimeOffset.UtcNow, null ) { }
-    public TelemetryEvent( string eventID, params TelemetryTag[]? tags ) : this( eventID, DateTimeOffset.UtcNow, tags ) { }
+    public Pair[]?        Tags      { get; } = tags;
+    public string         EventID   { get; } = eventID;
+    public DateTimeOffset Timestamp { get; } = timestamp;
 
 
+    public static ValueSorter<TelemetryEvent>    Sorter    => ValueSorter<TelemetryEvent>.Default;
+    public static ValueEqualizer<TelemetryEvent> Equalizer => ValueEqualizer<TelemetryEvent>.Default;
+    public TelemetryEvent( string eventID ) : this( eventID, DateTimeOffset.UtcNow, null ) { }
+    public TelemetryEvent( string eventID, params Pair[]? tags ) : this( eventID, DateTimeOffset.UtcNow, tags ) { }
 
-    public sealed class Collection() : LinkedList<TelemetryEvent>()
+
+    public override bool Equals( object?        obj )   => obj is TelemetryEvent other && Equals( other );
+    public          bool Equals( TelemetryEvent other ) => EventID == other.EventID    && Timestamp.Equals( other.Timestamp );
+    public int CompareTo( TelemetryEvent other )
     {
-        public static Collection Create() => new();
-        public Collection( IEnumerable<TelemetryEvent> values ) : this()
-        {
-            foreach ( TelemetryEvent tag in values ) { AddLast( tag ); }
-        }
+        int eventIDComparison = string.Compare( EventID, other.EventID, StringComparison.Ordinal );
+        if ( eventIDComparison != 0 ) { return eventIDComparison; }
+
+        return Timestamp.CompareTo( other.Timestamp );
     }
+    public int CompareTo( object? obj )
+    {
+        if ( obj is null ) { return 1; }
+
+        return obj is TelemetryEvent other
+                   ? CompareTo( other )
+                   : throw new ArgumentException( $"Object must be of type {nameof(TelemetryEvent)}" );
+    }
+    public override int GetHashCode()                                             => HashCode.Combine( EventID, Timestamp );
+    public static   bool operator <( TelemetryEvent  left, TelemetryEvent right ) => left.CompareTo( right ) < 0;
+    public static   bool operator >( TelemetryEvent  left, TelemetryEvent right ) => left.CompareTo( right ) > 0;
+    public static   bool operator <=( TelemetryEvent left, TelemetryEvent right ) => left.CompareTo( right ) <= 0;
+    public static   bool operator >=( TelemetryEvent left, TelemetryEvent right ) => left.CompareTo( right ) >= 0;
 }

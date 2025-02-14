@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 01/09/2025  15:01
 
-using System.Globalization;
-
-
-
 namespace Jakar.Extensions.Telemetry;
 
 

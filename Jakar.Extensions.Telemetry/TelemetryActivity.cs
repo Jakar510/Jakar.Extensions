@@ -82,11 +82,10 @@ public sealed class TelemetryActivity( string operationName, TelemetryActivityCo
 
     #region Complex / Collections
 
-    public TelemetryActivityContext    Context { get => context; init => context = value; }
-    public TelemetryTag.Collection     Tags    { get;            init; } = [];
-    public TelemetryBaggage.Collection Baggage { get;            init; } = [];
-    public TelemetryEvent.Collection   Events  { get;            init; } = [];
-    public Meter.Collection            Meters  { get;            init; } = [];
+    public TelemetryActivityContext   Context { get => context; init => context = value; }
+    public LinkedList<Pair>           Tags    { get;            init; } = [];
+    public LinkedList<TelemetryEvent> Events  { get;            init; } = [];
+    public TelemetryMeter.Collection  Meters  { get;            init; } = [];
     public TelemetryActivity? Child
     {
         get => _child;

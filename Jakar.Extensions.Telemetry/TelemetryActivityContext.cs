@@ -1,9 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
-
-
-
-namespace Jakar.Extensions.Telemetry;
+﻿namespace Jakar.Extensions.Telemetry;
 
 
 public interface ITelemetryActivityContext
