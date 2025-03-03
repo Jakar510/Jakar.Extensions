@@ -7,118 +7,120 @@ namespace Jakar.Extensions;
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 /// <typeparam name="T"> </typeparam>
 /// <param name="Value"> </param>
-/// <param name="Errors"> </param>
-[Serializable, DefaultValue( nameof(Empty) ), SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
-public readonly record struct ErrorOrResult( in bool? Value, in Error[]? Errors )
+/// <param name="Error"> </param>
+[Serializable, DefaultValue( nameof(Empty) )]
+public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
 {
-    public static ErrorOrResult Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(null, null); }
+    public static readonly ErrorOrResult Empty = new(null, null);
+    public readonly        bool?         Value = Value;
+    public readonly        Errors?       Error = Error;
 
 
-    [MemberNotNullWhen( true, nameof(Errors) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Errors?.Length is > 0; }
-    [MemberNotNullWhen( true, nameof(Value) )]  public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
-    [MemberNotNullWhen( true, nameof(Value) )]  public bool Passed    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is true; }
+    [MemberNotNullWhen( true, nameof(Error) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Error.HasValue; }
+    [MemberNotNullWhen( true, nameof(Value) )] public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
+    [MemberNotNullWhen( true, nameof(Value) )] public bool Passed    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is true; }
 
 
-    public Status GetStatus() => Errors.GetStatus();
+    public Status GetStatus() => Errors.GetStatus( Error );
 
 
-    public TResult Match<TResult>( Func<bool?, TResult> value, Func<Error[], TResult> errors ) => TryGetValue( out Error[]? e )
-                                                                                                      ? errors( e )
-                                                                                                      : value( Value );
-    public TResult Match<TResult>( Func<bool, TResult> value, Func<Error[], TResult> errors ) => TryGetValue( out Error[]? e )
-                                                                                                     ? errors( e )
-                                                                                                     : value( Value is true );
-    public ValueTask<TResult> Match<TResult>( Func<bool?, ValueTask<TResult>> value, Func<Error[], ValueTask<TResult>> errors ) => TryGetValue( out Error[]? e )
-                                                                                                                                       ? errors( e )
-                                                                                                                                       : value( Value );
-    public ValueTask<TResult> Match<TResult>( Func<bool, ValueTask<TResult>> value, Func<Error[], ValueTask<TResult>> errors ) => TryGetValue( out Error[]? e )
-                                                                                                                                      ? errors( e )
-                                                                                                                                      : value( Value is true );
-    public Task<TResult> Match<TResult>( Func<bool?, Task<TResult>> value, Func<Error[], Task<TResult>> errors ) => TryGetValue( out Error[]? e )
-                                                                                                                        ? errors( e )
-                                                                                                                        : value( Value );
-    public Task<TResult> Match<TResult>( Func<bool, Task<TResult>> value, Func<Error[], Task<TResult>> errors ) => TryGetValue( out Error[]? e )
-                                                                                                                       ? errors( e )
-                                                                                                                       : value( this );
+    public TResult Match<TResult>( Func<bool?, TResult> value, Func<Errors, TResult> errors ) => TryGetValue( out Errors? e )
+                                                                                                     ? errors( e.Value )
+                                                                                                     : value( Value );
+    public TResult Match<TResult>( Func<bool, TResult> value, Func<Errors, TResult> errors ) => TryGetValue( out Errors? e )
+                                                                                                    ? errors( e.Value )
+                                                                                                    : value( Value is true );
+    public ValueTask<TResult> Match<TResult>( Func<bool?, ValueTask<TResult>> value, Func<Errors, ValueTask<TResult>> errors ) => TryGetValue( out Errors? e )
+                                                                                                                                      ? errors( e.Value )
+                                                                                                                                      : value( Value );
+    public ValueTask<TResult> Match<TResult>( Func<bool, ValueTask<TResult>> value, Func<Errors, ValueTask<TResult>> errors ) => TryGetValue( out Errors? e )
+                                                                                                                                     ? errors( e.Value )
+                                                                                                                                     : value( Value is true );
+    public Task<TResult> Match<TResult>( Func<bool?, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) => TryGetValue( out Errors? e )
+                                                                                                                       ? errors( e.Value )
+                                                                                                                       : value( Value );
+    public Task<TResult> Match<TResult>( Func<bool, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) => TryGetValue( out Errors? e )
+                                                                                                                      ? errors( e.Value )
+                                                                                                                      : value( this );
 
 
-    public static ErrorOrResult Create( in     bool?   value )  => new(value, null);
-    public static ErrorOrResult Create( params Error[] errors ) => new(null, errors);
+    public static ErrorOrResult Create( bool?  value )  => new(value, null);
+    public static ErrorOrResult Create( Errors errors ) => new(null, errors);
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out Error[]? errors )
+    public bool TryGetValue( [NotNullWhen( true )] out Errors? errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors is not null;
     }
     public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors.IsEmpty is false;
     }
     public bool TryGetValue( out ReadOnlySpan<Error> errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors.IsEmpty is false;
     }
 
 
-    public static implicit operator OneOf<bool?, Error[]>( ErrorOrResult result ) => result.TryGetValue( out Error[]? errors )
-                                                                                         ? errors
-                                                                                         : result.Value;
-    public static implicit operator OneOf<bool, Error[]>( ErrorOrResult result ) => result.TryGetValue( out Error[]? errors )
-                                                                                        ? errors
-                                                                                        : true;
+    public static implicit operator OneOf<bool?, Errors>( ErrorOrResult result ) => result.TryGetValue( out Errors? errors )
+                                                                                        ? errors.Value
+                                                                                        : result.Value;
+    public static implicit operator OneOf<bool, Errors>( ErrorOrResult result ) => result.TryGetValue( out Errors? errors )
+                                                                                       ? errors.Value
+                                                                                       : true;
     public static implicit operator bool?( ErrorOrResult                 result ) => result.Value;
     public static implicit operator bool( ErrorOrResult                  result ) => result.Value is true;
     public static implicit operator ErrorOrResult( bool                  value )  => Create( value );
     public static implicit operator ErrorOrResult( bool?                 value )  => Create( value );
     public static implicit operator ErrorOrResult( Error                 error )  => Create( error );
-    public static implicit operator ErrorOrResult( List<Error>           errors ) => Create( [..errors] );
     public static implicit operator ErrorOrResult( Error[]               errors ) => Create( errors );
-    public static implicit operator Error[]( ErrorOrResult               result ) => result.Errors ?? [];
-    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult   result ) => result.Errors;
-    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult result ) => result.Errors;
+    public static implicit operator ErrorOrResult( List<Error>           errors ) => Create( errors );
+    public static implicit operator ErrorOrResult( Errors                errors ) => Create( errors );
+    public static implicit operator Errors( ErrorOrResult                result ) => result.Error ?? Errors.Empty;
+    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult   result ) => result.Error;
+    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult result ) => result.Error;
 }
 
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-/// <typeparam name="T"> </typeparam>
-/// <param name="Value"> </param>
-/// <param name="Errors"> </param>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors )
+public readonly record struct ErrorOrResult<T>( T? Value, Errors? Error )
 {
-    public static ErrorOrResult<T> Empty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(default, null); }
+    public static readonly ErrorOrResult<T> Empty = new(default, null);
+    public readonly        T?               Value = Value;
+    public readonly        Errors?          Error = Error;
 
 
-    [MemberNotNullWhen( true, nameof(Errors) ), MemberNotNullWhen( false, nameof(Value) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
-    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Errors) )] public bool HasValue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
+    [MemberNotNullWhen( true, nameof(Error) ), MemberNotNullWhen( false, nameof(Value) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )] public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
 
 
-    public Status GetStatus() => Errors.GetStatus();
+    public Status GetStatus() => Errors.GetStatus( Error );
 
 
-    public TResult Match<TResult>( Func<T, TResult> value, Func<Error[], TResult> errors ) =>
-        TryGetValue( out T? x, out Error[]? e )
+    public TResult Match<TResult>( Func<T, TResult> value, Func<Errors, TResult> errors ) =>
+        TryGetValue( out T? x, out Errors? e )
             ? value( x )
-            : errors( e );
-    public ValueTask<TResult> Match<TResult>( Func<T, ValueTask<TResult>> value, Func<Error[], ValueTask<TResult>> errors ) =>
-        TryGetValue( out T? x, out Error[]? e )
+            : errors( e.Value );
+    public ValueTask<TResult> Match<TResult>( Func<T, ValueTask<TResult>> value, Func<Errors, ValueTask<TResult>> errors ) =>
+        TryGetValue( out T? x, out Errors? e )
             ? value( x )
-            : errors( e );
-    public Task<TResult> Match<TResult>( Func<T, Task<TResult>> value, Func<Error[], Task<TResult>> errors ) =>
-        TryGetValue( out T? x, out Error[]? e )
+            : errors( e.Value );
+    public Task<TResult> Match<TResult>( Func<T, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) =>
+        TryGetValue( out T? x, out Errors? e )
             ? value( x )
-            : errors( e );
+            : errors( e.Value );
 
 
-    public static ErrorOrResult<T> Create( in     T       value )  => new(value, null);
-    public static ErrorOrResult<T> Create( params Error[] errors ) => new(default, errors);
+    public static ErrorOrResult<T> Create( T      value )  => new(value, null);
+    public static ErrorOrResult<T> Create( Errors errors ) => new(default, errors);
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Error[]? errors )
+    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Errors? errors )
     {
         if ( Value is not null )
         {
@@ -128,7 +130,7 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
         }
 
         value  = default;
-        errors = Errors ?? [];
+        errors = Error ?? Errors.Empty;
         return false;
     }
     public bool TryGetValue( [NotNullWhen( true )] out T? value )
@@ -136,32 +138,34 @@ public readonly record struct ErrorOrResult<T>( in T? Value, in Error[]? Errors 
         value = Value;
         return value is not null;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out Error[]? errors )
+    public bool TryGetValue( [NotNullWhen( true )] out Errors? errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors is not null;
     }
     public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors.IsEmpty is false;
     }
     public bool TryGetValue( out ReadOnlySpan<Error> errors )
     {
-        errors = Errors;
+        errors = Error;
         return errors.IsEmpty is false;
     }
 
 
-    public static implicit operator OneOf<T, Error[]>( ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Error[]? errors )
-                                                                                        ? value
-                                                                                        : errors;
+    public static implicit operator OneOf<T, Errors>( ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Errors? errors )
+                                                                                       ? value
+                                                                                       : errors.Value;
     public static implicit operator T?( ErrorOrResult<T>                    result ) => result.Value;
-    public static implicit operator Error[]( ErrorOrResult<T>               result ) => result.Errors ?? [];
-    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<T>   result ) => result.Errors;
-    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult<T> result ) => result.Errors;
+    public static implicit operator Errors( ErrorOrResult<T>                result ) => result.Error ?? Errors.Empty;
+    public static implicit operator Errors?( ErrorOrResult<T>               result ) => result.Error;
+    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<T>   result ) => result.Error;
+    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult<T> result ) => result.Error;
     public static implicit operator ErrorOrResult<T>( T                     value )  => Create( value );
     public static implicit operator ErrorOrResult<T>( Error                 error )  => Create( error );
-    public static implicit operator ErrorOrResult<T>( List<Error>           errors ) => Create( [..errors] );
+    public static implicit operator ErrorOrResult<T>( List<Error>           errors ) => Create( errors );
     public static implicit operator ErrorOrResult<T>( Error[]               errors ) => Create( errors );
+    public static implicit operator ErrorOrResult<T>( Errors                errors ) => Create( errors );
 }

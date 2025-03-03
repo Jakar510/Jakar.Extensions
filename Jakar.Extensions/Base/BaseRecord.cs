@@ -10,6 +10,23 @@ public record BaseRecord
     public const int    UNICODE_CAPACITY = 4000;
     public const string EMPTY            = "";
     public const string NULL             = "null";
+
+    
+    protected static async ValueTask CastAndDispose( IDisposable? resource )
+    {
+        switch ( resource )
+        {
+            case null: return;
+
+            case IAsyncDisposable resourceAsyncDisposable:
+                await resourceAsyncDisposable.DisposeAsync();
+                return;
+
+            default:
+                resource.Dispose();
+                return;
+        }
+    }
 }
 
 
