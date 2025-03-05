@@ -88,18 +88,18 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOrResult<T>( T? Value, Errors? Error )
+public readonly record struct ErrorOrResult<T>( T? Value, Errors Error )
 {
-    public static readonly ErrorOrResult<T> Empty = new(default, null);
+    public static readonly ErrorOrResult<T> Empty = new(default, Errors.Empty);
     public readonly        T?               Value = Value;
-    public readonly        Errors?          Error = Error;
+    public readonly        Errors           Error = Error;
 
 
-    [MemberNotNullWhen( true, nameof(Error) ), MemberNotNullWhen( false, nameof(Value) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ) is false; }
-    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )] public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TryGetValue( out _, out _ ); }
+    [MemberNotNullWhen( false, nameof(Value) )] public bool HasErrors { get => Error.IsValid && Value is null; }
+    [MemberNotNullWhen( true,  nameof(Value) )] public bool HasValue  { get => Value is not null; }
 
 
-    public Status GetStatus() => Errors.GetStatus( Error );
+    public Status GetStatus() => Error.GetStatus();
 
 
     public TResult Match<TResult>( Func<T, TResult> value, Func<Errors, TResult> errors ) =>
@@ -116,22 +116,21 @@ public readonly record struct ErrorOrResult<T>( T? Value, Errors? Error )
             : errors( e.Value );
 
 
-    public static ErrorOrResult<T> Create( T      value )  => new(value, null);
+    public static ErrorOrResult<T> Create( T      value )  => new(value, Errors.Empty);
     public static ErrorOrResult<T> Create( Errors errors ) => new(default, errors);
 
 
     public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Errors? errors )
     {
-        if ( Value is not null )
-        {
-            value  = Value;
-            errors = null;
-            return true;
-        }
-
-        value  = default;
-        errors = Error ?? Errors.Empty;
-        return false;
+        errors = Error;
+        value  = Value;
+        return value is not null;
+    }
+    public bool TryGetValue( [NotNullWhen( true )] out T? value, out Errors errors )
+    {
+        errors = Error;
+        value  = Value;
+        return value is not null;
     }
     public bool TryGetValue( [NotNullWhen( true )] out T? value )
     {
@@ -141,7 +140,12 @@ public readonly record struct ErrorOrResult<T>( T? Value, Errors? Error )
     public bool TryGetValue( [NotNullWhen( true )] out Errors? errors )
     {
         errors = Error;
-        return errors is not null;
+        return Error.IsValid;
+    }
+    public bool TryGetValue( out Errors errors )
+    {
+        errors = Error;
+        return Error.IsValid;
     }
     public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
@@ -159,7 +163,7 @@ public readonly record struct ErrorOrResult<T>( T? Value, Errors? Error )
                                                                                        ? value
                                                                                        : errors.Value;
     public static implicit operator T?( ErrorOrResult<T>                    result ) => result.Value;
-    public static implicit operator Errors( ErrorOrResult<T>                result ) => result.Error ?? Errors.Empty;
+    public static implicit operator Errors( ErrorOrResult<T>                result ) => result.Error;
     public static implicit operator Errors?( ErrorOrResult<T>               result ) => result.Error;
     public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<T>   result ) => result.Error;
     public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult<T> result ) => result.Error;

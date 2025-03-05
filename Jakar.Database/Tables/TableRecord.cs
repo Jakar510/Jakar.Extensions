@@ -69,8 +69,8 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
     [Pure]
     public UInt128 GetHash()
     {
-        string json = this.ToJson();
-        return Hashes.Hash128( json );
+        ReadOnlySpan<char> json = this.ToJson();
+        return json.Hash128();
     }
     public TRecord Modified()
     {

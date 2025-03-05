@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/03/2025  13:03
 
+using System;
 using Microsoft.Extensions.Primitives;
 
 
@@ -37,7 +38,7 @@ public static class ErrorExtensions
         return values;
     }
     public static string GetMessage( this IEnumerable<Error> errors ) => string.Join( '\n', errors.Select( GetMessage ) );
-    public static string GetMessage( this ReadOnlySpan<Error> errors )
+    public static string GetMessage( this ref readonly ReadOnlySpan<Error> errors )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( errors.Length );
         Span<string?>               span  = owner.Memory.Span;
@@ -62,9 +63,13 @@ public static class ErrorExtensions
     }
 
 
-    public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( static x => x.GetStatus() ) ?? Status.Ok;
-    public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => GetStatus( new ReadOnlySpan<Error>( errors ), status );
-    public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
+    public static Status GetStatus( this IEnumerable<Error>? errors ) => errors?.Max( static x => x.GetStatus() ) ?? Status.Ok;
+    public static Status GetStatus( this Error[]? errors, Status status )
+    {
+        ReadOnlySpan<Error> span = errors;
+        return GetStatus( in span, status );
+    }
+    public static Status GetStatus( this ref readonly ReadOnlySpan<Error> errors, Status status )
     {
         if ( errors.IsEmpty ) { return status; }
 

@@ -93,7 +93,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 {
     [SetsRequiredMembers] public FileData( IFileData<Guid, FileMetaData> file ) : this( file, file.MetaData ) { }
     [SetsRequiredMembers] public FileData( IFileData<Guid>               file,     FileMetaData              metaData ) : this( file.FileSize, file.Hash, file.Payload, metaData ) { }
-    [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this( content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
+    [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this( content.Length, content.Hash_SHA512(), Convert.ToBase64String( content ), metaData ) { }
 
 
     public static FileData Create( long fileSize, string hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);

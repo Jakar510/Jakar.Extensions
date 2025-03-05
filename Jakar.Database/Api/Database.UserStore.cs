@@ -47,10 +47,11 @@ public partial class Database
 
         if ( record is not null )
         {
-            Error provider = Error.NotFound( nameof(UserLoginProviderRecord.LoginProvider), login.LoginProvider );
-            Error key      = Error.NotFound( nameof(UserLoginProviderRecord.ProviderKey),   login.ProviderKey );
-            Error userID   = Error.NotFound( nameof(UserLoginProviderRecord.CreatedBy),     user.ID.value.ToString() );
-            return ErrorOrResult<UserLoginProviderRecord>.Create( provider, key, userID );
+            Error  provider = Error.NotFound( nameof(UserLoginProviderRecord.LoginProvider), login.LoginProvider );
+            Error  key      = Error.NotFound( nameof(UserLoginProviderRecord.ProviderKey),   login.ProviderKey );
+            Error  userID   = Error.NotFound( nameof(UserLoginProviderRecord.CreatedBy),     user.ID.value.ToString() );
+            Errors errors   = Errors.Create( [provider, key, userID] );
+            return ErrorOrResult<UserLoginProviderRecord>.Create( errors );
         }
 
         record = new UserLoginProviderRecord( user, login );
@@ -73,7 +74,7 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall( RemoveLoginAsync, user, loginProvider, providerKey, token );
     public virtual async ValueTask RemoveLoginAsync( DbConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        DynamicParameters                     parameters = UserLoginProviderRecord.GetDynamicParameters( user, loginProvider, providerKey );
+        DynamicParameters                         parameters = UserLoginProviderRecord.GetDynamicParameters( user, loginProvider, providerKey );
         IAsyncEnumerable<UserLoginProviderRecord> records    = UserLogins.Where( connection, transaction, true, parameters, token );
         await foreach ( UserLoginProviderRecord record in records ) { await UserLogins.Delete( connection, transaction, record, token ); }
     }

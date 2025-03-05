@@ -760,8 +760,8 @@ public sealed record UserRecord( string                        UserName,
 
     #region Tokens
 
-    public static bool CheckRefreshToken( scoped ref UserRecord record, in Tokens token, in bool hashed = true ) => CheckRefreshToken( ref record, token.RefreshToken, hashed );
-    public static bool CheckRefreshToken( scoped ref UserRecord record, in string? token, in bool hashed = true )
+    public static bool CheckRefreshToken( ref UserRecord record, Tokens token, bool hashed = true ) => CheckRefreshToken( ref record, token.RefreshToken, hashed );
+    public static bool CheckRefreshToken( ref UserRecord record, string? refreshToken, bool hashed = true )
     {
         // ReSharper disable once InvertIf
         if ( record.RefreshTokenExpiryTime.HasValue && DateTimeOffset.UtcNow > record.RefreshTokenExpiryTime.Value )
@@ -770,19 +770,17 @@ public sealed record UserRecord( string                        UserName,
             return false;
         }
 
-        return string.Equals( record.RefreshToken,
-                              hashed
-                                  ? Hashes.Hash128( token ).ToString()
-                                  : token,
-                              StringComparison.Ordinal );
+        return hashed
+                   ? string.Equals( record.RefreshToken, refreshToken?.Hash_SHA512(), StringComparison.Ordinal )
+                   : string.Equals( record.RefreshToken, refreshToken,                StringComparison.Ordinal );
     }
 
 
     public UserRecord WithNoRefreshToken()                                                                 => WithRefreshToken( string.Empty );
     public UserRecord WithRefreshToken( Tokens token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken( token.RefreshToken, date, securityStamp );
-    public UserRecord WithRefreshToken( in string? token, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
+    public UserRecord WithRefreshToken( string? refreshToken, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
     {
-        if ( string.IsNullOrEmpty( token ) )
+        if ( string.IsNullOrEmpty( refreshToken ) )
         {
             RefreshToken           = string.Empty;
             RefreshTokenExpiryTime = null;
@@ -791,12 +789,12 @@ public sealed record UserRecord( string                        UserName,
         }
 
         date ??= DateTimeOffset.UtcNow;
-        string hash = Hashes.Hash128( token ).ToString();
+        string hash = refreshToken.Hash_SHA512();
         SecurityStamp = securityStamp ?? hash;
 
         RefreshToken = hashed
                            ? hash
-                           : token;
+                           : refreshToken;
 
         RefreshTokenExpiryTime = date;
         return Modified();

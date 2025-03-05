@@ -132,7 +132,7 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     public virtual LocalFile GetFile( LocalDirectory directory )
     {
         string extension = Mime.ToExtension();
-        string name      = Path.GetFileName( MetaData.FileName ) ?? Guid.NewGuid().ToBase64();
+        string name      = Path.GetFileName( MetaData.FileName ) ?? Guids.NewBase64();
         string fileName  = $"{name}.{extension}";
         return directory.Join( fileName );
     }
@@ -194,8 +194,8 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => TClass.Create( data.FileSize, data.Hash, data.Payload, data.ID, metaData );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create( metaData, stream.AsReadOnlyMemory().Span );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create( metaData, content.Span );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TClass.Create( content.Length, content.Hash_SHA256(),                                       Convert.ToBase64String( content ), default, metaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TClass.Create( content.Length, Hashes.Hash_SHA256( content, encoding ?? Encoding.Default ), content,                           default, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TClass.Create( content.Length, content.Hash_SHA512(),                               Convert.ToBase64String( content ), default, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TClass.Create( content.Length, content.Hash_SHA512( encoding ?? Encoding.Default ), content,                           default, metaData );
 
 
     public static TClass? TryCreate( [NotNullIfNotNull( nameof(content) )] IFileData<TID, TFileMetaData>? content ) => content is not null

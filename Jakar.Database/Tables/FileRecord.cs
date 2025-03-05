@@ -10,7 +10,7 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FileType,
                                  long                 FileSize,
                                  string               Hash,
-                                 MimeType             MimeType,
+                                 MimeType?            MimeType,
                                  string               Payload,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
@@ -22,9 +22,9 @@ public sealed record FileRecord( string?              FileName,
     [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
 
 
-    public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?     file                      = null ) : this( data, data.MetaData, file ) { }
-    private FileRecord( IFileData<Guid>                            data, IFileMetaData? metaData, LocalFile? file = null ) : this( metaData?.FileName, metaData?.FileDescription, metaData?.FileType, data.FileSize, data.Hash, data.MimeType, data.Payload, file?.FullPath, RecordID<FileRecord>.New(), DateTimeOffset.UtcNow ) { }
-    public static FileRecord Create( IFileData<Guid, FileMetaData> data, LocalFile?     file = null ) => new(data, file);
+    public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this( data, data.MetaData, file ) { }
+    private FileRecord( IFileData<Guid>                            data, IFileMetaData metaData, LocalFile? file = null ) : this( metaData.FileName, metaData.FileDescription, metaData.FileType, data.FileSize, data.Hash, metaData.MimeType, data.Payload, file?.FullPath, RecordID<FileRecord>.New(), DateTimeOffset.UtcNow ) { }
+    public static FileRecord Create( IFileData<Guid, FileMetaData> data, LocalFile?    file = null ) => new(data, file);
     public static FileRecord Create<TFileMetaData>( IFileData<Guid, TFileMetaData> data, LocalFile? file = null )
         where TFileMetaData : class, IFileMetaData<TFileMetaData> => new(data, data.MetaData, file);
     public TFileData ToFileData<TFileData, TFileMetaData>()
@@ -60,7 +60,7 @@ public sealed record FileRecord( string?              FileName,
 
             if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
 
-            return new FileData( MimeType, FileSize, Hash, Convert.ToBase64String( content ), FileMetaData.Create( this ) );
+            return new FileData( FileSize, Hash, Convert.ToBase64String( content ), FileMetaData.Create( this ) );
         }
         else
         {
@@ -70,7 +70,7 @@ public sealed record FileRecord( string?              FileName,
 
             if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
 
-            return new FileData( MimeType, FileSize, Hash, content, FileMetaData.Create( this ) );
+            return new FileData( FileSize, Hash, content, FileMetaData.Create( this ) );
         }
     }
 
@@ -78,16 +78,17 @@ public sealed record FileRecord( string?              FileName,
     [Pure]
     public async ValueTask<FileRecord> Update( LocalFile file, CancellationToken token = default )
     {
-        FileData      data     = await FileData.Create( file, token );
-        FileMetaData? metaData = data.MetaData;
+        if ( FullPath != file.FullPath ) { throw new InvalidOperationException( $"{nameof(FullPath)} mismatch. Got {file.FullPath} but expected {FullPath}" ); }
 
-        return new FileRecord( metaData?.FileName,
-                               metaData?.FileDescription,
-                               metaData?.FileType,
-                               data.FileSize,
-                               data.Hash,
-                               data.MimeType,
-                               string.Empty,
+        (long fileSize, string? hash, string payload, _, FileMetaData? metaData) = await FileData.Create( file, token );
+
+        return new FileRecord( metaData.FileName,
+                               metaData.FileDescription,
+                               metaData.FileType,
+                               fileSize,
+                               hash,
+                               metaData.MimeType,
+                               payload,
                                file.FullPath,
                                ID,
                                DateCreated,

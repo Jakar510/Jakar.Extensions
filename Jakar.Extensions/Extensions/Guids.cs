@@ -15,20 +15,25 @@ public static class Guids
     private const char UNDERSCORE = '_';
 
 
-    public static bool TryAsGuid( this Span<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( this ref readonly Span<char> value, [NotNullWhen( true )] out Guid? result )
     {
-        result = AsGuid( value );
+        ReadOnlySpan<char> span = value;
+        result = span.AsGuid();
         return result.HasValue;
     }
-    public static bool TryAsGuid( this ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( this ref readonly ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
     {
-        result = AsGuid( value );
+        result = value.AsGuid();
         return result.HasValue;
     }
-    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result ) => value.AsSpan().TryAsGuid( out result );
+    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result )
+    {
+        ReadOnlySpan<char> span = value;
+        return span.TryAsGuid( out result );
+    }
 
 
-    public static bool TryWriteBytes( this Guid value, out Span<byte> result )
+    public static bool TryWriteBytes( this ref readonly Guid value, out Span<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
@@ -38,10 +43,10 @@ public static class Guids
             return true;
         }
 
-        result = default;
+        result = Span<byte>.Empty;
         return false;
     }
-    public static bool TryWriteBytes( this Guid value, out ReadOnlySpan<byte> result )
+    public static bool TryWriteBytes( this ref readonly Guid value, out ReadOnlySpan<byte> result )
     {
         Span<byte> span = stackalloc byte[16];
 
@@ -51,7 +56,7 @@ public static class Guids
             return true;
         }
 
-        result = default;
+        result = ReadOnlySpan<byte>.Empty;
         return false;
     }
 
@@ -61,7 +66,11 @@ public static class Guids
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static Guid? AsGuid( this string value ) => AsGuid( value.AsSpan() );
+    public static Guid? AsGuid( this string value )
+    {
+        ReadOnlySpan<char> span = value;
+        return AsGuid( in span );
+    }
 
 
     /// <summary>
@@ -69,7 +78,7 @@ public static class Guids
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static Guid? AsGuid( this ReadOnlySpan<char> value )
+    public static Guid? AsGuid( this ref readonly ReadOnlySpan<char> value )
     {
         if ( Guid.TryParse( value, out Guid result ) ) { return result; }
 
@@ -95,23 +104,26 @@ public static class Guids
                    : Guid.Empty;
     }
 
-#if NET9_0_OR_GREATER
-    public static string NewBase64( DateTimeOffset? timeStamp = null )
+    
+    public static string NewBase64()
+    {
+        Guid id = Guid.CreateVersion7( DateTimeOffset.UtcNow );
+        return NewBase64( in id );
+    }
+    public static string NewBase64( this ref readonly DateTimeOffset timeStamp )
+    {
+        Guid id = Guid.CreateVersion7( timeStamp );
+        return NewBase64( in id );
+    }
+    public static string NewBase64( this ref readonly DateTimeOffset? timeStamp )
     {
         Guid id = timeStamp.HasValue
                       ? Guid.CreateVersion7( timeStamp.Value )
                       : Guid.NewGuid();
 
-        return NewBase64( id );
+        return NewBase64( in id );
     }
-#else
-    public static string NewBase64()
-    {
-        Guid id = Guid.NewGuid();
-        return NewBase64( id );
-    }
-#endif
-    public static string NewBase64( Guid id )
+    public static string NewBase64( this ref readonly Guid id )
     {
         Span<char> result = stackalloc char[22];
         id.AsSpan( ref result );
@@ -124,7 +136,7 @@ public static class Guids
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static string ToBase64( this Guid value )
+    public static string ToBase64( this ref readonly Guid value )
     {
         Span<char> result = stackalloc char[22];
         value.AsSpan( ref result );
@@ -138,7 +150,7 @@ public static class Guids
     /// <param name="value"> </param>
     /// <param name="result"> </param>
     /// <returns> </returns>
-    public static bool AsSpan( this Guid value, scoped ref Span<char> result )
+    public static bool AsSpan( this ref readonly Guid value, scoped ref Span<char> result )
     {
         Guard.IsGreaterThanOrEqualTo( result.Length, 22 );
         Span<byte> base64Bytes = stackalloc byte[24];
@@ -162,17 +174,17 @@ public static class Guids
     }
 
 
-    public static (long Lower, long Upper) AsLong( this Guid value ) =>
+    public static (long Lower, long Upper) AsLong( this ref readonly Guid value ) =>
         value.AsLong( out long lower, out long upper )
             ? (lower, upper)
             : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
-    public static (ulong Lower, ulong Upper) AsULong( this Guid value ) =>
+    public static (ulong Lower, ulong Upper) AsULong( this ref readonly Guid value ) =>
         value.AsLong( out ulong lower, out ulong upper )
             ? (lower, upper)
             : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
 
 
-    public static bool AsLong( this Guid value, out long lower, out long upper )
+    public static bool AsLong( this ref readonly Guid value, out long lower, out long upper )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -188,7 +200,7 @@ public static class Guids
         upper = 0;
         return false;
     }
-    public static bool AsLong( this Guid value, out ulong lower, out ulong upper )
+    public static bool AsLong( this ref readonly Guid value, out ulong lower, out ulong upper )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -206,7 +218,7 @@ public static class Guids
     }
 
 
-    public static Guid AsGuid( this (long Lower, long Upper) value )
+    public static Guid AsGuid( this ref readonly (long Lower, long Upper) value )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -215,7 +227,7 @@ public static class Guids
 
         throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" );
     }
-    public static Guid AsGuid( this (ulong Lower, ulong Upper) value )
+    public static Guid AsGuid( this ref readonly (ulong Lower, ulong Upper) value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -224,7 +236,7 @@ public static class Guids
                    ? new Guid( span )
                    : throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" );
     }
-    public static Guid AsGuid( this long value )
+    public static Guid AsGuid( this ref readonly long value )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -234,7 +246,7 @@ public static class Guids
 
         return new Guid( span );
     }
-    public static Guid AsGuid( this ulong value )
+    public static Guid AsGuid( this ref readonly ulong value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -246,7 +258,7 @@ public static class Guids
     }
 
 
-    public static Guid AsGuid( this Int128 value )
+    public static Guid AsGuid( this ref readonly Int128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -254,7 +266,7 @@ public static class Guids
 
         return new Guid( span );
     }
-    public static Guid AsGuid( this UInt128 value )
+    public static Guid AsGuid( this ref readonly UInt128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -262,7 +274,7 @@ public static class Guids
 
         return new Guid( span );
     }
-    public static Int128 AsInt128( this Guid value )
+    public static Int128 AsInt128( this ref readonly Guid value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
@@ -271,7 +283,7 @@ public static class Guids
                    ? new Int128( BitConverter.ToUInt64( span[..SIZE] ), BitConverter.ToUInt64( span[SIZE..] ) )
                    : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
     }
-    public static UInt128 AsUInt128( this Guid value )
+    public static UInt128 AsUInt128( this ref readonly Guid value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];

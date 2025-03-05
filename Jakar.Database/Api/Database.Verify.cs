@@ -31,9 +31,9 @@ public abstract partial class Database
     public virtual ValueTask<ErrorOrResult<SubscriptionStatus>> ValidateSubscription( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(SubscriptionStatus.Ok);
 
 
-    protected virtual async ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( DbConnection connection, DbTransaction transaction,  ILoginRequest request, CancellationToken token = default )
+    protected virtual async ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( DbConnection connection, DbTransaction transaction, ILoginRequest request, CancellationToken token = default )
     {
-        UserRecord? record = await Users.Get( connection, transaction,  true, UserRecord.GetDynamicParameters( request ), token );
+        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is null ) { return Error.NotFound(); }
 
         try
@@ -41,7 +41,7 @@ public abstract partial class Database
             if ( UserRecord.VerifyPassword( ref record, request ) is false )
             {
                 record = record.MarkBadLogin();
-                return Error.Unauthorized(request.UserName);
+                return Error.Unauthorized( request.UserName );
             }
 
             if ( !record.IsActive )
@@ -67,7 +67,7 @@ public abstract partial class Database
             if ( status.HasErrors )
             {
                 record = record.MarkBadLogin();
-                return status.Errors;
+                return status.Error;
             }
 
             return record;
@@ -75,65 +75,65 @@ public abstract partial class Database
         finally
         {
             record = record.SetActive( true );
-            await Users.Update( connection, transaction,  record, token );
+            await Users.Update( connection, transaction, record, token );
         }
     }
 
 
-    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction,  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>> func, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction, ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>> func, CancellationToken token = default )
     {
-        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction,  request, token );
+        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction, request, token );
 
-        return loginResult.TryGetValue( out UserRecord? record, out Error[]? errors )
+        return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? func( connection, transaction, record )
-                   : errors;
+                   : errors.Value;
     }
 
-    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction,  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<T>>> func, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction, ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<T>>> func, CancellationToken token = default )
     {
-        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction,  request, token );
+        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction, request, token );
 
-        return loginResult.TryGetValue( out UserRecord? record, out Error[]? errors )
+        return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? await func( connection, transaction, record, token )
-                   : errors;
+                   : errors.Value;
     }
 
-    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction,  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<T>>> func, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<T>> Verify<T>( DbConnection connection, DbTransaction transaction, ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<T>>> func, CancellationToken token = default )
     {
-        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction,  request, token );
+        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction, request, token );
 
-        return loginResult.TryGetValue( out UserRecord? record, out Error[]? errors )
+        return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? await func( connection, transaction, record, token )
-                   : errors;
+                   : errors.Value;
     }
 
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Verify( DbConnection connection, DbTransaction transaction,  ILoginRequest request, ClaimType types, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<Tokens>> Verify( DbConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types, CancellationToken token = default )
     {
-        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction,  request, token );
+        ErrorOrResult<UserRecord> loginResult = await VerifyLogin( connection, transaction, request, token );
 
-        return loginResult.TryGetValue( out UserRecord? record, out Error[]? errors )
-                   ? await GetToken( connection, transaction,  record, types, token )
-                   : errors;
+        return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
+                   ? await GetToken( connection, transaction, record, types, token )
+                   : errors.Value;
     }
 
 
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register<TUser>( DbConnection connection, DbTransaction transaction,  ILoginRequest<TUser> request, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<Tokens>> Register<TUser>( DbConnection connection, DbTransaction transaction, ILoginRequest<TUser> request, CancellationToken token = default )
         where TUser : class, IUserData<Guid>
     {
-        UserRecord? record = await Users.Get( connection, transaction,  true, UserRecord.GetDynamicParameters( request ), token );
+        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
         if ( record is not null ) { return Error.Create( Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}" ); }
 
         record = CreateNewUser( request );
-        record = await Users.Insert( connection, transaction,  record, token );
-        return await GetToken( connection, transaction,  record, DEFAULT_CLAIM_TYPES, token );
+        record = await Users.Insert( connection, transaction, record, token );
+        return await GetToken( connection, transaction, record, DEFAULT_CLAIM_TYPES, token );
     }
     protected virtual UserRecord CreateNewUser<TUser>( ILoginRequest<TUser> request, UserRecord? caller = null )
         where TUser : class, IUserData<Guid> => UserRecord.Create( request, request.Data.Rights, caller );
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register<TUser>(  ILoginRequest<TUser> request, CancellationToken token = default )
-        where TUser : class, IUserData<Guid> => this.TryCall( Register,  request, token );
-    public ValueTask<ErrorOrResult<T>> Verify<T>(  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>>                               func, CancellationToken token = default ) => this.TryCall( Verify,  request, func, token );
-    public ValueTask<ErrorOrResult<T>> Verify<T>(  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<T>>> func, CancellationToken token = default ) => this.TryCall( Verify,  request, func, token );
-    public ValueTask<ErrorOrResult<T>> Verify<T>(  ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<T>>>      func, CancellationToken token = default ) => this.TryCall( Verify,  request, func, token );
+    public ValueTask<ErrorOrResult<Tokens>> Register<TUser>( ILoginRequest<TUser> request, CancellationToken token = default )
+        where TUser : class, IUserData<Guid> => this.TryCall( Register, request, token );
+    public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, ErrorOrResult<T>>                               func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<T>>> func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
+    public ValueTask<ErrorOrResult<T>> Verify<T>( ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<T>>>      func, CancellationToken token = default ) => this.TryCall( Verify, request, func, token );
 }

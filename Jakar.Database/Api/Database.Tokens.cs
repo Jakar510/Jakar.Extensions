@@ -25,7 +25,7 @@ public abstract partial class Database
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials( token );
-        JwtSecurityToken   security          = new( Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials );
+        JwtSecurityToken   security          = new(Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes( 15 ), signinCredentials);
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
@@ -50,7 +50,7 @@ public abstract partial class Database
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
 
-            return status.Errors;
+            return status.Error;
         }
 
         if ( record.IsDisabled )
@@ -90,7 +90,7 @@ public abstract partial class Database
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
 
-            return status.Errors;
+            return status.Error;
         }
 
         if ( record.IsDisabled )
@@ -173,7 +173,7 @@ public abstract partial class Database
     public virtual async ValueTask<ErrorOrResult<Tokens>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin( connection, transaction, refreshToken, types, token );
-        if ( result.TryGetValue( out UserRecord? record, out Error[]? error ) is false ) { return error; }
+        if ( result.TryGetValue( out UserRecord? record, out Errors? error ) is false ) { return error.Value; }
 
         DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
 
@@ -208,9 +208,9 @@ public abstract partial class Database
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin( connection, transaction, jsonToken, types, token );
 
-        return result.TryGetValue( out UserRecord? record, out Error[]? error )
+        return result.TryGetValue( out UserRecord? record, out Errors? error )
                    ? await GetToken( connection, transaction, record, types, token )
-                   : error;
+                   : error.Value;
     }
 
 
@@ -229,7 +229,7 @@ public abstract partial class Database
 
         Claim[]                   claims = validationResult.ClaimsIdentity.Claims.ToArray();
         ErrorOrResult<UserRecord> result = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
-        if ( result.TryGetValue( out UserRecord? record, out Error[]? errors ) is false ) { return errors; }
+        if ( result.TryGetValue( out UserRecord? record, out Errors? errors ) is false ) { return errors.Value; }
 
         record.LastLogin = DateTimeOffset.UtcNow;
         await Users.Update( connection, transaction, record, token );

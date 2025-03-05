@@ -27,15 +27,23 @@ public static class Base64
         byte[] payload = encoding.GetBytes( data );
         return Convert.ToBase64String( payload );
     }
-    public static string ToBase64( this byte[]               payload ) => Convert.ToBase64String( payload );
-    public static string ToBase64( this Memory<byte>         payload ) => payload.Span.ToBase64();
-    public static string ToBase64( this ReadOnlyMemory<byte> payload ) => payload.Span.ToBase64();
-    public static string ToBase64( this Span<byte> payload )
+    public static string ToBase64( this byte[] payload ) => Convert.ToBase64String( payload );
+    public static string ToBase64( this ref readonly Memory<byte> payload )
+    {
+        ReadOnlySpan<byte> span = payload.Span;
+        return span.ToBase64();
+    }
+    public static string ToBase64( this ref readonly ReadOnlyMemory<byte> payload )
+    {
+        ReadOnlySpan<byte> span = payload.Span;
+        return span.ToBase64();
+    }
+    public static string ToBase64( this ref readonly Span<byte> payload )
     {
         ReadOnlySpan<byte> span = payload;
         return span.ToBase64();
     }
-    public static string ToBase64( this ReadOnlySpan<byte> payload ) => Convert.ToBase64String( payload );
+    public static string ToBase64( this ref readonly ReadOnlySpan<byte> payload ) => Convert.ToBase64String( payload );
 
 
     public static TResult JsonFromBase64String<TResult>( this string b64 ) => b64.JsonFromBase64String<TResult>( Encoding.Default );

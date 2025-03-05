@@ -91,31 +91,43 @@ public static class AppLoggers
     public static FileData GetAttachment<T>( this T value, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
-        FileMetaData data = new(fileName, MimeTypeNames.Application.JSON);
-        return FileData.Create( MimeType.Text, data, value?.ToPrettyJson() ?? string.Empty, Encoding.Default );
+        FileMetaData data = FileMetaData.Create( fileName, MimeType.Json );
+        return FileData.Create( data, value?.ToPrettyJson() ?? string.Empty, Encoding.Default );
     }
     public static FileData GetAttachment( this EventDetails value, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
-        FileMetaData data = new(fileName, MimeTypeNames.Application.JSON);
-        return FileData.Create( MimeType.Text, data, value.ToPrettyJson(), Encoding.Default );
+        FileMetaData data = FileMetaData.Create( fileName, MimeType.Json );
+        return FileData.Create( data, value.ToPrettyJson(), Encoding.Default );
     }
     public static FileData GetAttachment( this string text, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
-        FileMetaData data = new(fileName, MimeTypeNames.Text.PLAIN);
-        return FileData.Create( MimeType.Text, data, text, Encoding.Default );
+        FileMetaData data = FileMetaData.Create( fileName, MimeType.PlainText );
+        return FileData.Create( data, text, Encoding.Default );
     }
     public static FileData GetAttachment( this byte[] bytes, string fileName, string contentType )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
-        FileMetaData data = new(fileName, contentType);
-        return FileData.Create( contentType.ToMimeType(), data, bytes );
+        FileMetaData data = new(fileName, contentType, contentType.ToMimeType());
+        return FileData.Create( data, bytes );
     }
-    public static FileData GetAttachment( this ReadOnlyMemory<byte> bytes, string fileName, string contentType )
+    public static FileData GetAttachment( this ref readonly ReadOnlyMemory<byte> bytes, string fileName, string contentType )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
-        FileMetaData data = new(fileName, contentType);
-        return FileData.Create( contentType.ToMimeType(), data, bytes.Span );
+        FileMetaData data = new(fileName, contentType, contentType.ToMimeType());
+        return FileData.Create( data, bytes.Span );
+    }
+    public static FileData GetAttachment( this byte[] bytes, string fileName, MimeType mime )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
+        FileMetaData data = FileMetaData.Create( fileName, mime );
+        return FileData.Create( data, bytes );
+    }
+    public static FileData GetAttachment( this ref readonly ReadOnlyMemory<byte> bytes, string fileName, MimeType mime )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
+        FileMetaData data = FileMetaData.Create( fileName, mime );
+        return FileData.Create( data, bytes.Span );
     }
 }
