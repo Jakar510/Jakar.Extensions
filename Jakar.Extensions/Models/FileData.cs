@@ -1,14 +1,19 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 3/5/2024  21:10
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+
+
 namespace Jakar.Extensions;
 
 
 public interface IFileMetaData : JsonModels.IJsonModel
 {
-    string? FileDescription { get; }
-    string? FileName        { get; }
-    string? FileType        { get; }
+    string?   FileDescription { get; }
+    string?   FileName        { get; }
+    string?   FileType        { get; }
+    MimeType? MimeType        { get; }
 }
 
 
@@ -20,10 +25,11 @@ public interface IFileMetaData<TClass> : IFileMetaData, IEquatable<TClass>, ICom
     public abstract static Equalizer<TClass> Equalizer { get; }
 
 
-    public abstract static TClass            Create( IFileMetaData                                        data );
-    public abstract static TClass?           TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
-    public abstract static TClass            Create( LocalFile                                            file );
-    public abstract static TClass            Create( string?                                              fileName, string? fileType, string? fileDescription = null );
+    public abstract static TClass  Create( IFileMetaData                                        data );
+    public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
+    public abstract static TClass  Create( LocalFile                                            file );
+    public abstract static TClass  Create( string?                                              fileName, MimeType mimeType, string?   fileDescription                   = null );
+    public abstract static TClass  Create( string?                                              fileName, string?  fileType, MimeType? mimeType, string? fileDescription = null );
 }
 
 
@@ -33,7 +39,7 @@ public interface IFileData<out TID> : IUniqueID<TID>
 {
     long     FileSize { get; }
     string   Hash     { get; }
-    MimeType MimeType { get; }
+    MimeType Mime     { get; }
     string   Payload  { get; }
 
 
@@ -69,6 +75,17 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public TFileMetaData? MetaData { get; }
+
+
+    public LocalFile GetFile( LocalDirectory directory );
+    public Task      WriteTo( LocalDirectory directory, CancellationToken token );
+    public Task      WriteTo( LocalFile      file,      CancellationToken token );
+    public Task      WriteTo( Stream         stream,    CancellationToken token );
+
+
+    public MemoryStream          GetPayloadAsStream();
+    public MemoryStream          GetPayloadAsStream( Encoding encoding );
+    public OneOf<byte[], string> GetData();
 }
 
 
@@ -102,20 +119,82 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
 
 [Serializable, SuppressMessage( "ReSharper", "InconsistentNaming" )]
 [SuppressMessage(               "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
-public abstract record FileData<TClass, TID, TFileMetaData>( MimeType MimeType, long FileSize, string Hash, string Payload, TID ID, TFileMetaData? MetaData ) : BaseRecord<TClass, TID>( ID ), IFileData<TID, TFileMetaData>
+public abstract record FileData<TClass, TID, TFileMetaData> : BaseRecord<TClass, TID>, IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : FileData<TClass, TID, TFileMetaData>, IFileData<TClass, TID, TFileMetaData>
 {
-    public                                    MimeType          MimeType  { get; init; } = MimeType;
-    public                                    long              FileSize  { get; init; } = FileSize;
-    [StringLength( UNICODE_CAPACITY )] public string            Hash      { get; init; } = Hash;
-    [StringLength( UNICODE_CAPACITY )] public string            Payload   { get; init; } = Payload;
-    public                                    TFileMetaData?    MetaData  { get; init; } = MetaData;
+    protected                                          TFileMetaData? _metaData;
+    public required                                    MimeType       MimeType { get;              init; }
+    public required                                    long           FileSize { get;              init; }
+    [StringLength( UNICODE_CAPACITY )] public required string         Hash     { get;              init; } = string.Empty;
+    [StringLength( UNICODE_CAPACITY )] public required string         Payload  { get;              init; } = string.Empty;
+    public required                                    TFileMetaData? MetaData { get => _metaData; init => _metaData = value; }
+    [JsonIgnore] public                                MimeType       Mime     => MetaData?.MimeType ?? MimeType.Text;
+
+
+    protected FileData( MimeType MimeType, long FileSize, string Hash, string Payload, TID ID, TFileMetaData? MetaData ) : base( ID )
+    {
+        _metaData     = MetaData;
+        this.MimeType = MimeType;
+        this.FileSize = FileSize;
+        this.Hash     = Hash;
+        this.Payload  = Payload;
+    }
+
+
+    public virtual LocalFile GetFile( LocalDirectory directory )
+    {
+        string extension = Mime.ToExtension();
+        string name      = Path.GetFileName( MetaData?.FileName ) ?? Guid.NewGuid().ToBase64();
+        string fileName  = $"{name}.{extension}";
+        return directory.Join( fileName );
+    }
+    public async Task WriteTo( LocalDirectory directory, CancellationToken token ) => await WriteTo( GetFile( directory ), token ).ConfigureAwait( false );
+    public async Task WriteTo( LocalFile file, CancellationToken token )
+    {
+        await using FileStream stream = file.OpenWrite( FileMode.OpenOrCreate );
+        await WriteTo( stream, token ).ConfigureAwait( false );
+    }
+    public async Task WriteTo( Stream stream, CancellationToken token )
+    {
+        if ( stream.CanWrite is false ) { throw new ArgumentException( "Stream is not writable" ); }
+
+        if ( stream.CanSeek is false ) { throw new ArgumentException( "Stream is not seekable" ); }
+
+        stream.Seek( 0, SeekOrigin.Begin );
+        this.GetData();
+
+        if ( Mime.IsText() )
+        {
+            await using StreamWriter writer = new(stream);
+            await writer.WriteAsync( Payload ).ConfigureAwait( false );
+            return;
+        }
+
+        ReadOnlyMemory<byte> payload = Convert.FromBase64String( Payload );
+        await stream.WriteAsync( payload, token ).ConfigureAwait( false );
+    }
+    public MemoryStream GetPayloadAsStream() => GetPayloadAsStream( Encoding.Default );
+    public MemoryStream GetPayloadAsStream( Encoding encoding )
+    {
+        OneOf<byte[], string> one = GetData();
+
+        return one.IsT0
+                   ? new MemoryStream( one.AsT0 )
+                   : new MemoryStream( encoding.GetBytes( one.AsT1 ) );
+    }
+    public OneOf<byte[], string> GetData()
+    {
+        if ( Mime.IsText() ) { return Payload; }
+
+        try { return Convert.FromBase64String( Payload ); }
+        catch ( FormatException ) { return Payload; }
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID, TFileMetaData> data )                                                                                                => Create( data, data.MetaData );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID>                data, TFileMetaData? metaData )                                                                       => TClass.Create( data.MimeType, data.FileSize, data.Hash, data.Payload, data.ID, metaData );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( IFileData<TID>                data, TFileMetaData? metaData )                                                                       => TClass.Create( data.Mime, data.FileSize, data.Hash, data.Payload, data.ID, metaData );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, MemoryStream                      stream )                             => Create( mime, metaData, stream.AsReadOnlyMemory().Span );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create( mime, metaData, content.Span );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TClass Create( MimeType                      mime, TFileMetaData? metaData, params       ReadOnlySpan<byte>   content )                            => TClass.Create( mime, content.Length, content.Hash_SHA256(),                                       Convert.ToBase64String( content ), default, metaData );
@@ -171,62 +250,42 @@ public abstract record FileData<TClass, TID, TFileMetaData>( MimeType MimeType, 
         return MimeType == other.MimeType && FileSize == other.FileSize && Hash == other.Hash && Payload == other.Payload && EqualityComparer<TFileMetaData>.Default.Equals( MetaData, other.MetaData );
     }
     public override int GetHashCode() => HashCode.Combine( MimeType, FileSize, Hash, Payload, MetaData );
-}
-
-
-
-public static class FileDataExtensions
-{
-    public static OneOf<byte[], string> TryGetData( this string data )
+    public void Deconstruct( out long fileSize, out string hash, out string payload, out TID id, out TFileMetaData? metaData )
     {
-        try { return Convert.FromBase64String( data ); }
-        catch ( FormatException ) { return data; }
+        fileSize = FileSize;
+        hash     = Hash;
+        payload  = Payload;
+        id       = ID;
+        metaData = MetaData;
     }
-
-    public static Stream GetStream<TID>( this IFileData<TID> data )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => data.GetStream( Encoding.Default );
-
-
-    public static Stream GetStream<TID>( this IFileData<TID> data, Encoding encoding )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    {
-        OneOf<byte[], string> one = data.GetData();
-
-        return one.IsT0
-                   ? new MemoryStream( one.AsT0 )
-                   : new MemoryStream( encoding.GetBytes( one.AsT1 ) );
-    }
-
-
-    public static OneOf<byte[], string> GetData<TID>( this IFileData<TID> data )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable => data.MimeType.IsText()
-                                                                                                                                                               ? data.Payload
-                                                                                                                                                               : data.Payload.TryGetData();
 }
 
 
 
 [Serializable]
 [SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
-public sealed class FileMetaData( string? fileName, string? fileType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
+public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
 {
     public static                             Sorter<FileMetaData>          Sorter          => Sorter<FileMetaData>.Default;
     public static                             Equalizer<FileMetaData>       Equalizer       => Equalizer<FileMetaData>.Default;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileName        { get; init; } = fileName;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileType        { get; init; } = fileType;
+    [StringLength( UNICODE_CAPACITY )] public MimeType?                     MimeType        { get; init; } = mimeType;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileDescription { get; init; } = fileDescription;
     [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData  { get; set; }
 
 
-    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.FileDescription )
+    public FileMetaData( IFileMetaData value ) : this( value.FileName, value.FileType, value.MimeType, value.FileDescription )
     {
         if ( value.AdditionalData is not null ) { AdditionalData = new Dictionary<string, JToken?>( value.AdditionalData ); }
     }
-    public FileMetaData( LocalFile value ) : this( value.Name, value.ContentType ) { }
+    public FileMetaData( LocalFile value ) : this( value.Name, value.ContentType, value.Mime ) { }
 
-    public static FileMetaData Create( IFileMetaData data )                                                       => new(data);
-    public static FileMetaData Create( LocalFile     file )                                                       => new(file.Name, file.ContentType);
-    public static FileMetaData Create( string?       fileName, string? fileType, string? fileDescription = null ) => new(fileName, fileType, fileDescription);
+
+    public static FileMetaData Create( IFileMetaData data )                                                                            => new(data);
+    public static FileMetaData Create( LocalFile     file )                                                                            => new(file);
+    public static FileMetaData Create( string?       fileName, MimeType mimeType, string?   fileDescription                   = null ) => new(fileName, mimeType.ToContentType(), mimeType, fileDescription);
+    public static FileMetaData Create( string?       fileName, string?  fileType, MimeType? mimeType, string? fileDescription = null ) => new(fileName, fileType, mimeType, fileDescription);
     public static FileMetaData? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data ) => data is null
                                                                                                            ? null
                                                                                                            : new FileMetaData( data );
