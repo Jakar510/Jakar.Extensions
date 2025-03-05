@@ -24,7 +24,9 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     private readonly        string                                  _issuer       = issuer;
     private readonly        TokenValidationParameters               _parameters   = parameters;
 
+    
 
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -32,6 +34,9 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
         return parser;
     }
+
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public static async ValueTask<JwtParser> CreateAsync<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -68,13 +73,15 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
         where TUser : IUserData<TID>
     {
-        DateTimeOffset now          = DateTimeOffset.UtcNow;
-        DateTimeOffset notBefore    = now - TimeSpan.FromMinutes( 2 );
-        string         accessToken  = CreateToken( user.GetExpires( now, TimeSpan.FromHours( 1 ) ), notBefore, identity );
-        string         refreshToken = CreateToken( user.GetExpires( now, TimeSpan.FromDays( 90 ) ), notBefore, identity );
+        DateTimeOffset now            = DateTimeOffset.UtcNow;
+        DateTimeOffset notBefore      = now - TimeSpan.FromMinutes( 2 );
+        DateTimeOffset expires        = user.GetExpires( now, TimeSpan.FromHours( 1 ) );
+        DateTimeOffset refreshExpires = user.GetExpires( now, TimeSpan.FromDays( 90 ) );
+        string         accessToken    = CreateToken( in expires,        in notBefore, identity );
+        string         refreshToken   = CreateToken( in refreshExpires, in notBefore, identity );
         return new Tokens<TID>( user.UserID, user.FullName, _version, accessToken, refreshToken, deviceID, sessionID );
     }
-    public string CreateToken( in DateTimeOffset expires, in DateTimeOffset notBefore, in ClaimsIdentity identity ) =>
+    public string CreateToken( ref readonly DateTimeOffset expires, ref readonly DateTimeOffset notBefore, in ClaimsIdentity identity ) =>
         _handler.CreateToken( new SecurityTokenDescriptor
                               {
                                   Audience           = _appName,
@@ -122,14 +129,21 @@ public static class JwtParserExtensions
     }
 
 
-    public static async ValueTask<SigningCredentials>   GetSigningCredentials( this   IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt     = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey( jwt, fileKey ), algorithm);
-    public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt       = JWT,                                    string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey( jwt, fileKey ));
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    public static async ValueTask<SigningCredentials> GetSigningCredentials( this IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey( jwt, fileKey ), algorithm);
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey( jwt, fileKey ));
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IWebAppSettings settings, string authenticationType, string? audience = null, string? issuer = null, string jwt = JWT, string fileKey = JWT_KEY, TimeSpan? clockSkew = null )
     {
         IConfiguration       configuration = settings.Configuration;
         SymmetricSecurityKey key           = await configuration.GetSymmetricSecurityKey( jwt, fileKey );
         return await configuration.GetTokenValidationParameters( authenticationType, key, audience, issuer, clockSkew );
     }
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IConfiguration configuration, string authenticationType, SymmetricSecurityKey? key = null, string? audience = null, string? issuer = null, TimeSpan? clockSkew = null )
     {
         key      ??= await configuration.GetSymmetricSecurityKey();

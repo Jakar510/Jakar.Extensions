@@ -18,32 +18,32 @@ public interface IDataProtectorProvider
 
 public interface IDataProtector : IDisposable
 {
-    public bool              TryEncrypt(scoped in ReadOnlySpan<byte> value,scoped ref  Span<byte> destination, out int bytesWritten );
-    public byte[]            Encrypt( scoped in   ReadOnlySpan<byte> value );
-    public string            Encrypt( string                         value );
-    public string            Encrypt( string                         value, Encoding              encoding );
-    public void              Encrypt( LocalFile                      file,  string                value );
-    public void              Encrypt( LocalFile                      file,  string                value, Encoding encoding );
-    public void              Encrypt( LocalFile                      file,  byte[]                value );
-    public bool              TryDecrypt(scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten );
-    public byte[]            Decrypt( scoped in   ReadOnlySpan<byte> value );
-    public string            Decrypt( string                         value );
-    public string            Decrypt( string                         value, Encoding encoding );
-    public byte[]            Decrypt( LocalFile                      file );
-    public string            Decrypt( LocalFile                      file,  Encoding                                                        encoding );
-    public T                 Decrypt<T>( LocalFile                   file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
-    public ValueTask<byte[]> DecryptAsync( LocalFile                 file,  CancellationToken                                               token                             = default );
-    public ValueTask<string> DecryptAsync( LocalFile                 file,  Encoding                                                        encoding, CancellationToken token = default );
-    public ValueTask<T>      DecryptAsync<T>( LocalFile              file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
-    public ValueTask         DecryptAsync( LocalFile                 input, LocalFile                                                       output, CancellationToken token                             = default );
-    public ValueTask         DecryptAsync( LocalFile                 input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile                 file,  string                                                          value,  CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                 file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile                 file,  byte[]                                                          value,  CancellationToken token = default );
-    public ValueTask<byte[]> EncryptAsync( LocalFile                 value, CancellationToken                                               token                                                         = default );
-    public ValueTask<string> EncryptAsync( LocalFile                 value, Encoding                                                        encoding, CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                 input, LocalFile                                                       output,   CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                 input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
+    public bool              TryEncrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten );
+    public byte[]            Encrypt( scoped in    ReadOnlySpan<byte> value );
+    public string            Encrypt( string                          value );
+    public string            Encrypt( string                          value, Encoding              encoding );
+    public void              Encrypt( LocalFile                       file,  string                value );
+    public void              Encrypt( LocalFile                       file,  string                value, Encoding encoding );
+    public void              Encrypt( LocalFile                       file,  byte[]                value );
+    public bool              TryDecrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten );
+    public byte[]            Decrypt( scoped in    ReadOnlySpan<byte> value );
+    public string            Decrypt( string                          value );
+    public string            Decrypt( string                          value, Encoding encoding );
+    public byte[]            Decrypt( LocalFile                       file );
+    public string            Decrypt( LocalFile                       file,  Encoding                                                        encoding );
+    public T                 Decrypt<T>( LocalFile                    file,  Func<LocalFile.IReadHandler, IDataProtector, T>                 func );
+    public ValueTask<byte[]> DecryptAsync( LocalFile                  file,  CancellationToken                                               token                             = default );
+    public ValueTask<string> DecryptAsync( LocalFile                  file,  Encoding                                                        encoding, CancellationToken token = default );
+    public ValueTask<T>      DecryptAsync<T>( LocalFile               file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<T>> func );
+    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                       output, CancellationToken token                             = default );
+    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                          value,  CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  byte[]                                                          value,  CancellationToken token = default );
+    public ValueTask<byte[]> EncryptAsync( LocalFile                  value, CancellationToken                                               token                                                         = default );
+    public ValueTask<string> EncryptAsync( LocalFile                  value, Encoding                                                        encoding, CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                       output,   CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
 }
 
 
@@ -87,19 +87,25 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name )                                        => WithKey( resources.GetResourceText( name ) );
     public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, SecuredString                password ) => WithKey( resources.GetResourceText( name ), password );
     public       DataProtector            WithKey<T>( EmbeddedResources<T>      resources, string name, scoped in ReadOnlySpan<char> password ) => WithKey( resources.GetResourceText( name ), password );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                                                                                               => WithKey( await resources.GetResourceTextAsync( name ) );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string                       password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
-    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString                password )                                                        => WithKey( await resources.GetResourceTextAsync( name ), password );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name )                         => WithKey( await resources.GetResourceTextAsync( name ) );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, string        password ) => WithKey( await resources.GetResourceTextAsync( name ), password );
+    public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString password ) => WithKey( await resources.GetResourceTextAsync( name ), password );
+
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
     public async ValueTask<DataProtector> WithKeyAsync<T>( EmbeddedResources<T> resources, string name, SecuredString.ResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( resources, name, await password.GetSecuredStringAsync( configuration, token ) );
 
 
-    public       DataProtector            WithKeyFile( LocalFile  pem )                                                                                                  => WithKey( pem.Read().AsString() );
-    public       DataProtector            WithKeyFile( LocalFile  pem, scoped in ReadOnlySpan<char> password )                                                           => WithKey( pem.Read().AsString(), password );
-    public       DataProtector            WithKeyFile( LocalFile  pem, SecuredString                password )                                                           => WithKey( pem.Read().AsString(), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken            token                             = default )                        => WithKey( await pem.ReadAsync().AsString( token ) );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password, CancellationToken token = default )                        => WithKey( await pem.ReadAsync().AsString( token ), password );
-    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString.ResolverOptions password, IConfiguration    configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ), token );
+    public       DataProtector            WithKeyFile( LocalFile  pem )                                                                           => WithKey( pem.Read().AsString() );
+    public       DataProtector            WithKeyFile( LocalFile  pem, scoped in ReadOnlySpan<char> password )                                    => WithKey( pem.Read().AsString(), password );
+    public       DataProtector            WithKeyFile( LocalFile  pem, SecuredString                password )                                    => WithKey( pem.Read().AsString(), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, CancellationToken            token                             = default ) => WithKey( await pem.ReadAsync().AsString( token ) );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, string                       password, CancellationToken token = default ) => WithKey( await pem.ReadAsync().AsString( token ), password );
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString                password, CancellationToken token = default ) => WithKey( await pem.ReadAsync().AsString( token ), password );
+
+
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    public async ValueTask<DataProtector> WithKeyAsync( LocalFile pem, SecuredString.ResolverOptions password, IConfiguration configuration, CancellationToken token ) => await WithKeyAsync( pem, await password.GetSecuredStringAsync( configuration, token ), token );
 
 
     public static byte[] GetBytes( string base64, Encoding encoding )
@@ -139,7 +145,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryDecrypt( scoped in ReadOnlySpan<byte> value,scoped ref Span<byte> destination, out int bytesWritten )
+    public bool TryDecrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
         return _rsa.TryDecrypt( value, destination, _padding, out bytesWritten );
@@ -154,7 +160,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         if ( encrypted.Length <= BLOCK ) { return _rsa.Decrypt( encrypted, _padding ); }
 
 
-        using MemoryStream stream    = new( encrypted.Length );
+        using MemoryStream stream    = new(encrypted.Length);
         Span<byte>         partition = stackalloc byte[DATA + 1];
 
         for ( int i = 0; i <= encrypted.Length / BLOCK; i++ )
@@ -225,7 +231,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool TryEncrypt(scoped in  ReadOnlySpan<byte> value,scoped ref Span<byte> destination, out int bytesWritten )
+    public bool TryEncrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
         return _rsa.TryEncrypt( value, destination, _padding, out bytesWritten );
@@ -239,7 +245,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         if ( value.Length <= DATA ) { return _rsa.Encrypt( value, _padding ); }
 
 
-        using MemoryStream stream    = new( value.Length * 2 );
+        using MemoryStream stream    = new(value.Length * 2);
         Span<byte>         partition = stackalloc byte[DATA + 1];
 
         for ( int i = 0; i <= value.Length / DATA; i++ )

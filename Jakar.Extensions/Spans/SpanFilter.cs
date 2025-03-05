@@ -8,10 +8,10 @@ namespace Jakar.Extensions;
 public ref struct SpanFilter<T>( scoped in ReadOnlySpan<T> span, Func<T, bool> func )
 {
     private readonly ReadOnlySpan<T> _span  = span;
-    private readonly Func<T, bool>    _func  = func;
+    private readonly Func<T, bool>   _func  = func;
     private          int             _index = NOT_FOUND;
 
-    public T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
+    public T Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanFilter<T> GetEnumerator() => this;
 

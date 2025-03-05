@@ -88,12 +88,13 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed record FileData( MimeType MimeType, long FileSize, string Hash, string Payload, FileMetaData? MetaData, Guid ID = default ) : FileData<FileData, Guid, FileMetaData>( MimeType, FileSize, Hash, Payload, ID, MetaData ), IFileData<FileData, Guid, FileMetaData>
+[method: SetsRequiredMembers]
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>( fileSize, hash, payload, id, metaData ), IFileData<FileData, Guid, FileMetaData>
 {
-    public FileData( IFileData<Guid, FileMetaData> file ) : this( file, file.MetaData ) { }
-    public FileData( IFileData<Guid>               file, FileMetaData? metaData ) : this( file.MimeType, file.FileSize, file.Hash, file.Payload, metaData ) { }
-    public FileData( MimeType                      mime, FileMetaData? metaData, params ReadOnlySpan<byte> content ) : this( mime, content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
+    [SetsRequiredMembers] public FileData( IFileData<Guid, FileMetaData> file ) : this( file, file.MetaData ) { }
+    [SetsRequiredMembers] public FileData( IFileData<Guid>               file,     FileMetaData              metaData ) : this( file.FileSize, file.Hash, file.Payload, metaData ) { }
+    [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this( content.Length, content.GetHash(), Convert.ToBase64String( content ), metaData ) { }
 
 
-    public static FileData Create( MimeType mime, long fileSize, string hash, string payload, Guid id, FileMetaData? metaData ) => new(mime, fileSize, hash, payload, metaData, id);
+    public static FileData Create( long fileSize, string hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);
 }

@@ -4,7 +4,7 @@
 public static class ExceptionExtensions
 {
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
+    public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException( nameof(e) ); }
 
@@ -49,9 +49,7 @@ public static class ExceptionExtensions
                 case nameof(Frame) when className     == nameof(ExceptionExtensions):
                     continue;
 
-                default:
-                    yield return $"{className}::{method.Name}";
-                    break;
+                default: yield return $"{className}::{method.Name}"; break;
             }
         }
     }
@@ -102,7 +100,7 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
-        dict = new Dictionary<string, string>( 10 );
+        dict = new Dictionary<string, string?>( 10 );
         e.Details( dict );
     }
 
@@ -124,7 +122,7 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
-        dict = new Dictionary<string, object>
+        dict = new Dictionary<string, object?>
                {
                    [nameof(Type)]                 = e.GetType().FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
@@ -179,7 +177,7 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
-        dict = new Dictionary<string, JToken>
+        dict = new Dictionary<string, JToken?>
                {
                    [nameof(Type)]                 = e.GetType().FullName,
                    [nameof(Exception.HResult)]    = e.HResult,

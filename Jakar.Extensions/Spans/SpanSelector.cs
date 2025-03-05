@@ -11,7 +11,7 @@ public ref struct SpanSelector<T, TNext>( ReadOnlySpan<T> span, Func<T, TNext> f
     private readonly Func<T, TNext>  _func  = func;
     private          int             _index = NOT_FOUND;
 
-    public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
+    public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanSelector<T, TNext> GetEnumerator() => this;
 
