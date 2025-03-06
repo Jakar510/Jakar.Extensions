@@ -49,17 +49,17 @@ public readonly struct Errors()
     public Alert?  Alert       { get; init; }
     public Error[] Details     { get; init; } = _details;
     public string  Description => Details.GetMessage();
-    public bool    IsValid     => Alert?.IsValid is true || Details.Length > 0;
+    public bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
 
 
-    public static Errors Create( params Error[]? details ) => Create( null, details );
+    public static Errors Create( params Error[]? details ) => Create( null,                                       details );
+    public static Errors Create( Error           details ) => Create( new Alert( details.Title, details.Detail ), details );
+    public static Errors Create( Alert           details ) => Create( details,                                    details.ToError() );
     public static Errors Create( Alert? alert, params Error[]? details ) => new()
                                                                             {
                                                                                 Alert   = alert,
                                                                                 Details = details ?? _details
                                                                             };
-    public static Errors Create( Error details ) => Create( new Alert( details.Title, details.Detail ), details );
-    public static Errors Create( Alert details ) => Create( details,                                    details.ToError() );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public        Status GetStatus()                 => Details.GetStatus( Status.Ok );

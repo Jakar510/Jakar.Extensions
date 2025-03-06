@@ -17,7 +17,7 @@ namespace Jakar.Extensions;
 /// <param name="Instance"> </param>
 /// <param name="Errors"> </param>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct Error( [property: JsonRequired] Status? StatusCode, [property: JsonRequired] string? Type, [property: JsonRequired] string? Title, [property: JsonRequired] string? Detail, [property: JsonRequired] string? Instance, [property: JsonRequired] StringValues Errors ) : IErrorDetails
+public readonly record struct Error( Status? StatusCode, [property: JsonRequired] string? Type, [property: JsonRequired] string? Title, [property: JsonRequired] string? Detail, [property: JsonRequired] string? Instance, StringValues Errors ) : IErrorDetails
 {
     public const           string       DISABLED_TYPE                        = "User.Disabled";
     public const           string       LOCKED_TYPE                          = "User.Locked";
@@ -104,7 +104,13 @@ public readonly record struct Error( [property: JsonRequired] Status? StatusCode
     public const           string       TEAPOT_TYPE                          = "Teapot";
     public const           string       OK_TYPE                              = "Ok";
     public static readonly Error        Empty                                = new(null, null, null, null, null, StringValues.Empty);
-    public static          IErrorTitles Titles { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
+    internal readonly      StringValues errors                               = Errors;
+    internal readonly      Status?      statusCode                           = StatusCode;
+
+
+    public static         IErrorTitles Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
+    [JsonRequired] public StringValues Errors     { get => errors;                                            init => errors = value; }
+    [JsonRequired] public Status?      StatusCode { get => statusCode;                                        init => statusCode = value; }
 
 
     public static implicit operator Error( Status       result ) => Create( result,            StringValues.Empty );

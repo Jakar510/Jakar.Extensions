@@ -3,13 +3,13 @@
 
 public static class ConsoleExtensions
 {
+    private const string ERROR       = nameof(ERROR);
     private const string INFORMATION = nameof(INFORMATION);
     private const string WARNING     = nameof(WARNING);
-    private const string ERROR       = nameof(ERROR);
     public static bool   CanDebug => Debugger.IsAttached;
     public static string Header   { get; set; } = '='.Repeat( 100 );
 
-    
+
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
         where T : Exception
@@ -91,60 +91,14 @@ public static class ConsoleExtensions
     }
 
 
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Span<char> self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
+    public static void WriteToDebug( this Span<char>         self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    public static void WriteToDebug( this string             self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    public static void WriteToDebug( this StringBuilder      self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString().WriteToDebug( variable, caller );
+    public static void WriteToDebug( this Buffer<char>       self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
+    public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
+    public static void WriteToDebug( this object             self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
 
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this string self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
-
-
-    [Conditional( "DEBUG" )] public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString().WriteToDebug( variable, caller );
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this Buffer<char> self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
-    public static void WriteToDebug( this object self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
-
-
-    [Conditional( "DEBUG" )]
     public static void WriteToDebug<T>( this T self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-        where T : struct
-    {
-        Console.WriteLine( $"{caller} -> {variable} '{self}'" );
-        Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
-    }
+        where T : notnull => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
 }

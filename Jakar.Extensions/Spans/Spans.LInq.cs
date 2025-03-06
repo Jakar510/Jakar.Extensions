@@ -171,7 +171,7 @@ public static partial class Spans
             if ( selector( value ) ) { buffer.Add( value ); }
         }
 
-        return buffer.Count > 0;
+        return buffer.Length > 0;
     }
     public static bool Where<T>( scoped in ReadOnlySpan<T> values, scoped ref Span<T> span, Func<T, bool> selector, out int length )
     {

@@ -8,15 +8,15 @@ using System.Collections.Generic;
 namespace Jakar.Extensions;
 
 
-public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
+public ref struct Buffer<TValue>( int capacity )
     where TValue : IEquatable<TValue>
 {
-    private readonly TValue[] _array;
+    private readonly TValue[] _array = ArrayPool<TValue>.Shared.Rent( Math.Max( capacity, DEFAULT_CAPACITY ) );
     private          long     _length;
 
 
     public int Capacity { [Pure] get => _array.Length; }
-    public int Count
+    public int Length
     {
         [Pure] get => (int)Interlocked.Read( ref _length );
         set
@@ -25,26 +25,21 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
             Interlocked.Exchange( ref _length, value );
         }
     }
-    public bool IsEmpty    { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Count == 0; }
-    public bool IsNotEmpty { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Count > 0; }
+    public bool IsEmpty    { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length == 0; }
+    public bool IsNotEmpty { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length > 0; }
     public bool IsReadOnly { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get; init; } = false;
     public ref TValue this[ int     index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
     public ref TValue this[ Index   index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
     public Span<TValue> this[ Range range ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span[range]; }
     public Span<TValue> this[ int   start, int length ] { [Pure] get => Span.Slice( start, length ); }
     public Memory<TValue>       Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public Span<TValue>         Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Count, Capacity); }
+    public Span<TValue>         Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Length, Capacity); }
     public Span<TValue>         Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public ReadOnlySpan<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Count); }
+    public ReadOnlySpan<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Length); }
 
 
     public Buffer() : this( DEFAULT_CAPACITY ) { }
-    public Buffer( int capacity )
-    {
-        Guard.IsGreaterThan( capacity, 0 );
-        _array = ArrayPool<TValue>.Shared.Rent( Math.Max( capacity, DEFAULT_CAPACITY ) );
-    }
-    public Buffer( scoped in ReadOnlySpan<TValue> span ) : this( span.Length ) => span.CopyTo( Span );
+    public Buffer( params ReadOnlySpan<TValue> span ) : this( span.Length ) => span.CopyTo( Span );
     public void Dispose() => ArrayPool<TValue>.Shared.Return( _array );
 
 
@@ -54,16 +49,16 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     public void Clear()
     {
         Span.Clear();
-        Count = 0;
+        Length = 0;
     }
     public void Fill( TValue value ) => Span.Fill( value );
 
 
-    public bool TryCopyTo( scoped in Span<TValue> destination, out int length )
+    public bool TryCopyTo( ref Span<TValue> destination, out int length )
     {
         if ( Span.TryCopyTo( destination ) )
         {
-            length = Count;
+            length = Length;
             return true;
         }
 
@@ -71,12 +66,12 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
         return false;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( TValue[] array )                            => CopyTo( array, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( TValue[] array, int destinationStartIndex ) => CopyTo( 0,     array, Count, 0 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( TValue[] array, int destinationStartIndex ) => CopyTo( 0,     array, Length, 0 );
     public void CopyTo( int sourceStartIndex, TValue[] array, int length, int destinationStartIndex )
     {
-        Guard.IsGreaterThanOrEqualTo( destinationStartIndex + array.Length, Count );
+        Guard.IsGreaterThanOrEqualTo( destinationStartIndex + array.Length, Length );
         Guard.IsGreaterThanOrEqualTo( length,                               0 );
-        Guard.IsLessThanOrEqualTo( length, Count );
+        Guard.IsLessThanOrEqualTo( length, Length );
 
         Span<TValue> target = new(array, destinationStartIndex, array.Length - destinationStartIndex);
         Span[sourceStartIndex..length].CopyTo( target );
@@ -99,11 +94,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( TValue value )            => IndexOf( value, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( TValue value, int start ) => IndexOf( value, start, Count - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( TValue value, int start ) => IndexOf( value, start, Length - 1 );
     public int IndexOf( TValue value, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
         Span<TValue> span = Span;
 
@@ -117,11 +112,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Func<TValue, bool> match )            => FindIndex( match, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Func<TValue, bool> match, int start ) => FindIndex( match, start, Count - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindIndex( Func<TValue, bool> match, int start ) => FindIndex( match, start, Length - 1 );
     public int FindIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
         Span<TValue> span = Span;
@@ -136,11 +131,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( TValue value )                   => LastIndexOf( value, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf( value, Count - 1, endInclusive );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf( value, Length - 1, endInclusive );
     public int LastIndexOf( TValue value, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
         Span<TValue> span = Span;
 
@@ -154,11 +149,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Func<TValue, bool> match )                   => FindLastIndex( match, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex( match, Count - 1, endInclusive );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex( match, Length - 1, endInclusive );
     public int FindLastIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
         Span<TValue> span = Span;
@@ -173,11 +168,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? FindLast( Func<TValue, bool> match )                   => FindLast( match, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast( match, Count - 1, endInclusive );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast( match, Length - 1, endInclusive );
     public TValue? FindLast( Func<TValue, bool> match, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
 
         Span<TValue> span = Span;
@@ -192,11 +187,11 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? Find( Func<TValue, bool> match )            => Find( match, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? Find( Func<TValue, bool> match, int start ) => Find( match, start, Count - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue? Find( Func<TValue, bool> match, int start ) => Find( match, start, Length - 1 );
     public TValue? Find( Func<TValue, bool> match, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
 
         Span<TValue> span = Span;
@@ -211,13 +206,13 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] FindAll( Func<TValue, bool> match )            => FindAll( match, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll( match, start, Count - 1 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll( match, start, Length - 1 );
     public TValue[] FindAll( Func<TValue, bool> match, int start, int endInclusive )
     {
-        Guard.IsInRange( start,        0, Count );
-        Guard.IsInRange( endInclusive, 0, Count );
+        Guard.IsInRange( start,        0, Length );
+        Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
-        using Buffer<TValue> buffer = new(Count);
+        using Buffer<TValue> buffer = new(Length);
         ReadOnlySpan<TValue> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
@@ -229,16 +224,16 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( TValue                         value ) => Span.Contains( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( scoped in ReadOnlySpan<TValue> value ) => Span.Contains( value, EqualityComparer<TValue>.Default );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( TValue                      value ) => Span.Contains( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( params ReadOnlySpan<TValue> value ) => Span.Contains( value, EqualityComparer<TValue>.Default );
 
 
     public bool RemoveAt( int index )
     {
-        if ( index < 0 || index >= Count ) { return false; }
+        if ( index < 0 || index >= Length ) { return false; }
 
         Array.Copy( _array, index + 1, _array, index, _array.Length - index - 1 );
-        Count--;
+        Length--;
         return true;
     }
     public bool Remove( TValue value ) => RemoveAt( IndexOf( value, 0 ) );
@@ -252,10 +247,10 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
 
         Span.Slice( start, count ).Fill( value );
     }
-    public void Replace( int start, scoped in ReadOnlySpan<TValue> values )
+    public void Replace( int start, params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
-        Guard.IsInRange( start,                 0, Count );
+        Guard.IsInRange( start,                 0, Length );
         Guard.IsInRange( start + values.Length, 0, Capacity );
 
         values.CopyTo( _array.AsSpan( start, values.Length ) );
@@ -269,34 +264,35 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
         owner.Memory.Span.Fill( value );
         Insert( start, owner.Memory.Span );
     }
-    public void Insert( int start, scoped in ReadOnlySpan<TValue> values )
+    public void Insert( int start, params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
-        Guard.IsInRange( start,                 0, Count );
+        Guard.IsInRange( start,                 0, Length );
         Guard.IsInRange( start + values.Length, 0, Capacity );
         if ( values.IsEmpty ) { return; }
 
         Array.Copy( _array, start, _array, values.Length + start, Capacity - start );
         values.CopyTo( _array.AsSpan( start, values.Length ) );
-        Count += values.Length;
+        Length += values.Length;
     }
 
 
-    public void Add( TValue                         value )            => Add( value, 1 );
-    public void Add( scoped in ReadOnlySpan<TValue> values )     => AddRange( values );
-    public void Add( IEnumerable<TValue>            enumerable ) => AddRange( enumerable );
+    public void Add( TValue                      value )  => Add( value, 1 );
+    public void Add( params ReadOnlySpan<TValue> values ) => AddRange( values );
     public void Add( TValue value, int count )
     {
         ThrowIfReadOnly();
         Guard.IsGreaterThanOrEqualTo( count, 0 );
-        Guard.IsInRange( Count + count, 0, Capacity );
+        Guard.IsInRange( Length + count, 0, Capacity );
         Span<TValue> span = Next;
 
         for ( int i = 0; i < count; i++ ) { span[i] = value; }
 
-        Count += count;
+        Length += count;
     }
-    public void AddRange( scoped in ReadOnlySpan<TValue> values )
+
+
+    public void AddRange( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         Span<TValue> span = Next;
@@ -309,7 +305,7 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
             case 1 when span.Length > 1:
             {
                 span[0] =  values[0];
-                Count   += 1;
+                Length  += 1;
                 return;
             }
 
@@ -317,7 +313,7 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
             {
                 span[0] =  values[0];
                 span[1] =  values[1];
-                Count   += 2;
+                Length  += 2;
                 return;
             }
 
@@ -326,22 +322,22 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
                 span[0] =  values[0];
                 span[1] =  values[1];
                 span[2] =  values[2];
-                Count   += 3;
+                Length  += 3;
                 return;
             }
 
             case > 0 when span.Length > values.Length:
             {
                 values.CopyTo( span );
-                Count += values.Length;
+                Length += values.Length;
                 return;
             }
 
             default:
             {
-                Guard.IsInRange( values.Length + Count, 0, Capacity );
+                Guard.IsInRange( values.Length + Length, 0, Capacity );
                 values.CopyTo( Next );
-                Count += values.Length;
+                Length += values.Length;
                 return;
             }
         }
@@ -357,9 +353,9 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
                 int count = array.Length;
                 if ( count <= 0 ) { return; }
 
-                Guard.IsInRange( array.Length + Count, 0, Capacity );
+                Guard.IsInRange( array.Length + Length, 0, Capacity );
                 new ReadOnlySpan<TValue>( array ).CopyTo( Next );
-                Count += count;
+                Length += count;
                 return;
             }
 
@@ -368,9 +364,9 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
                 int count = list.Count;
                 if ( count <= 0 ) { return; }
 
-                Guard.IsInRange( list.Count + Count, 0, Capacity );
+                Guard.IsInRange( list.Count + Length, 0, Capacity );
                 CollectionsMarshal.AsSpan( list ).CopyTo( Next );
-                Count += count;
+                Length += count;
                 return;
             }
 
@@ -379,9 +375,9 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
                 int count = collection.Count;
                 if ( count <= 0 ) { return; }
 
-                Guard.IsInRange( collection.Count + Count, 0, Capacity );
-                collection.CopyTo( _array, Count );
-                Count += count;
+                Guard.IsInRange( collection.Count + Length, 0, Capacity );
+                collection.CopyTo( _array, Length );
+                Length += count;
                 return;
             }
 
@@ -395,40 +391,42 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     }
 
 
-    public void Trim( scoped in TValue value )
+    public void Trim( TValue value )
     {
         ReadOnlySpan<TValue> span = Span.Trim( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
-    public void Trim( scoped in ReadOnlySpan<TValue> value )
+    public void Trim( params ReadOnlySpan<TValue> value )
     {
         ReadOnlySpan<TValue> span = Span.Trim( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
-    public void TrimStart( scoped in TValue value )
+
+    public void TrimStart( TValue value )
     {
         ReadOnlySpan<TValue> span = Span.TrimStart( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
-    public void TrimStart( scoped in ReadOnlySpan<TValue> value )
+    public void TrimStart( params ReadOnlySpan<TValue> value )
     {
         ReadOnlySpan<TValue> span = Span.TrimStart( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
-    public void TrimEnd( scoped in TValue value )
+
+    public void TrimEnd( TValue value )
     {
         ReadOnlySpan<TValue> span = Span.TrimEnd( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
-    public void TrimEnd( scoped in ReadOnlySpan<TValue> value )
+    public void TrimEnd( params ReadOnlySpan<TValue> value )
     {
         ReadOnlySpan<TValue> span = Span.TrimEnd( value );
-        Count = span.Length;
+        Length = span.Length;
         span.CopyTo( Span );
     }
 
@@ -439,20 +437,15 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     public void Sort( int                start, int length, IComparer<TValue> comparer ) => Span.Slice( start, length ).Sort( comparer );
 
 
-    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Count"/> whichever is greater. </summary>
+    /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
     [Pure]
-    public Buffer<TValue> Grow( in uint additionalRequestedCapacity )
-    {
-        Guard.IsInRange( additionalRequestedCapacity, 1, int.MaxValue );
-        return Grow( (uint)Capacity, additionalRequestedCapacity );
-    }
-    internal Buffer<TValue> Grow( in uint capacity, in uint additionalRequestedCapacity )
+    public Buffer<TValue> Grow( uint additionalRequestedCapacity )
     {
         ThrowIfReadOnly();
-        int            minimumCount = GetLength( capacity, additionalRequestedCapacity );
-        Buffer<TValue> buffer       = new(minimumCount);
-        Span.CopyTo( buffer.Span );
+        Guard.IsInRange( additionalRequestedCapacity, 1, int.MaxValue );
+        Buffer<TValue> buffer = new(GetLength( (uint)Capacity, additionalRequestedCapacity ));
+        Values.CopyTo( buffer.Span );
         Dispose();
         return buffer;
     }
@@ -465,21 +458,19 @@ public record struct Buffer<TValue> : IEnumerable<TValue>, IDisposable
     }
 
 
-    public IEnumerator<TValue> GetEnumerator() => new Enumerator( this );
-    IEnumerator IEnumerable.   GetEnumerator() => GetEnumerator();
+    public Enumerator GetEnumerator() => new(this);
 
 
 
     [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public struct Enumerator( scoped in Buffer<TValue> buffer ) : IEnumerator<TValue>
+    public ref struct Enumerator( Buffer<TValue> buffer )
     {
-        private readonly Buffer<TValue> _buffer = buffer;
-        private          int            _index  = NOT_FOUND;
-        public           TValue         Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer[_index]; }
-        object IEnumerator.             Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Current; }
+        private readonly    Buffer<TValue> _buffer = buffer;
+        private             int            _index  = NOT_FOUND;
+        public ref readonly TValue         Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
 
         public                                                            void Dispose()  { }
         [MethodImpl(       MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
-        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => (uint)++_index < (uint)_buffer.Count;
+        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => (uint)++_index < (uint)_buffer.Length;
     }
 }

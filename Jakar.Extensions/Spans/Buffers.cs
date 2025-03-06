@@ -13,13 +13,9 @@ public static class Buffers
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static void EnsureCapacity<TValue>( ref Buffer<TValue> buffer, uint additionalRequestedCapacity )
-        where TValue : IEquatable<TValue> => EnsureCapacity( ref buffer, (uint)buffer.Count, additionalRequestedCapacity );
-
-    internal static void EnsureCapacity<TValue>( ref Buffer<TValue> buffer, in uint count, in uint additionalRequestedCapacity )
         where TValue : IEquatable<TValue>
     {
-        buffer.ThrowIfReadOnly();
-        if ( count + additionalRequestedCapacity > buffer.Capacity ) { buffer = buffer.Grow( count + additionalRequestedCapacity ); }
+        if ( buffer.Length + additionalRequestedCapacity > buffer.Capacity ) { buffer = buffer.Grow( additionalRequestedCapacity ); }
     }
 
 

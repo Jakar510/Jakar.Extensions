@@ -17,7 +17,7 @@ public static class ErrorExtensions
 
     public static StringValues ToValues( this ref readonly PasswordValidator.Results results )
     {
-        using IMemoryOwner<string> owner  = MemoryPool<string>.Shared.Rent( 7 );
+        using IMemoryOwner<string> owner  = MemoryPool<string>.Shared.Rent( 10 );
         Span<string>               errors = owner.Memory.Span;
         int                        count  = 0;
         if ( results.LengthPassed ) { errors[count++] = Error.Titles.BlockedPassed; }
@@ -37,7 +37,12 @@ public static class ErrorExtensions
         StringValues values = [.. errors[..count]];
         return values;
     }
+
+
+    public static string GetMessage( this ref readonly Errors errors ) => string.Join( '\n', errors.Details.Select( GetMessage ) );
+
     public static string GetMessage( this IEnumerable<Error> errors ) => string.Join( '\n', errors.Select( GetMessage ) );
+
     public static string GetMessage( this ref readonly ReadOnlySpan<Error> errors )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( errors.Length );
@@ -49,15 +54,16 @@ public static class ErrorExtensions
         sb.AppendJoin( '\n', span );
         return sb.ToString();
     }
-    public static string GetMessage( this Error error ) => GetMessage( error.Title, error.Errors );
-    public static string GetMessage( this string? title, StringValues values )
+
+    public static string GetMessage( this Error error ) => GetMessage( error.Title, in error.errors );
+    public static string GetMessage( this string? title, ref readonly StringValues values )
     {
         if ( values.Count == 0 ) { return title ?? string.Empty; }
 
         using ValueStringBuilder builder = new(4096);
-        builder.Append( BULLET ).Append( title );
+        builder.Append( BULLET ).Append( title ?? string.Empty );
 
-        foreach ( string? value in values ) { builder.Append( SPACER ).Append( value ); }
+        foreach ( string? value in values ) { builder.Append( SPACER ).Append( value ?? string.Empty ); }
 
         return builder.ToString();
     }

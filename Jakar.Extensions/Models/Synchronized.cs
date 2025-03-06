@@ -14,21 +14,9 @@ namespace Jakar.Extensions;
 /// <typeparam name="TValue"> The value type. </typeparam>
 public sealed class Synchronized<TValue>( TValue value )
 {
-    private readonly Lock   _lock  = new();
-    private          TValue _value = value;
-
-
-    public TValue Value
-    {
-        get
-        {
-            lock (_lock) { return _value; }
-        }
-        set
-        {
-            lock (_lock) { _value = value; }
-        }
-    }
+    private TValue _value = value;
+    
+    public TValue Value { get => Interlocked.CompareExchange( ref _value!, default, default ); set { Interlocked.Exchange( ref _value, value ); } }
 
 
     public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;

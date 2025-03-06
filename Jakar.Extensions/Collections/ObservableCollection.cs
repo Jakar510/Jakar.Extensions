@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using System.Collections.Generic;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -40,6 +36,8 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
     public ObservableCollection() : this( Comparer<TValue>.Default ) { }
     public ObservableCollection( int                                 capacity ) : this( Comparer<TValue>.Default, capacity ) { }
+    public ObservableCollection( ref readonly Buffer<TValue>         values ) : this( values.Length ) => InternalAdd( values.Values );
+    public ObservableCollection( ref readonly Buffer<TValue>         values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.Values );
     public ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
     public ObservableCollection( ref readonly ImmutableArray<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.AsSpan() );
     public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this( values.Length ) => InternalAdd( values.Span );
