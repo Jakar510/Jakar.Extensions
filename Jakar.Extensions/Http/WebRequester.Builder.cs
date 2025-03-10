@@ -12,35 +12,35 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
-    public ref struct Builder( IHostInfo value )
+    public class Builder( IHostInfo value ) : IHttpClientFactory
     {
-        private readonly WebHeaders                      _headers                      = [];
-        private readonly IHostInfo                       _hostInfo                     = value;
-        private          Encoding                        _encoding                     = Encoding.Default;
-        private          bool?                           _useProxy                     = null;
-        private          IWebProxy?                      _proxy                        = null;
-        private          bool?                           _allowAutoRedirect            = null;
-        private          int?                            _maxAutomaticRedirections     = null;
-        private          ICredentials?                   _defaultProxyCredentials      = null;
-        private          ICredentials?                   _credentials                  = null;
-        private          bool?                           _preAuthenticate              = null;
-        private          bool?                           _useCookies                   = null;
-        private          CookieContainer?                _cookieContainer              = null;
-        private          int?                            _maxResponseHeadersLength     = null;
-        private          int?                            _maxConnectionsPerServer      = null;
-        private          AuthenticationHeaderValue?      _authenticationHeader         = null;
-        private          TimeSpan?                       _connectTimeout               = null;
-        private          RetryPolicy?                    _retryPolicy                  = null;
-        private          int?                            _maxResponseContentBufferSize = null;
-        private          ILogger?                        _logger                       = null;
-        private          SslClientAuthenticationOptions? _sslOptions                   = null;
-        private          TimeSpan?                       _responseDrainTimeout         = null;
-        private          HttpKeepAlivePingPolicy?        _keepAlivePingPolicy          = null;
-        private          TimeSpan?                       _keepAlivePingTimeout         = null;
-        private          TimeSpan?                       _keepAlivePingDelay           = null;
-        private          TimeSpan?                       _pooledConnectionLifetime     = null;
-        private          TimeSpan?                       _pooledConnectionIdleTimeout  = null;
-        private          int?                            _maxResponseDrainSize         = null;
+        private readonly WebHeaders                      _headers  = [];
+        private readonly IHostInfo                       _hostInfo = value;
+        private          Encoding                        _encoding = Encoding.Default;
+        private          bool?                           _useProxy;
+        private          IWebProxy?                      _proxy;
+        private          bool?                           _allowAutoRedirect;
+        private          int?                            _maxAutomaticRedirections;
+        private          ICredentials?                   _defaultProxyCredentials;
+        private          ICredentials?                   _credentials;
+        private          bool?                           _preAuthenticate;
+        private          bool?                           _useCookies;
+        private          CookieContainer?                _cookieContainer;
+        private          int?                            _maxResponseHeadersLength;
+        private          int?                            _maxConnectionsPerServer;
+        private          AuthenticationHeaderValue?      _authenticationHeader;
+        private          TimeSpan?                       _connectTimeout;
+        private          RetryPolicy?                    _retryPolicy;
+        private          int?                            _maxResponseContentBufferSize;
+        private          ILogger?                        _logger;
+        private          SslClientAuthenticationOptions? _sslOptions;
+        private          TimeSpan?                       _responseDrainTimeout;
+        private          HttpKeepAlivePingPolicy?        _keepAlivePingPolicy;
+        private          TimeSpan?                       _keepAlivePingTimeout;
+        private          TimeSpan?                       _keepAlivePingDelay;
+        private          TimeSpan?                       _pooledConnectionLifetime;
+        private          TimeSpan?                       _pooledConnectionIdleTimeout;
+        private          int?                            _maxResponseDrainSize;
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
@@ -49,10 +49,10 @@ public partial class WebRequester
         public static Builder Create( Func<Uri>       value ) => new(new MethodUriHolder( value ));
 
 
-        public readonly Builder Reset() => Create( _hostInfo );
+        public Builder Reset() => Create( _hostInfo );
 
 
-        private readonly HttpClient GetClient()
+        private HttpClient GetClient()
         {
             HttpClient client = new(GetHandler());
             foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
@@ -64,9 +64,9 @@ public partial class WebRequester
 
             return client;
         }
-        private readonly HttpMessageHandler GetHandler()
+        private HttpMessageHandler GetHandler()
         {
-            SocketsHttpHandler handler = new();
+            HttpMessageHandler handler = new SocketsHttpHandler();
 
             if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }
 
@@ -86,7 +86,6 @@ public partial class WebRequester
 
             if ( _pooledConnectionIdleTimeout.HasValue ) { handler.PooledConnectionIdleTimeout = _pooledConnectionIdleTimeout.Value; }
 
-
             if ( _maxResponseHeadersLength.HasValue ) { handler.MaxResponseHeadersLength = _maxResponseHeadersLength.Value; }
 
             if ( _maxConnectionsPerServer.HasValue ) { handler.MaxConnectionsPerServer = _maxConnectionsPerServer.Value; }
@@ -95,18 +94,15 @@ public partial class WebRequester
 
             if ( _allowAutoRedirect.HasValue ) { handler.AllowAutoRedirect = _allowAutoRedirect.Value; }
 
-
             if ( _useProxy.HasValue ) { handler.UseProxy = _useProxy.Value; }
 
             if ( _proxy is not null ) { handler.Proxy = _proxy; }
 
             if ( _defaultProxyCredentials is not null ) { handler.DefaultProxyCredentials = _defaultProxyCredentials; }
 
-
             if ( _credentials is not null ) { handler.Credentials = _credentials; }
 
             if ( _preAuthenticate.HasValue ) { handler.PreAuthenticate = _preAuthenticate.Value; }
-
 
             if ( _useCookies.HasValue ) { handler.UseCookies = _useCookies.Value; }
 
@@ -114,7 +110,8 @@ public partial class WebRequester
 
             return handler;
         }
-        public readonly WebRequester Build() => new(GetClient(), _hostInfo, _encoding, _logger, _retryPolicy);
+        public WebRequester Build()                     => new(GetClient(), _hostInfo, _logger, _encoding) { Retries = _retryPolicy };
+        public HttpClient   CreateClient( string name ) => GetClient();
 
 
         public Builder With_Logger( ILogger logger )
@@ -124,12 +121,12 @@ public partial class WebRequester
         }
 
 
-        public readonly Builder With_Header( string name, IEnumerable<string?> values )
+        public Builder With_Header( string name, IEnumerable<string?> values )
         {
             _headers.Add( name, values );
             return this;
         }
-        public readonly Builder With_Header( string name, string? value )
+        public Builder With_Header( string name, string? value )
         {
             _headers.Add( name, value );
             return this;
