@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Serilog
 // 01/19/2025  14:01
 
+using Newtonsoft.Json;
+
+
+
 namespace Jakar.Extensions.Serilog;
 
 
@@ -27,14 +31,16 @@ public readonly record struct HeaderDataCell( string? Title, string? Value )
 
 
 
-public sealed class HeaderData( string? title, FontAttributes titleAttributes, params HeaderDataCell[]? cells )
+[Serializable]
+[method: JsonConstructor]
+public sealed class HeaderData( string? title, TextFontAttributes titleAttributes, params HeaderDataCell[]? cells )
 {
-    public static HeaderData        Empty           => new(null, FontAttributes.None, null);
-    public        HeaderDataCell[]? Cells           { get; init; } = cells;
-    public        bool              IsEmpty         => IsNotEmpty is false;
-    public        bool              IsNotEmpty      => Cells?.Length is > 0 || !string.IsNullOrEmpty( Title );
-    public        string?           Title           { get; init; } = title;
-    public        FontAttributes    TitleAttributes { get; init; } = titleAttributes;
+    public static HeaderData         Empty           => new(null, TextFontAttributes.None, null);
+    public        HeaderDataCell[]?  Cells           { get; init; } = cells;
+    public        bool               IsEmpty         => IsNotEmpty is false;
+    public        bool               IsNotEmpty      => Cells?.Length is > 0 || !string.IsNullOrEmpty( Title );
+    public        string?            Title           { get; init; } = title;
+    public        TextFontAttributes TitleAttributes { get; init; } = titleAttributes;
 
 
     public bool GetCells( out ReadOnlySpan<HeaderDataCell> cells )
@@ -59,7 +65,7 @@ public sealed class HeaderData( string? title, FontAttributes titleAttributes, p
     public static HeaderData Create<T>( T heading )
         where T : IHeaderCells => new(heading.Title,
                                       heading.IsTitleBold
-                                          ? FontAttributes.Bold
-                                          : FontAttributes.None,
+                                          ? TextFontAttributes.Bold
+                                          : TextFontAttributes.None,
                                       heading.HeaderCells);
 }

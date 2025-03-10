@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Mvc;
 
 
 
 namespace Jakar.Extensions.Serilog.Server.Data;
 
 
+[Experimental( nameof(RemoteLogger) )]
 public static class ApiEndpoints
 {
     public static void AddEndpoints( this WebApplication application )

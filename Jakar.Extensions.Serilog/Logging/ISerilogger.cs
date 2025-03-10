@@ -22,9 +22,9 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
     public        ReadOnlyMemory<byte>     ScreenShotData { get; }
 
 
-    public                 Logger<T> CreateLogger<T>();
-    public abstract static void      SetDeviceID( Guid deviceID );
-    public abstract static void      SetDeviceID( long deviceID );
+    public Logger<T> CreateLogger<T>();
+    public void      SetDeviceID( Guid deviceID );
+    public void      SetDeviceID( long deviceID );
 
 
     public void TrackEvent<T>( T _, [CallerMemberName] string caller                                                                             = BaseRecord.EMPTY );
@@ -48,11 +48,11 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
 
 
 
-public interface ICreateSerilogger<out TSerilogger>
+public interface ICreateSerilogger<out TSerilogger, TApp>
     where TSerilogger : class, ISerilogger
 {
-    public abstract static ILoggerProvider GetProvider( IServiceProvider provider );
-    public abstract static TSerilogger     Get( IServiceProvider         provider );
-    public abstract static TSerilogger     Create( IServiceProvider      provider );
-    public abstract static TSerilogger     Create( SeriloggerOptions     options );
+    public abstract static ILoggerProvider GetProvider( IServiceProvider   provider );
+    public abstract static TSerilogger     Get( IServiceProvider           provider );
+    public abstract static TSerilogger     Create( IServiceProvider        provider );
+    public abstract static TSerilogger     Create( SeriloggerOptions<TApp> options );
 }

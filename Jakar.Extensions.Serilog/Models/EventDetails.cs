@@ -6,6 +6,7 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class EventDetails : Dictionary<string, string?>
 {
+    public const string TIMESTAMP = nameof(TIMESTAMP);
     public EventDetails() : base( 20 ) { }
     public EventDetails( IDictionary<string, string?> dictionary ) : base( dictionary ) => EnsureCapacity( 20 );
 

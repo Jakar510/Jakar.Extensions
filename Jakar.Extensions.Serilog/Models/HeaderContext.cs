@@ -11,7 +11,7 @@ namespace Jakar.Extensions.Serilog;
 
 
 [Flags]
-public enum FontAttributes
+public enum TextFontAttributes
 {
     None   = 0,
     Bold   = 1 << 0,
@@ -49,16 +49,16 @@ public interface IHeaderContext<TImageSource> : IHeaderContext
 
 public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImageSource>
 {
-    private bool           _isCollapsable;
-    private bool           _isExpanded;
-    private bool           _isVisible;
-    private FontAttributes _titleAttributes = FontAttributes.Bold;
-    private HeaderData?    _data;
-    private TImageSource?  _collapseIcon;
-    private TImageSource?  _expandIcon;
-    private TImageSource?  _icon;
-    private string?        _title;
-    private bool           _isTitleBold;
+    private bool               _isCollapsable;
+    private bool               _isExpanded;
+    private bool               _isVisible;
+    private TextFontAttributes _titleAttributes = TextFontAttributes.Bold;
+    private HeaderData?        _data;
+    private TImageSource?      _collapseIcon;
+    private TImageSource?      _expandIcon;
+    private TImageSource?      _icon;
+    private string?            _title;
+    private bool               _isTitleBold;
 
 
     public TImageSource? CollapseIcon { get => _collapseIcon; set => SetProperty( ref _collapseIcon, value ); }
@@ -93,10 +93,10 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
             if ( SetProperty( ref _isExpanded, value ) ) { Icon = GetIcon( value ); }
         }
     }
-    public bool           IsVisible       { get => _isVisible;                                       set => SetProperty( ref _isVisible,       value ); }
-    public bool           IsTitleBold     { get => _isTitleBold;                                     set => SetProperty( ref _isTitleBold,     value ); }
-    public string         Title           { get => _data?.Title           ?? _title ?? string.Empty; set => SetProperty( ref _title,           value ); }
-    public FontAttributes TitleAttributes { get => _data?.TitleAttributes ?? _titleAttributes;       set => SetProperty( ref _titleAttributes, value ); }
+    public bool               IsVisible       { get => _isVisible;                                       set => SetProperty( ref _isVisible,       value ); }
+    public bool               IsTitleBold     { get => _isTitleBold;                                     set => SetProperty( ref _isTitleBold,     value ); }
+    public string             Title           { get => _data?.Title           ?? _title ?? string.Empty; set => SetProperty( ref _title,           value ); }
+    public TextFontAttributes TitleAttributes { get => _data?.TitleAttributes ?? _titleAttributes;       set => SetProperty( ref _titleAttributes, value ); }
 
 
     public HeaderContext()
@@ -112,13 +112,13 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
                                                                                                                           };
 
 
-    private void ExpandCollapse()
+    protected void ExpandCollapse()
     {
         if ( _isCollapsable is false ) { return; }
 
-        IsExpanded = !IsExpanded;
+        IsExpanded = !_isExpanded;
     }
-    private TImageSource? GetIcon( bool isExpanded ) => isExpanded
-                                                            ? ExpandIcon
-                                                            : CollapseIcon;
+    protected TImageSource? GetIcon( bool isExpanded ) => isExpanded
+                                                              ? _expandIcon
+                                                              : _collapseIcon;
 }

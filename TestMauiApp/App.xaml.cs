@@ -1,14 +1,13 @@
 ﻿using Serilog;
-using Serilog.Core;
 
 
 
 namespace TestMauiApp;
 
 
-public sealed class Serilogger( SeriloggerOptions options ) : Serilogger<Serilogger, TestMauiApp>( options ), ICreateSerilogger<Serilogger>
+public sealed class Serilogger( SeriloggerOptions<TestMauiApp> options ) : Serilogger<Serilogger, SeriloggerSettings, TestMauiApp>( options ), ICreateSerilogger<Serilogger, TestMauiApp>
 {
-    public static Serilogger Create( SeriloggerOptions options ) => new(options);
+    public static Serilogger Create( SeriloggerOptions<TestMauiApp> options ) => new(options);
 }
 
 
@@ -18,10 +17,17 @@ public sealed partial class App : Application, IDisposable
     public static readonly ActivitySource ActivitySource = new(nameof(TestMauiApp));
     public static          FilePaths      Paths { get; } = new(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 
-    public static Serilogger Logger { get; } = Serilogger.Create( new SeriloggerOptions
+    public static Serilogger Logger { get; } = Serilogger.Create( new SeriloggerConstants
                                                                   {
                                                                       Paths          = Paths,
-                                                                      ActivitySource = ActivitySource
+                                                                      ActivitySource = ActivitySource,
+                                                                      DebugID        = TestMauiApp.AppID,
+                                                                      DeviceID       = Guid.NewGuid(),
+                                                                      DeviceIDLong   = 0,
+                                                                      DeviceName     = "DevTest1",
+                                                                      AppID          = Guid.NewGuid(),
+                                                                      AppName        = TestMauiApp.AppName,
+                                                                      AppVersion     = TestMauiApp.AppVersion
                                                                   } );
 
     public new static App Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));

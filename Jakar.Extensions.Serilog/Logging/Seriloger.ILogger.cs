@@ -147,7 +147,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Verbose( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Verbose, messageTemplate, _noPropertyValues );
+    public void Verbose( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Verbose, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Verbose"/> level. </summary>
@@ -210,7 +210,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Verbose( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Verbose, exception, messageTemplate, _noPropertyValues );
+    public void Verbose( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Verbose, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Verbose"/> level and associated exception. </summary>
@@ -276,7 +276,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Debug( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Debug, messageTemplate, _noPropertyValues );
+    public void Debug( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Debug, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Debug"/> level. </summary>
@@ -339,7 +339,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Debug( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Debug, exception, messageTemplate, _noPropertyValues );
+    public void Debug( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Debug, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Debug"/> level and associated exception. </summary>
@@ -405,7 +405,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Information( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Information, messageTemplate, _noPropertyValues );
+    public void Information( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Information, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Information"/> level. </summary>
@@ -468,7 +468,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Information( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Information, exception, messageTemplate, _noPropertyValues );
+    public void Information( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Information, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Information"/> level and associated exception. </summary>
@@ -534,7 +534,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Warning( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Warning, messageTemplate, _noPropertyValues );
+    public void Warning( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Warning, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Warning"/> level. </summary>
@@ -597,7 +597,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Warning( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Warning, exception, messageTemplate, _noPropertyValues );
+    public void Warning( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Warning, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Warning"/> level and associated exception. </summary>
@@ -663,7 +663,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Error( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Error, messageTemplate, _noPropertyValues );
+    public void Error( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Error, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Error"/> level. </summary>
@@ -726,7 +726,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Error( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Error, exception, messageTemplate, _noPropertyValues );
+    public void Error( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Error, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Error"/> level and associated exception. </summary>
@@ -792,7 +792,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Fatal( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Fatal, messageTemplate, _noPropertyValues );
+    public void Fatal( [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Fatal, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Fatal"/> level. </summary>
@@ -855,7 +855,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Fatal( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Fatal, exception, messageTemplate, _noPropertyValues );
+    public void Fatal( Exception? exception, [StructuredMessageTemplate] string messageTemplate ) => Write( LogEventLevel.Fatal, exception, messageTemplate, NoPropertyValues );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Fatal"/> level and associated exception. </summary>

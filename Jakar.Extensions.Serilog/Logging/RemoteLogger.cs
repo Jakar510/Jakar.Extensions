@@ -11,6 +11,7 @@ namespace Jakar.Extensions.Serilog;
 
 
 /// <summary> A <see cref="Api"/> to send log event batches to. Batches and empty batch notifications will not be sent concurrently. When the <see cref="RemoteLogger"/> is disposed, it will dispose this object if possible. </summary>
+[Experimental( nameof(RemoteLogger) )]
 public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLoggingFailureListener, IAsyncDisposable
 {
     private const    int                        BATCH_SIZE_LIMIT = 1000;

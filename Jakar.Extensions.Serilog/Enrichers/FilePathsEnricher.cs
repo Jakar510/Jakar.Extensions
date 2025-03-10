@@ -3,15 +3,16 @@
 
 using System.Runtime.InteropServices;
 using Serilog.Context;
+using Serilog.Debugging;
 
 
 
 namespace Jakar.Extensions.Serilog;
 
 
-public sealed class FilePathsEnricher() : ILogEventEnricher
+public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnricher
 {
-    private static ISerilogger _Logger => ISerilogger.Instance ?? throw new InvalidOperationException( $"{nameof(ISerilogger)} has not been created" );
+    private readonly ISerilogger _logger = serilogger;
     void ILogEventEnricher.Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
     {
         try
@@ -21,29 +22,29 @@ public sealed class FilePathsEnricher() : ILogEventEnricher
             using Disposables disposables = new();
             List<Task>        tasks       = new(20);
 
-            if ( _Logger.Settings.IncludeAppStateOnError )
+            if ( _logger.Settings.IncludeAppStateOnError )
             {
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.ScreenShotAddress ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.ScreenShotAddress ) );
 
-                ReadOnlyMemory<byte> data = _Logger.ScreenShotData;
+                ReadOnlyMemory<byte> data = _logger.ScreenShotData;
                 if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( IFilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
-            if ( _Logger.Settings.IncludeAppStateOnError )
+            if ( _logger.Settings.IncludeAppStateOnError )
             {
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.FeedbackFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppStateFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.CrashFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.IncomingFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.OutgoingFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppDataZipFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.AppCacheZipFile ) );
-                tasks.Add( Handle( disposables, _Logger.Settings.Paths.ZipLogsFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.FeedbackFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppStateFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.CrashFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.IncomingFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.OutgoingFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppDataZipFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppCacheZipFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.ZipLogsFile ) );
             }
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();
         }
-        catch ( Exception e ) { Debug.WriteLine( e ); }
+        catch ( Exception e ) { SelfLog.WriteLine( "{Exception}", e ); }
     }
     private static async Task Handle( Disposables disposables, LocalFile? file, CancellationToken token = default )
     {

@@ -2,6 +2,10 @@
 // 05/03/2022  9:01 AM
 
 
+using Microsoft.Extensions.Hosting;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -12,6 +16,7 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
+    [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
     public class Builder( IHostInfo value ) : IHttpClientFactory
     {
         private readonly WebHeaders                      _headers  = [];
@@ -44,15 +49,15 @@ public partial class WebRequester
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
-        public static Builder Create( Uri             value ) => new(new HostHolder( value ));
-        public static Builder Create( Func<IHostInfo> value ) => new(new MethodHolder( value ));
-        public static Builder Create( Func<Uri>       value ) => new(new MethodUriHolder( value ));
+        public static Builder Create( Uri             value ) => Create(new HostHolder( value ));
+        public static Builder Create( Func<IHostInfo> value ) => Create(new HostHolder( value ));
+        public static Builder Create( Func<Uri>       value ) => Create(new HostHolder( value ));
 
 
-        public Builder Reset() => Create( _hostInfo );
+        [Pure] public Builder Reset() => Create( _hostInfo );
 
 
-        private HttpClient GetClient()
+        protected virtual HttpClient GetClient()
         {
             HttpClient client = new(GetHandler());
             foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
@@ -64,9 +69,9 @@ public partial class WebRequester
 
             return client;
         }
-        private HttpMessageHandler GetHandler()
+        protected virtual HttpMessageHandler GetHandler()
         {
-            HttpMessageHandler handler = new SocketsHttpHandler();
+            SocketsHttpHandler handler = new();
 
             if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }
 
@@ -298,27 +303,10 @@ public partial class WebRequester
 
 
 
-        public sealed record HostHolder( Uri HostInfo ) : IHostInfo;
-
-
-
-        public sealed record MethodHolder : IHostInfo
+        public sealed class HostHolder( OneOf<Uri, Func<Uri>, Func<IHostInfo>> hostInfo ) : IHostInfo
         {
-            private readonly Func<IHostInfo> _value;
-
-            public Uri HostInfo => _value().HostInfo;
-
-            public MethodHolder( Func<IHostInfo> value ) => _value = value;
-        }
-
-
-
-        public sealed record MethodUriHolder : IHostInfo
-        {
-            private readonly Func<Uri> _value;
-            public           Uri       HostInfo => _value();
-
-            public MethodUriHolder( Func<Uri> value ) => _value = value;
+            private readonly OneOf<Uri, Func<Uri>, Func<IHostInfo>> _hostInfo = hostInfo;
+            public           Uri                                    HostInfo => _hostInfo.Match( static x => x, static x => x(), static x => x().HostInfo );
         }
     }
 }
