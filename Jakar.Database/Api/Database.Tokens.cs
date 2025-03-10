@@ -10,8 +10,8 @@ namespace Jakar.Database;
 
 public abstract partial class Database
 {
-    private static readonly Synchronized<TimeSpan> _accessTokenExpirationTime  = new(TimeSpan.FromMinutes( 15 ));
-    private static readonly Synchronized<TimeSpan> _refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
+    private static readonly SynchronizedValue<TimeSpan> _accessTokenExpirationTime  = new(TimeSpan.FromMinutes( 15 ));
+    private static readonly SynchronizedValue<TimeSpan> _refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
 
 
     public static TimeSpan AccessTokenExpirationTime  { get => _accessTokenExpirationTime;  set => _accessTokenExpirationTime.Value = value; }

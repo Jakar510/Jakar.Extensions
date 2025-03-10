@@ -10,16 +10,17 @@ public readonly struct StopWatch( string caller ) : IDisposable
     private readonly long   _start  = Stopwatch.GetTimestamp();
 
 
-    public TimeSpan Elapsed { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start ); }
+    public TimeSpan Elapsed { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
 
 
-    public void Dispose() => Console.WriteLine( ToString() );
+    public void Dispose() => Debug.WriteLine( ToString() );
     public override string ToString()
     {
-        (double Value, string Unit) range = GetRange( Elapsed );
+        TimeSpan                    elapsed = Elapsed;
+        (double Value, string Unit) range   = GetRange( in elapsed );
         return $"[{_caller}] {range.Value} {range.Unit}";
     }
-    public static (double Value, string Unit) GetRange( TimeSpan span )
+    public static (double Value, string Unit) GetRange( ref readonly TimeSpan span )
     {
         if ( span.Days > 0 ) { return (span.TotalDays, nameof(TimeSpan.Days)); }
 
@@ -35,7 +36,36 @@ public readonly struct StopWatch( string caller ) : IDisposable
 
         return (span.TotalNanoseconds, nameof(TimeSpan.Nanoseconds));
     }
+    public static (double Value, Unit Unit) GetRangeWithUnit( ref readonly TimeSpan span )
+    {
+        if ( span.Days > 0 ) { return (span.TotalDays, Unit.Days); }
+
+        if ( span.Hours > 0 ) { return (span.TotalHours, Unit.Hours); }
+
+        if ( span.Minutes > 0 ) { return (span.TotalMinutes, Unit.Minutes); }
+
+        if ( span.Seconds > 0 ) { return (span.TotalSeconds, Unit.Seconds); }
+
+        if ( span.Milliseconds > 0 ) { return (span.TotalMilliseconds, Unit.Milliseconds); }
+
+        if ( span.Microseconds > 0 ) { return (span.TotalMicroseconds, Unit.Microseconds); }
+
+        return (span.TotalNanoseconds, Unit.Nanoseconds);
+    }
 
 
     public static StopWatch Start( [CallerMemberName] string caller = EMPTY ) => new(caller);
+
+
+
+    public enum Unit
+    {
+        Days,
+        Hours,
+        Minutes,
+        Seconds,
+        Milliseconds,
+        Microseconds,
+        Nanoseconds,
+    }
 }

@@ -3,8 +3,8 @@ CancellationTokenSource source = new(TimeSpan.FromSeconds( 5 ));
 
 try
 {
-    Synchronized<long> sync  = new(0);
-    List<Task>         tasks = [Run( source.Token ), Run( source.Token ), Run( source.Token )];
+    SynchronizedValue<long> sync  = new(0);
+    List<Task>              tasks = [Run( source.Token ), Run( source.Token ), Run( source.Token )];
     await Task.WhenAll( tasks );
 
     async Task Run( CancellationToken token )

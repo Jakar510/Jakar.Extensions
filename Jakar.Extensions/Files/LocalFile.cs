@@ -51,7 +51,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     public LocalFile() => FullPath = string.Empty;
     public LocalFile( Uri                          path ) : this( FromUri( path ) ) { }
-    public LocalFile( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
+    public LocalFile( params ReadOnlySpan<char> path ) : this( path.ToString() ) { }
     public LocalFile( FileInfo                     path ) : this( path.FullName ) { }
     public LocalFile( string                       path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
     public LocalFile( string                       path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }

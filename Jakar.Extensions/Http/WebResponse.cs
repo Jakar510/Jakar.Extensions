@@ -78,7 +78,7 @@ public readonly record struct WebResponse<T>
                    : error.Value;
     }
 
-    
+
     public bool TryGetValue( [NotNullWhen( true )] out T? payload, [NotNullWhen( false )] out Error? errorMessage )
     {
         if ( IsSuccessStatusCode() )
@@ -208,8 +208,8 @@ public readonly record struct WebResponse<T>
 
     public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        ushort      count      = 0;
-        Exception[] exceptions = new Exception[policy.MaxRetires];
+        ushort          count      = 0;
+        List<Exception> exceptions = new(policy.MaxRetires);
 
         while ( count < policy.MaxRetires )
         {
@@ -220,19 +220,18 @@ public readonly record struct WebResponse<T>
                 T result = await func( response );
                 return new WebResponse<T>( response, result );
             }
-            catch ( HttpRequestException e ) { exceptions[count] = e; }
+            catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
-
-            await policy.Wait( ref count, token );
+            await policy.IncrementAndWait( ref count, token );
         }
 
-        try { throw new AggregateException( exceptions[..count] ); }
+        try { throw new AggregateException( exceptions.ToArray() ); }
         catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
     public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
     {
-        ushort      count      = 0;
-        Exception[] exceptions = new Exception[policy.MaxRetires];
+        ushort          count      = 0;
+        List<Exception> exceptions = new(policy.MaxRetires);
 
         while ( count < policy.MaxRetires )
         {
@@ -243,13 +242,12 @@ public readonly record struct WebResponse<T>
                 T result = await func( response, arg );
                 return new WebResponse<T>( response, result );
             }
-            catch ( HttpRequestException e ) { exceptions[count] = e; }
+            catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
-
-            await policy.Wait( ref count, token );
+            await policy.IncrementAndWait( ref count, token );
         }
 
-        try { throw new AggregateException( exceptions[..count] ); }
+        try { throw new AggregateException( exceptions.ToArray() ); }
         catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
 

@@ -6,9 +6,9 @@ namespace Jakar.Database;
 
 public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
 {
-    private readonly Synchronized<bool> _isAlive = new(false);
-    public           string             ClassName { get; }
-    public           string             FullName  { get; }
+    private readonly SynchronizedValue<bool> _isAlive = new(false);
+    public           string                  ClassName { get; }
+    public           string                  FullName  { get; }
 
 
     public virtual bool IsAlive

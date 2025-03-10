@@ -20,8 +20,6 @@ public static class AppPreference
         {
             lock (_lock)
             {
-                const string LINE = $"{nameof(AppPreference)}.{nameof(Source)} is not set";
-                Console.Error.WriteLine( $"{LINE}\n{new StackTrace().ToString()}" );
                 return _source ??= AppPreferenceFile.Create();
             }
         }

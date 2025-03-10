@@ -29,12 +29,19 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     {
         try
         {
-            Console.WriteLine( SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build() );
-            Console.WriteLine();
+            string sql = SqlTableBuilder<GroupRecord>.Create().WithColumn( ColumnMetaData.Nullable( nameof(GroupRecord.CustomerID), DbType.String, GroupRecord.MAX_SIZE ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.NameOfGroup), DbType.String, GroupRecord.MAX_SIZE, $"{nameof(GroupRecord.NameOfGroup)} > 0" ) ).WithColumn( ColumnMetaData.NotNullable( nameof(GroupRecord.Rights), DbType.StringFixedLength, (uint)Enum.GetValues<TestRight>().Length, $"{nameof(GroupRecord.Rights)} > 0" ) ).WithColumn<RecordID<GroupRecord>>( nameof(GroupRecord.ID) ).WithColumn<RecordID<GroupRecord>?>( nameof(GroupRecord.CreatedBy) ).WithColumn<Guid?>( nameof(GroupRecord.CreatedBy) ).WithColumn<DateTimeOffset>( nameof(GroupRecord.DateCreated) ).WithColumn<DateTimeOffset?>( nameof(GroupRecord.LastModified) ).Build();
+            sql.WriteToConsole();
             await InternalTestAsync();
+        #pragma warning disable RS1035
             Console.ReadKey();
+        #pragma warning restore RS1035
         }
-        catch ( Exception e ) { Console.Error.WriteLine( e ); }
+        catch ( Exception e )
+        {
+        #pragma warning disable RS1035
+            Console.Error.WriteLine( e );
+        #pragma warning restore RS1035
+        }
     }
     private static async Task InternalTestAsync()
     {
@@ -51,7 +58,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseTelemetry();
-        app.MapGet( "Ping", () => DateTimeOffset.UtcNow );
+        app.MapGet( "Ping", static () => DateTimeOffset.UtcNow );
 
         try
         {

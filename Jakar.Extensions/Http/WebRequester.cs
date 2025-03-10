@@ -8,6 +8,62 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Jakar.Extensions;
 
 
+/*
+public class TelemetryHttpClientHandler : HttpClientHandler
+{
+    private const string TRACE_PARENT = "trace_parent";
+    private const string TRACE_STATE  = "trace_state";
+    public TelemetryHttpClientHandler() { }
+
+    protected override async Task<HttpResponseMessage> SendAsync( HttpRequestMessage request, CancellationToken cancellationToken )
+    {
+        Dictionary<string, string> Headers_Params = new Dictionary<string, string>();
+
+        List<string> headersList = HeaderList.Instance.GetHttpHeaders().ToList();
+
+        foreach ( string h in headersList )
+        {
+            if ( request.Headers.Contains( h ) )
+            {
+                if ( request.Headers.TryGetValues( h, out IEnumerable<string>? values ) ) { Headers_Params.Add( h, values.First() ); }
+            }
+        }
+
+        TraceContext traceContext = NRAndroidAgent.NoticeDistributedTrace( null );
+        request.Headers.Add( traceContext.TracePayload.HeaderName, traceContext.TracePayload.HeaderValue );
+        request.Headers.Add( TRACE_PARENT,                         "00-"               + traceContext.TraceId + "-"                    + traceContext.ParentId + "-00" );
+        request.Headers.Add( TRACE_STATE,                          traceContext.Vendor + "=0-2-"              + traceContext.AccountId + "-"                   + traceContext.ApplicationId + "-" + traceContext.ParentId + "----" + DateTimeOffset.Now.ToUnixTimeMilliseconds() );
+        using StopWatch     startTime           = StopWatch.Start();
+        HttpResponseMessage httpResponseMessage = await base.SendAsync( request, cancellationToken );
+        TimeSpan            elapsed             = startTime.Elapsed;
+
+        try
+        {
+            HttpResponseMessage httpResponseMessage = await base.SendAsync( request, cancellationToken );
+        }
+        catch ( Exception e )
+        {
+            Console.WriteLine( e );
+            throw;
+        }
+
+        NRAndroidAgent.NoticeHttpTransaction( request.RequestUri.ToString(),
+                                              request.Method.ToString(),
+                                              (int)httpResponseMessage.StatusCode,
+                                              startTime,
+                                              elapsed,
+                                              0,
+                                              httpResponseMessage.ToString().Length,
+                                              "",
+                                              Headers_Params,
+                                              null,
+                                              traceContext.AsTraceAttributes() );
+    }
+}
+*/
+
+
+
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public sealed partial class WebRequester( HttpClient client, IHostInfo host, Encoding encoding, ILogger? logger = null, RetryPolicy? retryPolicy = null ) : IDisposable
 {

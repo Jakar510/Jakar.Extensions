@@ -69,7 +69,7 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
     public sealed class Collection() : ConcurrentObservableCollection<DebugLogEvent>( Buffers.DEFAULT_CAPACITY )
     {
         private readonly ConcurrentBag<DebugLogEvent> _pending  = [];
-        private readonly Synchronized<bool>           _isPaused = new(false);
+        private readonly SynchronizedValue<bool>      _isPaused = new(false);
         private          DateTimeOffset?              _end;
         private          DateTimeOffset?              _start;
         private          LogEventLevel                _level = LogEventLevel.Verbose;
