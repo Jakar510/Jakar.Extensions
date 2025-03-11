@@ -12,29 +12,26 @@ namespace Jakar.Extensions.Serilog;
 
 
 [SuppressMessage( "ReSharper", "AsyncVoidLambda" ), SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Local" )]
-public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp> : SeriloggerConstants, ISerilogger, IAsyncDisposable
-    where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings, TApp>, ICreateSerilogger<TSerilogger, TApp>
-    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings, TApp>
-    where TApp : IApp
+public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : SeriloggerConstants, ISerilogger, IAsyncDisposable
+    where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings>, ICreateSerilogger<TSerilogger>
+    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
+
 {
-    public readonly        SeriloggerOptions<TApp>           Options;
+    public readonly        SeriloggerOptions                 Options;
     public static readonly string                            SharedName = typeof(TSerilogger).Name;
     private readonly       SerilogLoggerProvider             _provider;
     private readonly       Synchronized<TSeriloggerSettings> _settings;
     private                LocalFile?                        _screenShotAddress;
 
 
-    public ActivitySource           ActivitySource    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public Activity                 Activity          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; protected set; }
-    public bool                     CannotDebug       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.EnableApi is false; }
+    public Activity                 Activity          { get; protected set; }
+    public bool                     CannotDebug       { get => Settings.EnableApi is false; }
     Guid IDeviceID.                 DeviceID          => Options.DeviceID;
-    string IDeviceName.             DeviceName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.DeviceName; }
-    public bool                     Disabled          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Enabled is false; }
-    public bool                     Enabled           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.EnableApi; }
-    public bool                     EnableDebugEvents { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    string IDeviceName.             DeviceName        { get => Options.DeviceName; }
+    public bool                     EnableDebugEvents { get; set; }
     public DebugLogEvent.Collection Events            { get; } = [];
     public bool                     IsValid           => Options.DeviceID.IsValidID() || Options.DeviceIDLong != 0;
-    public Logger                   Logger            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public Logger                   Logger            { get; init; }
     public MessageEvent.Collection  Messages          { get; } = [];
     public LocalFile? ScreenShotAddress
     {
@@ -45,11 +42,9 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
             _screenShotAddress = value?.SetTemporary();
         }
     }
-    public ReadOnlyMemory<byte>                                     ScreenShotData     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get;                    protected internal set; }
-    public TSeriloggerSettings                                      Settings           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _settings.Value; set => _settings.Value = value; }
-    public Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.TakeScreenShot; }
-    public Func<EventDetails, EventDetails>                         UpdateEventDetails { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.UpdateEventDetails; }
-    ISeriloggerSettings ISerilogger.                                Settings           => Settings;
+    public ReadOnlyMemory<byte>     ScreenShotData { get;                    protected internal set; }
+    public TSeriloggerSettings      Settings       { get => _settings.Value; set => _settings.Value = value; }
+    ISeriloggerSettings ISerilogger.Settings       => Settings;
 
 
     static Serilogger() => SelfLog.Enable( static message =>
@@ -58,40 +53,41 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
                                                // Console.WriteLine( message );
                                                Console.Error.WriteLine( message );
                                            } );
-    protected Serilogger( SeriloggerOptions<TApp> options )
+    protected Serilogger( SeriloggerOptions options )
     {
         Options = options;
-        ActivitySource source = options.ActivitySource ??= new ActivitySource( Options.AppName, options.AppVersion.ToString() );
-
-        ActivitySource = source;
         ActivitySource.AddActivityListener( GetActivityListener() );
         Activity             = GetActivity( Options.AppName );
         Log.Logger           = Logger = CreateLogger( in Options );
-        _settings            = new Synchronized<TSeriloggerSettings>( Options.FromPreferences<TSeriloggerSettings, TApp>() );
+        _settings            = new Synchronized<TSeriloggerSettings>( Options.FromPreferences<TSeriloggerSettings>() );
         _provider            = new SerilogLoggerProvider( this, true );
         ISerilogger.Instance = this;
         ClearCache();
     }
-    protected virtual Logger CreateLogger( ref readonly SeriloggerOptions<TApp> options )
+    protected virtual Logger CreateLogger( ref readonly SeriloggerOptions options )
     {
         LoggerConfiguration builder = new();
 
         builder.MinimumLevel.Verbose();
         builder.MinimumLevel.Override( nameof(Microsoft), LogEventLevel.Warning );
         builder.MinimumLevel.Override( nameof(System),    LogEventLevel.Warning );
-
         builder.Enrich.WithProperty( Constants.SourceContextPropertyName, options.AppName );
-        builder.Enrich.WithProperty( nameof(IAppID.AppID),                options.AppID.ToString() );
-        builder.Enrich.WithProperty( nameof(AppVersion),                  options.AppVersion.ToString() );
         builder.Enrich.FromLogContext();
-        builder.Enrich.With<AppContextEnricher<TApp>>();
+        builder.Enrich.With( AppContextEnricher.Create( options ) );
 
         builder.Enrich.WithSpan( new SpanOptions
                                  {
                                      IncludeBaggage       = true,
                                      IncludeOperationName = true,
                                      IncludeTags          = true,
-                                     IncludeTraceFlags    = true
+                                     IncludeTraceFlags    = true,
+                                     LogEventPropertiesNames = new SpanLogEventPropertiesNames
+                                                               {
+                                                                   OperationName = "OperationName",
+                                                                   ParentId      = "ParentID",
+                                                                   SpanId        = "SpanID",
+                                                                   TraceId       = "TraceID",
+                                                               }
                                  } );
 
 
@@ -102,7 +98,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
 
         return builder.CreateLogger();
     }
-    public void Dispose()
+    public virtual void Dispose()
     {
         ScreenShotData = ReadOnlyMemory<byte>.Empty;
         Events.Dispose();
@@ -114,7 +110,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
 
         GC.SuppressFinalize( this );
     }
-    public async ValueTask DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
         ScreenShotData = ReadOnlyMemory<byte>.Empty;
         await CastAndDispose( Events );
@@ -126,17 +122,10 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
         await Logger.DisposeAsync();
 
         GC.SuppressFinalize( this );
-        return;
-
-        static async ValueTask CastAndDispose( IDisposable resource )
-        {
-            if ( resource is IAsyncDisposable resourceAsyncDisposable ) { await resourceAsyncDisposable.DisposeAsync(); }
-            else { resource.Dispose(); }
-        }
     }
 
 
-    public static TSerilogger Create( IServiceProvider provider ) => TSerilogger.Create( provider.GetRequiredService<IOptions<SeriloggerOptions<TApp>>>().Value );
+    public static TSerilogger Create( IServiceProvider provider ) => TSerilogger.Create( provider.GetRequiredService<IOptions<SeriloggerOptions>>().Value );
 
 
     public TSerilogger ClearCache()
@@ -147,30 +136,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     }
 
 
-    public        Activity GetActivity( string         name,   Activity?               parent = null, ActivityKind kind   = ActivityKind.Internal )                           => GetActivity( ActivitySource, name,         Options, parent, kind );
-    public static Activity GetActivity( ActivitySource source, SeriloggerOptions<TApp> options,       Activity?    parent = null, ActivityKind kind = ActivityKind.Internal ) => GetActivity( source,         TApp.AppName, options, parent, kind );
-    public static Activity GetActivity( ActivitySource source, string name, SeriloggerOptions<TApp> options, Activity? parent = null, ActivityKind kind = ActivityKind.Internal )
-    {
-        parent ??= Activity.Current;
-        ActivityContext parentContext = parent?.Context ?? new ActivityContext();
-
-        Activity activity = source.CreateActivity( name, kind, parentContext ) ??
-                            new Activity( name )
-                            {
-                                DisplayName = name,
-                            };
-
-        activity.SetStartTime( DateTime.UtcNow );
-        activity.SetIdFormat( ActivityIdFormat.Hierarchical );
-        activity.SetStatus( ActivityStatusCode.Ok );
-        activity.SetTag( nameof(IAppID.AppName),     options.AppName );
-        activity.SetTag( nameof(IAppID.AppID),       options.AppID.ToString() );
-        activity.SetTag( nameof(IAppID.AppVersion),  options.AppVersion.ToString() );
-        activity.SetTag( nameof(IDeviceID.DeviceID), options.DeviceID.ToString() );
-        activity.SetTag( nameof(IApp.DebugID),       options.DebugID.ToString() );
-        activity.Start();
-        return activity;
-    }
+    public Activity GetActivity( string name, Activity? parent = null, ActivityKind kind = ActivityKind.Internal ) => Options.GetActivity( name, parent, kind );
 
 
     public ActivityListener GetActivityListener() => new()
@@ -211,12 +177,12 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     public async ValueTask HandleExceptionAsync<T>( T _, Exception exception, params FileData[] attachments )
     {
         System.Diagnostics.Debug.WriteLine( exception.ToString() );
-        if ( Disabled ) { return; }
+        if ( Settings.EnableApi is false ) { return; }
 
         if ( exception is OperationCanceledException or CredentialsException ) { return; }
 
         ScreenShotData = Settings.TakeScreenshotOnError
-                             ? await TakeScreenShot( CancellationToken.None )
+                             ? await Options.TakeScreenShot( CancellationToken.None )
                              : ReadOnlyMemory<byte>.Empty;
 
         TrackError( _, exception, AppState(), attachments );
@@ -300,17 +266,17 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings, TApp>
     }
 
 
-    public EventDetails AppState() => UpdateEventDetails( EventDetails.AppState( Options.AppName ) );
+    public EventDetails AppState() => Options.UpdateEventDetails( EventDetails.AppState( Options.AppName ) );
 
 
     public async ValueTask<bool> BufferScreenShot( CancellationToken token = default )
     {
-        ReadOnlyMemory<byte> data = ScreenShotData = await TakeScreenShot( token );
+        ReadOnlyMemory<byte> data = ScreenShotData = await Options.TakeScreenShot( token );
         return data.IsEmpty is false;
     }
     public async ValueTask<LocalFile?> GetScreenShot( CancellationToken token = default )
     {
-        ReadOnlyMemory<byte> screenShot = await TakeScreenShot( token );
+        ReadOnlyMemory<byte> screenShot = await Options.TakeScreenShot( token );
         return await WriteScreenShot( screenShot, token );
     }
     public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );

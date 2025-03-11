@@ -10,15 +10,16 @@ namespace Jakar.Extensions.Serilog;
 
 
 public sealed class SeriloggerSettings : SeriloggerSettings<SeriloggerSettings, IHeaderContext>, ICreateSeriloggerSettings<SeriloggerSettings>
+
 {
-    public SeriloggerSettings( SeriloggerConstants options, ISeriloggerSettings settings ) : base( options, settings ) { }
-    public SeriloggerSettings( SeriloggerConstants options, bool                enabled ) : base( options, enabled ) { }
-    public SeriloggerSettings( SeriloggerConstants options, bool                enableApi, bool    enableCrashes, bool    enableAnalytics, bool    includeAppStateOnError, bool    takeScreenshotOnError ) : base( options, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError ) { }
-    public SeriloggerSettings( SeriloggerConstants options, Setting             enableApi, Setting crashes,       Setting analytics,       Setting appState,               Setting screenshot ) : base( options, enableApi, crashes, analytics, appState, screenshot ) { }
+    public SeriloggerSettings( SeriloggerOptions options, ISeriloggerSettings settings ) : base( options, settings ) { }
+    public SeriloggerSettings( SeriloggerOptions options, bool                enabled ) : base( options, enabled ) { }
+    public SeriloggerSettings( SeriloggerOptions options, bool                enableApi, bool    enableCrashes, bool    enableAnalytics, bool    includeAppStateOnError, bool    takeScreenshotOnError ) : base( options, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError ) { }
+    public SeriloggerSettings( SeriloggerOptions options, Setting             enableApi, Setting crashes,       Setting analytics,       Setting appState,               Setting screenshot ) : base( options, enableApi, crashes, analytics, appState, screenshot ) { }
 
 
-    public static SeriloggerSettings Create( SeriloggerConstants options, ISeriloggerSettings settings )                                                                                                     => new(options, settings);
-    public static SeriloggerSettings Create( SeriloggerConstants options, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError ) => new(options, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError);
+    public static SeriloggerSettings Create( SeriloggerOptions options, ISeriloggerSettings settings )                                                                                                     => new(options, settings);
+    public static SeriloggerSettings Create( SeriloggerOptions options, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError ) => new(options, enableApi, enableCrashes, enableAnalytics, includeAppStateOnError, takeScreenshotOnError);
 }
 
 
@@ -27,6 +28,7 @@ public sealed class SeriloggerSettings : SeriloggerSettings<SeriloggerSettings, 
 public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableClass, ISeriloggerSettings
     where THeaderContext : class, IHeaderContext
     where TClass : SeriloggerSettings<TClass, THeaderContext>, ICreateSeriloggerSettings<TClass>
+
 
 {
     private bool _isDebuggable = true;
@@ -59,12 +61,12 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
     public IFilePaths         Paths                 => Options.Paths;
     public Setting            Screenshot            { get; }
     bool ISeriloggerSettings. TakeScreenshotOnError => Screenshot.Value;
-    public SeriloggerConstants  Options               { get; }
+    public SeriloggerOptions  Options               { get; }
 
 
-    protected SeriloggerSettings( SeriloggerConstants options, ISeriloggerSettings settings ) : this( options, settings.EnableApi, settings.EnableCrashes, settings.EnableAnalytics, settings.IncludeAppStateOnError, settings.TakeScreenshotOnError ) { }
-    protected SeriloggerSettings( SeriloggerConstants options, bool                enabled ) : this( options, enabled, enabled, enabled, enabled, enabled ) { }
-    protected SeriloggerSettings( SeriloggerConstants options, bool enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError )
+    protected SeriloggerSettings( SeriloggerOptions options, ISeriloggerSettings settings ) : this( options, settings.EnableApi, settings.EnableCrashes, settings.EnableAnalytics, settings.IncludeAppStateOnError, settings.TakeScreenshotOnError ) { }
+    protected SeriloggerSettings( SeriloggerOptions options, bool                enabled ) : this( options, enabled, enabled, enabled, enabled, enabled ) { }
+    protected SeriloggerSettings( SeriloggerOptions options, bool enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError )
     {
         Crashes    = new Setting( enableCrashes,          GetHint );
         Analytics  = new Setting( enableAnalytics,        GetHint );
@@ -73,7 +75,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
         EnableApi  = new Setting( enableApi,              GetApiHint, SetAll );
         Options    = options;
     }
-    protected SeriloggerSettings( SeriloggerConstants options, Setting enableApi, Setting crashes, Setting analytics, Setting appState, Setting screenshot )
+    protected SeriloggerSettings( SeriloggerOptions options, Setting enableApi, Setting crashes, Setting analytics, Setting appState, Setting screenshot )
     {
         Crashes    = crashes;
         Analytics  = analytics;
@@ -108,9 +110,9 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
 
     ISeriloggerSettings ISeriloggerSettings.Clone() => Clone();
     public TClass                           Clone() => Clone( Options, this );
-    public static TClass Clone( SeriloggerConstants options, ISeriloggerSettings settings )
+    public static TClass Clone( SeriloggerOptions options, ISeriloggerSettings settings )
     {
-        var result = TClass.Create( options, settings );
+        TClass result = TClass.Create( options, settings );
         Debug.Assert( ReferenceEquals( settings, result ) is false );
         result.SetPreferences();
         return result;
@@ -125,18 +127,18 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
     }
     public void Disabled()       => SetAll( false );
     public void Enabled()        => SetAll( true );
-    public void SetPreferences() => CreateSeriloggerSettings.SetPreferences( (TClass)this );
+    public void SetPreferences() => ((TClass)this).SetPreferences<TClass>();
 
 
-    public static LogLevel GetLogLevel( bool isDebuggable ) => isDebuggable
-                                                                   ? LogLevel.Trace
-                                                                   : LogLevel.Information;
-    public static string GetHint( bool value ) => value
-                                                      ? "Always Send"
-                                                      : "Never Send";
-    public static string GetApiHint( bool value ) => value
-                                                         ? "Allow Error Reporting"
-                                                         : "Deny Error Reporting";
+    public virtual LogLevel GetLogLevel( bool isDebuggable ) => isDebuggable
+                                                                    ? LogLevel.Trace
+                                                                    : LogLevel.Information;
+    public virtual string GetHint( bool value ) => value
+                                                       ? "Always Send"
+                                                       : "Never Send";
+    public virtual string GetApiHint( bool value ) => value
+                                                          ? "Allow Error Reporting"
+                                                          : "Deny Error Reporting";
 
 
 

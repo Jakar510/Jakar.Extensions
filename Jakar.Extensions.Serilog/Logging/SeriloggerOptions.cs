@@ -14,35 +14,62 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace Jakar.Extensions.Serilog;
 
 
-public class SeriloggerOptions<TApp> : SeriloggerConstants, IOptions<SeriloggerOptions<TApp>>, IDeviceName
-    where TApp : IApp
+public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<SeriloggerOptions>, IDeviceName
 {
-    public          ActivitySource?                                          ActivitySource     { get; set; }
-    public          Action<LoggerConfiguration>?                             AddNativeLogs      { get; set; }
-    public          Guid                                                     AppID              => TApp.AppID;
-    public          string                                                   AppName            => TApp.AppName;
-    public          AppVersion                                               AppVersion         => TApp.AppVersion;
-    public          Guid                                                     DebugID            { get => TApp.DebugID;    set => TApp.DebugID = value; }
-    public          Guid                                                     DeviceID           { get => TApp.DeviceID;   set => TApp.DeviceID = value; }
-    public          long                                                     DeviceIDLong       { get;                    set; }
-    public          string                                                   DeviceName         { get => TApp.DeviceName; set => TApp.DeviceName = value; }
-    public          FileLifecycleHooks?                                      Hooks              { get;                    set; }
-    public          IAsyncLogEventSinkMonitor?                               Monitor            { get;                    set; }
-    public required IFilePaths                                               Paths              { get;                    set; }
-    public          SeqData?                                                 Seq                { get;                    set; }
-    public          ConsoleData?                                             Console            { get;                    set; }
-    public          DebugData?                                               Debug              { get;                    set; }
-    public          CultureInfo                                              CultureInfo        { get;                    set; } = CultureInfo.InvariantCulture;
-    public          Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { get;                    set; } = TakeEmptyScreenShot;
-    public          Func<EventDetails, EventDetails>                         UpdateEventDetails { get;                    set; } = UpdateEventDetailsNoOpp;
-    SeriloggerOptions<TApp> IOptions<SeriloggerOptions<TApp>>.               Value              => this;
+    private ActivitySource? _source;
+
+
+    public          ActivitySource                                           ActivitySource     { get => GetActivitySource(); set => _source = value; }
+    public required Guid                                                     AppID              { get;                        set; }
+    public required string                                                   AppName            { get;                        set; }
+    public required AppVersion                                               AppVersion         { get;                        set; }
+    public          Guid                                                     DebugID            { get;                        set; } = Guid.NewGuid();
+    public          Guid                                                     DeviceID           { get;                        set; } = Guid.NewGuid();
+    public          string                                                   DeviceName         { get;                        set; } = string.Empty;
+    public          Action<LoggerConfiguration>?                             AddNativeLogs      { get;                        set; }
+    public          long                                                     DeviceIDLong       { get;                        set; }
+    public          FileLifecycleHooks?                                      Hooks              { get;                        set; }
+    public          IAsyncLogEventSinkMonitor?                               Monitor            { get;                        set; }
+    public required IFilePaths                                               Paths              { get;                        set; }
+    public          SeqData?                                                 Seq                { get;                        set; }
+    public          ConsoleData?                                             Console            { get;                        set; }
+    public          DebugData?                                               Debug              { get;                        set; }
+    public          CultureInfo                                              CultureInfo        { get;                        set; } = CultureInfo.InvariantCulture;
+    public          Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { get;                        set; } = TakeEmptyScreenShot;
+    public          Func<EventDetails, EventDetails>                         UpdateEventDetails { get;                        set; } = UpdateEventDetailsNoOpp;
+    SeriloggerOptions IOptions<SeriloggerOptions>.                           Value              => this;
 
 
     // public RemoteLogs? RemoteLogServer { get; set; }
 
 
+    private       ActivitySource                  GetActivitySource()                              => _source ??= new ActivitySource( AppName, AppVersion.ToString() );
     public static EventDetails                    UpdateEventDetailsNoOpp( EventDetails  details ) => details;
     public static ValueTask<ReadOnlyMemory<byte>> TakeEmptyScreenShot( CancellationToken token )   => new(ReadOnlyMemory<byte>.Empty);
+
+
+    public Activity GetActivity( string name, Activity? parent = null, ActivityKind kind = ActivityKind.Internal )
+    {
+        parent ??= Activity.Current;
+        ActivityContext parentContext = parent?.Context ?? new ActivityContext();
+
+        Activity activity = ActivitySource.CreateActivity( name, kind, parentContext ) ??
+                            new Activity( name )
+                            {
+                                DisplayName = name,
+                            };
+
+        activity.SetStartTime( DateTime.UtcNow );
+        activity.SetIdFormat( ActivityIdFormat.Hierarchical );
+        activity.SetStatus( ActivityStatusCode.Ok );
+        activity.SetTag( nameof(AppName),    AppName );
+        activity.SetTag( nameof(AppID),      AppID.ToString() );
+        activity.SetTag( nameof(AppVersion), AppVersion.ToString() );
+        activity.SetTag( nameof(DeviceID),   DeviceID.ToString() );
+        activity.SetTag( nameof(DebugID),    DebugID.ToString() );
+        activity.Start();
+        return activity;
+    }
 
 
 

@@ -31,30 +31,30 @@ public interface ISeriloggerSettings : INotifyPropertyChanged, INotifyPropertyCh
 
 
 
-public interface ISeriloggerSettings<out TSeriloggerSettings, TApp> : INotifyPropertyChanged, INotifyPropertyChanging
-    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings, TApp>
+public interface ISeriloggerSettings<out TSeriloggerSettings> : INotifyPropertyChanged, INotifyPropertyChanging
+    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
 {
     public TSeriloggerSettings DebugSettings { get; }
 }
 
 
 
-public interface ICreateSeriloggerSettings<out TSeriloggerSettings, TApp> : ISeriloggerSettings
-    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings, TApp>
+public interface ICreateSeriloggerSettings<out TSeriloggerSettings> : ISeriloggerSettings
+    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
 {
     public abstract static string                                   SharedKey { get; }
     public abstract static OneOf<Func<ValueTask<bool>>, Func<bool>> CanDebug  { get; set; }
     public new             TSeriloggerSettings                      Clone();
-    public abstract static TSeriloggerSettings                      Create( SeriloggerOptions<TApp> options, ISeriloggerSettings settings );
-    public abstract static TSeriloggerSettings                      Create( SeriloggerOptions<TApp> options, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError );
+    public abstract static TSeriloggerSettings                      Create( SeriloggerOptions options, ISeriloggerSettings settings );
+    public abstract static TSeriloggerSettings                      Create( SeriloggerOptions options, bool                enableApi, bool enableCrashes, bool enableAnalytics, bool includeAppStateOnError, bool takeScreenshotOnError );
 }
 
 
 
 public static class CreateSeriloggerSettings
 {
-    public static void SetPreferences<TSeriloggerSettings, TApp>( this TSeriloggerSettings value )
-        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings, TApp>
+    public static void SetPreferences<TSeriloggerSettings>( this TSeriloggerSettings value )
+        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
     {
         string sharedKey = TSeriloggerSettings.SharedKey;
         sharedKey.SetPreference( nameof(ISeriloggerSettings.IncludeAppStateOnError), value.IncludeAppStateOnError );
@@ -63,8 +63,9 @@ public static class CreateSeriloggerSettings
         sharedKey.SetPreference( nameof(ISeriloggerSettings.EnableApi),              value.EnableApi );
         sharedKey.SetPreference( nameof(ISeriloggerSettings.EnableCrashes),          value.EnableCrashes );
     }
-    public static TSeriloggerSettings FromPreferences<TSeriloggerSettings, TApp>( this SeriloggerOptions<TApp> options )
-        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings, TApp>
+    public static TSeriloggerSettings FromPreferences<TSeriloggerSettings>( this SeriloggerOptions options )
+        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
+        
     {
         string sharedKey              = TSeriloggerSettings.SharedKey;
         bool   enableAnalytics        = sharedKey.GetPreference( nameof(ISeriloggerSettings.EnableAnalytics),        true );

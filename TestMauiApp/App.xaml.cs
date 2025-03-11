@@ -5,9 +5,9 @@
 namespace TestMauiApp;
 
 
-public sealed class Serilogger( SeriloggerOptions<TestMauiApp> options ) : Serilogger<Serilogger, SeriloggerSettings, TestMauiApp>( options ), ICreateSerilogger<Serilogger, TestMauiApp>
+public sealed class Serilogger( SeriloggerOptions options ) : Serilogger<Serilogger, SeriloggerSettings>( options ), ICreateSerilogger<Serilogger>
 {
-    public static Serilogger Create( SeriloggerOptions<TestMauiApp> options ) => new(options);
+    public static Serilogger Create( SeriloggerOptions options ) => new(options);
 }
 
 
@@ -17,7 +17,7 @@ public sealed partial class App : Application, IDisposable
     public static readonly ActivitySource ActivitySource = new(nameof(TestMauiApp));
     public static          FilePaths      Paths { get; } = new(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 
-    public static Serilogger Logger { get; } = Serilogger.Create( new SeriloggerConstants
+    public static Serilogger Logger { get; } = Serilogger.Create( new SeriloggerOptions
                                                                   {
                                                                       Paths          = Paths,
                                                                       ActivitySource = ActivitySource,

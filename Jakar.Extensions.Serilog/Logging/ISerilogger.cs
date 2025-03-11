@@ -13,11 +13,9 @@ namespace Jakar.Extensions.Serilog;
 public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEventSink, ISupportExternalScope, IExceptionHandler, IValidator, IDeviceName, IDeviceID
 {
     public static ISerilogger?             Instance       { get; protected set; }
-    public        DebugLogEvent.Collection Events         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public        MessageEvent.Collection  Messages       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public        bool                     Enabled        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public        bool                     Disabled       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
-    public        Logger                   Logger         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    public        DebugLogEvent.Collection Events         { get; }
+    public        MessageEvent.Collection  Messages       { get; }
+    public        Logger                   Logger         { get; }
     public        ISeriloggerSettings      Settings       { get; }
     public        ReadOnlyMemory<byte>     ScreenShotData { get; }
 
@@ -48,11 +46,11 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
 
 
 
-public interface ICreateSerilogger<out TSerilogger, TApp>
+public interface ICreateSerilogger<out TSerilogger>
     where TSerilogger : class, ISerilogger
 {
     public abstract static ILoggerProvider GetProvider( IServiceProvider   provider );
     public abstract static TSerilogger     Get( IServiceProvider           provider );
     public abstract static TSerilogger     Create( IServiceProvider        provider );
-    public abstract static TSerilogger     Create( SeriloggerOptions<TApp> options );
+    public abstract static TSerilogger     Create( SeriloggerOptions options );
 }

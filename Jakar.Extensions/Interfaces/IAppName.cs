@@ -34,16 +34,13 @@ public interface IApp : IApp<Guid>;
 
 
 
-public sealed class AppData
+public interface IAppMetaData
 {
-    private ActivitySource? _source;
-
-
-    public          ActivitySource ActivitySource { get => _source ??= new ActivitySource( AppName ); set => _source = value; }
-    public required Guid           AppID          { get;                                              init; }
-    public required string         AppName        { get;                                              init; }
-    public required AppVersion     AppVersion     { get;                                              init; }
-    public          Guid           DebugID        { get;                                              set; } = Guid.NewGuid();
-    public          Guid           DeviceID       { get;                                              set; } = Guid.NewGuid();
-    public          string         DeviceName     { get;                                              set; } = string.Empty;
+    public ActivitySource ActivitySource { get; set; }
+    public Guid           AppID          { get; set; }
+    public string         AppName        { get; set; }
+    public AppVersion     AppVersion     { get; set; }
+    public Guid           DebugID        { get; set; }
+    public Guid           DeviceID       { get; set; }
+    public string         DeviceName     { get; set; }
 }
