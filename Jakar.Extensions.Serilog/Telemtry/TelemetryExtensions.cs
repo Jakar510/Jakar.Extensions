@@ -10,11 +10,9 @@ namespace Jakar.Extensions.Serilog;
 
 public static class TelemetryExtensions
 {
+    public static IServiceCollection AddSerilogger( this IServiceCollection collection, SeriloggerOptions options ) => collection.AddSerilogger<Serilogger>( options );
     public static IServiceCollection AddSerilogger<TSerilogger>( this IServiceCollection collection, SeriloggerOptions options )
-        where TSerilogger : Serilogger<TSerilogger, SeriloggerSettings>, ICreateSerilogger<TSerilogger> => collection.AddSerilogger<TSerilogger, SeriloggerSettings>( options );
-    public static IServiceCollection AddSerilogger<TSerilogger, TSeriloggerSettings>( this IServiceCollection collection, SeriloggerOptions options )
-        where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings>, ICreateSerilogger<TSerilogger>
-        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>, ISeriloggerSettings
+        where TSerilogger : Serilogger, ICreateSerilogger<TSerilogger>
     {
         collection.AddSingleton<IOptions<SeriloggerOptions>>( options );
         TSerilogger serilogger = TSerilogger.Create( options );
@@ -24,12 +22,9 @@ public static class TelemetryExtensions
     }
 
 
+    public static IServiceCollection AddSerilogger( this IServiceCollection collection, Func<IServiceProvider, SeriloggerOptions> configure ) => collection.AddSerilogger<Serilogger>( configure );
     public static IServiceCollection AddSerilogger<TSerilogger>( this IServiceCollection collection, Func<IServiceProvider, SeriloggerOptions> configure )
-        where TSerilogger : Serilogger<TSerilogger, SeriloggerSettings>, ICreateSerilogger<TSerilogger> => collection.AddSerilogger<TSerilogger, SeriloggerSettings>( configure );
-    public static IServiceCollection AddSerilogger<TSerilogger, TSeriloggerSettings>( this IServiceCollection collection, Func<IServiceProvider, SeriloggerOptions> configure )
-        where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings>, ICreateSerilogger<TSerilogger>
-        where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>, ISeriloggerSettings
-
+        where TSerilogger : Serilogger, ICreateSerilogger<TSerilogger>
     {
         collection.AddScoped<IOptions<SeriloggerOptions>>( configure );
         collection.AddScoped( TSerilogger.Create );

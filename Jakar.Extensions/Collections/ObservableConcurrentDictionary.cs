@@ -127,7 +127,6 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         }
     }
 
-    
 
     [Pure, MustDisposeResource]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
@@ -138,7 +137,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter( pair ) ) { values.Add( pair ); }
+            if ( Filter( in pair ) ) { values.Add( in pair ); }
         }
 
         return values;

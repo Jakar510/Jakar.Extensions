@@ -1,8 +1,12 @@
 ﻿namespace Jakar.Extensions.Serilog;
 
 
-public sealed record MessageEvent( string Message, LogEventLevel Level, TimeSpan TTL, DateTimeOffset TimeStamp )
+public sealed class MessageEvent( string message, LogEventLevel level, TimeSpan ttl, DateTimeOffset timeStamp )
 {
+    public string         Message   { get; } = message;
+    public LogEventLevel  Level     { get; } = level;
+    public TimeSpan       TTL       { get; } = ttl;
+    public DateTimeOffset TimeStamp { get; } = timeStamp;
     private MessageEvent( string message, LogEventLevel level, int ttl ) : this( message, level, TimeSpan.FromSeconds( ttl ), DateTimeOffset.UtcNow ) { }
 
     public static MessageEvent Create( in Exception e,       int              ttl            = 3 ) => Create( e.Message, LogEventLevel.Error, ttl );
@@ -11,10 +15,10 @@ public sealed record MessageEvent( string Message, LogEventLevel Level, TimeSpan
 
     public EventDetails ToDictionary() => new()
                                           {
-                                              [nameof(Message)]   = Message,
-                                              [nameof(TTL)]       = TTL.ToString(),
-                                              [nameof(Level)]     = Level.ToString(),
-                                              [nameof(TimeStamp)] = TimeStamp.ToString()
+                                              [nameof(message)]   = Message,
+                                              [nameof(ttl)]       = TTL.ToString(),
+                                              [nameof(level)]     = Level.ToString(),
+                                              [nameof(timeStamp)] = TimeStamp.ToString()
                                           };
     public MessageEvent TrackEvent()
     {

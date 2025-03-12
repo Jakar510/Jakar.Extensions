@@ -14,10 +14,10 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
     private const string STABLE         = "";
 
 
-    public static AppVersionFlags Stable     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(STABLE, 0); }
-    public        bool            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
-    public        bool            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
-    public        int             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
+    public static readonly AppVersionFlags Stable = new(STABLE, 0);
+    public                 bool            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
+    public                 bool            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
+    public                 int             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
 
 
     public override string ToString()                                                  => AsSpan().ToString();
@@ -36,9 +36,9 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public bool TryFormat( Span<char> span, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    public bool TryFormat( Span<char> buffer, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
-        Debug.Assert( span.Length > Length );
+        Debug.Assert( buffer.Length > Length );
 
         if ( IsEmpty )
         {
@@ -47,13 +47,13 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
         }
 
 
-        charsWritten         = 0;
-        span[charsWritten++] = FLAG_SEPARATOR;
-        foreach ( char t in Flag ) { span[charsWritten++] = t; }
+        charsWritten           = 0;
+        buffer[charsWritten++] = FLAG_SEPARATOR;
+        foreach ( char t in Flag ) { buffer[charsWritten++] = t; }
 
-        if ( Iteration > 0 && Iteration.TryFormat( span[charsWritten..], out int intCharsWritten, format, provider ) ) { charsWritten += intCharsWritten; }
+        if ( Iteration > 0 && Iteration.TryFormat( buffer[charsWritten..], out int intCharsWritten, format, provider ) ) { charsWritten += intCharsWritten; }
 
-        span.WriteToDebug();
+        buffer.WriteToDebug();
         return true;
     }
     public static AppVersionFlags ReleaseCandidate( uint iteration = 0 ) => new(RC, iteration);
@@ -61,100 +61,100 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
     public static AppVersionFlags Beta( uint             iteration = 0 ) => new(BETA, iteration);
 
 
-    public static AppVersionFlags Parse( scoped ref ReadOnlySpan<char> value, StringComparison comparison = StringComparison.OrdinalIgnoreCase )
+    public static AppVersionFlags Parse( scoped ref ReadOnlySpan<char> value )
     {
-        if ( value.EndsWith( "-rc", comparison ) )
+        if ( value.EndsWith( "-rc", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "-rc", comparison )];
+            value = value[..value.IndexOf( "-rc", StringComparison.OrdinalIgnoreCase )];
             return ReleaseCandidate();
         }
 
-        if ( value.EndsWith( "rc", comparison ) )
+        if ( value.EndsWith( "rc", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "rc", comparison )];
+            value = value[..value.IndexOf( "rc", StringComparison.OrdinalIgnoreCase )];
             return ReleaseCandidate();
         }
 
-        if ( value.EndsWith( "-beta", comparison ) )
+        if ( value.EndsWith( "-beta", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "-beta", comparison )];
+            value = value[..value.IndexOf( "-beta", StringComparison.OrdinalIgnoreCase )];
             return Beta();
         }
 
-        if ( value.EndsWith( "-alpha", comparison ) )
+        if ( value.EndsWith( "-alpha", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "-alpha", comparison )];
+            value = value[..value.IndexOf( "-alpha", StringComparison.OrdinalIgnoreCase )];
             return Alpha();
         }
 
-        if ( value.EndsWith( "beta", comparison ) )
+        if ( value.EndsWith( "beta", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "beta", comparison )];
+            value = value[..value.IndexOf( "beta", StringComparison.OrdinalIgnoreCase )];
             return Beta();
         }
 
-        if ( value.EndsWith( "alpha", comparison ) )
+        if ( value.EndsWith( "alpha", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "alpha", comparison )];
+            value = value[..value.IndexOf( "alpha", StringComparison.OrdinalIgnoreCase )];
             return Alpha();
         }
 
-        if ( value.EndsWith( "-b", comparison ) )
+        if ( value.EndsWith( "-b", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "-b", comparison )];
+            value = value[..value.IndexOf( "-b", StringComparison.OrdinalIgnoreCase )];
             return Beta();
         }
 
-        if ( value.EndsWith( "b", comparison ) )
+        if ( value.EndsWith( "b", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "b", comparison )];
+            value = value[..value.IndexOf( "b", StringComparison.OrdinalIgnoreCase )];
             return Beta();
         }
 
-        if ( value.EndsWith( "-a", comparison ) )
+        if ( value.EndsWith( "-a", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "-a", comparison )];
+            value = value[..value.IndexOf( "-a", StringComparison.OrdinalIgnoreCase )];
             return Alpha();
         }
 
-        if ( value.EndsWith( "a", comparison ) )
+        if ( value.EndsWith( "a", StringComparison.OrdinalIgnoreCase ) )
         {
-            value = value[..value.IndexOf( "a", comparison )];
+            value = value[..value.IndexOf( "a", StringComparison.OrdinalIgnoreCase )];
             return Alpha();
         }
 
         if ( value.Contains( FLAG_SEPARATOR ) is false ) { return Stable; }
 
         int                index = value.IndexOf( FLAG_SEPARATOR );
-        ReadOnlySpan<char> span  = value[(index - 1)..].Trim( FLAG_SEPARATOR );
+        ReadOnlySpan<char> flag  = value[(index - 1)..].Trim( FLAG_SEPARATOR );
         value = value[..index];
 
-        int end = span.IndexOfAny( Randoms.Numeric );
+        int end = flag.IndexOfAny( Randoms.Numeric );
 
         return end < 0
-                   ? new AppVersionFlags( span.ToString(),        0 )
-                   : new AppVersionFlags( span[..end].ToString(), uint.Parse( span[end..] ) );
+                   ? new AppVersionFlags( flag.ToString(),        0 )
+                   : new AppVersionFlags( flag[..end].ToString(), uint.Parse( flag[end..] ) );
     }
-    public static AppVersionFlags Parse( string s, IFormatProvider? provider )
+    public static AppVersionFlags Parse( string flag, IFormatProvider? provider )
     {
-        ReadOnlySpan<char> span = s;
+        ReadOnlySpan<char> span = flag;
         return Parse( ref span );
     }
-    public static bool TryParse( string? s, IFormatProvider? provider, out AppVersionFlags result )
+    public static bool TryParse( string? flag, IFormatProvider? provider, out AppVersionFlags result )
     {
-        if ( string.IsNullOrEmpty( s ) )
+        if ( string.IsNullOrEmpty( flag ) )
         {
             result = default;
             return false;
         }
 
-        result = Parse( s, provider );
+        result = Parse( flag, provider );
         return true;
     }
-    public static AppVersionFlags Parse( ReadOnlySpan<char> s, IFormatProvider? provider ) => Parse( ref s );
-    public static bool TryParse( ReadOnlySpan<char> s, IFormatProvider? provider, out AppVersionFlags result )
+    public static AppVersionFlags Parse( ReadOnlySpan<char> flag, IFormatProvider? provider ) => Parse( ref flag );
+    public static bool TryParse( ReadOnlySpan<char> flag, IFormatProvider? provider, out AppVersionFlags result )
     {
-        result = Parse( s, provider );
+        result = Parse( flag, provider );
         return true;
     }
 
@@ -179,7 +179,7 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                            },
                                  RC => other.Flag switch
                                        {
-                                           STABLE => NOT_FOUND,
+                                           STABLE => -1,
                                            RC     => 0,
                                            ALPHA  => 1,
                                            BETA   => 1,
@@ -187,17 +187,17 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
                                        },
                                  ALPHA => other.Flag switch
                                           {
-                                              STABLE => NOT_FOUND,
-                                              RC     => NOT_FOUND,
+                                              STABLE => -1,
+                                              RC     => -1,
                                               ALPHA  => 0,
                                               BETA   => 1,
                                               _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                           },
                                  BETA => other.Flag switch
                                          {
-                                             STABLE => NOT_FOUND,
-                                             RC     => NOT_FOUND,
-                                             ALPHA  => NOT_FOUND,
+                                             STABLE => -1,
+                                             RC     => -1,
+                                             ALPHA  => -1,
                                              BETA   => 0,
                                              _      => string.Compare( Flag, other.Flag, StringComparison.OrdinalIgnoreCase )
                                          },

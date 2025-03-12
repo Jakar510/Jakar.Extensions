@@ -8,37 +8,58 @@ namespace Jakar.Extensions;
 [Serializable]
 public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
 {
-    private   bool           _isTemporary;
-    protected DirectoryInfo? _info;
+    private            bool          _isTemporary;
+    protected readonly DirectoryInfo _info;
+    private readonly   string        _fullPath;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = Path.GetFullPath( value.FullPath ); }
-    public static       Equalizer<LocalDirectory> Equalizer         => Equalizer<LocalDirectory>.Default;
-    public static       Sorter<LocalDirectory>    Sorter            => Sorter<LocalDirectory>.Default;
-    public              DateTime                  CreationTimeUtc   { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
-    public              bool                      DoesNotExist      => !Exists;
-    public              bool                      Exists            => Info.Exists;
-    public              string                    FullPath          { get; init; }
-    [JsonIgnore] public DirectoryInfo             Info              => _info ??= new DirectoryInfo( FullPath );
-    bool TempFile.ITempFile.                      IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
-    public              DateTime                  LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
-    public              DateTime                  LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
-    public              string                    Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory?           Parent            => GetParent();
-    public              string                    Root              => Directory.GetDirectoryRoot( FullPath );
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
+    public static Equalizer<LocalDirectory> Equalizer       => Equalizer<LocalDirectory>.Default;
+    public static Sorter<LocalDirectory>    Sorter          => Sorter<LocalDirectory>.Default;
+    public        DateTime                  CreationTimeUtc { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
+    public        bool                      DoesNotExist    => !Exists;
+    public        bool                      Exists          => Info.Exists;
+    public required string FullPath
+    {
+        get => _fullPath;
+        [MemberNotNull( nameof(_fullPath) )]
+        [MemberNotNull( nameof(_info) )]
+        init
+        {
+            _info     = Directory.CreateDirectory( value );
+            _fullPath = _info.FullName;
+        }
+    }
+    [JsonIgnore] public DirectoryInfo   Info              => _info;
+    bool TempFile.ITempFile.            IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
+    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    public              string          Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
+    public              string          Root              => Directory.GetDirectoryRoot( FullPath );
 
 
-    public LocalDirectory() => FullPath = string.Empty;
-    public LocalDirectory( scoped in ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalDirectory( DirectoryInfo                path ) : this( path.FullName ) { }
-    public LocalDirectory( string                       path, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ) ) { }
-    public LocalDirectory( string                       path ) => FullPath = Path.GetFullPath( path );
+    public LocalDirectory() { }
+    [SetsRequiredMembers] public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ) ) { }
+    [SetsRequiredMembers] public LocalDirectory( string path ) => FullPath = path;
+
+#pragma warning disable CS8618, CS9264
+    [SetsRequiredMembers]
+    public LocalDirectory( DirectoryInfo path )
+    {
+        _info     = path;
+        _fullPath = path.FullName;
+    }
+#pragma warning restore CS8618, CS9264
+
+
     public void Dispose()
     {
         GC.SuppressFinalize( this );
         DisposeAsync().CallSynchronously();
     }
+
     public virtual async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
@@ -52,13 +73,13 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public static implicit operator DirectoryInfo( LocalDirectory                  directory ) => directory.Info;
     public static implicit operator ReadOnlySpan<char>( LocalDirectory             directory ) => directory.FullPath;
     public static implicit operator LocalDirectory( DirectoryInfo                  info )      => new(info);
-    public static implicit operator LocalDirectory( ReadOnlySpan<char>             path )      => new(path);
+    public static implicit operator LocalDirectory( ReadOnlySpan<char>             path )      => new(path.ToString());
     public static implicit operator LocalDirectory( string                         path )      => new(path);
     public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
     public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
     public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
     public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator Items( LocalDirectory                          directory ) => new(directory.GetSubFolders());
+    public static implicit operator Directories( LocalDirectory                    directory ) => new(directory.GetSubFolders());
     public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
     public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
     public static implicit operator LocalFile.Files( LocalDirectory                directory ) => new(directory.GetFiles());
@@ -221,7 +242,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     public sealed override string ToString() => FullPath;
 
-    /// <summary> Asynchronously deletes sub-directories and files. </summary>
+    /// <summary> Asynchronously deletes subdirectories and files. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
     /// <exception cref="DirectoryNotFoundException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
@@ -246,7 +267,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         Delete();
 
-        return tasks.WhenAll();
+        return Task.WhenAll( tasks.ToArray() );
     }
 
     /// <summary> Asynchronously deletes files. </summary>
@@ -257,7 +278,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteFilesAsync()
     {
-        List<Task> tasks = new();
+        List<Task> tasks = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -266,10 +287,10 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             tasks.Add( dir.DeleteFilesAsync() );
         }
 
-        return tasks.WhenAll();
+        return Task.WhenAll( tasks.ToArray() );
     }
 
-    /// <summary> Asynchronously deletes sub-directories. </summary>
+    /// <summary> Asynchronously deletes subdirectories. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
     /// <exception cref="DirectoryNotFoundException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
@@ -277,7 +298,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="SecurityException"> </exception>
     public Task DeleteSubFoldersAsync()
     {
-        List<Task> tasks = new();
+        List<Task> tasks = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
@@ -285,7 +306,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             dir.Delete();
         }
 
-        return tasks.WhenAll();
+        return Task.WhenAll( tasks.ToArray() );
     }
 
 
@@ -369,7 +390,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public void Delete() => Info.Delete();
 
 
-    /// <summary> Deletes sub-directories and files. This occurs on another thread in Windows, and is not blocking. </summary>
+    /// <summary> Deletes subdirectories and files. This occurs on another thread in Windows, and is not blocking. </summary>
     /// <param name="recursive"> </param>
     /// <exception cref="UnauthorizedAccessException"> </exception>
     /// <exception cref="DirectoryNotFoundException"> </exception>
@@ -378,7 +399,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public void Delete( bool recursive ) => Info.Delete( recursive );
 
 
-    /// <summary> Deletes sub-directories and files. </summary>
+    /// <summary> Deletes subdirectories and files. </summary>
     /// <exception cref="UnauthorizedAccessException"> </exception>
     /// <exception cref="DirectoryNotFoundException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
@@ -519,11 +540,11 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     [Serializable]
-    public class Items : List<LocalDirectory>
+    public class Directories : List<LocalDirectory>
     {
-        public Items() : base() { }
-        public Items( int                         capacity ) : base( capacity ) { }
-        public Items( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Directories() : base() { }
+        public Directories( int                         capacity ) : base( capacity ) { }
+        public Directories( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 
@@ -559,7 +580,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     [SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" )]
     public class Watcher : FileSystemWatcher
     {
-        public LocalDirectory Directory { get; init; }
+        public readonly LocalDirectory Directory;
 
 
         /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>

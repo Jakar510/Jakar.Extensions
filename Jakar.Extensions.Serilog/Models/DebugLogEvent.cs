@@ -1,47 +1,49 @@
-﻿using System.Collections.Immutable;
-using System.Reflection;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
+using NoAlloq;
 
 
 
 namespace Jakar.Extensions.Serilog;
 
 
-public readonly record struct DebugLogEvent( string Source, string Message, string Caller, LogEventLevel Level, DateTimeOffset TimeStamp, EventDetails? Details = null ) : ILastModified, IComparable<DebugLogEvent?>, IComparable<DebugLogEvent>
+public sealed class DebugLogEvent( string source, string message, string caller, LogEventLevel level, DateTimeOffset timeStamp, EventDetails? details = null ) : BaseClass, ILastModified, IComparable<DebugLogEvent>, IEquatable<DebugLogEvent>
 {
-    private readonly string                        _description = $"[{Level}] {Source}.{Caller} -> {Message}";
-    public static    ValueEqualizer<DebugLogEvent> Equalizer    => ValueEqualizer<DebugLogEvent>.Default;
-    public static    ValueSorter<DebugLogEvent>    Sorter       => ValueSorter<DebugLogEvent>.Default;
-    DateTimeOffset? ILastModified.                 LastModified => TimeStamp;
+    public        DateTimeOffset           TimeStamp    { get; } = timeStamp;
+    public        LogEventLevel            Level        { get; } = level;
+    public        string                   Caller       { get; } = caller;
+    public        string                   Description  { get; } = $"[{level}] {source}.{caller} -> {message}";
+    public        string                   Message      { get; } = message;
+    public        string                   Source       { get; } = source;
+    public static Equalizer<DebugLogEvent> Equalizer    => Equalizer<DebugLogEvent>.Default;
+    public static Sorter<DebugLogEvent>    Sorter       => Sorter<DebugLogEvent>.Default;
+    DateTimeOffset? ILastModified.         LastModified => TimeStamp;
 
 
     private DebugLogEvent( MemberInfo source, string message, string caller, LogEventLevel level, EventDetails? details = null ) : this( source.Name, message, caller, level, details ) { }
     private DebugLogEvent( string     source, string message, string caller, LogEventLevel level, EventDetails? details = null ) : this( source, message, caller, level, DateTimeOffset.UtcNow ) { }
 
 
-    public static DebugLogEvent Create<T>( string message, LogEventLevel level = LogEventLevel.Debug, EventDetails? details = null,                [CallerMemberName] string? caller  = null )                                           => Create( typeof(T), message, level, details, caller );
-    public static DebugLogEvent Create( Type      source,  string        message,                     LogEventLevel level   = LogEventLevel.Debug, EventDetails?              details = null, [CallerMemberName] string? caller = null ) => new(source, message, caller ?? string.Empty, level, details);
-    public static DebugLogEvent Create( string    source,  string        message,                     LogEventLevel level,                         EventDetails?              details = null, [CallerMemberName] string? caller = null ) => new(source, message, caller ?? string.Empty, level, details);
+    public static DebugLogEvent Create<T>( string message, LogEventLevel level = LogEventLevel.Debug, EventDetails? details = null,                [CallerMemberName] string caller  = EMPTY )                                          => Create( typeof(T), message, level, details, caller );
+    public static DebugLogEvent Create( Type      source,  string        message,                     LogEventLevel level   = LogEventLevel.Debug, EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
+    public static DebugLogEvent Create( string    source,  string        message,                     LogEventLevel level,                         EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
 
 
-    public static DebugLogEvent Error<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create<T>( e.Message, LogEventLevel.Error, details, caller );
-    public static DebugLogEvent Error( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
-    public static DebugLogEvent Error( string source, Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<T>( e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
 
 
-    public static DebugLogEvent Fatal<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create<T>( e.Message, LogEventLevel.Fatal, details, caller );
-    public static DebugLogEvent Fatal( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
-    public static DebugLogEvent Fatal( string source, Exception e, EventDetails? details = null, [CallerMemberName] string? caller = null ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<T>( e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
 
 
-    public override string ToString() => _description;
+    public override string ToString() => Description;
     public int CompareTo( DebugLogEvent? other )
     {
         if ( other is null ) { return 1; }
 
-        return CompareTo( other.Value );
-    }
-    public int CompareTo( DebugLogEvent other )
-    {
         int lastModifiedComparison = TimeStamp.CompareTo( other.TimeStamp );
         if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
 
@@ -56,20 +58,31 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
 
         return Comparer<LogEventLevel>.Default.Compare( Level, other.Level );
     }
+    public bool Equals( DebugLogEvent? other )
+    {
+        if ( other is null ) { return false; }
 
+        if ( ReferenceEquals( this, other ) ) { return true; }
 
-    public static bool operator <( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator >( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator <=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Compare( left, right ) <= 0;
-    public static bool operator >=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Compare( left, right ) >= 0;
+        return Description == other.Description && Source == other.Source && Message == other.Message && Caller == other.Caller && Level == other.Level && TimeStamp.Equals( other.TimeStamp );
+    }
+    public override bool Equals( object? obj )                                    => ReferenceEquals( this, obj ) || obj is DebugLogEvent other && Equals( other );
+    public override int  GetHashCode()                                            => HashCode.Combine( Description, Source, Message, Caller, (int)Level, TimeStamp );
+    public static   bool operator ==( DebugLogEvent? left, DebugLogEvent? right ) => Equals( left, right );
+    public static   bool operator !=( DebugLogEvent? left, DebugLogEvent? right ) => !Equals( left, right );
+    public static   bool operator <( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) < 0;
+    public static   bool operator >( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) > 0;
+    public static   bool operator <=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Compare( left, right ) <= 0;
+    public static   bool operator >=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Compare( left, right ) >= 0;
 
 
 
     [SuppressMessage( "ReSharper", "ReturnTypeCanBeEnumerable.Global" )]
     public sealed class Collection() : ConcurrentObservableCollection<DebugLogEvent>( Buffers.DEFAULT_CAPACITY )
     {
-        private readonly ConcurrentBag<DebugLogEvent> _pending  = [];
-        private readonly SynchronizedValue<bool>      _isPaused = new(false);
+        private readonly ConcurrentBag<DebugLogEvent> _pending   = [];
+        private readonly SynchronizedValue<bool>      _isEnabled = new(true);
+        private readonly SynchronizedValue<bool>      _isPaused  = new(false);
         private          DateTimeOffset?              _end;
         private          DateTimeOffset?              _start;
         private          LogEventLevel                _level = LogEventLevel.Verbose;
@@ -89,9 +102,10 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
                 return (DateTimeOffset.UtcNow - MinDate).Days;
             }
         }
+        public bool IsEnabled { get => _isEnabled; set => _isEnabled.Value = value; }
         public bool IsPaused
         {
-            [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isPaused.Value;
+            get => _isPaused.Value;
             private set
             {
                 _isPaused.Value = value;
@@ -105,22 +119,22 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
                 using ( AcquireLock() ) { return buffer.Min( static x => x.TimeStamp ); }
             }
         }
-
-
         public HashSet<string> Sources
         {
             get
             {
-                using ( AcquireLock() ) { return [..buffer.Select( static x => x.Source )]; }
+                using ( AcquireLock() ) { return [..CollectionsMarshal.AsSpan( buffer ).Select( static x => x.Source )]; }
             }
         }
 
 
-        public Collection( IEnumerable<DebugLogEvent> enumerable ) : this() => Add( enumerable );
+        public Collection( params ReadOnlySpan<DebugLogEvent> enumerable ) : this() => Add( enumerable );
 
 
-        protected override bool Filter( DebugLogEvent log )
+        protected override bool Filter( ref readonly DebugLogEvent? log )
         {
+            if ( log is null ) { return false; }
+
             if ( log.Level < _level ) { return false; }
 
             if ( _start.HasValue && log.TimeStamp < _start.Value ) { return false; }
@@ -130,60 +144,7 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
             return string.IsNullOrWhiteSpace( _source ) || string.Equals( _source, log.Source, StringComparison.OrdinalIgnoreCase );
         }
 
-
-        public override void Add( IEnumerable<DebugLogEvent> logs )
-        {
-            if ( IsPaused )
-            {
-                _pending.Add( logs );
-                return;
-            }
-
-            base.Add( logs );
-            Refresh();
-        }
-        public override void Add( params ReadOnlySpan<DebugLogEvent> logs )
-        {
-            if ( IsPaused )
-            {
-                _pending.Add( logs );
-                return;
-            }
-
-            base.Add( logs );
-            Refresh();
-        }
-        public override void Add( DebugLogEvent log )
-        {
-            if ( IsPaused )
-            {
-                _pending.Add( log );
-                return;
-            }
-
-            base.Add( log );
-        }
-        public override async ValueTask AddAsync( ReadOnlyMemory<DebugLogEvent> values, CancellationToken token = default )
-        {
-            if ( IsPaused )
-            {
-                _pending.Add( values.Span );
-                return;
-            }
-
-            await base.AddAsync( values, token );
-        }
-        public override async ValueTask AddAsync( ImmutableArray<DebugLogEvent> values, CancellationToken token = default )
-        {
-            if ( IsPaused )
-            {
-                _pending.Add( values.AsSpan() );
-                return;
-            }
-
-            await base.AddAsync( values, token );
-        }
-        public override async ValueTask AddAsync( IEnumerable<DebugLogEvent> values, CancellationToken token = default )
+        protected override void InternalAdd( IEnumerable<DebugLogEvent> values )
         {
             if ( IsPaused )
             {
@@ -191,19 +152,9 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
                 return;
             }
 
-            await base.AddAsync( values, token );
+            base.InternalAdd( values );
         }
-        public override async ValueTask AddAsync( IAsyncEnumerable<DebugLogEvent> values, CancellationToken token = default )
-        {
-            if ( IsPaused )
-            {
-                await _pending.Add( values, token );
-                return;
-            }
-
-            await base.AddAsync( values, token );
-        }
-        public override async ValueTask AddAsync( DebugLogEvent values, CancellationToken token = default )
+        protected override void InternalAdd( params ReadOnlySpan<DebugLogEvent> values )
         {
             if ( IsPaused )
             {
@@ -211,7 +162,29 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
                 return;
             }
 
-            await base.AddAsync( values, token );
+            base.InternalAdd( values );
+        }
+
+        protected override void InternalAdd( ref readonly DebugLogEvent value, int count )
+        {
+            if ( IsPaused )
+            {
+                for ( int i = 0; i < count; i++ ) { _pending.Add( value ); }
+
+                return;
+            }
+
+            base.InternalAdd( in value, count );
+        }
+        protected override void InternalAdd( ref readonly DebugLogEvent value )
+        {
+            if ( IsPaused )
+            {
+                _pending.Add( value );
+                return;
+            }
+
+            base.InternalAdd( in value );
         }
 
 
@@ -239,6 +212,8 @@ public readonly record struct DebugLogEvent( string Source, string Message, stri
             Refresh();
             return this;
         }
+
+
         public Collection Pause()
         {
             IsPaused = true;

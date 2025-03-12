@@ -15,21 +15,18 @@ namespace Jakar.Extensions;
 [SuppressMessage( "ReSharper", "RedundantVerbatimStringPrefix" )]
 public class Randoms : ObservableClass
 {
-    public const string ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    public const string LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";
-    public const string NUMERIC       = @"0123456789";
-    public const string SPECIAL_CHARS = @"_-.!#@+/*^=>|/\";
-    public const string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
-
-
-    public static char[]                AlphaNumeric { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. ALPHANUMERIC];
-    public static char[]                LowerCase    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. LOWER_CASE];
-    public static char[]                Numeric      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. NUMERIC];
-    public static Random                Random       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(69420);
-    public static RandomNumberGenerator Rng          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = RandomNumberGenerator.Create();
-    public static char[]                SpecialChars { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. SPECIAL_CHARS];
-    public static char[]                UpperCase    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; }      = [.. UPPER_CASE];
-
+    public const           string                ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    public const           string                LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";
+    public const           string                NUMERIC       = @"0123456789";
+    public const           string                SPECIAL_CHARS = @"_-.!#@+/*^=>|/\";
+    public const           string                UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
+    public static readonly char[]                AlphaNumeric  = [.. ALPHANUMERIC];
+    public static readonly char[]                LowerCase     = [.. LOWER_CASE];
+    public static readonly char[]                Numeric       = [.. NUMERIC];
+    public static readonly char[]                SpecialChars  = [.. SPECIAL_CHARS];
+    public static readonly char[]                UpperCase     = [.. UPPER_CASE];
+    public static          Random                Random { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(69420);
+    public static          RandomNumberGenerator Rng    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = RandomNumberGenerator.Create();
 
 
     public static string GenerateToken( int length = 20 )

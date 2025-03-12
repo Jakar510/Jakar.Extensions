@@ -19,7 +19,7 @@ public interface ISeriloggerSettings : INotifyPropertyChanged, INotifyPropertyCh
     public LoggingLevelSwitch LoggingLevel           { get; }
     public bool               TakeScreenshotOnError  { get; }
     public bool               IsDebuggable           { get; set; }
-    public IFilePaths         Paths                  { get; }
+    public FilePaths          Paths                  { get; }
 
 
     public        ISeriloggerSettings Clone();
@@ -65,7 +65,7 @@ public static class CreateSeriloggerSettings
     }
     public static TSeriloggerSettings FromPreferences<TSeriloggerSettings>( this SeriloggerOptions options )
         where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
-        
+
     {
         string sharedKey              = TSeriloggerSettings.SharedKey;
         bool   enableAnalytics        = sharedKey.GetPreference( nameof(ISeriloggerSettings.EnableAnalytics),        true );

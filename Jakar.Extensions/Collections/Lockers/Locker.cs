@@ -13,7 +13,7 @@ namespace Jakar.Extensions;
 public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
     where TCloser : IDisposable
 {
-    TCloser            AcquireLock();
+    Lock.Scope         AcquireLock();
     TCloser            AcquireLock( CancellationToken      token );
     ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
@@ -55,17 +55,16 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     public                  void     Dispose() => _locker?.EnterScope();
 
 
-    public static LockCloser Enter( Lock locker, CancellationToken token )
+    public static LockCloser Enter( Lock locker, CancellationToken token = default )
     {
-        while ( locker.TryEnter( _timeOut ) is false ) { }
-
+        locker.Enter();
         return new LockCloser( locker );
     }
-    public static ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token )
+    public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
-        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { }
+        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { await Task.Delay( 1, token ); }
 
-        return new ValueTask<LockCloser>( new LockCloser( locker ) );
+        return new LockCloser( locker );
     }
 }
 

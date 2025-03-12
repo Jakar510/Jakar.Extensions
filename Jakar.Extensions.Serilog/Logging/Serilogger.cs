@@ -1,49 +1,48 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Serilog.Context;
 using Serilog.Debugging;
 using Serilog.Enrichers.Span;
 using Serilog.Extensions.Logging;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 
 
 namespace Jakar.Extensions.Serilog;
 
 
-[SuppressMessage( "ReSharper", "AsyncVoidLambda" ), SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "StaticMemberInGenericType" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Local" )]
-public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : SeriloggerConstants, ISerilogger, IAsyncDisposable
-    where TSerilogger : Serilogger<TSerilogger, TSeriloggerSettings>, ICreateSerilogger<TSerilogger>
-    where TSeriloggerSettings : class, ICreateSeriloggerSettings<TSeriloggerSettings>
-
+public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDisposable, ICreateSerilogger<Serilogger>
 {
+    public static readonly string                            SharedName = nameof(Serilogger);
+    public readonly        DebugLogEvent.Collection          Events     = [];
+    public readonly        MessageEvent.Collection           Messages   = [];
+    public readonly        Logger                            Logger;
     public readonly        SeriloggerOptions                 Options;
-    public static readonly string                            SharedName = typeof(TSerilogger).Name;
-    private readonly       SerilogLoggerProvider             _provider;
-    private readonly       Synchronized<TSeriloggerSettings> _settings;
+    private readonly       Synchronized<ISeriloggerSettings> _settings;
     private                LocalFile?                        _screenShotAddress;
 
 
-    public Activity                 Activity          { get; protected set; }
-    public bool                     CannotDebug       { get => Settings.EnableApi is false; }
-    Guid IDeviceID.                 DeviceID          => Options.DeviceID;
-    string IDeviceName.             DeviceName        { get => Options.DeviceName; }
-    public bool                     EnableDebugEvents { get; set; }
-    public DebugLogEvent.Collection Events            { get; } = [];
-    public bool                     IsValid           => Options.DeviceID.IsValidID() || Options.DeviceIDLong != 0;
-    public Logger                   Logger            { get; init; }
-    public MessageEvent.Collection  Messages          { get; } = [];
+    public Activity                      Activity    { get; protected set; }
+    public bool                          CannotDebug => Settings.EnableApi is false;
+    Guid IDeviceID.                      DeviceID    => Options.DeviceID;
+    string IDeviceName.                  DeviceName  => Options.DeviceName;
+    DebugLogEvent.Collection ISerilogger.Events      => Events;
+    public bool                          IsValid     => Options.DeviceID.IsValidID() || Options.DeviceIDLong != 0;
+    Logger ISerilogger.                  Logger      => Logger;
+    MessageEvent.Collection ISerilogger. Messages    => Messages;
+    public FilePaths                     Paths       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.Paths; }
+    public SerilogLoggerProvider         Provider    { [Pure, MustDisposeResource] get => new(this, true); }
     public LocalFile? ScreenShotAddress
     {
-        get => _screenShotAddress ??= Settings.Paths.Cache.Join( IFilePaths.SCREEN_SHOT_FILE );
+        get => _screenShotAddress ??= Paths.Cache.Join( FilePaths.SCREEN_SHOT_FILE );
         set
         {
             _screenShotAddress?.Dispose();
             _screenShotAddress = value?.SetTemporary();
         }
     }
-    public ReadOnlyMemory<byte>     ScreenShotData { get;                    protected internal set; }
-    public TSeriloggerSettings      Settings       { get => _settings.Value; set => _settings.Value = value; }
+    public ReadOnlyMemory<byte>     ScreenShotData { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.ScreenShotData; }
+    public ISeriloggerSettings      Settings       { get => _settings.Value; set => _settings.Value = value; }
     ISeriloggerSettings ISerilogger.Settings       => Settings;
 
 
@@ -59,11 +58,17 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
         ActivitySource.AddActivityListener( GetActivityListener() );
         Activity             = GetActivity( Options.AppName );
         Log.Logger           = Logger = CreateLogger( in Options );
-        _settings            = new Synchronized<TSeriloggerSettings>( Options.FromPreferences<TSeriloggerSettings>() );
-        _provider            = new SerilogLoggerProvider( this, true );
+        _settings            = new Synchronized<ISeriloggerSettings>( Options.FromPreferences<SeriloggerSettings>() );
         ISerilogger.Instance = this;
         ClearCache();
     }
+
+
+    public Logger CreateLogger( Type                           type )                                                         => (Logger)Logger.ForContext( type );
+    public Logger CreateLogger( IEnumerable<ILogEventEnricher> enrichers )                                                    => (Logger)Logger.ForContext( enrichers );
+    public Logger CreateLogger( ILogEventEnricher              enricher )                                                     => (Logger)Logger.ForContext( enricher );
+    public Logger CreateLogger( string                         propertyName, object? value, bool destructureObjects = false ) => (Logger)Logger.ForContext( propertyName, value, destructureObjects );
+    public Logger CreateLogger<T>() => (Logger)Logger.ForContext<T>();
     protected virtual Logger CreateLogger( ref readonly SeriloggerOptions options )
     {
         LoggerConfiguration builder = new();
@@ -86,7 +91,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
                                                                    OperationName = "OperationName",
                                                                    ParentId      = "ParentID",
                                                                    SpanId        = "SpanID",
-                                                                   TraceId       = "TraceID",
+                                                                   TraceId       = "TraceID"
                                                                }
                                  } );
 
@@ -100,10 +105,10 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
     }
     public virtual void Dispose()
     {
-        ScreenShotData = ReadOnlyMemory<byte>.Empty;
-        Events.Dispose();
-        _provider.Dispose();
         _screenShotAddress?.Dispose();
+        _screenShotAddress = null;
+        Events.Dispose();
+        Options.Dispose();
         Settings.Dispose();
         Activity.Dispose();
         Logger.Dispose();
@@ -112,12 +117,12 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
     }
     public virtual async ValueTask DisposeAsync()
     {
-        ScreenShotData = ReadOnlyMemory<byte>.Empty;
-        await CastAndDispose( Events );
-        await _provider.DisposeAsync();
-        if ( _screenShotAddress is not null ) { await CastAndDispose( _screenShotAddress ); }
-
+        _screenShotAddress?.Dispose();
+        _screenShotAddress = null;
+        Events.Dispose();
+        Options.Dispose();
         Settings.Dispose();
+        Activity.Dispose();
         Activity.Dispose();
         await Logger.DisposeAsync();
 
@@ -125,14 +130,15 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
     }
 
 
-    public static TSerilogger Create( IServiceProvider provider ) => TSerilogger.Create( provider.GetRequiredService<IOptions<SeriloggerOptions>>().Value );
+    public static Serilogger Create( SeriloggerOptions options )  => new(options);
+    public static Serilogger Create( IServiceProvider  provider ) => Create( provider.GetRequiredService<IOptions<SeriloggerOptions>>().Value );
 
 
-    public TSerilogger ClearCache()
+    public Serilogger ClearCache()
     {
-        foreach ( LocalFile file in Settings.Paths.Cache.GetFiles() ) { file.Delete(); }
+        foreach ( LocalFile file in Paths.Cache.GetFiles() ) { file.Delete(); }
 
-        return (TSerilogger)this;
+        return this;
     }
 
 
@@ -153,8 +159,8 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
     protected virtual bool                   ShouldListenTo( ActivitySource                                    source )   => string.Equals( source.Name, Options.AppName, StringComparison.Ordinal );
     protected virtual ActivitySamplingResult SampleUsingParentId( ref ActivityCreationOptions<string>          options )  => ActivitySamplingResult.AllData;
     protected virtual ActivitySamplingResult Sample( ref              ActivityCreationOptions<ActivityContext> options )  => ActivitySamplingResult.AllData;
-    protected virtual void                   ActivityStarted( Activity                                         activity ) { TrackEvent( activity, $"{nameof(ActivityStarted)}.{activity.DisplayName}" ); }
-    protected virtual void                   ActivityStopped( Activity                                         activity ) { TrackEvent( activity, $"{nameof(ActivityStopped)}.{activity.DisplayName}" ); }
+    protected virtual void                   ActivityStarted( Activity                                         activity ) => TrackEvent( activity, $"{nameof(ActivityStarted)}.{activity.DisplayName}" );
+    protected virtual void                   ActivityStopped( Activity                                         activity ) => TrackEvent( activity, $"{nameof(ActivityStopped)}.{activity.DisplayName}" );
     protected virtual void ExceptionRecorder( Activity activity, Exception exception, ref TagList tags )
     {
         Dictionary<string, object?> dictionary = new(tags.Count);
@@ -164,16 +170,12 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
     }
 
 
-    public static TSerilogger     Get( IServiceProvider         provider )                                                         => provider.GetRequiredService<TSerilogger>();
-    public static ILoggerProvider GetProvider( IServiceProvider provider )                                                         => Get( provider );
-    void ILoggerFactory.          AddProvider( ILoggerProvider  provider )                                                         { }
-    public ILogger                CreateLogger( string          categoryName )                                                     => _provider.CreateLogger( categoryName );
-    public Logger<T>              CreateLogger<T>()                                                                                => new(this);
-    public void                   SetScopeProvider( IExternalScopeProvider scopeProvider )                                         => _provider.SetScopeProvider( scopeProvider );
-    void ILogEventSink.           Emit( LogEvent                           logEvent )                                              => ((ILogEventSink)Logger).Emit( logEvent );
-    public void                   HandleException<T>( T                    _, Exception exception )                                => HandleException( _, exception, Empty );
-    public void                   HandleException<T>( T                    _, Exception exception, params FileData[] attachments ) => Task.Run( async () => await HandleExceptionAsync( _, exception, attachments ) );
-    public ValueTask              HandleExceptionAsync<T>( T               _, Exception exception ) => HandleExceptionAsync( _, exception, Empty );
+    public static                       Serilogger      Get( IServiceProvider         provider )                                              => provider.GetRequiredService<Serilogger>();
+    [MustDisposeResource] public static ILoggerProvider GetProvider( IServiceProvider provider )                                              => Get( provider ).Provider;
+    void ILogEventSink.                                 Emit( LogEvent                logEvent )                                              => ((ILogEventSink)Logger).Emit( logEvent );
+    public void                                         HandleException<T>( T         _, Exception exception )                                => HandleException( _, exception, Empty );
+    public void                                         HandleException<T>( T         _, Exception exception, params FileData[] attachments ) => Task.Run( async () => await HandleExceptionAsync( _, exception, attachments ) );
+    public ValueTask                                    HandleExceptionAsync<T>( T    _, Exception exception ) => HandleExceptionAsync( _, exception, Empty );
     public async ValueTask HandleExceptionAsync<T>( T _, Exception exception, params FileData[] attachments )
     {
         System.Diagnostics.Debug.WriteLine( exception.ToString() );
@@ -181,10 +183,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
 
         if ( exception is OperationCanceledException or CredentialsException ) { return; }
 
-        ScreenShotData = Settings.TakeScreenshotOnError
-                             ? await Options.TakeScreenShot( CancellationToken.None )
-                             : ReadOnlyMemory<byte>.Empty;
-
+        await Options.BufferScreenShot();
         TrackError( _, exception, AppState(), attachments );
     }
 
@@ -195,7 +194,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
         if ( IsEnabled( LogEventLevel.Verbose ) is false ) { return; }
 
         Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(T).Name, caller, caller.GetHashCode() );
-        if ( EnableDebugEvents ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, null, caller ) ); }
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, null, caller ) ); }
     }
     public void TrackEvent<T>( T _, EventDetails properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
@@ -205,7 +204,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
         if ( IsEnabled( LogEventLevel.Verbose ) is false ) { return; }
 
         Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(T).Name, caller, caller.GetHashCode() );
-        if ( EnableDebugEvents ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, properties, caller ) ); }
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, properties, caller ) ); }
     }
     public void TrackEvent<T>( T _, string eventType, EventDetails? properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
@@ -225,7 +224,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
             Debug( "[{ClassName}.{Caller}.{EventId}] {EventType}", typeof(T).Name, caller, eventType.GetHashCode(), eventType );
         }
 
-        if ( EnableDebugEvents ) { Events.Add( DebugLogEvent.Create( typeof(T).Name, eventType, LogEventLevel.Debug, properties, caller ) ); }
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create( typeof(T).Name, eventType, LogEventLevel.Debug, properties, caller ) ); }
     }
 
 
@@ -253,7 +252,7 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
         if ( IsEnabled( LogEventLevel.Error ) is false ) { return; }
 
         Error( exception, "[{ClassName}.{Caller}.{EventId}] {Message}", typeof(T).Name, caller, exception.Message.GetHashCode(), exception.Message );
-        if ( EnableDebugEvents ) { Messages.Enqueue( MessageEvent.Create( exception ) ); }
+        if ( Events.IsEnabled ) { Messages.Enqueue( MessageEvent.Create( exception ) ); }
     }
 
 
@@ -262,37 +261,20 @@ public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings> : Ser
         Dictionary<string, object?> result = new() { [key] = feedback };
         if ( Settings.IncludeAppStateOnError ) { EventDetails.AddAppState( in result, Options.AppName ); }
 
-        await Settings.Paths.FeedbackFile.WriteAsync( result.ToPrettyJson() );
+        await Paths.FeedbackFile.WriteAsync( result.ToPrettyJson() );
     }
 
 
-    public EventDetails AppState() => Options.UpdateEventDetails( EventDetails.AppState( Options.AppName ) );
-
-
-    public async ValueTask<bool> BufferScreenShot( CancellationToken token = default )
-    {
-        ReadOnlyMemory<byte> data = ScreenShotData = await Options.TakeScreenShot( token );
-        return data.IsEmpty is false;
-    }
-    public async ValueTask<LocalFile?> GetScreenShot( CancellationToken token = default )
-    {
-        ReadOnlyMemory<byte> screenShot = await Options.TakeScreenShot( token );
-        return await WriteScreenShot( screenShot, token );
-    }
-    public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );
-    public async ValueTask<LocalFile?> WriteScreenShot( ReadOnlyMemory<byte> memory, CancellationToken token = default )
-    {
-        if ( memory.IsEmpty ) { return null; }
-
-        LocalFile file = Settings.Paths.Screenshot;
-        await file.WriteAsync( memory, token );
-        return file;
-    }
+    public EventDetails          AppState()                                                                        => Options.UpdateEventDetails( EventDetails.AppState( Options.AppName ) );
+    public ValueTask<bool>       BufferScreenShot( CancellationToken   token                           = default ) => Options.BufferScreenShot( token );
+    public ValueTask<LocalFile?> GetScreenShot( CancellationToken      token                           = default ) => Options.GetScreenShot( token );
+    public ValueTask<LocalFile?> WriteScreenShot( CancellationToken    token                           = default ) => Options.WriteScreenShot( token );
+    public ValueTask<LocalFile?> WriteScreenShot( ReadOnlyMemory<byte> memory, CancellationToken token = default ) => Options.WriteScreenShot( memory, token );
 
 
     public void SetDeviceID( Guid deviceID ) => Options.DeviceID = deviceID;
     public void SetDeviceID( long deviceID ) => Options.DeviceIDLong = deviceID;
-    public void SetSettings( TSeriloggerSettings settings )
+    public void SetSettings( SeriloggerSettings settings )
     {
         Settings = settings.Clone();
         Settings.SetPreferences();

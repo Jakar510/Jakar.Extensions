@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Serilog.Core;
 
 
 
@@ -7,7 +8,7 @@ namespace TestMauiApp;
 
 public sealed partial class LogsPage : ContentPage
 {
-    private readonly ILogger                        _logger;
+    private readonly Logger                         _logger;
     public           ObservableCollection<FileLogs> Files          { get; } = new(64);
     public           AsyncRelayCommand              RefreshCommand { get; }
 

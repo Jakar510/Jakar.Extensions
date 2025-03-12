@@ -1,11 +1,15 @@
-﻿namespace TestMauiApp;
+﻿using Serilog.Core;
+
+
+
+namespace TestMauiApp;
 
 
 public partial class MainPage : ContentPage, IDisposable
 {
     private readonly ObservableCollection<string> _collection = [];
     private          int                          _count;
-    private readonly ILogger                      _logger;
+    private readonly Logger                       _logger;
 
     // private readonly System.Collections.ObjectModel.ObservableCollection<string> _collection = [];
 
@@ -31,13 +35,13 @@ public partial class MainPage : ContentPage, IDisposable
     {
         base.OnAppearing();
         Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.CreateVersion7().ToString() ).SetBaggage( "SessionID", _count.ToString() ).AddTag( "X", "Y" );
-        _logger.LogInformation( "{Event}", nameof(OnAppearing) );
+        _logger.Information( "{Event}", nameof(OnAppearing) );
     }
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
         Activity.Current?.AddEvent();
-        _logger.LogInformation( "{Event}", nameof(OnDisappearing) );
+        _logger.Information( "{Event}", nameof(OnDisappearing) );
     }
 
 
@@ -51,7 +55,7 @@ public partial class MainPage : ContentPage, IDisposable
                                              : $"Clicked {_count} times";
 
         Activity.Current?.SetCustomProperty( nameof(_count), _count.ToString() );
-        _logger.LogInformation( "CounterClicked.{Value}", value );
+        _logger.Information( "CounterClicked.{Value}", value );
         if ( _count % 5 == 0 ) { _collection.Clear(); }
 
         _collection.Add( value );

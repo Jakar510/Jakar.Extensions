@@ -25,7 +25,7 @@ public static class MauiProgram
 
         builder.Services.AddHttpClient();
 
-        builder.Logging.AddSerilog( App.Logger );
+        builder.Logging.AddSerilog( App.Logger, true );
         return builder.Build();
     }
 }

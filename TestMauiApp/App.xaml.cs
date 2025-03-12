@@ -5,19 +5,11 @@
 namespace TestMauiApp;
 
 
-public sealed class Serilogger( SeriloggerOptions options ) : Serilogger<Serilogger, SeriloggerSettings>( options ), ICreateSerilogger<Serilogger>
-{
-    public static Serilogger Create( SeriloggerOptions options ) => new(options);
-}
-
-
-
 public sealed partial class App : Application, IDisposable
 {
     public static readonly ActivitySource ActivitySource = new(nameof(TestMauiApp));
-    public static          FilePaths      Paths { get; } = new(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 
-    public static Serilogger Logger { get; } = Serilogger.Create( new SeriloggerOptions
+    public static readonly Serilogger Logger = Serilogger.Create( new SeriloggerOptions
                                                                   {
                                                                       Paths          = Paths,
                                                                       ActivitySource = ActivitySource,
@@ -27,10 +19,11 @@ public sealed partial class App : Application, IDisposable
                                                                       DeviceName     = "DevTest1",
                                                                       AppID          = Guid.NewGuid(),
                                                                       AppName        = TestMauiApp.AppName,
-                                                                      AppVersion     = TestMauiApp.AppVersion
+                                                                      AppVersion     = TestMauiApp.AppVersion,
                                                                   } );
 
-    public new static App Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public new static App       Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public static     FilePaths Paths   { get; } = new(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 
 
     public App() : base()

@@ -5,21 +5,21 @@
 [Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ), JsonObject]
 public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable, ISpanFormattable, ISpanParsable<AppVersion>
 {
-    private const       char                       SEPARATOR = '.';
-    private             string?                    _string;
-    public static readonly AppVersion                 Default               = new();
-    public static       Equalizer<AppVersion>      Equalizer             { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
-    public static       Sorter<AppVersion>         Sorter                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
-    public static       FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public              Format                     Scheme                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int                        Major                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Minor                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Maintenance           { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       MajorRevision         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       MinorRevision         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                       Build                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    public              AppVersionFlags            Flags                 { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
-    [JsonIgnore] public int                        Length                { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    private const          char                       SEPARATOR = '.';
+    private                string?                    _string;
+    public static readonly AppVersion                 Default = new();
+    public static          Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
+    public static          Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public static          FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public                 Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public                 AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    [JsonIgnore] public    int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
 
 
     static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );
@@ -41,7 +41,6 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = flags;
     }
-    public AppVersion( List<int> span, AppVersionFlags flags = default ) : this( CollectionsMarshal.AsSpan( span ), flags ) { }
     public AppVersion( Version version )
     {
         Major         = version.Major;
@@ -53,7 +52,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
         Scheme        = GetFormat( Minor, Maintenance, MajorRevision, MinorRevision, Build );
         Flags         = AppVersionFlags.Stable;
     }
-    public AppVersion( scoped in ReadOnlySpan<int> span, AppVersionFlags flags = default )
+    public AppVersion( AppVersionFlags flags, params ReadOnlySpan<int> span )
     {
         Flags  = flags;
         Scheme = (Format)span.Length;
@@ -105,8 +104,8 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
 
     public static implicit operator AppVersion( string            value ) => Parse( value );
-    public static implicit operator AppVersion( Span<int>         value ) => new(value);
-    public static implicit operator AppVersion( ReadOnlySpan<int> value ) => new(value);
+    public static implicit operator AppVersion( Span<int>         value ) => new(AppVersionFlags.Stable, value);
+    public static implicit operator AppVersion( ReadOnlySpan<int> value ) => new(AppVersionFlags.Stable, value);
     public static implicit operator AppVersion( Version           value ) => new(value);
 
     // TODO: [GeneratedRegex(@"^(\d+\.\d+\.\d+\.\d+)$", OPTIONS, 200 )] private static partial Regex GetParserRegex();
@@ -157,23 +156,18 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
             if ( int.TryParse( value, NumberStyles.Integer, provider, out int n ) ) { return new AppVersion( n ); }
 
-            Debug.WriteLine( value.ToString() );
-            AppVersionFlags flags = AppVersionFlags.Parse( ref value );
-            Debug.WriteLine( value.ToString() );
-
+            AppVersionFlags    flags      = AppVersionFlags.Parse( ref value );
             int                count      = value.Count( SEPARATOR );
-            int                i          = 0;
             Span<int>          result     = stackalloc int[count + 1];
             ReadOnlySpan<char> separators = [SEPARATOR];
+            int                i          = 0;
 
             foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
             {
-                if ( span.IsEmpty ) { continue; }
-
-                result[i++] = int.Parse( span, NumberStyles.Number, provider );
+                if ( span.Length > 0 ) { result[i++] = int.Parse( span, NumberStyles.Number, provider ); }
             }
 
-            return new AppVersion( result, flags );
+            return new AppVersion( flags, result );
         }
         catch ( Exception e ) { throw new ArgumentException( $"Cannot convert '{original}' into {nameof(AppVersion)}", nameof(value), e ); }
     }
@@ -281,6 +275,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
     }
     IEnumerator IEnumerable.     GetEnumerator() => GetEnumerator();
     int IReadOnlyCollection<int>.Count           => Scheme.AsInt();
+    public bool                  IsValid         => ReferenceEquals( this, Default ) is false && this != Default;
 
 
     // public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance.Equals( left, right );

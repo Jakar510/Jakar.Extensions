@@ -10,19 +10,19 @@ using ILogger = Serilog.ILogger;
 namespace Jakar.Extensions.Serilog;
 
 
-public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEventSink, ISupportExternalScope, IExceptionHandler, IValidator, IDeviceName, IDeviceID
+public interface ISerilogger : ILogger, ILogEventSink, IExceptionHandler, IValidator, IDeviceName, IDeviceID // ILoggerFactory, ILoggerProvider, ISupportExternalScope
 {
     public static ISerilogger?             Instance       { get; protected set; }
     public        DebugLogEvent.Collection Events         { get; }
     public        MessageEvent.Collection  Messages       { get; }
     public        Logger                   Logger         { get; }
     public        ISeriloggerSettings      Settings       { get; }
+    public        FilePaths                Paths          { get; }
     public        ReadOnlyMemory<byte>     ScreenShotData { get; }
 
 
-    public Logger<T> CreateLogger<T>();
-    public void      SetDeviceID( Guid deviceID );
-    public void      SetDeviceID( long deviceID );
+    public void SetDeviceID( Guid deviceID );
+    public void SetDeviceID( long deviceID );
 
 
     public void TrackEvent<T>( T _, [CallerMemberName] string caller                                                                             = BaseRecord.EMPTY );
@@ -49,8 +49,8 @@ public interface ISerilogger : ILogger, ILoggerFactory, ILoggerProvider, ILogEve
 public interface ICreateSerilogger<out TSerilogger>
     where TSerilogger : class, ISerilogger
 {
-    public abstract static ILoggerProvider GetProvider( IServiceProvider   provider );
-    public abstract static TSerilogger     Get( IServiceProvider           provider );
-    public abstract static TSerilogger     Create( IServiceProvider        provider );
-    public abstract static TSerilogger     Create( SeriloggerOptions options );
+    public abstract static ILoggerProvider GetProvider( IServiceProvider provider );
+    public abstract static TSerilogger     Get( IServiceProvider         provider );
+    public abstract static TSerilogger     Create( IServiceProvider      provider );
+    public abstract static TSerilogger     Create( SeriloggerOptions     options );
 }

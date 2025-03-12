@@ -5,7 +5,7 @@
 namespace Jakar.Extensions.Serilog;
 
 
-public abstract partial class Serilogger<TSerilogger, TSeriloggerSettings>
+public partial class Serilogger
 {
     /// <summary> Create a Logger that enriches log events via the provided enrichers. </summary>
     /// <param name="enricher"> Enricher that applies in the context. </param>

@@ -58,7 +58,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
         }
     }
     public LoggingLevelSwitch LoggingLevel          { get; } = new(LogEventLevel.Verbose);
-    public IFilePaths         Paths                 => Options.Paths;
+    public FilePaths          Paths                 => Options.Paths;
     public Setting            Screenshot            { get; }
     bool ISeriloggerSettings. TakeScreenshotOnError => Screenshot.Value;
     public SeriloggerOptions  Options               { get; }

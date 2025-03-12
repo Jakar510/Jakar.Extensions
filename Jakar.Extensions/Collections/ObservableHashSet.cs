@@ -81,7 +81,6 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     public virtual bool Contains( TValue value )                 => buffer.Contains( value );
     public         void CopyTo( TValue[] array, int arrayIndex ) => buffer.CopyTo( array, arrayIndex );
 
-    
 
     [Pure, MustDisposeResource]
     protected internal override FilterBuffer<TValue> FilteredValues()
@@ -90,9 +89,9 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
         FilterBuffer<TValue> values = new(count);
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( TValue t in buffer )
+        foreach ( TValue value in buffer )
         {
-            if ( Filter( t ) ) { values.Add( t ); }
+            if ( Filter( in value ) ) { values.Add( in value ); }
         }
 
         return values;

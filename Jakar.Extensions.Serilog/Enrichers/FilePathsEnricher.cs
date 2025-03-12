@@ -27,7 +27,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.ScreenShotAddress ) );
 
                 ReadOnlyMemory<byte> data = _logger.ScreenShotData;
-                if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( IFilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
+                if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
             if ( _logger.Settings.IncludeAppStateOnError )
@@ -39,7 +39,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.OutgoingFile ) );
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.AppDataZipFile ) );
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.AppCacheZipFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.ZipLogsFile ) );
+                tasks.Add( Handle( disposables, _logger.Settings.Paths.LogsZipFile ) );
             }
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();

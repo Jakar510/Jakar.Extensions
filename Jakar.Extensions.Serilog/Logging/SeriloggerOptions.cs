@@ -14,39 +14,70 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace Jakar.Extensions.Serilog;
 
 
-public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<SeriloggerOptions>, IDeviceName
+public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<SeriloggerOptions>, IAppInfo, IDisposable
 {
     private ActivitySource? _source;
 
 
     public          ActivitySource                                           ActivitySource     { get => GetActivitySource(); set => _source = value; }
-    public required Guid                                                     AppID              { get;                        set; }
-    public required string                                                   AppName            { get;                        set; }
-    public required AppVersion                                               AppVersion         { get;                        set; }
-    public          Guid                                                     DebugID            { get;                        set; } = Guid.NewGuid();
-    public          Guid                                                     DeviceID           { get;                        set; } = Guid.NewGuid();
-    public          string                                                   DeviceName         { get;                        set; } = string.Empty;
-    public          Action<LoggerConfiguration>?                             AddNativeLogs      { get;                        set; }
-    public          long                                                     DeviceIDLong       { get;                        set; }
-    public          FileLifecycleHooks?                                      Hooks              { get;                        set; }
-    public          IAsyncLogEventSinkMonitor?                               Monitor            { get;                        set; }
-    public required IFilePaths                                               Paths              { get;                        set; }
-    public          SeqData?                                                 Seq                { get;                        set; }
-    public          ConsoleData?                                             Console            { get;                        set; }
-    public          DebugData?                                               Debug              { get;                        set; }
-    public          CultureInfo                                              CultureInfo        { get;                        set; } = CultureInfo.InvariantCulture;
-    public          Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { get;                        set; } = TakeEmptyScreenShot;
-    public          Func<EventDetails, EventDetails>                         UpdateEventDetails { get;                        set; } = UpdateEventDetailsNoOpp;
+    public          int?                                                     BuildNumber        => AppVersion.Build;
+    public required Guid                                                     AppID              { get; set; }
+    public required string                                                   AppName            { get; set; }
+    public required AppVersion                                               AppVersion         { get; set; }
+    public          Guid                                                     DebugID            { get; set; } = Guid.NewGuid();
+    public          Guid                                                     DeviceID           { get; set; } = Guid.NewGuid();
+    public          string                                                   DeviceName         { get; set; } = string.Empty;
+    public          Action<LoggerConfiguration>?                             AddNativeLogs      { get; set; }
+    public          long                                                     DeviceIDLong       { get; set; }
+    public          FileLifecycleHooks?                                      Hooks              { get; set; }
+    public          IAsyncLogEventSinkMonitor?                               Monitor            { get; set; }
+    public required FilePaths                                                Paths              { get; set; }
+    public          SeqData?                                                 Seq                { get; set; }
+    public          ConsoleData?                                             Console            { get; set; }
+    public          DebugData?                                               Debug              { get; set; }
+    public          CultureInfo                                              CultureInfo        { get; set; } = CultureInfo.InvariantCulture;
+    public          Func<CancellationToken, ValueTask<ReadOnlyMemory<byte>>> TakeScreenShot     { get; set; } = TakeEmptyScreenShot;
+    public          Func<EventDetails, EventDetails>                         UpdateEventDetails { get; set; } = UpdateEventDetailsNoOpp;
     SeriloggerOptions IOptions<SeriloggerOptions>.                           Value              => this;
+    public ReadOnlyMemory<byte>                                              ScreenShotData     { get; internal set; }
+    public bool                                                              IsValid            => AppID.IsValidID() && IsValidDeviceID && string.IsNullOrWhiteSpace( AppName ) is false && AppVersion.IsValid;
+    public bool                                                              IsValidDeviceID    => DeviceID.IsValidID() || DeviceIDLong                                                                != 0;
 
 
     // public RemoteLogs? RemoteLogServer { get; set; }
 
 
+    public void Dispose()
+    {
+        ScreenShotData = ReadOnlyMemory<byte>.Empty;
+        Paths.Dispose();
+        _source?.Dispose();
+        _source = null;
+    }
     private       ActivitySource                  GetActivitySource()                              => _source ??= new ActivitySource( AppName, AppVersion.ToString() );
     public static EventDetails                    UpdateEventDetailsNoOpp( EventDetails  details ) => details;
     public static ValueTask<ReadOnlyMemory<byte>> TakeEmptyScreenShot( CancellationToken token )   => new(ReadOnlyMemory<byte>.Empty);
 
+
+    public async ValueTask<bool> BufferScreenShot( CancellationToken token = default )
+    {
+        ReadOnlyMemory<byte> data = ScreenShotData = await TakeScreenShot( token );
+        return data.IsEmpty is false;
+    }
+    public async ValueTask<LocalFile?> GetScreenShot( CancellationToken token = default )
+    {
+        ReadOnlyMemory<byte> screenShot = await TakeScreenShot( token );
+        return await WriteScreenShot( screenShot, token );
+    }
+    public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );
+    public async ValueTask<LocalFile?> WriteScreenShot( ReadOnlyMemory<byte> memory, CancellationToken token = default )
+    {
+        if ( memory.IsEmpty ) { return null; }
+
+        LocalFile file = Paths.Screenshot;
+        await file.WriteAsync( memory, token );
+        return file;
+    }
 
     public Activity GetActivity( string name, Activity? parent = null, ActivityKind kind = ActivityKind.Internal )
     {

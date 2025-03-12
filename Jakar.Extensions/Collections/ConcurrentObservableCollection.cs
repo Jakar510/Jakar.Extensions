@@ -1,3 +1,7 @@
+using ZXing.Aztec.Internal;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -548,12 +552,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     IEnumerator IEnumerable.                             GetEnumerator()                               => GetEnumerator();
 
 
-    [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public LockCloser AcquireLock()
-    {
-        locker.Enter();
-        return new LockCloser( locker );
-    }
+    [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )] public Lock.Scope            AcquireLock()                               => locker.EnterScope();
     [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )] public LockCloser            AcquireLock( CancellationToken      token ) => LockCloser.Enter( locker, token );
     [MustDisposeResource, MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask<LockCloser> AcquireLockAsync( CancellationToken token ) => LockCloser.EnterAsync( locker, token );
 

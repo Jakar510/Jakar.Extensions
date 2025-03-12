@@ -55,11 +55,11 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public ObservableDictionary( int                                     capacity, IEqualityComparer<TKey> comparer ) : this( new Dictionary<TKey, TValue>( capacity, comparer ) ) { }
 
 
-    public static implicit operator ObservableDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
-    public static implicit operator ObservableDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>              items ) => new(items);
-    public static implicit operator ObservableDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>>        items ) => new(items);
-    public static implicit operator ObservableDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>           items ) => new(items);
-    public static implicit operator ObservableDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>          items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>       items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>> items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>    items ) => new(items);
+    public static implicit operator ObservableDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]              items ) => new(items);
 
 
     public bool ContainsValue( TValue value ) => buffer.ContainsValue( value );
@@ -106,7 +106,6 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
         }
     }
 
-    
 
     [Pure, MustDisposeResource]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
@@ -117,7 +116,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter( pair ) ) { values.Add( pair ); }
+            if ( Filter( in pair ) ) { values.Add( in pair ); }
         }
 
         return values;

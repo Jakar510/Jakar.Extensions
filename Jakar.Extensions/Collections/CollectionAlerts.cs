@@ -41,7 +41,7 @@ public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyColle
     }
 
 
-    protected virtual bool Filter( TValue? value ) => true;
+    protected virtual bool Filter( ref readonly TValue? value ) => true;
 
 
     public virtual IEnumerator<TValue> GetEnumerator()
@@ -52,18 +52,4 @@ public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyColle
     }
     IEnumerator IEnumerable.                                                     GetEnumerator() => GetEnumerator();
     [Pure, MustDisposeResource] protected internal abstract FilterBuffer<TValue> FilteredValues();
-}
-
-
-
-[SuppressMessage( "ReSharper", "ConvertToAutoPropertyWhenPossible" )]
-public record struct FilterBuffer<TValue>( int Capacity ) : IDisposable
-{
-    private readonly IMemoryOwner<TValue>   _owner = MemoryPool<TValue>.Shared.Rent( Capacity );
-    private          int                    _length;
-    public           int                    Capacity               { get; } = Capacity;
-    public readonly  int                    Length                 => _length;
-    public readonly  ReadOnlyMemory<TValue> Memory                 => _owner.Memory[.._length];
-    public           void                   Dispose()              => _owner.Dispose();
-    public           void                   Add( in TValue value ) => _owner.Memory.Span[_length++] = value;
 }
