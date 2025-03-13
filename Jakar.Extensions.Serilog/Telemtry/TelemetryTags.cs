@@ -84,7 +84,7 @@ public class TelemetryTags
         UpdateUserSubscription = nameof(UpdateUserSubscription);
         VerifyLogin            = nameof(VerifyLogin);
     }
-    public void AddPrefix( scoped in ReadOnlySpan<char> prefix )
+    public void AddPrefix( ReadOnlySpan<char> prefix )
     {
         ConnectDatabase        = GetPrefix( prefix, ConnectDatabase,        nameof(ConnectDatabase) );
         AddUser                = GetPrefix( prefix, AddUser,                nameof(AddUser) );
@@ -122,12 +122,12 @@ public class TelemetryTags
     }
 
 
-    private string GetPrefix( scoped in ReadOnlySpan<char> prefix, in string tag, in string defaultTag ) => prefix.IsEmpty
-                                                                                                                ? tag.Length == 0
-                                                                                                                      ? defaultTag
-                                                                                                                      : tag
-                                                                                                                : tag.Length == 0
-                                                                                                                    ? GetResult( prefix, tag )
-                                                                                                                    : GetResult( prefix, defaultTag );
-    private string GetResult( scoped in ReadOnlySpan<char> prefix, scoped in ReadOnlySpan<char> tag ) => $"{prefix}.{tag}";
+    private string GetPrefix( ReadOnlySpan<char> prefix, string tag, string defaultTag ) => prefix.IsEmpty
+                                                                                                ? tag.Length == 0
+                                                                                                      ? defaultTag
+                                                                                                      : tag
+                                                                                                : tag.Length == 0
+                                                                                                    ? GetResult( prefix, tag )
+                                                                                                    : GetResult( prefix, defaultTag );
+    private string GetResult( ReadOnlySpan<char> prefix, ReadOnlySpan<char> tag ) => $"{prefix}.{tag}";
 }

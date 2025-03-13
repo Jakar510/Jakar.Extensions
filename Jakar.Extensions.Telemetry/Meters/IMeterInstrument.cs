@@ -4,36 +4,33 @@
 namespace Jakar.Extensions.Telemetry.Meters;
 
 
+public readonly record struct MeterInstrumentInfo( string Name, string Unit, string? Description, params Pair[]? Tags )
+{
+    public MeterInstrumentInfo( string Name, string Unit, string? Description ) : this( Name, Unit, Description, null ) { }
+}
+
+
+
 public interface IMeterInstrument : IDisposable
 {
-    public string?         Description { get; }
-    public string          Name        { get; }
-    public Pair[]? Tags        { get; }
-    public string          Unit        { get; }
-    public string          Type        { get; }
-    public Reading?        LastValue   { get; }
+    public string              Type { get; }
+    public MeterInstrumentInfo Info { get; }
 }
 
 
 
-public interface IMeterInstrumentReadings : IMeterInstrument
+public interface IMeterInstrumentReadings<TValue> : IMeterInstrument
+    where TValue : IEquatable<TValue>
 {
-    public LinkedList<Reading> Readings { get; }
+    public Reading<TValue>?      LastValue { get; }
+    public List<Reading<TValue>> Readings  { get; }
 }
 
 
 
-public interface ICreateInstrument<out TInstrument> : IMeterInstrumentReadings
-    where TInstrument : ICreateInstrument<TInstrument>
+public interface ICreateInstrument<out TInstrument, TValue> : IMeterInstrumentReadings<TValue>
+    where TInstrument : ICreateInstrument<TInstrument, TValue>
+    where TValue : struct, INumber<TValue>
 {
-    public abstract static TInstrument Create( TelemetryMeter meter, string name, string unit, params Pair[]? tags );
-}
-
-
-
-[DefaultValue( nameof(Empty) )]
-public readonly record struct Reading( JToken Value, DateTimeOffset TimeStamp, params Pair[]? Tags )
-{
-    public static readonly Reading Empty = new(null!, DateTimeOffset.UtcNow, null);
-    public static          Reading Create( JToken value, params Pair[]? tags ) => new(value, DateTimeOffset.UtcNow, tags);
+    public abstract static TInstrument Create( TelemetryMeter<TValue> meter, string name, string unit, string? description, params Pair[]? tags );
 }

@@ -85,7 +85,7 @@ public sealed class TelemetryActivity( string operationName, TelemetryActivityCo
     public TelemetryActivityContext   Context { get => context; init => context = value; }
     public LinkedList<Pair>           Tags    { get;            init; } = [];
     public LinkedList<TelemetryEvent> Events  { get;            init; } = [];
-    public TelemetryMeter.Collection  Meters  { get;            init; } = [];
+    public TelemetryMeters            Meters  { get;            init; } = new();
     public TelemetryActivity? Child
     {
         get => _child;
