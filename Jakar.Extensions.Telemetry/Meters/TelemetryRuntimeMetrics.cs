@@ -1,4 +1,5 @@
-﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
+﻿/*
+// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 03/13/2025  13:03
 
 using System.Diagnostics.Metrics;
@@ -30,10 +31,6 @@ internal static class TelemetryRuntimeMetrics
                                                                 DefaultPrecision    = 1
                                                             };
 
-    // These MUST align to the possible attribute values defined in the semantic conventions (TODO: link to the spec)
-    private static readonly string[] _gcGenNames = ["gen0", "gen1", "gen2", "loh", "poh"];
-
-    private static readonly int _s_MaxGenerations = Math.Min( GC.GetGCMemoryInfo().GenerationInfo.Length, _gcGenNames.Length );
 
     private static readonly TelemetryCounter<long> _s_Exceptions;
 
@@ -94,47 +91,5 @@ internal static class TelemetryRuntimeMetrics
         if ( OperatingSystem.IsBrowser() is false && OperatingSystem.IsTvOS() is false && (OperatingSystem.IsIOS() || OperatingSystem.IsMacCatalyst()) ) { MeterDouble.CreateCounter( GetCpuTime, "dotnet.process.cpu.time", unit: "s", description: "CPU time used by the process." ); }
     }
 
-    private static Reading<long>[] GetGarbageCollectionCounts()
-    {
-        long            collectionsFromHigherGeneration = 0;
-        Reading<long>[] array                           = new Reading<long>[GC.MaxGeneration];
-
-        for ( int gen = GC.MaxGeneration; gen >= 0; --gen )
-        {
-            long collectionsFromThisGeneration = GC.CollectionCount( gen );
-            array[gen]                      = new Reading<long>( collectionsFromThisGeneration - collectionsFromHigherGeneration, new Pair( "gc.heap.generation", _gcGenNames[gen] ) );
-            collectionsFromHigherGeneration = collectionsFromThisGeneration;
-        }
-
-        return array;
-    }
-
-    [UnsupportedOSPlatform( "ios" )]
-    [UnsupportedOSPlatform( "tvos" )]
-    [UnsupportedOSPlatform( "browser" )]
-    [SupportedOSPlatform( "maccatalyst" )]
-    private static Reading<double>[] GetCpuTime()
-    {
-        Debug.Assert( !OperatingSystem.IsBrowser() && !OperatingSystem.IsTvOS() && !(OperatingSystem.IsIOS() && !OperatingSystem.IsMacCatalyst()) );
-        Environment.ProcessCpuUsage processCpuUsage = Environment.CpuUsage;
-        return [new Reading<double>( processCpuUsage.UserTime.TotalSeconds, new Pair( "cpu.mode", "user" ) ), new Reading<double>( processCpuUsage.PrivilegedTime.TotalSeconds, new Pair( "cpu.mode", "system" ) )];
-    }
-
-    private static Reading<long>[] GetHeapSizes()
-    {
-        GCMemoryInfo    gcInfo = GC.GetGCMemoryInfo();
-        Reading<long>[] array  = new Reading<long>[_s_MaxGenerations];
-        for ( int i = 0; i < _s_MaxGenerations; ++i ) { array[i] = new Reading<long>( gcInfo.GenerationInfo[i].SizeAfterBytes, new Pair( "gc.heap.generation", _gcGenNames[i] ) ); }
-
-        return array;
-    }
-
-    private static Reading<long>[] GetHeapFragmentation()
-    {
-        GCMemoryInfo    gcInfo = GC.GetGCMemoryInfo();
-        Reading<long>[] array  = new Reading<long>[_s_MaxGenerations];
-        for ( int i = 0; i < _s_MaxGenerations; ++i ) { array[i] = new Reading<long>( gcInfo.GenerationInfo[i].FragmentationAfterBytes, new Pair( "gc.heap.generation", _gcGenNames[i] ) ); }
-
-        return array;
-    }
 }
+*/
