@@ -6,11 +6,7 @@ public static class AppPreference
 {
     public const string FALSE = "false";
     public const string TRUE  = "true";
-#if NET9_0_OR_GREATER
     private static readonly Lock _lock = new();
-#else
-    private static readonly object _lock = new();
-#endif
     private static IAppPreferences? _source;
 
 
@@ -37,7 +33,7 @@ public static class AppPreference
                                                             NULL  => null,
                                                             TRUE  => true,
                                                             FALSE => false,
-                                                            _     => false
+                                                            _     => string.Equals(TRUE, value, StringComparison.OrdinalIgnoreCase)
                                                         };
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

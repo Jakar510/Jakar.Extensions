@@ -11,7 +11,7 @@ public interface IFuzzyEquals<T> : IEquatable<T>
 public sealed class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer
     where T : struct, IFuzzyEquals<T>
 {
-    public static ValueFuzzyEqualizer<T> Default { get; } = new();
+    public static readonly ValueFuzzyEqualizer<T> Default = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
@@ -47,7 +47,7 @@ public sealed class ValueFuzzyEqualizer<T> : IEqualityComparer<T?>, IEqualityCom
 public sealed class FuzzyEqualizer<T> : IEqualityComparer<T>, IEqualityComparer
     where T : class, IFuzzyEquals<T>
 {
-    public static FuzzyEqualizer<T> Default { get; } = new();
+    public static readonly FuzzyEqualizer<T> Default = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )

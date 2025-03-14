@@ -17,7 +17,7 @@ public sealed class Synchronized<TValue>( TValue value )
 {
     private TValue _value = value;
 
-    public TValue Value { get => Interlocked.CompareExchange( ref _value!, default, default ); set { Interlocked.Exchange( ref _value, value ); } }
+    public TValue Value { get => Interlocked.CompareExchange( ref _value!, null, null ); set => Interlocked.Exchange( ref _value, value ); }
 
 
     public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;

@@ -8,7 +8,8 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
 {
     private readonly ConcurrentBag<IDisposable> _disposables = [];
     public Disposables() : base() { }
-    public Disposables( IEnumerable<IDisposable> enumerable ) => _disposables = new ConcurrentBag<IDisposable>( enumerable );
+    public Disposables( IEnumerable<IDisposable>         enumerable ) => _disposables = [..enumerable];
+    public Disposables( params ReadOnlySpan<IDisposable> enumerable ) => _disposables = [..enumerable];
     public void Dispose()
     {
         foreach ( IDisposable disposable in _disposables ) { disposable.Dispose(); }
@@ -29,7 +30,8 @@ public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisp
 {
     private readonly ConcurrentBag<IAsyncDisposable> _disposables = [];
     public AsyncDisposables() : base() { }
-    public AsyncDisposables( IEnumerable<IAsyncDisposable> enumerable ) => _disposables = new ConcurrentBag<IAsyncDisposable>( enumerable );
+    public AsyncDisposables( IEnumerable<IAsyncDisposable>         enumerable ) => _disposables = [..enumerable];
+    public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => _disposables = [..enumerable];
     public async ValueTask DisposeAsync()
     {
         foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync().ConfigureAwait( false ); }

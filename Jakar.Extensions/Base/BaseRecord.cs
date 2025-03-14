@@ -11,7 +11,7 @@ public record BaseRecord
     public const string EMPTY            = "";
     public const string NULL             = "null";
 
-    
+
     protected static async ValueTask CastAndDispose( IDisposable? resource )
     {
         switch ( resource )
@@ -31,7 +31,7 @@ public record BaseRecord
 
 
 
-public abstract record BaseRecord<TRecord> : BaseRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable
+public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecord>, IComparable
     where TRecord : BaseRecord<TRecord>
 {
     public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }

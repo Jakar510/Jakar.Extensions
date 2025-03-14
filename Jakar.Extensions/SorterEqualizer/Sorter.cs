@@ -4,7 +4,7 @@
 public sealed class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer
     where T : struct, IComparable<T>
 {
-    public static ValueSorter<T> Default { get; } = new();
+    public static readonly ValueSorter<T> Default = new();
 
 
     public int Compare( object? x, object? y )
@@ -24,7 +24,7 @@ public sealed class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer
 public sealed class Sorter<T> : IComparer<T>, IComparer
     where T : class, IComparable<T>
 {
-    public static Sorter<T> Default { get; } = new();
+    public static readonly Sorter<T> Default = new();
 
 
     public int Compare( object? x, object? y )
