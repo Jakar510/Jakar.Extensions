@@ -19,3 +19,21 @@ public interface IOnDisappearing
 
 
 public interface IChangeable : IOnAppearing, IOnDisappearing;
+
+
+
+public interface IOnAppearingAsync
+{
+    Task OnAppearingAsync( CancellationToken token );
+}
+
+
+
+public interface IOnDisappearingAsync
+{
+    Task OnDisappearingAsync( CancellationToken token );
+}
+
+
+
+public interface IChangeableAsync : IOnAppearingAsync, IOnDisappearingAsync;

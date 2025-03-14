@@ -26,22 +26,18 @@ public sealed class Synchronized<TValue>( TValue value )
 
 
 public sealed class SynchronizedValue<TValue>( TValue value )
-    where TValue : struct
 {
     private readonly Lock   _lock  = new();
     private          TValue _value = value;
-
 
     public TValue Value
     {
         get
         {
-            // return Interlocked.CompareExchange( ref _value!, default, default );
             lock (_lock) { return _value; }
         }
         set
         {
-            // Interlocked.Exchange( ref _value, value );
             lock (_lock) { _value = value; }
         }
     }
