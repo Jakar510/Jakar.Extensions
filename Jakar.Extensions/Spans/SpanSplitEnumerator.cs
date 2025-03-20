@@ -19,7 +19,7 @@ public ref struct SpanSplitEnumerator<T>
     public LineSplitEntry<T> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> separators )
+    public SpanSplitEnumerator( scoped ref readonly ReadOnlySpan<T> span, scoped ref readonly ReadOnlySpan<T> separators )
     {
         if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 

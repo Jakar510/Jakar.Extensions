@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 /// <summary> An empty scope without any logic </summary>
 public sealed class NullScope : IDisposable
 {
-    public static NullScope Instance { get; } = new();
+    public static readonly NullScope Instance = new();
 
     private NullScope() { }
 

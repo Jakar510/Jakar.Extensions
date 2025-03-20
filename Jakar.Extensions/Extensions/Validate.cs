@@ -19,12 +19,19 @@ public static partial class Validate
     public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static bool IsDemo( this string value ) => value.AsSpan().IsDemo();
-    public static bool IsDemo( this ReadOnlySpan<char> value )
+    public static bool IsDemo( this string value, params ReadOnlySpan<string> options ) => value.AsSpan().IsDemo( options );
+    public static bool IsDemo( this ReadOnlySpan<char> value, params ReadOnlySpan<string> options )
     {
         if ( value.IsEmpty ) { return false; }
 
-        return value.CompareTo( _demo, StringComparison.OrdinalIgnoreCase ) == 0;
+        if ( value.Contains( _demo, StringComparison.OrdinalIgnoreCase ) ) { return true; }
+
+        foreach ( string option in options )
+        {
+            if ( value.Contains( option, StringComparison.OrdinalIgnoreCase ) ) { return true; }
+        }
+
+        return false;
     }
 
 

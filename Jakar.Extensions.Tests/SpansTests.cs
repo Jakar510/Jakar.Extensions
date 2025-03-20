@@ -38,7 +38,9 @@ public class SpansTests : Assert
     [Test, TestCase( ALPHANUMERIC, "65bc", true )]
     public void ContainsAny( string value, string other, bool expected )
     {
-        bool results = Spans.ContainsAny( value, other );
+        ReadOnlySpan<char> valueSpan = value;
+        ReadOnlySpan<char> otherSpan = other;
+        bool               results   = Spans.ContainsAny( value, other );
         this.AreEqual( expected, results );
     }
 
@@ -62,7 +64,8 @@ public class SpansTests : Assert
     [Test, TestCase( "", true ), TestCase( "  ", true ), TestCase( "\t", true ), TestCase( " \t ", true ), TestCase( "FULL", false ), TestCase( "   VALUES", false )]
     public void IsNullOrWhiteSpace( string value, bool expected )
     {
-        bool results = Spans.IsNullOrWhiteSpace( value );
+        ReadOnlySpan<char> valueSpan = value;
+        bool               results   = valueSpan.IsNullOrWhiteSpace();
         this.AreEqual( expected, results );
     }
 
@@ -70,7 +73,9 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC, 0 ), TestCase( NUMERIC, 2 )]
     public void Enumerate( string value, int start )
     {
-        foreach ( (int index, char c) in Spans.Enumerate<char>( value, start ) )
+        ReadOnlySpan<char> valueSpan = value;
+
+        foreach ( (int index, char c) in Spans.Enumerate<char>( in valueSpan, start ) )
         {
             Console.WriteLine( $"{index} : {start}" );
             this.AreEqual( value[index], c );
@@ -83,7 +88,8 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC, '9', 9 ), TestCase( NUMERIC, '0', 0 ), TestCase( NUMERIC, '5', 5 )]
     public void LastIndexOf( string value, char c, int expected )
     {
-        int results = Spans.LastIndexOf( value, c, value.Length );
+        ReadOnlySpan<char> valueSpan = value;
+        int                results   = Spans.LastIndexOf( in valueSpan, c, value.Length );
         this.AreEqual( expected, results );
     }
 
@@ -91,7 +97,8 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC, '9', 1 ), TestCase( NUMERIC + NUMERIC, '9', 2 )]
     public void Count( string value, char c, int expected )
     {
-        int results = Spans.Count( value, c );
+        ReadOnlySpan<char> valueSpan = value;
+        int                results   = Spans.Count( in valueSpan, c );
         this.AreEqual( expected, results );
     }
 
@@ -99,7 +106,8 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC ), TestCase( ALPHANUMERIC )]
     public void AsBytes( string value )
     {
-        ReadOnlySpan<byte> results = Spans.AsBytes( value );
+        ReadOnlySpan<char> valueSpan = value;
+        ReadOnlySpan<byte> results   = Spans.AsBytes( in valueSpan );
         this.AreEqual( Encoding.Unicode.GetBytes( value ), results );
     }
 
@@ -127,8 +135,9 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC, '-', $"{NUMERIC}-----" ), TestCase( UPPER_CASE, '-', $"{UPPER_CASE}-----" )]
     public void TryCopyTo( string value, char c, string expected )
     {
-        Span<char> span = stackalloc char[expected.Length];
-        this.True( Spans.TryCopyTo( value, ref span, c ) );
+        Span<char>         span      = stackalloc char[expected.Length];
+        ReadOnlySpan<char> valueSpan = value;
+        this.True( Spans.TryCopyTo( in valueSpan, ref span, c ) );
         string result = span.ToString();
         this.AreEqual<char>( expected, result );
     }
@@ -198,7 +207,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Max( params double[] values )
     {
-        double results = Spans.Max( values, double.MinValue );
+        ReadOnlySpan<double> valueSpan = values;
+        double               results   = valueSpan.Max( double.MinValue );
         this.AreEqual( values.Max(), results );
     }
 
@@ -206,7 +216,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Min( params double[] values )
     {
-        double results = Spans.Min( values, double.MaxValue );
+        ReadOnlySpan<double> valueSpan = values;
+        double               results   = valueSpan.Min( double.MaxValue );
         this.AreEqual( values.Min(), results );
     }
 
@@ -214,7 +225,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Sum( params double[] values )
     {
-        double results = Spans.Sum<double>( values );
+        ReadOnlySpan<double> valueSpan = values;
+        double               results   = valueSpan.Sum();
         this.AreEqual( values.Sum(), results );
     }
 
@@ -222,7 +234,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void First( params double[] values )
     {
-        double results = Spans.First<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> valueSpan = values;
+        double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
         this.AreEqual( values.First( IsDevisableByTwo ), results );
     }
 
@@ -230,7 +243,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void FirstOrDefault( params double[] values )
     {
-        double results = Spans.FirstOrDefault<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> valueSpan = values;
+        double               results   = valueSpan.FirstOrDefault( IsDevisableByTwo );
         this.AreEqual( values.FirstOrDefault( IsDevisableByTwo ), results );
     }
 
@@ -244,13 +258,15 @@ public class SpansTests : Assert
         {
             Catch( () =>
                    {
-                       double results = Spans.Single<double>( values, IsDevisableByTwo );
+                       ReadOnlySpan<double> valueSpan = values;
+                       double               results   = valueSpan.Single( IsDevisableByTwo );
                        this.AreEqual( values.Single( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
-            double results = Spans.Single<double>( values, IsDevisableByTwo );
+            ReadOnlySpan<double> valueSpan = values;
+            double               results   = valueSpan.Single( IsDevisableByTwo );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
@@ -265,13 +281,15 @@ public class SpansTests : Assert
         {
             Catch( () =>
                    {
-                       double results = Spans.SingleOrDefault<double>( values, IsDevisableByTwo );
+                       ReadOnlySpan<double> valueSpan = values;
+                       double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
                        this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
-            double results = Spans.SingleOrDefault<double>( values, IsDevisableByTwo );
+            ReadOnlySpan<double> valueSpan = values;
+            double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
@@ -280,23 +298,26 @@ public class SpansTests : Assert
     [Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Where( params double[] values )
     {
-        Span<double> results = Spans.Where<double>( values, IsDevisableByTwo );
-        this.AreEqual<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
+        using LinkSpan<double> link    = new(values);
+        using LinkSpan<double> results = link.Where( IsDevisableByTwo );
+        this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results.ReadOnlySpan );
     }
 
 
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void WhereValues( params double[] values )
     {
-        Span<double> results = Spans.Where<double>( values, IsDevisableByTwo );
-        this.AreEqual<double>( values.Where( IsDevisableByTwo ).ToArray(), results );
+        using LinkSpan<double> link    = new(values);
+        using LinkSpan<double> results = link.Where( IsDevisableByTwo );
+        this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results.ReadOnlySpan );
     }
 
 
     [Test, TestCase( NUMERIC, '9', true )]
     public void EndsWith( string value, char c, bool expected )
     {
-        bool results = Spans.EndsWith( value, c );
+        ReadOnlySpan<char> valueSpan = value;
+        bool               results   = Spans.EndsWith( in valueSpan, c );
         this.AreEqual( expected, results );
     }
 
@@ -304,17 +325,8 @@ public class SpansTests : Assert
     [Test, TestCase( NUMERIC, "0", true )]
     public void StartsWith( string value, string c, bool expected )
     {
-        bool results = Spans.StartsWith<char>( value, c );
-        this.AreEqual( expected, results );
-    }
-
-
-    [Test, TestCase( "EMPTY", true ), TestCase( "VALUES", true ), TestCase( ALPHANUMERIC, true )]
-    public void AsSpan( string value, bool expected )
-    {
-        ReadOnlySpan<char> span    = value;
-        ReadOnlySpan<char> result  = span.AsSpan();
-        bool               results = result.SequenceEqual( span );
+        ReadOnlySpan<char> valueSpan = value;
+        bool               results   = Spans.StartsWith( in valueSpan, c );
         this.AreEqual( expected, results );
     }
 
@@ -322,29 +334,30 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a154dbz123", "XYZ", "Abc_a154dbz123XYZ" )]
     public void Join( string value, string other, string expected )
     {
-        ReadOnlySpan<char> span   = Spans.Join<char>( value, other );
-        string             result = span.ToString();
-        this.AreEqual( expected, result );
+        ReadOnlySpan<char>   valueSpan = value;
+        ReadOnlySpan<char>   otherSpan = other;
+        using LinkSpan<char> result    = LinkSpan<char>.Join( in valueSpan, in otherSpan );
+        this.AreEqual( expected, result.ReadOnlySpan );
     }
 
 
     [Test, TestCase( "Abc_a1524dbz123", "1", "Abc_a524dbz23" ), TestCase( "Abc_a1524dbz123", "2", "Abc_a154dbz13" )]
     public void RemoveAll( string value, string other, string expected )
     {
-        Span<char> span = stackalloc char[value.Length];
-        value.CopyTo( span );
-
-        Span<char> result = span.RemoveAll( other );
-        this.AreEqual( expected, result.ToString() );
+        using LinkSpan<char> link   = new(value);
+        using LinkSpan<char> result = link.Remove( other );
+        this.AreEqual( expected, result.ReadOnlySpan );
     }
 
 
     [Test, TestCase( "Abc_a1524dbz123", "1", "z", "Abc_az524dbzz23" ), TestCase( "Abc_a1524dbz123", "2", "4", "Abc_a1544dbz143" )]
     public void Replace( string value, string oldValue, string newValue, string expected )
     {
-        this.AreEqual( expected, value.Replace( oldValue, newValue ) );
-        ReadOnlySpan<char> result = Spans.Replace<char>( value, oldValue, newValue );
-        this.AreEqual( expected, result.ToString() );
+        using LinkSpan<char> link         = new(value);
+        ReadOnlySpan<char>   oldValueSpan = oldValue;
+        ReadOnlySpan<char>   newValueSpan = newValue;
+        using LinkSpan<char> result       = link.Replace( in oldValueSpan, in newValueSpan );
+        this.AreEqual( expected, result.ReadOnlySpan );
     }
 
 

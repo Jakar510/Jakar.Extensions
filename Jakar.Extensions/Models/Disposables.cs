@@ -22,6 +22,40 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
     public void                     Add( params ReadOnlySpan<IDisposable> disposables ) => _disposables.Add( disposables );
     public IEnumerator<IDisposable> GetEnumerator()                                     => _disposables.GetEnumerator();
     IEnumerator IEnumerable.        GetEnumerator()                                     => GetEnumerator();
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static void CastAndDispose<T>( ref T? resource )
+        where T : IDisposable
+    {
+        resource?.Dispose();
+        resource = default;
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static ValueTask CastAndDisposeAsync<T>( ref T? resource )
+        where T : class, IDisposable
+    {
+        ValueTask task = CastAndDisposeAsync( resource );
+        resource = null;
+        return task;
+    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    public static async ValueTask CastAndDisposeAsync<T>( T? resource )
+        where T : class, IDisposable
+    {
+        switch ( resource )
+        {
+            case null: return;
+
+            case IAsyncDisposable resourceAsyncDisposable:
+                await resourceAsyncDisposable.DisposeAsync();
+                return;
+
+            default:
+                resource.Dispose();
+                return;
+        }
+    }
 }
 
 

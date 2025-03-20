@@ -77,16 +77,16 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         buffer.Insert( i, value );
         Added( value, i );
     }
-    protected internal virtual void InternalInsert( int index, IEnumerable<TValue> collection )
+    protected internal virtual void InternalInsert( int startIndex, IEnumerable<TValue> collection )
     {
         ThrowIfReadOnly();
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, in value ); }
+        foreach ( (int i, TValue? value) in collection.Enumerate( startIndex ) ) { InternalInsert( i, in value ); }
     }
-    protected internal virtual void InternalInsert( int index, params ReadOnlySpan<TValue> collection )
+    protected internal virtual void InternalInsert( int startIndex, params ReadOnlySpan<TValue> collection )
     {
         ThrowIfReadOnly();
-        EnsureCapacity( collection.Length );
-        foreach ( (int i, TValue? value) in collection.Enumerate( index ) ) { InternalInsert( i, in value ); }
+        EnsureCapacity( startIndex + collection.Length );
+        foreach ( (int i, TValue? value) in collection.Enumerate( startIndex ) ) { InternalInsert( i, in value ); }
     }
     protected internal virtual void InternalInsert( int index, ref readonly TValue value, int count )
     {
@@ -96,19 +96,19 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    protected internal virtual void InternalReplace( int index, ref readonly TValue value, int count )
+    protected internal virtual void InternalReplace( int startIndex, ref readonly TValue value, int count )
     {
         ThrowIfReadOnly();
         EnsureCapacity( count );
-        for ( int i = 0; i < count; i++ ) { buffer[i + index] = value; }
+        for ( int i = 0; i < count; i++ ) { buffer[i + startIndex] = value; }
 
         Reset();
     }
-    protected internal virtual void InternalReplace( int index, params ReadOnlySpan<TValue> value )
+    protected internal virtual void InternalReplace( int startIndex, params ReadOnlySpan<TValue> value )
     {
         ThrowIfReadOnly();
         EnsureCapacity( value.Length );
-        for ( int i = 0; i < value.Length; i++ ) { buffer[i + index] = value[i]; }
+        for ( int i = 0; i < value.Length; i++ ) { buffer[i + startIndex] = value[i]; }
 
         Reset();
     }
@@ -466,17 +466,17 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void CopyTo( TValue[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 ) => buffer.CopyTo( sourceStartIndex, array, length, destinationStartIndex );
 
 
-    public virtual void Insert( int index, TValue                              value )            => InternalInsert( index, in value );
-    public virtual void Insert( int index, TValue                              value, int count ) => InternalInsert( index, in value, count );
-    public virtual void Insert( int index, IEnumerable<TValue>                 collection ) => InternalInsert( index, collection );
-    public virtual void Insert( int index, params       ReadOnlySpan<TValue>   values )     => InternalInsert( index, values );
-    public virtual void Insert( int index, ref readonly ReadOnlyMemory<TValue> collection ) => Insert( index, collection.Span );
-    public virtual void Insert( int index, ref readonly ImmutableArray<TValue> collection ) => Insert( index, collection.AsSpan() );
+    public virtual void Insert( int index,      TValue                              value )            => InternalInsert( index,      in value );
+    public virtual void Insert( int startIndex, TValue                              value, int count ) => InternalInsert( startIndex, in value, count );
+    public virtual void Insert( int startIndex, IEnumerable<TValue>                 collection ) => InternalInsert( startIndex, collection );
+    public virtual void Insert( int startIndex, params       ReadOnlySpan<TValue>   values )     => InternalInsert( startIndex, values );
+    public virtual void Insert( int startIndex, ref readonly ReadOnlyMemory<TValue> collection ) => Insert( startIndex, collection.Span );
+    public virtual void Insert( int startIndex, ref readonly ImmutableArray<TValue> collection ) => Insert( startIndex, collection.AsSpan() );
 
 
-    public         void Replace( int     index, TValue                      value, int count = 1 ) => InternalReplace( index, in value, count );
-    public         void Replace( int     index, params ReadOnlySpan<TValue> values ) => InternalReplace( index, values );
-    public virtual void RemoveRange( int start, int                         count )  => InternalRemove( start, count );
+    public         void Replace( int     startIndex, TValue                      value, int count = 1 ) => InternalReplace( startIndex, in value, count );
+    public         void Replace( int     startIndex, params ReadOnlySpan<TValue> values ) => InternalReplace( startIndex, values );
+    public virtual void RemoveRange( int startIndex, int                         count )  => InternalRemove( startIndex, count );
 
 
     public virtual int  Remove( Func<TValue, bool>                  match )                                          => InternalRemove( match );

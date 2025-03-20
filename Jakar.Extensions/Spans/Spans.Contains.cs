@@ -12,32 +12,32 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool ContainsAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static bool ContainsAny<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.ContainsAny( value );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool ContainsAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static bool ContainsAnyExcept<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.ContainsAnyExcept( value );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int IndexOfAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static int IndexOfAnyExcept<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.IndexOfAnyExcept( value );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int IndexOfAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static int IndexOfAny<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.IndexOfAny( value );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int LastIndexOfAny<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static int LastIndexOfAny<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.LastIndexOfAny( value );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int LastIndexOfAnyExcept<T>( scoped in ReadOnlySpan<T> span, SearchValues<T> value )
+    public static int LastIndexOfAnyExcept<T>( scoped ref readonly ReadOnlySpan<T> span, SearchValues<T> value )
         where T : IEquatable<T> => span.LastIndexOfAnyExcept( value );
 
 
-    public static bool Contains( this Span<char>         span, scoped in ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
-    public static bool Contains( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
+    public static bool Contains( this Span<char>         span, params ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    public static bool Contains( this ReadOnlySpan<char> span, params ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
 
 
     public static bool Contains<T>( Span<T> span, T value )
@@ -52,12 +52,12 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this Span<T> span, scoped in T value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this Span<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
     {
         ReadOnlySpan<T> temp = span;
         return temp.Contains( value, comparer );
     }
-    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in T value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
     {
         if ( span.IsEmpty ) { return false; }
 
@@ -70,12 +70,12 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this Span<T> span, scoped in ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this Span<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
     {
         ReadOnlySpan<T> temp = span;
         return temp.Contains( value, comparer );
     }
-    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
     {
         Debug.Assert( comparer is not null );
         if ( span.IsEmpty || value.IsEmpty ) { return false; }
@@ -94,7 +94,7 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value )
+    public static bool Contains<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
@@ -110,7 +110,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
+    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -121,7 +121,7 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
+    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -132,7 +132,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAny( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> values )
+    public static bool ContainsAny( this ReadOnlySpan<char> span, params ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -142,7 +142,7 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> values )
+    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
         foreach ( T c in values )
@@ -153,7 +153,7 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsNone( this ReadOnlySpan<char> span, scoped in ReadOnlySpan<char> values )
+    public static bool ContainsNone( this ReadOnlySpan<char> span, params ReadOnlySpan<char> values )
     {
         foreach ( char c in values )
         {
@@ -167,13 +167,13 @@ public static partial class Spans
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
     public static bool EndsWith<T>( scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
-    public static bool EndsWith<T>( scoped ref readonly Span<T> span, in ReadOnlySpan<T> value )
+    public static bool EndsWith<T>( scoped ref readonly Span<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         ReadOnlySpan<T> temp = span;
         return temp.EndsWith( value );
     }
-    public static bool EndsWith<T>( scoped ref readonly ReadOnlySpan<T> span, in ReadOnlySpan<T> value )
+    public static bool EndsWith<T>( scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( span.IsEmpty ) { return false; }
@@ -195,13 +195,13 @@ public static partial class Spans
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
     public static bool StartsWith<T>( scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[0].Equals( value );
-    public static bool StartsWith<T>( scoped ref readonly Span<T> span, scoped in ReadOnlySpan<T> value )
+    public static bool StartsWith<T>( scoped ref readonly Span<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         ReadOnlySpan<T> temp = span;
         return temp.StartsWith( value );
     }
-    public static bool StartsWith<T>( scoped ref readonly ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> value )
+    public static bool StartsWith<T>( scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( span.IsEmpty ) { return false; }

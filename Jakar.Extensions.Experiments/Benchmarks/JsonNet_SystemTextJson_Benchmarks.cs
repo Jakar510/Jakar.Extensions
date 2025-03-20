@@ -195,7 +195,7 @@ public sealed class NodeFaker : Faker<Node>
             return Generate( (int)depth ).ToArray();
         }
 
-        return Array.Empty<Node>();
+        return [];
     }
 }
 
@@ -203,7 +203,7 @@ public sealed class NodeFaker : Faker<Node>
 
 public sealed record Node
 {
-    public Node[]         Children    { get; init; } = Array.Empty<Node>();
+    public Node[]         Children    { get; init; } = [];
     public DateTimeOffset Date        { get; init; }
     public string         Description { get; init; } = string.Empty;
     public string         Name        { get; init; } = string.Empty;

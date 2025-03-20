@@ -1,6 +1,9 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/10/2022  10:26 AM
 
+using JetBrains.Annotations;
+
+
 #pragma warning disable IDE0302 // Collection init can be simplified
 
 
@@ -84,32 +87,51 @@ public class SpansBenchmarks
     [Benchmark]
     public bool ContainsAny()
     {
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
-
+        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
         return Spans.ContainsAny( Value, buffer );
     }
 
     [Benchmark]
     public bool ContainsNone()
     {
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
-
+        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
         return Spans.ContainsNone( Value, buffer );
     }
 
-    [Benchmark] public bool EndsWith()           => Spans.EndsWith( Value, '1' );
-    [Benchmark] public bool IsNullOrWhiteSpace() => Spans.IsNullOrWhiteSpace( Value );
-    [Benchmark] public bool StartsWith()         => Spans.StartsWith( Value, '1' );
-
-
     [Benchmark]
-    public ReadOnlySpan<char> AsSpan()
+    public bool EndsWith()
     {
         ReadOnlySpan<char> span = Value;
-        return span.AsSpan();
+        return Spans.EndsWith( in span, '1' );
+    }
+    [Benchmark]
+    public bool IsNullOrWhiteSpace()
+    {
+        ReadOnlySpan<char> span = Value;
+        return span.IsNullOrWhiteSpace();
+    }
+    [Benchmark]
+    public bool StartsWith()
+    {
+        ReadOnlySpan<char> span = Value;
+        return Spans.StartsWith( in span, '1' );
     }
 
-    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
+
+    [Benchmark, MustDisposeResource]
+    public LinkSpan<char> AsBuffer()
+    {
+        ReadOnlySpan<char> span = Value;
+        return span.AsBuffer();
+    }
+
+    [Benchmark, MustDisposeResource]
+    public LinkSpan<char> Join()
+    {
+        ReadOnlySpan<char> value    = Value;
+        ReadOnlySpan<char> newValue = NEW_VALUE;
+        return LinkSpan<char>.Join( in value, in newValue );
+    }
 
     [Benchmark]
     public ReadOnlySpan<char> RemoveAll_Params()
@@ -117,17 +139,39 @@ public class SpansBenchmarks
         Span<char> span = stackalloc char[Value.Length];
         Value.CopyTo( span );
 
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
+        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
 
-        Span<char> result = span.RemoveAll( buffer );
+        Span<char> result = span.RemoveAll( in buffer );
         return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
     }
 
 
-    [Benchmark] public void       RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
-    [Benchmark] public Span<char> Replace()          => Spans.Replace<char>( Value, OLD, NEW_VALUE );
+    [Benchmark]
+    public void RemoveAll_Single()
+    {
+        ReadOnlySpan<char> value = Value;
+        Spans.RemoveAll( in value, '1' );
+    }
+    [Benchmark, MustDisposeResource]
+    public LinkSpan<char> Replace()
+    {
+        LinkSpan<char>     value    = new(Value);
+        ReadOnlySpan<char> oldValue = OLD;
+        ReadOnlySpan<char> newValue = NEW_VALUE;
+        return value.Replace( in oldValue, in newValue );
+    }
 
 
-    [Benchmark] public ReadOnlySpan<char> Slice_False() => Spans.Slice( Value, 'z', '4', false );
-    [Benchmark] public ReadOnlySpan<char> Slice_True()  => Spans.Slice( Value, 'z', '4', true );
+    [Benchmark]
+    public ReadOnlySpan<char> Slice_False()
+    {
+        ReadOnlySpan<char> value = Value;
+        return value.Slice( 'z', '4', false );
+    }
+    [Benchmark]
+    public ReadOnlySpan<char> Slice_True()
+    {
+        ReadOnlySpan<char> value = Value;
+        return value.Slice( 'z', '4', true );
+    }
 }

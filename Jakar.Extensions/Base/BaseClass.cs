@@ -11,20 +11,13 @@ public class BaseClass
     public const string EMPTY            = BaseRecord.EMPTY;
     public const string NULL             = BaseRecord.NULL;
 
-    
-    protected static async ValueTask CastAndDispose( IDisposable? resource )
-    {
-        switch ( resource )
-        {
-            case null: return;
 
-            case IAsyncDisposable resourceAsyncDisposable:
-                await resourceAsyncDisposable.DisposeAsync();
-                return;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected static void ClearAndDispose<T>( ref T? field )
+        where T : IDisposable => Disposables.CastAndDispose( ref field );
 
-            default:
-                resource.Dispose();
-                return;
-        }
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    protected static ValueTask ClearAndDisposeAsync<T>( ref T? resource )
+        where T : class, IDisposable => Disposables.CastAndDisposeAsync( ref resource );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected static ValueTask CastAndDispose( IDisposable? resource ) => Disposables.CastAndDisposeAsync( resource );
 }
