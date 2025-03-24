@@ -30,7 +30,9 @@ public class SpansTests : Assert
     [Test, TestCase( ALPHANUMERIC, "abc", true )]
     public void Contains( string value, string other, bool expected )
     {
-        bool results = Spans.Contains( value, other );
+        ReadOnlySpan<char> valueSpan = value;
+        ReadOnlySpan<char> otherSpan = other;
+        bool               results   = valueSpan.Contains( otherSpan );
         this.AreEqual( expected, results );
     }
 
@@ -40,7 +42,7 @@ public class SpansTests : Assert
     {
         ReadOnlySpan<char> valueSpan = value;
         ReadOnlySpan<char> otherSpan = other;
-        bool               results   = Spans.ContainsAny( value, other );
+        bool               results   = valueSpan.ContainsAny( otherSpan );
         this.AreEqual( expected, results );
     }
 
@@ -48,7 +50,9 @@ public class SpansTests : Assert
     [Test, TestCase( ALPHANUMERIC, "65bc", true )]
     public void ContainsAll( string value, string other, bool expected )
     {
-        bool results = Spans.ContainsAll<char>( value, other );
+        ReadOnlySpan<char> valueSpan = value;
+        ReadOnlySpan<char> otherSpan = other;
+        bool               results   = valueSpan.ContainsAll( otherSpan );
         this.AreEqual( expected, results );
     }
 
@@ -56,7 +60,9 @@ public class SpansTests : Assert
     [Test, TestCase( ALPHANUMERIC, "@&*^", true )]
     public void ContainsNone( string value, string other, bool expected )
     {
-        bool results = Spans.ContainsNone( value, other );
+        ReadOnlySpan<char> valueSpan = value;
+        ReadOnlySpan<char> otherSpan = other;
+        bool               results   = valueSpan.ContainsNone( otherSpan );
         this.AreEqual( expected, results );
     }
 
@@ -75,7 +81,7 @@ public class SpansTests : Assert
     {
         ReadOnlySpan<char> valueSpan = value;
 
-        foreach ( (int index, char c) in Spans.Enumerate<char>( in valueSpan, start ) )
+        foreach ( (int index, char c) in valueSpan.Enumerate( start ) )
         {
             Console.WriteLine( $"{index} : {start}" );
             this.AreEqual( value[index], c );

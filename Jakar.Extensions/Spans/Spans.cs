@@ -113,8 +113,8 @@ public static partial class Spans
             : value[..endIndex].LastIndexOf( c );
 
 
-    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span )                 => new(span);
-    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span, int startIndex ) => new(startIndex, span);
+    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span )                 => new(in span);
+    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span, int startIndex ) => new(startIndex, in span);
 
 
     [Pure, MustDisposeResource]
@@ -124,7 +124,7 @@ public static partial class Spans
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return new LinkSpan<T>( span[..length] );
     }
-    
+
     [Pure, MustDisposeResource]
     public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly ReadOnlySpan<T> span, int length )
         where T : IEquatable<T>
@@ -132,11 +132,11 @@ public static partial class Spans
         Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
         return new LinkSpan<T>( span[..length] );
     }
-    
+
     [Pure, MustDisposeResource]
     public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly Span<T> span )
         where T : IEquatable<T> => new(span);
-    
+
     [Pure, MustDisposeResource]
     public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly ReadOnlySpan<T> span )
         where T : IEquatable<T> => new(span);

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
+using System.Runtime.Intrinsics;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -36,28 +40,60 @@ public static partial class Spans
         where T : IEquatable<T> => span.LastIndexOfAnyExcept( value );
 
 
-    public static bool Contains( this Span<char>         span, params ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
-    public static bool Contains( this ReadOnlySpan<char> span, params ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
-
-
-    public static bool Contains<T>( Span<T> span, T value )
+    // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
+    public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T>
     {
-        return span.Contains( value );
+        if ( Vector.IsHardwareAccelerated is false || span.Length < Vector<T>.Count ) { return MemoryExtensions.Contains( span, value ); }
+
+        Vector<T> target            = Vector.Create( value );
+        ref T     current           = ref MemoryMarshal.GetReference( span );
+        ref T     endMinusOneVector = ref Unsafe.Add( ref current, span.Length - Vector<T>.Count );
+
+        do
+        {
+            if ( Vector.EqualsAny( target, Vector.LoadUnsafe( ref current ) ) ) { return true; }
+
+            current = ref Unsafe.Add( ref current, Vector<T>.Count );
+        }
+        while ( Unsafe.IsAddressLessThan( ref current, ref endMinusOneVector ) );
+
+        return Vector.EqualsAny( target, Vector.LoadUnsafe( ref endMinusOneVector ) );
     }
-    public static bool Contains<T>( ReadOnlySpan<T> span, T value )
+
+
+    // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
+    public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
-        return span.Contains( value );
+        if ( Vector.IsHardwareAccelerated is false || span.Length < Vector<T>.Count && values.Length < Vector<T>.Count ) { return span.ContainsAny( values ); }
+
+        Vector<T> target            = Vector.Create( values );
+        ref T     current           = ref MemoryMarshal.GetReference( span );
+        ref T     endMinusOneVector = ref Unsafe.Add( ref current, span.Length - Vector<T>.Count );
+
+        do
+        {
+            if ( Vector.EqualsAny( target, Vector.LoadUnsafe( ref current ) ) ) { return true; }
+
+            current = ref Unsafe.Add( ref current, Vector<T>.Count );
+        }
+        while ( Unsafe.IsAddressLessThan( ref current, ref endMinusOneVector ) );
+
+        return Vector.EqualsAny( target, Vector.LoadUnsafe( ref endMinusOneVector ) );
     }
 
 
-    public static bool Contains<T>( this Span<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
+    public static bool Contains( this scoped ref readonly Span<char>         span, params ReadOnlySpan<char> value ) => MemoryExtensions.Contains( span, value, StringComparison.Ordinal );
+    public static bool Contains( this scoped ref readonly ReadOnlySpan<char> span, params ReadOnlySpan<char> value ) => span.Contains( value, StringComparison.Ordinal );
+
+
+    public static bool Contains<T>( this scoped ref readonly Span<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
     {
-        ReadOnlySpan<T> temp = span;
-        return temp.Contains( value, comparer );
+        ReadOnlySpan<T> values = span;
+        return values.Contains( in value, comparer );
     }
-    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, scoped ref readonly T value, IEqualityComparer<T> comparer )
     {
         if ( span.IsEmpty ) { return false; }
 
@@ -70,12 +106,12 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this Span<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this scoped ref readonly Span<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
     {
-        ReadOnlySpan<T> temp = span;
-        return temp.Contains( value, comparer );
+        ReadOnlySpan<T> values = span;
+        return values.Contains( in value, comparer );
     }
-    public static bool Contains<T>( this ReadOnlySpan<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
+    public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, scoped ref readonly ReadOnlySpan<T> value, IEqualityComparer<T> comparer )
     {
         Debug.Assert( comparer is not null );
         if ( span.IsEmpty || value.IsEmpty ) { return false; }
@@ -94,7 +130,7 @@ public static partial class Spans
     }
 
 
-    public static bool Contains<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
+    public static bool ContainsExact<T>( scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
@@ -110,9 +146,23 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAll<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
+
+    public static bool ContainsAll<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+        if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
+        {
+            Vector<T> source = Vector.Create( span );
+            if ( values.Length >= Vector<T>.Count ) { return Vector.EqualsAll( source, Vector.Create( values ) ); }
+
+            using LinkSpan<Vector<T>> vectors = values.GetVectors();
+
+            foreach ( Vector<T> vector in vectors.ReadOnlySpan )
+            {
+                if ( Vector.EqualsAll( source, vector ) ) { return true; }
+            }
+        }
+
         foreach ( T c in values )
         {
             if ( span.Contains( c ) is false ) { return false; }
@@ -121,9 +171,23 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsAny<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
+
+    public static bool ContainsAny<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+        if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
+        {
+            Vector<T> source = Vector.Create( span );
+            if ( values.Length >= Vector<T>.Count ) { return Vector.EqualsAny( source, Vector.Create( values ) ); }
+
+            using LinkSpan<Vector<T>> vectors = values.GetVectors();
+
+            foreach ( Vector<T> vector in vectors.ReadOnlySpan )
+            {
+                if ( Vector.EqualsAny( source, vector ) ) { return true; }
+            }
+        }
+
         foreach ( T c in values )
         {
             if ( span.Contains( c ) ) { return true; }
@@ -132,19 +196,23 @@ public static partial class Spans
         return false;
     }
 
-    public static bool ContainsAny( this ReadOnlySpan<char> span, params ReadOnlySpan<char> values )
-    {
-        foreach ( char c in values )
-        {
-            if ( span.Contains( c ) ) { return true; }
-        }
 
-        return false;
-    }
-
-    public static bool ContainsNone<T>( this ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
+    public static bool ContainsNone<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+        if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
+        {
+            Vector<T> source = Vector.Create( span );
+            if ( values.Length >= Vector<T>.Count ) { return Vector.EqualsAny( source, Vector.Create( values ) ); }
+
+            using LinkSpan<Vector<T>> vectors = values.GetVectors();
+
+            foreach ( Vector<T> vector in vectors.ReadOnlySpan )
+            {
+                if ( Vector.EqualsAny( source, vector ) ) { return false; }
+            }
+        }
+
         foreach ( T c in values )
         {
             if ( span.Contains( c ) ) { return false; }
@@ -153,15 +221,17 @@ public static partial class Spans
         return true;
     }
 
-    public static bool ContainsNone( this ReadOnlySpan<char> span, params ReadOnlySpan<char> values )
-    {
-        foreach ( char c in values )
-        {
-            if ( span.Contains( c ) ) { return false; }
-        }
 
-        return true;
+    [Pure, MustDisposeResource]
+    public static LinkSpan<Vector<T>> GetVectors<T>( this scoped ref readonly ReadOnlySpan<T> values )
+        where T : IEquatable<T>
+    {
+        LinkSpan<Vector<T>> vectors = new(values.Length);
+        for ( int i = 0; i < vectors.Length; i++ ) { vectors[i] = Vector.Create( values[i] ); }
+
+        return vectors;
     }
+
 
     public static bool EndsWith<T>( scoped ref readonly Span<T> span, T value )
         where T : IEquatable<T> => span.IsEmpty is false && span[^1].Equals( value );
@@ -217,52 +287,4 @@ public static partial class Spans
 
         return true;
     }
-
-
-    // TODO: prep for DotNet 7
-    // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
-    // public static bool Contains<T>( this ReadOnlySpan<T> span, T value ) where T : struct
-    // {
-    //     if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
-    //     {
-    //         ref T current = ref MemoryMarshal.GetReference(span);
-    //
-    //         if ( Vector256.IsHardwareAccelerated && span.Length >= Vector256<T>.Count )
-    //         {
-    //             Vector256<T> target = Vector256.Create(value);
-    //             ref T        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector256<T>.Count);
-    //
-    //             do
-    //             {
-    //                 if ( Vector.EqualsAny(target, Vector256.LoadUnsafe(ref current)) ) { return true; }
-    //
-    //                 current = ref Unsafe.Add(ref current, Vector256<T>.Count);
-    //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
-    //
-    //             if ( Vector256.EqualsAny(target, Vector256.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
-    //         }
-    //         else
-    //         {
-    //             Vector128<T> target            = new Vector<T>(value).AsVector128();
-    //             ref T        endMinusOneVector = ref Unsafe.Add(ref current, span.Length - Vector128<T>.Count);
-    //
-    //             do
-    //             {
-    //                 if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref current)) ) { return true; }
-    //
-    //                 current = ref Unsafe.Add(ref current, Vector128<T>.Count);
-    //             } while ( Unsafe.IsAddressLessThan(ref current, ref endMinusOneVector) );
-    //
-    //             if ( Vector128.EqualsAny(target, Vector128.LoadUnsafe(ref endMinusOneVector)) ) { return true; }
-    //         }
-    //     }
-    //
-    //
-    //     foreach ( T item in span )
-    //     {
-    //         if ( value.Equals(item) ) { return true; }
-    //     }
-    //
-    //     return false;
-    // }
 }

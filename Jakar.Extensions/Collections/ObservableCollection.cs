@@ -529,9 +529,13 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool Contains( TValue                      value ) => buffer.Contains( value );
-    public         bool Contains( params ReadOnlySpan<TValue> value ) => AsSpan().Contains( value );
-    public virtual void Clear()                                       => InternalClear();
+    public virtual bool Contains( TValue value ) => buffer.Contains( value );
+    public virtual bool Contains( params ReadOnlySpan<TValue> values )
+    {
+        ReadOnlySpan<TValue> span = AsSpan();
+        return span.ContainsAny( values );
+    }
+    public virtual void Clear() => InternalClear();
 
 
     [Pure, MustDisposeResource]
