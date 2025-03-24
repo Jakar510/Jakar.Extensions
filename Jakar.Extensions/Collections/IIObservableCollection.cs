@@ -94,28 +94,28 @@ public interface ICollectionSort<out TValue>
 public interface ICollectionSearch<TValue>
 {
     void     Reverse();
-    void     Reverse( int                                start, int length );
-    int      IndexOf( TValue                             value, int start );
-    int      IndexOf( TValue                             value, int start, int endInclusive );
-    int      FindIndex( Func<TValue, bool>               match, int start );
-    int      FindIndex( Func<TValue, bool>               match, int start, int endInclusive );
-    int      LastIndexOf( TValue                         value );
-    int      LastIndexOf( TValue                         value, int endInclusive );
-    int      LastIndexOf( TValue                         value, int start, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>           match, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>           match, int start, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>                match );
-    TValue?  FindLast( Func<TValue, bool>                match, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>                match, int start, int endInclusive );
-    TValue?  Find( Func<TValue, bool>                    match );
-    TValue?  Find( Func<TValue, bool>                    match, int start );
-    TValue?  Find( Func<TValue, bool>                    match, int start, int endInclusive );
-    TValue[] FindAll( Func<TValue, bool>                 match );
-    TValue[] FindAll( Func<TValue, bool>                 match, int start );
-    TValue[] FindAll( Func<TValue, bool>                 match, int start, int endInclusive );
-    int      FindCount( Func<TValue, bool>               match );
-    bool     Contains( TValue                            value );
-    bool     Contains( ref readonly ReadOnlySpan<TValue> value );
+    void     Reverse( int                          start, int length );
+    int      IndexOf( TValue                       value, int start );
+    int      IndexOf( TValue                       value, int start, int endInclusive );
+    int      FindIndex( Func<TValue, bool>         match, int start );
+    int      FindIndex( Func<TValue, bool>         match, int start, int endInclusive );
+    int      LastIndexOf( TValue                   value );
+    int      LastIndexOf( TValue                   value, int endInclusive );
+    int      LastIndexOf( TValue                   value, int start, int endInclusive );
+    int      FindLastIndex( Func<TValue, bool>     match, int endInclusive );
+    int      FindLastIndex( Func<TValue, bool>     match, int start, int endInclusive );
+    TValue?  FindLast( Func<TValue, bool>          match );
+    TValue?  FindLast( Func<TValue, bool>          match, int endInclusive );
+    TValue?  FindLast( Func<TValue, bool>          match, int start, int endInclusive );
+    TValue?  Find( Func<TValue, bool>              match );
+    TValue?  Find( Func<TValue, bool>              match, int start );
+    TValue?  Find( Func<TValue, bool>              match, int start, int endInclusive );
+    TValue[] FindAll( Func<TValue, bool>           match );
+    TValue[] FindAll( Func<TValue, bool>           match, int start );
+    TValue[] FindAll( Func<TValue, bool>           match, int start, int endInclusive );
+    int      FindCount( Func<TValue, bool>         match );
+    bool     Contains( TValue                      value );
+    bool     Contains( params ReadOnlySpan<TValue> value );
 }
 
 

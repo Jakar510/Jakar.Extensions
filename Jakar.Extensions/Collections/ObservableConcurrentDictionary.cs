@@ -24,10 +24,14 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         {
             bool exists = TryGetValue( key, out TValue? old );
             buffer[key] = value;
+            KeyValuePair<TKey, TValue> pair = new(key, value);
 
-            // ReSharper disable once NullableWarningSuppressionIsUsed
-            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue>( key,             value ) ); }
+            if ( exists )
+            {
+                KeyValuePair<TKey, TValue> oldPair = new(key, old!);
+                Replaced( in oldPair, in pair, -1 );
+            }
+            else { Added( in pair, -1 ); }
         }
     }
 
@@ -68,9 +72,10 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
-        if ( !buffer.TryAdd( key, value ) ) { return false; }
+        if ( buffer.TryAdd( key, value ) is false ) { return false; }
 
-        Added( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Added( in pair, -1 );
         return true;
     }
 
@@ -98,11 +103,12 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
-        if ( !buffer.ContainsKey( key ) ) { return false; }
+        if ( buffer.ContainsKey( key ) is false ) { return false; }
 
-        if ( !buffer.TryRemove( key, out TValue? value ) ) { return false; }
+        if ( buffer.TryRemove( key, out TValue? value ) is false ) { return false; }
 
-        Removed( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Removed( in pair, -1 );
         OnCountChanged();
         return true;
     }
@@ -129,15 +135,16 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
 
     [Pure, MustDisposeResource]
+    [SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;
         FilterBuffer<KeyValuePair<TKey, TValue>> values = new(count);
+        int                                      index  = 0;
 
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter( in pair ) ) { values.Add( in pair ); }
+            if ( Filter( index++, in pair ) ) { values.Add( in pair ); }
         }
 
         return values;

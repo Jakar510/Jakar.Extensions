@@ -131,10 +131,12 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     protected internal virtual bool InternalRemove( ref readonly TValue value )
     {
         ThrowIfReadOnly();
-        bool result = buffer.Remove( value );
-        if ( result ) { Removed( value ); }
+        int index = buffer.IndexOf( value );
+        if ( index < 0 ) { return false; }
 
-        return result;
+        buffer.RemoveAt( index );
+        Removed( in value, index );
+        return true;
     }
     protected internal virtual int InternalRemove( Func<TValue, bool> match )
     {
@@ -527,9 +529,9 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool Contains( TValue                            value ) => buffer.Contains( value );
-    public         bool Contains( ref readonly ReadOnlySpan<TValue> value ) => AsSpan().Contains( value );
-    public virtual void Clear()                                             => InternalClear();
+    public virtual bool Contains( TValue                      value ) => buffer.Contains( value );
+    public         bool Contains( params ReadOnlySpan<TValue> value ) => AsSpan().Contains( value );
+    public virtual void Clear()                                       => InternalClear();
 
 
     [Pure, MustDisposeResource]
@@ -538,9 +540,9 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         ReadOnlySpan<TValue> span   = AsSpan();
         FilterBuffer<TValue> values = new(span.Length);
 
-        foreach ( TValue value in span )
+        for ( int i = 0; i < span.Length; i++ )
         {
-            if ( Filter( in value ) ) { values.Add( in value ); }
+            if ( Filter( i, in span[i] ) ) { values.Add( in span[i] ); }
         }
 
         return values;

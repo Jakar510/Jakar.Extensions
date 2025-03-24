@@ -4,22 +4,29 @@
 namespace Jakar.Extensions;
 
 
-public readonly struct StopWatch( string caller ) : IDisposable
+public readonly struct StopWatch( string caller, TextWriter? writer = null ) : IDisposable
 {
-    private readonly string _caller = caller;
-    private readonly long   _start  = Stopwatch.GetTimestamp();
+    private readonly TextWriter? _writer = writer;
+    private readonly string      _caller = caller;
+    private readonly long        _start  = Stopwatch.GetTimestamp();
 
 
     public TimeSpan Elapsed { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
 
 
-    public void Dispose() => Debug.WriteLine( ToString() );
+    public void Dispose()
+    {
+        if (_writer is not null) { _writer.WriteLine( ToString() ); }
+        else { Debug.WriteLine(ToString()); }
+    }
     public override string ToString()
     {
         TimeSpan                    elapsed = Elapsed;
         (double Value, string Unit) range   = GetRange( in elapsed );
         return $"[{_caller}] {range.Value} {range.Unit}";
     }
+    
+    
     public static (double Value, string Unit) GetRange( ref readonly TimeSpan span )
     {
         if ( span.Days > 0 ) { return (span.TotalDays, nameof(TimeSpan.Days)); }
@@ -55,6 +62,7 @@ public readonly struct StopWatch( string caller ) : IDisposable
 
 
     public static StopWatch Start( [CallerMemberName] string caller = EMPTY ) => new(caller);
+    public static StopWatch Start(TextWriter writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
 
 
 

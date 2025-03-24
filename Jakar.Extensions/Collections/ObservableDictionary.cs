@@ -1,4 +1,5 @@
-﻿using NoAlloq;
+﻿using System;
+using NoAlloq;
 
 
 
@@ -31,10 +32,14 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
                               : default;
 
             buffer[key] = value;
+            KeyValuePair<TKey, TValue> pair = new(key, value);
 
-            // ReSharper disable once NullableWarningSuppressionIsUsed
-            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue>( key,             value ) ); }
+            if ( exists )
+            {
+                KeyValuePair<TKey, TValue> oldPair = new(key, old!);
+                Replaced( in oldPair, in pair, -1 );
+            }
+            else { Added( in pair, -1 ); }
         }
     }
 
@@ -73,18 +78,23 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public virtual void Add( KeyValuePair<TKey, TValue> item ) => Add( item.Key, item.Value );
     public virtual void Add( TKey key, TValue value )
     {
-        if ( !buffer.TryAdd( key, value ) ) { return; }
+        if ( buffer.TryAdd( key, value ) is false ) { return; }
 
-        Added( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Added( in pair, -1 );
     }
 
 
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
+        if ( buffer.ContainsKey( key ) is false ) { return false; }
+
         if ( buffer.Remove( key, out TValue? value ) is false ) { return false; }
 
-        Removed( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Removed( in pair, -1 );
+        OnCountChanged();
         return true;
     }
 
@@ -108,15 +118,16 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
 
 
     [Pure, MustDisposeResource]
+    [SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;
         FilterBuffer<KeyValuePair<TKey, TValue>> values = new(count);
+        int                                      index  = 0;
 
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter( in pair ) ) { values.Add( in pair ); }
+            if ( Filter( index++, in pair ) ) { values.Add( in pair ); }
         }
 
         return values;

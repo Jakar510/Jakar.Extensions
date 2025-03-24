@@ -63,7 +63,7 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     public virtual bool Add( TValue value )
     {
         bool result = buffer.Add( value );
-        if ( result ) { Added( value ); }
+        if ( result ) { Added( in value, -1 ); }
 
         return result;
     }
@@ -72,7 +72,7 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     public virtual bool Remove( TValue value )
     {
         bool result = buffer.Remove( value );
-        if ( result ) { Removed( value ); }
+        if ( result ) { Removed( in value, -1 ); }
 
         return result;
     }
@@ -87,11 +87,12 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : CollectionAle
     {
         int                  count  = buffer.Count;
         FilterBuffer<TValue> values = new(count);
+        int                  index  = 0;
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TValue value in buffer )
         {
-            if ( Filter( in value ) ) { values.Add( in value ); }
+            if ( Filter( index++, in value ) ) { values.Add( in value ); }
         }
 
         return values;

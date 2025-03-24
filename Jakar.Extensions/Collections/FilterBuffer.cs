@@ -4,14 +4,18 @@
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "ConvertToAutoPropertyWhenPossible" )]
-public record struct FilterBuffer<TValue>( int Capacity ) : IDisposable
+public struct FilterBuffer<TValue>( int capacity ) : IDisposable
 {
-    private readonly IMemoryOwner<TValue>   _owner = MemoryPool<TValue>.Shared.Rent( Capacity );
-    private          int                    _length;
-    public           int                    Capacity                         { get; } = Capacity;
-    public readonly  int                    Length                           => _length;
-    public readonly  ReadOnlyMemory<TValue> Memory                           => _owner.Memory[.._length];
-    public           void                   Dispose()                        => _owner.Dispose();
-    public           void                   Add( ref readonly TValue value ) => _owner.Memory.Span[_length++] = value;
+    private readonly IMemoryOwner<TValue> _owner   = MemoryPool<TValue>.Shared.Rent( capacity );
+    public readonly  int                  Capacity = capacity;
+    internal         int                  length;
+
+
+    public readonly int                    Length => length;
+    public readonly ReadOnlyMemory<TValue> Memory => _owner.Memory[..length];
+    public readonly ReadOnlySpan<TValue>   Values => Memory.Span;
+
+
+    public void Dispose()                        => _owner.Dispose();
+    public void Add( ref readonly TValue value ) => _owner.Memory.Span[length++] = value;
 }
