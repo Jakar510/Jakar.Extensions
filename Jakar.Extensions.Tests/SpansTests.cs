@@ -57,7 +57,7 @@ public class SpansTests : Assert
     }
 
 
-    [Test, TestCase( ALPHANUMERIC, "@&*^", true )]
+    [Test, TestCase( ALPHANUMERIC, "@&*^", true ), TestCase( ALPHANUMERIC, "@&*^AcPd", false )]
     public void ContainsNone( string value, string other, bool expected )
     {
         ReadOnlySpan<char> valueSpan = value;
@@ -343,6 +343,10 @@ public class SpansTests : Assert
         ReadOnlySpan<char>   valueSpan = value;
         ReadOnlySpan<char>   otherSpan = other;
         using LinkSpan<char> result    = LinkSpan<char>.Join( in valueSpan, in otherSpan );
+
+        Console.WriteLine( $"{nameof(result)}  : {result.ReadOnlySpan}" );
+        Console.WriteLine( $"{nameof(expected)}: {expected}" );
+
         this.AreEqual( expected, result.ReadOnlySpan );
     }
 
@@ -359,9 +363,9 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a1524dbz123", "1", "z", "Abc_az524dbzz23" ), TestCase( "Abc_a1524dbz123", "2", "4", "Abc_a1544dbz143" )]
     public void Replace( string value, string oldValue, string newValue, string expected )
     {
-        using LinkSpan<char> link         = new(value);
         ReadOnlySpan<char>   oldValueSpan = oldValue;
         ReadOnlySpan<char>   newValueSpan = newValue;
+        using LinkSpan<char> link         = new(value);
         using LinkSpan<char> result       = link.Replace( in oldValueSpan, in newValueSpan );
         this.AreEqual( expected, result.ReadOnlySpan );
     }

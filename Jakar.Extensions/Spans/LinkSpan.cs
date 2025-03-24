@@ -4,13 +4,13 @@
 namespace Jakar.Extensions;
 
 
-public readonly ref struct LinkSpan<T>( IMemoryOwner<T> owner )
+public readonly ref struct LinkSpan<T>
     where T : IEquatable<T>
 {
-    private readonly IMemoryOwner<T>? _owner       = owner;
-    public readonly  Span<T>          Span         = owner.Memory.Span;
-    public readonly  ReadOnlySpan<T>  ReadOnlySpan = owner.Memory.Span;
-    public readonly  int              Length       = owner.Memory.Length;
+    private readonly IMemoryOwner<T>? _owner;
+    public readonly  Span<T>          Span;
+    public readonly  ReadOnlySpan<T>  ReadOnlySpan;
+    public readonly  int              Length;
 
 
     public bool IsEmpty => Length == 0;
@@ -19,8 +19,14 @@ public readonly ref struct LinkSpan<T>( IMemoryOwner<T> owner )
     public ReadOnlySpan<T> this[ Range index ] { get => ReadOnlySpan[index]; }
 
 
-    public LinkSpan( int                    capacity ) : this( MemoryPool<T>.Shared.Rent( capacity ) ) { }
-    public LinkSpan( params ReadOnlySpan<T> span ) : this( MemoryPool<T>.Shared.Rent( span.Length ) ) => span.CopyTo( Span );
+    public LinkSpan( params ReadOnlySpan<T> span ) : this( span.Length ) => span.CopyTo( Span );
+    public LinkSpan( int capacity )
+    {
+        Length       = capacity;
+        _owner       = MemoryPool<T>.Shared.Rent( capacity );
+        Span         = _owner.Memory.Span[..capacity];
+        ReadOnlySpan = _owner.Memory.Span[..capacity];
+    }
 
 
     [Pure, MustDisposeResource] public static LinkSpan<T>                Create( params ReadOnlySpan<T> span ) => new(span);
@@ -102,7 +108,7 @@ public readonly ref struct LinkSpan<T>( IMemoryOwner<T> owner )
         LinkSpan<T> buffer = new(Length + ReadOnlySpan.Count( oldValue ) * newValue.Length);
         Span<T>     span   = buffer.Span;
 
-        if ( ReadOnlySpan.Contains( oldValue ) is false )
+        if ( ReadOnlySpan.ContainsExact( oldValue ) is false )
         {
             ReadOnlySpan.CopyTo( span );
             return buffer;
@@ -119,7 +125,7 @@ public readonly ref struct LinkSpan<T>( IMemoryOwner<T> owner )
                 newValue.CopyTo( span[startIndex..] );
             }
         }
-        while ( ReadOnlySpan.Contains( oldValue ) );
+        while ( ReadOnlySpan.ContainsExact( oldValue ) );
 
         return buffer;
     }

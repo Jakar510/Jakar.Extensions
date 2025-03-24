@@ -44,43 +44,13 @@ public static partial class Spans
     public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, T value )
         where T : IEquatable<T>
     {
-        if ( Vector.IsHardwareAccelerated is false || span.Length < Vector<T>.Count ) { return MemoryExtensions.Contains( span, value ); }
-
-        Vector<T> target            = Vector.Create( value );
-        ref T     current           = ref MemoryMarshal.GetReference( span );
-        ref T     endMinusOneVector = ref Unsafe.Add( ref current, span.Length - Vector<T>.Count );
-
-        do
+        if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
         {
-            if ( Vector.EqualsAny( target, Vector.LoadUnsafe( ref current ) ) ) { return true; }
-
-            current = ref Unsafe.Add( ref current, Vector<T>.Count );
+            Vector<T> source = Vector.Create( span );
+            return Vector.EqualsAll( source, Vector.Create( value ) );
         }
-        while ( Unsafe.IsAddressLessThan( ref current, ref endMinusOneVector ) );
 
-        return Vector.EqualsAny( target, Vector.LoadUnsafe( ref endMinusOneVector ) );
-    }
-
-
-    // https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#:~:text=also%20add%20a-,Vector256,-%3CT%3E
-    public static bool Contains<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
-        where T : IEquatable<T>
-    {
-        if ( Vector.IsHardwareAccelerated is false || span.Length < Vector<T>.Count && values.Length < Vector<T>.Count ) { return span.ContainsAny( values ); }
-
-        Vector<T> target            = Vector.Create( values );
-        ref T     current           = ref MemoryMarshal.GetReference( span );
-        ref T     endMinusOneVector = ref Unsafe.Add( ref current, span.Length - Vector<T>.Count );
-
-        do
-        {
-            if ( Vector.EqualsAny( target, Vector.LoadUnsafe( ref current ) ) ) { return true; }
-
-            current = ref Unsafe.Add( ref current, Vector<T>.Count );
-        }
-        while ( Unsafe.IsAddressLessThan( ref current, ref endMinusOneVector ) );
-
-        return Vector.EqualsAny( target, Vector.LoadUnsafe( ref endMinusOneVector ) );
+        return MemoryExtensions.Contains( span, value );
     }
 
 
@@ -130,13 +100,12 @@ public static partial class Spans
     }
 
 
-    public static bool ContainsExact<T>( scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
+    public static bool ContainsExact<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> value )
         where T : IEquatable<T>
     {
         if ( value.Length > span.Length ) { return false; }
 
         if ( value.Length == span.Length ) { return span.SequenceEqual( value ); }
-
 
         for ( int i = 0; i < span.Length || i + value.Length < span.Length; i++ )
         {
@@ -150,6 +119,8 @@ public static partial class Spans
     public static bool ContainsAll<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+
+        /*
         if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
         {
             Vector<T> source = Vector.Create( span );
@@ -162,6 +133,7 @@ public static partial class Spans
                 if ( Vector.EqualsAll( source, vector ) ) { return true; }
             }
         }
+        */
 
         foreach ( T c in values )
         {
@@ -175,6 +147,7 @@ public static partial class Spans
     public static bool ContainsAny<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+        /*
         if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
         {
             Vector<T> source = Vector.Create( span );
@@ -187,6 +160,7 @@ public static partial class Spans
                 if ( Vector.EqualsAny( source, vector ) ) { return true; }
             }
         }
+        */
 
         foreach ( T c in values )
         {
@@ -200,6 +174,7 @@ public static partial class Spans
     public static bool ContainsNone<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> values )
         where T : IEquatable<T>
     {
+        /*
         if ( Vector.IsHardwareAccelerated && span.Length >= Vector<T>.Count )
         {
             Vector<T> source = Vector.Create( span );
@@ -212,6 +187,7 @@ public static partial class Spans
                 if ( Vector.EqualsAny( source, vector ) ) { return false; }
             }
         }
+        */
 
         foreach ( T c in values )
         {
