@@ -1,9 +1,6 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/10/2022  10:26 AM
 
-using JetBrains.Annotations;
-
-
 #pragma warning disable IDE0302 // Collection init can be simplified
 
 
@@ -118,20 +115,9 @@ public class SpansBenchmarks
     }
 
 
-    [Benchmark, MustDisposeResource]
-    public LinkSpan<char> AsBuffer()
-    {
-        ReadOnlySpan<char> span = Value;
-        return span.AsBuffer();
-    }
+    [Benchmark] public ReadOnlySpan<char> AsBuffer() => Value;
 
-    [Benchmark, MustDisposeResource]
-    public LinkSpan<char> Join()
-    {
-        ReadOnlySpan<char> value    = Value;
-        ReadOnlySpan<char> newValue = NEW_VALUE;
-        return LinkSpan<char>.Join( in value, in newValue );
-    }
+    [Benchmark] public ReadOnlySpan<char> Join() => LinkSpan.Join<char>( Value, NEW_VALUE );
 
     [Benchmark]
     public ReadOnlySpan<char> RemoveAll_Params()
@@ -139,9 +125,7 @@ public class SpansBenchmarks
         Span<char> span = stackalloc char[Value.Length];
         Value.CopyTo( span );
 
-        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
-
-        Span<char> result = span.RemoveAll( in buffer );
+        Span<char> result = span.RemoveAll( '1', '3', 'F', 'A' );
         return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
     }
 
@@ -152,14 +136,7 @@ public class SpansBenchmarks
         ReadOnlySpan<char> value = Value;
         Spans.RemoveAll( in value, '1' );
     }
-    [Benchmark, MustDisposeResource]
-    public LinkSpan<char> Replace()
-    {
-        LinkSpan<char>     value    = new(Value);
-        ReadOnlySpan<char> oldValue = OLD;
-        ReadOnlySpan<char> newValue = NEW_VALUE;
-        return value.Replace( in oldValue, in newValue );
-    }
+    [Benchmark] public ReadOnlySpan<char> Replace() => LinkSpan.Replace<char>( Value, OLD, NEW_VALUE );
 
 
     [Benchmark]

@@ -18,9 +18,9 @@ public interface ILoginRequest : IValidator, IUserName
 
 
 
-public interface ILoginRequest<out T> : ILoginRequest
+public interface ILoginRequest<out TValue> : ILoginRequest
 {
-    public T Data { get; }
+    public TValue Data { get; }
 }
 
 
@@ -33,7 +33,7 @@ public interface IChangePassword : ILoginRequest, INotifyPropertyChanged, INotif
 
 
 
-public interface IChangePassword<out T> : ILoginRequest<T>, IChangePassword;
+public interface IChangePassword<out TValue> : ILoginRequest<TValue>, IChangePassword;
 
 
 

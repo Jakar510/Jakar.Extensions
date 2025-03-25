@@ -4,8 +4,8 @@
 namespace Jakar.SettingsView.Abstractions;
 
 
-public interface ISvCellSaveValue<T> : ISvCellValue<T>
-    where T : IEquatable<T>, IComparable<T>
+public interface ISvCellSaveValue<TValue> : ISvCellValue<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
-    public ErrorOrResult<T> Save();
+    public ErrorOrResult<TValue> Save();
 }

@@ -43,7 +43,7 @@ public interface ICollectionRemove<TValue>
     void Replace( int                                index, TValue                      value, int count = 1 );
     void Replace( int                                index, params ReadOnlySpan<TValue> values );
     void RemoveRange( int                            start, int                         count );
-    int  Remove( Func<TValue, bool>                  match );
+    int  Remove( RefCheck<TValue>                    match );
     int  Remove( IEnumerable<TValue>                 values );
     int  Remove( params       ReadOnlySpan<TValue>   values );
     int  Remove( ref readonly ReadOnlyMemory<TValue> values );
@@ -75,7 +75,7 @@ public interface ICollectionAdd<TValue>
     void Insert( int                                                          index, params       ReadOnlySpan<TValue>   collection );
     void Insert( int                                                          index, ref readonly ReadOnlyMemory<TValue> collection );
     void Insert( int                                                          index, ref readonly ImmutableArray<TValue> collection );
-    bool Exists( Func<TValue, bool>                                           match );
+    bool Exists( RefCheck<TValue>                                             match );
 }
 
 
@@ -97,23 +97,23 @@ public interface ICollectionSearch<TValue>
     void     Reverse( int                          start, int length );
     int      IndexOf( TValue                       value, int start );
     int      IndexOf( TValue                       value, int start, int endInclusive );
-    int      FindIndex( Func<TValue, bool>         match, int start );
-    int      FindIndex( Func<TValue, bool>         match, int start, int endInclusive );
+    int      FindIndex( RefCheck<TValue>           match, int start );
+    int      FindIndex( RefCheck<TValue>           match, int start, int endInclusive );
     int      LastIndexOf( TValue                   value );
     int      LastIndexOf( TValue                   value, int endInclusive );
     int      LastIndexOf( TValue                   value, int start, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>     match, int endInclusive );
-    int      FindLastIndex( Func<TValue, bool>     match, int start, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>          match );
-    TValue?  FindLast( Func<TValue, bool>          match, int endInclusive );
-    TValue?  FindLast( Func<TValue, bool>          match, int start, int endInclusive );
-    TValue?  Find( Func<TValue, bool>              match );
-    TValue?  Find( Func<TValue, bool>              match, int start );
-    TValue?  Find( Func<TValue, bool>              match, int start, int endInclusive );
-    TValue[] FindAll( Func<TValue, bool>           match );
-    TValue[] FindAll( Func<TValue, bool>           match, int start );
-    TValue[] FindAll( Func<TValue, bool>           match, int start, int endInclusive );
-    int      FindCount( Func<TValue, bool>         match );
+    int      FindLastIndex( RefCheck<TValue>       match, int endInclusive );
+    int      FindLastIndex( RefCheck<TValue>       match, int start, int endInclusive );
+    TValue?  FindLast( RefCheck<TValue>            match );
+    TValue?  FindLast( RefCheck<TValue>            match, int endInclusive );
+    TValue?  FindLast( RefCheck<TValue>            match, int start, int endInclusive );
+    TValue?  Find( RefCheck<TValue>                match );
+    TValue?  Find( RefCheck<TValue>                match, int start );
+    TValue?  Find( RefCheck<TValue>                match, int start, int endInclusive );
+    TValue[] FindAll( RefCheck<TValue>             match );
+    TValue[] FindAll( RefCheck<TValue>             match, int start );
+    TValue[] FindAll( RefCheck<TValue>             match, int start, int endInclusive );
+    int      FindCount( RefCheck<TValue>           match );
     bool     Contains( TValue                      value );
     bool     Contains( params ReadOnlySpan<TValue> value );
 }

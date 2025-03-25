@@ -96,11 +96,11 @@ public static partial class DbExtensions
     }
 
 
-    public static IServiceCollection AddAuth<T>( this IServiceCollection services )
-        where T : class, IAuthenticationService
+    public static IServiceCollection AddAuth<TValue>( this IServiceCollection services )
+        where TValue : class, IAuthenticationService
     {
         services.AddHttpContextAccessor();
-        services.AddTransient<IAuthenticationService, T>();
+        services.AddTransient<IAuthenticationService, TValue>();
         return services;
     }
 }

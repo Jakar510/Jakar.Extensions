@@ -143,8 +143,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition GetCommand<T>( T command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where T : class, IDapperSqlCommand
+    public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+        where TValue : class, IDapperSqlCommand
     {
         Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
         return new CommandDefinition( command.Sql, ParametersDictionary.LoadFrom( command ), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token );
@@ -163,8 +163,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public async ValueTask<DbDataReader> ExecuteReaderAsync<T>( DbConnection connection, DbTransaction? transaction, T command, CancellationToken token )
-        where T : class, IDapperSqlCommand
+    public async ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( DbConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
+        where TValue : class, IDapperSqlCommand
     {
         try
         {
@@ -233,8 +233,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public virtual async IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T : IDbReaderMapping<T>, IRecordPair
+    public virtual async IAsyncEnumerable<TValue> Where<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TValue : IDbReaderMapping<TValue>, IRecordPair
     {
         DbDataReader reader;
 
@@ -246,10 +246,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
 
-        await foreach ( T record in T.CreateAsync( reader, token ) ) { yield return record; }
+        await foreach ( TValue record in TValue.CreateAsync( reader, token ) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T : struct
+    public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TValue : struct
     {
         DbDataReader reader;
 
@@ -257,12 +257,12 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         {
             SqlCommand        sqlCommand = new SqlCommand( sql, parameters );
             CommandDefinition command    = GetCommand( in sqlCommand, transaction, token );
-            await connection.QueryAsync<T>( command );
+            await connection.QueryAsync<TValue>( command );
 
             reader = await connection.ExecuteReaderAsync( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
 
-        while ( await reader.ReadAsync( token ) ) { yield return reader.GetFieldValue<T>( 0 ); }
+        while ( await reader.ReadAsync( token ) ) { yield return reader.GetFieldValue<TValue>( 0 ); }
     }
 }

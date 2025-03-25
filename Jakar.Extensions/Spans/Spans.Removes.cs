@@ -6,39 +6,39 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    public static ReadOnlySpan<T> RemoveAll<T>( this scoped ref readonly ReadOnlySpan<T> source, T c )
-        where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, TValue c )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        Span<T> result = stackalloc T[source.Length];
+        Span<TValue> result = stackalloc TValue[source.Length];
         RemoveAll( in source, in c, in result, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), length );
     }
 
 
-    public static ReadOnlySpan<T> RemoveAll<T>( this scoped ref readonly ReadOnlySpan<T> source, scoped ref readonly ReadOnlySpan<T> removed )
-        where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, params  ReadOnlySpan<TValue> removed )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        Span<T>         result = stackalloc T[source.Length];
-        ReadOnlySpan<T> temp   = removed;
+        Span<TValue>         result = stackalloc TValue[source.Length];
+        ReadOnlySpan<TValue> temp   = removed;
         RemoveAll( in source, in temp, in result, out int length );
         return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), length );
     }
 
 
-    public static Span<T> RemoveAll<T>( this scoped ref readonly Span<T> source, scoped ref readonly ReadOnlySpan<T> removed )
-        where T : unmanaged, IEquatable<T>
+    public static Span<TValue> RemoveAll<TValue>( this scoped ref readonly Span<TValue> source, params ReadOnlySpan<TValue> removed )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        using IMemoryOwner<T> owner  = MemoryPool<T>.Shared.Rent( source.Length );
-        Span<T>               result = owner.Memory.Span;
-        ReadOnlySpan<T>       temp   = removed;
-        ReadOnlySpan<T>       span   = source;
+        using IMemoryOwner<TValue> owner  = MemoryPool<TValue>.Shared.Rent( source.Length );
+        Span<TValue>               result = owner.Memory.Span;
+        ReadOnlySpan<TValue>       temp   = removed;
+        ReadOnlySpan<TValue>       span   = source;
         RemoveAll( in span, in temp, in result, out int length );
         return result[..length].ToArray();
     }
 
 
-    public static void RemoveAll<T>( scoped ref readonly ReadOnlySpan<T> source, scoped ref readonly T value, scoped ref readonly Span<T> result, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly TValue value, scoped ref readonly Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
         Guard.IsInRangeFor( source.Length - 1, result, nameof(result) );
         int offset = 0;
@@ -58,8 +58,8 @@ public static partial class Spans
     }
 
 
-    public static void RemoveAll<T>( scoped ref readonly ReadOnlySpan<T> source, scoped ref readonly ReadOnlySpan<T> removed, scoped ref readonly Span<T> result, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly ReadOnlySpan<TValue> removed, scoped ref readonly Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
         Guard.IsInRangeFor( source.Length - 1, result, nameof(result) );
         int offset = 0;
@@ -68,7 +68,7 @@ public static partial class Spans
         {
             bool skip = false;
 
-            foreach ( T item in removed )
+            foreach ( TValue item in removed )
             {
                 if ( !source[i].Equals( item ) ) { continue; }
 
@@ -86,8 +86,8 @@ public static partial class Spans
 
 
     [Pure]
-    public static ReadOnlySpan<T> Slice<T>( this scoped ref readonly ReadOnlySpan<T> source, T startValue, T endValue, bool includeEnds )
-        where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<TValue> Slice<TValue>( this ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds )
+        where TValue : unmanaged, IEquatable<TValue>
     {
         int start = source.IndexOf( startValue );
         int end   = source.IndexOf( endValue );
@@ -110,8 +110,8 @@ public static partial class Spans
         Guard.IsInRangeFor( end,   source, nameof(source) );
         return source.Slice( start, length );
     }
-    public static void Slice<T>( scoped ref readonly ReadOnlySpan<T> source, T startValue, T endValue, bool includeEnds, scoped ref Span<T> result, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static void Slice<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds, scoped ref Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
         int start = source.IndexOf( startValue );
         int end   = source.IndexOf( endValue );
@@ -126,7 +126,7 @@ public static partial class Spans
                        ? 1
                        : 0;
 
-            ReadOnlySpan<T> span = start + end - start >= source.Length
+            ReadOnlySpan<TValue> span = start + end - start >= source.Length
                                        ? source[start..]
                                        : source.Slice( start, end );
 

@@ -45,14 +45,14 @@ public static class LoggingExtensions
     public static IConfigurationBuilder AddJsonStream( this WebApplicationBuilder builder, Stream                          stream )          => builder.Configuration.AddJsonStream( stream );
 
 
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder )
-        where T : class => builder.AddDefaultLogging<T>( builder.Environment.EnvironmentName == Environments.Development );
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, bool isDevEnvironment )
-        where T : class => builder.AddDefaultLogging<T>( isDevEnvironment
+    public static ILoggingBuilder AddDefaultLogging<TValue>( this WebApplicationBuilder builder )
+        where TValue : class => builder.AddDefaultLogging<TValue>( builder.Environment.EnvironmentName == Environments.Development );
+    public static ILoggingBuilder AddDefaultLogging<TValue>( this WebApplicationBuilder builder, bool isDevEnvironment )
+        where TValue : class => builder.AddDefaultLogging<TValue>( isDevEnvironment
                                                              ? LogLevel.Trace
                                                              : LogLevel.Information );
-    public static ILoggingBuilder AddDefaultLogging<T>( this WebApplicationBuilder builder, in LogLevel minimumLevel )
-        where T : class => builder.AddDefaultLogging( minimumLevel, typeof(T).Name );
+    public static ILoggingBuilder AddDefaultLogging<TValue>( this WebApplicationBuilder builder, in LogLevel minimumLevel )
+        where TValue : class => builder.AddDefaultLogging( minimumLevel, typeof(TValue).Name );
 
 
     public static ILoggingBuilder AddDefaultLogging( this WebApplicationBuilder builder, in LogLevel minimumLevel, in string name )

@@ -178,8 +178,8 @@ public static class Claims
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool HasFlag<T>( in T value, in T flag )
-        where T : struct, Enum => (value.AsULong() & flag.AsULong()) != 0;
+    public static bool HasFlag<TValue>( in TValue value, in TValue flag )
+        where TValue : struct, Enum => (value.AsULong() & flag.AsULong()) != 0;
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool HasFlag( in ClaimType value, in ClaimType flag ) => (value & flag) != 0;
 
 

@@ -43,80 +43,80 @@ public static class Telemetry
     public static Meter GetOrAdd_Meter( [CallerMemberName] string meterName = BaseRecord.EMPTY ) => Meters.GetOrAdd( meterName, CreateMeter );
 
 
-    public static Histogram<T> GetOrAdd_Histogram<T>( string unit, string description, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static Histogram<TValue> GetOrAdd_Histogram<TValue>( string unit, string description, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( description, out Instrument? value ) && value is Histogram<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( description, out Instrument? value ) && value is Histogram<TValue> instrument ) { return instrument; }
 
-        Instruments[description] = instrument = GetOrAdd_Meter( meterName ).CreateHistogram<T>( meterName, unit, description, tags ?? Pairs );
+        Instruments[description] = instrument = GetOrAdd_Meter( meterName ).CreateHistogram<TValue>( meterName, unit, description, tags ?? Pairs );
         return instrument;
     }
 
 
-    public static ObservableGauge<T> GetOrAdd_Gauge<T>( string name, Func<Measurement<T>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableGauge<TValue> GetOrAdd_Gauge<TValue>( string name, Func<Measurement<TValue>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
-    public static ObservableGauge<T> GetOrAdd_Gauge<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableGauge<TValue> GetOrAdd_Gauge<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableGauge<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableGauge( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
 
 
-    public static Counter<T> GetOrAdd_Counter<T>( string name, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static Counter<TValue> GetOrAdd_Counter<TValue>( string name, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is Counter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is Counter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateCounter<T>( name, unit, description, tags ?? Pairs );
+        Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateCounter<TValue>( name, unit, description, tags ?? Pairs );
         return instrument;
     }
-    public static ObservableCounter<T> GetOrAdd_Counter<T>( string name, Func<Measurement<T>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableCounter<TValue> GetOrAdd_Counter<TValue>( string name, Func<Measurement<TValue>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
-    public static ObservableCounter<T> GetOrAdd_Counter<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableCounter<TValue> GetOrAdd_Counter<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableCounter<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
 
 
-    public static UpDownCounter<T> GetOrAdd_UpDownCounter<T>( string name, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static UpDownCounter<TValue> GetOrAdd_UpDownCounter<TValue>( string name, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is UpDownCounter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is UpDownCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateUpDownCounter<T>( name, unit, description, tags ?? Pairs );
+        Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateUpDownCounter<TValue>( name, unit, description, tags ?? Pairs );
         return instrument;
     }
-    public static ObservableUpDownCounter<T> GetOrAdd_UpDownCounter<T>( string name, Func<Measurement<T>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableUpDownCounter<TValue> GetOrAdd_UpDownCounter<TValue>( string name, Func<Measurement<TValue>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;
     }
-    public static ObservableUpDownCounter<T> GetOrAdd_UpDownCounter<T>( string name, Func<IEnumerable<Measurement<T>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
-        where T : struct
+    public static ObservableUpDownCounter<TValue> GetOrAdd_UpDownCounter<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = BaseRecord.EMPTY )
+        where TValue : struct
     {
-        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<T> instrument ) { return instrument; }
+        if ( Instruments.TryGetValue( name, out Instrument? value ) && value is ObservableUpDownCounter<TValue> instrument ) { return instrument; }
 
         Instruments[name] = instrument = GetOrAdd_Meter( meterName ).CreateObservableUpDownCounter( name, observeValue, unit, description, tags ?? Pairs );
         return instrument;

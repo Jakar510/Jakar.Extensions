@@ -4,29 +4,29 @@
 public static partial class Spans
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T As<T>( this scoped ref readonly ReadOnlySpan<byte> value, T defaultValue, IFormatProvider? provider = null )
-        where T : INumber<T> => T.TryParse( value, provider, out T? d )
+    public static TValue As<TValue>( this scoped ref readonly ReadOnlySpan<byte> value, TValue defaultValue, IFormatProvider? provider = null )
+        where TValue : INumber<TValue> => TValue.TryParse( value, provider, out TValue? d )
                                     ? d
                                     : defaultValue;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T As<T>( this scoped ref readonly ReadOnlySpan<byte> value, NumberStyles style, T defaultValue, IFormatProvider? provider = null )
-        where T : INumber<T> => T.TryParse( value, style, provider, out T? d )
+    public static TValue As<TValue>( this scoped ref readonly ReadOnlySpan<byte> value, NumberStyles style, TValue defaultValue, IFormatProvider? provider = null )
+        where TValue : INumber<TValue> => TValue.TryParse( value, style, provider, out TValue? d )
                                     ? d
                                     : defaultValue;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T As<T>( this scoped ref readonly ReadOnlySpan<char> value, T defaultValue, IFormatProvider? provider = null )
-        where T : INumber<T> => T.TryParse( value, provider, out T? d )
+    public static TValue As<TValue>( this scoped ref readonly ReadOnlySpan<char> value, TValue defaultValue, IFormatProvider? provider = null )
+        where TValue : INumber<TValue> => TValue.TryParse( value, provider, out TValue? d )
                                     ? d
                                     : defaultValue;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T As<T>( this scoped ref readonly ReadOnlySpan<char> value, NumberStyles style, T defaultValue, IFormatProvider? provider = null )
-        where T : INumber<T> => T.TryParse( value, style, provider, out T? d )
+    public static TValue As<TValue>( this scoped ref readonly ReadOnlySpan<char> value, NumberStyles style, TValue defaultValue, IFormatProvider? provider = null )
+        where TValue : INumber<TValue> => TValue.TryParse( value, style, provider, out TValue? d )
                                     ? d
                                     : defaultValue;
 }

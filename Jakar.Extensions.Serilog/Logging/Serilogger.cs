@@ -68,7 +68,7 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     public Logger CreateLogger( IEnumerable<ILogEventEnricher> enrichers )                                                    => (Logger)Logger.ForContext( enrichers );
     public Logger CreateLogger( ILogEventEnricher              enricher )                                                     => (Logger)Logger.ForContext( enricher );
     public Logger CreateLogger( string                         propertyName, object? value, bool destructureObjects = false ) => (Logger)Logger.ForContext( propertyName, value, destructureObjects );
-    public Logger CreateLogger<T>() => (Logger)Logger.ForContext<T>();
+    public Logger CreateLogger<TValue>() => (Logger)Logger.ForContext<TValue>();
     protected virtual Logger CreateLogger( ref readonly SeriloggerOptions options )
     {
         LoggerConfiguration builder = new();
@@ -173,10 +173,10 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     public static                       Serilogger      Get( IServiceProvider         provider )                                              => provider.GetRequiredService<Serilogger>();
     [MustDisposeResource] public static ILoggerProvider GetProvider( IServiceProvider provider )                                              => Get( provider ).Provider;
     void ILogEventSink.                                 Emit( LogEvent                logEvent )                                              => ((ILogEventSink)Logger).Emit( logEvent );
-    public void                                         HandleException<T>( T         _, Exception exception )                                => HandleException( _, exception, Empty );
-    public void                                         HandleException<T>( T         _, Exception exception, params FileData[] attachments ) => Task.Run( async () => await HandleExceptionAsync( _, exception, attachments ) );
-    public ValueTask                                    HandleExceptionAsync<T>( T    _, Exception exception ) => HandleExceptionAsync( _, exception, Empty );
-    public async ValueTask HandleExceptionAsync<T>( T _, Exception exception, params FileData[] attachments )
+    public void                                         HandleException<TValue>( TValue         _, Exception exception )                                => HandleException( _, exception, Empty );
+    public void                                         HandleException<TValue>( TValue         _, Exception exception, params FileData[] attachments ) => Task.Run( async () => await HandleExceptionAsync( _, exception, attachments ) );
+    public ValueTask                                    HandleExceptionAsync<TValue>( TValue    _, Exception exception ) => HandleExceptionAsync( _, exception, Empty );
+    public async ValueTask HandleExceptionAsync<TValue>( TValue _, Exception exception, params FileData[] attachments )
     {
         System.Diagnostics.Debug.WriteLine( exception.ToString() );
         if ( Settings.EnableApi is false ) { return; }
@@ -188,25 +188,25 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     }
 
 
-    public void TrackEvent<T>( T _, [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void TrackEvent<TValue>( TValue _, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( caller );
         if ( IsEnabled( LogEventLevel.Verbose ) is false ) { return; }
 
-        Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(T).Name, caller, caller.GetHashCode() );
-        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, null, caller ) ); }
+        Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(TValue).Name, caller, caller.GetHashCode() );
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<TValue>( caller, LogEventLevel.Debug, null, caller ) ); }
     }
-    public void TrackEvent<T>( T _, EventDetails properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void TrackEvent<TValue>( TValue _, EventDetails properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
         if ( Settings.EnableApi is false || Settings.EnableCrashes is false ) { return; }
 
         ArgumentException.ThrowIfNullOrWhiteSpace( caller );
         if ( IsEnabled( LogEventLevel.Verbose ) is false ) { return; }
 
-        Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(T).Name, caller, caller.GetHashCode() );
-        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<T>( caller, LogEventLevel.Debug, properties, caller ) ); }
+        Debug( "[{ClassName}.{Caller}.{EventId}]", typeof(TValue).Name, caller, caller.GetHashCode() );
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create<TValue>( caller, LogEventLevel.Debug, properties, caller ) ); }
     }
-    public void TrackEvent<T>( T _, string eventType, EventDetails? properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void TrackEvent<TValue>( TValue _, string eventType, EventDetails? properties, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
         if ( Settings.EnableApi is false || Settings.EnableCrashes is false ) { return; }
 
@@ -221,14 +221,14 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
                 foreach ( (string key, string? value) in properties ) { disposables.Add( LogContext.PushProperty( key, value ) ); }
             }
 
-            Debug( "[{ClassName}.{Caller}.{EventId}] {EventType}", typeof(T).Name, caller, eventType.GetHashCode(), eventType );
+            Debug( "[{ClassName}.{Caller}.{EventId}] {EventType}", typeof(TValue).Name, caller, eventType.GetHashCode(), eventType );
         }
 
-        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create( typeof(T).Name, eventType, LogEventLevel.Debug, properties, caller ) ); }
+        if ( Events.IsEnabled ) { Events.Add( DebugLogEvent.Create( typeof(TValue).Name, eventType, LogEventLevel.Debug, properties, caller ) ); }
     }
 
 
-    public void TrackError<T>( T _, Exception exception, EventDetails? details, IEnumerable<FileData>? attachments, [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void TrackError<TValue>( TValue _, Exception exception, EventDetails? details, IEnumerable<FileData>? attachments, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
         if ( Settings.EnableApi is false || Settings.EnableCrashes is false ) { return; }
 
@@ -244,14 +244,14 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
 
         TrackError( _, exception, caller );
     }
-    public void TrackError<T>( T _, Exception exception, [CallerMemberName] string caller = BaseRecord.EMPTY )
+    public void TrackError<TValue>( TValue _, Exception exception, [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
         if ( Settings.EnableApi is false || Settings.EnableCrashes is false ) { return; }
 
         ArgumentException.ThrowIfNullOrWhiteSpace( caller );
         if ( IsEnabled( LogEventLevel.Error ) is false ) { return; }
 
-        Error( exception, "[{ClassName}.{Caller}.{EventId}] {Message}", typeof(T).Name, caller, exception.Message.GetHashCode(), exception.Message );
+        Error( exception, "[{ClassName}.{Caller}.{EventId}] {Message}", typeof(TValue).Name, caller, exception.Message.GetHashCode(), exception.Message );
         if ( Events.IsEnabled ) { Messages.Enqueue( MessageEvent.Create( exception ) ); }
     }
 

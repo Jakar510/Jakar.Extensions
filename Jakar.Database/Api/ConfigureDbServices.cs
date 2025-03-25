@@ -14,10 +14,10 @@ using ZiggyCreatures.Caching.Fusion.OpenTelemetry;
 namespace Jakar.Database;
 
 
-public abstract class ConfigureDbServices<T, TApp, TDatabase>
+public abstract class ConfigureDbServices<TValue, TApp, TDatabase>
     where TApp : IAppName
     where TDatabase : Database
-    where T : ConfigureDbServices<T, TApp, TDatabase>, new()
+    where TValue : ConfigureDbServices<TValue, TApp, TDatabase>, new()
 {
     public          string                  AppName                         { get; }       = TApp.AppName;
     public          string                  AuthenticationScheme            { get; init; } = DbServices.AUTHENTICATION_SCHEME;
@@ -46,7 +46,7 @@ public abstract class ConfigureDbServices<T, TApp, TDatabase>
 
     public static void Setup( WebApplicationBuilder builder )
     {
-        T instance = new();
+        TValue instance = new();
         instance.Configure( builder );
     }
     protected internal virtual WebApplicationBuilder Configure( WebApplicationBuilder builder )

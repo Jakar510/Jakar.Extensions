@@ -162,18 +162,18 @@ public ref struct JArray
     }
 
 
-    public readonly JArray Add<T>( T? value )
-        where T : ISpanFormattable => Add( value, CultureInfo.CurrentCulture );
-    public readonly JArray Add<T>( T? value, IFormatProvider? culture )
-        where T : ISpanFormattable => Add( value, default, culture );
-    public readonly JArray Add<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public readonly JArray Add<TValue>( TValue? value )
+        where TValue : ISpanFormattable => Add( value, CultureInfo.CurrentCulture );
+    public readonly JArray Add<TValue>( TValue? value, IFormatProvider? culture )
+        where TValue : ISpanFormattable => Add( value, default, culture );
+    public readonly JArray Add<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
         _writer.Append( value, format, provider );
         return this;
     }
-    public readonly JArray Add<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public readonly JArray Add<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
         if ( value is not null ) { _writer.Append( value, format, bufferSize, provider ).Next(); }
 
@@ -181,19 +181,19 @@ public ref struct JArray
     }
 
 
-    public readonly JArray AddNumber<T>( T? value )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
-    public readonly JArray AddNumber<T>( T? value, IFormatProvider? culture )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, default, culture );
-    public readonly JArray AddNumber<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JArray AddNumber<TValue>( TValue? value )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
+    public readonly JArray AddNumber<TValue>( TValue? value, IFormatProvider? culture )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, default, culture );
+    public readonly JArray AddNumber<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         if ( value is null ) { return this; }
 
         return AddNumber( value.Value, format, provider );
     }
-    public readonly JArray AddNumber<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JArray AddNumber<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         if ( value is null ) { return this; }
 
@@ -201,18 +201,18 @@ public ref struct JArray
     }
 
 
-    public readonly JArray AddNumber<T>( T value )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
-    public readonly JArray AddNumber<T>( T value, IFormatProvider? culture )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, default, culture );
-    public readonly JArray AddNumber<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JArray AddNumber<TValue>( TValue value )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture );
+    public readonly JArray AddNumber<TValue>( TValue value, IFormatProvider? culture )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, default, culture );
+    public readonly JArray AddNumber<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         _writer.Append( value, format, provider );
         return this;
     }
-    public readonly JArray AddNumber<T>( T value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JArray AddNumber<TValue>( TValue value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         _writer.AppendValue( value, format, bufferSize, provider ).Next();
 

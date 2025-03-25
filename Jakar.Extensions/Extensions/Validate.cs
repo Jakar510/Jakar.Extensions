@@ -19,8 +19,13 @@ public static partial class Validate
     public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static bool IsDemo( this string value, params ReadOnlySpan<string> options ) => value.AsSpan().IsDemo( options );
-    public static bool IsDemo( this ReadOnlySpan<char> value, params ReadOnlySpan<string> options )
+    public static bool IsDemo( this string value, params ReadOnlySpan<string> options )
+    {
+        ReadOnlySpan<char> span = value.AsSpan();
+        span = span.Trim();
+        return span.IsDemo( options );
+    }
+    public static bool IsDemo( this ref readonly ReadOnlySpan<char> value, params ReadOnlySpan<string> options )
     {
         if ( value.IsEmpty ) { return false; }
 
@@ -117,7 +122,7 @@ public static partial class Validate
 
 
     // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => value ?? throw new ArgumentNullException( name, caller );
+    public static TValue ThrowIfNull<TValue>( TValue? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => value ?? throw new ArgumentNullException( name, caller );
 
 
     public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace( value )

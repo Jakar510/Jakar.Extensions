@@ -32,10 +32,10 @@ public ref struct Buffer<TValue>( int capacity )
     public ref TValue this[ Index   index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
     public Span<TValue> this[ Range range ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span[range]; }
     public Span<TValue> this[ int   start, int length ] { [Pure] get => Span.Slice( start, length ); }
-    public Memory<TValue>       Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public Span<TValue>         Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Length, Capacity); }
-    public Span<TValue>         Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public ReadOnlySpan<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Length); }
+    public Memory<TValue> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
+    public Span<TValue>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Length, Capacity); }
+    public Span<TValue>   Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _array; }
+    public Span<TValue>   Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Length); }
 
 
     public Buffer() : this( DEFAULT_CAPACITY ) { }
@@ -43,7 +43,7 @@ public ref struct Buffer<TValue>( int capacity )
     public void Dispose() => ArrayPool<TValue>.Shared.Return( _array );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] ToArray() => Span.ToArray();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] ToArray() => Values.ToArray();
 
 
     public void Clear()
@@ -54,9 +54,10 @@ public ref struct Buffer<TValue>( int capacity )
     public void Fill( TValue value ) => Span.Fill( value );
 
 
-    public bool TryCopyTo( ref Span<TValue> destination, out int length )
+    public void CopyTo( Span<TValue> array ) => Values.CopyTo( array );
+    public bool TryCopyTo( Span<TValue> destination, out int length )
     {
-        if ( Span.TryCopyTo( destination ) )
+        if ( Values.TryCopyTo( destination ) )
         {
             length = Length;
             return true;
@@ -65,32 +66,20 @@ public ref struct Buffer<TValue>( int capacity )
         length = 0;
         return false;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( TValue[] array )                            => CopyTo( array, 0 );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public void CopyTo( TValue[] array, int destinationStartIndex ) => CopyTo( 0,     array, Length, 0 );
-    public void CopyTo( int sourceStartIndex, TValue[] array, int length, int destinationStartIndex )
-    {
-        Guard.IsGreaterThanOrEqualTo( destinationStartIndex + array.Length, Length );
-        Guard.IsGreaterThanOrEqualTo( length,                               0 );
-        Guard.IsLessThanOrEqualTo( length, Length );
-
-        Span<TValue> target = new(array, destinationStartIndex, array.Length - destinationStartIndex);
-        Span[sourceStartIndex..length].CopyTo( target );
-    }
 
 
-    public void Reverse( int start, int length ) => Span.Slice( start, length ).Reverse();
-    public void Reverse() => Span.Reverse();
+    public void Reverse( int start, int length ) => Values.Slice( start, length ).Reverse();
+    public void Reverse() => Values.Reverse();
 
 
     public ReadOnlySpan<TValue> AsSpan( TValue? terminate )
     {
-        if ( terminate is null ) { return Span; }
+        if ( terminate is not null ) { Add( terminate ); }
 
-        Add( terminate );
-        return Span;
+        return Values;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<TValue> Slice( int start )             => Span[start..];
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<TValue> Slice( int start, int length ) => Span.Slice( start, length );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<TValue> Slice( int start )             => Slice( start, Capacity - start );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Span<TValue> Slice( int start, int length ) => new(_array, start, length);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public int IndexOf( TValue value )            => IndexOf( value, 0 );
@@ -100,7 +89,7 @@ public ref struct Buffer<TValue>( int capacity )
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
-        Span<TValue> span = Span;
+        ReadOnlySpan<TValue> span = Values;
 
         for ( int i = start; i <= endInclusive; i++ )
         {
@@ -118,8 +107,7 @@ public ref struct Buffer<TValue>( int capacity )
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( endInclusive, start );
-
-        Span<TValue> span = Span;
+        ReadOnlySpan<TValue> span = Values;
 
         for ( int i = start; i <= endInclusive; i++ )
         {
@@ -137,7 +125,7 @@ public ref struct Buffer<TValue>( int capacity )
         Guard.IsInRange( start,        0, Length );
         Guard.IsInRange( endInclusive, 0, Length );
         Guard.IsGreaterThanOrEqualTo( start, endInclusive );
-        Span<TValue> span = Span;
+        ReadOnlySpan<TValue> span = Values;
 
         for ( int i = start; i >= endInclusive; i-- )
         {
@@ -224,8 +212,16 @@ public ref struct Buffer<TValue>( int capacity )
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( TValue                      value ) => Span.Contains( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool Contains( params ReadOnlySpan<TValue> value ) => Span.Contains( value, EqualityComparer<TValue>.Default );
+    public bool Contains( TValue value )
+    {
+        ReadOnlySpan<TValue> values = Values;
+        return values.Contains( value );
+    }
+    public bool Contains( params ReadOnlySpan<TValue> value )
+    {
+        ReadOnlySpan<TValue> values = Values;
+        return values.Contains( in value, EqualityComparer<TValue>.Default );
+    }
 
 
     public bool RemoveAt( int index )
@@ -245,7 +241,7 @@ public ref struct Buffer<TValue>( int capacity )
         Guard.IsGreaterThanOrEqualTo( count, 0 );
         Guard.IsInRange( start + count, 0, Capacity );
 
-        Span.Slice( start, count ).Fill( value );
+        Values.Slice( start, count ).Fill( value );
     }
     public void Replace( int start, params ReadOnlySpan<TValue> values )
     {
@@ -277,7 +273,7 @@ public ref struct Buffer<TValue>( int capacity )
     }
 
 
-    public void Add( TValue                      value )  => Add( value, 1 );
+    public void Add( TValue                      value )  => _array[Length++] = value;
     public void Add( params ReadOnlySpan<TValue> values ) => AddRange( values );
     public void Add( TValue value, int count )
     {
@@ -393,41 +389,47 @@ public ref struct Buffer<TValue>( int capacity )
 
     public void Trim( TValue value )
     {
-        ReadOnlySpan<TValue> span = Span.Trim( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.Trim( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
     public void Trim( params ReadOnlySpan<TValue> value )
     {
-        ReadOnlySpan<TValue> span = Span.Trim( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.Trim( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
 
     public void TrimStart( TValue value )
     {
-        ReadOnlySpan<TValue> span = Span.TrimStart( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.TrimStart( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
     public void TrimStart( params ReadOnlySpan<TValue> value )
     {
-        ReadOnlySpan<TValue> span = Span.TrimStart( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.TrimStart( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
 
     public void TrimEnd( TValue value )
     {
-        ReadOnlySpan<TValue> span = Span.TrimEnd( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.TrimEnd( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
     public void TrimEnd( params ReadOnlySpan<TValue> value )
     {
-        ReadOnlySpan<TValue> span = Span.TrimEnd( value );
+        Span<TValue>         values = Span;
+        ReadOnlySpan<TValue> span   = values.TrimEnd( value );
         Length = span.Length;
-        span.CopyTo( Span );
+        span.CopyTo( values );
     }
 
 

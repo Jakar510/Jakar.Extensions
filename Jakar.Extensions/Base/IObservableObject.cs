@@ -7,10 +7,10 @@ namespace Jakar.Extensions;
 public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
 {
     /*
-    public bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY );
+    public bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY );
 
 
-    public bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null );
+    public bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null );
     */
 
 
@@ -24,7 +24,7 @@ public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyCha
     ///     <para> Checks the values with <paramref name="equalityComparer"/> . </para>
     ///     Then calls <see cref="OnPropertyChanging(string)"/> , sets the value, then calls <see cref="OnPropertyChanged(string)"/>
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     /// <param name="backingStore"> </param>
     /// <param name="value"> </param>
     /// <param name="equalityComparer"> </param>
@@ -32,8 +32,8 @@ public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyCha
     /// <returns>
     ///     <para> Returns <see langword="false"/> if the values are equal, and therefore the <paramref name="backingStore"/> was not changed, otherwise <see langword="true"/> </para>
     /// </returns>
-    bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY );
-    bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null );
+    bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY );
+    bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null );
 }
 
 
@@ -54,13 +54,13 @@ public static class ObservableObjects
 
         return args;
     }
-    public static bool SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, in T minDate, IComparer<T> comparer, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static bool SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, in TValue minDate, IComparer<TValue> comparer, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         value = comparer.Compare( value, minDate ) < 0
                     ? minDate
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? EqualityComparer<T>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? EqualityComparer<TValue>.Default, propertyName );
     }
 
 
@@ -155,7 +155,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static Task SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, Func<Task> onChanged, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static Task SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, Func<Task> onChanged, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return Task.CompletedTask; }
 
@@ -164,7 +164,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static Task SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, IEqualityComparer<T> equalityComparer, Func<Task> onChanged, [CallerMemberName] string propertyName = EMPTY )
+    public static Task SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, IEqualityComparer<TValue> equalityComparer, Func<Task> onChanged, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return Task.CompletedTask; }
 
@@ -173,7 +173,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static Task SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, Func<T, Task> onChanged, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static Task SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, Func<TValue, Task> onChanged, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return Task.CompletedTask; }
 
@@ -182,7 +182,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static void SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, ICommand onChanged, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static void SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, ICommand onChanged, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return; }
 
@@ -191,7 +191,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static void SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, Action onChanged, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static void SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, Action onChanged, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return; }
 
@@ -200,7 +200,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static void SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, IEqualityComparer<T> equalityComparer, Action onChanged, [CallerMemberName] string propertyName = EMPTY )
+    public static void SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, IEqualityComparer<TValue> equalityComparer, Action onChanged, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return; }
 
@@ -209,7 +209,7 @@ public static class ObservableObjects
 
 
     /// <summary> "onChanged" only called if the backingStore value has changed. </summary>
-    public static void SetProperty<T>( this IObservableObject observable, ref T backingStore, T value, Action<T> onChanged, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+    public static void SetProperty<TValue>( this IObservableObject observable, ref TValue backingStore, TValue value, Action<TValue> onChanged, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
         if ( observable.SetProperty( ref backingStore, value, equalityComparer, propertyName ) is false ) { return; }
 

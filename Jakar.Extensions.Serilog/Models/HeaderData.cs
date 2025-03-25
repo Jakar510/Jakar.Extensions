@@ -56,14 +56,14 @@ public sealed class HeaderData( string? title, TextFontAttributes titleAttribute
     }
 
 
-    public static HeaderData? TryCreate<T>( [NotNullIfNotNull( nameof(heading) )] T? heading )
-        where T : IHeaderCells => heading is not null
+    public static HeaderData? TryCreate<TValue>( [NotNullIfNotNull( nameof(heading) )] TValue? heading )
+        where TValue : IHeaderCells => heading is not null
                                       ? Create( heading )
                                       : null;
 
 
-    public static HeaderData Create<T>( T heading )
-        where T : IHeaderCells => new(heading.Title,
+    public static HeaderData Create<TValue>( TValue heading )
+        where TValue : IHeaderCells => new(heading.Title,
                                       heading.IsTitleBold
                                           ? TextFontAttributes.Bold
                                           : TextFontAttributes.None,

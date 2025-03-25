@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
-public readonly record struct WebResponse<T>
+public readonly record struct WebResponse<TValue>
 {
     public const string ERROR_MESSAGE = "Error Message: ";
     public const string NO_RESPONSE   = "NO RESPONSE";
@@ -27,7 +27,7 @@ public readonly record struct WebResponse<T>
     public              DateTimeOffset?                      LastModified      { get; init; } = null;
     public              Uri?                                 Location          { get; init; } = null;
     public              string?                              Method            { get; init; } = null;
-    public              T?                                   Payload           { get; init; } = default;
+    public              TValue?                                   Payload           { get; init; } = default;
     public              string?                              Sender            { get; init; } = null;
     public              string?                              Server            { get; init; } = null;
     public              Status                               StatusCode        { get; init; } = Status.NotSet;
@@ -37,7 +37,7 @@ public readonly record struct WebResponse<T>
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, null, error ) { }
     public WebResponse( HttpResponseMessage response, Exception e, string error ) : this( response, default, e, error ) { }
-    public WebResponse( HttpResponseMessage response, T? payload, Exception? exception = null, string? error = null )
+    public WebResponse( HttpResponseMessage response, TValue? payload, Exception? exception = null, string? error = null )
     {
         Errors            = ParseError( error ?? exception?.Message );
         Payload           = payload;
@@ -63,7 +63,7 @@ public readonly record struct WebResponse<T>
 
     /// <summary> Gets the payload if available; otherwise throws. </summary>
     /// <exception cref="HttpRequestException"> </exception>
-    public T GetPayload()
+    public TValue GetPayload()
     {
         EnsureSuccessStatusCode();
         Debug.Assert( Payload is not null );
@@ -71,15 +71,15 @@ public readonly record struct WebResponse<T>
     }
 
 
-    public ErrorOrResult<T> TryGetPayload()
+    public ErrorOrResult<TValue> TryGetPayload()
     {
-        return TryGetValue( out T? payload, out Error? error )
+        return TryGetValue( out TValue? payload, out Error? error )
                    ? payload
                    : error.Value;
     }
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out T? payload, [NotNullWhen( false )] out Error? errorMessage )
+    public bool TryGetValue( [NotNullWhen( true )] out TValue? payload, [NotNullWhen( false )] out Error? errorMessage )
     {
         if ( IsSuccessStatusCode() )
         {
@@ -104,8 +104,8 @@ public readonly record struct WebResponse<T>
     public override string ToString() => this.ToJson( Formatting.Indented );
 
 
-    internal static WebResponse<T> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
-    internal static WebResponse<T> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
+    internal static WebResponse<TValue> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
+    internal static WebResponse<TValue> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
     public static OneOf<JToken, string, Error[], None> ParseError( string? error )
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return UNKNOWN_ERROR; }
@@ -153,7 +153,7 @@ public readonly record struct WebResponse<T>
     */
 
 
-    public static async ValueTask<WebResponse<T>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<T>> func )
+    public static async ValueTask<WebResponse<TValue>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<TValue>> func )
     {
         using ( handler )
         {
@@ -164,7 +164,7 @@ public readonly record struct WebResponse<T>
                        : await Create( response, func, handler.Token );
         }
     }
-    public static async ValueTask<WebResponse<T>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func )
+    public static async ValueTask<WebResponse<TValue>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func )
     {
         using ( handler )
         {
@@ -174,39 +174,39 @@ public readonly record struct WebResponse<T>
             {
                 if ( response.IsSuccessStatusCode is false ) { return await Create( response, handler.Token ); }
 
-                T result = await func( response, arg );
-                return new WebResponse<T>( response, result );
+                TValue result = await func( response, arg );
+                return new WebResponse<TValue>( response, result );
             }
             catch ( HttpRequestException e ) { return await Create( response, e, handler.Token ); }
         }
     }
 
 
-    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<TValue>> func, CancellationToken token )
     {
         try
         {
             if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
-            T result = await func( response );
-            return new WebResponse<T>( response, result );
+            TValue result = await func( response );
+            return new WebResponse<TValue>( response, result );
         }
         catch ( HttpRequestException e ) { return await Create( response, e, token ); }
     }
-    public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func, CancellationToken token )
     {
         try
         {
             if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
-            T result = await func( response, arg );
-            return new WebResponse<T>( response, result );
+            TValue result = await func( response, arg );
+            return new WebResponse<TValue>( response, result );
         }
         catch ( HttpRequestException e ) { return await Create( response, e, token ); }
     }
 
 
-    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
     {
         ushort          count      = 0;
         List<Exception> exceptions = new(policy.MaxRetires);
@@ -217,8 +217,8 @@ public readonly record struct WebResponse<T>
             {
                 if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
-                T result = await func( response );
-                return new WebResponse<T>( response, result );
+                TValue result = await func( response );
+                return new WebResponse<TValue>( response, result );
             }
             catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
@@ -228,7 +228,7 @@ public readonly record struct WebResponse<T>
         try { throw new AggregateException( exceptions.ToArray() ); }
         catch ( AggregateException e ) { return await Create( response, e, token ); }
     }
-    public static async ValueTask<WebResponse<T>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<T>> func, RetryPolicy policy, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
     {
         ushort          count      = 0;
         List<Exception> exceptions = new(policy.MaxRetires);
@@ -239,8 +239,8 @@ public readonly record struct WebResponse<T>
             {
                 if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
 
-                T result = await func( response, arg );
-                return new WebResponse<T>( response, result );
+                TValue result = await func( response, arg );
+                return new WebResponse<TValue>( response, result );
             }
             catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
@@ -252,7 +252,7 @@ public readonly record struct WebResponse<T>
     }
 
 
-    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, CancellationToken token )
     {
         await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
         string              error;
@@ -264,14 +264,14 @@ public readonly record struct WebResponse<T>
             using StreamReader reader       = new(stream);
             string             errorMessage = await reader.ReadToEndAsync( token );
 
-            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<T>( response, errorMessage ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<TValue>( response, errorMessage ); }
 
             error = errorMessage;
         }
 
-        return new WebResponse<T>( response, error );
+        return new WebResponse<TValue>( response, error );
     }
-    public static async ValueTask<WebResponse<T>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
+    public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
         await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
         string              error;
@@ -283,11 +283,11 @@ public readonly record struct WebResponse<T>
             using StreamReader reader       = new(stream);
             string             errorMessage = await reader.ReadToEndAsync( token );
 
-            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<T>( response, errorMessage ); }
+            if ( string.IsNullOrWhiteSpace( errorMessage ) ) { return new WebResponse<TValue>( response, errorMessage ); }
 
             error = errorMessage;
         }
 
-        return new WebResponse<T>( response, e, error );
+        return new WebResponse<TValue>( response, e, error );
     }
 }

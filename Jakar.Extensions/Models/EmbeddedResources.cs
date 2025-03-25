@@ -13,23 +13,23 @@ public class ResourceException : Exception
 
 
 
-public class ResourceException<T>( string path ) : ResourceException( path, GetMessage( path ) )
+public class ResourceException<TValue>( string path ) : ResourceException( path, GetMessage( path ) )
 {
-    public static string GetMessage( string path ) => $"""{nameof(EmbeddedResources<T>)}.{nameof(EmbeddedResources<T>.GetResourceStream)}.{nameof(Assembly.GetManifestResourceStream)}: "{path}".""";
+    public static string GetMessage( string path ) => $"""{nameof(EmbeddedResources<TValue>)}.{nameof(EmbeddedResources<TValue>.GetResourceStream)}.{nameof(Assembly.GetManifestResourceStream)}: "{path}".""";
 }
 
 
 
-public class EmbeddedResources<T>
+public class EmbeddedResources<TValue>
 {
-    private readonly Assembly _assembly = typeof(T).Assembly;
-    public static    string   Namespace { get; } = typeof(T).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
+    private readonly Assembly _assembly = typeof(TValue).Assembly;
+    public static    string   Namespace { get; } = typeof(TValue).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
 
 
     public Stream GetResourceStream( string fileName )
     {
         string path = GetPath( fileName );
-        return _assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<T>( path );
+        return _assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<TValue>( path );
     }
 
 

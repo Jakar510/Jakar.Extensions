@@ -54,13 +54,13 @@ public static class KeyWords
 
 
     public static string GetName( this    Type   type )                  => type.GetTableName();
-    public static string GetName<T>( this T      _ )                     => typeof(T).GetTableName();
-    public static string GetName<T>( this string columnName, T    _ )    => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string GetName<TValue>( this TValue      _ )                     => typeof(TValue).GetTableName();
+    public static string GetName<TValue>( this string columnName, TValue    _ )    => $"{typeof(TValue).GetTableName()}.{columnName}";
     public static string GetName( this    string columnName, Type type ) => $"{type.GetTableName()}.{columnName}";
-    public static string? GetName<T>( [NotNullIfNotNull( nameof(columnName) )] this string? columnName )
+    public static string? GetName<TValue>( [NotNullIfNotNull( nameof(columnName) )] this string? columnName )
     {
         return columnName is null
                    ? null
-                   : $"{typeof(T).GetTableName()}.{columnName}";
+                   : $"{typeof(TValue).GetTableName()}.{columnName}";
     }
 }

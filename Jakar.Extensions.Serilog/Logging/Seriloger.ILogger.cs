@@ -56,7 +56,7 @@ public partial class Serilogger
     /// <param name="messageTemplate"> Message template describing the event. </param>
     /// <param name="propertyValue"> Object positionally formatted into the message template. </param>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Write<T>( LogEventLevel level, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Logger.Write( level, messageTemplate, propertyValue );
+    public void Write<TValue>( LogEventLevel level, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Logger.Write( level, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the specified level. </summary>
@@ -100,7 +100,7 @@ public partial class Serilogger
     /// <param name="messageTemplate"> Message template describing the event. </param>
     /// <param name="propertyValue"> Object positionally formatted into the message template. </param>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Write<T>( LogEventLevel level, Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Logger.Write( level, exception, messageTemplate, propertyValue );
+    public void Write<TValue>( LogEventLevel level, Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Logger.Write( level, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the specified level and associated exception. </summary>
@@ -159,7 +159,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Verbose<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Verbose, messageTemplate, propertyValue );
+    public void Verbose<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Verbose, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Verbose"/> level. </summary>
@@ -223,7 +223,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Verbose<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Verbose, exception, messageTemplate, propertyValue );
+    public void Verbose<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Verbose, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Verbose"/> level and associated exception. </summary>
@@ -288,7 +288,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Debug<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Debug, messageTemplate, propertyValue );
+    public void Debug<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Debug, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Debug"/> level. </summary>
@@ -352,7 +352,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Debug<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Debug, exception, messageTemplate, propertyValue );
+    public void Debug<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Debug, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Debug"/> level and associated exception. </summary>
@@ -417,7 +417,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Information<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Information, messageTemplate, propertyValue );
+    public void Information<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Information, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Information"/> level. </summary>
@@ -481,7 +481,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Information<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Information, exception, messageTemplate, propertyValue );
+    public void Information<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Information, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Information"/> level and associated exception. </summary>
@@ -546,7 +546,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Warning<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Warning, messageTemplate, propertyValue );
+    public void Warning<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Warning, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Warning"/> level. </summary>
@@ -610,7 +610,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Warning<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Warning, exception, messageTemplate, propertyValue );
+    public void Warning<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Warning, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Warning"/> level and associated exception. </summary>
@@ -675,7 +675,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Error<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Error, messageTemplate, propertyValue );
+    public void Error<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Error, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Error"/> level. </summary>
@@ -739,7 +739,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Error<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Error, exception, messageTemplate, propertyValue );
+    public void Error<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Error, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Error"/> level and associated exception. </summary>
@@ -804,7 +804,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Fatal<T>( [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Fatal, messageTemplate, propertyValue );
+    public void Fatal<TValue>( [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Fatal, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Fatal"/> level. </summary>
@@ -868,7 +868,7 @@ public partial class Serilogger
     /// </code>
     /// </example>
     [MessageTemplateFormatMethod( nameof(messageTemplate) )]
-    public void Fatal<T>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, T propertyValue ) => Write( LogEventLevel.Fatal, exception, messageTemplate, propertyValue );
+    public void Fatal<TValue>( Exception? exception, [StructuredMessageTemplate] string messageTemplate, TValue propertyValue ) => Write( LogEventLevel.Fatal, exception, messageTemplate, propertyValue );
 
 
     /// <summary> Write a log event with the <see cref="LogEventLevel.Fatal"/> level and associated exception. </summary>

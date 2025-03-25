@@ -173,7 +173,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
     }
 
 
-    public static AppVersion FromAssembly<T>()                     => FromAssembly( typeof(T).Assembly );
+    public static AppVersion FromAssembly<TValue>()                     => FromAssembly( typeof(TValue).Assembly );
     public static AppVersion FromAssembly( Type         type )     => FromAssembly( type.Assembly );
     public static AppVersion FromAssembly( Assembly     assembly ) => FromAssembly( assembly.GetName() );
     public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException( nameof(assembly.Version) );

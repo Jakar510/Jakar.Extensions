@@ -12,7 +12,7 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     public ISelector Next( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
     ///     Adds table_name.
     ///     <param name="columnName"> </param>
     ///     to SELECT set
@@ -21,8 +21,8 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     /// <returns>
     ///     <see cref="ISelector"/>
     /// </returns>
-    public ISelector Next<T>( string columnName )
-        where T : class;
+    public ISelector Next<TValue>( string columnName )
+        where TValue : class;
 
 
     /// <summary> Adds
@@ -38,7 +38,7 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     public ISelector Next( string alias, string separator, params string[] columnNames );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Adds table_name.columnName separated by
     ///     <param name="separator"> </param>
     ///     to SELECT set and setting it to the
@@ -48,6 +48,6 @@ public interface ISelector : IFromSyntax<ISqlBuilderRoot>, IAggregateFunctions<I
     /// <returns>
     ///     <see cref="ISelector"/>
     /// </returns>
-    public ISelector Next<T>( string alias, string separator, params string[] columnNames )
-        where T : class;
+    public ISelector Next<TValue>( string alias, string separator, params string[] columnNames )
+        where TValue : class;
 }

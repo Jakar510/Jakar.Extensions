@@ -150,12 +150,12 @@ public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
     }
 
 
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize )
-        where T : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture )
-        where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
-        where T : struct, ISpanFormattable
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize )
+        where TValue : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize, CultureInfo culture )
+        where TValue : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
+        where TValue : struct, ISpanFormattable
     {
         _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 

@@ -5,7 +5,7 @@ public readonly record struct All;
 
 
 
-public readonly record struct All<T>( T Value )
+public readonly record struct All<TValue>( TValue Value )
 {
-    public static implicit operator All<T>( T value ) => new(value);
+    public static implicit operator All<TValue>( TValue value ) => new(value);
 }

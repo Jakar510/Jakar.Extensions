@@ -71,11 +71,11 @@ public static partial class Xmlizer
                                   typeof(double),
                                   typeof(decimal),
                                   typeof(TimeSpan) );
-    public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = null ) => Serialize( obj, attributes );
+    public static string ToXml<TValue>( this TValue obj, in IDictionary<string, string>? attributes = null ) => Serialize( obj, attributes );
 
 
-    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes )
-        where T : new() => Deserialize<T>( xml, out attributes );
+    public static TValue FromXml<TValue>( this string xml, out IDictionary<string, string>? attributes )
+        where TValue : new() => Deserialize<TValue>( xml, out attributes );
 
 
     // Register(typeof(IPAddress),
@@ -83,7 +83,7 @@ public static partial class Xmlizer
     // typeof(SocketAddress));
     public static void Register( Assembly assembly ) => Register( assembly.GetTypes() );
 
-    public static void Register<T>() => Register( typeof(T) );
+    public static void Register<TValue>() => Register( typeof(TValue) );
 
     public static void Register( params Type[] types )
     {

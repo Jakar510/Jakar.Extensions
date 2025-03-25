@@ -38,13 +38,13 @@ public ref struct ValueStringBuilder
     public void Dispose() => _chars.Dispose();
 
 
-    public void EnsureCapacity<T>( params ReadOnlySpan<char> format )
+    public void EnsureCapacity<TValue>( params ReadOnlySpan<char> format )
     {
-        int capacity = Sizes.GetBufferSize<T>();
+        int capacity = Sizes.GetBufferSize<TValue>();
 
-        if ( typeof(T)      == typeof(DateTime) ) { capacity       = Math.Max( format.Length, capacity ); }
-        else if ( typeof(T) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
-        else if ( typeof(T) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
+        if ( typeof(TValue)      == typeof(DateTime) ) { capacity       = Math.Max( format.Length, capacity ); }
+        else if ( typeof(TValue) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
+        else if ( typeof(TValue) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
 
         Buffers.EnsureCapacity( ref _chars, capacity );
     }
@@ -210,27 +210,27 @@ public ref struct ValueStringBuilder
     }
 
 
-    public ValueStringBuilder AppendFormat<T>( ReadOnlySpan<char> format, T arg0, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
         AppendFormatHelper( provider, format, arg0 );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( ReadOnlySpan<char> format, T arg0, T arg1, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
 
     {
         AppendFormatHelper( provider, format, arg0, arg1 );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( ReadOnlySpan<char> format, T arg0, T arg1, T arg2, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, TValue arg0, TValue arg1, TValue arg2, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
         AppendFormatHelper( provider, format, arg0, arg1, arg2 );
         return this;
     }
-    public ValueStringBuilder AppendFormat<T>( ReadOnlySpan<char> format, IFormatProvider? provider, params ReadOnlySpan<T> args )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendFormat<TValue>( ReadOnlySpan<char> format, IFormatProvider? provider, params ReadOnlySpan<TValue> args )
+        where TValue : ISpanFormattable
     {
         if ( args.IsEmpty )
         {
@@ -298,10 +298,10 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( char separator, ReadOnlySpan<T> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<TValue>( char separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
-        ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
+        ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
         bool                       shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
@@ -318,10 +318,10 @@ public ref struct ValueStringBuilder
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( ReadOnlySpan<char> separator, ReadOnlySpan<T> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
-        ReadOnlySpan<T>.Enumerator enumerator     = enumerable.GetEnumerator();
+        ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
         bool                       shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
@@ -338,10 +338,10 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( char separator, IEnumerable<T> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
-        using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
+        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
         bool                 shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
@@ -357,10 +357,10 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendJoin<T>( ReadOnlySpan<char> separator, IEnumerable<T> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
-        using IEnumerator<T> enumerator     = enumerable.GetEnumerator();
+        using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
         bool                 shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
@@ -376,10 +376,10 @@ public ref struct ValueStringBuilder
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public ValueStringBuilder AppendSpanFormattable<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
-        where T : ISpanFormattable
+    public ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
+        where TValue : ISpanFormattable
     {
-        EnsureCapacity<T>( format );
+        EnsureCapacity<TValue>( format );
 
         if ( value.TryFormat( Next, out int charsWritten, format, provider ) ) { _chars.Length += charsWritten; }
 
@@ -395,8 +395,8 @@ public ref struct ValueStringBuilder
     /// <returns> </returns>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="FormatException"> </exception>
-    internal void AppendFormatHelper<T>( IFormatProvider? provider, ReadOnlySpan<char> format, params ReadOnlySpan<T> args )
-        where T : ISpanFormattable
+    internal void AppendFormatHelper<TValue>( IFormatProvider? provider, ReadOnlySpan<char> format, params ReadOnlySpan<TValue> args )
+        where TValue : ISpanFormattable
     {
         // Undocumented exclusive limits on the range for Argument Hole Count and Argument Hole Alignment.
         const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
@@ -538,7 +538,7 @@ public ref struct ValueStringBuilder
             //
             // Start of parsing of optional formatting parameter.
             //
-            T arg = args[index];
+            TValue arg = args[index];
 
             ReadOnlySpan<char> itemFormatSpan = default; // used if itemFormat is null
 

@@ -315,32 +315,32 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     // /// <exception cref="FileNotFoundException">if file is not found</exception>
     // /// <returns><see cref="string"/></returns>
-    // public T Read<T>()
+    // public TValue Read<TValue>()
     // {
     //     string content = ReadAsString();
-    //     return content.FromJson<T>();
+    //     return content.FromJson<TValue>();
     //
     //     /// <summary>
     //     /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
     //     /// </summary>
-    //     /// <typeparam name="T"></typeparam>
+    //     /// <typeparam name="TValue"></typeparam>
     //     /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     //     /// <exception cref="FileNotFoundException">if file is not found</exception>
     //     /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
-    //     /// <returns><typeparamref name="T"/></returns>
+    //     /// <returns><typeparamref name="TValue"/></returns>
     // }
     // /// <summary>
     // /// Reads the contents of the file as a <see cref="string"/>, then calls <see cref="JsonExtensions.FromJson{TResult}(string)"/> on it, asynchronously.
     // /// </summary>
-    // /// <typeparam name="T"></typeparam>
+    // /// <typeparam name="TValue"></typeparam>
     // /// <exception cref="NullReferenceException">if FullPath is null or empty</exception>
     // /// <exception cref="FileNotFoundException">if file is not found</exception>
     // /// <exception cref="JsonReaderException">if an error  deserialization occurs</exception>
-    // /// <returns><typeparamref name="T"/></returns>
-    // public async ValueTask<T> ReadAsync<T>()
+    // /// <returns><typeparamref name="TValue"/></returns>
+    // public async ValueTask<TValue> ReadAsync<TValue>()
     // {
     //     string content = await ReadAsStringAsync();
-    //     return content.FromJson<T>();
+    //     return content.FromJson<TValue>();
     // }
     //
     //
@@ -828,11 +828,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return await stream.ReadToEndAsync( token );
     }
 
-    async ValueTask<T> IAsyncReadHandler.AsJson<T>()
+    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>()
     {
         using var stream  = new StreamReader( OpenRead(), FileEncoding );
         string    content = await stream.ReadToEndAsync();
-        return content.FromJson<T>();
+        return content.FromJson<TValue>();
     }
 
     async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
@@ -869,11 +869,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    T IReadHandler.AsJson<T>()
+    TValue IReadHandler.AsJson<TValue>()
     {
         using var stream  = new StreamReader( OpenRead(), FileEncoding );
         string    content = stream.ReadToEnd();
-        return content.FromJson<T>();
+        return content.FromJson<TValue>();
     }
 
     string IReadHandler.AsString()
@@ -1016,14 +1016,14 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         ValueTask<string> AsString( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
-        /// <typeparam name="T"> </typeparam>
+        /// <typeparam name="TValue"> </typeparam>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
         /// <exception cref="JsonReaderException"> if an error  deserialization occurs </exception>
         /// <returns>
-        ///     <typeparamref name="T"/>
+        ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<T> AsJson<T>();
+        ValueTask<TValue> AsJson<TValue>();
     }
 
 
@@ -1069,7 +1069,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        T AsJson<T>();
+        TValue AsJson<TValue>();
     }
 
 

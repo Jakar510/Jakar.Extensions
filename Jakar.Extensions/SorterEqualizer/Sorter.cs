@@ -1,41 +1,41 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class ValueSorter<T> : IComparer<T?>, IComparer<T>, IComparer
-    where T : struct, IComparable<T>
+public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>, IComparer
+    where TValue : struct, IComparable<TValue>
 {
-    public static readonly ValueSorter<T> Default = new();
+    public static readonly ValueSorter<TValue> Default = new();
 
 
     public int Compare( object? x, object? y )
     {
-        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
 
-        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not TValue right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(TValue) ); }
 
         return left.CompareTo( right );
     }
-    public int Compare( T? left, T? right ) => Nullable.Compare( left, right );
-    public int Compare( T  left, T  right ) => left.CompareTo( right );
+    public int Compare( TValue? left, TValue? right ) => Nullable.Compare( left, right );
+    public int Compare( TValue  left, TValue  right ) => left.CompareTo( right );
 }
 
 
 
-public sealed class Sorter<T> : IComparer<T>, IComparer
-    where T : class, IComparable<T>
+public sealed class Sorter<TValue> : IComparer<TValue>, IComparer
+    where TValue : class, IComparable<TValue>
 {
-    public static readonly Sorter<T> Default = new();
+    public static readonly Sorter<TValue> Default = new();
 
 
     public int Compare( object? x, object? y )
     {
-        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
 
-        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not TValue right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(TValue) ); }
 
         return left.CompareTo( right );
     }
-    public int Compare( T? left, T? right )
+    public int Compare( TValue? left, TValue? right )
     {
         if ( left is null ) { return 1; }
 

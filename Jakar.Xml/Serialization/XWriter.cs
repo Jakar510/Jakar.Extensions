@@ -192,8 +192,8 @@ public ref struct XWriter( bool shouldIndent )
         _sb.Append( buffer[..charsWritten] );
         return this;
     }
-    public XWriter Append<T>( T? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
-        where T : struct, ISpanFormattable
+    public XWriter Append<TValue>( TValue? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
+        where TValue : struct, ISpanFormattable
     {
         if ( value.HasValue )
         {

@@ -9,9 +9,9 @@ public static partial class Tasks
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    Task         task ) => task.GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this Task<T>      task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue    CallSynchronously<TValue>( this Task<TValue>      task ) => task.GetAwaiter().GetResult();
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    ValueTask    task ) => task.GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static T    CallSynchronously<T>( this ValueTask<T> task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue    CallSynchronously<TValue>( this ValueTask<TValue> task ) => task.GetAwaiter().GetResult();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -21,7 +21,7 @@ public static partial class Tasks
         return task.IsCompletedSuccessfully;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T WaitSynchronously<T>( this Task<T> task, CancellationToken token = default )
+    public static TValue WaitSynchronously<TValue>( this Task<TValue> task, CancellationToken token = default )
     {
         task.Wait( token );
         return task.Result;
@@ -35,7 +35,7 @@ public static partial class Tasks
         return task.IsCompletedSuccessfully;
     }
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T WaitSynchronously<T>( this ValueTask<T> task )
+    public static TValue WaitSynchronously<TValue>( this ValueTask<TValue> task )
     {
         task.GetAwaiter().GetResult();
 
@@ -45,12 +45,12 @@ public static partial class Tasks
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<Task>                            func, CancellationToken token = default ) => Task.Run( func,                                 token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<Task<T>>                         func, CancellationToken token = default ) => Task.Run( func,                                 token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<ValueTask<T>>                    func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<Task<TValue>>                         func, CancellationToken token = default ) => Task.Run( func,                                 token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<ValueTask<TValue>>                    func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<CancellationToken, Task<T>>      func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<T> Run<T>( this Func<CancellationToken, ValueTask<T>> func, CancellationToken token = default ) => Task.Run( new Caller<T>( func, token ).Execute, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<CancellationToken, Task<TValue>>      func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<CancellationToken, ValueTask<TValue>> func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
@@ -72,13 +72,13 @@ public static partial class Tasks
     public static int WaitAny( this IEnumerable<Task> tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
 
-    public static async IAsyncEnumerable<T> WheneverAny<T>( this IEnumerable<ValueTask<T>> tasks, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TValue> WheneverAny<TValue>( this IEnumerable<ValueTask<TValue>> tasks, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( T result in tasks.Select( static x => x.AsTask() ).WheneverAny( token ) ) { yield return result; }
+        await foreach ( TValue result in tasks.Select( static x => x.AsTask() ).WheneverAny( token ) ) { yield return result; }
     }
-    public static async IAsyncEnumerable<T> WheneverAny<T>( this IEnumerable<Task<T>> tasks, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<TValue> WheneverAny<TValue>( this IEnumerable<Task<TValue>> tasks, [EnumeratorCancellation] CancellationToken token = default )
     {
-        List<Task<T>> list = [..tasks];
+        List<Task<TValue>> list = [..tasks];
 
         while ( token.ShouldContinue() && list.Count > 0 )
         {

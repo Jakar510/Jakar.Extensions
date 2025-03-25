@@ -25,8 +25,8 @@ public struct WhereConditionBuilder<TNext>( in TNext next, ref EasySqlBuilder bu
         _cache.Add( $"{columnName}={value ?? NULL}" );
         return this;
     }
-    public WhereConditionBuilder<TNext> With<T>( string columnName, T value )
-        where T : struct
+    public WhereConditionBuilder<TNext> With<TValue>( string columnName, TValue value )
+        where TValue : struct
     {
         _cache.Add( $"{columnName}={value}" );
         return this;

@@ -4,7 +4,7 @@
 public interface ILoginRequestProvider
 {
     public LoginRequest GetLoginRequest();
-    public LoginRequest<T> GetLoginRequest<T>(T value);
+    public LoginRequest<TValue> GetLoginRequest<TValue>(TValue value);
 }
 
 
@@ -25,9 +25,9 @@ public class LoginRequest( string userName, string password ) : BaseClass, ILogi
 
 
 [Serializable]
-public class LoginRequest<T>( string userName, string password, T data ) : LoginRequest( userName, password ), ILoginRequest<T>
+public class LoginRequest<TValue>( string userName, string password, TValue data ) : LoginRequest( userName, password ), ILoginRequest<TValue>
 {
-    [Required] public T Data { get; init; } = data;
+    [Required] public TValue Data { get; init; } = data;
 
     [JsonIgnore]
     public override bool IsValid => Data is IValidator validator
@@ -35,6 +35,6 @@ public class LoginRequest<T>( string userName, string password, T data ) : Login
                                         : this.IsValidRequest();
 
 
-    public LoginRequest( ILoginRequest    request, T data ) : this( request.UserName, request.Password, data ) { }
-    public LoginRequest( ILoginRequest<T> request ) : this( request.UserName, request.Password, request.Data ) { }
+    public LoginRequest( ILoginRequest    request, TValue data ) : this( request.UserName, request.Password, data ) { }
+    public LoginRequest( ILoginRequest<TValue> request ) : this( request.UserName, request.Password, request.Data ) { }
 }

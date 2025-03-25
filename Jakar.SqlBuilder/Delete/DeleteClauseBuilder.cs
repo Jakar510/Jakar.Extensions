@@ -17,22 +17,22 @@ public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
         return new DeleteChainBuilder( this, ref _builder );
     }
 
-    public DeleteChainBuilder From<T>( T _, string? alias )
+    public DeleteChainBuilder From<TValue>( TValue _, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(TValue).GetTableName() ); }
 
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { _builder.Add( FROM, typeof(TValue).GetName(), AS, alias ); }
 
         _builder.NewLine();
 
         return new DeleteChainBuilder( this, ref _builder );
     }
 
-    public DeleteChainBuilder From<T>( string? alias )
+    public DeleteChainBuilder From<TValue>( string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(TValue).GetTableName() ); }
 
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { _builder.Add( FROM, typeof(TValue).GetName(), AS, alias ); }
 
         _builder.NewLine();
 

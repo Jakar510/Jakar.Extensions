@@ -40,18 +40,18 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.Select( static item => item.FullName ).ToArray();
 
 
-    public static T Verify<T>( object? item, TKey key )
+    public static TValue Verify<TValue>( object? item, TKey key )
     {
-        if ( item is T value ) { return value; }
+        if ( item is TValue value ) { return value; }
 
-        throw new ExpectedValueTypeException<TKey>( key, item?.GetType(), typeof(T) );
+        throw new ExpectedValueTypeException<TKey>( key, item?.GetType(), typeof(TValue) );
     }
 
-    public static T Verify<T>( object? item )
+    public static TValue Verify<TValue>( object? item )
     {
-        if ( item is T value ) { return value; }
+        if ( item is TValue value ) { return value; }
 
-        throw new ExpectedValueTypeException<TKey>( item?.GetType(), typeof(T) );
+        throw new ExpectedValueTypeException<TKey>( item?.GetType(), typeof(TValue) );
     }
 
 
@@ -83,6 +83,6 @@ public class ExpectedValueTypeException : ExpectedValueTypeException<string> // 
     public ExpectedValueTypeException( Exception inner, Type?                     value, params ReadOnlySpan<Type> expected ) : base( inner, value, expected ) { }
 
 
-    public new static T Verify<T>( object? item, string key ) => ExpectedValueTypeException<string>.Verify<T>( item, key );
-    public new static T Verify<T>( object? item ) => ExpectedValueTypeException<string>.Verify<T>( item );
+    public new static TValue Verify<TValue>( object? item, string key ) => ExpectedValueTypeException<string>.Verify<TValue>( item, key );
+    public new static TValue Verify<TValue>( object? item ) => ExpectedValueTypeException<string>.Verify<TValue>( item );
 }

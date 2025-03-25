@@ -11,13 +11,13 @@ public static class ConsoleExtensions
 
 
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    public static StringBuilder WrapException<T>( this T self, char c = '-', int padding = 40 )
-        where T : Exception
+    public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
+        where TValue : Exception
     {
         StringBuilder builder = new();
         builder.AppendLine( " Exception Start ".Wrapper( c, padding ) );
         builder.AppendLine();
-        builder.AppendLine( typeof(T).FullName );
+        builder.AppendLine( typeof(TValue).FullName );
         builder.AppendLine();
         builder.AppendLine();
 
@@ -30,15 +30,15 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    public static StringBuilder PrintJson<T>( this T self, char c = '-', int length = 80 )
-        where T : notnull
+    public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
+        where TValue : notnull
     {
         string wrapper = c.Repeat( length );
 
         StringBuilder builder = new();
         builder.AppendLine();
         builder.AppendLine( wrapper );
-        builder.AppendLine( typeof(T).FullName );
+        builder.AppendLine( typeof(TValue).FullName );
         builder.AppendLine();
         builder.AppendLine();
         builder.AppendLine( self.ToPrettyJson() );
@@ -57,7 +57,7 @@ public static class ConsoleExtensions
 
     public static string GetCount( this    string         self, int  count,   char c      = '-', int length = 80 ) => $"{c.Repeat( length )}   {self}.Count: => {count}";
     public static string GetCount( this    ICollection    self, char c = '-', int  length = 80 ) => $"{c.Repeat( length )}   {self.GetType().Name}.Count: => {self.Count}";
-    public static string GetCount<T>( this ICollection<T> self, char c = '-', int  length = 80 ) => $"{c.Repeat( length )}   {self.GetType().Name}.Count: => {self.Count}";
+    public static string GetCount<TValue>( this ICollection<TValue> self, char c = '-', int  length = 80 ) => $"{c.Repeat( length )}   {self.GetType().Name}.Count: => {self.Count}";
 
 
     public static void Print( this Span<char>         self ) => Console.Write( self.ToString() );
@@ -81,8 +81,8 @@ public static class ConsoleExtensions
     public static void WriteToConsole( this ValueStringBuilder self ) => self.Span.WriteToConsole();
     public static void WriteToConsole( this Buffer<char>       self ) => self.Span.WriteToConsole();
     public static void WriteToConsole( this StringBuilder      self ) => self.ToString().WriteToConsole();
-    public static void WriteToConsole<T>( this T self )
-        where T : notnull => self.ToString()?.WriteToConsole();
+    public static void WriteToConsole<TValue>( this TValue self )
+        where TValue : notnull => self.ToString()?.WriteToConsole();
     public static void WriteToConsole( this string self )
     {
         Console.WriteLine();
@@ -99,6 +99,6 @@ public static class ConsoleExtensions
     public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self.Span}'" );
     public static void WriteToDebug( this object             self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
 
-    public static void WriteToDebug<T>( this T self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
-        where T : notnull => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
+    public static void WriteToDebug<TValue>( this TValue self, [CallerArgumentExpression( "self" )] string? variable = null, [CallerMemberName] string? caller = null )
+        where TValue : notnull => Debug.WriteLine( $"{caller} -> {variable} '{self}'" );
 }

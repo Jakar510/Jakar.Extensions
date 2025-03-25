@@ -56,33 +56,33 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TResult FromJson<TResult>( this string             value, params JsonConverter[]  converters ) => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, converters ) );
 
 
-    public static string ToJson<T>( this ReadOnlySpan<T> values )
+    public static string ToJson<TValue>( this ReadOnlySpan<TValue> values )
     {
-        T[] array = ArrayPool<T>.Shared.Rent( values.Length );
+        TValue[] array = ArrayPool<TValue>.Shared.Rent( values.Length );
 
         try
         {
             values.CopyTo( array );
             return array.ToJson();
         }
-        finally { ArrayPool<T>.Shared.Return( array ); }
+        finally { ArrayPool<TValue>.Shared.Return( array ); }
     }
-    public static string ToPrettyJson<T>( this ReadOnlySpan<T> values )
+    public static string ToPrettyJson<TValue>( this ReadOnlySpan<TValue> values )
     {
-        T[] array = ArrayPool<T>.Shared.Rent( values.Length );
+        TValue[] array = ArrayPool<TValue>.Shared.Rent( values.Length );
 
         try
         {
             values.CopyTo( array );
             return array.ToPrettyJson();
         }
-        finally { ArrayPool<T>.Shared.Return( array ); }
+        finally { ArrayPool<TValue>.Shared.Return( array ); }
     }
 
 
     [Conditional( "DEBUG" )]
-    public static void SaveDebug<T>( this T value, [CallerMemberName] string? caller = null, [CallerArgumentExpression( "value" )] string? variableName = null )
-        where T : notnull =>
+    public static void SaveDebug<TValue>( this TValue value, [CallerMemberName] string? caller = null, [CallerArgumentExpression( "value" )] string? variableName = null )
+        where TValue : notnull =>
         Task.Run( async () =>
                   {
                       LocalFile file = LocalDirectory.Create( "DEBUG" ).Join( $"{caller}__{variableName}.value" );

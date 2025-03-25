@@ -23,22 +23,22 @@ public interface IAggregateFunctions<out TNext>
     public TNext Average( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Average<T>( string columnName );
+    public TNext Average<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Average<T>( T obj, string columnName );
+    public TNext Average<TValue>( TValue obj, string columnName );
 
 
     /// <summary> Return count of values in all columns </summary>
@@ -54,22 +54,22 @@ public interface IAggregateFunctions<out TNext>
     public TNext Count( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Count<T>( string columnName );
+    public TNext Count<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Count<T>( T obj, string columnName );
+    public TNext Count<TValue>( TValue obj, string columnName );
 
     /// <summary> return only distinct (different) values. </summary>
     /// <returns>
@@ -91,22 +91,22 @@ public interface IAggregateFunctions<out TNext>
     public TNext Max( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Max<T>( string columnName );
+    public TNext Max<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Max<T>( T obj, string columnName );
+    public TNext Max<TValue>( TValue obj, string columnName );
 
 
     /// <summary> Return the minimum value of values in all columns </summary>
@@ -122,22 +122,22 @@ public interface IAggregateFunctions<out TNext>
     public TNext Min( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Min<T>( string columnName );
+    public TNext Min<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Min<T>( T obj, string columnName );
+    public TNext Min<TValue>( TValue obj, string columnName );
 
 
     /// <summary> Return the total value of values in all columns </summary>
@@ -153,20 +153,20 @@ public interface IAggregateFunctions<out TNext>
     public TNext Sum( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Sum<T>( string columnName );
+    public TNext Sum<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     Return the maximum value of values in table_name. <paramref name="columnName"/>
     /// </summary>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext Sum<T>( T obj, string columnName );
+    public TNext Sum<TValue>( TValue obj, string columnName );
 }

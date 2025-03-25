@@ -103,16 +103,16 @@ public static partial class WpfApi
     // -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public static ListCollectionView ToCollectionView<T>( this ConcurrentObservableCollection<T> list )
-        where T : IEquatable<T>
+    public static ListCollectionView ToCollectionView<TValue>( this ConcurrentObservableCollection<TValue> list )
+        where TValue : IEquatable<TValue>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
         ListCollectionView collection = new( list );
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer )
-        where TComparer : IComparer<T>, IComparer
-        where T : IEquatable<T>
+    public static ListCollectionView ToCollectionView<TValue, TComparer>( this ConcurrentObservableCollection<TValue> list, TComparer comparer )
+        where TComparer : IComparer<TValue>, IComparer
+        where TValue : IEquatable<TValue>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
@@ -120,9 +120,9 @@ public static partial class WpfApi
 
         return collection;
     }
-    public static ListCollectionView ToCollectionView<T, TComparer>( this ConcurrentObservableCollection<T> list, TComparer comparer, Func<T, bool> filter )
-        where TComparer : IComparer<T>, IComparer
-        where T : IEquatable<T>
+    public static ListCollectionView ToCollectionView<TValue, TComparer>( this ConcurrentObservableCollection<TValue> list, TComparer comparer, Func<TValue, bool> filter )
+        where TComparer : IComparer<TValue>, IComparer
+        where TValue : IEquatable<TValue>
     {
         BindingOperations.EnableCollectionSynchronization( list, list.Lock );
 
@@ -133,7 +133,7 @@ public static partial class WpfApi
                                         };
 
         return collection;
-        bool Filter( object item ) => item is T value && filter( value );
+        bool Filter( object item ) => item is TValue value && filter( value );
     }
 
 

@@ -1,9 +1,9 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class ConcurrentDeque<T> : IQueue<T>
+public class ConcurrentDeque<TValue> : IQueue<TValue>
 {
-    protected readonly Deque<T> _queue;
+    protected readonly Deque<TValue> _queue;
 #if NET8_0
     protected readonly object _lock;
 #else
@@ -27,7 +27,7 @@ public class ConcurrentDeque<T> : IQueue<T>
             lock (_lock) { return _queue.IsEmpty(); }
         }
     }
-    public T Next
+    public TValue Next
     {
         get
         {
@@ -36,7 +36,7 @@ public class ConcurrentDeque<T> : IQueue<T>
     }
 
     public ConcurrentDeque() : this( null ) { }
-    public ConcurrentDeque( IEnumerable<T>? enumerable,
+    public ConcurrentDeque( IEnumerable<TValue>? enumerable,
                             int             capacity = DEFAULT_CAPACITY,
                         #if NET8_0
                             object? locker = null
@@ -45,7 +45,7 @@ public class ConcurrentDeque<T> : IQueue<T>
 #endif
     )
     {
-        _queue = new Deque<T>( capacity );
+        _queue = new Deque<TValue>( capacity );
 
         _lock = locker ??
             #if NET8_0
@@ -56,16 +56,16 @@ public class ConcurrentDeque<T> : IQueue<T>
 
         if ( enumerable is not null )
         {
-            foreach ( T x in enumerable ) { _queue.AddToBack( x ); }
+            foreach ( TValue x in enumerable ) { _queue.AddToBack( x ); }
         }
     }
 
 
-    public virtual void Add( T value )
+    public virtual void Add( TValue value )
     {
         lock (_lock) { _queue.AddToBack( value ); }
     }
-    public virtual ValueTask AddAsync( T value )
+    public virtual ValueTask AddAsync( TValue value )
     {
         lock (_lock) { _queue.AddToBack( value ); }
 
@@ -73,13 +73,13 @@ public class ConcurrentDeque<T> : IQueue<T>
     }
 
 
-    public virtual bool Remove( [NotNullWhen( true )] out T? value )
+    public virtual bool Remove( [NotNullWhen( true )] out TValue? value )
     {
         lock (_lock)
         {
             if ( _queue.Count > 0 )
             {
-                T t = _queue.RemoveFromBack();
+                TValue t = _queue.RemoveFromBack();
 
                 if ( t is not null )
                 {
@@ -92,15 +92,15 @@ public class ConcurrentDeque<T> : IQueue<T>
         value = default;
         return false;
     }
-    public virtual ValueTask<T?> RemoveAsync()
+    public virtual ValueTask<TValue?> RemoveAsync()
     {
-        T? value = default;
+        TValue? value = default;
 
         lock (_lock)
         {
             if ( _queue.Count > 0 )
             {
-                T t = _queue.RemoveFromBack();
+                TValue t = _queue.RemoveFromBack();
 
                 if ( t is not null ) { value = t; }
             }
@@ -122,17 +122,17 @@ public class ConcurrentDeque<T> : IQueue<T>
     }
 
 
-    public virtual bool Contains( T obj )
+    public virtual bool Contains( TValue obj )
     {
         lock (_lock) { return _queue.Contains( obj ); }
     }
-    public virtual ValueTask<bool> ContainsAsync( T obj )
+    public virtual ValueTask<bool> ContainsAsync( TValue obj )
     {
         lock (_lock) { return ValueTask.FromResult( _queue.Contains( obj ) ); }
     }
 
 
-    public IEnumerator<T> GetEnumerator()
+    public IEnumerator<TValue> GetEnumerator()
     {
         lock (_lock) { return _queue.GetEnumerator(); }
     }

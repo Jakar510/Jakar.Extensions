@@ -40,21 +40,21 @@ public interface IConnectableDb : IDbTable, IDbOptions
 
 public interface IConnectableDbRoot : IConnectableDb
 {
-    public IAsyncEnumerable<T> Where<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T : IDbReaderMapping<T>, IRecordPair;
-    public IAsyncEnumerable<T> WhereValue<T>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where T : struct;
+    public IAsyncEnumerable<TValue> Where<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TValue : IDbReaderMapping<TValue>, IRecordPair;
+    public IAsyncEnumerable<TValue> WhereValue<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TValue : struct;
 
 
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public CommandDefinition GetCommand<T>( T command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where T : class, IDapperSqlCommand;
+    public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+        where TValue : class, IDapperSqlCommand;
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition     GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token );
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, DbConnection   connection,  DbTransaction?    transaction, CancellationToken token );
 
 
-    public ValueTask<DbDataReader> ExecuteReaderAsync<T>( DbConnection connection, DbTransaction? transaction, T command, CancellationToken token )
-        where T : class, IDapperSqlCommand;
+    public ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( DbConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
+        where TValue : class, IDapperSqlCommand;
     public ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection          connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token );
     public ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition );
 }

@@ -8,8 +8,8 @@ using Jakar.SettingsView.Maui.Sv.Base;
 namespace Jakar.SettingsView.Maui.Sv;
 
 
-public abstract class SvRadioCell<T> : ValueCellBase<T>
-    where T : IEquatable<T>, IComparable<T>
+public abstract class SvRadioCell<TValue> : ValueCellBase<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
     public sealed override WidgetType Type => WidgetType.Radio;
 }

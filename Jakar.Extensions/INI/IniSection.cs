@@ -86,19 +86,19 @@ public partial class IniConfig
 
         #region Gets
 
-        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T? value )
+        public bool ValueAs<TValue>( string key, [NotNullWhen( true )] out TValue? value )
         {
             string? s = this[key];
 
             value = string.IsNullOrEmpty( s )
                         ? default
-                        : s.FromJson<T>();
+                        : s.FromJson<TValue>();
 
             return value is not null;
         }
-        public bool ValueAs<T>( string key, [NotNullWhen( true )] out T[]? value )
+        public bool ValueAs<TValue>( string key, [NotNullWhen( true )] out TValue[]? value )
         {
-            value = this[key]?.FromJson<T[]>();
+            value = this[key]?.FromJson<TValue[]>();
 
             return value is not null;
         }
@@ -158,12 +158,12 @@ public partial class IniConfig
 
         #region Adds
 
-        public void AddJson<T>( string key, T value )
-            where T : class => this[key] = value.ToJson();
-        public void Add<T>( string key, params ReadOnlySpan<T> values ) => this[key] = values.ToJson();
+        public void AddJson<TValue>( string key, TValue value )
+            where TValue : class => this[key] = value.ToJson();
+        public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString( null, CultureInfo.CurrentCulture );
-        public void Add<T>( string key, IEnumerable<T>      values )                   => this[key] = values.ToJson();
+        public void Add<TValue>( string key, IEnumerable<TValue>      values )                   => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values )                   => this[key] = values.ToJson();
         public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
         public void Add( string    key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );

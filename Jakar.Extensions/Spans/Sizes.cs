@@ -46,7 +46,7 @@ public static class Sizes
 
 
     public static bool Register( Type              type, int size ) => _sizes.TryAdd( type, size );
-    public static int  GetBufferSize<T>( int       defaultSize           = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(T), defaultSize );
-    public static int  GetBufferSize<T>( this T    _,    int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(T), defaultSize );
+    public static int  GetBufferSize<TValue>( int       defaultSize           = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(TValue), defaultSize );
+    public static int  GetBufferSize<TValue>( this TValue    _,    int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(TValue), defaultSize );
     public static int  GetBufferSize( this    Type type, int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( type,      defaultSize );
 }

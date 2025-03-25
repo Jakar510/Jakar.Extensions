@@ -12,11 +12,11 @@ public interface IUserRights
 
 
 
-public interface IUserRights<out T, TEnum> : IUserRights
+public interface IUserRights<out TValue, TEnum> : IUserRights
     where TEnum : struct, Enum
-    where T : IUserRights<T, TEnum>
+    where TValue : IUserRights<TValue, TEnum>
 {
-    public T WithRights( UserRights<TEnum> rights );
+    public TValue WithRights( UserRights<TEnum> rights );
 }
 
 
@@ -87,16 +87,16 @@ public ref struct UserRights<TEnum>
     [Pure] public static   UserRights<TEnum> Create( params ReadOnlySpan<TEnum> indexes ) => Default.Add( indexes );
 
     [Pure]
-    public static UserRights<TEnum> Create<T>( IEnumerable<IEnumerable<T>> user )
-        where T : IUserRights => Default.With( user );
+    public static UserRights<TEnum> Create<TValue>( IEnumerable<IEnumerable<TValue>> user )
+        where TValue : IUserRights => Default.With( user );
 
     [Pure]
-    public static UserRights<TEnum> Create<T>( IEnumerable<T> user )
-        where T : IUserRights => Default.With( user );
+    public static UserRights<TEnum> Create<TValue>( IEnumerable<TValue> user )
+        where TValue : IUserRights => Default.With( user );
 
     [Pure]
-    public static UserRights<TEnum> Create<T>( T user )
-        where T : IUserRights => Default.With( user );
+    public static UserRights<TEnum> Create<TValue>( TValue user )
+        where TValue : IUserRights => Default.With( user );
 
 
     [Pure]
@@ -108,26 +108,26 @@ public ref struct UserRights<TEnum>
     }
 
 
-    public UserRights<TEnum> With<T>( IEnumerable<IEnumerable<T>> values )
-        where T : IUserRights => With( values.SelectMany( static x => x ) );
-    public UserRights<TEnum> With<T>( IEnumerable<T> values )
-        where T : IUserRights
+    public UserRights<TEnum> With<TValue>( IEnumerable<IEnumerable<TValue>> values )
+        where TValue : IUserRights => With( values.SelectMany( static x => x ) );
+    public UserRights<TEnum> With<TValue>( IEnumerable<TValue> values )
+        where TValue : IUserRights
     {
-        foreach ( T value in values ) { this = With( value ); }
+        foreach ( TValue value in values ) { this = With( value ); }
 
         return this;
     }
-    public UserRights<TEnum> With<T>( params ReadOnlySpan<T> values )
-        where T : IUserRights
+    public UserRights<TEnum> With<TValue>( params ReadOnlySpan<TValue> values )
+        where TValue : IUserRights
     {
-        foreach ( T value in values ) { this = With( value ); }
+        foreach ( TValue value in values ) { this = With( value ); }
 
         return this;
     }
 
 
-    public readonly UserRights<TEnum> With<T>( T user )
-        where T : IUserRights => With( user.Rights );
+    public readonly UserRights<TEnum> With<TValue>( TValue user )
+        where TValue : IUserRights => With( user.Rights );
     private readonly UserRights<TEnum> With( params ReadOnlySpan<char> other )
     {
         Span<char> span = this.span;

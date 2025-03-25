@@ -47,11 +47,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     public bool ValueAs( TKey key, [NotNullWhen( true )] out Version?    value ) => ValueAs<Version>( key, out value );
 
 
-    public bool ValueAs<T>( TKey key, [NotNullWhen( true )] out T? value )
+    public bool ValueAs<TValue>( TKey key, [NotNullWhen( true )] out TValue? value )
     {
         object? s = this[key];
 
-        if ( s is T item )
+        if ( s is TValue item )
         {
             value = item;
             return true;
@@ -62,11 +62,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     }
 
 
-    public T ValueAs<T>( TKey key )
+    public TValue ValueAs<TValue>( TKey key )
     {
         if ( !ContainsKey( key ) ) { throw new KeyNotFoundException( key.ToString() ); }
 
-        return ExpectedValueTypeException<TKey>.Verify<T>( this[key], key );
+        return ExpectedValueTypeException<TKey>.Verify<TValue>( this[key], key );
     }
 
     #endregion
@@ -75,7 +75,7 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 
     #region Adds
 
-    public void Add<T>( TKey key, T          value ) => this[key] = value;
+    public void Add<TValue>( TKey key, TValue          value ) => this[key] = value;
     public void Add( TKey    key, double     value ) => this[key] = value;
     public void Add( TKey    key, double?    value ) => this[key] = value;
     public void Add( TKey    key, float      value ) => this[key] = value;

@@ -9,14 +9,14 @@ public static class TableExtensions
                                                                                                      : null;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T? GetData<T>( this DbDataReader reader, string propertyName )
-        where T : class => reader.GetFieldValue<object?>( propertyName ) is string json
-                               ? json.FromJson<T>()
+    public static TValue? GetData<TValue>( this DbDataReader reader, string propertyName )
+        where TValue : class => reader.GetFieldValue<object?>( propertyName ) is string json
+                               ? json.FromJson<TValue>()
                                : null;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static T? GetValue<T>( this DbDataReader reader, string propertyName ) => reader.GetFieldValue<object?>( propertyName ) is T value
+    public static TValue? GetValue<TValue>( this DbDataReader reader, string propertyName ) => reader.GetFieldValue<object?>( propertyName ) is TValue value
                                                                                          ? value
                                                                                          : default;
 

@@ -37,8 +37,8 @@ public class TelemetryLogger : BackgroundService, IBatchedLogEventSink, ILogEven
             await SendAsync( logs );
         }
     }
-    public virtual Task SendAsync<T>( T logs )
-        where T : IEnumerable<TelemetryLogEvent> => Task.CompletedTask;
+    public virtual Task SendAsync<TValue>( TValue logs )
+        where TValue : IEnumerable<TelemetryLogEvent> => Task.CompletedTask;
 
 
     public override async Task StopAsync( CancellationToken token )

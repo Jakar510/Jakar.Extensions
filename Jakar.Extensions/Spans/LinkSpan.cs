@@ -4,159 +4,141 @@
 namespace Jakar.Extensions;
 
 
-public readonly ref struct LinkSpan<T>
-    where T : IEquatable<T>
-{
-    private readonly IMemoryOwner<T>? _owner;
-    public readonly  Span<T>          Span;
-    public readonly  ReadOnlySpan<T>  ReadOnlySpan;
-    public readonly  int              Length;
+public delegate bool RefCheck<TValue>( ref readonly TValue value );
 
 
-    public bool IsEmpty => Length == 0;
-    public ref T this[ int             index ] { get => ref Span[index]; }
-    public ref T this[ Index           index ] { get => ref Span[index]; }
-    public ReadOnlySpan<T> this[ Range index ] { get => ReadOnlySpan[index]; }
+
+public delegate TNext RefConvert<TValue, out TNext>( ref readonly TValue value );
 
 
-    public LinkSpan( params ReadOnlySpan<T> span ) : this( span.Length ) => span.CopyTo( Span );
-    public LinkSpan( int capacity )
+
+public static class LinkSpan
+{ 
+    [Pure]
+    public static ReadOnlySpan<TValue> Where<TValue>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector )
     {
-        Length       = capacity;
-        _owner       = MemoryPool<T>.Shared.Rent( capacity );
-        Span         = _owner.Memory.Span[..capacity];
-        ReadOnlySpan = _owner.Memory.Span[..capacity];
-    }
+        if ( span.IsEmpty ) { return default; }
 
+        TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
+        int      index  = 0;
 
-    [Pure, MustDisposeResource] public static LinkSpan<T>                Create( params ReadOnlySpan<T> span ) => new(span);
-    public                                    void                       Dispose()                             => _owner?.Dispose();
-    public                                    ReadOnlySpan<T>.Enumerator GetEnumerator()                       => ReadOnlySpan.GetEnumerator();
-    public T[] ToArray()
-    {
-        T[] span = ReadOnlySpan.ToArray();
-        Dispose();
-        return span;
-    }
-
-
-    [Pure, MustDisposeResource]
-    public LinkSpan<T> Where( Func<T, bool> selector )
-    {
-        if ( IsEmpty ) { return default; }
-
-        LinkSpan<T> buffer = new(Length);
-        Span<T>     span   = buffer.Span;
-        int         index  = 0;
-
-        foreach ( T value in ReadOnlySpan )
+        foreach ( TValue value in span )
         {
-            if ( selector( value ) ) { span[index++] = value; }
+            if ( selector( in value ) ) { buffer[index++] = value; }
         }
 
-        return buffer;
+        return new ReadOnlySpan<TValue>( buffer, 0, index );
     }
-
-    [Pure, MustDisposeResource]
-    public LinkSpan<TNext> Where<TNext>( Func<T, bool> selector, Func<T, TNext> func )
+     
+    [Pure]
+    public static ReadOnlySpan<TNext> Select<TValue, TNext>( ReadOnlySpan<TValue> span, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
     {
-        if ( IsEmpty ) { return default; }
+        if ( span.IsEmpty ) { return default; }
 
-        LinkSpan<TNext> buffer = new(Length);
-        Span<TNext>     span   = buffer.Span;
-        int             index  = 0;
+        TNext[] buffer = GC.AllocateUninitializedArray<TNext>( span.Length );
+        int     index  = 0;
 
-        foreach ( T value in ReadOnlySpan )
-        {
-            if ( selector( value ) ) { span[index++] = func( value ); }
-        }
+        foreach ( TValue value in span ) { buffer[index++] = func( in value ); }
 
         return buffer;
     }
 
-    [Pure, MustDisposeResource]
-    public LinkSpan<TNext> Select<TNext>( Func<T, TNext> func )
+    
+    [Pure]
+    public static ReadOnlySpan<TNext> Where<TValue, TNext>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
     {
-        if ( IsEmpty ) { return default; }
+        if ( span.IsEmpty ) { return default; }
 
-        LinkSpan<TNext> buffer = new(Length);
-        Span<TNext>     span   = buffer.Span;
-        int             index  = 0;
+        TNext[] buffer = GC.AllocateUninitializedArray<TNext>( span.Length );
+        int     index  = 0;
 
-        foreach ( T value in ReadOnlySpan ) { span[index++] = func( value ); }
-
-        return buffer;
-    }
-
-    [Pure, MustDisposeResource]
-    public static LinkSpan<T> Join( scoped ref readonly ReadOnlySpan<T> first, scoped ref readonly ReadOnlySpan<T> last )
-    {
-        int         size   = first.Length;
-        int         length = size + last.Length;
-        LinkSpan<T> buffer = new(length);
-        Guard.IsGreaterThanOrEqualTo( buffer.Length, length );
-        first.CopyTo( buffer.Span[..size] );
-        last.CopyTo( buffer.Span[size..] );
-        return buffer;
-    }
-
-    [Pure, MustDisposeResource]
-    public LinkSpan<T> Replace( scoped ref readonly ReadOnlySpan<T> oldValue, scoped ref readonly ReadOnlySpan<T> newValue )
-    {
-        LinkSpan<T> buffer = new(Length + ReadOnlySpan.Count( oldValue ) * newValue.Length);
-        Span<T>     span   = buffer.Span;
-
-        if ( ReadOnlySpan.ContainsExact( oldValue ) is false )
+        foreach ( TValue value in span )
         {
-            ReadOnlySpan.CopyTo( span );
-            return buffer;
+            if ( selector( in value ) ) { buffer[index++] = func( in value ); }
         }
 
-        do
-        {
-            int startIndex = ReadOnlySpan.IndexOf( oldValue );
+        return new ReadOnlySpan<TNext>( buffer, 0, index );
+    }
 
-            if ( startIndex <= 0 ) { ReadOnlySpan[startIndex..].CopyTo( span[startIndex..] ); }
-            else
+
+    [Pure]
+    public static ReadOnlySpan<TValue> Join<TValue>( this ReadOnlySpan<TValue> first, params ReadOnlySpan<TValue> last )
+    {
+        int          size   = first.Length;
+        TValue[]     buffer = GC.AllocateUninitializedArray<TValue>( size + last.Length );
+        Span<TValue> result = buffer;
+        first.CopyTo( result[..size] );
+        last.CopyTo( result[size..] );
+        return buffer;
+    }
+
+
+    [Pure]
+    public static ReadOnlySpan<TValue> Replace<TValue>( this ReadOnlySpan<TValue> value, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue )
+        where TValue : unmanaged, IEquatable<TValue>
+    {
+        Buffer<TValue> buffer = new(value.Length + value.Count( oldValue ) * (newValue.Length - oldValue.Length));
+
+        try
+        {
+            value.Replace( oldValue, newValue, ref buffer );
+            return buffer.ToArray();
+        }
+        finally { buffer.Dispose(); }
+    }
+    public static void Replace<TValue>( this ReadOnlySpan<TValue> source, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue, scoped ref Buffer<TValue> buffer )
+        where TValue : unmanaged, IEquatable<TValue>
+    {
+        if ( source.ContainsExact( oldValue ) is false )
+        {
+            source.CopyTo( buffer.Next );
+            return;
+        }
+
+        int sourceIndex = 0;
+
+        while ( sourceIndex < source.Length )
+        {
+            if ( source[sourceIndex..].StartsWith( oldValue ) )
             {
-                ReadOnlySpan[..startIndex].CopyTo( span[..startIndex] );
-                newValue.CopyTo( span[startIndex..] );
+                buffer.Add( newValue );
+                sourceIndex += oldValue.Length;
             }
+            else { buffer.Add( source[sourceIndex++] ); }
         }
-        while ( ReadOnlySpan.ContainsExact( oldValue ) );
-
-        return buffer;
     }
 
-    [Pure, MustDisposeResource]
-    public LinkSpan<T> Remove( scoped ref readonly T value )
-    {
-        using IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( Length );
-        Span<T>               span  = owner.Memory.Span;
-        int                   index = 0;
 
-        foreach ( T equatable in ReadOnlySpan )
+    [Pure]
+    public static ReadOnlySpan<TValue> Remove<TValue>( this ReadOnlySpan<TValue> span, TValue value )
+        where TValue : IEquatable<TValue>
+    {
+        TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
+        int      index  = 0;
+
+        foreach ( TValue equatable in span )
         {
-            if ( equatable.Equals( value ) is false ) { span[index++] = equatable; }
+            if ( equatable.Equals( value ) is false ) { buffer[index++] = equatable; }
         }
 
-        return new LinkSpan<T>( span[..index] );
+        return new ReadOnlySpan<TValue>( buffer, 0, index );
     }
 
-    [Pure, MustDisposeResource]
-    public LinkSpan<T> Remove( params ReadOnlySpan<T> values )
-    {
-        using IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( Length );
-        Span<T>               span  = owner.Memory.Span;
-        int                   index = 0;
 
-        foreach ( T equatable in ReadOnlySpan )
+    [Pure]
+    public static ReadOnlySpan<TValue> Remove<TValue>( this ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> values )
+        where TValue : IEquatable<TValue>
+    {
+        TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
+        int      index  = 0;
+
+        foreach ( TValue equatable in span )
         {
-            if ( equatable.IsOneOf( values ) is false ) { span[index++] = equatable; }
+            if ( equatable.IsOneOf( values ) is false ) { buffer[index++] = equatable; }
         }
 
-        return new LinkSpan<T>( span[..index] );
+        return new ReadOnlySpan<TValue>( buffer, 0, index );
     }
 }

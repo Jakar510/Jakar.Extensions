@@ -13,17 +13,17 @@ namespace Jakar.Extensions.Serilog;
 [SuppressMessage( "ReSharper", "CollectionNeverQueried.Local" )]
 public static class AppLoggers
 {
-    public static void TrackError<T>( this T _, Exception                 exception, IEnumerable<FileData>?    attachments, [CallerMemberName] string caller                                        = BaseRecord.EMPTY ) => TrackError( _, exception, ISerilogger.Instance?.AppState(), attachments, caller );
-    public static void TrackError<T>( this T _, Exception                 exception, EventDetails?             details,     IEnumerable<FileData>?    attachments, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, details, attachments, caller );
-    public static void TrackError<T>( this T _, Exception                 exception, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, caller );
-    public static void TrackEvent<T>( this T _, [CallerMemberName] string eventType                                                                          = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType );
-    public static void TrackEvent<T>( this T _, EventDetails              properties, [CallerMemberName] string eventType                                    = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, properties, eventType );
-    public static void TrackEvent<T>( this T _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType,  properties, caller );
+    public static void TrackError<TValue>( this TValue _, Exception                 exception, IEnumerable<FileData>?    attachments, [CallerMemberName] string caller                                        = BaseRecord.EMPTY ) => TrackError( _, exception, ISerilogger.Instance?.AppState(), attachments, caller );
+    public static void TrackError<TValue>( this TValue _, Exception                 exception, EventDetails?             details,     IEnumerable<FileData>?    attachments, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, details, attachments, caller );
+    public static void TrackError<TValue>( this TValue _, Exception                 exception, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackError( _, exception, caller );
+    public static void TrackEvent<TValue>( this TValue _, [CallerMemberName] string eventType                                                                          = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType );
+    public static void TrackEvent<TValue>( this TValue _, EventDetails              properties, [CallerMemberName] string eventType                                    = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, properties, eventType );
+    public static void TrackEvent<TValue>( this TValue _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY ) => ISerilogger.Instance?.TrackEvent( _, eventType,  properties, caller );
 
 
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    public static void Details<T>( Exception e, T dict )
-        where T : class, IDictionary<string, string?>
+    public static void Details<TValue>( Exception e, TValue dict )
+        where TValue : class, IDictionary<string, string?>
     {
         dict[nameof(Type)]                                = e.GetType().FullName;
         dict[nameof(e.Source)]                            = e.Source;
@@ -88,7 +88,7 @@ public static class AppLoggers
                    ? LogContext.PushProperty( file.MetaData.FileName, file.ToPrettyJson() )
                    : NullScope.Instance;
     }
-    public static FileData GetAttachment<T>( this T value, string fileName )
+    public static FileData GetAttachment<TValue>( this TValue value, string fileName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( fileName );
         FileMetaData data = FileMetaData.Create( fileName, MimeType.Json );

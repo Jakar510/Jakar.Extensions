@@ -36,7 +36,7 @@ public static class SvConstants
     public static string GetID() => Guids.NewBase64();
 
 
-    public static async ValueTask Execute<T>( this EventCallback<T> callback, T? args = default )
+    public static async ValueTask Execute<TValue>( this EventCallback<TValue> callback, TValue? args = default )
     {
         if ( args is null ) { return; }
 

@@ -8,10 +8,10 @@ namespace Jakar.Extensions;
 public static class Hashes
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static int GetHash<T>( this IEnumerable<T> values )
+    public static int GetHash<TValue>( this IEnumerable<TValue> values )
     {
         HashCode hash = new();
-        foreach ( T value in values ) { hash.Add( value ); }
+        foreach ( TValue value in values ) { hash.Add( value ); }
 
         return hash.ToHashCode();
     }
@@ -66,10 +66,10 @@ public static class Hashes
 
 
     [Pure]
-    public static unsafe UInt128 Hash128<T>( this ref readonly ReadOnlySpan<T> value, long seed = 0 )
-        where T : unmanaged
+    public static unsafe UInt128 Hash128<TValue>( this ref readonly ReadOnlySpan<TValue> value, long seed = 0 )
+        where TValue : unmanaged
     {
-        int                      size   = sizeof(T);
+        int                      size   = sizeof(TValue);
         int                      length = size * value.Length;
         using IMemoryOwner<byte> owner  = MemoryPool<byte>.Shared.Rent( length );
         Span<byte>               span   = owner.Memory.Span;
@@ -87,10 +87,10 @@ public static class Hashes
     }
 
     [Pure]
-    public static unsafe ulong Hash<T>( this ref readonly ReadOnlySpan<T> value, long seed = 0 )
-        where T : unmanaged
+    public static unsafe ulong Hash<TValue>( this ref readonly ReadOnlySpan<TValue> value, long seed = 0 )
+        where TValue : unmanaged
     {
-        int                      size   = sizeof(T);
+        int                      size   = sizeof(TValue);
         int                      length = size * value.Length;
         using IMemoryOwner<byte> owner  = MemoryPool<byte>.Shared.Rent( length );
         Span<byte>               span   = owner.Memory.Span;

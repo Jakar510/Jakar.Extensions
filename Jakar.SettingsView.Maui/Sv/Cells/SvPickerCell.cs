@@ -5,14 +5,14 @@
 namespace Jakar.SettingsView.Maui.Sv;
 
 
-public abstract class SvPickerCell<T> : ValueCellBase<T>
-    where T : IEquatable<T>, IComparable<T>
+public abstract class SvPickerCell<TValue> : ValueCellBase<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
     public override WidgetType Type   => WidgetType.Picker;
-    public          IList<T>?  Values { get; set; }
+    public          IList<TValue>?  Values { get; set; }
 
 
-    public override ErrorOrResult<T> Save()
+    public override ErrorOrResult<TValue> Save()
     {
         return Value is not null
                    ? Value

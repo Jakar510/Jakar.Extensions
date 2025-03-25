@@ -24,17 +24,17 @@ public sealed class DebugLogEvent( string source, string message, string caller,
     private DebugLogEvent( string     source, string message, string caller, LogEventLevel level, EventDetails? details = null ) : this( source, message, caller, level, DateTimeOffset.UtcNow ) { }
 
 
-    public static DebugLogEvent Create<T>( string message, LogEventLevel level = LogEventLevel.Debug, EventDetails? details = null,                [CallerMemberName] string caller  = EMPTY )                                          => Create( typeof(T), message, level, details, caller );
+    public static DebugLogEvent Create<TValue>( string message, LogEventLevel level = LogEventLevel.Debug, EventDetails? details = null,                [CallerMemberName] string caller  = EMPTY )                                          => Create( typeof(TValue), message, level, details, caller );
     public static DebugLogEvent Create( Type      source,  string        message,                     LogEventLevel level   = LogEventLevel.Debug, EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
     public static DebugLogEvent Create( string    source,  string        message,                     LogEventLevel level,                         EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
 
 
-    public static DebugLogEvent Error<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<T>( e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error<TValue>( TValue   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Error, details, caller );
     public static DebugLogEvent Error( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
     public static DebugLogEvent Error( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
 
 
-    public static DebugLogEvent Fatal<T>( T   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<T>( e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal<TValue>( TValue   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Fatal, details, caller );
     public static DebugLogEvent Fatal( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
     public static DebugLogEvent Fatal( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
 

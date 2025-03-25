@@ -75,7 +75,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         ThrowIfReadOnly();
         EnsureCapacity( 1 );
         buffer.Insert( i, value );
-        Added( value, i );
+        Added( in value, i );
     }
     protected internal virtual void InternalInsert( int startIndex, IEnumerable<TValue> collection )
     {
@@ -138,15 +138,16 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         Removed( in value, index );
         return true;
     }
-    protected internal virtual int InternalRemove( Func<TValue, bool> match )
+    protected internal virtual int InternalRemove( RefCheck<TValue> match )
     {
         ThrowIfReadOnly();
-        int count = 0;
+        ReadOnlySpan<TValue> span  = AsSpan();
+        int                  count = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TValue value in buffer.Where( match ) )
+        foreach ( TValue value in span )
         {
-            if ( Remove( value ) ) { count++; }
+            if ( match( in value ) && InternalRemove( in value ) ) { count++; }
         }
 
         return count;
@@ -173,7 +174,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
         value = buffer[index];
         buffer.RemoveAt( index );
-        Removed( value, index );
+        Removed( in value, index );
         return true;
     }
     protected internal virtual bool InternalTryAdd( ref readonly TValue value )
@@ -190,7 +191,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     {
         ThrowIfReadOnly();
         buffer.Add( value );
-        Added( value, Count - 1 );
+        Added( in value, Count - 1 );
     }
     protected internal virtual void InternalAdd( ref readonly TValue value, int count )
     {
@@ -315,7 +316,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
         Guard.IsInRangeFor( index, buffer, nameof(index) );
         buffer[index] = value;
-        Replaced( old, value, index );
+        Replaced( in old, in value, index );
     }
 
 
@@ -323,41 +324,43 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void   Set( int index, TValue value ) => InternalSet( index, in value );
 
 
-    public virtual bool Exists( Func<TValue, bool> match ) => FindIndex( match ) >= 0;
+    public virtual bool Exists( RefCheck<TValue> match ) => FindIndex( match ) >= 0;
 
 
-    public virtual int FindIndex( Func<TValue, bool> match, int start = 0 )
+    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         return FindIndex( match, start, Count - 1 );
     }
-    public virtual int FindIndex( Func<TValue, bool> match, int start, int endInclusive )
+    public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsInRangeFor( start,        buffer, nameof(start) );
         Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
+        ReadOnlySpan<TValue> span = AsSpan();
 
         for ( int i = start; i < endInclusive; i++ )
         {
-            if ( match( buffer[i] ) ) { return i; }
+            if ( match( in span[i] ) ) { return i; }
         }
 
         return NOT_FOUND;
     }
 
 
-    public virtual int FindLastIndex( Func<TValue, bool> match, int start = 0 )
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 )
     {
         Guard.IsInRangeFor( start, buffer, nameof(start) );
         return FindLastIndex( match, Count - 1, start );
     }
-    public virtual int FindLastIndex( Func<TValue, bool> match, int start, int endInclusive )
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsInRangeFor( start,        buffer, nameof(start) );
         Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
+        ReadOnlySpan<TValue> span = AsSpan();
 
         for ( int i = start; i < endInclusive; i-- )
         {
-            if ( match( buffer[i] ) ) { return i; }
+            if ( match( in span[i] ) ) { return i; }
         }
 
         return NOT_FOUND;
@@ -392,29 +395,35 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual int     FindCount( Func<TValue, bool> match )            => buffer.Count( match );
-    public virtual TValue? Find( Func<TValue, bool>      match )            => Find( match, 0 );
-    public virtual TValue? Find( Func<TValue, bool>      match, int start ) => Find( match, start, Count - 1 );
-    public virtual TValue? Find( Func<TValue, bool> match, int start, int endInclusive )
+    public virtual int FindCount( RefCheck<TValue> match )
+    {
+        ReadOnlySpan<TValue> span = AsSpan();
+        return span.Count( match );
+    }
+    public virtual TValue? Find( RefCheck<TValue> match )            => Find( match, 0 );
+    public virtual TValue? Find( RefCheck<TValue> match, int start ) => Find( match, start, Count - 1 );
+    public virtual TValue? Find( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo( start, endInclusive );
         Guard.IsInRangeFor( start,        buffer, nameof(start) );
         Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
-        return AsSpan( start, endInclusive - start ).FirstOrDefault( match );
+        ReadOnlySpan<TValue> span = AsSpan( start, endInclusive - start );
+        return span.FirstOrDefault( match );
     }
-    public virtual TValue? FindLast( Func<TValue, bool> match )            => FindLast( match, 0 );
-    public virtual TValue? FindLast( Func<TValue, bool> match, int start ) => FindLast( match, start, Count - 1 );
-    public virtual TValue? FindLast( Func<TValue, bool> match, int start, int endInclusive )
+    public virtual TValue? FindLast( RefCheck<TValue> match )            => FindLast( match, 0 );
+    public virtual TValue? FindLast( RefCheck<TValue> match, int start ) => FindLast( match, start, Count - 1 );
+    public virtual TValue? FindLast( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo( start, endInclusive );
         Guard.IsInRangeFor( start,        buffer, nameof(start) );
         Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
 
-        return AsSpan( start, endInclusive - start ).LastOrDefault( match );
+        ReadOnlySpan<TValue> span = AsSpan( start, endInclusive - start );
+        return span.LastOrDefault( match );
     }
-    public virtual TValue[] FindAll( Func<TValue, bool> match )            => FindAll( match, 0 );
-    public virtual TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll( match, start, Count - 1 );
-    public virtual TValue[] FindAll( Func<TValue, bool> match, int start, int endInclusive )
+    public virtual TValue[] FindAll( RefCheck<TValue> match )            => FindAll( match, 0 );
+    public virtual TValue[] FindAll( RefCheck<TValue> match, int start ) => FindAll( match, start, Count - 1 );
+    public virtual TValue[] FindAll( RefCheck<TValue> match, int start, int endInclusive )
     {
         Guard.IsLessThanOrEqualTo( start, endInclusive );
         Guard.IsInRangeFor( start,        buffer, nameof(start) );
@@ -424,7 +433,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
         foreach ( TValue value in span )
         {
-            if ( match( value ) ) { list.Add( value ); }
+            if ( match( in value ) ) { list.Add( value ); }
         }
 
         return list.ToArray();
@@ -481,7 +490,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void RemoveRange( int startIndex, int                         count )  => InternalRemove( startIndex, count );
 
 
-    public virtual int  Remove( Func<TValue, bool>                  match )                                          => InternalRemove( match );
+    public virtual int  Remove( RefCheck<TValue>                    match )                                          => InternalRemove( match );
     public virtual bool Remove( TValue                              value )                                          => InternalRemove( in value );
     public virtual int  Remove( IEnumerable<TValue>                 values )                                         => InternalRemove( values );
     public virtual int  Remove( params       ReadOnlySpan<TValue>   values )                                         => InternalRemove( values );

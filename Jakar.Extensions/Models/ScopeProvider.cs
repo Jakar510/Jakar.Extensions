@@ -55,11 +55,11 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
 
 
-public sealed class ScopeProvider<T> : IExternalScopeProvider
+public sealed class ScopeProvider<TValue> : IExternalScopeProvider
 {
-    private static readonly Lazy<ScopeProvider<T>> _service      = new(static () => new ScopeProvider<T>());
+    private static readonly Lazy<ScopeProvider<TValue>> _service      = new(static () => new ScopeProvider<TValue>());
     private readonly        AsyncLocal<Scope?>     _currentScope = new();
-    public static           ScopeProvider<T>       Current => _service.Value;
+    public static           ScopeProvider<TValue>       Current => _service.Value;
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
@@ -75,8 +75,8 @@ public sealed class ScopeProvider<T> : IExternalScopeProvider
         }
     }
 
-    IDisposable IExternalScopeProvider.Push( object? state ) => Push( (T?)state );
-    public IDisposable Push( T? state )
+    IDisposable IExternalScopeProvider.Push( object? state ) => Push( (TValue?)state );
+    public IDisposable Push( TValue? state )
     {
         Scope? parent   = _currentScope.Value;
         Scope  newScope = new(this, state, parent);
@@ -87,11 +87,11 @@ public sealed class ScopeProvider<T> : IExternalScopeProvider
 
 
 
-    private sealed class Scope( ScopeProvider<T> provider, T? state, Scope? parent ) : IDisposable
+    private sealed class Scope( ScopeProvider<TValue> provider, TValue? state, Scope? parent ) : IDisposable
     {
-        private readonly ScopeProvider<T> _provider = provider;
+        private readonly ScopeProvider<TValue> _provider = provider;
         public readonly  Scope?           parent    = parent;
-        public readonly  T?               state     = state;
+        public readonly  TValue?               state     = state;
         private          bool             _isDisposed;
 
 

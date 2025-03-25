@@ -13,11 +13,11 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
 
 
 
-public interface IGroupModel<out T, TID> : IGroupModel<TID>
+public interface IGroupModel<out TValue, TID> : IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where T : IGroupModel<T, TID>
+    where TValue : IGroupModel<TValue, TID>
 {
-    public abstract static T Create( IGroupModel<TID> model );
+    public abstract static TValue Create( IGroupModel<TID> model );
 }
 
 

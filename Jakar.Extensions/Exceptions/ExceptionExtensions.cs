@@ -106,8 +106,8 @@ public static class ExceptionExtensions
 
 
     [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-    public static void Details<T>( this Exception e, in T dict )
-        where T : class, IDictionary<string, string?>
+    public static void Details<TValue>( this Exception e, in TValue dict )
+        where TValue : class, IDictionary<string, string?>
     {
         dict[nameof(Type)]               = e.GetType().FullName;
         dict[nameof(e.Source)]           = e.Source;
@@ -141,10 +141,10 @@ public static class ExceptionExtensions
     }
 
 
-    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] T>( this T e, ref Dictionary<string, object?> dictionary )
-        where T : Exception
+    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] TValue>( this TValue e, ref Dictionary<string, object?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
             string key = info.Name;
 
@@ -155,10 +155,10 @@ public static class ExceptionExtensions
     }
 
 
-    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] T>( this T e, ref Dictionary<string, JToken?> dictionary )
-        where T : Exception
+    public static void GetProperties<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
             string key = info.Name;
 
@@ -204,10 +204,10 @@ public static class ExceptionExtensions
 
 
 /*
-    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JToken?> dictionary )
-        where T : Exception
+    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
             string key = info.AppName;
 

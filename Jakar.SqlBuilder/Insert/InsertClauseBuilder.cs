@@ -10,24 +10,24 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
     private EasySqlBuilder _builder = builder;
 
 
-    public EasySqlBuilder Into<T>( string tableName, T value )
+    public EasySqlBuilder Into<TValue>( string tableName, TValue value )
     {
         _builder.Add( INSERT, INTO, tableName.GetName( value ) );
         return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( T value )
+    public EasySqlBuilder Into<TValue>( TValue value )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
+        _builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
         return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( IEnumerable<T> values )
+    public EasySqlBuilder Into<TValue>( IEnumerable<TValue> values )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
+        _builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
         return SetValues( values );
     }
-    private EasySqlBuilder SetValues<T>( T value )
+    private EasySqlBuilder SetValues<TValue>( TValue value )
     {
-        PropertyInfo[]             properties = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty );
+        PropertyInfo[]             properties = typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty );
         Dictionary<string, string> cache      = new(properties.Length);
 
         foreach ( PropertyInfo info in properties )
@@ -51,14 +51,14 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
         _builder.Add( INSERT, INTO, tableName );
         return In();
     }
-    public DataInsertBuilder In<T>()
+    public DataInsertBuilder In<TValue>()
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetName() );
+        _builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
-    public DataInsertBuilder In<T>( T _ )
+    public DataInsertBuilder In<TValue>( TValue _ )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetName() );
+        _builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
 }

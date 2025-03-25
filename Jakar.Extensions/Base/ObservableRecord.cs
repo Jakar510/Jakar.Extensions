@@ -23,10 +23,10 @@
         protected internal               void                                      OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke( this, e );
 
 
-        bool IObservableObject.SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => SetProperty( ref backingStore, value, equalityComparer, propertyName );
-        protected virtual bool SetProperty<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
+        bool IObservableObject.SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => SetProperty( ref backingStore, value, equalityComparer, propertyName );
+        protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
         {
-            equalityComparer ??= EqualityComparer<T>.Default;
+            equalityComparer ??= EqualityComparer<TValue>.Default;
             if ( equalityComparer.Equals( backingStore, value ) ) { return false; }
 
             OnPropertyChanging( propertyName );
@@ -39,10 +39,10 @@
         }
 
 
-        bool IObservableObject.SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null ) => SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
-        protected virtual bool SetPropertyWithoutNotify<T>( ref T backingStore, T value, IEqualityComparer<T>? equalityComparer = null )
+        bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
+        protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null )
         {
-            equalityComparer ??= EqualityComparer<T>.Default;
+            equalityComparer ??= EqualityComparer<TValue>.Default;
             if ( equalityComparer.Equals( backingStore, value ) ) { return false; }
 
             backingStore = value;

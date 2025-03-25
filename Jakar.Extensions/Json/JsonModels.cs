@@ -50,19 +50,19 @@ public static class JsonModels
 
     public static JToken? Get( this IJsonModel       self, string key ) => self.AdditionalData?[key];
     public static JToken? Get( this IJsonStringModel self, string key ) => self.GetAdditionalData()?[key];
-    public static T? Get<T>( this IJsonModel self, string key )
+    public static TValue? Get<TValue>( this IJsonModel self, string key )
     {
         JToken? token = self.Get( key );
         if ( token is null ) { return default; }
 
-        return token.ToObject<T>();
+        return token.ToObject<TValue>();
     }
-    public static T? Get<T>( this IJsonStringModel self, string key )
+    public static TValue? Get<TValue>( this IJsonStringModel self, string key )
     {
         JToken? token = self.Get( key );
         if ( token is null ) { return default; }
 
-        return token.ToObject<T>();
+        return token.ToObject<TValue>();
     }
 
 

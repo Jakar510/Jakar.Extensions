@@ -11,8 +11,8 @@ public sealed class EventDetails : Dictionary<string, string?>
 
 
     public override string ToString() => this.ToJson();
-    public static void AddAppState<T>( ref readonly T dictionary, string appName )
-        where T : class, IDictionary<string, object?> => dictionary[nameof(AppState)] = AppState( appName );
+    public static void AddAppState<TValue>( ref readonly TValue dictionary, string appName )
+        where TValue : class, IDictionary<string, object?> => dictionary[nameof(AppState)] = AppState( appName );
     public static EventDetails AppState( string appName ) =>
         new()
         {

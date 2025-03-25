@@ -17,7 +17,7 @@ namespace Jakar.Database.DbMigrations;
 
        CHAR(Size): A fixed-length character string, space-padded.
        VARCHAR(Size): A variable-length character string.
-       TEXT: A large text data typeof(T), with column.Size limits depending on the DBMS.
+       TEXT: A large text data typeof(TValue), with column.Size limits depending on the DBMS.
 
    Date and Time Types
 
@@ -40,7 +40,7 @@ namespace Jakar.Database.DbMigrations;
 
        ENUM: A string object that can have only one value chosen from a list of predefined values.
        SET: Similar to ENUM, but can store multiple values from a predefined list.
-       UUID/GUID: A special typeof(T) for storing Universally Unique Identifiers.
+       UUID/GUID: A special typeof(TValue) for storing Universally Unique Identifiers.
        JSON: Stores JSON data, allowing for complex data structures within a single database field.
        ARRAY: Supported by some databases like PostgreSQL, allowing storage of arrays.
        XML: For storing XML data, with some DBMS providing additional functions to manipulate XML data.
@@ -225,9 +225,9 @@ public ref struct SqlTableBuilder<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public SqlTableBuilder<TRecord> WithColumn<T>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
+    public SqlTableBuilder<TRecord> WithColumn<TValue>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
     {
-        DbType         dbType = GetDataType<T>( out bool isNullable, ref length );
+        DbType         dbType = GetDataType<TValue>( out bool isNullable, ref length );
         ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);
         return WithColumn( column );
     }
@@ -239,179 +239,179 @@ public ref struct SqlTableBuilder<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    private static DbType GetDataType<T>( out bool isNullable, ref OneOf<uint, ColumnPrecisionMetaData> length )
+    private static DbType GetDataType<TValue>( out bool isNullable, ref OneOf<uint, ColumnPrecisionMetaData> length )
     {
-        isNullable = typeof(T).IsNullableType() || typeof(T).IsBuiltInNullableType();
+        isNullable = typeof(TValue).IsNullableType() || typeof(TValue).IsBuiltInNullableType();
 
-        if ( typeof(T) == typeof(byte[]) ) { return DbType.Binary; }
+        if ( typeof(TValue) == typeof(byte[]) ) { return DbType.Binary; }
 
-        if ( typeof(JToken).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+        if ( typeof(JToken).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom( typeof(T) ) ) { return DbType.Object; }
+        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
 
-        if ( typeof(T).IsEnum )
+        if ( typeof(TValue).IsEnum )
         {
-            length = Spans.Max<string, uint>( Enum.GetNames( typeof(T) ), static x => (uint)x.Length, 0 );
+            length = Spans.Max<string, uint>( Enum.GetNames( typeof(TValue) ), static x => (uint)x.Length, 0 );
             return DbType.StringFixedLength;
         }
 
-        if ( typeof(T) == typeof(string) ) { return DbType.String; }
+        if ( typeof(TValue) == typeof(string) ) { return DbType.String; }
 
-        if ( typeof(T) == typeof(Int128) ) { return DbType.String; }
+        if ( typeof(TValue) == typeof(Int128) ) { return DbType.String; }
 
-        if ( typeof(T) == typeof(Int128?) )
+        if ( typeof(TValue) == typeof(Int128?) )
         {
             isNullable = true;
             return DbType.String;
         }
 
-        if ( typeof(T) == typeof(UInt128) ) { return DbType.String; }
+        if ( typeof(TValue) == typeof(UInt128) ) { return DbType.String; }
 
-        if ( typeof(T) == typeof(UInt128?) )
+        if ( typeof(TValue) == typeof(UInt128?) )
         {
             isNullable = true;
             return DbType.String;
         }
 
-        if ( typeof(T) == typeof(Guid) || typeof(T) == typeof(RecordID<TRecord>) ) { return DbType.Guid; }
+        if ( typeof(TValue) == typeof(Guid) || typeof(TValue) == typeof(RecordID<TRecord>) ) { return DbType.Guid; }
 
-        if ( typeof(T) == typeof(Guid?) || typeof(T) == typeof(RecordID<TRecord>?) )
+        if ( typeof(TValue) == typeof(Guid?) || typeof(TValue) == typeof(RecordID<TRecord>?) )
         {
             isNullable = true;
             return DbType.Guid;
         }
 
-        if ( typeof(T) == typeof(byte) ) { return DbType.Byte; }
+        if ( typeof(TValue) == typeof(byte) ) { return DbType.Byte; }
 
-        if ( typeof(T) == typeof(byte?) )
+        if ( typeof(TValue) == typeof(byte?) )
         {
             isNullable = true;
             return DbType.Byte;
         }
 
-        if ( typeof(T) == typeof(short) ) { return DbType.Int16; }
+        if ( typeof(TValue) == typeof(short) ) { return DbType.Int16; }
 
-        if ( typeof(T) == typeof(short?) )
+        if ( typeof(TValue) == typeof(short?) )
         {
             isNullable = true;
             return DbType.Int16;
         }
 
-        if ( typeof(T) == typeof(ushort) ) { return DbType.UInt16; }
+        if ( typeof(TValue) == typeof(ushort) ) { return DbType.UInt16; }
 
-        if ( typeof(T) == typeof(ushort?) )
+        if ( typeof(TValue) == typeof(ushort?) )
         {
             isNullable = true;
             return DbType.UInt16;
         }
 
-        if ( typeof(T) == typeof(int) ) { return DbType.Int32; }
+        if ( typeof(TValue) == typeof(int) ) { return DbType.Int32; }
 
-        if ( typeof(T) == typeof(int?) )
+        if ( typeof(TValue) == typeof(int?) )
         {
             isNullable = true;
             return DbType.Int32;
         }
 
-        if ( typeof(T) == typeof(uint) ) { return DbType.UInt32; }
+        if ( typeof(TValue) == typeof(uint) ) { return DbType.UInt32; }
 
-        if ( typeof(T) == typeof(uint?) )
+        if ( typeof(TValue) == typeof(uint?) )
         {
             isNullable = true;
             return DbType.UInt32;
         }
 
-        if ( typeof(T) == typeof(long) ) { return DbType.Int64; }
+        if ( typeof(TValue) == typeof(long) ) { return DbType.Int64; }
 
-        if ( typeof(T) == typeof(long?) )
+        if ( typeof(TValue) == typeof(long?) )
         {
             isNullable = true;
             return DbType.Int64;
         }
 
-        if ( typeof(T) == typeof(ulong) ) { return DbType.UInt64; }
+        if ( typeof(TValue) == typeof(ulong) ) { return DbType.UInt64; }
 
-        if ( typeof(T) == typeof(ulong?) )
+        if ( typeof(TValue) == typeof(ulong?) )
         {
             isNullable = true;
             return DbType.UInt64;
         }
 
-        if ( typeof(T) == typeof(float) ) { return DbType.Single; }
+        if ( typeof(TValue) == typeof(float) ) { return DbType.Single; }
 
-        if ( typeof(T) == typeof(float?) )
+        if ( typeof(TValue) == typeof(float?) )
         {
             isNullable = true;
             return DbType.Single;
         }
 
-        if ( typeof(T) == typeof(double) ) { return DbType.Double; }
+        if ( typeof(TValue) == typeof(double) ) { return DbType.Double; }
 
-        if ( typeof(T) == typeof(double?) )
+        if ( typeof(TValue) == typeof(double?) )
         {
             isNullable = true;
             return DbType.Double;
         }
 
-        if ( typeof(T) == typeof(decimal) ) { return DbType.Decimal; }
+        if ( typeof(TValue) == typeof(decimal) ) { return DbType.Decimal; }
 
-        if ( typeof(T) == typeof(decimal?) )
+        if ( typeof(TValue) == typeof(decimal?) )
         {
             isNullable = true;
             return DbType.Decimal;
         }
 
-        if ( typeof(T) == typeof(bool) ) { return DbType.Boolean; }
+        if ( typeof(TValue) == typeof(bool) ) { return DbType.Boolean; }
 
-        if ( typeof(T) == typeof(bool?) )
+        if ( typeof(TValue) == typeof(bool?) )
         {
             isNullable = true;
             return DbType.Boolean;
         }
 
-        if ( typeof(T) == typeof(DateOnly) ) { return DbType.Date; }
+        if ( typeof(TValue) == typeof(DateOnly) ) { return DbType.Date; }
 
-        if ( typeof(T) == typeof(DateOnly?) )
+        if ( typeof(TValue) == typeof(DateOnly?) )
         {
             isNullable = true;
             return DbType.Date;
         }
 
-        if ( typeof(T) == typeof(TimeOnly) ) { return DbType.Time; }
+        if ( typeof(TValue) == typeof(TimeOnly) ) { return DbType.Time; }
 
-        if ( typeof(T) == typeof(TimeOnly?) )
+        if ( typeof(TValue) == typeof(TimeOnly?) )
         {
             isNullable = true;
             return DbType.Time;
         }
 
-        if ( typeof(T) == typeof(TimeSpan) ) { return DbType.Time; }
+        if ( typeof(TValue) == typeof(TimeSpan) ) { return DbType.Time; }
 
-        if ( typeof(T) == typeof(TimeSpan?) )
+        if ( typeof(TValue) == typeof(TimeSpan?) )
         {
             isNullable = true;
             return DbType.Time;
         }
 
-        if ( typeof(T) == typeof(DateTime) ) { return DbType.DateTime2; }
+        if ( typeof(TValue) == typeof(DateTime) ) { return DbType.DateTime2; }
 
-        if ( typeof(T) == typeof(DateTime?) )
+        if ( typeof(TValue) == typeof(DateTime?) )
         {
             isNullable = true;
             return DbType.DateTime2;
         }
 
-        if ( typeof(T) == typeof(DateTimeOffset) ) { return DbType.DateTimeOffset; }
+        if ( typeof(TValue) == typeof(DateTimeOffset) ) { return DbType.DateTimeOffset; }
 
-        if ( typeof(T) == typeof(DateTimeOffset?) )
+        if ( typeof(TValue) == typeof(DateTimeOffset?) )
         {
             isNullable = true;
             return DbType.DateTimeOffset;
         }
 
-        throw new ArgumentException( $"Unsupported typeof(T): {typeof(T).Name}" );
+        throw new ArgumentException( $"Unsupported typeof(TValue): {typeof(TValue).Name}" );
     }
 
 

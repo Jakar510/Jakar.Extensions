@@ -8,10 +8,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Memory<T> Trim<T>( this scoped ref readonly Memory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static Memory<TValue> Trim<TValue>( this scoped ref readonly Memory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span   = memory.Span;
+        ReadOnlySpan<TValue> span   = memory.Span;
         int             start  = span.ClampStart( trimElement );
         int             length = span.ClampEnd( start, trimElement );
         return memory.Slice( start, length );
@@ -22,10 +22,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Memory<T> TrimStart<T>( this scoped ref readonly Memory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static Memory<TValue> TrimStart<TValue>( this scoped ref readonly Memory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span = memory.Span;
+        ReadOnlySpan<TValue> span = memory.Span;
         return memory.Slice( span.ClampStart( trimElement ) );
     }
 
@@ -34,10 +34,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Memory<T> TrimEnd<T>( this scoped ref readonly Memory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static Memory<TValue> TrimEnd<TValue>( this scoped ref readonly Memory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span = memory.Span;
+        ReadOnlySpan<TValue> span = memory.Span;
         return memory.Slice( 0, span.ClampEnd( 0, trimElement ) );
     }
 
@@ -46,10 +46,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlyMemory<T> Trim<T>( this scoped ref readonly ReadOnlyMemory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> Trim<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span   = memory.Span;
+        ReadOnlySpan<TValue> span   = memory.Span;
         int             start  = span.ClampStart( trimElement );
         int             length = span.ClampEnd( start, trimElement );
         return memory.Slice( start, length );
@@ -60,10 +60,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlyMemory<T> TrimStart<T>( this scoped ref readonly ReadOnlyMemory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> TrimStart<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span = memory.Span;
+        ReadOnlySpan<TValue> span = memory.Span;
         return memory.Slice( span.ClampStart( trimElement ) );
     }
 
@@ -72,10 +72,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="memory">The source memory from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlyMemory<T> TrimEnd<T>( this scoped ref readonly ReadOnlyMemory<T> memory, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> TrimEnd<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> span = memory.Span;
+        ReadOnlySpan<TValue> span = memory.Span;
         return memory.Slice( 0, span.ClampEnd( 0, trimElement ) );
     }
 
@@ -84,10 +84,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Span<T> Trim<T>( this scoped ref readonly Span<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static Span<TValue> Trim<TValue>( this scoped ref readonly Span<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> values = span;
+        ReadOnlySpan<TValue> values = span;
         int             start  = values.ClampStart( trimElement );
         int             length = values.ClampEnd( start, trimElement );
         return span.Slice( start, length );
@@ -98,10 +98,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Span<T> TrimStart<T>( this scoped ref readonly Span<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static Span<TValue> TrimStart<TValue>( this scoped ref readonly Span<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> temp = span;
+        ReadOnlySpan<TValue> temp = span;
         return span.Slice( temp.ClampStart( trimElement ) );
     }
 
@@ -110,10 +110,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static Span<T> TrimEnd<T>( this scoped ref readonly Span<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static Span<TValue> TrimEnd<TValue>( this scoped ref readonly Span<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> values = span;
+        ReadOnlySpan<TValue> values = span;
         return span.Slice( 0, values.ClampEnd( 0, trimElement ) );
     }
 
@@ -122,8 +122,8 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlySpan<T> Trim<T>( this scoped ref readonly ReadOnlySpan<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> Trim<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
         int start  = span.ClampStart( trimElement );
         int length = span.ClampEnd( start, trimElement );
@@ -135,8 +135,8 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlySpan<T> TrimStart<T>( this scoped ref readonly ReadOnlySpan<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> TrimStart<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
         return span.Slice( span.ClampStart( trimElement ) );
     }
@@ -146,10 +146,10 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static ReadOnlySpan<T> TrimEnd<T>( this scoped ref readonly ReadOnlySpan<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> TrimEnd<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
-        ReadOnlySpan<T> values = span;
+        ReadOnlySpan<TValue> values = span;
         return span.Slice( 0, values.ClampEnd( 0, trimElement ) );
     }
 
@@ -158,8 +158,8 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static int ClampStart<T>( this scoped ref readonly ReadOnlySpan<T> span, T trimElement )
-        where T : IEquatable<T>?
+    public static int ClampStart<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
         int start = 0;
 
@@ -187,8 +187,8 @@ public static partial class Spans
     /// <param name="span">The source span from which the element is removed.</param>
     /// <param name="start">The start index from which to being searching.</param>
     /// <param name="trimElement">The specified element to look for and remove.</param>
-    public static int ClampEnd<T>( this scoped ref readonly ReadOnlySpan<T> span, int start, T trimElement )
-        where T : IEquatable<T>?
+    public static int ClampEnd<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, int start, TValue trimElement )
+        where TValue : IEquatable<TValue>?
     {
         // Initially, start==len==0. If ClampStart trims all, start==len
         Debug.Assert( (uint)start <= span.Length );
@@ -220,14 +220,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static Memory<T> Trim<T>( this scoped ref readonly Memory<T> memory, ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Memory<TValue> Trim<TValue>( this scoped ref readonly Memory<TValue> memory, ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> span   = memory.Span;
+                ReadOnlySpan<TValue> span   = memory.Span;
                 int             start  = span.ClampStart( trimElements );
                 int             length = span.ClampEnd( start, trimElements );
                 return memory.Slice( start, length );
@@ -245,14 +245,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static Memory<T> TrimStart<T>( this scoped ref readonly Memory<T> memory, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Memory<TValue> TrimStart<TValue>( this scoped ref readonly Memory<TValue> memory, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = memory.Span;
+                ReadOnlySpan<TValue> values = memory.Span;
                 return memory.Slice( values.ClampStart( trimElements ) );
             }
 
@@ -268,14 +268,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static Memory<T> TrimEnd<T>( this scoped ref readonly Memory<T> memory, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Memory<TValue> TrimEnd<TValue>( this scoped ref readonly Memory<TValue> memory, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = memory.Span;
+                ReadOnlySpan<TValue> values = memory.Span;
                 return memory.Slice( 0, values.ClampEnd( 0, trimElements ) );
             }
 
@@ -291,14 +291,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static ReadOnlyMemory<T> Trim<T>( this scoped ref readonly ReadOnlyMemory<T> memory, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> Trim<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> span   = memory.Span;
+                ReadOnlySpan<TValue> span   = memory.Span;
                 int             start  = span.ClampStart( trimElements );
                 int             length = span.ClampEnd( start, trimElements );
                 return memory.Slice( start, length );
@@ -316,14 +316,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static ReadOnlyMemory<T> TrimStart<T>( this scoped ref readonly ReadOnlyMemory<T> memory, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> TrimStart<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = memory.Span;
+                ReadOnlySpan<TValue> values = memory.Span;
                 return memory.Slice( values.ClampStart( trimElements ) );
             }
 
@@ -339,14 +339,14 @@ public static partial class Spans
     /// <param name="memory">The source memory from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the memory is returned unaltered.</remarks>
-    public static ReadOnlyMemory<T> TrimEnd<T>( this scoped ref readonly ReadOnlyMemory<T> memory, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlyMemory<TValue> TrimEnd<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> memory, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = memory.Span;
+                ReadOnlySpan<TValue> values = memory.Span;
                 return memory.Slice( 0, values.ClampEnd( 0, trimElements ) );
             }
 
@@ -362,14 +362,14 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static Span<T> Trim<T>( this scoped ref readonly Span<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Span<TValue> Trim<TValue>( this scoped ref readonly Span<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = span;
+                ReadOnlySpan<TValue> values = span;
                 int             start  = values.ClampStart( trimElements );
                 int             length = values.ClampEnd( start, trimElements );
                 return span.Slice( start, length );
@@ -387,14 +387,14 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static Span<T> TrimStart<T>( this scoped ref readonly Span<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Span<TValue> TrimStart<TValue>( this scoped ref readonly Span<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = span;
+                ReadOnlySpan<TValue> values = span;
                 return span.Slice( values.ClampStart( trimElements ) );
             }
 
@@ -410,14 +410,14 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static Span<T> TrimEnd<T>( this scoped ref readonly Span<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static Span<TValue> TrimEnd<TValue>( this scoped ref readonly Span<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = span;
+                ReadOnlySpan<TValue> values = span;
                 return span.Slice( 0, values.ClampEnd( 0, trimElements ) );
             }
 
@@ -433,14 +433,14 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static ReadOnlySpan<T> Trim<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> Trim<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         switch ( trimElements.Length )
         {
             case > 1:
             {
-                ReadOnlySpan<T> values = span;
+                ReadOnlySpan<TValue> values = span;
                 int             start  = values.ClampStart( trimElements );
                 int             length = values.ClampEnd( start, trimElements );
                 return span.Slice( start, length );
@@ -458,8 +458,8 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static ReadOnlySpan<T> TrimStart<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> TrimStart<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         return trimElements.Length switch
                {
@@ -476,8 +476,8 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
     /// <remarks>If <paramref name="trimElements"/> is empty, the span is returned unaltered.</remarks>
-    public static ReadOnlySpan<T> TrimEnd<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static ReadOnlySpan<TValue> TrimEnd<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         return trimElements.Length switch
                {
@@ -493,8 +493,8 @@ public static partial class Spans
     /// </summary>
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
-    public static int ClampStart<T>( this scoped ref readonly ReadOnlySpan<T> span, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static int ClampStart<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         int start = 0;
 
@@ -513,8 +513,8 @@ public static partial class Spans
     /// <param name="span">The source span from which the elements are removed.</param>
     /// <param name="start">The start index from which to being searching.</param>
     /// <param name="trimElements">The span which contains the set of elements to remove.</param>
-    public static int ClampEnd<T>( this scoped ref readonly ReadOnlySpan<T> span, int start, params ReadOnlySpan<T> trimElements )
-        where T : IEquatable<T>?
+    public static int ClampEnd<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, int start, params ReadOnlySpan<TValue> trimElements )
+        where TValue : IEquatable<TValue>?
     {
         // Initially, start==len==0. If ClampStart trims all, start==len
         Debug.Assert( (uint)start <= span.Length );

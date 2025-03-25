@@ -118,8 +118,8 @@ public static class DbServices
     }
 
 
-    public static IHealthChecksBuilder AddHealthCheck<T>( this IServiceCollection services )
-        where T : IHealthCheck => services.AddHealthCheck( HealthChecks.Create<T>() );
+    public static IHealthChecksBuilder AddHealthCheck<TValue>( this IServiceCollection services )
+        where TValue : IHealthCheck => services.AddHealthCheck( HealthChecks.Create<TValue>() );
     public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) => services.AddHealthChecks().Add( registration );
 
 
@@ -139,12 +139,12 @@ public static class DbServices
         DbOptions.GetConnectionString( migration );
         migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
-    public static void MigrationsMsSql<T>( this IMigrationRunnerBuilder migration )
-        where T : IAppName
+    public static void MigrationsMsSql<TValue>( this IMigrationRunnerBuilder migration )
+        where TValue : IAppName
     {
         migration.AddSqlServer2016();
         DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.ScanIn( typeof(TValue).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
     public static void MigrationsPostgres( this IMigrationRunnerBuilder migration )
     {
@@ -152,12 +152,12 @@ public static class DbServices
         DbOptions.GetConnectionString( migration );
         migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
-    public static void MigrationsPostgres<T>( this IMigrationRunnerBuilder migration )
-        where T : IAppName
+    public static void MigrationsPostgres<TValue>( this IMigrationRunnerBuilder migration )
+        where TValue : IAppName
     {
         migration.AddPostgres();
         DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(T).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        migration.ScanIn( typeof(TValue).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
     }
 
 
@@ -181,14 +181,14 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddOptions<T>( this IServiceCollection services, Action<T> options )
-        where T : class, IOptions<T> => services.AddOptions( options, Options.DefaultName );
-    public static IServiceCollection AddOptions<T>( this IServiceCollection services, Action<T> options, string name )
-        where T : class, IOptions<T>
+    public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options )
+        where TValue : class, IOptions<TValue> => services.AddOptions( options, Options.DefaultName );
+    public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options, string name )
+        where TValue : class, IOptions<TValue>
     {
-        services.AddSingleton<T>();
+        services.AddSingleton<TValue>();
         services.Configure( name, options );
-        services.AddTransient<IOptions<T>>( static provider => provider.GetRequiredService<T>() );
+        services.AddTransient<IOptions<TValue>>( static provider => provider.GetRequiredService<TValue>() );
         return services;
     }
 

@@ -121,8 +121,8 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
     public TClass With( IEnumerable<TRoleModel>             values );
     public TClass With( scoped in ReadOnlySpan<TRoleModel>  values );
     public TClass With( IDictionary<string, JToken?>?       data );
-    public TClass With<T>( T value )
-        where T : IUserData<TID>;
+    public TClass With<TValue>( TValue value )
+        where TValue : IUserData<TID>;
 
 
     public abstract static TClass            Create( IUserData<TID>      model, IEnumerable<TAddress>            addresses, IEnumerable<TGroupModel>            groups, IEnumerable<TRoleModel>            roles );

@@ -3,34 +3,23 @@
 
 public static class OneOfChecks
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property ) => string.Equals( e.PropertyName, property, StringComparison.Ordinal );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property )                                      => string.Equals( e.PropertyName, property, StringComparison.Ordinal );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2 )                   => e.IsEqual( property1 ) || e.IsEqual( property2 );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, string property1, string property2, string property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, ReadOnlySpan<char> property ) => property.SequenceEqual( e.PropertyName );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, ReadOnlySpan<char> property1, ReadOnlySpan<char> property2 ) => e.IsEqual( property1 ) || e.IsEqual( property2 );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, ReadOnlySpan<char> property )                                                              => property.SequenceEqual( e.PropertyName );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, ReadOnlySpan<char> property1, ReadOnlySpan<char> property2 )                               => e.IsEqual( property1 ) || e.IsEqual( property2 );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqual( this PropertyChangedEventArgs e, ReadOnlySpan<char> property1, ReadOnlySpan<char> property2, ReadOnlySpan<char> property3 ) => e.IsEqual( property1 ) || e.IsEqual( property2 ) || e.IsEqual( property3 );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsOneOf<TValue>( this TValue value, params ReadOnlySpan<TValue> items )
+        where TValue : IEquatable<TValue>
     {
-        if ( value is null ) { return false; }
-
-        if ( value is IEquatable<TValue> equatable )
+        foreach ( TValue item in items )
         {
-            foreach ( TValue item in items )
-            {
-                if ( equatable.Equals( item ) ) { return true; }
-            }
-        }
-        else
-        {
-            foreach ( TValue item in items )
-            {
-                if ( value.Equals( item ) ) { return true; }
-            }
+            if ( value.Equals( item ) ) { return true; }
         }
 
         return false;
@@ -53,8 +42,8 @@ public static class OneOfChecks
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsOneOf<T>( this PropertyChangedEventArgs e, T properties )
-        where T : IEnumerable<string>
+    public static bool IsOneOf<TValue>( this PropertyChangedEventArgs e, TValue properties )
+        where TValue : IEnumerable<string>
     {
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( string property in properties )
@@ -67,7 +56,7 @@ public static class OneOfChecks
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsOneOf( this PropertyChangedEventArgs e,params ReadOnlySpan<string> properties )
+    public static bool IsOneOf( this PropertyChangedEventArgs e, params ReadOnlySpan<string> properties )
     {
         if ( string.IsNullOrEmpty( e.PropertyName ) ) { return false; }
 

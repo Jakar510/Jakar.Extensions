@@ -106,48 +106,23 @@ public static partial class Spans
     }
 
     [Pure]
-    public static int LastIndexOf<T>( this scoped ref readonly ReadOnlySpan<T> value, T c, int endIndex )
-        where T : IEquatable<T> =>
+    public static int LastIndexOf<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, TValue c, int endIndex )
+        where TValue : IEquatable<TValue> =>
         endIndex < 0 || endIndex >= value.Length
             ? value.LastIndexOf( c )
             : value[..endIndex].LastIndexOf( c );
 
 
-    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span )                 => new(in span);
-    [Pure] public static EnumerateEnumerator<T> Enumerate<T>( this scoped ref readonly ReadOnlySpan<T> span, int startIndex ) => new(startIndex, in span);
+    [Pure] public static EnumerateEnumerator<TValue> Enumerate<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span )                 => new(span);
+    [Pure] public static EnumerateEnumerator<TValue> Enumerate<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, int startIndex ) => new(startIndex, span);
 
 
-    [Pure, MustDisposeResource]
-    public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly Span<T> span, int length )
-        where T : IEquatable<T>
-    {
-        Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
-        return new LinkSpan<T>( span[..length] );
-    }
-
-    [Pure, MustDisposeResource]
-    public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly ReadOnlySpan<T> span, int length )
-        where T : IEquatable<T>
-    {
-        Guard.IsLessThanOrEqualTo( length, span.Length, nameof(length) );
-        return new LinkSpan<T>( span[..length] );
-    }
-
-    [Pure, MustDisposeResource]
-    public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly Span<T> span )
-        where T : IEquatable<T> => new(span);
-
-    [Pure, MustDisposeResource]
-    public static LinkSpan<T> AsBuffer<T>( this scoped ref readonly ReadOnlySpan<T> span )
-        where T : IEquatable<T> => new(span);
-
-
-    public static void CopyTo<T>( this scoped ref readonly ReadOnlySpan<T> value, ref Span<T> buffer )
+    public static void CopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer )
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         value.CopyTo( buffer );
     }
-    public static void CopyTo<T>( this scoped ref readonly ReadOnlySpan<T> value, ref Span<T> buffer, T defaultValue )
+    public static void CopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer, TValue defaultValue )
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         value.CopyTo( buffer );
@@ -158,12 +133,12 @@ public static partial class Spans
     }
 
 
-    public static bool TryCopyTo<T>( this scoped ref readonly ReadOnlySpan<T> value, ref Span<T> buffer )
+    public static bool TryCopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer )
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
         return value.TryCopyTo( buffer );
     }
-    public static bool TryCopyTo<T>( this scoped ref readonly ReadOnlySpan<T> value, ref Span<T> buffer, T defaultValue )
+    public static bool TryCopyTo<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, ref Span<TValue> buffer, TValue defaultValue )
     {
         Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
 
@@ -175,55 +150,55 @@ public static partial class Spans
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<T> CreateSpan<T>( int size ) => AsyncLinq.GetArray<T>( size );
-    public static Span<T> CreateValue<T>( int size )
-        where T : unmanaged
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<TValue> CreateSpan<TValue>( int size ) => AsyncLinq.GetArray<TValue>( size );
+    public static Span<TValue> CreateValue<TValue>( int size )
+        where TValue : unmanaged
     {
-        if ( size > 250 ) { return CreateSpan<T>( size ); }
+        if ( size > 250 ) { return CreateSpan<TValue>( size ); }
 
-        Span<T> span = stackalloc T[size];
+        Span<TValue> span = stackalloc TValue[size];
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static Span<T> Create<T>( T arg0 )
+    public static Span<TValue> Create<TValue>( TValue arg0 )
     {
-        Span<T> span = [arg0];
+        Span<TValue> span = [arg0];
 
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static Span<T> Create<T>( T arg0, T arg1 )
+    public static Span<TValue> Create<TValue>( TValue arg0, TValue arg1 )
     {
-        Span<T> span = [arg0, arg1];
+        Span<TValue> span = [arg0, arg1];
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2 )
+    public static Span<TValue> Create<TValue>( TValue arg0, TValue arg1, TValue arg2 )
     {
-        Span<T> span = [arg0, arg1, arg2];
+        Span<TValue> span = [arg0, arg1, arg2];
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3 )
+    public static Span<TValue> Create<TValue>( TValue arg0, TValue arg1, TValue arg2, TValue arg3 )
     {
-        Span<T> span = [arg0, arg1, arg2, arg3];
+        Span<TValue> span = [arg0, arg1, arg2, arg3];
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
-    public static Span<T> Create<T>( T arg0, T arg1, T arg2, T arg3, T arg4 )
+    public static Span<TValue> Create<TValue>( TValue arg0, TValue arg1, TValue arg2, TValue arg3, TValue arg4 )
     {
-        Span<T> span = [arg0, arg1, arg2, arg3, arg4];
+        Span<TValue> span = [arg0, arg1, arg2, arg3, arg4];
         return MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
     }
 
 
     [Pure]
-    public static EnumerateEnumerator<T> Enumerate<T, TNumber>( this scoped ref readonly ReadOnlySpan<T> span )
+    public static EnumerateEnumerator<TValue> Enumerate<TValue, TNumber>( this scoped ref readonly ReadOnlySpan<TValue> span )
         where TNumber : struct, INumber<TNumber> => new(span);
 
 
-    public static void QuickSort<T>( ref Span<T> span, Comparison<T> comparison )
+    public static void QuickSort<TValue>( ref Span<TValue> span, Comparison<TValue> comparison )
     {
         if ( span.Length <= 1 ) { return; }
 
         QuickSort( ref span, 0, span.Length - 1, comparison );
     }
-    public static void QuickSort<T>( ref Span<T> span, int left, int right, Comparison<T> comparison )
+    public static void QuickSort<TValue>( ref Span<TValue> span, int left, int right, Comparison<TValue> comparison )
     {
         if ( left >= right ) { return; }
 
@@ -233,9 +208,9 @@ public static partial class Spans
 
         return;
 
-        static int Partition( ref readonly Span<T> span, int left, int right, Comparison<T> comparison )
+        static int Partition( ref readonly Span<TValue> span, int left, int right, Comparison<TValue> comparison )
         {
-            T   pivot = span[right];
+            TValue   pivot = span[right];
             int i     = left - 1;
 
             for ( int j = left; j < right; j++ )
@@ -250,6 +225,6 @@ public static partial class Spans
             return i + 1;
         }
 
-        static void Swap( ref T left, ref T right ) => (left, right) = (right, left);
+        static void Swap( ref TValue left, ref TValue right ) => (left, right) = (right, left);
     }
 }

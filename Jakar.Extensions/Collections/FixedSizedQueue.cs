@@ -4,8 +4,8 @@
 /// <summary>
 ///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name="T"> </typeparam>
-public class FixedSizedQueue<T>( int size,  
+/// <typeparam name="TValue"> </typeparam>
+public class FixedSizedQueue<TValue>( int size,  
                              #if NET8_0
                                  object? locker = null
 #else
@@ -13,7 +13,7 @@ public class FixedSizedQueue<T>( int size,
 #endif
     )
 { 
-    protected readonly Queue<T> _q    = new(size);
+    protected readonly Queue<TValue> _q    = new(size);
 #if NET8_0
     protected readonly object _lock = locker ?? new object();
 #else
@@ -23,27 +23,27 @@ public class FixedSizedQueue<T>( int size,
     public int Size { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = size;
 
 
-    public bool Contains( T value )
+    public bool Contains( TValue value )
     {
         lock (_lock) { return _q.Contains( value ); }
     }
-    public ValueTask<bool> ContainsAsync( T value, CancellationToken token = default )
+    public ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
     {
         lock (_lock) { return ValueTask.FromResult( _q.Contains( value ) ); }
     }
 
 
-    public T Dequeue()
+    public TValue Dequeue()
     {
         lock (_lock) { return _q.Dequeue(); }
     }
-    public ValueTask<T> DequeueAsync( CancellationToken token = default )
+    public ValueTask<TValue> DequeueAsync( CancellationToken token = default )
     {
         lock (_lock) { return ValueTask.FromResult( _q.Dequeue() ); }
     }
 
 
-    public void Enqueue( T value )
+    public void Enqueue( TValue value )
     {
         lock (_lock)
         {
@@ -51,7 +51,7 @@ public class FixedSizedQueue<T>( int size,
             while ( _q.Count > Size ) { _q.Dequeue(); }
         }
     }
-    public ValueTask EnqueueAsync( T value, CancellationToken token = default )
+    public ValueTask EnqueueAsync( TValue value, CancellationToken token = default )
     {
         lock (_lock)
         {

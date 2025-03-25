@@ -8,40 +8,40 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     <para> Based on System.ParamsArray </para>
 /// </summary>
-public readonly ref struct ParamsArray<T>( IMemoryOwner<T> owner, int length )
+public readonly ref struct ParamsArray<TValue>( IMemoryOwner<TValue> owner, int length )
 {
-    private readonly IMemoryOwner<T> _owner  = owner;
-    public readonly  ReadOnlySpan<T> Span    = owner.Memory.Span[..length];
+    private readonly IMemoryOwner<TValue> _owner  = owner;
+    public readonly  ReadOnlySpan<TValue> Span    = owner.Memory.Span[..length];
     public readonly  int             Length  = length;
     public readonly  bool            IsEmpty = length <= 0;
 
 
-    public ref readonly T this[ int index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
+    public ref readonly TValue this[ int index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
     public          void                       Dispose()       => _owner.Dispose();
-    public override string                     ToString()      => $"ParamsArray<{typeof(T).Name}>({nameof(Length)}: {Length})";
-    [Pure] public   ReadOnlySpan<T>.Enumerator GetEnumerator() => Span.GetEnumerator();
+    public override string                     ToString()      => $"ParamsArray<{typeof(TValue).Name}>({nameof(Length)}: {Length})";
+    [Pure] public   ReadOnlySpan<TValue>.Enumerator GetEnumerator() => Span.GetEnumerator();
 
 
-    public static implicit operator ParamsArray<T>( Span<T>         args ) => Create( args );
-    public static implicit operator ParamsArray<T>( ReadOnlySpan<T> args ) => Create( args );
-    public static implicit operator ParamsArray<T>( T               args ) => Create( args );
-    public static implicit operator ParamsArray<T>( T[]             args ) => Create( args );
-    public static implicit operator ParamsArray<T>( List<T>         args ) => Create( args );
-    public static implicit operator ReadOnlySpan<T>( ParamsArray<T> args ) => args.Span;
+    public static implicit operator ParamsArray<TValue>( Span<TValue>         args ) => Create( args );
+    public static implicit operator ParamsArray<TValue>( ReadOnlySpan<TValue> args ) => Create( args );
+    public static implicit operator ParamsArray<TValue>( TValue               args ) => Create( args );
+    public static implicit operator ParamsArray<TValue>( TValue[]             args ) => Create( args );
+    public static implicit operator ParamsArray<TValue>( List<TValue>         args ) => Create( args );
+    public static implicit operator ReadOnlySpan<TValue>( ParamsArray<TValue> args ) => args.Span;
 
 
     [Pure]
-    public static ParamsArray<T> Create( params ReadOnlySpan<T> args )
+    public static ParamsArray<TValue> Create( params ReadOnlySpan<TValue> args )
     {
-        IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( args.Length );
+        IMemoryOwner<TValue> owner = MemoryPool<TValue>.Shared.Rent( args.Length );
         args.CopyTo( owner.Memory.Span );
-        return new ParamsArray<T>( owner, args.Length );
+        return new ParamsArray<TValue>( owner, args.Length );
     }
     [Pure]
-    public static ParamsArray<T> Create( List<T> args )
+    public static ParamsArray<TValue> Create( List<TValue> args )
     {
-        IMemoryOwner<T> owner = MemoryPool<T>.Shared.Rent( args.Count );
+        IMemoryOwner<TValue> owner = MemoryPool<TValue>.Shared.Rent( args.Count );
         CollectionsMarshal.AsSpan( args ).CopyTo( owner.Memory.Span );
-        return new ParamsArray<T>( owner, args.Count );
+        return new ParamsArray<TValue>( owner, args.Count );
     }
 }

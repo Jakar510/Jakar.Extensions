@@ -11,14 +11,14 @@ public struct UpdateClauseBuilder( ref EasySqlBuilder builder )
         _builder.Add( UPDATE, tableName, SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
-    public UpdateChainBuilder To<T>( T _ )
+    public UpdateChainBuilder To<TValue>( TValue _ )
     {
-        _builder.Add( UPDATE, typeof(T).GetName(), SET );
+        _builder.Add( UPDATE, typeof(TValue).GetName(), SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
-    public UpdateChainBuilder To<T>()
+    public UpdateChainBuilder To<TValue>()
     {
-        _builder.Add( UPDATE, typeof(T).GetName(), SET );
+        _builder.Add( UPDATE, typeof(TValue).GetName(), SET );
         return new UpdateChainBuilder( this, ref _builder );
     }
 

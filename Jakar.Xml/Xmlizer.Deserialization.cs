@@ -12,11 +12,11 @@ namespace Jakar.Xml;
 
 public static partial class Xmlizer
 {
-    public static string Serialize<T>( T obj, in IDictionary<string, string>? attributes = null )
+    public static string Serialize<TValue>( TValue obj, in IDictionary<string, string>? attributes = null )
     {
         if ( obj is null ) { throw new NullReferenceException( nameof(obj) ); }
 
-        Type type   = typeof(T);
+        Type type   = typeof(TValue);
         XWriter  writer = new();
 
         return writer.ToString();

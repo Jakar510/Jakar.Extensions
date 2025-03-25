@@ -12,11 +12,11 @@ public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
 
 
 
-public interface IRoleModel<out T, TID> : IRoleModel<TID>
+public interface IRoleModel<out TValue, TID> : IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where T : IRoleModel<T, TID>
+    where TValue : IRoleModel<TValue, TID>
 {
-    public abstract static T Create( IRoleModel<TID> model );
+    public abstract static TValue Create( IRoleModel<TID> model );
 }
 
 

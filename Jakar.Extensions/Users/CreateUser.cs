@@ -89,7 +89,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 
 
     public LoginRequest    GetLoginRequest()             => new(UserName, Password);
-    public LoginRequest<T> GetLoginRequest<T>( T value ) => new(UserName, Password, value);
+    public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value ) => new(UserName, Password, value);
 
 
     public virtual bool Validate( ICollection<string> errors )

@@ -25,12 +25,12 @@ public interface ISerilogger : ILogger, ILogEventSink, IExceptionHandler, IValid
     public void SetDeviceID( long deviceID );
 
 
-    public void TrackEvent<T>( T _, [CallerMemberName] string caller                                                                             = BaseRecord.EMPTY );
-    public void TrackEvent<T>( T _, EventDetails              properties, [CallerMemberName] string caller                                       = BaseRecord.EMPTY );
-    public void TrackEvent<T>( T _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY );
+    public void TrackEvent<TValue>( TValue _, [CallerMemberName] string caller                                                                             = BaseRecord.EMPTY );
+    public void TrackEvent<TValue>( TValue _, EventDetails              properties, [CallerMemberName] string caller                                       = BaseRecord.EMPTY );
+    public void TrackEvent<TValue>( TValue _, string                    eventType,  EventDetails?             properties, [CallerMemberName] string caller = BaseRecord.EMPTY );
 
-    public void TrackError<T>( T _, Exception exception, EventDetails?             details, IEnumerable<FileData>? attachments, [CallerMemberName] string caller = BaseRecord.EMPTY );
-    public void TrackError<T>( T _, Exception exception, [CallerMemberName] string caller = BaseRecord.EMPTY );
+    public void TrackError<TValue>( TValue _, Exception exception, EventDetails?             details, IEnumerable<FileData>? attachments, [CallerMemberName] string caller = BaseRecord.EMPTY );
+    public void TrackError<TValue>( TValue _, Exception exception, [CallerMemberName] string caller = BaseRecord.EMPTY );
 
 
     public ValueTask SaveFeedBackAppState( Dictionary<string, string> feedback, string key = "feedback" );

@@ -172,16 +172,16 @@ public static class Strings
     public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
 
 
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, T separator )
-        where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this Span<T> span, scoped in ReadOnlySpan<T> separators )
-        where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, TValue separator )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, Spans.Create( separator ));
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, scoped in ReadOnlySpan<TValue> separators )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, separators);
 
 
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, T separator )
-        where T : unmanaged, IEquatable<T> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<T> SplitOn<T>( this ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> separators )
-        where T : unmanaged, IEquatable<T> => new(span, separators);
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this ReadOnlySpan<TValue> span, TValue separator )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, Spans.Create( separator ));
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this ReadOnlySpan<TValue> span, scoped in ReadOnlySpan<TValue> separators )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, separators);
 
 
     public static string ConvertToString( this byte[]               value, Encoding encoding ) => encoding.GetString( value );

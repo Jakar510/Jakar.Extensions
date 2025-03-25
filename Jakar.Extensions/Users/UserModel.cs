@@ -197,8 +197,8 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
 
     void IUserData<TID>.With( IUserData<TID> value ) => With( value );
-    public TClass With<T>( T value )
-        where T : IUserData<TID>
+    public TClass With<TValue>( TValue value )
+        where TValue : IUserData<TID>
     {
         CreatedBy         = value.CreatedBy;
         EscalateTo        = value.EscalateTo;

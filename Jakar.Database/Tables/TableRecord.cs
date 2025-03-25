@@ -125,10 +125,10 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
 
 
     [Pure]
-    protected static T TryGet<T>( DbDataReader reader, string key )
+    protected static TValue TryGet<TValue>( DbDataReader reader, string key )
     {
         int index = reader.GetOrdinal( key );
-        return (T)reader.GetValue( index );
+        return (TValue)reader.GetValue( index );
     }
 
 

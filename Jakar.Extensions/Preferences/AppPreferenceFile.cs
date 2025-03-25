@@ -41,20 +41,20 @@ public sealed class AppPreferenceFile( LocalFile file ) : IAppPreferences, IAsyn
     public void Set( string key, Uri   value, string sharedName ) => Set( key, value.ToString(),  sharedName );
     public void Set( string key, bool  value, string sharedName ) => Set( key, value.GetString(), sharedName );
     public void Set( string key, bool? value, string sharedName ) => Set( key, value.GetString(), sharedName );
-    public void Set<T>( string key, T value, string sharedName )
-        where T : IParsable<T>, IFormattable
+    public void Set<TValue>( string key, TValue value, string sharedName )
+        where TValue : IParsable<TValue>, IFormattable
     {
         _config[sharedName][key] = value.ToString( null, CultureInfo.CurrentCulture );
         _                        = SaveAsync();
     }
 
 
-    public T Get<T>( string key, T defaultValue, string sharedName, string? oldKey = null )
-        where T : IParsable<T>, IFormattable
+    public TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? oldKey = null )
+        where TValue : IParsable<TValue>, IFormattable
     {
         string? value = Get( key, sharedName, oldKey, defaultValue.ToString( null, CultureInfo.CurrentCulture ) );
 
-        return T.TryParse( value, CultureInfo.CurrentCulture, out T? result )
+        return TValue.TryParse( value, CultureInfo.CurrentCulture, out TValue? result )
                    ? result
                    : defaultValue;
     }

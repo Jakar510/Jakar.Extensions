@@ -9,9 +9,9 @@ public interface IAppName
 
 
 
-public interface IAppID<out T> : IAppName
+public interface IAppID<out TValue> : IAppName
 {
-    public abstract static T AppID { get; }
+    public abstract static TValue AppID { get; }
 }
 
 
@@ -20,10 +20,10 @@ public interface IAppID : IAppID<Guid>;
 
 
 
-public interface IApp<T> : IAppID<T>
+public interface IApp<TValue> : IAppID<TValue>
 {
-    public abstract static T              DebugID        { get; set; }
-    public abstract static T              DeviceID       { get; set; }
+    public abstract static TValue              DebugID        { get; set; }
+    public abstract static TValue              DeviceID       { get; set; }
     public abstract static string         DeviceName     { get; set; }
     public abstract static ActivitySource ActivitySource { get; }
 }

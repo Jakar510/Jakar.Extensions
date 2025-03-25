@@ -30,12 +30,12 @@ public interface IAppPreferences
     void Set( string key, Uri    value, string sharedName );
     void Set( string key, bool   value, string sharedName );
     void Set( string key, bool?  value, string sharedName );
-    void Set<T>( string key, T value, string sharedName )
-        where T : IParsable<T>, IFormattable;
+    void Set<TValue>( string key, TValue value, string sharedName )
+        where TValue : IParsable<TValue>, IFormattable;
 
 
-    T Get<T>( string key, T defaultValue, string sharedName, string? oldKey = null )
-        where T : IParsable<T>, IFormattable;
+    TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? oldKey = null )
+        where TValue : IParsable<TValue>, IFormattable;
     string Get( string key, string sharedName,   string? oldKey = null, string  defaultValue = EMPTY );
     Uri    Get( string key, Uri    defaultValue, string  sharedName,    string? oldKey       = null );
     bool   Get( string key, bool   defaultValue, string  sharedName,    string? oldKey       = null );

@@ -1,23 +1,23 @@
 ﻿namespace Jakar.Database;
 
 
-public class JsonSqlHandler<TConverter, T> : SqlConverter<JsonSqlHandler<T>, T>
-    where TConverter : JsonSqlHandler<TConverter, T>, new()
+public class JsonSqlHandler<TConverter, TValue> : SqlConverter<JsonSqlHandler<TValue>, TValue>
+    where TConverter : JsonSqlHandler<TConverter, TValue>, new()
 {
     public JsonSqlHandler() { }
 
 
-    public override T Parse( object? value )
+    public override TValue Parse( object? value )
     {
         string? item = value?.ToString();
 
         // ReSharper disable once NullableWarningSuppressionIsUsed
         return item is null
                    ? default!
-                   : item.FromJson<T>();
+                   : item.FromJson<TValue>();
     }
 
-    public override void SetValue( IDbDataParameter parameter, T? value )
+    public override void SetValue( IDbDataParameter parameter, TValue? value )
     {
         parameter.Value  = value?.ToPrettyJson();
         parameter.DbType = DbType.String;
@@ -26,22 +26,22 @@ public class JsonSqlHandler<TConverter, T> : SqlConverter<JsonSqlHandler<T>, T>
 
 
 
-public sealed class JsonSqlHandler<T> : JsonSqlHandler<JsonSqlHandler<T>, T>
+public sealed class JsonSqlHandler<TValue> : JsonSqlHandler<JsonSqlHandler<TValue>, TValue>
 {
     public JsonSqlHandler() { }
 
 
-    public override T Parse( object? value )
+    public override TValue Parse( object? value )
     {
         string? s = value?.ToString();
 
         // ReSharper disable once NullableWarningSuppressionIsUsed
         return s is null
                    ? default!
-                   : s.FromJson<T>();
+                   : s.FromJson<TValue>();
     }
 
-    public override void SetValue( IDbDataParameter parameter, T? value )
+    public override void SetValue( IDbDataParameter parameter, TValue? value )
     {
         parameter.Value  = value?.ToPrettyJson();
         parameter.DbType = DbType.String;

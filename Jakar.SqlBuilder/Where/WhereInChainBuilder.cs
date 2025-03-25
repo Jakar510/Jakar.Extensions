@@ -31,8 +31,8 @@ public struct WhereInChainBuilder<TNext>
         _cache.Add( $"'{value ?? NULL}'" );
         return this;
     }
-    public WhereInChainBuilder<TNext> With<T>( T value )
-        where T : struct
+    public WhereInChainBuilder<TNext> With<TValue>( TValue value )
+        where TValue : struct
     {
         _cache.Add( value.ToString() ?? "''" );
         return this;
@@ -40,6 +40,6 @@ public struct WhereInChainBuilder<TNext>
 
 
     // public SelectClauseBuilder<WhereInChainBuilder<TNext>> From( string     tableName, string? alias ) => new(this, ref _builder);
-    // public SelectClauseBuilder<WhereInChainBuilder<TNext>> From<T>( T       obj,       string? alias ) => new(this, ref _builder);
-    // public SelectClauseBuilder<WhereInChainBuilder<TNext>> From<T>( string? alias ) => new(this, ref _builder);
+    // public SelectClauseBuilder<WhereInChainBuilder<TNext>> From<TValue>( TValue       obj,       string? alias ) => new(this, ref _builder);
+    // public SelectClauseBuilder<WhereInChainBuilder<TNext>> From<TValue>( string? alias ) => new(this, ref _builder);
 }

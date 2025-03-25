@@ -19,10 +19,10 @@ public struct WhereClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder build
     //     _builder.Add(KeyWords.EXISTS, condition);
     //     return new WhereChainBuilder<TNext>(this, ref _builder);
     // }
-    // public WhereChainBuilder<TNext> Chain<T>( string columnName, T _ ) => Chain<T>(columnName);
-    // public WhereChainBuilder<TNext> Chain<T>( string columnName )
+    // public WhereChainBuilder<TNext> Chain<TValue>( string columnName, TValue _ ) => Chain<TValue>(columnName);
+    // public WhereChainBuilder<TNext> Chain<TValue>( string columnName )
     // {
-    //     _builder.Add(KeyWords.EXISTS, columnName.GetName<T>());
+    //     _builder.Add(KeyWords.EXISTS, columnName.GetName<TValue>());
     //     return new WhereChainBuilder<TNext>(this, ref _builder);
     // }
 

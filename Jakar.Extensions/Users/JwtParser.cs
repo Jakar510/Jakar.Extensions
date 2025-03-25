@@ -26,7 +26,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
     
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -36,7 +36,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     }
 
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<JwtParser> CreateAsync<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
@@ -107,7 +107,7 @@ public static class JwtParserExtensions
     public const string JWT_KEY        = "JWT.key";
 
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
     {
         string? value = configuration.GetValue<string>( fileKey );
@@ -129,13 +129,13 @@ public static class JwtParserExtensions
     }
 
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<SigningCredentials> GetSigningCredentials( this IConfiguration configuration, string algorithm = SecurityAlgorithms.HmacSha512Signature, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetSymmetricSecurityKey( jwt, fileKey ), algorithm);
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<SymmetricSecurityKey> GetSymmetricSecurityKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY ) => new(await configuration.GetJWTKey( jwt, fileKey ));
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IWebAppSettings settings, string authenticationType, string? audience = null, string? issuer = null, string jwt = JWT, string fileKey = JWT_KEY, TimeSpan? clockSkew = null )
     {
         IConfiguration       configuration = settings.Configuration;
@@ -143,7 +143,7 @@ public static class JwtParserExtensions
         return await configuration.GetTokenValidationParameters( authenticationType, key, audience, issuer, clockSkew );
     }
 
-    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<T>(String)" )]
+    [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<TokenValidationParameters> GetTokenValidationParameters( this IConfiguration configuration, string authenticationType, SymmetricSecurityKey? key = null, string? audience = null, string? issuer = null, TimeSpan? clockSkew = null )
     {
         key      ??= await configuration.GetSymmetricSecurityKey();

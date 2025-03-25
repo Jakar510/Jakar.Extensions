@@ -13,11 +13,11 @@ public class BaseClass
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected static void ClearAndDispose<T>( ref T? field )
-        where T : IDisposable => Disposables.CastAndDispose( ref field );
+    protected static void ClearAndDispose<TValue>( ref TValue? field )
+        where TValue : IDisposable => Disposables.CastAndDispose( ref field );
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected static ValueTask ClearAndDisposeAsync<T>( ref T? resource )
-        where T : class, IDisposable => Disposables.CastAndDisposeAsync( ref resource );
+    protected static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
+        where TValue : class, IDisposable => Disposables.CastAndDisposeAsync( ref resource );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected static ValueTask CastAndDispose( IDisposable? resource ) => Disposables.CastAndDisposeAsync( resource );
 }

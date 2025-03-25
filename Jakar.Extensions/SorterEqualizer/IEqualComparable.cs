@@ -4,18 +4,18 @@
 namespace Jakar.Extensions;
 
 
-public interface IEqualComparable<T> : IEquatable<T>, IComparable<T>
-    where T : class, IEqualComparable<T>
+public interface IEqualComparable<TValue> : IEquatable<TValue>, IComparable<TValue>
+    where TValue : class, IEqualComparable<TValue>
 {
-    public abstract static Equalizer<T> Equalizer { get; }
-    public abstract static Sorter<T>    Sorter    { get; }
+    public abstract static Equalizer<TValue> Equalizer { get; }
+    public abstract static Sorter<TValue>    Sorter    { get; }
 }
 
 
 
-public interface IValueEqualComparable<T> : IEquatable<T>, IComparable<T>
-    where T : struct, IValueEqualComparable<T>
+public interface IValueEqualComparable<TValue> : IEquatable<TValue>, IComparable<TValue>
+    where TValue : struct, IValueEqualComparable<TValue>
 {
-    public abstract static ValueEqualizer<T> Equalizer { get; }
-    public abstract static ValueSorter<T>    Sorter    { get; }
+    public abstract static ValueEqualizer<TValue> Equalizer { get; }
+    public abstract static ValueSorter<TValue>    Sorter    { get; }
 }

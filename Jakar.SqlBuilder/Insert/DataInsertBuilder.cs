@@ -11,7 +11,7 @@ public struct DataInsertBuilder( in InsertClauseBuilder insert, ref EasySqlBuild
     private          EasySqlBuilder             _builder = builder;
 
 
-    public DataInsertBuilder With<T>( string columnName, T data )
+    public DataInsertBuilder With<TValue>( string columnName, TValue data )
     {
         _cache[columnName] = data?.ToString() ?? NULL;
         return this;

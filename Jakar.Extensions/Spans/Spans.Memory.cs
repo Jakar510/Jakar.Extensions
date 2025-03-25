@@ -23,12 +23,12 @@ public static partial class Spans
     [Pure] public static Span<byte>           AsSpan( this           MemoryStream stream ) => new(stream.GetBuffer(), 0, (int)stream.Length);
 
 
-    [Pure] public static bool TryAsSegment<T>( this ReadOnlyMemory<T> value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
-    [Pure] public static bool TryAsSegment<T>( this Memory<T>         value, out ArraySegment<T> result ) => MemoryMarshal.TryGetArray( value, out result );
+    [Pure] public static bool TryAsSegment<TValue>( this ReadOnlyMemory<TValue> value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray( value, out result );
+    [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray( value, out result );
 
 
-    [Pure] public static Memory<T>            ToMemory<T>( this                          IEnumerable<T>     value ) => value as T[] ?? value.ToArray();
-    [Pure] public static ReadOnlyMemory<T>    ToReadOnlyMemory<T>( this                  IEnumerable<T>     value ) => value as T[] ?? value.ToArray();
+    [Pure] public static Memory<TValue>            ToMemory<TValue>( this                          IEnumerable<TValue>     value ) => value as TValue[] ?? value.ToArray();
+    [Pure] public static ReadOnlyMemory<TValue>    ToReadOnlyMemory<TValue>( this                  IEnumerable<TValue>     value ) => value as TValue[] ?? value.ToArray();
     [Pure] public static Memory<byte>         ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();
     [Pure] public static ReadOnlyMemory<byte> ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte> value ) => value.ToArray();
     [Pure] public static Memory<char>         ToMemory( this scoped ref readonly         ReadOnlySpan<char> value ) => value.ToArray();
@@ -53,12 +53,12 @@ public static partial class Spans
                                                                                                                                        : null;
 
 
-    public static void CopyTo<T>( this scoped ref readonly ReadOnlyMemory<T> value, scoped ref Span<T> buffer )
+    public static void CopyTo<TValue>( this scoped ref readonly ReadOnlyMemory<TValue> value, scoped ref Span<TValue> buffer )
     {
         Guard.IsInRangeFor( value.Length, buffer, nameof(buffer) );
         value.Span.CopyTo( buffer );
     }
-    public static void CopyTo<T>( this scoped ref readonly Memory<T> value, scoped ref Span<T> buffer )
+    public static void CopyTo<TValue>( this scoped ref readonly Memory<TValue> value, scoped ref Span<TValue> buffer )
     {
         Guard.IsInRangeFor( value.Length, buffer, nameof(buffer) );
         value.Span.CopyTo( buffer );

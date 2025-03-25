@@ -14,7 +14,7 @@ public static class MimeTypes
 
     public static int MaxLength => _maxLength ??= Names.Values.Max( static x => x.Length );
 
-    private static T SelectSelf<T>( T v ) => v;
+    private static TValue SelectSelf<TValue>( TValue v ) => v;
 
 
     /// <summary> Gets the <see cref="MimeType"/> of the provided extension <see cref="string"/> . </summary>

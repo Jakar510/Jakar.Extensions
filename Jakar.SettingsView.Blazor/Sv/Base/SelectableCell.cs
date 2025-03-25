@@ -34,8 +34,8 @@ public abstract class SelectableCell : CellBase
 
 
 
-public abstract class SelectableCell<T, TArgs> : ValueCellBase<T>
-    where T : IEquatable<T>, IComparable<T>
+public abstract class SelectableCell<TValue, TArgs> : ValueCellBase<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
     where TArgs : class
 {
     protected bool? _isToggle;
@@ -67,5 +67,5 @@ public abstract class SelectableCell<T, TArgs> : ValueCellBase<T>
 
 
 
-public abstract class SelectableCell<T> : SelectableCell<T, MouseEventArgs>
-    where T : IEquatable<T>, IComparable<T>;
+public abstract class SelectableCell<TValue> : SelectableCell<TValue, MouseEventArgs>
+    where TValue : IEquatable<TValue>, IComparable<TValue>;

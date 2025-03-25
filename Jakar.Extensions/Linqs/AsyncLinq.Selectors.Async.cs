@@ -30,7 +30,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> First<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value )
+    public static async ValueTask<TElement> First<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
@@ -39,7 +39,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> First<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value )
+    public static async ValueTask<TElement> First<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
@@ -74,7 +74,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> FirstOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value )
+    public static async ValueTask<TElement?> FirstOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
@@ -83,7 +83,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> FirstOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value )
+    public static async ValueTask<TElement?> FirstOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
@@ -115,7 +115,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> Last<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value, CancellationToken token = default )
+    public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -126,7 +126,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> Last<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value, CancellationToken token = default )
+    public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -160,7 +160,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> LastOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value, CancellationToken token = default )
+    public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -171,7 +171,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> LastOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value, CancellationToken token = default )
+    public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
         List<TElement> list = await source.ToList( token );
 
@@ -223,7 +223,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> Single<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value )
+    public static async ValueTask<TElement> Single<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
         TElement? result = default;
 
@@ -236,7 +236,7 @@ public static partial class AsyncLinq
 
         throw new InvalidOperationException( $"No records in {nameof(source)}" );
     }
-    public static async ValueTask<TElement> Single<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value )
+    public static async ValueTask<TElement> Single<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
         TElement? result = default;
 
@@ -290,7 +290,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> SingleOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, bool> selector, T value )
+    public static async ValueTask<TElement?> SingleOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
         TElement? result = default;
 
@@ -303,7 +303,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static async ValueTask<TElement?> SingleOrDefault<TElement, T>( this IAsyncEnumerable<TElement> source, Func<TElement, T, ValueTask<bool>> selector, T value )
+    public static async ValueTask<TElement?> SingleOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
         TElement? result = default;
 

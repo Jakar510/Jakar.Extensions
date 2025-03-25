@@ -8,15 +8,15 @@ public interface ISvCellValue : ISvCellHint
 
 
 
-public interface ISvCellValue<T> : ISvCellValue, IValidator
-    where T : IEquatable<T>, IComparable<T>
+public interface ISvCellValue<TValue> : ISvCellValue, IValidator
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
-    public abstract static IEqualityComparer<T> Equalizer { get; }
-    public abstract static IComparer<T>         Sorter    { get; }
-    public                 T?                   Max       { get; set; }
-    public                 T?                   Min       { get; set; }
-    public                 T?                   Value     { get; set; }
+    public abstract static IEqualityComparer<TValue> Equalizer { get; }
+    public abstract static IComparer<TValue>         Sorter    { get; }
+    public                 TValue?                   Max       { get; set; }
+    public                 TValue?                   Min       { get; set; }
+    public                 TValue?                   Value     { get; set; }
 
 
-    public event EventHandler<ChangedEventArgs<T>>? TextChanged;
+    public event EventHandler<ChangedEventArgs<TValue>>? TextChanged;
 }

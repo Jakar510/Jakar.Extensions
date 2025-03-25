@@ -164,7 +164,7 @@ finally { "Bye".WriteToConsole(); }
 // builder = builder.Append( '.', 5 );
 // builder = builder.Append( ' ' );
 // builder = builder.AppendSpanFormattable( DateTime.Now, "dd/mm/yyyy hh:ss" );
-// builder = builder.Replace( 0, 'T' );
+// builder = builder.Replace( 0, 'TValue' );
 //
 // builder = builder.Insert( builder.Span.IndexOf( 't' ), "Yes " );
 // builder = builder.Insert( 4,                           ' ', 5 );

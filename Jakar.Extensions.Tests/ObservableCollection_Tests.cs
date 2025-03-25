@@ -28,7 +28,7 @@ public class ObservableCollection_Tests : Assert
         this.AreEqual( value, collection.FindAll( Match )[0] );
         return;
 
-        bool Match( int x ) => x == value;
+        bool Match( ref readonly int x ) => x == value;
     }
 
 
@@ -43,23 +43,23 @@ public class ObservableCollection_Tests : Assert
         this.AreEqual( sorted.Span, collection.ToArray() );
 
         collection.Clear();
-        collection.Add( array );
+        collection.Add( array.Span );
         collection.Sort( Sorter );
         this.AreEqual( sorted.Span, collection.ToArray() );
     }
-    private static ReadOnlyMemory<T> GetSorted<T>( scoped in ReadOnlySpan<T> array )
+    private static ReadOnlyMemory<TValue> GetSorted<TValue>( scoped in ReadOnlySpan<TValue> array )
     {
-        T[] sorted = [.. array];
-        Array.Sort( sorted, Comparer<T>.Default );
+        TValue[] sorted = [.. array];
+        Array.Sort( sorted, Comparer<TValue>.Default );
         return sorted;
     }
 
 
     [Test, TestCase( 1 ), TestCase( 2 ), TestCase( 3 ), TestCase( 4 ), TestCase( "1" ), TestCase( "2" ), TestCase( "3" ), TestCase( "4" )]
-    public void Run<T>( T value )
-        where T : IEquatable<T>
+    public void Run<TValue>( TValue value )
+        where TValue : IEquatable<TValue>
     {
-        ObservableCollection<T> collection = [];
+        ObservableCollection<TValue> collection = [];
         collection.Add( value );
         this.True( collection.Contains( value ) );
         this.False( collection.TryAdd( value ) );

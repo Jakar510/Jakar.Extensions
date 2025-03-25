@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 public static partial class AsyncLinq
 {
-    public static TElement? First<TElement, T>( this IEnumerable<TElement> enumerable, Func<TElement, T, bool> selector, T value )
+    public static TElement? First<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
     {
         foreach ( TElement element in enumerable )
         {
@@ -15,7 +15,7 @@ public static partial class AsyncLinq
 
         return default;
     }
-    public static TElement? FirstOrDefault<TElement, T>( this IEnumerable<TElement> enumerable, Func<TElement, T, bool> selector, T value )
+    public static TElement? FirstOrDefault<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
     {
         foreach ( TElement element in enumerable )
         {
@@ -26,7 +26,7 @@ public static partial class AsyncLinq
     }
 
 
-    public static TElement? Single<TElement, T>( this IEnumerable<TElement> enumerable, Func<TElement, T, bool> selector, T value )
+    public static TElement? Single<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
     {
         Enumerable.Range( 0, 10 ).AsAsyncEnumerable();
 
@@ -44,7 +44,7 @@ public static partial class AsyncLinq
 
         return result;
     }
-    public static TElement? SingleOrDefault<TElement, T>( this IEnumerable<TElement> enumerable, Func<TElement, T, bool> selector, T value )
+    public static TElement? SingleOrDefault<TElement, TValue>( this IEnumerable<TElement> enumerable, Func<TElement, TValue, bool> selector, TValue value )
     {
         TElement? result = default;
 

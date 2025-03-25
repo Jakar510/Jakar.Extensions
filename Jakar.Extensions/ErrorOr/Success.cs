@@ -5,7 +5,7 @@ public readonly record struct Success;
 
 
 
-public readonly record struct Success<T>( T Value )
+public readonly record struct Success<TValue>( TValue Value )
 {
-    public static implicit operator Success<T>( T value ) => new(value);
+    public static implicit operator Success<TValue>( TValue value ) => new(value);
 }

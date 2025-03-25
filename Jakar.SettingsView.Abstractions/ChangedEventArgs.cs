@@ -4,8 +4,8 @@
 namespace Jakar.SettingsView.Abstractions;
 
 
-public sealed class ChangedEventArgs<T>( T? oldValue, T? newValue ) : EventArgs
+public sealed class ChangedEventArgs<TValue>( TValue? oldValue, TValue? newValue ) : EventArgs
 {
-    public T? NewValue { get; } = newValue;
-    public T? OldValue { get; } = oldValue;
+    public TValue? NewValue { get; } = newValue;
+    public TValue? OldValue { get; } = oldValue;
 }

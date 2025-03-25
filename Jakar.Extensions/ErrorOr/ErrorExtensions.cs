@@ -47,7 +47,6 @@ public static class ErrorExtensions
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( errors.Length );
         Span<string?>               span  = owner.Memory.Span;
-
         errors.Select<Error, string?>( GetMessage ).ConsumeInto( span );
 
         StringBuilder sb = new(4096);

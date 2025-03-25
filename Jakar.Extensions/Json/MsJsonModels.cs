@@ -102,9 +102,9 @@ public static class MsJsonModels
         return self.Add( key, node );
     }
 
-    public static TClass Add<T, TClass>( this TClass self, string key, T value )
+    public static TClass Add<TValue, TClass>( this TClass self, string key, TValue value )
         where TClass : IJsonModel
-        where T : IJsonizer => self.Add( key, value.GetProperties() );
+        where TValue : IJsonizer => self.Add( key, value.GetProperties() );
 
     public static TClass Add<TClass>( this TClass self, string key, JToken? value )
         where TClass : IJsonModel

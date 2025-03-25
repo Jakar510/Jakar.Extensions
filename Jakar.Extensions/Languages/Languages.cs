@@ -12,7 +12,7 @@ public static class Languages
     public static readonly FrozenDictionary<string, SupportedLanguage> Names             = All.ToFrozenDictionary( GetName,      SelectSelf );
 
 
-    private static T SelectSelf<T>( T v ) => v;
+    private static TValue SelectSelf<TValue>( TValue v ) => v;
 
 
     public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo defaultValue ) =>

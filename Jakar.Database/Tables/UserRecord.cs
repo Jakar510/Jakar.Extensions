@@ -719,8 +719,8 @@ public sealed record UserRecord( string                        UserName,
 
     #region Updaters
 
-    public UserRecord WithAdditionalData<T>( T? value )
-        where T : IDictionary<string, JToken?>
+    public UserRecord WithAdditionalData<TValue>( TValue? value )
+        where TValue : IDictionary<string, JToken?>
     {
         if ( value is null || value.Count <= 0 ) { return Modified(); }
 

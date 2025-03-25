@@ -1,49 +1,49 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class ValueEqualizer<T> : IEqualityComparer<T?>, IEqualityComparer<T>, IEqualityComparer
-    where T : struct, IEquatable<T>
+public sealed class ValueEqualizer<TValue> : IEqualityComparer<TValue?>, IEqualityComparer<TValue>, IEqualityComparer
+    where TValue : struct, IEquatable<TValue>
 {
-    public static readonly ValueEqualizer<T> Default = new();
+    public static readonly ValueEqualizer<TValue> Default = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
     {
-        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
 
-        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not TValue right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(TValue) ); }
 
         return left.Equals( right );
     }
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 
-    public bool Equals( T?      left, T? right ) => Nullable.Equals( left, right );
-    public int  GetHashCode( T? obj )           => obj.GetHashCode();
-    public bool Equals( T       left, T right ) => left.Equals( right );
-    public int  GetHashCode( T  obj ) => obj.GetHashCode();
+    public bool Equals( TValue?      left, TValue? right ) => Nullable.Equals( left, right );
+    public int  GetHashCode( TValue? obj )           => obj.GetHashCode();
+    public bool Equals( TValue       left, TValue right ) => left.Equals( right );
+    public int  GetHashCode( TValue  obj ) => obj.GetHashCode();
 }
 
 
 
-public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer
-    where T : class, IEquatable<T>
+public sealed class Equalizer<TValue> : IEqualityComparer<TValue>, IEqualityComparer
+    where TValue : class, IEquatable<TValue>
 {
-    public static readonly Equalizer<T> Default = new();
+    public static readonly Equalizer<TValue> Default = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
     {
-        if ( x is not T left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(T) ); }
+        if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
 
-        if ( y is not T right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(T) ); }
+        if ( y is not TValue right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(TValue) ); }
 
         return left.Equals( right );
     }
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 
-    public bool Equals( T? left, T? right )
+    public bool Equals( TValue? left, TValue? right )
     {
         // ReSharper disable once ConvertIfStatementToSwitchStatement
         if ( left is null && right is null ) { return true; }
@@ -54,5 +54,5 @@ public sealed class Equalizer<T> : IEqualityComparer<T>, IEqualityComparer
     }
 
 
-    public int GetHashCode( T obj ) => obj.GetHashCode();
+    public int GetHashCode( TValue obj ) => obj.GetHashCode();
 }

@@ -220,10 +220,10 @@ public static partial class Migrations
     }
 
 
-    public static IInsertDataSyntax AddRow<T>( this IInsertDataSyntax insert, T context )
-        where T : BaseRecord
+    public static IInsertDataSyntax AddRow<TValue>( this IInsertDataSyntax insert, TValue context )
+        where TValue : BaseRecord
     {
-        PropertyInfo[]              properties = typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+        PropertyInfo[]              properties = typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public );
         Dictionary<string, object?> columns    = new(properties.Length);
 
         foreach ( PropertyInfo property in properties )
@@ -253,7 +253,7 @@ public static partial class Migrations
     }
 
 
-    public static string GetMappingTableName<T>( this Type   parent, string       propertyName, IEnumerable<T> items ) => parent.GetMappingTableName( propertyName,      typeof(T) );
+    public static string GetMappingTableName<TValue>( this Type   parent, string       propertyName, IEnumerable<TValue> items ) => parent.GetMappingTableName( propertyName,      typeof(TValue) );
     public static string GetMappingTableName( this    Type   parent, PropertyInfo propertyInfo, Type           other ) => parent.GetMappingTableName( propertyInfo.Name, other );
     public static string GetMappingTableName( this    Type   parent, string       propertyName, Type           other ) => parent.Name.GetMappingTableName( propertyName, other.Name );
     public static string GetMappingTableName( this    string parent, string       propertyName, string         other ) => $"{parent}_{other}_{propertyName}_mapping";

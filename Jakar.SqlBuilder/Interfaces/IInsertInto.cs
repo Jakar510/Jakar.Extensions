@@ -13,67 +13,67 @@ public interface IInsertInto
     public IDataInsert In( string tableName );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(System.Type)"/> </para>
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public IDataInsert In<T>()
-        where T : class;
+    public IDataInsert In<TValue>()
+        where TValue : class;
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Starts a <see cref="IDataInsert"/> chain.
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public IDataInsert In<T>( T obj )
-        where T : class;
+    public IDataInsert In<TValue>( TValue obj )
+        where TValue : class;
 
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Uses <see cref="System.Reflection"/> to determine the column names and its values. Uses public properties only.
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public ISqlBuilderRoot Into<T>( string tableName, T obj );
+    public ISqlBuilderRoot Into<TValue>( string tableName, TValue obj );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Also uses <see cref="System.Reflection"/> to determine the column names and its values.
     ///     <para> Checks public properties only. </para>
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public ISqlBuilderRoot Into<T>( T obj )
-        where T : class;
+    public ISqlBuilderRoot Into<TValue>( TValue obj )
+        where TValue : class;
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName(Type)"/> </para>
     ///     Also uses <see cref="System.Reflection"/> to determine the column names and its values.
     ///     <para> Checks public properties only. </para>
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="ISqlBuilderRoot"/>
     /// </returns>
-    public ISqlBuilderRoot Into<T>( IEnumerable<T> obj )
-        where T : class;
+    public ISqlBuilderRoot Into<TValue>( IEnumerable<TValue> obj )
+        where TValue : class;
 }
 
 
 
 public interface IDataInsert : IChainEnd<ISqlBuilderRoot>
 {
-    public IDataInsert With<T>( string columnName, T data );
-    public IDataInsert With<T>( T      data );
+    public IDataInsert With<TValue>( string columnName, TValue data );
+    public IDataInsert With<TValue>( TValue      data );
 }

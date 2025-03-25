@@ -48,12 +48,12 @@ public static class AppPreference
 
 
     public static string GetPreference( this string sharedName, string key, string? oldKey = null, string defaultValue = EMPTY ) => Source.Get( key, sharedName, oldKey, defaultValue );
-    public static T GetPreference<T>( this string sharedName, string key, T defaultValue, in string? oldKey = null )
-        where T : IParsable<T>, IFormattable
+    public static TValue GetPreference<TValue>( this string sharedName, string key, TValue defaultValue, in string? oldKey = null )
+        where TValue : IParsable<TValue>, IFormattable
     {
         string value = Source.Get( key, sharedName, oldKey, defaultValue.ToString( null, CultureInfo.CurrentCulture ) );
 
-        return T.TryParse( value, CultureInfo.CurrentCulture, out T? result )
+        return TValue.TryParse( value, CultureInfo.CurrentCulture, out TValue? result )
                    ? result
                    : defaultValue;
     }
@@ -95,8 +95,8 @@ public static class AppPreference
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void SetPreference<T>( this string sharedName, string key, T value )
-        where T : IParsable<T>, IFormattable => Source.Set( key, value, sharedName );
+    public static void SetPreference<TValue>( this string sharedName, string key, TValue value )
+        where TValue : IParsable<TValue>, IFormattable => Source.Set( key, value, sharedName );
 
 
     public static void RemovePreference( this string sharedName, string key, string? oldKey = null ) => Source.Remove( key, sharedName, oldKey );

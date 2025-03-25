@@ -5,15 +5,15 @@ namespace Jakar.Extensions;
 
 
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct SpanSelector<T, TNext>( ReadOnlySpan<T> span, Func<T, TNext> func )
+public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<TValue, TNext> func )
 {
-    private readonly ReadOnlySpan<T> _span  = span;
-    private readonly Func<T, TNext>  _func  = func;
+    private readonly ReadOnlySpan<TValue> _span  = span;
+    private readonly Func<TValue, TNext>  _func  = func;
     private          int             _index = NOT_FOUND;
 
     public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanSelector<T, TNext> GetEnumerator() => this;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanSelector<TValue, TNext> GetEnumerator() => this;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

@@ -60,10 +60,10 @@ public class LoginUserState( HttpContext context, IAuthenticationService authent
 
 
 
-public interface ILoginState<T>
-    where T : ILoginUserState
+public interface ILoginState<TValue>
+    where TValue : ILoginUserState
 {
-    [CascadingParameter( Name = LoginUserState.KEY )] public T User { get; set; }
+    [CascadingParameter( Name = LoginUserState.KEY )] public TValue User { get; set; }
 }
 
 

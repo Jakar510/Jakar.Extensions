@@ -3,7 +3,7 @@
 
 public static partial class Types
 {
-    public static bool HasInterface<T>( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface( typeof(T) );
+    public static bool HasInterface<TValue>( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface( typeof(TValue) );
 
 
     public static bool HasInterface( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type, Type interfaceType )

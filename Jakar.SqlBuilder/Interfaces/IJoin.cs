@@ -21,23 +21,23 @@ public interface IJoin : IChainEnd<ISqlBuilderRoot>
 public interface IJoinChain : IChainEnd<ISqlBuilderRoot>
 {
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     /// 
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     /// <param name="columnName"> </param>
     /// <returns> </returns>
-    public IJoinChainMiddle Left<T>( string columnName );
+    public IJoinChainMiddle Left<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     /// 
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     /// <param name="obj"> </param>
     /// <param name="columnName"> </param>
     /// <returns> </returns>
-    public IJoinChainMiddle Left<T>( T obj, string columnName );
+    public IJoinChainMiddle Left<TValue>( TValue obj, string columnName );
 
 
     /// <summary> </summary>
@@ -55,23 +55,23 @@ public interface IJoinChainMiddle : IComparators<IJoinChainRight> { }
 public interface IJoinChainRight
 {
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     /// 
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     /// <param name="columnName"> </param>
     /// <returns> </returns>
-    public IJoinChain Right<T>( string columnName );
+    public IJoinChain Right<TValue>( string columnName );
 
     /// <summary>
-    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <paramref name="obj"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     /// 
     /// </summary>
-    /// <typeparam name="T"> </typeparam>
+    /// <typeparam name="TValue"> </typeparam>
     /// <param name="obj"> </param>
     /// <param name="columnName"> </param>
     /// <returns> </returns>
-    public IJoinChain Right<T>( T obj, string columnName );
+    public IJoinChain Right<TValue>( TValue obj, string columnName );
 
 
     /// <summary> </summary>

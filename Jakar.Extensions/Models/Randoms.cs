@@ -57,10 +57,10 @@ public class Randoms : ObservableClass
     }
 
 
-    public static string RandomString<T>( int length, T values )
-        where T : IReadOnlyList<char> => RandomString( length, values, Random );
-    public static string RandomString<T>( int length, T values, Random random )
-        where T : IReadOnlyList<char>
+    public static string RandomString<TValue>( int length, TValue values )
+        where TValue : IReadOnlyList<char> => RandomString( length, values, Random );
+    public static string RandomString<TValue>( int length, TValue values, Random random )
+        where TValue : IReadOnlyList<char>
     {
         Span<char> builder = stackalloc char[length];
 

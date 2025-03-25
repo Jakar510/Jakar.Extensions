@@ -18,10 +18,10 @@ public record struct EasySqlBuilder()
     public string Result => ToString();
 
 
-    internal EasySqlBuilder AddRange<T>( char separator, params ReadOnlySpan<string?> names )
+    internal EasySqlBuilder AddRange<TValue>( char separator, params ReadOnlySpan<string?> names )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.Select( KeyWords.GetName<T> ).ConsumeInto( owner.Memory.Span );
+        names.Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
         return AddRange( separator, owner.Memory.Span[..names.Length] );
     }
     internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
@@ -36,10 +36,10 @@ public record struct EasySqlBuilder()
 
         return Space();
     }
-    internal EasySqlBuilder AddRange<T>( string separator, params ReadOnlySpan<string?> names )
+    internal EasySqlBuilder AddRange<TValue>( string separator, params ReadOnlySpan<string?> names )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.Select( KeyWords.GetName<T> ).ConsumeInto( owner.Memory.Span );
+        names.Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
         return AddRange( separator, owner.Memory.Span[..names.Length] );
     }
     internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )

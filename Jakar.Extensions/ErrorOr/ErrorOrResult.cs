@@ -89,10 +89,10 @@ public readonly record struct ErrorOrResult( bool? Value, Errors Error )
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOrResult<T>( T? Value, Errors Error )
+public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors Error )
 {
-    public static readonly ErrorOrResult<T> Empty = new(default, Errors.Empty);
-    public readonly        T?               Value = Value;
+    public static readonly ErrorOrResult<TValue> Empty = new(default, Errors.Empty);
+    public readonly        TValue?               Value = Value;
     public readonly        Errors           Error = Error;
 
 
@@ -103,37 +103,37 @@ public readonly record struct ErrorOrResult<T>( T? Value, Errors Error )
     public Status GetStatus() => Error.GetStatus();
 
 
-    public TResult Match<TResult>( Func<T, TResult> value, Func<Errors, TResult> errors ) =>
-        TryGetValue( out T? x, out Errors? e )
+    public TResult Match<TResult>( Func<TValue, TResult> value, Func<Errors, TResult> errors ) =>
+        TryGetValue( out TValue? x, out Errors? e )
             ? value( x )
             : errors( e.Value );
-    public ValueTask<TResult> Match<TResult>( Func<T, ValueTask<TResult>> value, Func<Errors, ValueTask<TResult>> errors ) =>
-        TryGetValue( out T? x, out Errors? e )
+    public ValueTask<TResult> Match<TResult>( Func<TValue, ValueTask<TResult>> value, Func<Errors, ValueTask<TResult>> errors ) =>
+        TryGetValue( out TValue? x, out Errors? e )
             ? value( x )
             : errors( e.Value );
-    public Task<TResult> Match<TResult>( Func<T, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) =>
-        TryGetValue( out T? x, out Errors? e )
+    public Task<TResult> Match<TResult>( Func<TValue, Task<TResult>> value, Func<Errors, Task<TResult>> errors ) =>
+        TryGetValue( out TValue? x, out Errors? e )
             ? value( x )
             : errors( e.Value );
 
 
-    public static ErrorOrResult<T> Create( T      value )  => new(value, Errors.Empty);
-    public static ErrorOrResult<T> Create( Errors errors ) => new(default, errors);
+    public static ErrorOrResult<TValue> Create( TValue      value )  => new(value, Errors.Empty);
+    public static ErrorOrResult<TValue> Create( Errors errors ) => new(default, errors);
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, [NotNullWhen( false )] out Errors? errors )
+    public bool TryGetValue( [NotNullWhen( true )] out TValue? value, [NotNullWhen( false )] out Errors? errors )
     {
         errors = Error;
         value  = Value;
         return value is not null;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value, out Errors errors )
+    public bool TryGetValue( [NotNullWhen( true )] out TValue? value, out Errors errors )
     {
         errors = Error;
         value  = Value;
         return value is not null;
     }
-    public bool TryGetValue( [NotNullWhen( true )] out T? value )
+    public bool TryGetValue( [NotNullWhen( true )] out TValue? value )
     {
         value = Value;
         return value is not null;
@@ -160,17 +160,17 @@ public readonly record struct ErrorOrResult<T>( T? Value, Errors Error )
     }
 
 
-    public static implicit operator OneOf<T, Errors>( ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Errors? errors )
+    public static implicit operator OneOf<TValue, Errors>( ErrorOrResult<TValue> result ) => result.TryGetValue( out TValue? value, out Errors? errors )
                                                                                        ? value
                                                                                        : errors.Value;
-    public static implicit operator T?( ErrorOrResult<T>                    result ) => result.Value;
-    public static implicit operator Errors( ErrorOrResult<T>                result ) => result.Error;
-    public static implicit operator Errors?( ErrorOrResult<T>               result ) => result.Error;
-    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<T>   result ) => result.Error;
-    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult<T> result ) => result.Error;
-    public static implicit operator ErrorOrResult<T>( T                     value )  => Create( value );
-    public static implicit operator ErrorOrResult<T>( Error                 error )  => Create( error );
-    public static implicit operator ErrorOrResult<T>( List<Error>           errors ) => Create( errors );
-    public static implicit operator ErrorOrResult<T>( Error[]               errors ) => Create( errors );
-    public static implicit operator ErrorOrResult<T>( Errors                errors ) => Create( errors );
+    public static implicit operator TValue?( ErrorOrResult<TValue>                    result ) => result.Value;
+    public static implicit operator Errors( ErrorOrResult<TValue>                result ) => result.Error;
+    public static implicit operator Errors?( ErrorOrResult<TValue>               result ) => result.Error;
+    public static implicit operator ReadOnlySpan<Error>( ErrorOrResult<TValue>   result ) => result.Error;
+    public static implicit operator ReadOnlyMemory<Error>( ErrorOrResult<TValue> result ) => result.Error;
+    public static implicit operator ErrorOrResult<TValue>( TValue                     value )  => Create( value );
+    public static implicit operator ErrorOrResult<TValue>( Error                 error )  => Create( error );
+    public static implicit operator ErrorOrResult<TValue>( List<Error>           errors ) => Create( errors );
+    public static implicit operator ErrorOrResult<TValue>( Error[]               errors ) => Create( errors );
+    public static implicit operator ErrorOrResult<TValue>( Errors                errors ) => Create( errors );
 }

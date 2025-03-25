@@ -35,14 +35,14 @@ public readonly struct RecordID<TRecord>( Guid value ) : IEquatable<RecordID<TRe
     [Pure] public static RecordID<TRecord> Create( DbDataReader reader, string columnName ) => Create( reader.GetFieldValue<Guid>( columnName ) );
     [Pure] public static RecordID<TRecord> Create( Guid         id ) => new(id);
     [Pure]
-    public static RecordID<TRecord> Create<T>( T id )
-        where T : IUniqueID<Guid> => Create( id.ID );
+    public static RecordID<TRecord> Create<TValue>( TValue id )
+        where TValue : IUniqueID<Guid> => Create( id.ID );
     [Pure]
-    public static IEnumerable<RecordID<TRecord>> Create<T>( IEnumerable<T> ids )
-        where T : IUniqueID<Guid> => ids.Select( Create );
+    public static IEnumerable<RecordID<TRecord>> Create<TValue>( IEnumerable<TValue> ids )
+        where TValue : IUniqueID<Guid> => ids.Select( Create );
     [Pure]
-    public static IAsyncEnumerable<RecordID<TRecord>> Create<T>( IAsyncEnumerable<T> ids )
-        where T : IUniqueID<Guid> => ids.Select( Create );
+    public static IAsyncEnumerable<RecordID<TRecord>> Create<TValue>( IAsyncEnumerable<TValue> ids )
+        where TValue : IUniqueID<Guid> => ids.Select( Create );
 
 
     public static RecordID<TRecord> Parse( string                           value, IFormatProvider?      provider ) => new(Guid.Parse( value, provider ));

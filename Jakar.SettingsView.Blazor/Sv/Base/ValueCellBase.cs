@@ -8,34 +8,34 @@ using Jakar.SettingsView.Abstractions;
 namespace Jakar.SettingsView.Blazor.Sv;
 
 
-public abstract class ValueCellBase<T> : DescriptionCellBase, ISvCellValue<T>
-    where T : IEquatable<T>, IComparable<T>
+public abstract class ValueCellBase<TValue> : DescriptionCellBase, ISvCellValue<TValue>
+    where TValue : IEquatable<TValue>, IComparable<TValue>
 {
-    protected static readonly T                          _default = default!;
-    public static             IEqualityComparer<T>       Equalizer           { get; set; } = EqualityComparer<T>.Default;
-    public static             IComparer<T>               Sorter              { get; set; } = Comparer<T>.Default;
+    protected static readonly TValue                          _default = default!;
+    public static             IEqualityComparer<TValue>       Equalizer           { get; set; } = EqualityComparer<TValue>.Default;
+    public static             IComparer<TValue>               Sorter              { get; set; } = Comparer<TValue>.Default;
     [Parameter] public        string?                    Hint                { get; set; }
     [Parameter] public        EventCallback<string?>     HintChanged         { get; set; }
     [Parameter] public        Expression<Func<string?>>? HintExpression      { get; set; }
-    [Parameter] public        T?                         Value               { get; set; }
-    [Parameter] public        EventCallback<T?>          ValueChanged        { get; set; }
-    [Parameter] public        Expression<Func<T?>>?      ValueExpression     { get; set; }
+    [Parameter] public        TValue?                         Value               { get; set; }
+    [Parameter] public        EventCallback<TValue?>          ValueChanged        { get; set; }
+    [Parameter] public        Expression<Func<TValue?>>?      ValueExpression     { get; set; }
     [Parameter] public        string?                    ValueText           { get; set; }
     [Parameter] public        EventCallback<string?>     ValueTextChanged    { get; set; }
     [Parameter] public        Expression<Func<string?>>? ValueTextExpression { get; set; }
     [Parameter] public        string?                    ValueDisplayFormat  { get; set; }
-    [Parameter] public        T?                         Max                 { get; set; }
-    [Parameter] public        T?                         Min                 { get; set; }
+    [Parameter] public        TValue?                         Max                 { get; set; }
+    [Parameter] public        TValue?                         Min                 { get; set; }
     public virtual            bool                       IsValid             => Value is not null || Equalizer.Equals( _default, Value ) is false;
 
 
-    public event EventHandler<ChangedEventArgs<T>>? TextChanged;
+    public event EventHandler<ChangedEventArgs<TValue>>? TextChanged;
 
-    public async ValueTask SetValue( T? value )
+    public async ValueTask SetValue( TValue? value )
     {
-        if ( EqualityComparer<T>.Default.Equals( Value, value ) ) { return; }
+        if ( EqualityComparer<TValue>.Default.Equals( Value, value ) ) { return; }
 
-        TextChanged?.Invoke( this, new ChangedEventArgs<T>( Value, value ) );
+        TextChanged?.Invoke( this, new ChangedEventArgs<TValue>( Value, value ) );
         Value = value;
         await ValueChanged.InvokeAsync( value );
 

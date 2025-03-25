@@ -11,7 +11,7 @@
 				Then calls <see cref="M:Jakar.Extensions.IObservableObject.OnPropertyChanging(System.String)" /> , sets the value, then calls
 				<see cref="M:Jakar.Extensions.IObservableObject.OnPropertyChanged(System.String)" />
 			</summary>
-			<typeparam name="T"> </typeparam>
+			<typeparam name="TValue"> </typeparam>
 			<param name="backingStore"> </param>
 			<param name="value"> </param>
 			<param name="equalityComparer"> </param>
@@ -52,7 +52,7 @@
 			</summary>
 			<param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
 		</member>
-		<member name="T:Jakar.Extensions.ConcurrentObservableCollection`1">
+		<member name="TValue:Jakar.Extensions.ConcurrentObservableCollection`1">
 			<summary>
 				<para>
 					<see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
@@ -63,31 +63,31 @@
 			</summary>
 			<typeparam name="TValue"> </typeparam>
 		</member>
-		<member name="T:Jakar.Extensions.FixedSizedDeque`1">
+		<member name="TValue:Jakar.Extensions.FixedSizedDeque`1">
 			<summary>
 				<seealso href="https://stackoverflow.com/a/5852926/9530917" />
 			</summary>
-			<typeparam name="T"> </typeparam>
+			<typeparam name="TValue"> </typeparam>
 		</member>
 		<member name="M:Jakar.Extensions.FixedSizedDeque`1.#ctor(System.Int32,System.Threading.Lock)">
 			<summary>
 				<seealso href="https://stackoverflow.com/a/5852926/9530917" />
 			</summary>
-			<typeparam name="T"> </typeparam>
+			<typeparam name="TValue"> </typeparam>
 		</member>
-		<member name="T:Jakar.Extensions.FixedSizedQueue`1">
+		<member name="TValue:Jakar.Extensions.FixedSizedQueue`1">
 			<summary>
 				<seealso href="https://stackoverflow.com/a/5852926/9530917" />
 			</summary>
-			<typeparam name="T"> </typeparam>
+			<typeparam name="TValue"> </typeparam>
 		</member>
 		<member name="M:Jakar.Extensions.FixedSizedQueue`1.#ctor(System.Int32,System.Threading.Lock)">
 			<summary>
 				<seealso href="https://stackoverflow.com/a/5852926/9530917" />
 			</summary>
-			<typeparam name="T"> </typeparam>
+			<typeparam name="TValue"> </typeparam>
 		</member>
-		<member name="T:Jakar.Extensions.ObservableCollection`1">
+		<member name="TValue:Jakar.Extensions.ObservableCollection`1">
 			<summary>
 				<para>
 					<see href="https://stackoverflow.com/a/54733415/9530917"> This type of CollectionView does not support changes to its SourceCollection from a thread different from the Dispatcher thread </see>
@@ -115,7 +115,7 @@
 		<member name="M:Jakar.Extensions.ObservableCollection`1.AsSpan(System.Int32,System.Int32)">
 			<summary> Use With Caution -- Do not modify the <see cref="F:Jakar.Extensions.ObservableCollection`1.buffer" /> while the span is being used. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.UnitConverters">
+		<member name="TValue:Jakar.Extensions.UnitConverters">
 			<summary>
 				<see href="https://github.com/xamarin/Essentials/blob/main/Xamarin.Essentials/Types/UnitConverters.shared.cs" />
 			</summary>
@@ -132,7 +132,7 @@
 		<member name="M:Jakar.Extensions.UnitConverters.UsSurveyFeetToMeters(System.Double)">
 			<summary> Exactly 1200/3937 meters by definition. In decimal terms approximately 0.304 800 609 601 219 meters. Variation from the common international foot of exactly 0.3048 meters may only be considerable over large survey distances. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.AltitudeReference">
+		<member name="TValue:Jakar.Extensions.AltitudeReference">
 			<Docs>
 				<summary> Indicates the altitude reference system to be used in defining a location. </summary>
 				<remarks>
@@ -165,7 +165,7 @@
 				<summary> The altitude reference system is based on the distance above the tallest surface structures, such as buildings, trees, roads, etc., above terrain or ground level. </summary>
 			</Docs>
 		</member>
-		<member name="T:Jakar.Extensions.DeviceType">
+		<member name="TValue:Jakar.Extensions.DeviceType">
 			<Docs>
 				<summary> Various types of devices. </summary>
 				<remarks />
@@ -186,7 +186,7 @@
 				<summary> The device is virtual, such as the iOS simulators, Android emulators or Windows emulators. </summary>
 			</Docs>
 		</member>
-		<member name="T:Jakar.Extensions.DistanceUnit">
+		<member name="TValue:Jakar.Extensions.DistanceUnit">
 			<Docs>
 				<summary> Distance Unit for use in conversion. </summary>
 				<remarks />
@@ -208,7 +208,7 @@
 			<typeparam name="TValue"> </typeparam>
 			<returns> </returns>
 		</member>
-		<member name="T:Jakar.Extensions.Error">
+		<member name="TValue:Jakar.Extensions.Error">
 			<summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 			<param name="StatusCode"> </param>
 			<param name="Type"> </param>
@@ -238,69 +238,69 @@
 		<member name="P:Jakar.Extensions.Error.Instance">
 			<summary> </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ErrorOrResult">
+		<member name="TValue:Jakar.Extensions.ErrorOrResult">
 			<summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 		</member>
 		<member name="M:Jakar.Extensions.ErrorOrResult.#ctor(System.Nullable{System.Boolean},Jakar.Extensions.Errors)">
 			<summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ErrorOrResult`1">
+		<member name="TValue:Jakar.Extensions.ErrorOrResult`1">
 			<summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 		</member>
 		<member name="M:Jakar.Extensions.ErrorOrResult`1.#ctor(`0,Jakar.Extensions.Errors)">
 			<summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ActivelyRefusedConnectionException">
+		<member name="TValue:Jakar.Extensions.ActivelyRefusedConnectionException">
 			<summary> A web exception of unknown type occurred. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ConnectFailureException">
+		<member name="TValue:Jakar.Extensions.ConnectFailureException">
 			<summary> The remote service point could not be contacted at the transport level. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ConnectionClosedException">
+		<member name="TValue:Jakar.Extensions.ConnectionClosedException">
 			<summary> The connection was prematurely closed. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.KeepAliveFailureException">
+		<member name="TValue:Jakar.Extensions.KeepAliveFailureException">
 			<summary> The connection for a request that specifies the Keep-alive header was closed unexpectedly. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.MessageLengthLimitExceededException">
+		<member name="TValue:Jakar.Extensions.MessageLengthLimitExceededException">
 			<summary> A complete response was not received from the remote server. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.NameResolutionException">
+		<member name="TValue:Jakar.Extensions.NameResolutionException">
 			<summary> The name resolver service could not resolve the host name. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.PendingWebException">
+		<member name="TValue:Jakar.Extensions.PendingWebException">
 			<summary> The remote service point could not be contacted at the transport level. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.PipelineFailureException">
+		<member name="TValue:Jakar.Extensions.PipelineFailureException">
 			<summary> The remote service point could not be contacted at the transport level. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ProtocolErrorException">
+		<member name="TValue:Jakar.Extensions.ProtocolErrorException">
 			<summary> A response was received from server but was indicated a protocol-level error. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ReceiveFailureException">
+		<member name="TValue:Jakar.Extensions.ReceiveFailureException">
 			<summary> The request was canceled, the System.Net.WebRequest.Abort method was called, or an unclassifiable error occurred. This is the default value for System.Net.WebException.Status. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.SecureChannelFailureException">
+		<member name="TValue:Jakar.Extensions.SecureChannelFailureException">
 			<summary> An error occurred while establishing a connection using SSL. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.SendFailureException">
+		<member name="TValue:Jakar.Extensions.SendFailureException">
 			<summary> A complete response was not received from the remote server. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ServerProtocolViolationException">
+		<member name="TValue:Jakar.Extensions.ServerProtocolViolationException">
 			<summary> The response was not a valid HTTP response. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.TrustFailureException">
+		<member name="TValue:Jakar.Extensions.TrustFailureException">
 			<summary> A Server certificate could not be verified. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.UnknownWebErrorException">
+		<member name="TValue:Jakar.Extensions.UnknownWebErrorException">
 			<summary> A web exception of unknown type occurred. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ArrayExtensions.ArrayAccessor`1">
+		<member name="TValue:Jakar.Extensions.ArrayExtensions.ArrayAccessor`1">
 			<summary>
 				<see href="https://stackoverflow.com/a/17308019/9530917" />
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.CastTo`2">
+		<member name="TValue:Jakar.Extensions.CastTo`2">
 			<summary> Class to cast <typeparamref name="TEnum" /> to <typeparamref name="TResult" /> </summary>
 			<remarks>
 				<see href="https://stackoverflow.com/a/23391746/9530917" />
@@ -339,79 +339,79 @@
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_MD5(System.ReadOnlySpan{System.Byte}@)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_MD5(System.ReadOnlySpan{System.Char}@,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_MD5(System.String,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA1(System.ReadOnlySpan{System.Byte}@)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA1(System.ReadOnlySpan{System.Char}@,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA1(System.String,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA256(System.ReadOnlySpan{System.Byte}@)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA256(System.ReadOnlySpan{System.Char}@,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA256(System.String,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA384(System.ReadOnlySpan{System.Byte}@)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA384(System.ReadOnlySpan{System.Char}@,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA384(System.String,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA512(System.ReadOnlySpan{System.Byte}@)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA512(System.ReadOnlySpan{System.Char}@,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.Hash_SHA512(System.String,System.Text.Encoding)">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_MD5(System.ReadOnlyMemory{System.Byte})">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA1(System.ReadOnlyMemory{System.Byte})">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA256(System.ReadOnlyMemory{System.Byte})">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA384(System.ReadOnlyMemory{System.Byte})">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA512(System.ReadOnlyMemory{System.Byte})">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_MD5(System.Byte[])">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA1(System.Byte[])">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA256(System.Byte[])">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA384(System.Byte[])">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Hashes.HashAsync_SHA512(System.Byte[])">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Strings.IsBalanced(System.String,System.Collections.Generic.IReadOnlyDictionary{System.Char,System.Char})">
 			<summary>
@@ -462,14 +462,14 @@
 				</para>
 			</summary>
 			<param name="str"> </param>
-			<param name="separator"> the <see cref="T:System.Char" /> to split on </param>
+			<param name="separator"> the <see cref="TValue:System.Char" /> to split on </param>
 		</member>
 		<member name="M:Jakar.Extensions.Strings.SplitOn(System.String)">
 			<summary>
 				<para>
 					<see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
 				</para>
-				Default chars <see cref="T:System.Char" /> to '\n' and '\r'
+				Default chars <see cref="TValue:System.Char" /> to '\n' and '\r'
 			</summary>
 			<param name="str"> </param>
 		</member>
@@ -478,7 +478,7 @@
 				<para>
 					<see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
 				</para>
-				Default chars <see cref="T:System.Char" /> to '\n' and '\r'
+				Default chars <see cref="TValue:System.Char" /> to '\n' and '\r'
 			</summary>
 			<param name="span"> </param>
 		</member>
@@ -489,7 +489,7 @@
 			<param name="c"> </param>
 			<param name="count"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.Strings.Repeat(System.String,System.Int32)">
@@ -499,7 +499,7 @@
 			<param name="value"> </param>
 			<param name="count"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.Strings.ToSnakeCase(System.String)">
@@ -522,22 +522,22 @@
 			<summary>
 				<see href="https://stackoverflow.com/a/63141544/9530917" />
 			</summary>
-			<exception cref="T:System.AggregateException"> </exception>
+			<exception cref="TValue:System.AggregateException"> </exception>
 		</member>
 		<member
 			name="M:Jakar.Extensions.Tasks.WhenAll``1(System.Collections.Generic.IEnumerable{System.Func{System.Threading.CancellationToken,System.Threading.Tasks.ValueTask{``0}}},System.Threading.CancellationToken)">
 			<summary>
 				<see href="https://stackoverflow.com/a/63141544/9530917" />
 			</summary>
-			<exception cref="T:System.AggregateException"> </exception>
+			<exception cref="TValue:System.AggregateException"> </exception>
 		</member>
-		<member name="T:Jakar.Extensions.Validate">
+		<member name="TValue:Jakar.Extensions.Validate">
 			<summary> Validator Extensions </summary>
 		</member>
 		<member name="P:Jakar.Extensions.Validate.Re.Address">
 			<remarks>
 				Pattern:<br />
-				<code>/(?:(?&lt;=^)|(?&lt;=[;:.,|][ ])|(?&lt;=[[('"]))(?:[)]?P\\.?O\\.?(?:(?i)[ ]?Box)?[ ]{0,2}(?&lt;PO&gt;\\d{1,5})[)]?|(?&lt;HouseNumber&gt;(?&gt;(?:(?&lt;NumberException&gt;(?:19[789]|20[0123])\\d)|\\d+?(?:[-\\\\\\/]\\d{1,3})?)(?=(?:[;,]|[-\\\\\\/]?[A-Za-z]\\d?)?\\s)))(?:(?&lt;DoorSide&gt;[-\\\\\\/]?[A-Za-z]\\d{0,2}))?,?\\s{0,2}(?&gt;(?:(?:^|[ ]{1,2})(?&lt;StreetPrefix&gt;AU|EI?|GR|H[AW]|JO|K|M[AEM]|N[EOW]?|O[HLMV]|RD|S[EW]?|TE|W)\\b)?)(?:(?:^|[ ]{1,2})(?&lt;StreetName&gt;(?:\\p{Lu}[-'\\p{L}]*?(?:\\.?[ ]{1,2}\\p{Lu}[-'\\p{L}]*?){0,8}?(?&gt;(?&lt;StreetNameIndicator&gt;(?i)BOULEVARD|PLAZA|ROAD|STR(?:ASSE|EET)|WA(?:LK|Y))?)|(?&lt;StreetOrdinal&gt;\\d{1,3}(?:[. ]?(?:°|st|[nr]d|th))))\\b))(?:(?:(?&gt;[ ]{1,2}(?i)(?&lt;StreetType&gt;A(?:C(?:CESS|RES)|LLEY|NX|PPROACH|R(?:CADE|TERY)|VE(?:NUE)?)|B(?:A(?:NK|SIN|Y)|CH|E(?:ACH|ND)|L(?:DG|VD)?|O(?:ULEVARD|ARDWALK|WL)|R(?:ACE|AE|EAK|IDGE|O(?:ADWAY|OK|W))?|YPASS)|C(?:A(?:NAL|USEWAY)|ENTRE(?:WAY)?|H(?:A(?:NN?EL|SE)?)?|I(?:R(?:C(?:LET?|U(?:IT|S)))?)?|L(?:B|OSE)?|O(?:MMON|NCOURSE|OP|PSE|R(?:[DK]|NER|S[OT])|UR(?:[VS]E|T(?:YARD)?)|VE)?|R(?:ES(?:CENT|T)?|IEF|OSS(?:ING)?)|T[RS]?|U(?:LDESAC|RVE)|V)|D(?:ALE|EVIATION|I[PV]|M|OWNS|R(?:IVE(?:WAY)?)?)|E(?:ASEMENT|DGE|LBOW|N(?:D|TRANCE)|S(?:PLANADE|T(?:ATE|S))|X(?:P(?:(?:(?:RESS)?WA)?Y)|T(?:ENSION)?))|F(?:AIRWAY|I(?:ELDS?|RETRAIL)|L(?:DS?|S)|O(?:LLOW|R(?:D|MATION))|R(?:D|EEWAY|ONT(?:AGE|ROAD)?))|G(?:A(?:P|RDENS?|TE(?:S|WAY)?)|L(?:ADE|EN)|R(?:ANGE|EEN|O(?:UND|V(?:ET?)?))?)|H(?:AVEN|BR|E(?:ATH|IGHTS)|I(?:GHWAY|LL)|L|OUSE|TS|UB|WY)|I(?:NTER(?:CHANGE)?|SLAND)|J(?:C|UNCTION)|K(?:EY|NOLL)|L(?:A(?:NE(?:WAY)?)?|DG|IN(?:E|K)|N|O(?:O(?:KOUT|P)|WER)?)|M(?:A(?:LL)?|DWS?|E(?:A(?:D|NDER)|WS)|L|NR|OT(?:EL|ORWAY))|NO(?:OK)?|O(?:L|UTLOOK|V(?:ERPASS)?)|P(?:A(?:R(?:ADE|K(?:LANDS|WAY)?)|SS|TH(?:WAY)?)?|DE|I(?:ER|[KN]E)|KW?Y|L(?:A(?:CE|ZA)|Z)?|O(?:CKET|INT|RT)|RO(?:MENADE|PERTY)|T|URSUIT)?|QUA(?:D(?:RANT)?|YS?)|R(?:A?(?:MBLE|NCH)|DG?|E(?:ACH|S(?:ERVE|T)|T(?:REAT|URN))|I(?:D(?:E|GE)|NG|S(?:E|ING))|O(?:AD(?:WAY)?|TARY|U(?:ND|TE)|W)|R|UN)|S(?:CH|(?:ER(?:VICE)?WAY)|IDING|LOPE|MT|P(?:PGS|UR)|Q(?:UARE)?|T(?:A(?:TE)?|CT|EPS|HY|PL|RAND|R(?:EET|IP)|TER)?|UBWAY)|T(?:ARN|CE|E(?:R(?:RACE)?)?|HRO(?:UGHWAY|WAY)|O(?:LLWAY|P|R)|R(?:A(?:CK|IL)|FY|L)?|URN)|UN(?:DERPASS|IV)?|V(?:AL(?:E|LEY)|I(?:EW|S(?:TA)?)?|L(?:GS?|Y))|W(?:A(?:L[KL](?:WAY)?|Y)|HARF|YND)|XING)\\b\\.?){1,2})??(?&gt;(?:[ ]{1,2}(?&lt;StreetSuffix&gt;E|N[EW]?|S[EW]?|W)\\b)?))(?:(?:^|[ ]{1,2}|[;,.]\\s{0,2}?)(?i)(?&lt;Apt&gt;(?:[#]?\\d{1,5}(?:[. ]{0,2}(?:°|st|[nr]d|th))?[;,. ]{0,2})?(?:(?:(?&gt;(?:A|DE)P(?:AR)?T(?:MENT)?S?|B(?:UI)?LD(?:IN)?G?|FL(?:(?:OO)?R)?|HA?NGS?R|LOT|PIER|RM|S(LIP|PC|T(E|OP))|TRLR|UNIT|(?=[#]))(?:[ ]{1,2}[#]?\\w{1,5})??|BA?SE?ME?N?T|FRO?NT|LO?BBY|LOWE?R|OF(?:C|FICE)|P\\.?H|REAR|SIDE|UPPR)){1,3}(?:[#;,. ]{1,3}(?:[-.]?[A-Z\\d]){1,3})?)[;,.]?)?)(?&lt;CityState&gt;[-;,.[(]?\\s{1,4}(?&lt;City&gt;[A-Z][A-Za-z]{1,16}[.]?(?:[- ](?:[A-Z][A-Za-z]{0,16}|[a-z]{1,3})(?:(?:[- ][A-Za-z]{1,17}){1,7})?)?)(?&lt;!\\s[ACDF-IK-PR-W][AC-EHI-PR-Z])[)]?(?&gt;(?&lt;State&gt;[-;,.]?\\s{1,4}[[(]?(?&lt;StateAbbr&gt;A[LKSZRAP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY])\\b[])]?|[-;,.]\\s{0,3}[ ][[(]?(?=[A-Z])(?&lt;StateName&gt;(?i)Ala(?:bam+a|[sz]ka)|Ari[sz]ona|Arkan[sz]as|California|Colorado|Con+ec?t+icut+|Delaw[ae]re?|Flori?da|Georgia|Haw+ai+|Idaho|Ill?inois|Indiana|Iowa|Kansas|Kentu[ck]+[iy]|Louis+ian+a|Ma(?:ine|r[iy]land|s+achuset+s)|Mi(?:chigan|n+es+ot+a|s+is+ip+i|s+ouri)|Montana|Ne(?:bra[sz]ka|vada|w[ ]?(?:Hamp?shire|Jerse[iy]|Mexico|York))|[NS](?:o[ru]th|[.])[ ]?(?:Carolina|Dakota)|Ohio|Oklahoma|Oregon|Pen+s[iy]lvan+[iy]a|Rh?oa?de?[ ]?Island|Ten+es+e+|Texas|Ut+ah?|Vermont|Washington|(?:W(?:est|[.])?[ ]?)?Virginia|Wi[sz]cou?nsin|W[iy]om[iy]+ng?)[])]?)?)(?(State)|(?:(?&lt;=[)])|(?! [A-Z]))))?(?&gt;(?:[-;,.\\s]{0,4}(?:^|[ ]{1,2})[[(]?(?&lt;ZipCode&gt;(?!0{5})\\d{5}(?:-\\d{4})?)[])]?)?)(?(State)|(?(ZipCode)|(?(City)(?!)|(?(PO)|(?(NumberException)(?!)|(?(StreetNameIndicator)|(?(StreetType)|(?(StreetPrefix)|(?!)))))))))(?=[]).?!'"\\s]|$)(?![ ]+\\d)/gmx</code>
+				<code>/(?:(?&lt;=^)|(?&lt;=[;:.,|][ ])|(?&lt;=[[('"]))(?:[)]?P\\.?O\\.?(?:(?i)[ ]?Box)?[ ]{0,2}(?&lt;PO&gt;\\d{1,5})[)]?|(?&lt;HouseNumber&gt;(?&gt;(?:(?&lt;NumberException&gt;(?:19[789]|20[0123])\\d)|\\d+?(?:[-\\\\\\/]\\d{1,3})?)(?=(?:[;,]|[-\\\\\\/]?[A-Za-z]\\d?)?\\s)))(?:(?&lt;DoorSide&gt;[-\\\\\\/]?[A-Za-z]\\d{0,2}))?,?\\s{0,2}(?&gt;(?:(?:^|[ ]{1,2})(?&lt;StreetPrefix&gt;AU|EI?|GR|H[AW]|JO|K|M[AEM]|N[EOW]?|O[HLMV]|RD|S[EW]?|TE|W)\\b)?)(?:(?:^|[ ]{1,2})(?&lt;StreetName&gt;(?:\\p{Lu}[-'\\p{L}]*?(?:\\.?[ ]{1,2}\\p{Lu}[-'\\p{L}]*?){0,8}?(?&gt;(?&lt;StreetNameIndicator&gt;(?i)BOULEVARD|PLAZA|ROAD|STR(?:ASSE|EET)|WA(?:LK|Y))?)|(?&lt;StreetOrdinal&gt;\\d{1,3}(?:[. ]?(?:°|st|[nr]d|th))))\\b))(?:(?:(?&gt;[ ]{1,2}(?i)(?&lt;StreetType&gt;A(?:C(?:CESS|RES)|LLEY|NX|PPROACH|R(?:CADE|TERY)|VE(?:NUE)?)|B(?:A(?:NK|SIN|Y)|CH|E(?:ACH|ND)|L(?:DG|VD)?|O(?:ULEVARD|ARDWALK|WL)|R(?:ACE|AE|EAK|IDGE|O(?:ADWAY|OK|W))?|YPASS)|C(?:A(?:NAL|USEWAY)|ENTRE(?:WAY)?|H(?:A(?:NN?EL|SE)?)?|I(?:R(?:C(?:LET?|U(?:IT|S)))?)?|L(?:B|OSE)?|O(?:MMON|NCOURSE|OP|PSE|R(?:[DK]|NER|S[OT])|UR(?:[VS]E|TValue(?:YARD)?)|VE)?|R(?:ES(?:CENT|TValue)?|IEF|OSS(?:ING)?)|TValue[RS]?|U(?:LDESAC|RVE)|V)|D(?:ALE|EVIATION|I[PV]|M|OWNS|R(?:IVE(?:WAY)?)?)|E(?:ASEMENT|DGE|LBOW|N(?:D|TRANCE)|S(?:PLANADE|TValue(?:ATE|S))|X(?:P(?:(?:(?:RESS)?WA)?Y)|TValue(?:ENSION)?))|F(?:AIRWAY|I(?:ELDS?|RETRAIL)|L(?:DS?|S)|O(?:LLOW|R(?:D|MATION))|R(?:D|EEWAY|ONT(?:AGE|ROAD)?))|G(?:A(?:P|RDENS?|TE(?:S|WAY)?)|L(?:ADE|EN)|R(?:ANGE|EEN|O(?:UND|V(?:ET?)?))?)|H(?:AVEN|BR|E(?:ATH|IGHTS)|I(?:GHWAY|LL)|L|OUSE|TS|UB|WY)|I(?:NTER(?:CHANGE)?|SLAND)|J(?:C|UNCTION)|K(?:EY|NOLL)|L(?:A(?:NE(?:WAY)?)?|DG|IN(?:E|K)|N|O(?:O(?:KOUT|P)|WER)?)|M(?:A(?:LL)?|DWS?|E(?:A(?:D|NDER)|WS)|L|NR|OT(?:EL|ORWAY))|NO(?:OK)?|O(?:L|UTLOOK|V(?:ERPASS)?)|P(?:A(?:R(?:ADE|K(?:LANDS|WAY)?)|SS|TH(?:WAY)?)?|DE|I(?:ER|[KN]E)|KW?Y|L(?:A(?:CE|ZA)|Z)?|O(?:CKET|INT|RT)|RO(?:MENADE|PERTY)|TValue|URSUIT)?|QUA(?:D(?:RANT)?|YS?)|R(?:A?(?:MBLE|NCH)|DG?|E(?:ACH|S(?:ERVE|TValue)|TValue(?:REAT|URN))|I(?:D(?:E|GE)|NG|S(?:E|ING))|O(?:AD(?:WAY)?|TARY|U(?:ND|TE)|W)|R|UN)|S(?:CH|(?:ER(?:VICE)?WAY)|IDING|LOPE|MT|P(?:PGS|UR)|Q(?:UARE)?|TValue(?:A(?:TE)?|CT|EPS|HY|PL|RAND|R(?:EET|IP)|TER)?|UBWAY)|TValue(?:ARN|CE|E(?:R(?:RACE)?)?|HRO(?:UGHWAY|WAY)|O(?:LLWAY|P|R)|R(?:A(?:CK|IL)|FY|L)?|URN)|UN(?:DERPASS|IV)?|V(?:AL(?:E|LEY)|I(?:EW|S(?:TA)?)?|L(?:GS?|Y))|W(?:A(?:L[KL](?:WAY)?|Y)|HARF|YND)|XING)\\b\\.?){1,2})??(?&gt;(?:[ ]{1,2}(?&lt;StreetSuffix&gt;E|N[EW]?|S[EW]?|W)\\b)?))(?:(?:^|[ ]{1,2}|[;,.]\\s{0,2}?)(?i)(?&lt;Apt&gt;(?:[#]?\\d{1,5}(?:[. ]{0,2}(?:°|st|[nr]d|th))?[;,. ]{0,2})?(?:(?:(?&gt;(?:A|DE)P(?:AR)?TValue(?:MENT)?S?|B(?:UI)?LD(?:IN)?G?|FL(?:(?:OO)?R)?|HA?NGS?R|LOT|PIER|RM|S(LIP|PC|TValue(E|OP))|TRLR|UNIT|(?=[#]))(?:[ ]{1,2}[#]?\\w{1,5})??|BA?SE?ME?N?TValue|FRO?NT|LO?BBY|LOWE?R|OF(?:C|FICE)|P\\.?H|REAR|SIDE|UPPR)){1,3}(?:[#;,. ]{1,3}(?:[-.]?[A-Z\\d]){1,3})?)[;,.]?)?)(?&lt;CityState&gt;[-;,.[(]?\\s{1,4}(?&lt;City&gt;[A-Z][A-Za-z]{1,16}[.]?(?:[- ](?:[A-Z][A-Za-z]{0,16}|[a-z]{1,3})(?:(?:[- ][A-Za-z]{1,17}){1,7})?)?)(?&lt;!\\s[ACDF-IK-PR-W][AC-EHI-PR-Z])[)]?(?&gt;(?&lt;State&gt;[-;,.]?\\s{1,4}[[(]?(?&lt;StateAbbr&gt;A[LKSZRAP]|C[AOT]|D[EC]|F[LM]|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEHINOPST]|N[CDEHJMVY]|O[HKR]|P[ARW]|RI|S[CD]|TValue[NX]|UT|V[AIT]|W[AIVY])\\b[])]?|[-;,.]\\s{0,3}[ ][[(]?(?=[A-Z])(?&lt;StateName&gt;(?i)Ala(?:bam+a|[sz]ka)|Ari[sz]ona|Arkan[sz]as|California|Colorado|Con+ec?t+icut+|Delaw[ae]re?|Flori?da|Georgia|Haw+ai+|Idaho|Ill?inois|Indiana|Iowa|Kansas|Kentu[ck]+[iy]|Louis+ian+a|Ma(?:ine|r[iy]land|s+achuset+s)|Mi(?:chigan|n+es+ot+a|s+is+ip+i|s+ouri)|Montana|Ne(?:bra[sz]ka|vada|w[ ]?(?:Hamp?shire|Jerse[iy]|Mexico|York))|[NS](?:o[ru]th|[.])[ ]?(?:Carolina|Dakota)|Ohio|Oklahoma|Oregon|Pen+s[iy]lvan+[iy]a|Rh?oa?de?[ ]?Island|Ten+es+e+|Texas|Ut+ah?|Vermont|Washington|(?:W(?:est|[.])?[ ]?)?Virginia|Wi[sz]cou?nsin|W[iy]om[iy]+ng?)[])]?)?)(?(State)|(?:(?&lt;=[)])|(?! [A-Z]))))?(?&gt;(?:[-;,.\\s]{0,4}(?:^|[ ]{1,2})[[(]?(?&lt;ZipCode&gt;(?!0{5})\\d{5}(?:-\\d{4})?)[])]?)?)(?(State)|(?(ZipCode)|(?(City)(?!)|(?(PO)|(?(NumberException)(?!)|(?(StreetNameIndicator)|(?(StreetType)|(?(StreetPrefix)|(?!)))))))))(?=[]).?!'"\\s]|$)(?![ ]+\\d)/gmx</code>
 				<br />
 				Options:<br />
 				<code>RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline</code><br />
@@ -2705,7 +2705,7 @@
 		<member name="P:Jakar.Extensions.Validate.Re.DateTimeOffset">
 			<remarks>
 				Pattern:<br />
-				<code>^(\\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)(\\.\\d{1,7})?([+-]([01]\\d|2[0-3]):([0-5]\\d)|Z)$</code><br />
+				<code>^(\\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])TValue([01]\\d|2[0-3]):([0-5]\\d):([0-5]\\d)(\\.\\d{1,7})?([+-]([01]\\d|2[0-3]):([0-5]\\d)|Z)$</code><br />
 				Options:<br />
 				<code>RegexOptions.IgnoreCase | RegexOptions.Compiled | RegexOptions.Singleline</code><br />
 				Explanation:<br />
@@ -3661,156 +3661,156 @@
 			<param name="path"> </param>
 			<param name="subFolders"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalDirectory" />
+				<see cref="TValue:Jakar.Extensions.LocalDirectory" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Create(System.ReadOnlySpan{System.String})">
 			<summary> Uses the <see cref="P:Jakar.Extensions.LocalDirectory.CurrentDirectory" /> and creates the tree structure based on <paramref name="subFolders" /> </summary>
 			<param name="subFolders"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalDirectory" />
+				<see cref="TValue:Jakar.Extensions.LocalDirectory" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.CreateTemp(System.ReadOnlySpan{System.String})">
 			<summary> Uses <see cref="M:System.IO.Path.GetTempPath" /> and creates the tree structure based on <paramref name="subFolders" /> </summary>
 			<param name="subFolders"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalDirectory" />
+				<see cref="TValue:Jakar.Extensions.LocalDirectory" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.CreateSubDirectory(System.ReadOnlySpan{System.String})">
-			<summary> Gets the <see cref="T:Jakar.Extensions.LocalDirectory" /> object of the directory in this <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.LocalDirectory" /> object of the directory in this <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 			<param name="paths"> </param>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalDirectory" />
+				<see cref="TValue:Jakar.Extensions.LocalDirectory" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Join(System.String)">
-			<summary> Gets the <see cref="T:Jakar.Extensions.LocalFile" /> object of the file in this <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.LocalFile" /> object of the file in this <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 			<param name="path"> </param>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalFile" />
+				<see cref="TValue:Jakar.Extensions.LocalFile" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Join(System.String,System.Text.Encoding)">
-			<summary> Gets the <see cref="T:Jakar.Extensions.LocalFile" /> object of the file in this <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.LocalFile" /> object of the file in this <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 			<param name="path"> </param>
 			<param name="encoding"> </param>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalFile" />
+				<see cref="TValue:Jakar.Extensions.LocalFile" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Combine(System.String)">
-			<summary> Gets the path of the directory or file in this <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+			<summary> Gets the path of the directory or file in this <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 			<param name="subPaths"> </param>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Combine(System.ReadOnlySpan{System.String})">
-			<summary> Gets the path of the directory or file in this <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+			<summary> Gets the path of the directory or file in this <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 			<param name="subPaths"> </param>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteAllRecursivelyAsync">
 			<summary> Asynchronously deletes subdirectories and files. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteFilesAsync">
 			<summary> Asynchronously deletes files. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteSubFoldersAsync">
 			<summary> Asynchronously deletes subdirectories. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Delete">
 			<summary> Deletes this directory if it is empty. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Delete(System.Boolean)">
 			<summary> Deletes subdirectories and files. This occurs on another thread in Windows, and is not blocking. </summary>
 			<param name="recursive"> </param>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteAllRecursively">
 			<summary> Deletes subdirectories and files. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteFiles">
 			<summary> Deletes sub-directories. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.DeleteSubFolders">
 			<summary> Deletes sub-directories. </summary>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.LocalDirectory.Zip(Jakar.Extensions.LocalFile@,System.IO.Compression.CompressionLevel)">
 			<summary> Uses the <see cref="P:System.Text.Encoding.Default" /> encoding to used for the file names </summary>
@@ -3829,50 +3829,50 @@
 		<member name="M:Jakar.Extensions.LocalFile.FromUri(System.Uri)">
 			<summary> </summary>
 			<param name="uri"> </param>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.CreateAndOpen(System.String,Jakar.Extensions.LocalFile@)">
 			<summary> </summary>
 			<param name="path"> </param>
 			<param name="file"> </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.CreateTempFileAndOpen(Jakar.Extensions.LocalFile@)">
 			<summary> </summary>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.CreateTempFileAndOpen(Jakar.Extensions.MimeType,Jakar.Extensions.LocalFile@)">
 			<summary> </summary>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.SaveToFileAsync(System.String,System.IO.Stream,System.Threading.CancellationToken)">
@@ -3880,9 +3880,9 @@
 			<param name="payload"> the data being written to the file </param>
 			<param name="path"> </param>
 			<param name="token"> </param>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.Net.WebException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.Net.WebException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns> </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.SaveToFileAsync(System.String,System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
@@ -3890,11 +3890,11 @@
 			<param name="payload"> the data being written to the file </param>
 			<param name="path"> </param>
 			<param name="token"> </param>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.Net.WebException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.Net.WebException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
 			<returns>
-				<see cref="T:Jakar.Extensions.LocalFile" />
+				<see cref="TValue:Jakar.Extensions.LocalFile" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Open(System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.Int32,System.Boolean)">
@@ -3908,38 +3908,38 @@
 			<param name="share"> </param>
 			<param name="bufferSize"> </param>
 			<param name="useAsync"> </param>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
-			<exception cref="T:System.ArgumentOutOfRangeException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.ArgumentOutOfRangeException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
 			<returns>
-				<see cref="T:System.IO.FileStream" />
+				<see cref="TValue:System.IO.FileStream" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.OpenRead(System.Int32,System.Boolean)">
-			<summary> Opens file for read only actions. If it doesn't exist, <see cref="T:System.IO.FileNotFoundException" /> will be raised. </summary>
+			<summary> Opens file for read only actions. If it doesn't exist, <see cref="TValue:System.IO.FileNotFoundException" /> will be raised. </summary>
 			<param name="bufferSize"> </param>
 			<param name="useAsync"> </param>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentOutOfRangeException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentOutOfRangeException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
 			<returns>
-				<see cref="T:System.IO.FileStream" />
+				<see cref="TValue:System.IO.FileStream" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.OpenWrite(System.IO.FileMode,System.Int32,System.Boolean)">
@@ -3947,19 +3947,19 @@
 			<param name="mode"> </param>
 			<param name="bufferSize"> </param>
 			<param name="useAsync"> </param>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.NotSupportedException"> </exception>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentOutOfRangeException"> </exception>
-			<exception cref="T:System.IO.IOException"> </exception>
-			<exception cref="T:System.Security.SecurityException"> </exception>
-			<exception cref="T:System.IO.DirectoryNotFoundException"> </exception>
-			<exception cref="T:System.UnauthorizedAccessException"> </exception>
-			<exception cref="T:System.IO.PathTooLongException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.NotSupportedException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentOutOfRangeException"> </exception>
+			<exception cref="TValue:System.IO.IOException"> </exception>
+			<exception cref="TValue:System.Security.SecurityException"> </exception>
+			<exception cref="TValue:System.IO.DirectoryNotFoundException"> </exception>
+			<exception cref="TValue:System.UnauthorizedAccessException"> </exception>
+			<exception cref="TValue:System.IO.PathTooLongException"> </exception>
 			<returns>
-				<see cref="T:System.IO.FileStream" />
+				<see cref="TValue:System.IO.FileStream" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.ChangeExtension(Jakar.Extensions.MimeType)">
@@ -3973,19 +3973,19 @@
 			<returns> The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. </returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Hash_MD5">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Hash_SHA1">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Hash_SHA256">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Hash_SHA384">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Hash_SHA512">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.ToUri(System.Nullable{Jakar.Extensions.MimeType})">
 			<summary> Creates an <see cref="F:System.UriKind.Absolute" /> based on the detected <see cref="P:Jakar.Extensions.LocalFile.Mime" /> </summary>
@@ -3994,7 +3994,7 @@
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.ToUri(System.Uri,System.String,System.Nullable{Jakar.Extensions.MimeType})">
 			<summary>
-				Creates a <see cref="T:System.Uri" /> using provided prefix, and <see cref="M:System.Web.HttpUtility.UrlEncode(System.String)" /> to encode the
+				Creates a <see cref="TValue:System.Uri" /> using provided prefix, and <see cref="M:System.Web.HttpUtility.UrlEncode(System.String)" /> to encode the
 				<see cref="P:Jakar.Extensions.LocalFile.FullPath" /> .
 			</summary>
 			<param name="baseUri"> </param>
@@ -4028,183 +4028,183 @@
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.Text.StringBuilder)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(Jakar.Extensions.ValueStringBuilder)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.String)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.Byte[])">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.Span{System.Byte})">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.ReadOnlySpan{System.Byte})">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.ReadOnlyMemory{System.Byte})">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.ReadOnlyMemory{System.Char})">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.Write(System.IO.Stream)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.Text.StringBuilder)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(Jakar.Extensions.ValueStringBuilder)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.String)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.Byte[],System.Threading.CancellationToken)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
 			<param name="token"> </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.ReadOnlyMemory{System.Byte},System.Threading.CancellationToken)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
 			<param name="token"> </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.ReadOnlyMemory{System.Char},System.Threading.CancellationToken)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
 			<param name="token"> </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.WriteAsync(System.IO.Stream,System.Threading.CancellationToken)">
 			<summary> Write the <paramref name="payload" /> to the file. </summary>
 			<param name="payload"> the data being written to the file </param>
 			<param name="token"> </param>
-			<exception cref="T:System.NullReferenceException"> </exception>
-			<exception cref="T:System.ArgumentException"> </exception>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> </exception>
+			<exception cref="TValue:System.NullReferenceException"> </exception>
+			<exception cref="TValue:System.ArgumentException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> </exception>
 			<returns>
-				<see cref="T:System.Threading.Tasks.ValueTask" />
+				<see cref="TValue:System.Threading.Tasks.ValueTask" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IAsyncReadHandler.AsBytes(System.Threading.CancellationToken)">
 			<summary> Reads the contents of the file as a byte array. </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
 				<see cref="!:byte[]" />
 			</returns>
@@ -4212,88 +4212,88 @@
 		<member name="M:Jakar.Extensions.LocalFile.IAsyncReadHandler.AsMemory(System.Threading.CancellationToken)">
 			<summary> Reads the contents of the file as a <see cref="!:ReadOnlyMemory&lt;byte&gt;" /> , asynchronously. </summary>
 			<param name="token"> </param>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
 				<see cref="!:ReadOnlyMemory&lt;byte&gt;" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IAsyncReadHandler.AsString(System.Threading.CancellationToken)">
-			<summary> Reads the contents of the file as a <see cref="T:System.String" /> , asynchronously. </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<summary> Reads the contents of the file as a <see cref="TValue:System.String" /> , asynchronously. </summary>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IAsyncReadHandler.AsJson``1">
-			<summary> Reads the contents of the file as a <see cref="T:System.String" /> , then calls <see cref="M:Jakar.Extensions.JsonNet.FromJson(System.String)" /> on it, asynchronously. </summary>
-			<typeparam name="T"> </typeparam>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
-			<exception cref="T:Newtonsoft.Json.JsonReaderException"> if an error  deserialization occurs </exception>
+			<summary> Reads the contents of the file as a <see cref="TValue:System.String" /> , then calls <see cref="M:Jakar.Extensions.JsonNet.FromJson(System.String)" /> on it, asynchronously. </summary>
+			<typeparam name="TValue"> </typeparam>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:Newtonsoft.Json.JsonReaderException"> if an error  deserialization occurs </exception>
 			<returns>
-				<typeparamref name="T" />
+				<typeparamref name="TValue" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IReadHandler.AsBytes">
 			<summary> Reads the contents of the file as a byte array. </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
 				<see cref="!:byte[]" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IReadHandler.AsMemory">
 			<summary> Reads the contents of the file as a <see cref="!:ReadOnlyMemory&lt;byte&gt;" /> . </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
 				<see cref="!:ReadOnlyMemory&lt;byte&gt;" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IReadHandler.AsSpan">
 			<summary> Reads the contents of the file as a <see cref="!:ReadOnlySpan&lt;byte&gt;" /> . </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
 				<see cref="!:ReadOnlySpan&lt;byte&gt;" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IReadHandler.AsString">
-			<summary> Reads the contents of the file as a <see cref="T:System.String" /> . </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<summary> Reads the contents of the file as a <see cref="TValue:System.String" /> . </summary>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			'
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.IReadHandler.AsJson``1">
-			<summary> Reads the contents of the file as a <see cref="T:System.String" /> . </summary>
-			<exception cref="T:System.NullReferenceException"> if FullPath is null or empty </exception>
-			<exception cref="T:System.IO.FileNotFoundException"> if file is not found </exception>
+			<summary> Reads the contents of the file as a <see cref="TValue:System.String" /> . </summary>
+			<exception cref="TValue:System.NullReferenceException"> if FullPath is null or empty </exception>
+			<exception cref="TValue:System.IO.FileNotFoundException"> if file is not found </exception>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
-		<member name="T:Jakar.Extensions.LocalFile.Watcher">
-			<summary> A collection of files that are  the <see cref="T:Jakar.Extensions.LocalDirectory" /> </summary>
+		<member name="TValue:Jakar.Extensions.LocalFile.Watcher">
+			<summary> A collection of files that are  the <see cref="TValue:Jakar.Extensions.LocalDirectory" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.HashAsync_MD5">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.MD5" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.MD5" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.HashAsync_SHA1">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA1" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA1" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.HashAsync_SHA256">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA256" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA256" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.HashAsync_SHA384">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA384" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA384" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.LocalFile.HashAsync_SHA512">
-			<summary> Calculates a file hash using <see cref="T:System.Security.Cryptography.SHA512" /> </summary>
+			<summary> Calculates a file hash using <see cref="TValue:System.Security.Cryptography.SHA512" /> </summary>
 		</member>
 		<member name="M:Jakar.Extensions.PathExtensions.GetExtension(System.String)">
 			<summary> extension method for <see cref="M:System.IO.Path.GetExtension(System.String)" /> </summary>
@@ -4310,7 +4310,7 @@
 			<param name="path"> </param>
 			<returns> </returns>
 		</member>
-		<member name="T:Jakar.Extensions.MimeTypeNames">
+		<member name="TValue:Jakar.Extensions.MimeTypeNames">
 			<summary>
 				<para>
 					<seealso href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types" />
@@ -4321,55 +4321,55 @@
 			</summary>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.FromExtension(System.String)">
-			<summary> Gets the <see cref="T:Jakar.Extensions.MimeType" /> of the provided extension <see cref="T:System.String" /> . </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.MimeType" /> of the provided extension <see cref="TValue:System.String" /> . </summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.MimeType" />
+				<see cref="TValue:Jakar.Extensions.MimeType" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.FromExtension(System.ReadOnlySpan{System.Char})">
-			<summary> Gets the <see cref="T:Jakar.Extensions.MimeType" /> of the provided extension <see cref="T:System.String" /> . </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.MimeType" /> of the provided extension <see cref="TValue:System.String" /> . </summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.MimeType" />
+				<see cref="TValue:Jakar.Extensions.MimeType" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToMimeType(System.String)">
 			<summary>
-				Converts the provided ContentType <see cref="T:System.String" /> to it's associated <see cref="T:Jakar.Extensions.MimeType" /> via <seealso cref="T:Jakar.Extensions.MimeTypeNames" />
+				Converts the provided ContentType <see cref="TValue:System.String" /> to it's associated <see cref="TValue:Jakar.Extensions.MimeType" /> via <seealso cref="TValue:Jakar.Extensions.MimeTypeNames" />
 			</summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.MimeType" />
+				<see cref="TValue:Jakar.Extensions.MimeType" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToContentType(Jakar.Extensions.MimeType)">
-			<summary> Converts the provided <see cref="T:Jakar.Extensions.MimeType" /> to it's associated ContentType via <seealso cref="T:Jakar.Extensions.MimeTypeNames" /> </summary>
+			<summary> Converts the provided <see cref="TValue:Jakar.Extensions.MimeType" /> to it's associated ContentType via <seealso cref="TValue:Jakar.Extensions.MimeTypeNames" /> </summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToExtensionWithPeriod(Jakar.Extensions.MimeType)">
-			<summary> Gets the extension of the provided <see cref="T:Jakar.Extensions.MimeType" /> . </summary>
+			<summary> Gets the extension of the provided <see cref="TValue:Jakar.Extensions.MimeType" /> . </summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToExtension(Jakar.Extensions.MimeType)">
-			<summary> Gets the extension of the provided <see cref="T:Jakar.Extensions.MimeType" /> . </summary>
+			<summary> Gets the extension of the provided <see cref="TValue:Jakar.Extensions.MimeType" /> . </summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToFileName(Jakar.Extensions.MimeType,System.String)">
-			<summary> Uses the provided <paramref name="fileName" /> and adds the extension based on provided <see cref="T:Jakar.Extensions.MimeType" /> . </summary>
+			<summary> Uses the provided <paramref name="fileName" /> and adds the extension based on provided <see cref="TValue:Jakar.Extensions.MimeType" /> . </summary>
 			<param name="mime"> </param>
 			<param name="fileName"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
 		<member name="M:Jakar.Extensions.MimeTypes.ToUriScheme(Jakar.Extensions.MimeType)">
@@ -4378,10 +4378,10 @@
 			</summary>
 			<param name="mime"> </param>
 			<returns>
-				<see cref="T:System.String" />
+				<see cref="TValue:System.String" />
 			</returns>
 		</member>
-		<member name="T:Jakar.Extensions.Status">
+		<member name="TValue:Jakar.Extensions.Status">
 			<summary>
 				<para>
 					<see href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Status" />
@@ -4610,7 +4610,7 @@
 		<member name="F:Jakar.Extensions.Status.NetworkAuthenticationRequired">
 			<summary> The 511 status code indicates that the client needs to authenticate to gain network access. </summary>
 		</member>
-		<member name="T:Jakar.Extensions.WebRequester">
+		<member name="TValue:Jakar.Extensions.WebRequester">
 			<summary>
 				<para>
 					<see href="https://www.stevejgordon.co.uk/httpclient-connection-pooling--dotnet-core" />
@@ -4619,13 +4619,13 @@
 		</member>
 		<member name="M:Jakar.Extensions.WebResponse`1.GetPayload">
 			<summary> Gets the payload if available; otherwise throws. </summary>
-			<exception cref="T:System.Net.Http.HttpRequestException"> </exception>
+			<exception cref="TValue:System.Net.Http.HttpRequestException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.IniConfig.GetOrAdd(System.String)">
-			<summary> Gets the <see cref="T:Jakar.Extensions.IniConfig.Section" /> with the <paramref name="sectionName" /> . If it doesn't exist, it is created, then returned. </summary>
+			<summary> Gets the <see cref="TValue:Jakar.Extensions.IniConfig.Section" /> with the <paramref name="sectionName" /> . If it doesn't exist, it is created, then returned. </summary>
 			<param name="sectionName"> Section AppName </param>
 			<returns>
-				<see cref="T:Jakar.Extensions.IniConfig.Section" />
+				<see cref="TValue:Jakar.Extensions.IniConfig.Section" />
 			</returns>
 		</member>
 		<member name="P:Jakar.Extensions.IErrorDetails.Type">
@@ -4658,10 +4658,10 @@
 				A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced.
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.AsyncLinq">
+		<member name="TValue:Jakar.Extensions.AsyncLinq">
 			<summary>
 				<para>
-					<see cref="T:System.Linq.Enumerable" />
+					<see cref="TValue:System.Linq.Enumerable" />
 				</para>
 				<para> AsyncEnumerable </para>
 				<para>
@@ -4671,11 +4671,11 @@
 			</summary>
 		</member>
 		<member name="M:Jakar.Extensions.AsyncLinq.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
-			<summary> If <paramref name="source" /> is an <see cref="T:System.Collections.Generic.List`1" /> , items should not be added or removed while the calling. </summary>
+			<summary> If <paramref name="source" /> is an <see cref="TValue:System.Collections.Generic.List`1" /> , items should not be added or removed while the calling. </summary>
 			<typeparam name="TElement"> </typeparam>
 		</member>
-		<member name="T:Jakar.Extensions.AppVersion">
-			<summary> See <see cref="T:Jakar.Extensions.AppVersion.Format" /> for formatting details. </summary>
+		<member name="TValue:Jakar.Extensions.AppVersion">
+			<summary> See <see cref="TValue:Jakar.Extensions.AppVersion.Format" /> for formatting details. </summary>
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.TryParse(System.ReadOnlySpan{System.Char},Jakar.Extensions.AppVersion@)">
 			<summary> </summary>
@@ -4687,13 +4687,13 @@
 			<summary>
 				If the <see cref="P:Jakar.Extensions.AppVersion.Scheme" /> is any of [ <see cref="F:Jakar.Extensions.AppVersion.Format.Singular" /> ,
 				<see cref="F:Jakar.Extensions.AppVersion.Format.DetailedRevisions" /> , <see cref="F:Jakar.Extensions.AppVersion.Format.Complete" /> ], will throw
-				<see cref="T:System.InvalidOperationException" />
+				<see cref="TValue:System.InvalidOperationException" />
 			</summary>
 			<returns> </returns>
-			<exception cref="T:System.InvalidOperationException"> </exception>
+			<exception cref="TValue:System.InvalidOperationException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.CompareTo(System.Object)">
-			<summary> Compares two <see cref="T:Jakar.Extensions.AppVersion" /> instances </summary>
+			<summary> Compares two <see cref="TValue:Jakar.Extensions.AppVersion" /> instances </summary>
 			<param name="other"> </param>
 			<returns>
 				<see langword="0" /> if the <paramref name="other" /> is equivalent. <br /> <see langword="NOT_FOUND" /> if the <paramref name="other" /> is smaller. <br /> <see langword="1" /> if the
@@ -4703,13 +4703,13 @@
 				if the
 				<paramref name="other" />
 				is not an instance of
-				<see cref="T:Jakar.Extensions.AppVersion" />
+				<see cref="TValue:Jakar.Extensions.AppVersion" />
 				. <br />
 			</returns>
-			<exception cref="T:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
+			<exception cref="TValue:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.FuzzyEquals(Jakar.Extensions.AppVersion)">
-			<summary> Compares two <see cref="T:Jakar.Extensions.AppVersion" /> instances for relative equality. </summary>
+			<summary> Compares two <see cref="TValue:Jakar.Extensions.AppVersion" /> instances for relative equality. </summary>
 			<param name="other"> </param>
 			<returns>
 				<para>
@@ -4742,7 +4742,7 @@
 				</para>
 				<para> otherwise <see langword="false" /> </para>
 			</returns>
-			<exception cref="T:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
+			<exception cref="TValue:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
 		</member>
 		<member name="F:Jakar.Extensions.AppVersion.Format.Singular">
 			<summary> Major </summary>
@@ -4762,18 +4762,18 @@
 		<member name="F:Jakar.Extensions.AppVersion.Format.Complete">
 			<summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
 		</member>
-		<member name="T:Jakar.Extensions.NullScope">
+		<member name="TValue:Jakar.Extensions.NullScope">
 			<summary> An empty scope without any logic </summary>
 		</member>
 		<member name="M:Jakar.Extensions.NullScope.Dispose">
 			<inheritdoc />
 		</member>
-		<member name="T:Jakar.Extensions.Randoms">
+		<member name="TValue:Jakar.Extensions.Randoms">
 			<summary>
 				<see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp" />
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.Synchronized`1">
+		<member name="TValue:Jakar.Extensions.Synchronized`1">
 			<summary>
 				<seealso href="https://www.codeproject.com/Articles/33559/Handy-wrapper-class-for-thread-safe-property-acces" />
 			</summary>
@@ -4785,20 +4785,20 @@
 			</summary>
 			<typeparam name="TValue"> The value type. </typeparam>
 		</member>
-		<member name="T:Jakar.Extensions.Tokens">
+		<member name="TValue:Jakar.Extensions.Tokens">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Tokens.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="T:Jakar.Extensions.Tokens`1">
+		<member name="TValue:Jakar.Extensions.Tokens`1">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Tokens`1.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String,System.Guid,`0)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="T:Jakar.Extensions.ValidValueOf`2">
-			<summary> Inspired by <see cref="T:ValueOf.ValueOf`2" /> </summary>
+		<member name="TValue:Jakar.Extensions.ValidValueOf`2">
+			<summary> Inspired by <see cref="TValue:ValueOf.ValueOf`2" /> </summary>
 			<typeparam name="TValue"> </typeparam>
 			<typeparam name="TThis"> </typeparam>
 		</member>
@@ -4806,10 +4806,10 @@
 			<summary> </summary>
 			<returns> <see langword="true" /> if <see cref="P:Jakar.Extensions.ValidValueOf`2.Value" /> is valid, otherwise <see langword="false" /> </returns>
 		</member>
-		<member name="T:Jakar.Extensions.AppPreferenceExtensions.ShareKeyCollection">
+		<member name="TValue:Jakar.Extensions.AppPreferenceExtensions.ShareKeyCollection">
 			<summary> A collection of sharedName -> key -> $"{sharedName}.{key}". </summary>
 		</member>
-		<member name="T:Jakar.Extensions.LineSplitEntry`1">
+		<member name="TValue:Jakar.Extensions.LineSplitEntry`1">
 			<summary>
 				<para>
 					<see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
@@ -4823,7 +4823,7 @@
 				</para>
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.ParamsArray`1">
+		<member name="TValue:Jakar.Extensions.ParamsArray`1">
 			<summary>
 				<para> Based on System.ParamsArray </para>
 			</summary>
@@ -4833,47 +4833,47 @@
 				<para> Based on System.ParamsArray </para>
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.SpanEnumerator`1">
-			<summary> A <see langword="ref" /> <see langword="struct" /> that enumerates the items in a given <see cref="T:System.Span`1" /> instance. </summary>
-			<typeparam name="T"> The type of items to enumerate. </typeparam>
-			<remarks> Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanEnumerator`1" /> struct. </remarks>
-			<param name="span"> The source <see cref="T:System.Span`1" /> instance. </param>
+		<member name="TValue:Jakar.Extensions.SpanEnumerator`1">
+			<summary> A <see langword="ref" /> <see langword="struct" /> that enumerates the items in a given <see cref="TValue:System.Span`1" /> instance. </summary>
+			<typeparam name="TValue"> The type of items to enumerate. </typeparam>
+			<remarks> Initializes a new instance of the <see cref="TValue:Jakar.Extensions.SpanEnumerator`1" /> struct. </remarks>
+			<param name="span"> The source <see cref="TValue:System.Span`1" /> instance. </param>
 		</member>
 		<member name="M:Jakar.Extensions.SpanEnumerator`1.#ctor(System.ReadOnlySpan{`0}@)">
-			<summary> A <see langword="ref" /> <see langword="struct" /> that enumerates the items in a given <see cref="T:System.Span`1" /> instance. </summary>
-			<typeparam name="T"> The type of items to enumerate. </typeparam>
-			<remarks> Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanEnumerator`1" /> struct. </remarks>
-			<param name="span"> The source <see cref="T:System.Span`1" /> instance. </param>
+			<summary> A <see langword="ref" /> <see langword="struct" /> that enumerates the items in a given <see cref="TValue:System.Span`1" /> instance. </summary>
+			<typeparam name="TValue"> The type of items to enumerate. </typeparam>
+			<remarks> Initializes a new instance of the <see cref="TValue:Jakar.Extensions.SpanEnumerator`1" /> struct. </remarks>
+			<param name="span"> The source <see cref="TValue:System.Span`1" /> instance. </param>
 		</member>
-		<member name="T:Jakar.Extensions.SpanEnumerator`1.Item">
-			<summary> An item from a source <see cref="T:System.Span`1" /> instance. </summary>
-			<remarks> Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanEnumerator`1.Item" /> struct. </remarks>
-			<param name="span"> The source <see cref="T:System.Span`1" /> instance. </param>
+		<member name="TValue:Jakar.Extensions.SpanEnumerator`1.Item">
+			<summary> An item from a source <see cref="TValue:System.Span`1" /> instance. </summary>
+			<remarks> Initializes a new instance of the <see cref="TValue:Jakar.Extensions.SpanEnumerator`1.Item" /> struct. </remarks>
+			<param name="span"> The source <see cref="TValue:System.Span`1" /> instance. </param>
 			<param name="index"> The current index within <paramref name="span" /> . </param>
 		</member>
 		<member name="M:Jakar.Extensions.SpanEnumerator`1.Item.#ctor(System.ReadOnlySpan{`0}@,System.Int32)">
-			<summary> An item from a source <see cref="T:System.Span`1" /> instance. </summary>
-			<remarks> Initializes a new instance of the <see cref="T:Jakar.Extensions.SpanEnumerator`1.Item" /> struct. </remarks>
-			<param name="span"> The source <see cref="T:System.Span`1" /> instance. </param>
+			<summary> An item from a source <see cref="TValue:System.Span`1" /> instance. </summary>
+			<remarks> Initializes a new instance of the <see cref="TValue:Jakar.Extensions.SpanEnumerator`1.Item" /> struct. </remarks>
+			<param name="span"> The source <see cref="TValue:System.Span`1" /> instance. </param>
 			<param name="index"> The current index within <paramref name="span" /> . </param>
 		</member>
-		<member name="T:Jakar.Extensions.Spans">
+		<member name="TValue:Jakar.Extensions.Spans">
 			<summary>
 				<para>
 					<see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization" />
 				</para>
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.SpanSplitEnumerator`1">
+		<member name="TValue:Jakar.Extensions.SpanSplitEnumerator`1">
 			<summary>
-				<see cref="T:Jakar.Extensions.SpanSplitEnumerator`1" /> is a struct so there is no allocation here.
-				<para> Must be a ref struct as it contains a <see cref="T:System.ReadOnlySpan`1" /> </para>
+				<see cref="TValue:Jakar.Extensions.SpanSplitEnumerator`1" /> is a struct so there is no allocation here.
+				<para> Must be a ref struct as it contains a <see cref="TValue:System.ReadOnlySpan`1" /> </para>
 				<para>
 					<see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm" />
 				</para>
 			</summary>
 		</member>
-		<member name="T:Jakar.Extensions.ValueStringBuilder">
+		<member name="TValue:Jakar.Extensions.ValueStringBuilder">
 			<summary>
 				<para> Based on System.Text.ValueStringBuilder </para>
 			</summary>
@@ -4895,8 +4895,8 @@
 			<param name="format"> </param>
 			<param name="args"> </param>
 			<returns> </returns>
-			<exception cref="T:System.ArgumentNullException"> </exception>
-			<exception cref="T:System.FormatException"> </exception>
+			<exception cref="TValue:System.ArgumentNullException"> </exception>
+			<exception cref="TValue:System.FormatException"> </exception>
 		</member>
 		<member name="M:Jakar.Extensions.TypeNameComparer.Compare(System.Type,System.Type)">
 			<summary>
@@ -4914,7 +4914,7 @@
 			<param name="y"> </param>
 			<returns> </returns>
 		</member>
-		<member name="T:Jakar.Extensions.Types">
+		<member name="TValue:Jakar.Extensions.Types">
 			<summary>
 				<para>
 					<see href="https://github.com/dotnet/roslyn/blob/main/docs/features/nullable-metadata.md" />
@@ -4931,10 +4931,10 @@
 			<summary> A random value that must change whenever a user is persisted to the store </summary>
 		</member>
 		<member name="P:Jakar.Extensions.IUserDevice`1.IP">
-			<summary> Last known <see cref="T:System.Net.IPAddress" /> </summary>
+			<summary> Last known <see cref="TValue:System.Net.IPAddress" /> </summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Address_0">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Address method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Address_0">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Address method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Address_0.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -4942,13 +4942,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Address_0.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Address_0.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -4965,8 +4965,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateOnly_1">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the DateOnly method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateOnly_1">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the DateOnly method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.DateOnly_1.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -4974,13 +4974,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.DateOnly_1.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.DateOnly_1.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -4997,8 +4997,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateTimeOffset_2">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the DateTimeOffset method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateTimeOffset_2">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the DateTimeOffset method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.DateTimeOffset_2.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5006,13 +5006,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.DateTimeOffset_2.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.DateTimeOffset_2.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5029,8 +5029,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Email_3">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Email method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Email_3">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Email method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Email_3.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5038,13 +5038,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Email_3.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Email_3.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5061,8 +5061,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Ip_4">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Ip method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Ip_4">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Ip method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Ip_4.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5070,13 +5070,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Ip_4.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Ip_4.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5093,8 +5093,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.IpV6_5">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the IpV6 method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.IpV6_5">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the IpV6 method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.IpV6_5.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5102,13 +5102,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.IpV6_5.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.IpV6_5.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5125,8 +5125,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Url_6">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Url method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Url_6">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Url method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Url_6.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5134,13 +5134,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Url_6.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Url_6.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5157,8 +5157,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Brazil_7">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Brazil method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Brazil_7">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Brazil method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Brazil_7.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5166,13 +5166,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Brazil_7.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Brazil_7.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5189,8 +5189,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China1_8">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the China1 method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.China1_8">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the China1 method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.China1_8.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5198,13 +5198,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.China1_8.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.China1_8.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5221,8 +5221,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China2_9">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the China2 method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.China2_9">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the China2 method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.China2_9.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5230,13 +5230,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.China2_9.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.China2_9.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5253,8 +5253,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Generic_10">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Generic method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Generic_10">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Generic method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Generic_10.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5262,13 +5262,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Generic_10.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Generic_10.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5285,8 +5285,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Germany_11">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Germany method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Germany_11">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Germany method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Germany_11.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5294,13 +5294,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Germany_11.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Germany_11.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5317,8 +5317,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.India_12">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the India method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.India_12">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the India method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.India_12.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5326,13 +5326,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.India_12.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.India_12.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.India_12.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.India_12.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.India_12.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.India_12.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.India_12.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5349,8 +5349,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Indonesia_13">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Indonesia method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Indonesia_13">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Indonesia method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Indonesia_13.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5358,13 +5358,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Indonesia_13.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Indonesia_13.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5381,8 +5381,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Japan_14">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Japan method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Japan_14">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Japan method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Japan_14.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5390,13 +5390,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Japan_14.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Japan_14.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5413,8 +5413,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Russia_15">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the Russia method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Russia_15">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the Russia method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.Russia_15.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5422,13 +5422,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.Russia_15.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Russia_15.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5445,8 +5445,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedKingdom_16">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the UnitedKingdom method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedKingdom_16">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the UnitedKingdom method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.UnitedKingdom_16.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5454,13 +5454,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedKingdom_16.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedKingdom_16.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5477,8 +5477,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the UnitedSatesOrCanada1 method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the UnitedSatesOrCanada1 method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5486,13 +5486,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada1_17.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5509,8 +5509,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18">
-			<summary>Custom <see cref="T:System.Text.RegularExpressions.Regex" />-derived type for the UnitedSatesOrCanada2 method.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18">
+			<summary>Custom <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived type for the UnitedSatesOrCanada2 method.</summary>
 		</member>
 		<member name="F:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.Instance">
 			<summary>Cached, thread-safe singleton instance.</summary>
@@ -5518,13 +5518,13 @@
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.#ctor">
 			<summary>Initializes the instance.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory">
-			<summary>Provides a factory for creating <see cref="T:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory">
+			<summary>Provides a factory for creating <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> instances to be used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory.CreateInstance">
-			<summary>Creates an instance of a <see cref="T:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="T:System.Text.RegularExpressions.Regex" />.</summary>
+			<summary>Creates an instance of a <see cref="TValue:System.Text.RegularExpressions.RegexRunner" /> used by methods on <see cref="TValue:System.Text.RegularExpressions.Regex" />.</summary>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory.Runner">
+		<member name="TValue:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory.Runner">
 			<summary>Provides the runner that contains the custom logic implementing the specified regular expression.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.UnitedSatesOrCanada2_18.RunnerFactory.Runner.Scan(System.ReadOnlySpan{System.Char})">
@@ -5541,8 +5541,8 @@
 			<param name="inputSpan">The text being scanned by the regular expression.</param>
 			<returns>true if the regular expression matches at the current position; otherwise, false.</returns>
 		</member>
-		<member name="T:System.Text.RegularExpressions.Generated.Utilities">
-			<summary>Helper methods used by generated <see cref="T:System.Text.RegularExpressions.Regex" />-derived implementations.</summary>
+		<member name="TValue:System.Text.RegularExpressions.Generated.Utilities">
+			<summary>Helper methods used by generated <see cref="TValue:System.Text.RegularExpressions.Regex" />-derived implementations.</summary>
 		</member>
 		<member name="M:System.Text.RegularExpressions.Generated.Utilities.IndexOfNonAsciiOrAny_49CD85532B4B112F232927F87674A53AD51604B79E483FA96CCCD4482940CDA5(System.ReadOnlySpan{System.Char})">
 			<summary>Finds the next index of any character that matches a character in the set [+07-9\d].</summary>

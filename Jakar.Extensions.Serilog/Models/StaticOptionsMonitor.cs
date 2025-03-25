@@ -8,9 +8,9 @@ using Microsoft.Extensions.Options;
 namespace Jakar.Extensions.Serilog;
 
 
-public sealed class StaticOptionsMonitor<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicParameterlessConstructor )] T>( T currentValue ) : IOptionsMonitor<T>
+public sealed class StaticOptionsMonitor<[DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicParameterlessConstructor )] TValue>( TValue currentValue ) : IOptionsMonitor<TValue>
 {
-    public T           CurrentValue                            { get; } = currentValue ?? throw new ArgumentNullException( nameof(currentValue) );
-    public T           Get( string?                 name )     => CurrentValue;
-    public IDisposable OnChange( Action<T, string?> listener ) => NullScope.Instance;
+    public TValue           CurrentValue                            { get; } = currentValue ?? throw new ArgumentNullException( nameof(currentValue) );
+    public TValue           Get( string?                 name )     => CurrentValue;
+    public IDisposable OnChange( Action<TValue, string?> listener ) => NullScope.Instance;
 }

@@ -16,10 +16,10 @@ public interface ISvSection : IValidator, IDisposable
 
 
 
-public interface ISvSection<T> : ISvSection
-    where T : ISvCellTitle, IEquatable<T>
+public interface ISvSection<TValue> : ISvSection
+    where TValue : ISvCellTitle, IEquatable<TValue>
 {
-    public ObservableCollection<T> Cells { get; }
+    public ObservableCollection<TValue> Cells { get; }
 }
 
 
@@ -27,14 +27,14 @@ public interface ISvSection<T> : ISvSection
 public static class SvSectionExtensions
 {
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool AreCellsValid<T>( this ISvSection<T> section )
-        where T : ISvCellTitle, IEquatable<T> => section.Cells.AreCellsValid();
+    public static bool AreCellsValid<TValue>( this ISvSection<TValue> section )
+        where TValue : ISvCellTitle, IEquatable<TValue> => section.Cells.AreCellsValid();
 
 
-    public static bool AreCellsValid<T>( this IEnumerable<T> cells )
-        where T : ISvCellTitle
+    public static bool AreCellsValid<TValue>( this IEnumerable<TValue> cells )
+        where TValue : ISvCellTitle
     {
-        foreach ( T cell in cells )
+        foreach ( TValue cell in cells )
         {
             if ( cell is not IValidator validator ) { continue; }
 
@@ -46,56 +46,56 @@ public static class SvSectionExtensions
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Add<T>( this ISvSection<T> section, T cell )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Add<TValue>( this ISvSection<TValue> section, TValue cell )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
         section.Cells.Add( cell );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Add<T>( this ISvSection<T> section, IEnumerable<T> cells )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Add<TValue>( this ISvSection<TValue> section, IEnumerable<TValue> cells )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
-        foreach ( T cell in cells ) { section.Cells.Add( cell ); }
+        foreach ( TValue cell in cells ) { section.Cells.Add( cell ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Add<T>( this ISvSection<T> section, params T[] cells )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Add<TValue>( this ISvSection<TValue> section, params TValue[] cells )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
         section.Add( cells.AsEnumerable() );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Remove<T>( this ISvSection<T> section, T cell )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Remove<TValue>( this ISvSection<TValue> section, TValue cell )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
         section.Cells.Remove( cell );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Remove<T>( this ISvSection<T> section, IEnumerable<T> cells )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Remove<TValue>( this ISvSection<TValue> section, IEnumerable<TValue> cells )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
-        foreach ( T cell in cells ) { section.Cells.Remove( cell ); }
+        foreach ( TValue cell in cells ) { section.Cells.Remove( cell ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Remove<T>( this ISvSection<T> section, params T[] cells )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Remove<TValue>( this ISvSection<TValue> section, params TValue[] cells )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
         section.Remove( cells.AsEnumerable() );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void Clear<T>( this ISvSection<T> section )
-        where T : ISvCellTitle, IEquatable<T>
+    public static void Clear<TValue>( this ISvSection<TValue> section )
+        where TValue : ISvCellTitle, IEquatable<TValue>
     {
         section.Cells.Clear();
     }

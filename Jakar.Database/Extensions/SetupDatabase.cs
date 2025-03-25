@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 
 [ Experimental( "SetupDatabase" ) ]
-public abstract class SetupDatabase<T>
-    where T : Database
+public abstract class SetupDatabase<TValue>
+    where TValue : Database
 {
     private readonly WebApplicationBuilder _builder;
     public           string                AuthenticationScheme            { get; init; } = JwtBearerDefaults.AuthenticationScheme;

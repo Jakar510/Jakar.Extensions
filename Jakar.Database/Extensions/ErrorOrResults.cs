@@ -20,7 +20,7 @@ public static class ErrorOrResults
     public static UnprocessableEntity    UnprocessableEntity { get; } = TypedResults.UnprocessableEntity();
 
 
-    public static JsonResult<T>      ToJsonResult<T>( this ref readonly T      value, Status status = Status.Ok ) => new(value, status.AsInt());
+    public static JsonResult<TValue>      ToJsonResult<TValue>( this ref readonly TValue      value, Status status = Status.Ok ) => new(value, status.AsInt());
     public static JsonResult<Errors> ToJsonResult( this ref readonly    Error  value ) => new(Errors.Create( [value] ), value.GetStatus());
     public static JsonResult<Errors> ToJsonResult( this ref readonly    Errors value ) => new(value, value.GetStatus());
 
@@ -32,10 +32,10 @@ public static class ErrorOrResults
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 
-    public static SerializableError? ToSerializableError<T>( this ref readonly ErrorOrResult<T> result ) => result.TryGetValue( out Errors errors )
+    public static SerializableError? ToSerializableError<TValue>( this ref readonly ErrorOrResult<TValue> result ) => result.TryGetValue( out Errors errors )
                                                                                                                 ? new SerializableError( errors.ToModelStateDictionary() )
                                                                                                                 : null;
-    public static ModelStateDictionary? ToModelStateDictionary<T>( this ref readonly ErrorOrResult<T> result ) => result.TryGetValue( out Errors errors )
+    public static ModelStateDictionary? ToModelStateDictionary<TValue>( this ref readonly ErrorOrResult<TValue> result ) => result.TryGetValue( out Errors errors )
                                                                                                                       ? errors.ToModelStateDictionary()
                                                                                                                       : null;
     public static SerializableError ToSerializableError( this ref readonly Errors errors ) => new(errors.ToModelStateDictionary());
@@ -72,20 +72,20 @@ public static class ErrorOrResults
     }
 
 
-    public static async Task<Results<JsonResult<T>, JsonResult<Errors>>>      ToResult<T>( this           Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToResult();
-    public static async ValueTask<Results<JsonResult<T>, JsonResult<Errors>>> ToResult<T>( this           ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToResult();
+    public static async Task<Results<JsonResult<TValue>, JsonResult<Errors>>>      ToResult<TValue>( this           Task<ErrorOrResult<TValue>>      result ) => (await result.ConfigureAwait( false )).ToResult();
+    public static async ValueTask<Results<JsonResult<TValue>, JsonResult<Errors>>> ToResult<TValue>( this           ValueTask<ErrorOrResult<TValue>> result ) => (await result.ConfigureAwait( false )).ToResult();
     public static       JsonResult<Error>                                     ToResult( this ref readonly Error                       error )  => new(error, (int)(error.StatusCode ?? Status.Ok));
     public static       JsonResult<Errors>                                    ToResult( this ref readonly Errors                      error )  => new(error, (int)error.GetStatus());
-    public static Results<JsonResult<T>, JsonResult<Errors>> ToResult<T>( this ref readonly ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Errors errors )
-                                                                                                                             ? new JsonResult<T>( value, Errors.GetStatus( errors ) )
+    public static Results<JsonResult<TValue>, JsonResult<Errors>> ToResult<TValue>( this ref readonly ErrorOrResult<TValue> result ) => result.TryGetValue( out TValue? value, out Errors errors )
+                                                                                                                             ? new JsonResult<TValue>( value, Errors.GetStatus( errors ) )
                                                                                                                              : errors.ToResult();
 
 
-    public static ActionResult<T> ToActionResult<T>( this ref readonly ErrorOrResult<T> result ) => result.TryGetValue( out T? value, out Errors errors )
+    public static ActionResult<TValue> ToActionResult<TValue>( this ref readonly ErrorOrResult<TValue> result ) => result.TryGetValue( out TValue? value, out Errors errors )
                                                                                                         ? new ObjectResult( value ) { StatusCode  = (int)errors.GetStatus() }
                                                                                                         : new ObjectResult( errors ) { StatusCode = (int)errors.GetStatus() };
     public static       ObjectResult               ToActionResult( this ref readonly Error                       error )  => new(error) { StatusCode = (int)(error.StatusCode ?? Status.Ok) };
     public static       ObjectResult               ToActionResult( this ref readonly Errors                      error )  => new(error) { StatusCode = (int)error.GetStatus() };
-    public static async Task<ActionResult<T>>      ToActionResult<T>( this           Task<ErrorOrResult<T>>      result ) => (await result.ConfigureAwait( false )).ToActionResult();
-    public static async ValueTask<ActionResult<T>> ToActionResult<T>( this           ValueTask<ErrorOrResult<T>> result ) => (await result.ConfigureAwait( false )).ToActionResult();
+    public static async Task<ActionResult<TValue>>      ToActionResult<TValue>( this           Task<ErrorOrResult<TValue>>      result ) => (await result.ConfigureAwait( false )).ToActionResult();
+    public static async ValueTask<ActionResult<TValue>> ToActionResult<TValue>( this           ValueTask<ErrorOrResult<TValue>> result ) => (await result.ConfigureAwait( false )).ToActionResult();
 }

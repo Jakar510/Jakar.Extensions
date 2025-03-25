@@ -9,9 +9,9 @@ public interface IWhere
     /// <summary> Filters WHERE <paramref name="columnName"/> = " <paramref name="obj"/> " </summary>
     /// <param name="columnName"> </param>
     /// <param name="obj"> The Target Value </param>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns> </returns>
-    public ISqlBuilderRoot Filter<T>( string columnName, T obj );
+    public ISqlBuilderRoot Filter<TValue>( string columnName, TValue obj );
 
     /// <summary> filters WHERE <paramref name="condition"/> is " <see langword="true"/> " </summary>
     /// <returns> </returns>
@@ -64,11 +64,11 @@ public interface IWhere
     /// <example> </example>
     /// <param name="columnName"> </param>
     /// <param name="target"> The Target Value </param>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="IWhereChain"/>
     /// </returns>
-    public IWhereChain Chain<T>( string columnName, T target );
+    public IWhereChain Chain<TValue>( string columnName, TValue target );
 
     /// <summary> Begins a WHERE condition chain starting with <paramref name="condition"/> is " <see langword="true"/> " </summary>
     /// <example> </example>
@@ -154,11 +154,11 @@ public interface IWhereChain : IChainEnd<ISqlBuilderRoot>, INextChain<IWhere>
     /// <summary> joins the chain with a AND and <paramref name="columnName"/> = " <paramref name="obj"/> " </summary>
     /// <param name="columnName"> </param>
     /// <param name="obj"> The Target Value </param>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="IWhereChain"/>
     /// </returns>
-    public IWhereChain And<T>( T obj, string columnName );
+    public IWhereChain And<TValue>( TValue obj, string columnName );
 
 
     /// <summary> joins the chain with a AND and <paramref name="condition"/> is " <see langword="true"/> " </summary>
@@ -172,11 +172,11 @@ public interface IWhereChain : IChainEnd<ISqlBuilderRoot>, INextChain<IWhere>
     /// <summary> joins the chain with a NOT and <paramref name="columnName"/> = " <paramref name="obj"/> " </summary>
     /// <param name="columnName"> </param>
     /// <param name="obj"> The Target Value </param>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="IWhereChain"/>
     /// </returns>
-    public IWhereChain Not<T>( T obj, string columnName );
+    public IWhereChain Not<TValue>( TValue obj, string columnName );
 
     /// <summary> joins the chain with a AND and <paramref name="condition"/> is " <see langword="true"/> " </summary>
     /// <param name="condition"> </param>
@@ -189,11 +189,11 @@ public interface IWhereChain : IChainEnd<ISqlBuilderRoot>, INextChain<IWhere>
     /// <summary> joins the chain with a OR and <paramref name="columnName"/> = " <paramref name="obj"/> " </summary>
     /// <param name="columnName"> </param>
     /// <param name="obj"> The Target Value </param>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <see cref="IWhereChain"/>
     /// </returns>
-    public IWhereChain Or<T>( T obj, string columnName );
+    public IWhereChain Or<TValue>( TValue obj, string columnName );
 
     /// <summary> joins the chain with a AND and <paramref name="condition"/> is " <see langword="true"/> " </summary>
     /// <param name="condition"> </param>

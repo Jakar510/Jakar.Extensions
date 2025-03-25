@@ -127,12 +127,12 @@ public static class XmlExtensions
         document.Save( writer );
         return builder.ToString();
     }
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items )
-        where T : IUniqueID<long> => items.Consolidate().SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T> items )
-        where T : IUniqueID<long> => items.Select( item => item.ID ).SetMappedIDs<T>();
+    public static string SetMappedIDs<TValue>( this IEnumerable<IEnumerable<TValue>> items )
+        where TValue : IUniqueID<long> => items.Consolidate().SetMappedIDs();
+    public static string SetMappedIDs<TValue>( this IEnumerable<TValue> items )
+        where TValue : IUniqueID<long> => items.Select( item => item.ID ).SetMappedIDs<TValue>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(T).GetTableName() } );
+    public static string SetMappedIDs<TValue>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(TValue).GetTableName() } );
 
 
     public static string ToXml( this JObject item )

@@ -26,34 +26,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { Log( logger, e, caller, variable ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, ILogger logger, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, ILogger logger, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
     {
         try { await task; }
         catch ( Exception e ) { Log( logger, e, caller, variable ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, ILogger logger, Action<T> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, ILogger logger, Action<TValue> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { Log( logger, e, caller, variable ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, ILogger logger, Func<T, Task> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, ILogger logger, Func<TValue, Task> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { Log( logger, e, caller, variable ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, ILogger logger, Func<T, ValueTask> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, ILogger logger, Func<TValue, ValueTask> next, [CallerArgumentExpression( nameof(task) )] string variable = EMPTY, [CallerMemberName] string caller = EMPTY )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { Log( logger, e, caller, variable ); }
@@ -65,34 +65,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Action<Exception> onError )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Action<Exception> onError )
     {
         try { await task; }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Action<Exception> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Action<Exception> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Action<Exception> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Action<Exception> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Action<Exception> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Action<Exception> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { onError( e ); }
@@ -104,34 +104,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Action<Exception> onError )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Action<Exception> onError )
     {
         try { await task; }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Action<Exception> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Action<Exception> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Action<Exception> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Action<Exception> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Action<Exception> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Action<Exception> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { onError( e ); }
@@ -143,34 +143,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, Task> onError )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, Task> onError )
     {
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, Task> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, Task> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, Task> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, Task> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, Task> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, Task> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
@@ -182,34 +182,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, Task> onError )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, Task> onError )
     {
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, Task> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, Task> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, Task> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, Task> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, Task> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, Task> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
@@ -221,34 +221,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, ValueTask> onError )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, ValueTask> onError )
     {
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, ValueTask> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, ValueTask> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, ValueTask> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, ValueTask> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this Task<T> task, Func<Exception, ValueTask> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this Task<TValue> task, Func<Exception, ValueTask> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
@@ -260,34 +260,34 @@ public static partial class Tasks
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, ValueTask> onError )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, ValueTask> onError )
     {
         try { await task; }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, ValueTask> onError, Action<T> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, ValueTask> onError, Action<TValue> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, ValueTask> onError, Func<T, Task> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, ValueTask> onError, Func<TValue, Task> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }
     }
-    public static async void SafeFireAndForget<T>( this ValueTask<T> task, Func<Exception, ValueTask> onError, Func<T, ValueTask> next )
+    public static async void SafeFireAndForget<TValue>( this ValueTask<TValue> task, Func<Exception, ValueTask> onError, Func<TValue, ValueTask> next )
     {
         try
         {
-            T result = await task;
+            TValue result = await task;
             await next( result );
         }
         catch ( Exception e ) { await onError( e ); }

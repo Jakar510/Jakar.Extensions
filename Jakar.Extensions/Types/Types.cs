@@ -19,14 +19,14 @@ public static partial class Types
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType( this    Type value, Type other ) => value                           == other;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType<T>( this T    value, Type other ) => (value?.GetType() ?? typeof(T)) == other;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType<T>( this Type other ) => typeof(T) == other;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType<TValue>( this TValue    value, Type other ) => (value?.GetType() ?? typeof(TValue)) == other;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsEqualType<TValue>( this Type other ) => typeof(TValue) == other;
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this    Type value, scoped in ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType<T>( this T    value, scoped in ReadOnlySpan<Type> types ) => (value?.GetType() ?? typeof(T)).IsOneOfType( types );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType<TValue>( this TValue    value, scoped in ReadOnlySpan<Type> types ) => (value?.GetType() ?? typeof(TValue)).IsOneOfType( types );
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

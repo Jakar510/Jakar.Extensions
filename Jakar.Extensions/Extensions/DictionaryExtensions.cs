@@ -10,8 +10,8 @@ namespace Jakar.Extensions;
 
 public static class DictionaryExtensions
 {
-    public static void Add<T>( this T dictionary, string key, in StringValues value )
-        where T : IDictionary<string, StringValues>
+    public static void Add<TValue>( this TValue dictionary, string key, in StringValues value )
+        where TValue : IDictionary<string, StringValues>
     {
         if ( dictionary.TryGetValue( key, out StringValues values ) )
         {
