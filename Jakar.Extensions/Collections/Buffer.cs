@@ -446,7 +446,7 @@ public ref struct Buffer<TValue>( int capacity )
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
-    [Pure, MustDisposeResource]
+    [Pure]
     public Buffer<TValue> Grow( uint additionalRequestedCapacity )
     {
         ThrowIfReadOnly();
@@ -456,7 +456,7 @@ public ref struct Buffer<TValue>( int capacity )
         Dispose();
         return buffer;
     }
-    [Pure, MustDisposeResource]
+    [Pure]
     public Buffer<TValue> EnsureCapacity( int additionalRequestedCapacity )
     {
         uint capacity = (uint)additionalRequestedCapacity;

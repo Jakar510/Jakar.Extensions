@@ -38,17 +38,8 @@ public ref struct ValueStringBuilder
     public void Dispose() => _chars.Dispose();
 
 
-    public void EnsureCapacity<TValue>( params ReadOnlySpan<char> format )
-    {
-        int capacity = Sizes.GetBufferSize<TValue>();
-
-        if ( typeof(TValue)      == typeof(DateTime) ) { capacity       = Math.Max( format.Length, capacity ); }
-        else if ( typeof(TValue) == typeof(DateTimeOffset) ) { capacity = Math.Max( format.Length, capacity ); }
-        else if ( typeof(TValue) == typeof(TimeSpan) ) { capacity       = Math.Max( format.Length, capacity ); }
-
-        Buffers.EnsureCapacity( ref _chars, capacity );
-    }
-    public void EnsureCapacity( int capacity ) => Buffers.EnsureCapacity( ref _chars, capacity );
+    public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format )   => EnsureCapacity( Math.Max( format.Length, Sizes.GetBufferSize<TValue>() ) );
+    public void EnsureCapacity( int                                     capacity ) => Buffers.EnsureCapacity( ref _chars, capacity );
 
 
     /// <summary> Get a pinnable reference to the builder. Does not ensure there is a null char after <see cref="Length"/> . This overload is pattern matched  the C# 7.3+ compiler so you can omit the explicit method call, and write eg "fixed (char* c = builder)" </summary>
@@ -379,8 +370,7 @@ public ref struct ValueStringBuilder
     public ValueStringBuilder AppendSpanFormattable<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        EnsureCapacity<TValue>( format );
-
+        EnsureCapacity<TValue>( in format );
         if ( value.TryFormat( Next, out int charsWritten, format, provider ) ) { _chars.Length += charsWritten; }
 
         Debug.Assert( charsWritten > 0, $"No values added to {nameof(_chars)}" );
@@ -390,35 +380,36 @@ public ref struct ValueStringBuilder
 
     /// <summary> Copied from StringBuilder, can't be done via generic extension as ValueStringBuilder is a ref struct and cannot be used a generic. </summary>
     /// <param name="provider"> </param>
-    /// <param name="format"> </param>
+    /// <param name="formatSpan"> </param>
     /// <param name="args"> </param>
     /// <returns> </returns>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="FormatException"> </exception>
-    internal void AppendFormatHelper<TValue>( IFormatProvider? provider, ReadOnlySpan<char> format, params ReadOnlySpan<TValue> args )
+    internal void AppendFormatHelper<TValue>( IFormatProvider? provider, ReadOnlySpan<char> formatSpan, params ReadOnlySpan<TValue> args )
         where TValue : ISpanFormattable
     {
         // Undocumented exclusive limits on the range for Argument Hole Count and Argument Hole Alignment.
         const int INDEX_LIMIT = 1000000; // Note:            0 <= ArgIndex < IndexLimit
         const int WIDTH_LIMIT = 1000000; // Note:  -WidthLimit <  ArgAlign < WidthLimit
 
-        if ( format.IsEmpty ) { throw new ArgumentNullException( nameof(format) ); }
+        if ( formatSpan.IsEmpty ) { throw new ArgumentNullException( nameof(formatSpan) ); }
 
-        int  pos             = 0;
-        char ch              = '\0';
-        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        EnsureCapacity<TValue>( in formatSpan );
+        int               pos             = 0;
+        char              ch              = '\0';
+        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {
-            while ( pos < format.Length )
+            while ( pos < formatSpan.Length )
             {
-                ch = format[pos++];
+                ch = formatSpan[pos++];
 
                 // Is it a closing brace?
                 if ( ch == '}' )
                 {
                     // Check next character (if there is one) to see if it is escaped. eg }}
-                    if ( pos < format.Length && format[pos] == '}' ) { pos++; }
+                    if ( pos < formatSpan.Length && formatSpan[pos] == '}' ) { pos++; }
                     else
                     {
                         // Otherwise treat it as an error (Mismatched closing brace)
@@ -430,7 +421,7 @@ public ref struct ValueStringBuilder
                 else if ( ch == '{' )
                 {
                     // Check next character (if there is one) to see if it is escaped. eg {{
-                    if ( pos < format.Length && format[pos] == '{' ) { pos++; }
+                    if ( pos < formatSpan.Length && formatSpan[pos] == '{' ) { pos++; }
                     else
                     {
                         // Otherwise treat it as the opening brace of an Argument Hole.
@@ -447,7 +438,7 @@ public ref struct ValueStringBuilder
             // Start of parsing of Argument Hole.
             // Argument Hole ::= { Count (, WS* Alignment WS*)? (: Formatting)? }
             //
-            if ( pos == format.Length ) { break; }
+            if ( pos == formatSpan.Length ) { break; }
 
             //
             //  Start of parsing required Count parameter.
@@ -457,16 +448,16 @@ public ref struct ValueStringBuilder
 
             // If reached end of text then error (Unexpected end of text)
             // or character is not a digit then error (Unexpected Character)
-            if ( pos == format.Length || (ch = format[pos]) < '0' || ch > '9' ) { ThrowFormatError(); }
+            if ( pos == formatSpan.Length || (ch = formatSpan[pos]) < '0' || ch > '9' ) { ThrowFormatError(); }
 
             int index = 0;
 
             do
             {
                 index = index * 10 + ch - '0';
-                if ( ++pos == format.Length ) { ThrowFormatError(); } // If reached end of text then error (Unexpected end of text)
+                if ( ++pos == formatSpan.Length ) { ThrowFormatError(); } // If reached end of text then error (Unexpected end of text)
 
-                ch = format[pos]; // so long as character is digit and value of the index is less than 1000000 ( index limit )
+                ch = formatSpan[pos]; // so long as character is digit and value of the index is less than 1000000 ( index limit )
             }
             while ( ch is >= '0' and <= '9' && index < INDEX_LIMIT );
 
@@ -474,7 +465,7 @@ public ref struct ValueStringBuilder
             if ( index >= args.Length ) { throw new FormatException( "Format Count Out Of Range" ); }
 
             // Consume optional whitespace.
-            while ( pos < format.Length && (ch = format[pos]) == ' ' ) { pos++; }
+            while ( pos < formatSpan.Length && (ch = formatSpan[pos]) == ' ' ) { pos++; }
 
             // End of parsing index parameter.
 
@@ -491,13 +482,13 @@ public ref struct ValueStringBuilder
                 pos++;
 
                 // Consume Optional whitespace
-                while ( pos < format.Length && format[pos] == ' ' ) { pos++; }
+                while ( pos < formatSpan.Length && formatSpan[pos] == ' ' ) { pos++; }
 
                 // If reached the end of the text then error (Unexpected end of text)
-                if ( pos == format.Length ) { ThrowFormatError(); }
+                if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
                 // Is there a minus sign?
-                ch = format[pos];
+                ch = formatSpan[pos];
 
                 if ( ch == '-' )
                 {
@@ -506,9 +497,9 @@ public ref struct ValueStringBuilder
                     pos++;
 
                     // If reached end of text then error (Unexpected end of text)
-                    if ( pos == format.Length ) { ThrowFormatError(); }
+                    if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
-                    ch = format[pos];
+                    ch = formatSpan[pos];
                 }
 
                 // If current character is not a digit then error (Unexpected character)
@@ -521,9 +512,9 @@ public ref struct ValueStringBuilder
                     pos++;
 
                     // If reached end of text then error. (Unexpected end of text)
-                    if ( pos == format.Length ) { ThrowFormatError(); }
+                    if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
-                    ch = format[pos];
+                    ch = formatSpan[pos];
 
                     // So long a current character is a digit and the value of width is less than 100000 ( width limit )
                 }
@@ -533,7 +524,7 @@ public ref struct ValueStringBuilder
             }
 
             // Consume optional whitespace
-            while ( pos < format.Length && (ch = format[pos]) == ' ' ) { pos++; }
+            while ( pos < formatSpan.Length && (ch = formatSpan[pos]) == ' ' ) { pos++; }
 
             //
             // Start of parsing of optional formatting parameter.
@@ -551,9 +542,9 @@ public ref struct ValueStringBuilder
                 while ( true )
                 {
                     // If reached end of text then error. (Unexpected end of text)
-                    if ( pos == format.Length ) { ThrowFormatError(); }
+                    if ( pos == formatSpan.Length ) { ThrowFormatError(); }
 
-                    ch = format[pos];
+                    ch = formatSpan[pos];
 
                     if ( ch == '}' )
                     {
@@ -570,7 +561,7 @@ public ref struct ValueStringBuilder
                     pos++;
                 }
 
-                if ( pos > startPos ) { itemFormatSpan = format.Slice( startPos, pos - startPos ); }
+                if ( pos > startPos ) { itemFormatSpan = formatSpan.Slice( startPos, pos - startPos ); }
             }
             else if ( ch != '}' )
             {
