@@ -7,7 +7,6 @@
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>disable</ImplicitUsings>
 		<Version>9.6.0</Version>
-		<GeneratePackageOnBuild>false</GeneratePackageOnBuild>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -23,6 +22,7 @@
 		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
 		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
 		<PackageTags>Extension AsynLinq Linq Http Files Strings Types Languages Collections Ini</PackageTags>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
