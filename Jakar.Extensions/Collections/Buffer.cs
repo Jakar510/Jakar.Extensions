@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 09/21/2024  10:09
 
-using System.Collections.Generic;
+using System;
 
 
 
@@ -28,18 +28,26 @@ public ref struct Buffer<TValue>( int capacity )
     public bool IsEmpty    { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length == 0; }
     public bool IsNotEmpty { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get => Length > 0; }
     public bool IsReadOnly { [Pure, MethodImpl(                  MethodImplOptions.AggressiveInlining )] get; init; } = false;
-    public ref TValue this[ int     index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public ref TValue this[ Index   index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public Span<TValue> this[ Range range ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Span[range]; }
-    public Span<TValue> this[ int   start, int length ] { [Pure] get => Span.Slice( start, length ); }
-    public Memory<TValue> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Capacity); }
-    public Span<TValue>   Next   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, Length, Capacity); }
-    public Span<TValue>   Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _array; }
-    public Span<TValue>   Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Length); }
+    public ref TValue this[ int     index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Values[index]; }
+    public ref TValue this[ Index   index ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Values[index]; }
+    public Span<TValue> this[ Range range ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Values[range]; }
+    public Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice( start, length ); }
+    public Memory<TValue> Memory { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _array; }
+    public Span<TValue> Next
+    {
+        [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+        get
+        {
+            int length = Length;
+            return new Span<TValue>( _array, length, Capacity - length );
+        }
+    }
+    public Span<TValue> Span   { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _array; }
+    public Span<TValue> Values { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_array, 0, Length); }
 
 
     public Buffer() : this( DEFAULT_CAPACITY ) { }
-    public Buffer( params ReadOnlySpan<TValue> span ) : this( span.Length ) => span.CopyTo( Span );
+    public Buffer( params ReadOnlySpan<TValue> span ) : this( span.Length ) => span.CopyTo( _array );
     public void Dispose() => ArrayPool<TValue>.Shared.Return( _array );
 
 
@@ -273,8 +281,7 @@ public ref struct Buffer<TValue>( int capacity )
     }
 
 
-    public void Add( TValue                      value )  => _array[Length++] = value;
-    public void Add( params ReadOnlySpan<TValue> values ) => AddRange( values );
+    public void Add( TValue value ) => _array[Length++] = value;
     public void Add( TValue value, int count )
     {
         ThrowIfReadOnly();
@@ -286,9 +293,7 @@ public ref struct Buffer<TValue>( int capacity )
 
         Length += count;
     }
-
-
-    public void AddRange( params ReadOnlySpan<TValue> values )
+    public void Add( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
         Span<TValue> span = Next;
@@ -441,7 +446,7 @@ public ref struct Buffer<TValue>( int capacity )
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
-    [Pure]
+    [Pure, MustDisposeResource]
     public Buffer<TValue> Grow( uint additionalRequestedCapacity )
     {
         ThrowIfReadOnly();
@@ -450,6 +455,15 @@ public ref struct Buffer<TValue>( int capacity )
         Values.CopyTo( buffer.Span );
         Dispose();
         return buffer;
+    }
+    [Pure, MustDisposeResource]
+    public Buffer<TValue> EnsureCapacity( int additionalRequestedCapacity )
+    {
+        uint capacity = (uint)additionalRequestedCapacity;
+
+        return (uint)Length + capacity > (uint)Capacity
+                   ? Grow( capacity )
+                   : this;
     }
 
 
@@ -460,10 +474,15 @@ public ref struct Buffer<TValue>( int capacity )
     }
 
 
-    public Enumerator GetEnumerator() => new(this);
+    public ReadOnlySpan<TValue>.Enumerator GetEnumerator()
+    {
+        ReadOnlySpan<TValue> span = Values;
+        return span.GetEnumerator();
+    }
 
 
 
+    /*
     [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
     public ref struct Enumerator( Buffer<TValue> buffer )
     {
@@ -475,4 +494,5 @@ public ref struct Buffer<TValue>( int capacity )
         [MethodImpl(       MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
         [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => (uint)++_index < (uint)_buffer.Length;
     }
+    */
 }

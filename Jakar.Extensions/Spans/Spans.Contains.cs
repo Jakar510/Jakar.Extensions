@@ -44,7 +44,7 @@ public static partial class Spans
     public static bool Contains<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue value )
         where TValue : IEquatable<TValue>
     {
-        if ( Vector.IsHardwareAccelerated && span.Length >= Vector<TValue>.Count )
+        if ( Vector.IsHardwareAccelerated && Vector<TValue>.IsSupported && span.Length >= Vector<TValue>.Count )
         {
             Vector<TValue> source = Vector.Create( span );
             return Vector.EqualsAll( source, Vector.Create( value ) );

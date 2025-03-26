@@ -302,7 +302,7 @@ public ref struct ValueStringBuilder
         where TValue : ISpanFormattable
     {
         ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
-        bool                       shouldContinue = enumerator.MoveNext();
+        bool                            shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
         {
@@ -322,11 +322,11 @@ public ref struct ValueStringBuilder
         where TValue : ISpanFormattable
     {
         ReadOnlySpan<TValue>.Enumerator enumerator     = enumerable.GetEnumerator();
-        bool                       shouldContinue = enumerator.MoveNext();
+        bool                            shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
         {
-            if ( enumerator.Current.TryFormat( Next, out int charsWritten, format, provider ) is false ) { continue; }
+            if ( enumerator.Current.TryFormat( _chars.Next, out int charsWritten, format, provider ) is false ) { continue; }
 
             _chars.Length  += charsWritten;
             shouldContinue =  enumerator.MoveNext();
@@ -342,7 +342,7 @@ public ref struct ValueStringBuilder
         where TValue : ISpanFormattable
     {
         using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
-        bool                 shouldContinue = enumerator.MoveNext();
+        bool                      shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
         {
@@ -361,7 +361,7 @@ public ref struct ValueStringBuilder
         where TValue : ISpanFormattable
     {
         using IEnumerator<TValue> enumerator     = enumerable.GetEnumerator();
-        bool                 shouldContinue = enumerator.MoveNext();
+        bool                      shouldContinue = enumerator.MoveNext();
 
         while ( shouldContinue )
         {

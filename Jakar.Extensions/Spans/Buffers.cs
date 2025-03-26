@@ -8,14 +8,11 @@ public static class Buffers
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void EnsureCapacity<TValue>( this ref Buffer<TValue> buffer, int additionalRequestedCapacity )
-        where TValue : IEquatable<TValue> => EnsureCapacity( ref buffer, (uint)additionalRequestedCapacity );
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void EnsureCapacity<TValue>( this ref Buffer<TValue> buffer, uint additionalRequestedCapacity )
+    public static void EnsureCapacity<TValue>( [MustDisposeResource] this ref Buffer<TValue> buffer, int additionalRequestedCapacity )
         where TValue : IEquatable<TValue>
     {
-        if ( buffer.Length + additionalRequestedCapacity > buffer.Capacity ) { buffer = buffer.Grow( additionalRequestedCapacity ); }
+        uint capacity = (uint)additionalRequestedCapacity;
+        if ( (uint)buffer.Length + capacity > (uint)buffer.Capacity ) { buffer = buffer.Grow( capacity ); }
     }
 
 

@@ -13,7 +13,7 @@ public delegate TNext RefConvert<TValue, out TNext>( ref readonly TValue value )
 
 
 public static class LinkSpan
-{ 
+{
     [Pure]
     public static ReadOnlySpan<TValue> Where<TValue>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector )
     {
@@ -29,7 +29,7 @@ public static class LinkSpan
 
         return new ReadOnlySpan<TValue>( buffer, 0, index );
     }
-     
+
     [Pure]
     public static ReadOnlySpan<TNext> Select<TValue, TNext>( ReadOnlySpan<TValue> span, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
@@ -44,7 +44,7 @@ public static class LinkSpan
         return buffer;
     }
 
-    
+
     [Pure]
     public static ReadOnlySpan<TNext> Where<TValue, TNext>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
@@ -88,7 +88,7 @@ public static class LinkSpan
         }
         finally { buffer.Dispose(); }
     }
-    public static void Replace<TValue>( this ReadOnlySpan<TValue> source, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue, scoped ref Buffer<TValue> buffer )
+    public static void Replace<TValue>( this ReadOnlySpan<TValue> source, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue, [MustDisposeResource] scoped ref Buffer<TValue> buffer )
         where TValue : unmanaged, IEquatable<TValue>
     {
         if ( source.ContainsExact( oldValue ) is false )
@@ -103,6 +103,7 @@ public static class LinkSpan
         {
             if ( source[sourceIndex..].StartsWith( oldValue ) )
             {
+                buffer = buffer.EnsureCapacity( newValue.Length );
                 buffer.Add( newValue );
                 sourceIndex += oldValue.Length;
             }
