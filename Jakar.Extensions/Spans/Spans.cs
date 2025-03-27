@@ -151,7 +151,7 @@ public static partial class Spans
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Span<TValue> CreateSpan<TValue>( int size ) => AsyncLinq.GetArray<TValue>( size );
-    public static Span<TValue> CreateValue<TValue>( int size )
+    public static Span<TValue> Create<TValue>( int size )
         where TValue : unmanaged
     {
         if ( size > 250 ) { return CreateSpan<TValue>( size ); }
@@ -210,8 +210,8 @@ public static partial class Spans
 
         static int Partition( ref readonly Span<TValue> span, int left, int right, Comparison<TValue> comparison )
         {
-            TValue   pivot = span[right];
-            int i     = left - 1;
+            TValue pivot = span[right];
+            int    i     = left - 1;
 
             for ( int j = left; j < right; j++ )
             {

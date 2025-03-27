@@ -2,7 +2,6 @@
 // 04/26/2024  13:04
 
 using Microsoft.Extensions.Primitives;
-using static Jakar.Extensions.Errors;
 
 
 
@@ -10,107 +9,120 @@ namespace Jakar.Extensions;
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-/// <param name="StatusCode"> </param>
-/// <param name="Type"> </param>
-/// <param name="Title"> </param>
-/// <param name="Detail"> </param>
-/// <param name="Instance"> </param>
-/// <param name="Errors"> </param>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct Error( Status? StatusCode, [property: JsonRequired] string? Type, [property: JsonRequired] string? Title, [property: JsonRequired] string? Detail, [property: JsonRequired] string? Instance, StringValues Errors ) : IErrorDetails
+public sealed class Error : BaseClass, IErrorDetails, IEquatable<Error>, IComparable<Error>, IComparable
 {
-    public const           string       DISABLED_TYPE                        = "User.Disabled";
-    public const           string       LOCKED_TYPE                          = "User.Locked";
-    public const           string       EXPIRED_SUBSCRIPTION_TYPE            = "User.Subscription.Expired";
-    public const           string       INVALID_SUBSCRIPTION_TYPE            = "User.Subscription.Invalid";
-    public const           string       NO_SUBSCRIPTION_TYPE                 = "User.Subscription.None";
-    public const           string       PASSWORD_VALIDATION_TYPE             = "Password.Unauthorized";
+    public const           string       ACCEPTED_TYPE                        = "Server.Accepted";
+    public const           string       ALREADY_EXISTS_TYPE                  = "Server.AlreadyExists";
+    public const           string       ALREADY_REPORTED_TYPE                = "Server.AlreadyReported";
+    public const           string       AMBIGUOUS_TYPE                       = "Client.Ambiguous";
+    public const           string       BAD_GATEWAY_TYPE                     = "Server.BadGateway";
+    public const           string       BAD_REQUEST_TYPE                     = "Client.BadRequest";
     public const           string       BLOCKED_PASSED                       = "Password.Blocked";
+    public const           string       CLIENT_CLOSED_REQUEST_TYPE           = "Client.ClosedRequest";
+    public const           string       CLIENT_IS_OUTDATED_TYPE              = "Client.Outdated";
+    public const           string       CLIENT_IS_UNAVAILABLE_TYPE           = "Client.Unavailable";
+    public const           string       CLIENT_OPERATION_CANCELED            = "Client.OperationCanceled";
+    public const           string       CONFLICT_TYPE                        = "General.Conflict";
+    public const           string       CONTINUE_TYPE                        = "General.Continue";
+    public const           string       CREATED_TYPE                         = "Server.Created";
+    public const           string       DISABLED_TYPE                        = "User.Disabled";
+    public const           string       EARLY_HINTS_TYPE                     = "EarlyHints";
+    public const           string       EXPECTATION_FAILED_TYPE              = "Client.ExpectationFailed";
+    public const           string       EXPIRED_SUBSCRIPTION_TYPE            = "User.Subscription.Expired";
+    public const           string       FAILED_DEPENDENCY_TYPE               = "Client.FailedDependency";
+    public const           string       FORBIDDEN_TYPE                       = "General.Forbidden";
+    public const           string       FOUND_TYPE                           = "Server.Found";
+    public const           string       GATEWAY_TIMEOUT_TYPE                 = "Server.GatewayTimeout";
+    public const           string       GENERAL_FAILURE_TYPE                 = "General.Failure";
+    public const           string       GONE_TYPE                            = "Gone";
+    public const           string       HTTP_VERSION_NOT_SUPPORTED_TYPE      = "Server.HttpVersionNotSupported";
+    public const           string       IM_USED_TYPE                         = "ImUsed";
+    public const           string       INSUFFICIENT_STORAGE_TYPE            = "Server.InsufficientStorage";
+    public const           string       INTERNAL_SERVER_ERROR_TYPE           = "Server.InternalServerError";
+    public const           string       INVALID_SUBSCRIPTION_TYPE            = "User.Subscription.Invalid";
+    public const           string       LENGTH_REQUIRED_TYPE                 = "Client.LengthRequired";
+    public const           string       LOCKED_TYPE                          = "User.Locked";
+    public const           string       LOOP_DETECTED_TYPE                   = "LoopDetected";
+    public const           string       METHOD_NOT_ALLOWED_TYPE              = "Client.MethodNotAllowed";
+    public const           string       MISDIRECTED_REQUEST_TYPE             = "Client.MisdirectedRequest";
+    public const           string       MOVED_TYPE                           = "Server.Moved";
+    public const           string       MULTI_STATUS_TYPE                    = "Server.MultiStatus";
+    public const           string       NETWORK_AUTHENTICATION_REQUIRED_TYPE = "Client.NetworkAuthenticationRequired";
+    public const           string       NO_CONTENT_TYPE                      = "Server.NoContent";
     public const           string       NO_INTERNET_TYPE                     = "Internet.Disabled";
     public const           string       NO_INTERNET_WIFI_TYPE                = "Internet.Disabled.WiFi";
-    public const           string       CONFLICT_TYPE                        = "General.Conflict";
-    public const           string       FORBIDDEN_TYPE                       = "General.Forbidden";
-    public const           string       GENERAL_FAILURE_TYPE                 = "General.Failure";
+    public const           string       NO_RESPONSE_TYPE                     = "NoResponse";
+    public const           string       NO_SUBSCRIPTION_TYPE                 = "User.Subscription.None";
+    public const           string       NON_AUTHORITATIVE_INFORMATION_TYPE   = "Server.NonAuthoritativeInformation";
+    public const           string       NOT_ACCEPTABLE_TYPE                  = "Client.NotAcceptable";
+    public const           string       NOT_EXTENDED_TYPE                    = "Client.NotExtended";
     public const           string       NOT_FOUND_TYPE                       = "General.NotFound";
-    public const           string       UNAUTHORIZED_TYPE                    = "General.Unauthorized";
-    public const           string       UNEXPECTED_TYPE                      = "General.Unexpected";
-    public const           string       VALIDATION_TYPE                      = "General.Unexpected";
+    public const           string       NOT_IMPLEMENTED_TYPE                 = "NotImplemented";
+    public const           string       NOT_MODIFIED_TYPE                    = "Server.NotModified";
     public const           string       NOT_SET_TYPE                         = "General.NotSet";
-    public const           string       CONTINUE_TYPE                        = "General.Continue";
+    public const           string       OK_TYPE                              = "Ok";
+    public const           string       PARTIAL_CONTENT_TYPE                 = "Server.PartialContent";
+    public const           string       PASSWORD_VALIDATION_TYPE             = "Password.Unauthorized";
+    public const           string       PAYMENT_REQUIRED_TYPE                = "Client.PaymentRequired";
+    public const           string       PERMANENT_REDIRECT_TYPE              = "Server.PermanentRedirect";
+    public const           string       PRECONDITION_FAILED_TYPE             = "Client.PreconditionFailed";
+    public const           string       PRECONDITION_REQUIRED_TYPE           = "Client.PreconditionRequired";
+    public const           string       PROCESSING_TYPE                      = "Server.Processing";
+    public const           string       PROXY_AUTHENTICATION_REQUIRED_TYPE   = "Client.ProxyAuthenticationRequired";
+    public const           string       REDIRECT_KEEP_VERB_TYPE              = "Server.RedirectKeepVerb";
+    public const           string       REDIRECT_METHOD_TYPE                 = "Server.Redirect";
+    public const           string       REQUEST_ENTITY_TOO_LARGE_TYPE        = "Client.RequestEntityTooLarge";
+    public const           string       REQUEST_HEADER_FIELDS_TOO_LARGE_TYPE = "Client.RequestHeaderFieldsTooLarge";
+    public const           string       REQUEST_TIMEOUT_TYPE                 = "Client.RequestTimeout";
+    public const           string       REQUEST_URI_TOO_LONG_TYPE            = "Client.RequestUriTooLong";
+    public const           string       REQUESTED_RANGE_NOT_SATISFIABLE_TYPE = "Client.RequestedRangeNotSatisfiable";
+    public const           string       RESET_CONTENT_TYPE                   = "Server.ResetContent";
     public const           string       SERVER_IS_OUTDATED_TYPE              = "Server.Outdated";
     public const           string       SERVER_IS_UNAVAILABLE_TYPE           = "Server.Unavailable";
-    public const           string       PROCESSING_TYPE                      = "Server.Processing";
-    public const           string       SWITCHING_PROTOCOLS_TYPE             = "Server.SwitchingProtocols";
-    public const           string       CREATED_TYPE                         = "Server.Created";
-    public const           string       ACCEPTED_TYPE                        = "Server.Accepted";
-    public const           string       NON_AUTHORITATIVE_INFORMATION_TYPE   = "Server.NonAuthoritativeInformation";
-    public const           string       NO_CONTENT_TYPE                      = "Server.NoContent";
-    public const           string       RESET_CONTENT_TYPE                   = "Server.ResetContent";
-    public const           string       PARTIAL_CONTENT_TYPE                 = "Server.PartialContent";
-    public const           string       MULTI_STATUS_TYPE                    = "Server.MultiStatus";
-    public const           string       ALREADY_REPORTED_TYPE                = "Server.AlreadyReported";
-    public const           string       NOT_MODIFIED_TYPE                    = "Server.NotModified";
-    public const           string       REDIRECT_KEEP_VERB_TYPE              = "Server.RedirectKeepVerb";
-    public const           string       PERMANENT_REDIRECT_TYPE              = "Server.PermanentRedirect";
-    public const           string       INTERNAL_SERVER_ERROR_TYPE           = "Server.InternalServerError";
-    public const           string       BAD_GATEWAY_TYPE                     = "Server.BadGateway";
     public const           string       SERVICE_UNAVAILABLE_TYPE             = "Server.ServiceUnavailable";
-    public const           string       GATEWAY_TIMEOUT_TYPE                 = "Server.GatewayTimeout";
-    public const           string       HTTP_VERSION_NOT_SUPPORTED_TYPE      = "Server.HttpVersionNotSupported";
-    public const           string       INSUFFICIENT_STORAGE_TYPE            = "Server.InsufficientStorage";
-    public const           string       UNAVAILABLE_FOR_LEGAL_REASONS_TYPE   = "Server.UnavailableForLegalReasons";
-    public const           string       ALREADY_EXISTS_TYPE                  = "Server.AlreadyExists";
-    public const           string       MOVED_TYPE                           = "Server.Moved";
-    public const           string       FOUND_TYPE                           = "Server.Found";
-    public const           string       REDIRECT_METHOD_TYPE                 = "Server.Redirect";
-    public const           string       CLIENT_IS_OUTDATED_TYPE              = "Client.Outdated";
-    public const           string       CLIENT_OPERATION_CANCELED            = "Client.OperationCanceled";
-    public const           string       CLIENT_IS_UNAVAILABLE_TYPE           = "Client.Unavailable";
-    public const           string       PAYMENT_REQUIRED_TYPE                = "Client.PaymentRequired";
-    public const           string       METHOD_NOT_ALLOWED_TYPE              = "Client.MethodNotAllowed";
-    public const           string       NOT_ACCEPTABLE_TYPE                  = "Client.NotAcceptable";
-    public const           string       PROXY_AUTHENTICATION_REQUIRED_TYPE   = "Client.ProxyAuthenticationRequired";
-    public const           string       REQUEST_TIMEOUT_TYPE                 = "Client.RequestTimeout";
-    public const           string       BAD_REQUEST_TYPE                     = "Client.BadRequest";
-    public const           string       LENGTH_REQUIRED_TYPE                 = "Client.LengthRequired";
-    public const           string       PRECONDITION_FAILED_TYPE             = "Client.PreconditionFailed";
-    public const           string       AMBIGUOUS_TYPE                       = "Client.Ambiguous";
-    public const           string       REQUEST_ENTITY_TOO_LARGE_TYPE        = "Client.RequestEntityTooLarge";
-    public const           string       REQUEST_URI_TOO_LONG_TYPE            = "Client.RequestUriTooLong";
-    public const           string       UNSUPPORTED_MEDIA_TYPE_TYPE          = "Client.UnsupportedMediaType";
-    public const           string       REQUESTED_RANGE_NOT_SATISFIABLE_TYPE = "Client.RequestedRangeNotSatisfiable";
-    public const           string       EXPECTATION_FAILED_TYPE              = "Client.ExpectationFailed";
-    public const           string       MISDIRECTED_REQUEST_TYPE             = "Client.MisdirectedRequest";
-    public const           string       UNPROCESSABLE_ENTITY_TYPE            = "Client.UnprocessableEntity";
-    public const           string       FAILED_DEPENDENCY_TYPE               = "Client.FailedDependency";
-    public const           string       TOO_EARLY_TYPE                       = "Client.TooEarly";
-    public const           string       UPGRADE_REQUIRED_TYPE                = "Client.UpgradeRequired";
-    public const           string       PRECONDITION_REQUIRED_TYPE           = "Client.PreconditionRequired";
-    public const           string       TOO_MANY_REQUESTS_TYPE               = "Client.TooManyRequests";
-    public const           string       REQUEST_HEADER_FIELDS_TOO_LARGE_TYPE = "Client.RequestHeaderFieldsTooLarge";
     public const           string       SESSION_EXPIRED_TYPE                 = "Client.SessionExpired";
-    public const           string       CLIENT_CLOSED_REQUEST_TYPE           = "Client.ClosedRequest";
-    public const           string       NOT_EXTENDED_TYPE                    = "Client.NotExtended";
-    public const           string       NETWORK_AUTHENTICATION_REQUIRED_TYPE = "Client.NetworkAuthenticationRequired";
-    public const           string       EARLY_HINTS_TYPE                     = "EarlyHints";
-    public const           string       LOOP_DETECTED_TYPE                   = "LoopDetected";
-    public const           string       NOT_IMPLEMENTED_TYPE                 = "NotImplemented";
-    public const           string       VARIANT_ALSO_NEGOTIATES_TYPE         = "VariantAlsoNegotiates";
-    public const           string       NO_RESPONSE_TYPE                     = "NoResponse";
-    public const           string       IM_USED_TYPE                         = "ImUsed";
-    public const           string       USE_PROXY_TYPE                       = "UseProxy";
-    public const           string       UNUSED_TYPE                          = "Unused";
-    public const           string       GONE_TYPE                            = "Gone";
+    public const           string       SWITCHING_PROTOCOLS_TYPE             = "Server.SwitchingProtocols";
     public const           string       TEAPOT_TYPE                          = "Teapot";
-    public const           string       OK_TYPE                              = "Ok";
+    public const           string       TOO_EARLY_TYPE                       = "Client.TooEarly";
+    public const           string       TOO_MANY_REQUESTS_TYPE               = "Client.TooManyRequests";
+    public const           string       UNAUTHORIZED_TYPE                    = "General.Unauthorized";
+    public const           string       UNAVAILABLE_FOR_LEGAL_REASONS_TYPE   = "Server.UnavailableForLegalReasons";
+    public const           string       UNEXPECTED_TYPE                      = "General.Unexpected";
+    public const           string       UNPROCESSABLE_ENTITY_TYPE            = "Client.UnprocessableEntity";
+    public const           string       UNSUPPORTED_MEDIA_TYPE_TYPE          = "Client.UnsupportedMediaType";
+    public const           string       UNUSED_TYPE                          = "Unused";
+    public const           string       UPGRADE_REQUIRED_TYPE                = "Client.UpgradeRequired";
+    public const           string       USE_PROXY_TYPE                       = "UseProxy";
+    public const           string       VALIDATION_TYPE                      = "General.Unexpected";
+    public const           string       VARIANT_ALSO_NEGOTIATES_TYPE         = "VariantAlsoNegotiates";
     public static readonly Error        Empty                                = new(null, null, null, null, null, StringValues.Empty);
-    internal readonly      StringValues errors                               = Errors;
-    internal readonly      Status?      statusCode                           = StatusCode;
+    internal readonly      Status?      statusCode;
+    internal readonly      StringValues errors;
 
 
-    public static         IErrorTitles Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
-    [JsonRequired] public StringValues Errors     { get => errors;                                            init => errors = value; }
-    [JsonRequired] public Status?      StatusCode { get => statusCode;                                        init => statusCode = value; }
+    public static                  Equalizer<Error> Equalizer  => Equalizer<Error>.Default;
+    public static                  Sorter<Error>    Sorter     => Sorter<Error>.Default;
+    public static                  IErrorTitles     Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
+    [JsonRequired] public required string?          Detail     { get;                                                      init; }
+    [JsonRequired] public required StringValues     Errors     { get => errors;                                            init => errors = value; }
+    [JsonRequired] public required string?          Instance   { get;                                                      init; }
+    [JsonRequired] public required Status?          StatusCode { get => statusCode;                                        init => statusCode = value; }
+    [JsonRequired] public required string?          Title      { get;                                                      init; }
+    [JsonRequired] public required string?          Type       { get;                                                      init; }
+
+
+    public Error() : base() { }
+    [SetsRequiredMembers]
+    public Error( Status? statusCode, string? type, string? title, string? detail, string? instance, StringValues errors ) : base()
+    {
+        this.statusCode = statusCode;
+        this.errors     = errors;
+        Detail          = detail;
+        Instance        = instance;
+        Title           = title;
+        Type            = type;
+    }
 
 
     public static implicit operator Error( Status       result ) => Create( result,            StringValues.Empty );
@@ -227,4 +239,52 @@ public readonly record struct Error( Status? StatusCode, [property: JsonRequired
     public static Error LoopDetected( StringValues                           errors = default, string? instance = null, string? detail = null, string? title = null, string type = LOOP_DETECTED_TYPE )                   => new(Status.LoopDetected, type, title                  ?? Titles.LoopDetected, detail, instance, errors);
     public static Error NotExtended( StringValues                            errors = default, string? instance = null, string? detail = null, string? title = null, string type = NOT_EXTENDED_TYPE )                    => new(Status.NotExtended, type, title                   ?? Titles.NotExtended, detail, instance, errors);
     public static Error NetworkAuthenticationRequired( StringValues          errors = default, string? instance = null, string? detail = null, string? title = null, string type = NETWORK_AUTHENTICATION_REQUIRED_TYPE ) => new(Status.NetworkAuthenticationRequired, type, title ?? Titles.NetworkAuthenticationRequired, detail, instance, errors);
+
+
+    public int CompareTo( Error? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        int statusCodeComparison = Nullable.Compare( statusCode, other.statusCode );
+        if ( statusCodeComparison != 0 ) { return statusCodeComparison; }
+
+        int typeComparison = string.Compare( Type, other.Type, StringComparison.Ordinal );
+        if ( typeComparison != 0 ) { return typeComparison; }
+
+        int titleComparison = string.Compare( Title, other.Title, StringComparison.Ordinal );
+        if ( titleComparison != 0 ) { return titleComparison; }
+
+        int detailComparison = string.Compare( Detail, other.Detail, StringComparison.Ordinal );
+        if ( detailComparison != 0 ) { return detailComparison; }
+
+        return string.Compare( Instance, other.Instance, StringComparison.Ordinal );
+    }
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return other is Error error
+                   ? CompareTo( error )
+                   : throw new ArgumentException( $"Object must be of type {nameof(Error)}" );
+    }
+    public bool Equals( Error? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return Nullable.Equals( statusCode, other.statusCode ) && string.Equals( Type, other.Type, StringComparison.Ordinal ) && string.Equals( Title, other.Title, StringComparison.Ordinal ) && string.Equals( Detail, other.Detail, StringComparison.Ordinal ) && string.Equals( Instance, other.Instance, StringComparison.Ordinal );
+    }
+    public override bool Equals( object? other )                  => ReferenceEquals( this, other ) || other is Error error && Equals( error );
+    public override int  GetHashCode()                            => HashCode.Combine( statusCode, Type, Title, Detail, Instance, errors );
+    public static   bool operator <( Error?  left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) < 0;
+    public static   bool operator >( Error?  left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) > 0;
+    public static   bool operator <=( Error? left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) <= 0;
+    public static   bool operator >=( Error? left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) >= 0;
+    public static   bool operator ==( Error? left, Error? right ) => Equals( left, right );
+    public static   bool operator !=( Error? left, Error? right ) => !Equals( left, right );
 }

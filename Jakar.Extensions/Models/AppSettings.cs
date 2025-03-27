@@ -1,9 +1,9 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface IScreenShotAddress
+public interface IScreenshot
 {
-    public LocalFile? ScreenShotAddress { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
+    public LocalFile? Screenshot { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
 }
 
 
@@ -20,7 +20,7 @@ public interface IAppSettings : IDeviceID
 
 
 
-public interface IAppSettings<TViewPage> : IAppSettings, IScreenShotAddress
+public interface IAppSettings<TViewPage> : IAppSettings, IScreenshot
 {
     public TViewPage? CurrentViewPage { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
 }
@@ -28,10 +28,10 @@ public interface IAppSettings<TViewPage> : IAppSettings, IScreenShotAddress
 
 
 [Serializable]
-public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel( hostInfo, defaultHostInfo ), IAppSettings, IScreenShotAddress
+public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel( hostInfo, defaultHostInfo ), IAppSettings, IScreenshot
 {
     private Guid       _deviceID;
-    private LocalFile? _screenShotAddress;
+    private LocalFile? _screenshot;
 
 
     public string     AppName    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = appName;
@@ -44,8 +44,8 @@ public class AppSettings( string appName, AppVersion version, string deviceVersi
             if ( SetProperty( ref _deviceID, value ) ) { OnSetDeviceID( value ); }
         }
     }
-    public         string     DeviceVersion     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = deviceVersion;
-    public virtual LocalFile? ScreenShotAddress { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _screenShotAddress; set => SetProperty( ref _screenShotAddress, value ); }
+    public         string     DeviceVersion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = deviceVersion;
+    public virtual LocalFile? Screenshot    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _screenshot; set => SetProperty( ref _screenshot, value ); }
 
 
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }

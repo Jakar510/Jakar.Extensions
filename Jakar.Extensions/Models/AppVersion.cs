@@ -159,10 +159,9 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
             AppVersionFlags    flags      = AppVersionFlags.Parse( ref value );
             int                count      = value.Count( SEPARATOR );
             Span<int>          result     = stackalloc int[count + 1];
-            ReadOnlySpan<char> separators = [SEPARATOR];
             int                i          = 0;
 
-            foreach ( ReadOnlySpan<char> span in value.SplitOn( separators ) )
+            foreach ( ReadOnlySpan<char> span in value.SplitOn( SEPARATOR ) )
             {
                 if ( span.Length > 0 ) { result[i++] = int.Parse( span, NumberStyles.Number, provider ); }
             }

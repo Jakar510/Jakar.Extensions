@@ -1,6 +1,9 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 05/10/2022  10:26 AM
 
+using JetBrains.Annotations;
+
+
 #pragma warning disable IDE0302 // Collection init can be simplified
 
 
@@ -119,14 +122,14 @@ public class SpansBenchmarks
 
     [Benchmark] public ReadOnlySpan<char> Join() => LinkSpan.Join<char>( Value, NEW_VALUE );
 
-    [Benchmark]
-    public ReadOnlySpan<char> RemoveAll_Params()
+    [Benchmark, MustDisposeResource]
+    public Buffer<char> RemoveAll_Params()
     {
         Span<char> span = stackalloc char[Value.Length];
         Value.CopyTo( span );
 
         Span<char> result = span.RemoveAll( '1', '3', 'F', 'A' );
-        return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
+        return new Buffer<char>( result );
     }
 
 

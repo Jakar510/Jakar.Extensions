@@ -50,13 +50,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     public LocalFile() => FullPath = string.Empty;
-    public LocalFile( Uri                          path ) : this( FromUri( path ) ) { }
+    public LocalFile( Uri                       path ) : this( FromUri( path ) ) { }
     public LocalFile( params ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalFile( FileInfo                     path ) : this( path.FullName ) { }
-    public LocalFile( string                       path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
-    public LocalFile( string                       path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
-    public LocalFile( DirectoryInfo                path, string                      fileName ) : this( path.Combine( fileName ) ) { }
-    public LocalFile( string                       path, string                      fileName ) : this( new DirectoryInfo( path ), fileName ) { }
+    public LocalFile( FileInfo                  path ) : this( path.FullName ) { }
+    public LocalFile( string                    path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
+    public LocalFile( string                    path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
+    public LocalFile( DirectoryInfo             path, string                      fileName ) : this( path.Combine( fileName ) ) { }
+    public LocalFile( string                    path, string                      fileName ) : this( new DirectoryInfo( path ), fileName ) { }
     public LocalFile( string path, Encoding? encoding = null )
     {
         this.SetNormal();
@@ -895,7 +895,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         IReadHandler handler = this;
         return handler.AsMemory();
     }
-    ReadOnlySpan<byte> IReadHandler.AsSpan()
+    [MustDisposeResource]
+    Buffer<byte> IReadHandler.AsSpan()
     {
         using FileStream file   = OpenRead();
         int              length = (int)file.Length;
@@ -903,7 +904,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         length = file.Read( span );
 
         span = span[..length];
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        return new Buffer<byte>( span );
     }
 
 
@@ -1052,7 +1053,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="ReadOnlySpan{byte}"/>
         /// </returns>
-        ReadOnlySpan<byte> AsSpan();
+        [MustDisposeResource]
+        Buffer<byte> AsSpan();
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>

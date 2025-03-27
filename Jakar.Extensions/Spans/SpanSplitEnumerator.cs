@@ -19,9 +19,9 @@ public ref struct SpanSplitEnumerator<TValue>
     public LineSplitEntry<TValue> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( scoped ref readonly ReadOnlySpan<TValue> span, scoped ref readonly ReadOnlySpan<TValue> separators )
+    public SpanSplitEnumerator( ReadOnlySpan<TValue> span, params TValue[] separators )
     {
-        if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
+        if ( separators.Length == 0 ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
         _originalString = span;
         _span           = span;
@@ -30,9 +30,9 @@ public ref struct SpanSplitEnumerator<TValue>
     }
 
 
-    public readonly override string                 ToString()      => $"{nameof(LineSplitEntry<TValue>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
+    public readonly override string                      ToString()      => $"{nameof(LineSplitEntry<TValue>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
     public readonly          SpanSplitEnumerator<TValue> GetEnumerator() => this;
-    public                   void                   Reset()         => _span = _originalString;
+    public                   void                        Reset()         => _span = _originalString;
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]

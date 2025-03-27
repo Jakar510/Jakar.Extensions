@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 04/25/2022  9:42 PM
 
+using JetBrains.Annotations;
+
+
+
 namespace Jakar.Extensions.Experiments.Benchmarks;
 #pragma warning disable CA1822
 
@@ -23,10 +27,13 @@ public class GuidBenchmarks
     private static readonly string _b64  = _guid.ToBase64();
 
 
-    [Benchmark]
-    public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out ReadOnlySpan<byte> memory )
-                                                     ? memory
-                                                     : default;
+    [Benchmark, MustDisposeResource]
+    public Buffer<byte> TryWriteBytes()
+    {
+        return _guid.TryWriteBytes( out Buffer<byte> memory )
+                   ? memory
+                   : default;
+    }
     [Benchmark] public     Guid    StringParse() => Guid.Parse( GUID );
     [Benchmark] public     Guid?   SpanParse()   => _b64.AsGuid();
     [Benchmark] public     string  AsBase64()    => _guid.ToBase64();

@@ -11,7 +11,7 @@ public static partial class Spans
     {
         Span<TValue> result = stackalloc TValue[source.Length];
         RemoveAll( in source, in c, in result, out int length );
-        return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), length );
+        return result[..length].ToArray();
     }
 
 
@@ -21,7 +21,7 @@ public static partial class Spans
         Span<TValue>         result = stackalloc TValue[source.Length];
         ReadOnlySpan<TValue> temp   = removed;
         RemoveAll( in source, in temp, in result, out int length );
-        return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), length );
+        return result[..length].ToArray();
     }
 
 

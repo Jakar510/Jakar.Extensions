@@ -16,23 +16,23 @@ public readonly record struct WebResponse<TValue>
     public const string UNKNOWN_ERROR = "Unknown Error";
 
 
-    public              List<string>                         Allow             { get; init; } = [];
-    public              List<string>                         ContentEncoding   { get; init; } = [];
-    public              long?                                ContentLength     { get; init; } = null;
-    public              string?                              ContentType       { get; init; } = null;
-    [JsonIgnore] public OneOf<JToken, string, Error[], None> Errors            { get; init; } = new None();
-    public              string?                              ErrorMessage      => Errors.Match<string?>( static x => x.ToString( Formatting.Indented ), static x => x, static x => x.GetMessage(), static x => null );
-    [JsonIgnore] public Exception?                           Exception         { get; init; } = null;
-    public              DateTimeOffset?                      Expires           { get; init; } = null;
-    public              DateTimeOffset?                      LastModified      { get; init; } = null;
-    public              Uri?                                 Location          { get; init; } = null;
-    public              string?                              Method            { get; init; } = null;
-    public              TValue?                                   Payload           { get; init; } = default;
-    public              string?                              Sender            { get; init; } = null;
-    public              string?                              Server            { get; init; } = null;
-    public              Status                               StatusCode        { get; init; } = Status.NotSet;
-    public              string?                              StatusDescription { get; init; } = null;
-    public              Uri?                                 URL               { get; init; } = null;
+    public              List<string>                        Allow             { get; init; } = [];
+    public              List<string>                        ContentEncoding   { get; init; } = [];
+    public              long?                               ContentLength     { get; init; } = null;
+    public              string?                             ContentType       { get; init; } = null;
+    [JsonIgnore] public OneOf<JToken, string, Errors, None> Errors            { get; init; } = new None();
+    public              string?                             ErrorMessage      => Errors.Match<string?>( static x => x.ToString( Formatting.Indented ), static x => x, static x => x.GetMessage(), static x => null );
+    [JsonIgnore] public Exception?                          Exception         { get; init; } = null;
+    public              DateTimeOffset?                     Expires           { get; init; } = null;
+    public              DateTimeOffset?                     LastModified      { get; init; } = null;
+    public              Uri?                                Location          { get; init; } = null;
+    public              string?                             Method            { get; init; } = null;
+    public              TValue?                             Payload           { get; init; } = default;
+    public              string?                             Sender            { get; init; } = null;
+    public              string?                             Server            { get; init; } = null;
+    public              Status                              StatusCode        { get; init; } = Status.NotSet;
+    public              string?                             StatusDescription { get; init; } = null;
+    public              Uri?                                URL               { get; init; } = null;
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, null, error ) { }
@@ -73,13 +73,13 @@ public readonly record struct WebResponse<TValue>
 
     public ErrorOrResult<TValue> TryGetPayload()
     {
-        return TryGetValue( out TValue? payload, out Error? error )
+        return TryGetValue( out TValue? payload, out Errors? error )
                    ? payload
-                   : error.Value;
+                   : error;
     }
 
 
-    public bool TryGetValue( [NotNullWhen( true )] out TValue? payload, [NotNullWhen( false )] out Error? errorMessage )
+    public bool TryGetValue( [NotNullWhen( true )] out TValue? payload, [NotNullWhen( false )] out Errors? errorMessage )
     {
         if ( IsSuccessStatusCode() )
         {
@@ -106,7 +106,7 @@ public readonly record struct WebResponse<TValue>
 
     internal static WebResponse<TValue> None( HttpResponseMessage response )              => new(response, NO_RESPONSE);
     internal static WebResponse<TValue> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
-    public static OneOf<JToken, string, Error[], None> ParseError( string? error )
+    public static OneOf<JToken, string, Errors, None> ParseError( string? error )
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return UNKNOWN_ERROR; }
 
@@ -114,7 +114,7 @@ public readonly record struct WebResponse<TValue>
         const string QUOTE                           = @"""";
         if ( error.Contains( ESCAPED_QUOTE ) ) error = error.Replace( ESCAPED_QUOTE, QUOTE );
 
-        try { return error.FromJson<Error[]>(); }
+        try { return error.FromJson<Errors>(); }
         catch ( Exception )
         {
             try { return error.FromJson(); }

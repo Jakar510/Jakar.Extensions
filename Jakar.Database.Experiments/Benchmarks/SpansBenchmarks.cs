@@ -117,10 +117,8 @@ public class SpansBenchmarks
         Span<char> span = stackalloc char[Value.Length];
         Value.CopyTo( span );
 
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
-
-        Span<char> result = span.RemoveAll( buffer );
-        return MemoryMarshal.CreateReadOnlySpan( ref result.GetPinnableReference(), result.Length );
+        Span<char> result = span.RemoveAll( ['1', '3', 'F', 'A'] );
+        return result.ToArray();
     }
 
 

@@ -33,30 +33,12 @@ public static class Guids
     }
 
 
-    public static bool TryWriteBytes( this ref readonly Guid value, out Span<byte> result )
+    public static bool TryWriteBytes( this ref readonly Guid value, [MustDisposeResource] out Buffer<byte> result )
     {
-        Span<byte> span = stackalloc byte[16];
+        result = new Buffer<byte>( 16 );
+        if ( value.TryWriteBytes( result.Span ) ) { return true; }
 
-        if ( value.TryWriteBytes( span ) )
-        {
-            result = MemoryMarshal.CreateSpan( ref span.GetPinnableReference(), span.Length );
-            return true;
-        }
-
-        result = Span<byte>.Empty;
-        return false;
-    }
-    public static bool TryWriteBytes( this ref readonly Guid value, out ReadOnlySpan<byte> result )
-    {
-        Span<byte> span = stackalloc byte[16];
-
-        if ( value.TryWriteBytes( span ) )
-        {
-            result = MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
-            return true;
-        }
-
-        result = ReadOnlySpan<byte>.Empty;
+        result = default;
         return false;
     }
 
@@ -104,7 +86,7 @@ public static class Guids
                    : Guid.Empty;
     }
 
-    
+
     public static string NewBase64()
     {
         Guid id = Guid.CreateVersion7( DateTimeOffset.UtcNow );

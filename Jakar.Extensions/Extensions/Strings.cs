@@ -94,13 +94,14 @@ public static class Strings
     }
 
 
-    public static byte[]             ToByteArray( this string value, Encoding? encoding = null ) => (encoding ?? Encoding.Default).GetBytes( value );
-    public static ReadOnlySpan<byte> AsSpanBytes( this string value, Encoding  encoding )           => AsSpanBytes( value.AsSpan(), encoding );
-    public static unsafe ReadOnlySpan<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
+    public static                       byte[]       ToByteArray( this string value, Encoding? encoding = null ) => (encoding ?? Encoding.Default).GetBytes( value );
+    [MustDisposeResource] public static Buffer<byte> AsSpanBytes( this string value, Encoding  encoding )        => AsSpanBytes( value.AsSpan(), encoding );
+    [MustDisposeResource]
+    public static Buffer<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
-        Span<byte> span = stackalloc byte[encoding.GetByteCount( value )];
-        encoding.GetBytes( value, span );
-        return MemoryMarshal.CreateReadOnlySpan( ref span.GetPinnableReference(), span.Length );
+        Buffer<byte> span = new(encoding.GetByteCount( value ));
+        encoding.GetBytes( value, span.Span );
+        return span;
     }
 
 
@@ -108,11 +109,11 @@ public static class Strings
     public static IEnumerable<string> SplitAndTrimLines( this string value, string separator )        => value.Split( separator ).Select( static line => line.Trim() );
 
 
-    public static string[]             SplitLines( this       string value, char      separator = '\n' )   => value.Split( separator );
-    public static string[]             SplitLines( this       string value, string    separator )          => value.Split( separator );
-    public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = null ) => value.ToByteArray( encoding ?? Encoding.Default ).AsMemory();
-    public static object               ConvertTo( this        string value, Type      target )             => Convert.ChangeType( value, target );
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = null ) => value.ToMemory( encoding ?? Encoding.Default );
+    public static string[]             SplitLines( this       string value, char      separator = '\n' ) => value.Split( separator );
+    public static string[]             SplitLines( this       string value, string    separator )        => value.Split( separator );
+    public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = null )  => value.ToByteArray( encoding ?? Encoding.Default ).AsMemory();
+    public static object               ConvertTo( this        string value, Type      target )           => Convert.ChangeType( value, target );
+    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = null )  => value.ToMemory( encoding ?? Encoding.Default );
 
 
     public static SecureString ToSecureString( this ReadOnlySpan<byte>   value, bool makeReadonly = true ) => Convert.ToBase64String( value ).AsSpan().ToSecureString( makeReadonly );
@@ -173,14 +174,14 @@ public static class Strings
 
 
     public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, TValue separator )
-        where TValue : unmanaged, IEquatable<TValue> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, scoped in ReadOnlySpan<TValue> separators )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, separator);
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, params TValue[] separators )
         where TValue : unmanaged, IEquatable<TValue> => new(span, separators);
 
 
     public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this ReadOnlySpan<TValue> span, TValue separator )
-        where TValue : unmanaged, IEquatable<TValue> => new(span, Spans.Create( separator ));
-    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this ReadOnlySpan<TValue> span, scoped in ReadOnlySpan<TValue> separators )
+        where TValue : unmanaged, IEquatable<TValue> => new(span, separator);
+    public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this ReadOnlySpan<TValue> span, params TValue[] separators )
         where TValue : unmanaged, IEquatable<TValue> => new(span, separators);
 
 

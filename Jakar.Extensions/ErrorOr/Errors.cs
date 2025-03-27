@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly struct Alert()
+public readonly record struct Alert()
 {
     public static readonly Alert Empty = new(null);
 
@@ -40,16 +40,20 @@ public readonly struct Alert()
 
 [Serializable, DefaultValue( nameof(Empty) )]
 [method: JsonConstructor]
-public readonly struct Errors()
+public sealed record Errors()
 {
     private static readonly Error[] _details = [];
-    public static readonly  Errors  Empty    = new();
+    public static readonly Errors Empty = new()
+                                          {
+                                              Alert   = null,
+                                              Details = _details
+                                          };
 
 
-    public Alert?  Alert       { get; init; }
-    public Error[] Details     { get; init; } = _details;
-    public string  Description => Details.GetMessage();
-    public bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
+    public required Alert?  Alert       { get; init; }
+    public required Error[] Details     { get; init; }
+    public          string  Description => Details.GetMessage();
+    public          bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
 
 
     public static Errors Create( params Error[]? details ) => Create( null,                                       details );
@@ -66,13 +70,12 @@ public readonly struct Errors()
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Status GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
 
 
-    public static implicit operator ReadOnlySpan<Error>( Errors    result )  => result.Details;
-    public static implicit operator ReadOnlyMemory<Error>( Errors  result )  => result.Details;
-    public static implicit operator ReadOnlySpan<Error>( Errors?   result )  => result?.Details;
-    public static implicit operator ReadOnlyMemory<Error>( Errors? result )  => result?.Details;
-    public static implicit operator Errors( string                 title )   => Create( new Alert( title ) );
-    public static implicit operator Errors( Alert                  details ) => Create( details );
-    public static implicit operator Errors( Error                  details ) => Create( details );
-    public static implicit operator Errors( Error[]                details ) => Create( null, details );
-    public static implicit operator Errors( List<Error>            details ) => Create( details.ToArray() );
+    public static implicit operator ReadOnlySpan<Error>( Errors   result )  => result.Details;
+    public static implicit operator ReadOnlyMemory<Error>( Errors result )  => result.Details;
+    public static implicit operator Errors( string                title )   => Create( new Alert( title ) );
+    public static implicit operator Errors( Alert                 details ) => Create( details );
+    public static implicit operator Errors( Error                 details ) => Create( details );
+    public static implicit operator Errors( Error[]               details ) => Create( null, details );
+    public static implicit operator Errors( List<Error>           details ) => Create( details.ToArray() );
+    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create( details.ToArray() );
 }
