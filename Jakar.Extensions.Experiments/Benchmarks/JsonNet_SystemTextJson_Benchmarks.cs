@@ -150,16 +150,16 @@ public class JsonNet_SystemTextJson_Benchmarks
     private static readonly Node _node = JSON.FromJson<Node>();
 
 
-    [Benchmark, Category( "Serialize" )]  public string? ToStringSerialize()             => _node.ToString();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerialize()              => _node.ToJson();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
+    [Benchmark, Category( "Serialize" )] public string? ToStringSerialize()             => _node.ToString();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerialize()              => _node.ToJson();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
 
 
-    [Benchmark, Category( "Deserialize" )]  public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
-    [Benchmark, Category( "Deserialize" )]  public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
-    [Benchmark, Category( "Deserialize" )]  public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
+    [Benchmark, Category( "Deserialize" )] public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
+    [Benchmark, Category( "Deserialize" )] public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
+    [Benchmark, Category( "Deserialize" )] public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
 
 
     public static async ValueTask SaveAsync()
@@ -203,24 +203,26 @@ public sealed class NodeFaker : Faker<Node>
 
 public sealed record Node
 {
-    public Node[]         Children    { get; init; } = [];
-    public DateTimeOffset Date        { get; init; }
-    public string         Description { get; init; } = string.Empty;
-    public string         Name        { get; init; } = string.Empty;
-    public double         Price       { get; init; }
+    private static readonly Node[]         _empty = [];
+    public                  Node[]         Children    { get; init; } = _empty;
+    public                  DateTimeOffset Date        { get; init; }
+    public                  string         Description { get; init; } = string.Empty;
+    public                  string         Name        { get; init; } = string.Empty;
+    public                  double         Price       { get; init; }
 
     // [ JsonExtensionData ]                                public Dictionary<string, JToken>?      JsonExtensionData { get; set; }
     // [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? ExtensionData     { get; set; }
 
 
     public Node() { }
-    public Node( string name, string value, double price, DateTimeOffset date, params Node[] children )
+    public Node( string name, string value, double price, DateTimeOffset date ) : this( name, value, price, date, null ) { }
+    public Node( string name, string value, double price, DateTimeOffset date, params Node[]? children )
     {
         Name        = name;
         Description = value;
         Price       = price;
         Date        = date;
-        Children    = children;
+        Children    = children ?? _empty;
     }
 }
 

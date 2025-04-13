@@ -50,10 +50,10 @@ public sealed record Errors()
                                           };
 
 
-    public required Alert?  Alert       { get; init; }
-    public required Error[] Details     { get; init; }
-    public          string  Description => Details.GetMessage();
-    public          bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
+    [JsonRequired] public required Alert?  Alert       { get; init; }
+    [JsonRequired] public required Error[] Details     { get; init; }
+    public                         string  Description => Details.GetMessage();
+    public                         bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
 
 
     public static Errors Create( params Error[]? details ) => Create( null,                                       details );

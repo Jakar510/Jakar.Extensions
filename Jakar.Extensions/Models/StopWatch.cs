@@ -45,17 +45,17 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     }
     public static (double Value, Unit Unit) GetRangeWithUnit( ref readonly TimeSpan span )
     {
-        if ( span.Days > 0 ) { return (span.TotalDays, Unit.Days); }
+        if ( span.Days != 0 ) { return (span.TotalDays, Unit.Days); }
 
-        if ( span.Hours > 0 ) { return (span.TotalHours, Unit.Hours); }
+        if ( span.Hours != 0 ) { return (span.TotalHours, Unit.Hours); }
 
-        if ( span.Minutes > 0 ) { return (span.TotalMinutes, Unit.Minutes); }
+        if ( span.Minutes != 0 ) { return (span.TotalMinutes, Unit.Minutes); }
 
-        if ( span.Seconds > 0 ) { return (span.TotalSeconds, Unit.Seconds); }
+        if ( span.Seconds != 0 ) { return (span.TotalSeconds, Unit.Seconds); }
 
-        if ( span.Milliseconds > 0 ) { return (span.TotalMilliseconds, Unit.Milliseconds); }
+        if ( span.Milliseconds != 0 ) { return (span.TotalMilliseconds, Unit.Milliseconds); }
 
-        if ( span.Microseconds > 0 ) { return (span.TotalMicroseconds, Unit.Microseconds); }
+        if ( span.Microseconds != 0 ) { return (span.TotalMicroseconds, Unit.Microseconds); }
 
         return (span.TotalNanoseconds, Unit.Nanoseconds);
     }

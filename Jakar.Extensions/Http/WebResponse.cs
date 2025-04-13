@@ -8,31 +8,33 @@ using Microsoft.Extensions.Primitives;
 namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedParameter.Global" ), SuppressMessage( "ReSharper", "CollectionNeverQueried.Global" )]
-public readonly record struct WebResponse<TValue>
+[IsNotJsonSerializable]
+public sealed class WebResponse<TValue>
 {
-    public const string ERROR_MESSAGE = "Error Message: ";
-    public const string NO_RESPONSE   = "NO RESPONSE";
-    public const string UNKNOWN_ERROR = "Unknown Error";
+    public const    string                              ERROR_MESSAGE = "Error Message: ";
+    public const    string                              NO_RESPONSE   = "NO RESPONSE";
+    public const    string                              UNKNOWN_ERROR = "Unknown Error";
+    public readonly DateTimeOffset?                     Expires;
+    public readonly DateTimeOffset?                     LastModified;
+    public readonly Exception?                          Exception;
+    public readonly List<string>                        Allow           = new(DEFAULT_CAPACITY);
+    public readonly List<string>                        ContentEncoding = new(DEFAULT_CAPACITY);
+    public readonly long?                               ContentLength;
+    public readonly OneOf<JToken, string, Errors, None> Errors;
+    public readonly Status                              StatusCode;
+    public readonly string?                             ContentType;
+    public readonly string?                             Method;
+    public readonly string?                             Sender;
+    public readonly string?                             Server;
+    public readonly string?                             StatusDescription;
+    public readonly TValue?                             Payload;
+    public readonly Uri?                                Location;
+    public readonly Uri?                                URL;
 
 
-    public              List<string>                        Allow             { get; init; } = [];
-    public              List<string>                        ContentEncoding   { get; init; } = [];
-    public              long?                               ContentLength     { get; init; } = null;
-    public              string?                             ContentType       { get; init; } = null;
-    [JsonIgnore] public OneOf<JToken, string, Errors, None> Errors            { get; init; } = new None();
-    public              string?                             ErrorMessage      => Errors.Match<string?>( static x => x.ToString( Formatting.Indented ), static x => x, static x => x.GetMessage(), static x => null );
-    [JsonIgnore] public Exception?                          Exception         { get; init; } = null;
-    public              DateTimeOffset?                     Expires           { get; init; } = null;
-    public              DateTimeOffset?                     LastModified      { get; init; } = null;
-    public              Uri?                                Location          { get; init; } = null;
-    public              string?                             Method            { get; init; } = null;
-    public              TValue?                             Payload           { get; init; } = default;
-    public              string?                             Sender            { get; init; } = null;
-    public              string?                             Server            { get; init; } = null;
-    public              Status                              StatusCode        { get; init; } = Status.NotSet;
-    public              string?                             StatusDescription { get; init; } = null;
-    public              Uri?                                URL               { get; init; } = null;
+    public                                              string? ErrorMessage        => Errors.Match<string?>( static x => x.ToString( Formatting.Indented ), static x => x, static x => x.GetMessage(), static x => null );
+    [MemberNotNullWhen( true, nameof(Payload) )] public bool    HasPayload          => Payload is not null;
+    public                                              bool    IsSuccessStatusCode => StatusCode < Status.BadRequest;
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this( response, default, null, error ) { }
@@ -71,17 +73,15 @@ public readonly record struct WebResponse<TValue>
     }
 
 
-    public ErrorOrResult<TValue> TryGetPayload()
-    {
-        return TryGetValue( out TValue? payload, out Errors? error )
-                   ? payload
-                   : error;
-    }
+    public ErrorOrResult<TValue> TryGetPayload() =>
+        TryGetValue( out TValue? payload, out Errors? error )
+            ? payload
+            : error;
 
 
     public bool TryGetValue( [NotNullWhen( true )] out TValue? payload, [NotNullWhen( false )] out Errors? errorMessage )
     {
-        if ( IsSuccessStatusCode() )
+        if ( IsSuccessStatusCode )
         {
             payload      = Payload;
             errorMessage = null;
@@ -92,12 +92,10 @@ public readonly record struct WebResponse<TValue>
         errorMessage = GetError();
         return false;
     }
-    public  bool  HasPayload()          => Payload is not null;
-    private Error GetError()            => Error.Create( Exception, ErrorMessage, URL?.OriginalString, StringValues.Empty, status: StatusCode );
-    public  bool  IsSuccessStatusCode() => StatusCode < Status.BadRequest;
+    private Error GetError() => Error.Create( Exception, ErrorMessage, URL?.OriginalString, StringValues.Empty, StatusCode );
     public void EnsureSuccessStatusCode()
     {
-        if ( IsSuccessStatusCode() ) { return; }
+        if ( IsSuccessStatusCode ) { return; }
 
         throw new HttpRequestException( this.ToPrettyJson(), Exception );
     }
@@ -110,9 +108,9 @@ public readonly record struct WebResponse<TValue>
     {
         if ( string.IsNullOrWhiteSpace( error ) ) { return UNKNOWN_ERROR; }
 
-        const string ESCAPED_QUOTE                   = @"\""";
-        const string QUOTE                           = @"""";
-        if ( error.Contains( ESCAPED_QUOTE ) ) error = error.Replace( ESCAPED_QUOTE, QUOTE );
+        const string ESCAPED_QUOTE = @"\""";
+        const string QUOTE         = @"""";
+        if ( error.Contains( ESCAPED_QUOTE ) ) { error = error.Replace( ESCAPED_QUOTE, QUOTE ); }
 
         try { return error.FromJson<Errors>(); }
         catch ( Exception )
