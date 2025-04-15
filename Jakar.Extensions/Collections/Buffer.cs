@@ -51,7 +51,12 @@ public ref struct Buffer<TValue>( int capacity )
     public void Dispose() => ArrayPool<TValue>.Shared.Return( _array );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TValue[] ToArray() => Values.ToArray();
+    public TValue[] ToArray()
+    {
+        TValue[] array = Values.ToArray();
+        Dispose();
+        return array;
+    }
 
 
     public void Clear()
@@ -479,7 +484,6 @@ public ref struct Buffer<TValue>( int capacity )
         ReadOnlySpan<TValue> span = Values;
         return span.GetEnumerator();
     }
-
 
 
     /*

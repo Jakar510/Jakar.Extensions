@@ -84,7 +84,7 @@ public class SpansBenchmarks
     [Benchmark]
     public bool ContainsAny()
     {
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
+        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
 
         return Spans.ContainsAny( Value, buffer );
     }
@@ -92,7 +92,7 @@ public class SpansBenchmarks
     [Benchmark]
     public bool ContainsNone()
     {
-        ReadOnlySpan<char> buffer = stackalloc char[4] { '1', '3', 'F', 'A' };
+        ReadOnlySpan<char> buffer = ['1', '3', 'F', 'A'];
 
         return Spans.ContainsNone( Value, buffer );
     }
@@ -102,14 +102,9 @@ public class SpansBenchmarks
     [Benchmark] public bool StartsWith()         => Spans.StartsWith( Value, '1' );
 
 
-    [Benchmark]
-    public ReadOnlySpan<char> AsSpan()
-    {
-        ReadOnlySpan<char> span = Value;
-        return span.AsSpan();
-    }
+    [Benchmark] public ReadOnlySpan<char> AsSpan() => Value;
 
-    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Join() => LinkSpan.Join<char>( Value, NEW_VALUE );
 
     [Benchmark]
     public ReadOnlySpan<char> RemoveAll_Params()
@@ -122,8 +117,8 @@ public class SpansBenchmarks
     }
 
 
-    [Benchmark] public void       RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
-    [Benchmark] public Span<char> Replace()          => Spans.Replace<char>( Value, OLD, NEW_VALUE );
+    [Benchmark] public void               RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
+    [Benchmark] public ReadOnlySpan<char> Replace()          => LinkSpan.Replace<char>( Value, OLD, NEW_VALUE );
 
 
     [Benchmark] public ReadOnlySpan<char> Slice_False() => Spans.Slice( Value, 'z', '4', false );

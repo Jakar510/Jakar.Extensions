@@ -22,7 +22,7 @@ public sealed class MethodDetails
     public bool               IsStatic            { get; init; }
     public bool               IsVirtual           { get; init; }
     public string             Name                { get; init; } = string.Empty;
-    public ParameterDetails[] Parameters          { get; init; } = Array.Empty<ParameterDetails>();
+    public ParameterDetails[] Parameters          { get; init; } = [];
     public string             Signature           { get; init; } = string.Empty;
 
 

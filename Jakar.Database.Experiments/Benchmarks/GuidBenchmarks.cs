@@ -24,9 +24,9 @@ public class GuidBenchmarks
 
 
     [Benchmark]
-    public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out ReadOnlySpan<byte> memory )
-                                                     ? memory
-                                                     : default;
+    public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out Buffer<byte> memory )
+                                                     ? memory.ToArray()
+                                                     : ReadOnlySpan<byte>.Empty;
     [Benchmark] public     Guid    StringParse() => Guid.Parse( GUID );
     [Benchmark] public     Guid?   SpanParse()   => _b64.AsGuid();
     [Benchmark] public     string  AsBase64()    => _guid.ToBase64();

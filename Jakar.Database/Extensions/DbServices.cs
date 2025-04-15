@@ -15,15 +15,21 @@ public static class DbServices
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsValid<TRecord>( this TRecord value )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.ID.IsValid();
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    {
+        return value.ID.IsValid();
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static bool IsNotValid<TRecord>( this TRecord value )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => value.IsValid() is false;
+        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    {
+        return value.IsValid() is false;
+    }
 
 
-    public static string GetFullName( this Type type ) => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
+    public static string GetFullName( this Type type ) { return type.AssemblyQualifiedName ?? type.FullName ?? type.Name; }
 
 
     public static IHostApplicationBuilder OpenTelemetry( this IHostApplicationBuilder builder )
@@ -63,16 +69,27 @@ public static class DbServices
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static LogLevel GetLogLevel( this bool isDevEnvironment ) =>
-        isDevEnvironment
-            ? LogLevel.Trace
-            : LogLevel.Information;
+    private static LogLevel GetLogLevel( this bool isDevEnvironment )
+    {
+        return isDevEnvironment
+                   ? LogLevel.Trace
+                   : LogLevel.Information;
+    }
     public static ILoggingBuilder AddDefaultLogging<TApp>( this WebApplicationBuilder builder )
-        where TApp : IAppName => AddDefaultLogging<TApp>( builder.Logging, builder.Environment.IsDevelopment() );
+        where TApp : IAppName
+    {
+        return AddDefaultLogging<TApp>( builder.Logging, builder.Environment.IsDevelopment() );
+    }
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, bool isDevEnvironment )
-        where TApp : IAppName => AddDefaultLogging<TApp>( builder, isDevEnvironment.GetLogLevel() );
+        where TApp : IAppName
+    {
+        return AddDefaultLogging<TApp>( builder, isDevEnvironment.GetLogLevel() );
+    }
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, in LogLevel minimumLevel )
-        where TApp : IAppName => AddDefaultLogging( builder, minimumLevel, TApp.AppName );
+        where TApp : IAppName
+    {
+        return AddDefaultLogging( builder, minimumLevel, TApp.AppName );
+    }
     public static ILoggingBuilder AddDefaultLogging( this ILoggingBuilder builder, in LogLevel minimumLevel, in string name )
     {
         builder.ClearProviders();
@@ -98,17 +115,19 @@ public static class DbServices
     public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name )
     {
         return GetEventLogLoggerProvider( name, Filter );
-        static bool Filter( string category, LogLevel level ) => level > LogLevel.Information;
+        static bool Filter( string category, LogLevel level ) { return level > LogLevel.Information; }
     }
     [SupportedOSPlatform( "Windows" )]
-    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter ) =>
-        new(new EventLogSettings
-            {
-                SourceName  = name,
-                LogName     = name,
-                MachineName = GetMachineName(),
-                Filter      = filter
-            });
+    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter )
+    {
+        return new EventLogLoggerProvider(new EventLogSettings
+                                          {
+                                              SourceName  = name,
+                                              LogName     = name,
+                                              MachineName = GetMachineName(),
+                                              Filter      = filter
+                                          });
+    }
     public static string GetMachineName()
     {
     #pragma warning disable RS1035
@@ -119,18 +138,23 @@ public static class DbServices
 
 
     public static IHealthChecksBuilder AddHealthCheck<TValue>( this IServiceCollection services )
-        where TValue : IHealthCheck => services.AddHealthCheck( HealthChecks.Create<TValue>() );
-    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) => services.AddHealthChecks().Add( registration );
+        where TValue : IHealthCheck
+    {
+        return services.AddHealthCheck( HealthChecks.Create<TValue>() );
+    }
+    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) { return services.AddHealthChecks().Add( registration ); }
 
 
-    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       => new(new OptionsWrapper<FluentMigratorLoggerOptions>( options ));
-    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) => services.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() );
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true ) =>
-        services.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
-                                          {
-                                              ShowElapsedTime = showElapsedTime,
-                                              ShowSql         = showSql
-                                          } );
+    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       { return new FluentMigratorConsoleLoggerProvider(new OptionsWrapper<FluentMigratorLoggerOptions>( options )); }
+    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) { return services.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() ); }
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true )
+    {
+        return services.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
+                                                 {
+                                                     ShowElapsedTime = showElapsedTime,
+                                                     ShowSql         = showSql
+                                                 } );
+    }
 
 
     public static void MigrationsMsSql( this IMigrationRunnerBuilder migration )
@@ -182,7 +206,10 @@ public static class DbServices
 
 
     public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options )
-        where TValue : class, IOptions<TValue> => services.AddOptions( options, Options.DefaultName );
+        where TValue : class, IOptions<TValue>
+    {
+        return services.AddOptions( options, Options.DefaultName );
+    }
     public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options, string name )
         where TValue : class, IOptions<TValue>
     {
@@ -219,7 +246,7 @@ public static class DbServices
         ProtectedDataProvider.Register( services );
         return services;
     }
-    public static IServiceCollection AddEmailer( this IServiceCollection services ) => services.AddEmailer( static options => { } );
+    public static IServiceCollection AddEmailer( this IServiceCollection services ) { return services.AddEmailer( static options => { } ); }
     public static IServiceCollection AddEmailer( this IServiceCollection services, Action<Emailer.Options> options )
     {
         services.AddOptions( options );
@@ -228,7 +255,7 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddPasswordValidator( this IServiceCollection services ) => services.AddPasswordValidator( static requirements => { } );
+    public static IServiceCollection AddPasswordValidator( this IServiceCollection services ) { return services.AddPasswordValidator( static requirements => { } ); }
     public static IServiceCollection AddPasswordValidator( this IServiceCollection services, Action<PasswordRequirements> options )
     {
         services.AddOptions( options );
@@ -237,7 +264,7 @@ public static class DbServices
     }
 
 
-    public static IServiceCollection AddTokenizer( this IServiceCollection services ) => services.AddTokenizer<Tokenizer>();
+    public static IServiceCollection AddTokenizer( this IServiceCollection services ) { return services.AddTokenizer<Tokenizer>(); }
     public static IServiceCollection AddTokenizer<TTokenizer>( this IServiceCollection services )
         where TTokenizer : class, ITokenService
     {
@@ -246,5 +273,5 @@ public static class DbServices
     }
 
 
-    public static AuthorizationBuilder RequireMultiFactorAuthentication( this AuthorizationBuilder builder ) => builder.AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( RequireMfa.Instance ) );
+    public static AuthorizationBuilder RequireMultiFactorAuthentication( this AuthorizationBuilder builder ) { return builder.AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( RequireMfa.Instance ) ); }
 }

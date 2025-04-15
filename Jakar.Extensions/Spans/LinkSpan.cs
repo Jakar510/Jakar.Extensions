@@ -15,7 +15,7 @@ public delegate TNext RefConvert<TValue, out TNext>( ref readonly TValue value )
 public static class LinkSpan
 {
     [Pure]
-    public static ReadOnlySpan<TValue> Where<TValue>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector )
+    public static ReadOnlySpan<TValue> Where<TValue>( ref readonly ReadOnlySpan<TValue> span, RefCheck<TValue> selector )
     {
         if ( span.IsEmpty ) { return default; }
 
@@ -31,7 +31,7 @@ public static class LinkSpan
     }
 
     [Pure]
-    public static ReadOnlySpan<TNext> Select<TValue, TNext>( ReadOnlySpan<TValue> span, RefConvert<TValue, TNext> func )
+    public static ReadOnlySpan<TNext> Select<TValue, TNext>( ref readonly ReadOnlySpan<TValue> span, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
     {
         if ( span.IsEmpty ) { return default; }
@@ -46,7 +46,7 @@ public static class LinkSpan
 
 
     [Pure]
-    public static ReadOnlySpan<TNext> Where<TValue, TNext>( ReadOnlySpan<TValue> span, RefCheck<TValue> selector, RefConvert<TValue, TNext> func )
+    public static ReadOnlySpan<TNext> Where<TValue, TNext>( ref readonly ReadOnlySpan<TValue> span, RefCheck<TValue> selector, RefConvert<TValue, TNext> func )
         where TNext : IEquatable<TNext>
     {
         if ( span.IsEmpty ) { return default; }
@@ -64,7 +64,7 @@ public static class LinkSpan
 
 
     [Pure]
-    public static ReadOnlySpan<TValue> Join<TValue>( this ReadOnlySpan<TValue> first, params ReadOnlySpan<TValue> last )
+    public static ReadOnlySpan<TValue> Join<TValue>( this ref readonly ReadOnlySpan<TValue> first, params ReadOnlySpan<TValue> last )
     {
         int          size   = first.Length;
         TValue[]     buffer = GC.AllocateUninitializedArray<TValue>( size + last.Length );
@@ -76,7 +76,7 @@ public static class LinkSpan
 
 
     [Pure]
-    public static ReadOnlySpan<TValue> Replace<TValue>( this ReadOnlySpan<TValue> value, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue )
+    public static ReadOnlySpan<TValue> Replace<TValue>( this ref readonly ReadOnlySpan<TValue> value, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue )
         where TValue : unmanaged, IEquatable<TValue>
     {
         Buffer<TValue> buffer = new(value.Length + value.Count( oldValue ) * (newValue.Length - oldValue.Length));
@@ -113,7 +113,7 @@ public static class LinkSpan
 
 
     [Pure]
-    public static ReadOnlySpan<TValue> Remove<TValue>( this ReadOnlySpan<TValue> span, TValue value )
+    public static ReadOnlySpan<TValue> Remove<TValue>( this ref readonly ReadOnlySpan<TValue> span, TValue value )
         where TValue : IEquatable<TValue>
     {
         TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
@@ -129,7 +129,7 @@ public static class LinkSpan
 
 
     [Pure]
-    public static ReadOnlySpan<TValue> Remove<TValue>( this ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> values )
+    public static ReadOnlySpan<TValue> Remove<TValue>( this ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> values )
         where TValue : IEquatable<TValue>
     {
         TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );

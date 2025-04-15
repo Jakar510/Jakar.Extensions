@@ -85,12 +85,12 @@ public abstract partial class Database
 
         ErrorOrResult<SubscriptionStatus> status = await ValidateSubscription( connection, transaction, record, token );
 
-        if ( status.HasErrors )
+        if ( status.TryGetValue( out Errors? errors ) )
         {
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
 
-            return status.Error;
+            return errors;
         }
 
         if ( record.IsDisabled )
@@ -173,7 +173,7 @@ public abstract partial class Database
     public virtual async ValueTask<ErrorOrResult<Tokens>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin( connection, transaction, refreshToken, types, token );
-        if ( result.TryGetValue( out UserRecord? record, out Errors? error ) is false ) { return error.Value; }
+        if ( result.TryGetValue( out UserRecord? record, out Errors? error ) is false ) { return error; }
 
         DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
 
@@ -210,7 +210,7 @@ public abstract partial class Database
 
         return result.TryGetValue( out UserRecord? record, out Errors? error )
                    ? await GetToken( connection, transaction, record, types, token )
-                   : error.Value;
+                   : error;
     }
 
 
@@ -229,7 +229,7 @@ public abstract partial class Database
 
         Claim[]                   claims = validationResult.ClaimsIdentity.Claims.ToArray();
         ErrorOrResult<UserRecord> result = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
-        if ( result.TryGetValue( out UserRecord? record, out Errors? errors ) is false ) { return errors.Value; }
+        if ( result.TryGetValue( out UserRecord? record, out Errors? errors ) is false ) { return errors; }
 
         record.LastLogin = DateTimeOffset.UtcNow;
         await Users.Update( connection, transaction, record, token );

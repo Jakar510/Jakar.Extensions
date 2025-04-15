@@ -60,7 +60,7 @@ public class StringCollectionBenchmarks
         {
             _count  = value;
             _values = GetArray( 10000 );
-            _array  = ImmutableArray.Create( _values );
+            _array  = [.._values];
             _memory = _values;
         }
     }

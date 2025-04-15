@@ -10,8 +10,8 @@ namespace Jakar.Database;
 
 public static class MinApis
 {
-    public static void ExpireOneMinute( this   OutputCachePolicyBuilder policy )                            => policy.Expire( TimeSpan.FromMinutes( 1 ) );
-    public static void ExpireOneMinute( this   OutputCachePolicyBuilder policy, params string[] queryKeys ) => policy.Expire( TimeSpan.FromMinutes( 1 ) ).SetVaryByQuery( queryKeys );
-    public static void ExpireFiveMinutes( this OutputCachePolicyBuilder policy )                            => policy.Expire( TimeSpan.FromMinutes( 5 ) );
-    public static void ExpireFiveMinutes( this OutputCachePolicyBuilder policy, params string[] queryKeys ) => policy.Expire( TimeSpan.FromMinutes( 5 ) ).SetVaryByQuery( queryKeys );
+    public static void ExpireOneMinute( this   OutputCachePolicyBuilder policy )                            { policy.Expire( TimeSpan.FromMinutes( 1 ) ); }
+    public static void ExpireOneMinute( this   OutputCachePolicyBuilder policy, params string[] queryKeys ) { policy.Expire( TimeSpan.FromMinutes( 1 ) ).SetVaryByQuery( queryKeys ); }
+    public static void ExpireFiveMinutes( this OutputCachePolicyBuilder policy )                            { policy.Expire( TimeSpan.FromMinutes( 5 ) ); }
+    public static void ExpireFiveMinutes( this OutputCachePolicyBuilder policy, params string[] queryKeys ) { policy.Expire( TimeSpan.FromMinutes( 5 ) ).SetVaryByQuery( queryKeys ); }
 }

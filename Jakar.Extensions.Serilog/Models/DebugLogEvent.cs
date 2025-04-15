@@ -25,18 +25,18 @@ public sealed class DebugLogEvent( string source, string message, string caller,
 
 
     public static DebugLogEvent Create<TValue>( string message, LogEventLevel level = LogEventLevel.Debug, EventDetails? details = null,                [CallerMemberName] string caller  = EMPTY )                                          => Create( typeof(TValue), message, level, details, caller );
-    public static DebugLogEvent Create( Type      source,  string        message,                     LogEventLevel level   = LogEventLevel.Debug, EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
-    public static DebugLogEvent Create( string    source,  string        message,                     LogEventLevel level,                         EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
+    public static DebugLogEvent Create( Type           source,  string        message,                     LogEventLevel level   = LogEventLevel.Debug, EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
+    public static DebugLogEvent Create( string         source,  string        message,                     LogEventLevel level,                         EventDetails?             details = null, [CallerMemberName] string caller = EMPTY ) => new(source, message, caller, level, details);
 
 
-    public static DebugLogEvent Error<TValue>( TValue   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Error, details, caller );
-    public static DebugLogEvent Error( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
-    public static DebugLogEvent Error( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error<TValue>( TValue _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error( Type           source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
+    public static DebugLogEvent Error( string         source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Error, details, caller );
 
 
-    public static DebugLogEvent Fatal<TValue>( TValue   _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Fatal, details, caller );
-    public static DebugLogEvent Fatal( Type   source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
-    public static DebugLogEvent Fatal( string source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal<TValue>( TValue _,      Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create<TValue>( e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal( Type           source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
+    public static DebugLogEvent Fatal( string         source, Exception e, EventDetails? details = null, [CallerMemberName] string caller = EMPTY ) => Create( source, e.Message, LogEventLevel.Fatal, details, caller );
 
 
     public override string ToString() => Description;
@@ -131,7 +131,7 @@ public sealed class DebugLogEvent( string source, string message, string caller,
         public Collection( params ReadOnlySpan<DebugLogEvent> enumerable ) : this() => Add( enumerable );
 
 
-        protected override bool Filter( ref readonly DebugLogEvent? log )
+        protected override bool Filter( int index, ref readonly DebugLogEvent? log )
         {
             if ( log is null ) { return false; }
 

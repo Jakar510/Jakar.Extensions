@@ -252,7 +252,7 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
             Log[]                    logs     = batch.Select( Log.Create ).ToArray( batch.Length );
             WebResponse<LogResponse> response = await _requester.Post( INGEST, logs, token ).AsJson<LogResponse>();
 
-            if ( response.IsSuccessStatusCode() ) { return response.Payload; }
+            if ( response.IsSuccessStatusCode ) { return response.Payload; }
 
             Exception? e      = response.Exception;
             string?    error  = response.ErrorMessage;

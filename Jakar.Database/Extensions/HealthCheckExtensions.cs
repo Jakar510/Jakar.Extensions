@@ -26,19 +26,34 @@ public static class HealthChecks
 
 
     public static HealthCheckRegistration Create<TValue>()
-        where TValue : IHealthCheck => Create<TValue>( HealthStatus.Unhealthy );
+        where TValue : IHealthCheck
+    {
+        return Create<TValue>( HealthStatus.Unhealthy );
+    }
     public static HealthCheckRegistration Create<TValue>( HealthStatus? failureStatus )
-        where TValue : IHealthCheck => Create<TValue>( failureStatus, GetHealthCheckTags<TValue>() );
+        where TValue : IHealthCheck
+    {
+        return Create<TValue>( failureStatus, GetHealthCheckTags<TValue>() );
+    }
     public static HealthCheckRegistration Create<TValue>( HealthStatus? failureStatus, IEnumerable<string> tags )
-        where TValue : IHealthCheck => new(typeof(TValue).Name, provider => provider.GetRequiredService<TValue>(), failureStatus, tags);
+        where TValue : IHealthCheck
+    {
+        return new HealthCheckRegistration(typeof(TValue).Name, provider => provider.GetRequiredService<TValue>(), failureStatus, tags);
+    }
     public static HealthCheckRegistration Create<TValue>( params string[] tags )
-        where TValue : IHealthCheck => Create<TValue>( HealthStatus.Unhealthy, tags );
+        where TValue : IHealthCheck
+    {
+        return Create<TValue>( HealthStatus.Unhealthy, tags );
+    }
     public static HealthCheckRegistration Create<TValue>( HealthStatus? failureStatus, params string[] tags )
-        where TValue : IHealthCheck => new(typeof(TValue).Name, provider => provider.GetRequiredService<TValue>(), failureStatus, tags);
+        where TValue : IHealthCheck
+    {
+        return new HealthCheckRegistration(typeof(TValue).Name, provider => provider.GetRequiredService<TValue>(), failureStatus, tags);
+    }
 
 
-    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder )                                       => builder.Services.AddHealthChecks();
-    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, HealthCheckRegistration registration ) => builder.AddHealthChecks().Add( registration );
+    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder )                                       { return builder.Services.AddHealthChecks(); }
+    public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, HealthCheckRegistration registration ) { return builder.AddHealthChecks().Add( registration ); }
     public static IHealthChecksBuilder AddHealthChecks( this WebApplicationBuilder builder, params HealthCheckRegistration[] registrations )
     {
         IHealthChecksBuilder checks = builder.AddHealthChecks();

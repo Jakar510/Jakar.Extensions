@@ -16,7 +16,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -36,7 +36,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -56,7 +56,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -76,7 +76,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -96,7 +96,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -116,7 +116,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -136,7 +136,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -158,7 +158,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 
@@ -201,7 +201,7 @@ public static partial class DbExtensions
             else
             {
                 passed = false;
-                yield return errors.Value;
+                yield return errors;
             }
         }
 

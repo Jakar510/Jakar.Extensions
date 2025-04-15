@@ -12,7 +12,7 @@ public static class Controllers
 {
     public const  string       DETAILS = nameof(DETAILS);
     public const  string       ERROR   = nameof(ERROR);
-    public static ActionResult ClientClosed( this ControllerBase _ ) => new StatusCodeResult( Status.ClientClosedRequest.AsInt() );
+    public static ActionResult ClientClosed( this ControllerBase _ ) { return new StatusCodeResult( Status.ClientClosedRequest.AsInt() ); }
 
 
     public static ActionResult Duplicate( this ControllerBase controller, Exception e )
@@ -128,12 +128,12 @@ public static class Controllers
     }
 
 
-    public static ActionResult Problem( this ControllerBase controller, in Status      status )  => controller.Problem( controller.ToProblemDetails( status ) );
-    public static ActionResult Problem( this ControllerBase _,          ProblemDetails details ) => new ObjectResult( details ) { StatusCode = details.Status };
+    public static ActionResult Problem( this ControllerBase controller, in Status      status )  { return controller.Problem( controller.ToProblemDetails( status ) ); }
+    public static ActionResult Problem( this ControllerBase _,          ProblemDetails details ) { return new ObjectResult( details ) { StatusCode = details.Status }; }
 
 
-    public static ActionResult ServerProblem( this ControllerBase controller, Exception e )                         => controller.ServerProblem( e.Message );
-    public static ActionResult ServerProblem( this ControllerBase controller, string    message = "Unknown Error" ) => controller.Problem( message, statusCode: Status.InternalServerError.AsInt() );
+    public static ActionResult ServerProblem( this ControllerBase controller, Exception e )                         { return controller.ServerProblem( e.Message ); }
+    public static ActionResult ServerProblem( this ControllerBase controller, string    message = "Unknown Error" ) { return controller.Problem( message, statusCode: Status.InternalServerError.AsInt() ); }
 
 
     public static ActionResult TimeoutOccurred( this ControllerBase controller, Exception e )
@@ -187,7 +187,7 @@ public static class Controllers
     }
 
 
-    public static ProblemDetails ToProblemDetails( this ControllerBase controller, in Status status ) => controller.ModelState.ToProblemDetails( status );
+    public static ProblemDetails ToProblemDetails( this ControllerBase controller, in Status status ) { return controller.ModelState.ToProblemDetails( status ); }
     public static ProblemDetails ToProblemDetails( this ModelStateDictionary state, in Status status )
     {
         state.TryGetValue( nameof(ProblemDetails.Detail),   out ModelStateEntry? detail );
@@ -215,10 +215,10 @@ public static class Controllers
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error, string? title = null, string key = ERROR ) => controller.ModelState.AddError( error, title, key );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) => controller.ModelState.AddError( errors.AsSpan() );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) => controller.ModelState.AddError( errors );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, Exception           e )      => controller.ModelState.AddError( e );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, string              error, string? title = null, string key = ERROR ) { controller.ModelState.AddError( error, title, key ); }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, params string[]     errors ) { controller.ModelState.AddError( errors.AsSpan() ); }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) { controller.ModelState.AddError( errors ); }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void AddError( this ControllerBase controller, Exception           e )      { controller.ModelState.AddError( e ); }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -230,10 +230,13 @@ public static class Controllers
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void AddError( this ModelStateDictionary state, string error, string? title = null, string key = ERROR ) => state.AddError( key,
-                                                                                                                                              title is null
-                                                                                                                                                  ? error
-                                                                                                                                                  : $"{title} : {error}" );
+    public static void AddError( this ModelStateDictionary state, string error, string? title = null, string key = ERROR )
+    {
+        state.AddError( key,
+                        title is null
+                            ? error
+                            : $"{title} : {error}" );
+    }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

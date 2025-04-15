@@ -86,7 +86,7 @@ public abstract partial class Database
 
         return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? func( connection, transaction, record )
-                   : errors.Value;
+                   : errors;
     }
 
     public virtual async ValueTask<ErrorOrResult<TValue>> Verify<TValue>( DbConnection connection, DbTransaction transaction, ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, ValueTask<ErrorOrResult<TValue>>> func, CancellationToken token = default )
@@ -95,7 +95,7 @@ public abstract partial class Database
 
         return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? await func( connection, transaction, record, token )
-                   : errors.Value;
+                   : errors;
     }
 
     public virtual async ValueTask<ErrorOrResult<TValue>> Verify<TValue>( DbConnection connection, DbTransaction transaction, ILoginRequest request, Func<DbConnection, DbTransaction, UserRecord, CancellationToken, Task<ErrorOrResult<TValue>>> func, CancellationToken token = default )
@@ -104,7 +104,7 @@ public abstract partial class Database
 
         return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? await func( connection, transaction, record, token )
-                   : errors.Value;
+                   : errors;
     }
 
     public virtual async ValueTask<ErrorOrResult<Tokens>> Verify( DbConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types, CancellationToken token = default )
@@ -113,7 +113,7 @@ public abstract partial class Database
 
         return loginResult.TryGetValue( out UserRecord? record, out Errors? errors )
                    ? await GetToken( connection, transaction, record, types, token )
-                   : errors.Value;
+                   : errors;
     }
 
 

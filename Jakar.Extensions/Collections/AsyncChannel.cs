@@ -35,17 +35,18 @@ public sealed class AsyncChannel<TValue> : IDisposable
 
     public class AsyncReader( AsyncChannel<TValue> parent ) : ChannelReader<TValue?>
     {
-        private readonly ConcurrentQueue<TValue>    _values     = parent._values;
-        private readonly TaskCompletionSource<bool> _completion = parent._completion;
-        public override  bool                       CanCount   => true;
-        public override  bool                       CanPeek    => true;
-        public override  Task                       Completion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _completion.Task; }
-        public override  int                        Count      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.Count; }
-        public           bool                       IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.IsEmpty; }
+        private readonly AsyncChannel<TValue>       _parent = parent;
+        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
+        private          TaskCompletionSource<bool> _Completion => _parent._completion;
+        public override  bool                       CanCount    => true;
+        public override  bool                       CanPeek     => true;
+        public override  Task                       Completion  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Completion.Task; }
+        public override  int                        Count       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Values.Count; }
+        public           bool                       IsEmpty     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Values.IsEmpty; }
 
 
         public TValue? Read() =>
-            _values.TryDequeue( out TValue? first )
+            _Values.TryDequeue( out TValue? first )
                 ? first
                 : default;
         public override bool TryRead( [NotNullWhen( true )] out TValue? value )
@@ -53,7 +54,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
             value = Read();
             return value is not null;
         }
-        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => _values.TryPeek( out value );
+        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => _Values.TryPeek( out value );
         public override ValueTask<TValue?> ReadAsync( CancellationToken               token = default ) => new(Read());
         public override async IAsyncEnumerable<TValue> ReadAllAsync( [EnumeratorCancellation] CancellationToken token = default )
         {
@@ -67,31 +68,32 @@ public sealed class AsyncChannel<TValue> : IDisposable
                 await Task.Delay( 5, token ).ConfigureAwait( false );
             }
         }
-        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(_values.IsEmpty is false);
+        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(_Values.IsEmpty is false);
     }
 
 
 
     public class AsyncWriter( AsyncChannel<TValue> parent ) : ChannelWriter<TValue>
     {
-        private readonly ConcurrentQueue<TValue>    _values     = parent._values;
-        private readonly TaskCompletionSource<bool> _completion = parent._completion;
+        private readonly AsyncChannel<TValue>       _parent = parent;
+        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
+        private          TaskCompletionSource<bool> _Completion => _parent._completion;
 
 
         public override bool TryComplete( Exception? error = null ) => error is not null
-                                                                           ? _completion.TrySetException( error )
-                                                                           : _completion.TrySetResult( true );
+                                                                           ? _Completion.TrySetException( error )
+                                                                           : _Completion.TrySetResult( true );
         public override ValueTask<bool> WaitToWriteAsync( CancellationToken token = default ) => token.IsCancellationRequested
                                                                                                      ? ValueTask.FromCanceled<bool>( token )
                                                                                                      : new ValueTask<bool>( true );
         public override bool TryWrite( TValue value )
         {
-            _values.Enqueue( Validate.ThrowIfNull( value ) );
+            _Values.Enqueue( Validate.ThrowIfNull( value ) );
             return true;
         }
         public override ValueTask WriteAsync( TValue value, CancellationToken token = default )
         {
-            _values.Enqueue( Validate.ThrowIfNull( value ) );
+            _Values.Enqueue( Validate.ThrowIfNull( value ) );
             return ValueTask.CompletedTask;
         }
     }

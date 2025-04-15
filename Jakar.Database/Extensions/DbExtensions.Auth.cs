@@ -34,7 +34,7 @@ public static partial class DbExtensions
         userID = null;
         return false;
     }
-    public static bool TryParse( this ClaimsPrincipal principal, out RecordID<UserRecord> userID, out string userName ) => TryParse( principal.Claims.ToArray(), out userID, out userName );
+    public static bool TryParse( this ClaimsPrincipal principal, out RecordID<UserRecord> userID, out string userName ) { return TryParse( principal.Claims.ToArray(), out userID, out userName ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out RecordID<UserRecord> userID, out string userName )
     {
         userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
@@ -48,7 +48,7 @@ public static partial class DbExtensions
         userID = RecordID<UserRecord>.Empty;
         return false;
     }
-    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName ) => TryParse( principal.Claims.ToArray(), out userID, out userName );
+    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName ) { return TryParse( principal.Claims.ToArray(), out userID, out userName ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName )
     {
         userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
@@ -62,7 +62,7 @@ public static partial class DbExtensions
         userID = null;
         return false;
     }
-    public static bool TryParse( this ClaimsPrincipal principal, out RecordID<UserRecord> userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
+    public static bool TryParse( this ClaimsPrincipal principal, out RecordID<UserRecord> userID, out string userName, out Claim[] roles, out Claim[] groups ) { return TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out RecordID<UserRecord> userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
         roles    = claims.Where( Claims.IsRole ).ToArray();
@@ -78,7 +78,7 @@ public static partial class DbExtensions
         userID = RecordID<UserRecord>.Empty;
         return false;
     }
-    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
+    public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName, out Claim[] roles, out Claim[] groups ) { return TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
         roles    = claims.Where( Claims.IsRole ).ToArray();

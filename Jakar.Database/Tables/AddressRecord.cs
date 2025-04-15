@@ -79,18 +79,19 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
 
     [Pure]
-    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, ReadOnlyMemory<Claim> claims, ClaimType types, CancellationToken token )
+    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
-        DynamicParameters parameters = new();
-        if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), claims.Span.Single( static x => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
+        DynamicParameters   parameters = new();
+        ReadOnlySpan<Claim> span       = claims;
+        if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.StreetAddressLine2 ) ) { parameters.Add( nameof(Line2), claims.Span.Single( static x => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes() ).Value ); }
+        if ( HasFlag( types, ClaimType.StreetAddressLine2 ) ) { parameters.Add( nameof(Line2), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.StateOrProvince ) ) { parameters.Add( nameof(StateOrProvince), claims.Span.Single( static x => x.Type == ClaimType.StateOrProvince.ToClaimTypes() ).Value ); }
+        if ( HasFlag( types, ClaimType.StateOrProvince ) ) { parameters.Add( nameof(StateOrProvince), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StateOrProvince.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.Country ) ) { parameters.Add( nameof(Country), claims.Span.Single( static x => x.Type == ClaimType.Country.ToClaimTypes() ).Value ); }
+        if ( HasFlag( types, ClaimType.Country ) ) { parameters.Add( nameof(Country), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.Country.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), claims.Span.Single( static x => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
+        if ( HasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
 

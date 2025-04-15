@@ -43,7 +43,7 @@ public static class Claims
 
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID )
     {
-        Claim? claim = principal.Claims.FirstOrDefault( IsUserID );
+        Claim? claim = principal.Claims.FirstOrDefault( CheckUserID );
 
         if ( Guid.TryParse( claim?.Value, out Guid id ) )
         {
@@ -53,10 +53,11 @@ public static class Claims
 
         userID = Guid.Empty;
         return false;
+        static bool CheckUserID( Claim claim ) => claim.IsUserID();
     }
     public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out Guid? userID )
     {
-        Claim? claim = principal.Claims.FirstOrDefault( IsUserID );
+        Claim? claim = principal.Claims.FirstOrDefault( CheckUserID );
 
         if ( Guid.TryParse( claim?.Value, out Guid id ) )
         {
@@ -66,6 +67,7 @@ public static class Claims
 
         userID = null;
         return false;
+        static bool CheckUserID( Claim claim ) => claim.IsUserID();
     }
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName ) => TryParse( principal.Claims.ToArray(), out userID, out userName );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName )
@@ -98,8 +100,8 @@ public static class Claims
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
-        roles    = claims.Where( IsRole ).ToArray();
-        groups   = claims.Where( IsGroup ).ToArray();
+        roles    = claims.Where( CheckRole ).ToArray();
+        groups   = claims.Where( CheckGroup ).ToArray();
         userName = claims.FirstOrDefault( IsUserName )?.Value ?? string.Empty;
 
         if ( Guid.TryParse( claims.FirstOrDefault( IsUserID )?.Value, out Guid id ) )
@@ -110,12 +112,14 @@ public static class Claims
 
         userID = Guid.Empty;
         return false;
+        static bool CheckRole( Claim  claim ) => claim.IsRole();
+        static bool CheckGroup( Claim claim ) => claim.IsGroup();
     }
     public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out Guid? userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out Guid? userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
-        roles    = claims.Where( IsRole ).ToArray();
-        groups   = claims.Where( IsGroup ).ToArray();
+        roles    = claims.Where( CheckRole ).ToArray();
+        groups   = claims.Where( CheckGroup ).ToArray();
         userName = claims.FirstOrDefault( IsUserName )?.Value ?? string.Empty;
 
         if ( Guid.TryParse( claims.FirstOrDefault( IsUserID )?.Value, out Guid id ) )
@@ -126,6 +130,8 @@ public static class Claims
 
         userID = null;
         return false;
+        static bool CheckRole( Claim  claim ) => claim.IsRole();
+        static bool CheckGroup( Claim claim ) => claim.IsGroup();
     }
 
 

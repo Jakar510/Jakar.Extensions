@@ -12,6 +12,40 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
     [Pure]
+    public static TValue First<TValue>( scoped ref readonly Span<TValue> values, Func<TValue, bool> selector )
+    {
+        ReadOnlySpan<TValue> span = values;
+        return First( in span, selector );
+    }
+    [Pure]
+    public static TValue First<TValue>( scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( selector( value ) ) { return value; }
+        }
+
+        throw new NotFoundException();
+    }
+    [Pure]
+    public static TValue? FirstOrDefault<TValue>( scoped ref readonly Span<TValue> values, Func<TValue, bool> selector )
+    {
+        ReadOnlySpan<TValue> span = values;
+        return FirstOrDefault( in span, selector );
+    }
+    [Pure]
+    public static TValue? FirstOrDefault<TValue>( scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( selector( value ) ) { return value; }
+        }
+
+        return default;
+    }
+
+
+    [Pure]
     public static TValue First<TValue>( this scoped ref readonly Span<TValue> values, RefCheck<TValue> selector )
     {
         ReadOnlySpan<TValue> span = values;
@@ -46,6 +80,28 @@ public static partial class Spans
 
 
     [Pure]
+    public static TValue Last<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, Func<TValue, bool> predicate )
+    {
+        for ( int index = span.Length - 1; index >= 0; --index )
+        {
+            if ( predicate( span[index] ) ) return span[index];
+        }
+
+        throw new NotFoundException();
+    }
+    [Pure]
+    public static TValue? LastOrDefault<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, Func<TValue, bool> predicate )
+    {
+        for ( int index = span.Length - 1; index >= 0; --index )
+        {
+            if ( predicate( span[index] ) ) return span[index];
+        }
+
+        return default;
+    }
+
+
+    [Pure]
     public static TValue Last<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, RefCheck<TValue> predicate )
     {
         for ( int index = span.Length - 1; index >= 0; --index )
@@ -64,6 +120,24 @@ public static partial class Spans
         }
 
         return default;
+    }
+
+
+    [Pure]
+    public static bool All<TValue>( this scoped ref readonly Span<TValue> values, Func<TValue, bool> selector )
+    {
+        ReadOnlySpan<TValue> span = values;
+        return span.All( selector );
+    }
+    [Pure]
+    public static bool All<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( selector( value ) is false ) { return false; }
+        }
+
+        return true;
     }
 
 
@@ -131,6 +205,40 @@ public static partial class Spans
         foreach ( TValue value in values )
         {
             if ( selector( in value ) ) { return value; }
+        }
+
+        return default;
+    }
+
+
+    [Pure]
+    public static TValue Single<TValue>( scoped ref readonly Span<TValue> values, Func<TValue, bool> selector )
+    {
+        ReadOnlySpan<TValue> span = values;
+        return Single( in span, selector );
+    }
+    [Pure]
+    public static TValue Single<TValue>( scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( selector( value ) ) { return value; }
+        }
+
+        throw new NotFoundException();
+    }
+    [Pure]
+    public static TValue? SingleOrDefault<TValue>( scoped ref readonly Span<TValue> values, Func<TValue, bool> selector )
+    {
+        ReadOnlySpan<TValue> span = values;
+        return SingleOrDefault( in span, selector );
+    }
+    [Pure]
+    public static TValue? SingleOrDefault<TValue>( scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
+    {
+        foreach ( TValue value in values )
+        {
+            if ( selector( value ) ) { return value; }
         }
 
         return default;

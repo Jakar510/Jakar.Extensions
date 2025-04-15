@@ -27,11 +27,17 @@ public static class Log
     {
         if ( logger.IsEnabled( LogLevel.Information ) ) { _senderCallback( logger, remoteIP, className, caller, null ); }
     }
-    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) => Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, className, caller );
+    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) { Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, className, caller ); }
     public static void Sender<TValue>( ILogger logger, HttpContext context, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, typeof(TValue).Name, caller );
+        where TValue : notnull
+    {
+        Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, typeof(TValue).Name, caller );
+    }
     public static void Sender<TValue>( ILogger logger, HttpContext context, TValue cls, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, cls.GetType().Name, caller );
+        where TValue : notnull
+    {
+        Sender( logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, cls.GetType().Name, caller );
+    }
 
 
     public static void ServiceStopped( ILogger logger, string serviceName, Boolean isCancelled, string className, Exception? e, string caller )
@@ -39,10 +45,16 @@ public static class Log
         if ( logger.IsEnabled( LogLevel.Critical ) ) { _serviceStoppedCallback( logger, serviceName, isCancelled, className, caller, e ); }
     }
     public static void ServiceStopped<TValue, TService>( ILogger logger, CancellationToken token, Exception? e = null, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => ServiceStopped( logger, typeof(TValue).Name, token.IsCancellationRequested, typeof(TService).FullName ?? typeof(TService).Name, e, caller );
+        where TValue : notnull
+    {
+        ServiceStopped( logger, typeof(TValue).Name, token.IsCancellationRequested, typeof(TService).FullName ?? typeof(TService).Name, e, caller );
+    }
     public static void ServiceStopped<TValue, TService>( ILogger logger, TValue t, TService cls, CancellationToken token, Exception? e = null, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
-        where TService : notnull => ServiceStopped( logger, t.GetType().Name, token.IsCancellationRequested, cls.GetType().FullName ?? cls.GetType().Name, e, caller );
+        where TService : notnull
+    {
+        ServiceStopped( logger, t.GetType().Name, token.IsCancellationRequested, cls.GetType().FullName ?? cls.GetType().Name, e, caller );
+    }
 
 
     public static void ServiceError( ILogger logger, Exception e, string serviceName, string className, string caller )
@@ -50,10 +62,16 @@ public static class Log
         if ( logger.IsEnabled( LogLevel.Critical ) ) { _serviceErrorCallback( logger, serviceName, className, caller, e ); }
     }
     public static void ServiceError<TValue, TService>( ILogger logger, Exception e, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => ServiceError( logger, e, typeof(TValue).Name, typeof(TService).FullName ?? typeof(TService).Name, caller );
+        where TValue : notnull
+    {
+        ServiceError( logger, e, typeof(TValue).Name, typeof(TService).FullName ?? typeof(TService).Name, caller );
+    }
     public static void ServiceError<TValue, TService>( ILogger logger, Exception e, TValue t, TService cls, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
-        where TService : notnull => ServiceError( logger, e, t.GetType().Name, cls.GetType().FullName ?? cls.GetType().Name, caller );
+        where TService : notnull
+    {
+        ServiceError( logger, e, t.GetType().Name, cls.GetType().FullName ?? cls.GetType().Name, caller );
+    }
 
 
     public static void Error( ILogger logger, Exception e, string className, string caller )
@@ -61,9 +79,15 @@ public static class Log
         if ( logger.IsEnabled( LogLevel.Error ) ) { _errorCallback( logger, className, caller, e ); }
     }
     public static void Error<TValue>( ILogger logger, Exception e, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => Error( logger, e, typeof(TValue).Name, caller );
+        where TValue : notnull
+    {
+        Error( logger, e, typeof(TValue).Name, caller );
+    }
     public static void Error<TValue>( ILogger logger, Exception e, TValue cls, [CallerMemberName] string caller = EMPTY )
-        where TValue : notnull => Error( logger, e, cls.GetType().Name, caller );
+        where TValue : notnull
+    {
+        Error( logger, e, cls.GetType().Name, caller );
+    }
 
 
     public static void CacheFailure( ILogger logger, Exception e, string table )

@@ -1,12 +1,34 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2024  21:04
 
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Extensions;
+
+
+public interface IErrorOrResult<TValue>
+{
+    bool               HasErrors { get; }
+    bool               HasValue  { get; }
+    Status             GetStatus();
+    TResult            Match<TResult>( Func<TValue, TResult>                        value, Func<Errors, TResult>              errors );
+    ValueTask<TResult> Match<TResult>( Func<TValue, ValueTask<TResult>>             value, Func<Errors, ValueTask<TResult>>   errors );
+    Task<TResult>      Match<TResult>( Func<TValue, Task<TResult>>                  value, Func<Errors, Task<TResult>>        errors );
+    bool               TryGetValue( [NotNullWhen( true )] out TValue?               value, [NotNullWhen( false )] out Errors? errors );
+    bool               TryGetValue( [NotNullWhen( true )] out TValue?               value );
+    bool               TryGetValue( [NotNullWhen( true )] out Errors?               errors );
+    bool               TryGetValue( out                       ReadOnlyMemory<Error> errors );
+    bool               TryGetValue( out                       ReadOnlySpan<Error>   errors );
+    void               Deconstruct( out                       TValue?               value, out Errors? error );
+}
+
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
+public readonly record struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrResult<bool?>
 {
     public static readonly ErrorOrResult Empty = new(null, Errors.Empty);
     public readonly        bool?         Value = Value;
@@ -18,7 +40,9 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
     [MemberNotNullWhen( true, nameof(Value) )] public bool Passed    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is true; }
 
 
-    public Status GetStatus() => Error?.GetStatus() ?? Status.Ok;
+    public static ErrorOrResult Create( bool   value )  => new(value, Errors.Empty);
+    public static ErrorOrResult Create( Errors errors ) => new(null, errors);
+    public        Status        GetStatus()             => Error?.GetStatus() ?? Status.Ok;
 
 
     public TResult Match<TResult>( Func<bool?, TResult> value, Func<Errors, TResult> errors ) => TryGetValue( out Errors? e )
@@ -41,10 +65,24 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
                                                                                                                       : value( this );
 
 
-    public static ErrorOrResult Create( bool   value )  => new(value, Errors.Empty);
-    public static ErrorOrResult Create( Errors errors ) => new(null, errors);
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )]
+    public bool TryGetValue( [NotNullWhen( true )] out bool? value, [NotNullWhen( false )] out Errors? errors )
+    {
+        value  = Value;
+        errors = null;
+        return value is true;
+    }
 
 
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )]
+    public bool TryGetValue( [NotNullWhen( true )] out bool? value )
+    {
+        value = Value;
+        return value is true;
+    }
+
+
+    [MemberNotNullWhen( true, nameof(Error) )]
     public bool TryGetValue( [NotNullWhen( true )] out Errors? errors )
     {
         errors = Error;
@@ -59,6 +97,13 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
     {
         errors = Error?.Details;
         return errors.IsEmpty is false;
+    }
+   
+    
+    public void Deconstruct( out bool value, out Errors? error )
+    {
+        value = false;
+        error = null;
     }
 
 
@@ -84,18 +129,20 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Error )
+public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : IErrorOrResult<TValue>
 {
     public static readonly ErrorOrResult<TValue> Empty = new(default, Errors.Empty);
-    public readonly        TValue?               Value = Value;
     public readonly        Errors?               Error = Error;
+    public readonly        TValue?               Value = Value;
 
 
-    [MemberNotNullWhen( true, nameof(Value) )] public bool HasErrors { get => Error?.IsValid is true && Value is null; }
-    [MemberNotNullWhen( true, nameof(Value) )] public bool HasValue  { get => Value is not null; }
+    [MemberNotNullWhen( false, nameof(Value) ), MemberNotNullWhen( true, nameof(Error) )] public bool HasErrors => Error?.IsValid is true && Value is null;
+    [MemberNotNullWhen( true,  nameof(Value) )]                                           public bool HasValue  => Value is not null;
 
 
-    public Status GetStatus() => Error?.GetStatus() ?? Status.Ok;
+    public static ErrorOrResult<TValue> Create( TValue value )  => new(value, Errors.Empty);
+    public static ErrorOrResult<TValue> Create( Errors errors ) => new(default, errors);
+    public        Status                GetStatus()             => Error?.GetStatus() ?? Status.Ok;
 
 
     public TResult Match<TResult>( Func<TValue, TResult> value, Func<Errors, TResult> errors ) =>
@@ -112,21 +159,24 @@ public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Erro
             : errors( e );
 
 
-    public static ErrorOrResult<TValue> Create( TValue value )  => new(value, Errors.Empty);
-    public static ErrorOrResult<TValue> Create( Errors errors ) => new(default, errors);
-
-
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )]
     public bool TryGetValue( [NotNullWhen( true )] out TValue? value, [NotNullWhen( false )] out Errors? errors )
     {
         errors = Error;
         value  = Value;
         return value is not null;
     }
+
+
+    [MemberNotNullWhen( true, nameof(Value) ), MemberNotNullWhen( false, nameof(Error) )]
     public bool TryGetValue( [NotNullWhen( true )] out TValue? value )
     {
         value = Value;
         return value is not null;
     }
+
+
+    [MemberNotNullWhen( false, nameof(Error) )]
     public bool TryGetValue( [NotNullWhen( true )] out Errors? errors )
     {
         errors = Error;
@@ -141,6 +191,13 @@ public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Erro
     {
         errors = Error?.Details;
         return errors.IsEmpty is false;
+    }
+    
+    
+    public void Deconstruct( out TValue? value, out Errors? error )
+    {
+        value = Value;
+        error = Error;
     }
 
 
