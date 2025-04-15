@@ -126,7 +126,8 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
         if ( value.Contains( FLAG_SEPARATOR ) is false ) { return Stable; }
 
         int                index = value.IndexOf( FLAG_SEPARATOR );
-        ReadOnlySpan<char> flag  = value[(index - 1)..].Trim( FLAG_SEPARATOR );
+        ReadOnlySpan<char> flag  = value[(index - 1)..];
+        flag  = flag.Trim( FLAG_SEPARATOR );
         value = value[..index];
 
         int end = flag.IndexOfAny( Randoms.Numeric );

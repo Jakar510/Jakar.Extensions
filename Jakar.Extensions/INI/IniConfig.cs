@@ -86,7 +86,8 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
 
                 // [Section:header]
                 case '[' when line[^1] == ']':
-                    ReadOnlySpan<char> sectionSpan = line[1..^1].Trim(); // remove the brackets and whitespace
+                    ReadOnlySpan<char> sectionSpan = line[1..^1];
+                    sectionSpan = sectionSpan.Trim(); // remove the brackets and whitespace
 
                     if ( sectionSpan.IsNullOrWhiteSpace() ) { throw new FormatException( "section title cannot be empty or whitespace." ); }
 
@@ -95,20 +96,21 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
                     continue;
             }
 
-
-            if ( line.Trim().IsNullOrWhiteSpace() ) { continue; }
+            line = line.Trim();
+            if ( line.IsNullOrWhiteSpace() ) { continue; }
 
 
             int separator = line.IndexOf( '=' ); // key = value OR "value"
             if ( separator < 0 ) { continue; }
 
+            ReadOnlySpan<char> keySpan = line[..separator];
+            string             key     = keySpan.Trim().ToString();
 
-            string key = line[..separator].Trim().ToString();
+            ReadOnlySpan<char> valueSpan = line[(separator + 1)..];
+            valueSpan = valueSpan.Trim();
+            valueSpan = valueSpan.Trim( '"' ); // Remove quotes;
 
-            string value = line[(separator + 1)..]
-                          .Trim()
-                          .Trim( '"' ) // Remove quotes;
-                          .ToString();
+            string value = valueSpan.ToString();
 
             Debug.Assert( !string.IsNullOrEmpty( section ) );
 

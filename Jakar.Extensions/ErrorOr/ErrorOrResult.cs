@@ -13,7 +13,7 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error )
     public readonly        Errors?       Error = Error;
 
 
-    [MemberNotNullWhen( true, nameof(Error) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Error.IsValid; }
+    [MemberNotNullWhen( true, nameof(Error) )] public bool HasErrors { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Error?.IsValid is true; }
     [MemberNotNullWhen( true, nameof(Value) )] public bool HasValue  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is not null; }
     [MemberNotNullWhen( true, nameof(Value) )] public bool Passed    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value is true; }
 

@@ -39,8 +39,7 @@ public static class ErrorExtensions
     }
 
 
-    public static string GetMessage( this ref readonly Errors errors ) => string.Join( '\n', errors.Details.Select( GetMessage ) );
-
+    public static string GetMessage( this Errors             errors ) => string.Join( '\n', errors.Details.Select( GetMessage ) );
     public static string GetMessage( this IEnumerable<Error> errors ) => string.Join( '\n', errors.Select( GetMessage ) );
 
     public static string GetMessage( this ref readonly ReadOnlySpan<Error> errors )

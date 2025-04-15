@@ -46,21 +46,21 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Jakar.Extensions" Version="9.5.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.3" />
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.3" />
+    <PackageReference Include="Jakar.Extensions" Version="9.7.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.4" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.4" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.11.1" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.11.1" />
 	<PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
 	<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
 	<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-	<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.0" />
+	<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.1" />
 	<PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
 	<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
 	<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
 	<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-	<PackageReference Include="Serilog.Sinks.Http" Version="9.1.0" />
+	<PackageReference Include="Serilog.Sinks.Http" Version="9.1.1" />
 	<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.1.1" />
 	<PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
   </ItemGroup>

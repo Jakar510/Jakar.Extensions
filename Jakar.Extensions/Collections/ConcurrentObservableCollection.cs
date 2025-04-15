@@ -326,7 +326,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
         {
-            await foreach ( (int i, TValue value) in collection.Enumerate( index ).WithCancellation( token ) ) { InternalInsert( i, value ); }
+            await foreach ( (int i, TValue value) in collection.Enumerate( index ).WithCancellation( token ) ) { InternalInsert( i, in value ); }
         }
     }
     public async ValueTask InsertRangeAsync( int index, ImmutableArray<TValue> collection, CancellationToken token = default )
@@ -502,7 +502,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() )
         {
-            if ( value is TValue x ) { InternalInsert( index, x ); }
+            if ( value is TValue x ) { InternalInsert( index, in x ); }
         }
     }
 
@@ -539,11 +539,11 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
     public override void Insert( int index, TValue value )
     {
-        using ( AcquireLock() ) { InternalInsert( index, value ); }
+        using ( AcquireLock() ) { InternalInsert( index, in value ); }
     }
     public async ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
     {
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, value ); }
+        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, in value ); }
     }
 
 

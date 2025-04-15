@@ -79,8 +79,8 @@ public class EmbeddedResources<TValue>
     }
 
 
-    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName ) => await GetResourceTextAsync<TValue>( fileName, Encoding.Default );
-    public async ValueTask<TValue> GetResourceTextAsync<TValue>( string fileName, Encoding encoding )
+    public async ValueTask<TValue> GetResourceJsonAsync( string fileName ) => await GetResourceJsonAsync( fileName, Encoding.Default );
+    public async ValueTask<TValue> GetResourceJsonAsync( string fileName, Encoding encoding )
     {
         string text = await GetResourceTextAsync( fileName, encoding );
         return text.FromJson<TValue>();

@@ -271,6 +271,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEquatable<Error>, ICompar
                    ? CompareTo( error )
                    : throw new ArgumentException( $"Object must be of type {nameof(Error)}" );
     }
+    public static bool Equals( ReadOnlySpan<Error> left, ReadOnlySpan<Error> right ) => left.SequenceEqual( right );
     public bool Equals( Error? other )
     {
         if ( other is null ) { return false; }

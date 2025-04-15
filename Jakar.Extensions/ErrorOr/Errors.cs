@@ -40,7 +40,7 @@ public readonly record struct Alert()
 
 [Serializable, DefaultValue( nameof(Empty) )]
 [method: JsonConstructor]
-public sealed record Errors()
+public sealed class Errors() : BaseClass, IEquatable<Errors>
 {
     private static readonly Error[] _details = [];
     public static readonly Errors Empty = new()
@@ -78,4 +78,16 @@ public sealed record Errors()
     public static implicit operator Errors( Error[]               details ) => Create( null, details );
     public static implicit operator Errors( List<Error>           details ) => Create( details.ToArray() );
     public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create( details.ToArray() );
+
+
+    public bool Equals( Errors? other )
+    {
+        if ( other is null ) { return false; }
+
+        return ReferenceEquals( this, other ) || Nullable.Equals( Alert, other.Alert ) && Error.Equals( Details, other.Details );
+    }
+    public override bool Equals( object? obj )                      => ReferenceEquals( this, obj ) || obj is Errors other && Equals( other );
+    public override int  GetHashCode()                              => HashCode.Combine( Alert, Details );
+    public static   bool operator ==( Errors? left, Errors? right ) => Equals( left, right );
+    public static   bool operator !=( Errors? left, Errors? right ) => !Equals( left, right );
 }

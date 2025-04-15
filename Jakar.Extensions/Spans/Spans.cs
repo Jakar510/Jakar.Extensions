@@ -78,7 +78,7 @@ public static partial class Spans
             Array.Sort( leftSpan );
             Array.Sort( rightSpan );
 
-            return SequenceEqual( leftSpan, rightSpan );
+            return leftSpan.SequenceEqual( rightSpan );
         }
         finally
         {
