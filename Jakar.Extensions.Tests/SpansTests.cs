@@ -306,7 +306,7 @@ public class SpansTests : Assert
     [Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Where( params double[] values )
     {
-        ReadOnlySpan<double> results = LinkSpan.Where<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> results = Spans.Where<double>( values, IsDevisableByTwo );
         this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
@@ -314,7 +314,7 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void WhereValues( params double[] values )
     {
-        ReadOnlySpan<double> results = LinkSpan.Where<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> results = Spans.Where<double>( values, IsDevisableByTwo );
         this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
@@ -340,7 +340,7 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a154dbz123", "XYZ", "Abc_a154dbz123XYZ" )]
     public void Join( string value, string other, string expected )
     {
-        ReadOnlySpan<char> result = LinkSpan.Join<char>( value, other );
+        ReadOnlySpan<char> result = Spans.Join<char>( value, other );
 
         Console.WriteLine( $"{nameof(result)}  : {result}" );
         Console.WriteLine( $"{nameof(expected)}: {expected}" );
@@ -352,7 +352,7 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a1524dbz123", "1", "Abc_a524dbz23" ), TestCase( "Abc_a1524dbz123", "2", "Abc_a154dbz13" )]
     public void RemoveAll( string value, string other, string expected )
     {
-        ReadOnlySpan<char> result = LinkSpan.Remove<char>( value, other );
+        ReadOnlySpan<char> result = Spans.Remove<char>( value, other );
         this.AreEqual( expected, result );
     }
 
@@ -360,7 +360,7 @@ public class SpansTests : Assert
     [Test, TestCase( "Abc_a1524dbz123", "1", "z", @"Abc_az524dbzz23" ), TestCase( "Abc_a1524dbz123", "2", "4", "Abc_a1544dbz143" )]
     public void Replace( string value, string oldValue, string newValue, string expected )
     {
-        ReadOnlySpan<char> result = LinkSpan.Replace<char>( value, oldValue, newValue );
+        ReadOnlySpan<char> result = Spans.Replace<char>( value, oldValue, newValue );
 
         Console.WriteLine( $"{nameof(result)}  : {result}" );
         Console.WriteLine( $"{nameof(expected)}: {expected}" );

@@ -120,7 +120,7 @@ public class SpansBenchmarks
 
     [Benchmark] public ReadOnlySpan<char> AsBuffer() => Value;
 
-    [Benchmark] public ReadOnlySpan<char> Join() => LinkSpan.Join<char>( Value, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
 
     [Benchmark, MustDisposeResource]
     public Buffer<char> RemoveAll_Params()
@@ -139,7 +139,7 @@ public class SpansBenchmarks
         ReadOnlySpan<char> value = Value;
         Spans.RemoveAll( in value, '1' );
     }
-    [Benchmark] public ReadOnlySpan<char> Replace() => LinkSpan.Replace<char>( Value, OLD, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Replace() => Spans.Replace<char>( Value, OLD, NEW_VALUE );
 
 
     [Benchmark]

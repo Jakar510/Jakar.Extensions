@@ -57,7 +57,7 @@ public class EmbeddedResources<TValue>
     public byte[] GetResourceBytes( string fileName )
     {
         using Stream       stream = GetResourceStream( fileName );
-        using MemoryStream memory = new( (int)stream.Length );
+        using MemoryStream memory = new((int)stream.Length);
         stream.CopyTo( memory );
         return memory.GetBuffer();
     }
@@ -74,15 +74,15 @@ public class EmbeddedResources<TValue>
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
         await using Stream stream = GetResourceStream( fileName );
-        using StreamReader reader = new( stream, encoding );
+        using StreamReader reader = new(stream, encoding);
         return await reader.ReadToEndAsync();
     }
 
 
-    public async ValueTask<TValue> GetResourceJsonAsync( string fileName ) => await GetResourceJsonAsync( fileName, Encoding.Default );
-    public async ValueTask<TValue> GetResourceJsonAsync( string fileName, Encoding encoding )
+    public async ValueTask<T> GetResourceJsonAsync<T>( string fileName ) => await GetResourceJsonAsync<T>( fileName, Encoding.Default );
+    public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
     {
         string text = await GetResourceTextAsync( fileName, encoding );
-        return text.FromJson<TValue>();
+        return text.FromJson<T>();
     }
 }
