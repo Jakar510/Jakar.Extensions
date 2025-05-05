@@ -27,8 +27,8 @@ public interface ILoginRequest<out TValue> : ILoginRequest
 
 public interface IChangePassword : ILoginRequest, INotifyPropertyChanged, INotifyPropertyChanging
 {
-    public new string Password        { get; set; }
     public     string ConfirmPassword { get; set; }
+    public new string Password        { get; set; }
 }
 
 

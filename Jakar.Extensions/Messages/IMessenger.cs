@@ -295,7 +295,7 @@ public sealed class ConditionalWeakTable2<TKey, TValue>
 
             int hashCode = RuntimeHelpers.GetHashCode( key ) & int.MaxValue;
             int newEntry = _firstFreeEntry++;
-            
+
             _buckets                    ??= new int[DEFAULT_CAPACITY];
             _entries                    ??= new Entry[Math.Max( DEFAULT_CAPACITY, newEntry )];
             _entries[newEntry].hashCode =   hashCode;
@@ -683,3 +683,5 @@ public sealed class ConditionalWeakTable2<TKey, TValue>
     }
 }
 */
+
+

@@ -6,20 +6,22 @@
 public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable, ISpanFormattable, ISpanParsable<AppVersion>
 {
     private const          char                       SEPARATOR = '.';
+    public static readonly AppVersion                 Default   = new();
     private                string?                    _string;
-    public static readonly AppVersion                 Default = new();
     public static          Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
-    public static          Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
     public static          FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public                 Format                     Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 int                        Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 int?                       Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 int?                       Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 int?                       MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 int?                       MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static          Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
     public                 int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public                 AppVersionFlags            Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    [JsonIgnore] public    int                        Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    int IReadOnlyCollection<int>.                     Count                 => Scheme.AsInt();
+    public              AppVersionFlags               Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              bool                          IsValid               => ReferenceEquals( this, Default ) is false && this != Default;
+    [JsonIgnore] public int                           Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    public              int?                          Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int                           Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              Format                        Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
 
 
     static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );
@@ -156,10 +158,10 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
             if ( int.TryParse( value, NumberStyles.Integer, provider, out int n ) ) { return new AppVersion( n ); }
 
-            AppVersionFlags    flags      = AppVersionFlags.Parse( ref value );
-            int                count      = value.Count( SEPARATOR );
-            Span<int>          result     = stackalloc int[count + 1];
-            int                i          = 0;
+            AppVersionFlags flags  = AppVersionFlags.Parse( ref value );
+            int             count  = value.Count( SEPARATOR );
+            Span<int>       result = stackalloc int[count + 1];
+            int             i      = 0;
 
             foreach ( ReadOnlySpan<char> span in value.SplitOn( SEPARATOR ) )
             {
@@ -172,7 +174,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
     }
 
 
-    public static AppVersion FromAssembly<TValue>()                     => FromAssembly( typeof(TValue).Assembly );
+    public static AppVersion FromAssembly<TValue>()                => FromAssembly( typeof(TValue).Assembly );
     public static AppVersion FromAssembly( Type         type )     => FromAssembly( type.Assembly );
     public static AppVersion FromAssembly( Assembly     assembly ) => FromAssembly( assembly.GetName() );
     public static AppVersion FromAssembly( AssemblyName assembly ) => assembly.Version ?? throw new NullReferenceException( nameof(assembly.Version) );
@@ -239,9 +241,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
-    ///     <see
-    ///         cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -272,9 +272,7 @@ public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEqu
 
         if ( Build.HasValue ) { yield return Build.Value; }
     }
-    IEnumerator IEnumerable.     GetEnumerator() => GetEnumerator();
-    int IReadOnlyCollection<int>.Count           => Scheme.AsInt();
-    public bool                  IsValid         => ReferenceEquals( this, Default ) is false && this != Default;
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
     // public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance.Equals( left, right );

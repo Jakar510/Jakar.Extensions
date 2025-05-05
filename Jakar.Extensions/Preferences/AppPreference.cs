@@ -4,20 +4,17 @@
 [SuppressMessage( "ReSharper", "ConvertToAutoPropertyWhenPossible" )]
 public static class AppPreference
 {
-    public const string FALSE = "false";
-    public const string TRUE  = "true";
-    private static readonly Lock _lock = new();
-    private static IAppPreferences? _source;
+    public const            string           FALSE = "false";
+    public const            string           TRUE  = "true";
+    private static readonly Lock             _lock = new();
+    private static          IAppPreferences? _source;
 
 
     public static IAppPreferences Source
     {
         get
         {
-            lock (_lock)
-            {
-                return _source ??= AppPreferenceFile.Create();
-            }
+            lock (_lock) { return _source ??= AppPreferenceFile.Create(); }
         }
         set
         {
@@ -33,7 +30,7 @@ public static class AppPreference
                                                             NULL  => null,
                                                             TRUE  => true,
                                                             FALSE => false,
-                                                            _     => string.Equals(TRUE, value, StringComparison.OrdinalIgnoreCase)
+                                                            _     => string.Equals( TRUE, value, StringComparison.OrdinalIgnoreCase )
                                                         };
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

@@ -5,8 +5,8 @@
     [Serializable]
     public abstract class ObservableClass : BaseClass, IObservableObject
     {
-        public static             DateTime                                                SQLMinDate     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDate; }
-        public static             DateOnly                                                SQLMinDateOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDateOnly; }
+        public static DateTime SQLMinDate     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDate; }
+        public static DateOnly SQLMinDateOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDateOnly; }
 
 
         public event PropertyChangedEventHandler?  PropertyChanged;

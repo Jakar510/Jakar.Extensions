@@ -9,7 +9,7 @@ public ref struct SpanFilter<TValue>( scoped in ReadOnlySpan<TValue> span, Func<
 {
     private readonly ReadOnlySpan<TValue> _span  = span;
     private readonly Func<TValue, bool>   _func  = func;
-    private          int             _index = NOT_FOUND;
+    private          int                  _index = NOT_FOUND;
 
     public TValue Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 

@@ -1,9 +1,4 @@
-﻿using System;
-using NoAlloq;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 #pragma warning disable CS8767 // Nullability of reference types in type of parameter doesn't match implicitly implemented member (possibly because of nullability attributes).
@@ -117,8 +112,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     }
 
 
-    [Pure, MustDisposeResource]
-    [SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
+    [Pure, MustDisposeResource, SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;

@@ -21,6 +21,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static       Equalizer<LocalFile> Equalizer       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<LocalFile>.Default; }
     public static       Sorter<LocalFile>    Sorter          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<LocalFile>.Default; }
     public              string               ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
+    public              DateTimeOffset       CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
     public              string?              DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
     public              bool                 DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
     public              bool                 Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
@@ -30,7 +31,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [JsonIgnore] public FileInfo             Info            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _info ??= new FileInfo( FullPath ); }
     bool TempFile.ITempFile.                 IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
     public DateTimeOffset                    LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
-    public DateTimeOffset                    CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
     public MimeType                          Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
     public string                            Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
 
@@ -945,6 +945,30 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) <= 0;
 
 
+    /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
+    public ValueTask<string> HashAsync_MD5() => HashAsync( MD5.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
+    public ValueTask<string> HashAsync_SHA1() => HashAsync( SHA1.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
+    public ValueTask<string> HashAsync_SHA256() => HashAsync( SHA256.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
+    public ValueTask<string> HashAsync_SHA384() => HashAsync( SHA384.Create() );
+    /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
+    public ValueTask<string> HashAsync_SHA512() => HashAsync( SHA512.Create() );
+
+
+    public async ValueTask<string> HashAsync( HashAlgorithm hasher )
+    {
+        using ( hasher )
+        {
+            await using FileStream stream = OpenRead();
+            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
+
+            return BitConverter.ToString( hash );
+        }
+    }
+
+
 
     [Serializable]
     public class Collection : ObservableCollection<LocalFile>
@@ -982,6 +1006,16 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     {
         public Deque() : base() { }
         public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
+    public class Files : List<LocalFile>
+    {
+        public Files() : base() { }
+        public Files( int                    capacity ) : base( capacity ) { }
+        public Files( IEnumerable<LocalFile> items ) : base( items ) { }
     }
 
 
@@ -1077,16 +1111,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
 
     [Serializable]
-    public class Files : List<LocalFile>
-    {
-        public Files() : base() { }
-        public Files( int                    capacity ) : base( capacity ) { }
-        public Files( IEnumerable<LocalFile> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
     public class Queue : Queue<LocalFile>
     {
         public Queue() : base() { }
@@ -1109,8 +1133,8 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     [Serializable]
     public class Watcher : ConcurrentObservableCollection<LocalFile>
     {
-        private readonly WeakEventManager<ErrorEventArgs> _errorEventManager = new();
         private readonly LocalDirectory.Watcher           _watcher;
+        private readonly WeakEventManager<ErrorEventArgs> _errorEventManager = new();
 
 
         public event ErrorEventHandler? Error { add => _errorEventManager.AddEventHandler( x => value?.Invoke( this, x ) ); remove => _errorEventManager.RemoveEventHandler( x => value?.Invoke( this, x ) ); }
@@ -1156,31 +1180,6 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
             _watcher.Dispose();
             GC.SuppressFinalize( this );
-        }
-    }
-
-
-
-    /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public ValueTask<string> HashAsync_MD5() => HashAsync( MD5.Create() );
-    /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public ValueTask<string> HashAsync_SHA1() => HashAsync( SHA1.Create() );
-    /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
-    public ValueTask<string> HashAsync_SHA256() => HashAsync( SHA256.Create() );
-    /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
-    public ValueTask<string> HashAsync_SHA384() => HashAsync( SHA384.Create() );
-    /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
-    public ValueTask<string> HashAsync_SHA512() => HashAsync( SHA512.Create() );
-
-
-    public async ValueTask<string> HashAsync( HashAlgorithm hasher )
-    {
-        using ( hasher )
-        {
-            await using FileStream stream = OpenRead();
-            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
-
-            return BitConverter.ToString( hash );
         }
     }
 }

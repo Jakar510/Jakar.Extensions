@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/26/2023  12:06 PM
 
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -214,7 +210,7 @@ public static partial class Spans
     {
         for ( int index = span.Length - 1; index >= 0; --index )
         {
-            if ( predicate( span[index] ) ) return span[index];
+            if ( predicate( span[index] ) ) { return span[index]; }
         }
 
         throw new NotFoundException();
@@ -224,7 +220,7 @@ public static partial class Spans
     {
         for ( int index = span.Length - 1; index >= 0; --index )
         {
-            if ( predicate( span[index] ) ) return span[index];
+            if ( predicate( span[index] ) ) { return span[index]; }
         }
 
         return default;
@@ -236,7 +232,7 @@ public static partial class Spans
     {
         for ( int index = span.Length - 1; index >= 0; --index )
         {
-            if ( predicate( in span[index] ) ) return span[index];
+            if ( predicate( in span[index] ) ) { return span[index]; }
         }
 
         throw new NotFoundException();
@@ -246,7 +242,7 @@ public static partial class Spans
     {
         for ( int index = span.Length - 1; index >= 0; --index )
         {
-            if ( predicate( in span[index] ) ) return span[index];
+            if ( predicate( in span[index] ) ) { return span[index]; }
         }
 
         return default;

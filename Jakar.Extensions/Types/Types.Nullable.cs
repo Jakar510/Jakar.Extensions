@@ -40,7 +40,7 @@ public static partial class Types
 
             if ( attributeArgument.ArgumentType == typeof(byte[]) )
             {
-                ReadOnlyCollection<CustomAttributeTypedArgument> args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
+                var args = (ReadOnlyCollection<CustomAttributeTypedArgument>)attributeArgument.Value!;
                 if ( args.Count > 0 && args[0].ArgumentType == typeof(byte) ) { return (byte)args[0].Value! == 2; }
             }
             else if ( attributeArgument.ArgumentType == typeof(byte) ) { return (byte)attributeArgument.Value! == 2; }

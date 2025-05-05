@@ -8,7 +8,7 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     [StringLength( UNICODE_CAPACITY )] string NameOfGroup { get; }
-    TID?                                                 OwnerID     { get; }
+    TID?                                      OwnerID     { get; }
 }
 
 

@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/03/2025  13:03
 
-using System;
 using Microsoft.Extensions.Primitives;
 
 

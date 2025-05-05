@@ -134,8 +134,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    [Pure, MustDisposeResource]
-    [SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
+    [Pure, MustDisposeResource, SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;

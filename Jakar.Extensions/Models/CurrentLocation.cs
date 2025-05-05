@@ -69,7 +69,7 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
         {
             DistanceUnit.Kilometers => UnitConverters.CoordinatesToKilometers( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
             DistanceUnit.Miles      => UnitConverters.CoordinatesToMiles( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
-            _                       => throw new OutOfRangeException(  unit )
+            _                       => throw new OutOfRangeException( unit )
         };
     public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
     public override bool Equals( object? obj )
@@ -155,16 +155,6 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return InstanceID.Equals( other.InstanceID )                       &&
-               Timestamp.Equals( other.Timestamp )                         &&
-               Latitude.Equals( other.Latitude )                           &&
-               Longitude.Equals( other.Longitude )                         &&
-               Nullable.Equals( Altitude,         other.Altitude )         &&
-               Nullable.Equals( Accuracy,         other.Accuracy )         &&
-               Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) &&
-               Nullable.Equals( Speed,            other.Speed )            &&
-               Nullable.Equals( Course,           other.Course )           &&
-               IsFromMockProvider      == other.IsFromMockProvider         &&
-               AltitudeReferenceSystem == other.AltitudeReferenceSystem;
+        return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) && Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) && IsFromMockProvider == other.IsFromMockProvider && AltitudeReferenceSystem == other.AltitudeReferenceSystem;
     }
 }

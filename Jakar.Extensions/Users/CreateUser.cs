@@ -88,7 +88,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    public LoginRequest    GetLoginRequest()             => new(UserName, Password);
+    public LoginRequest         GetLoginRequest()                       => new(UserName, Password);
     public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value ) => new(UserName, Password, value);
 
 

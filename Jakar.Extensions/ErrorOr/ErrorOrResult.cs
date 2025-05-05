@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2024  21:04
 
-using Newtonsoft.Json.Linq;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -98,8 +94,8 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error ) : IErr
         errors = Error?.Details;
         return errors.IsEmpty is false;
     }
-   
-    
+
+
     public void Deconstruct( out bool value, out Errors? error )
     {
         value = false;
@@ -192,8 +188,8 @@ public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Erro
         errors = Error?.Details;
         return errors.IsEmpty is false;
     }
-    
-    
+
+
     public void Deconstruct( out TValue? value, out Errors? error )
     {
         value = Value;

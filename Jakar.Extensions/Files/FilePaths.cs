@@ -17,13 +17,10 @@ public class FilePaths : BaseClass, IDisposable
     public const    string                                   LOGS_ZIP_FILE_NAME = "App.logs.zip";
     public const    string                                   OUTGOING_FILE      = "Outgoing.json";
     public const    string                                   SCREEN_SHOT_FILE   = "ScreenShot.png";
-    protected       ConcurrentDictionary<string, LocalFile>? _additionalFiles;
     public readonly LocalDirectory                           AppData;
     public readonly LocalDirectory                           Cache;
     public readonly LocalDirectory                           Logs;
-    public readonly LocalDirectory.Watcher                   AppDataWatcher;
-    public readonly LocalDirectory.Watcher                   CacheWatcher;
-    public readonly LocalDirectory.Watcher                   LogWatcher;
+    protected       ConcurrentDictionary<string, LocalFile>? _additionalFiles;
     protected       LocalFile?                               _accountsFile;
     protected       LocalFile?                               _appCacheZipFile;
     protected       LocalFile?                               _appDataZipFile;
@@ -38,16 +35,17 @@ public class FilePaths : BaseClass, IDisposable
     protected       ReadOnlyMemory<byte>                     _screenshotData;
 
 
-    public LocalFile AccountsFile    { get => GetAccountsFile();    set => _accountsFile = value; }
-    public LocalFile AppCacheZipFile { get => GetAppCacheZipFile(); set => _appCacheZipFile = value; }
-    public LocalFile AppDataZipFile  { get => GetAppDataZipFile();  set => _appDataZipFile = value; }
-    public LocalFile AppStateFile    { get => GetAppStateFile();    set => _appStateFile = value; }
-    public LocalFile CrashFile       { get => GetCrashFile();       set => _crashFile = value; }
-    public LocalFile FeedbackFile    { get => GetFeedbackFile();    set => _feedbackFile = value; }
-    public LocalFile IncomingFile    { get => GetIncomingFile();    set => _incomingFile = value; }
-    public LocalFile LogsFile        { get => GetLogsFile();        set => _logsFile = value; }
-    public LocalFile LogsZipFile     { get => GetLogsZipFile();     set => _logsZipFile = value; }
-    public LocalFile OutgoingFile    { get => GetOutgoingFile();    set => _outgoingFile = value; }
+    public LocalFile                               AccountsFile    { get => GetAccountsFile(); set => _accountsFile = value; }
+    public ConcurrentDictionary<string, LocalFile> AdditionalFiles => _additionalFiles ??= new ConcurrentDictionary<string, LocalFile>( Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal );
+    public LocalFile                               AppCacheZipFile { get => GetAppCacheZipFile(); set => _appCacheZipFile = value; }
+    public LocalFile                               AppDataZipFile  { get => GetAppDataZipFile();  set => _appDataZipFile = value; }
+    public LocalFile                               AppStateFile    { get => GetAppStateFile();    set => _appStateFile = value; }
+    public LocalFile                               CrashFile       { get => GetCrashFile();       set => _crashFile = value; }
+    public LocalFile                               FeedbackFile    { get => GetFeedbackFile();    set => _feedbackFile = value; }
+    public LocalFile                               IncomingFile    { get => GetIncomingFile();    set => _incomingFile = value; }
+    public LocalFile                               LogsFile        { get => GetLogsFile();        set => _logsFile = value; }
+    public LocalFile                               LogsZipFile     { get => GetLogsZipFile();     set => _logsZipFile = value; }
+    public LocalFile                               OutgoingFile    { get => GetOutgoingFile();    set => _outgoingFile = value; }
     public LocalFile Screenshot
     {
         get => GetScreenshotFile();
@@ -57,22 +55,17 @@ public class FilePaths : BaseClass, IDisposable
             _screenshot = value?.SetTemporary();
         }
     }
-    public ReadOnlyMemory<byte>                    ScreenshotData  { get => _screenshotData; set => _screenshotData = value; }
-    public ConcurrentDictionary<string, LocalFile> AdditionalFiles => _additionalFiles ??= new ConcurrentDictionary<string, LocalFile>( Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal );
+    public ReadOnlyMemory<byte> ScreenshotData { get => _screenshotData; set => _screenshotData = value; }
 
 
     public FilePaths() : this( LocalDirectory.CurrentDirectory ) { }
     public FilePaths( LocalDirectory currentDirectory ) : this( currentDirectory.Combine( APP_DATA_DIRECTORY ), currentDirectory.Combine( CACHE_DIRECTORY ) ) { }
     public FilePaths( LocalDirectory appData, LocalDirectory cache ) : this( appData, cache, cache.Combine( LOGS_DIRECTORY ) ) { }
-    public FilePaths( LocalDirectory appData, LocalDirectory cache, LocalDirectory logs ) : this( appData, new LocalDirectory.Watcher( appData ), cache, new LocalDirectory.Watcher( cache ), logs, new LocalDirectory.Watcher( logs ) ) { }
-    public FilePaths( LocalDirectory appData, LocalDirectory.Watcher appDataWatcher, LocalDirectory cache, LocalDirectory.Watcher cacheWatcher, LocalDirectory logs, LocalDirectory.Watcher logWatcher )
+    public FilePaths( LocalDirectory appData, LocalDirectory cache, LocalDirectory logs )
     {
-        AppData        = appData;
-        AppDataWatcher = appDataWatcher;
-        Cache          = cache;
-        CacheWatcher   = cacheWatcher;
-        Logs           = logs;
-        LogWatcher     = logWatcher;
+        AppData = appData;
+        Cache   = cache;
+        Logs    = logs;
         Directory.CreateDirectory( Cache );
         Directory.CreateDirectory( AppData );
         Directory.CreateDirectory( Logs );
@@ -105,7 +98,6 @@ public class FilePaths : BaseClass, IDisposable
 
         _additionalFiles.Clear();
         _additionalFiles = null;
-
     }
     public void Dispose()
     {

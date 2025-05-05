@@ -80,13 +80,9 @@ public class HeaderCollection : Dictionary<string, object>
         {
             switch ( value )
             {
-                case string s:
-                    headers.Add( key, s );
-                    break;
+                case string s: headers.Add( key, s ); break;
 
-                case IEnumerable<string> items:
-                    headers.Add( key, items );
-                    break;
+                case IEnumerable<string> items: headers.Add( key, items ); break;
             }
         }
 
@@ -98,13 +94,9 @@ public class HeaderCollection : Dictionary<string, object>
         {
             switch ( value )
             {
-                case string s:
-                    headers.Add( key, s );
-                    break;
+                case string s: headers.Add( key, s ); break;
 
-                case IEnumerable<string> items:
-                    headers.Add( key, items );
-                    break;
+                case IEnumerable<string> items: headers.Add( key, items ); break;
             }
         }
 

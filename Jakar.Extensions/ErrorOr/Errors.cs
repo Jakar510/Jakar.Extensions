@@ -12,13 +12,13 @@ namespace Jakar.Extensions;
 public readonly record struct Alert()
 {
     public static readonly Alert Empty = new(null);
+    public                 bool  IsNotValid => CheckIsValid( Title, Message ) is false;
 
 
-    public bool      IsValid    => CheckIsValid( Title, Message );
-    public bool      IsNotValid => CheckIsValid( Title, Message ) is false;
-    public string?   Title      { get; init; }
-    public string?   Message    { get; init; }
-    public TimeSpan? TTL        { get; init; }
+    public bool      IsValid => CheckIsValid( Title, Message );
+    public string?   Message { get; init; }
+    public string?   Title   { get; init; }
+    public TimeSpan? TTL     { get; init; }
 
 
     public Alert( string? title, string? message, double ttlSeconds ) : this( title, message, TimeSpan.FromSeconds( ttlSeconds ) ) { }
@@ -51,8 +51,8 @@ public sealed class Errors() : BaseClass, IEquatable<Errors>
 
 
     [JsonRequired] public required Alert?  Alert       { get; init; }
-    [JsonRequired] public required Error[] Details     { get; init; }
     public                         string  Description => Details.GetMessage();
+    [JsonRequired] public required Error[] Details     { get; init; }
     public                         bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
 
 

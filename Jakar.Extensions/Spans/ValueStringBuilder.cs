@@ -395,9 +395,9 @@ public ref struct ValueStringBuilder
         if ( formatSpan.IsEmpty ) { throw new ArgumentNullException( nameof(formatSpan) ); }
 
         EnsureCapacity<TValue>( in formatSpan );
-        int               pos             = 0;
-        char              ch              = '\0';
-        ICustomFormatter? customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
+        int  pos             = 0;
+        char ch              = '\0';
+        var  customFormatter = provider?.GetFormat( typeof(ICustomFormatter) ) as ICustomFormatter;
 
         while ( true )
         {

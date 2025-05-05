@@ -158,8 +158,8 @@ public interface IUserDetailsModel<TID> : IUserData<TID>
     public bool            IsLocked               { get; set; }
     public bool            IsPhoneNumberConfirmed { get; set; }
     public bool            IsTwoFactorEnabled     { get; set; }
-    public DateTimeOffset? LastLogin              { get; set; }
     public DateTimeOffset? LastBadAttempt         { get; set; }
+    public DateTimeOffset? LastLogin              { get; set; }
     public DateTimeOffset? LockDate               { get; set; }
 }
 

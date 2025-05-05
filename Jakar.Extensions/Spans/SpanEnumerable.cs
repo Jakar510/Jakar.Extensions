@@ -13,13 +13,13 @@ namespace Jakar.Extensions;
 public ref struct SpanEnumerator<TValue>( scoped in ReadOnlySpan<TValue> span )
 {
     private readonly ReadOnlySpan<TValue> _span  = span;
-    private          int             _index = NOT_FOUND;
+    private          int                  _index = NOT_FOUND;
 
 
     public readonly Item Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(_span, _index); }
 
     [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanEnumerator<TValue> GetEnumerator() => this;
-    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public          bool              MoveNext()      => ++_index < _span.Length;
+    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public          bool                   MoveNext()      => ++_index < _span.Length;
 
 
 
@@ -33,8 +33,8 @@ public ref struct SpanEnumerator<TValue>( scoped in ReadOnlySpan<TValue> span )
     {
         private readonly ReadOnlySpan<TValue> _span = span;
 
-        public ref readonly TValue   Value { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _span[Index]; }
-        public              int Index { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = index;
+        public ref readonly TValue Value { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _span[Index]; }
+        public              int    Index { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = index;
 
         public void Deconstruct( out TValue line, out int separator )
         {

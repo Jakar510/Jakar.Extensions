@@ -75,32 +75,32 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 
     #region Adds
 
-    public void Add<TValue>( TKey key, TValue          value ) => this[key] = value;
-    public void Add( TKey    key, double     value ) => this[key] = value;
-    public void Add( TKey    key, double?    value ) => this[key] = value;
-    public void Add( TKey    key, float      value ) => this[key] = value;
-    public void Add( TKey    key, float?     value ) => this[key] = value;
-    public void Add( TKey    key, long       value ) => this[key] = value;
-    public void Add( TKey    key, long?      value ) => this[key] = value;
-    public void Add( TKey    key, ulong      value ) => this[key] = value;
-    public void Add( TKey    key, ulong?     value ) => this[key] = value;
-    public void Add( TKey    key, int        value ) => this[key] = value;
-    public void Add( TKey    key, uint?      value ) => this[key] = value;
-    public void Add( TKey    key, short      value ) => this[key] = value;
-    public void Add( TKey    key, short?     value ) => this[key] = value;
-    public void Add( TKey    key, ushort     value ) => this[key] = value;
-    public void Add( TKey    key, ushort?    value ) => this[key] = value;
-    public void Add( TKey    key, Guid       value ) => this[key] = value;
-    public void Add( TKey    key, Guid?      value ) => this[key] = value;
-    public void Add( TKey    key, DateTime   value ) => this[key] = value;
-    public void Add( TKey    key, DateTime?  value ) => this[key] = value;
-    public void Add( TKey    key, TimeSpan   value ) => this[key] = value;
-    public void Add( TKey    key, TimeSpan?  value ) => this[key] = value;
-    public void Add( TKey    key, bool       value ) => this[key] = value;
-    public void Add( TKey    key, bool?      value ) => this[key] = value;
-    public void Add( TKey    key, IPAddress  value ) => this[key] = value;
-    public void Add( TKey    key, AppVersion value ) => this[key] = value;
-    public void Add( TKey    key, Version    value ) => this[key] = value;
+    public void Add<TValue>( TKey key, TValue     value ) => this[key] = value;
+    public void Add( TKey         key, double     value ) => this[key] = value;
+    public void Add( TKey         key, double?    value ) => this[key] = value;
+    public void Add( TKey         key, float      value ) => this[key] = value;
+    public void Add( TKey         key, float?     value ) => this[key] = value;
+    public void Add( TKey         key, long       value ) => this[key] = value;
+    public void Add( TKey         key, long?      value ) => this[key] = value;
+    public void Add( TKey         key, ulong      value ) => this[key] = value;
+    public void Add( TKey         key, ulong?     value ) => this[key] = value;
+    public void Add( TKey         key, int        value ) => this[key] = value;
+    public void Add( TKey         key, uint?      value ) => this[key] = value;
+    public void Add( TKey         key, short      value ) => this[key] = value;
+    public void Add( TKey         key, short?     value ) => this[key] = value;
+    public void Add( TKey         key, ushort     value ) => this[key] = value;
+    public void Add( TKey         key, ushort?    value ) => this[key] = value;
+    public void Add( TKey         key, Guid       value ) => this[key] = value;
+    public void Add( TKey         key, Guid?      value ) => this[key] = value;
+    public void Add( TKey         key, DateTime   value ) => this[key] = value;
+    public void Add( TKey         key, DateTime?  value ) => this[key] = value;
+    public void Add( TKey         key, TimeSpan   value ) => this[key] = value;
+    public void Add( TKey         key, TimeSpan?  value ) => this[key] = value;
+    public void Add( TKey         key, bool       value ) => this[key] = value;
+    public void Add( TKey         key, bool?      value ) => this[key] = value;
+    public void Add( TKey         key, IPAddress  value ) => this[key] = value;
+    public void Add( TKey         key, AppVersion value ) => this[key] = value;
+    public void Add( TKey         key, Version    value ) => this[key] = value;
 
     #endregion
 }

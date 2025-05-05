@@ -37,7 +37,7 @@ public class ConcurrentDeque<TValue> : IQueue<TValue>
 
     public ConcurrentDeque() : this( null ) { }
     public ConcurrentDeque( IEnumerable<TValue>? enumerable,
-                            int             capacity = DEFAULT_CAPACITY,
+                            int                  capacity = DEFAULT_CAPACITY,
                         #if NET8_0
                             object? locker = null
                         #else

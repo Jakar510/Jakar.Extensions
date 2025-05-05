@@ -6,10 +6,10 @@
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 public class FixedSizedDeque<TValue>( int size,
-                             #if NET8_0
+                                  #if NET8_0
                                  object? locker = null
-#else
-                                 Lock? locker = null
+                                  #else
+                                      Lock? locker = null
 #endif
 )
 {
@@ -17,7 +17,7 @@ public class FixedSizedDeque<TValue>( int size,
 #if NET8_0
     protected readonly object _lock = locker ?? new object();
 #else
-    protected readonly Lock     _lock = locker ?? new Lock();
+    protected readonly Lock _lock = locker ?? new Lock();
 #endif
 
     public int Size { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = size;

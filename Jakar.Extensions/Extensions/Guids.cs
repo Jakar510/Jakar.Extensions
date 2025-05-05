@@ -89,12 +89,12 @@ public static class Guids
 
     public static string NewBase64()
     {
-        Guid id = Guid.CreateVersion7( DateTimeOffset.UtcNow );
+        var id = Guid.CreateVersion7( DateTimeOffset.UtcNow );
         return NewBase64( in id );
     }
     public static string NewBase64( this ref readonly DateTimeOffset timeStamp )
     {
-        Guid id = Guid.CreateVersion7( timeStamp );
+        var id = Guid.CreateVersion7( timeStamp );
         return NewBase64( in id );
     }
     public static string NewBase64( this ref readonly DateTimeOffset? timeStamp )

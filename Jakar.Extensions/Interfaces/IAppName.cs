@@ -22,10 +22,10 @@ public interface IAppID : IAppID<Guid>;
 
 public interface IApp<TValue> : IAppID<TValue>
 {
-    public abstract static TValue              DebugID        { get; set; }
-    public abstract static TValue              DeviceID       { get; set; }
-    public abstract static string         DeviceName     { get; set; }
     public abstract static ActivitySource ActivitySource { get; }
+    public abstract static TValue         DebugID        { get; set; }
+    public abstract static TValue         DeviceID       { get; set; }
+    public abstract static string         DeviceName     { get; set; }
 }
 
 

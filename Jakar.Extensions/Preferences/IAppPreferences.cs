@@ -3,6 +3,7 @@
 
 namespace Jakar.Extensions;
 
+
 public static class AppPreferenceExtensions
 {
     private static readonly ShareKeyCollection _sharedKeys = new();
@@ -17,6 +18,7 @@ public static class AppPreferenceExtensions
         public         string GetOrAdd( string                           sharedName, string key ) => GetOrAdd( (sharedName, key), CreateKey );
     }
 }
+
 
 
 public interface IAppPreferences

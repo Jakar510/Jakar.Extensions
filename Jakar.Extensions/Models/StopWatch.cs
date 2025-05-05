@@ -16,8 +16,8 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
 
     public void Dispose()
     {
-        if (_writer is not null) { _writer.WriteLine( ToString() ); }
-        else { Debug.WriteLine(ToString()); }
+        if ( _writer is not null ) { _writer.WriteLine( ToString() ); }
+        else { Debug.WriteLine( ToString() ); }
     }
     public override string ToString()
     {
@@ -25,8 +25,8 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
         (double Value, string Unit) range   = GetRange( in elapsed );
         return $"[{_caller}] {range.Value} {range.Unit}";
     }
-    
-    
+
+
     public static (double Value, string Unit) GetRange( ref readonly TimeSpan span )
     {
         if ( span.Days > 0 ) { return (span.TotalDays, nameof(TimeSpan.Days)); }
@@ -61,8 +61,8 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     }
 
 
-    public static StopWatch Start( [CallerMemberName] string caller = EMPTY ) => new(caller);
-    public static StopWatch Start(TextWriter writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
+    public static StopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => new(caller);
+    public static StopWatch Start( TextWriter                writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
 
 
 
@@ -74,6 +74,6 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
         Seconds,
         Milliseconds,
         Microseconds,
-        Nanoseconds,
+        Nanoseconds
     }
 }

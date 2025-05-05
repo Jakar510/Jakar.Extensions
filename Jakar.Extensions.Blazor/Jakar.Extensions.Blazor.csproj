@@ -55,12 +55,12 @@
 		<PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Cropper.Blazor" Version="1.4.0" />
-		<PackageReference Include="MudBlazor" Version="8.5.1" />
-		<PackageReference Include="MudBlazor.Markdown" Version="8.0.0" />
+		<PackageReference Include="MudBlazor" Version="8.6.0" />
+		<PackageReference Include="MudBlazor.Markdown" Version="8.6.0" />
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
-		<PackageReference Include="PanoramicData.Blazor" Version="9.0.64" />
-		<PackageReference Include="Radzen.Blazor" Version="6.6.1" />
-		<PackageReference Include="Jakar.Extensions" Version="9.7.0" />
+		<PackageReference Include="PanoramicData.Blazor" Version="9.0.67" />
+		<PackageReference Include="Radzen.Blazor" Version="6.6.4" />
+		<PackageReference Include="Jakar.Extensions" Version="9.7.3" />
 		<PackageReference Include="Hardware.Info" Version="101.0.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.4" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />

@@ -44,7 +44,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : this( comparer, values.Length ) => InternalAdd( values.Span );
     public ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this( values.Length ) => InternalAdd( values );
     public ObservableCollection( IComparer<TValue>                   comparer, params ReadOnlySpan<TValue> values ) : this( comparer, values.Length ) => InternalAdd( values );
-    public ObservableCollection( TValue[]                            values ) : this( values.Length ) => InternalAdd( new ReadOnlySpan<TValue>( values ) );
+    public ObservableCollection( TValue[]                            values ) : this( values.Length ) => InternalAdd();
     public ObservableCollection( TValue[]                            values, IComparer<TValue> comparer ) : this( comparer, new ReadOnlySpan<TValue>( values ) ) { }
     public ObservableCollection( IEnumerable<TValue>                 values ) : this( values, Comparer<TValue>.Default ) { }
     public ObservableCollection( IEnumerable<TValue>                 values, IComparer<TValue> comparer ) : this( comparer ) => InternalAdd( values );
@@ -455,7 +455,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 
 
-    public virtual void AddOrUpdate( TValue value ) { InternalAddOrUpdate( in value ); }
+    public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate( in value );
     public virtual void AddOrUpdate( IEnumerable<TValue> values )
     {
         foreach ( TValue value in values ) { InternalAddOrUpdate( in value ); }

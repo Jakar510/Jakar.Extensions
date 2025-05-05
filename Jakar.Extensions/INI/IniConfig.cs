@@ -3,13 +3,15 @@
 
 public sealed partial class IniConfig( IEqualityComparer<string> comparer, int capacity = DEFAULT_CAPACITY ) : IReadOnlyDictionary<string, IniConfig.Section>, ISpanParsable<IniConfig>, ISpanFormattable
 {
-    private readonly IEqualityComparer<string>             _comparer   = comparer;
     private readonly ConcurrentDictionary<string, Section> _dictionary = new(Environment.ProcessorCount, capacity, comparer);
+    private readonly IEqualityComparer<string>             _comparer   = comparer;
+
+    public int  Count      => _dictionary.Count;
+    public bool IsReadOnly => ((ICollection<KeyValuePair<string, Section>>)_dictionary).IsReadOnly;
 
 
     public Section this[ string sectionName ] { get => GetOrAdd( sectionName ); set => _dictionary[sectionName] = value; }
-    public IEnumerable<string>  Keys   => _dictionary.Keys;
-    public IEnumerable<Section> Values => _dictionary.Values;
+    public IEnumerable<string> Keys => _dictionary.Keys;
     public int Length
     {
         get
@@ -19,10 +21,8 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
             return result;
         }
     }
-
-    public int                                                                       Count      => _dictionary.Count;
-    public bool                                                                      IsReadOnly => ((ICollection<KeyValuePair<string, Section>>)_dictionary).IsReadOnly;
-    public ConcurrentDictionary<string, Section>.AlternateLookup<ReadOnlySpan<char>> Lookup     => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+    public ConcurrentDictionary<string, Section>.AlternateLookup<ReadOnlySpan<char>> Lookup => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+    public IEnumerable<Section>                                                      Values => _dictionary.Values;
 
 
     public IniConfig() : this( StringComparer.OrdinalIgnoreCase ) { }

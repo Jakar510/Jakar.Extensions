@@ -60,22 +60,22 @@ public class ViewModelProperty() : ObservableClass
 {
     private bool      _isEnabled = true;
     private bool      _isVisible = true;
+    private ICommand? _command;
+    private object?   _commandParameter;
     private string?   _description;
     private string?   _hint;
     private string?   _placeholder;
     private string?   _title;
-    private ICommand? _command;
-    private object?   _commandParameter;
+    public  ICommand? Command          { get => _command;          set => SetProperty( ref _command,          value ); }
+    public  object?   CommandParameter { get => _commandParameter; set => SetProperty( ref _commandParameter, value ); }
 
 
-    public string?   Description      { get => _description;      set => SetProperty( ref _description,      value ); }
-    public string?   Hint             { get => _hint;             set => SetProperty( ref _hint,             value ); }
-    public bool      IsEnabled        { get => _isEnabled;        set => SetProperty( ref _isEnabled,        value ); }
-    public bool      IsVisible        { get => _isVisible;        set => SetProperty( ref _isVisible,        value ); }
-    public string?   Placeholder      { get => _placeholder;      set => SetProperty( ref _placeholder,      value ); }
-    public string?   Title            { get => _title;            set => SetProperty( ref _title,            value ); }
-    public ICommand? Command          { get => _command;          set => SetProperty( ref _command,          value ); }
-    public object?   CommandParameter { get => _commandParameter; set => SetProperty( ref _commandParameter, value ); }
+    public string? Description { get => _description; set => SetProperty( ref _description, value ); }
+    public string? Hint        { get => _hint;        set => SetProperty( ref _hint,        value ); }
+    public bool    IsEnabled   { get => _isEnabled;   set => SetProperty( ref _isEnabled,   value ); }
+    public bool    IsVisible   { get => _isVisible;   set => SetProperty( ref _isVisible,   value ); }
+    public string? Placeholder { get => _placeholder; set => SetProperty( ref _placeholder, value ); }
+    public string? Title       { get => _title;       set => SetProperty( ref _title,       value ); }
 }
 
 
@@ -83,17 +83,17 @@ public class ViewModelProperty() : ObservableClass
 public class ViewModelProperty<TValue> : ViewModelProperty, IValidator
 {
     private readonly IEqualityComparer<TValue?> _equalityComparer;
-    private          TValue?                    _value;
-    protected        Func<TValue?, TValue?>     _coerceValue = Properties.NoCoerceValue;
     protected        Func<TValue?, bool>        _checkValue  = Properties.HasValue;
+    protected        Func<TValue?, TValue?>     _coerceValue = Properties.NoCoerceValue;
+    private          TValue?                    _value;
 
 
     public static Func<Action<TValue?>, ICommand?>                        ActionToCommand { get;                 set; } = static x => null;
     public static Func<Func<TValue?, CancellationToken, Task>, ICommand?> FuncToCommand   { get;                 set; } = static x => null;
     public        Func<TValue?, bool>                                     CheckValue      { get => _checkValue;  set => _checkValue = value; }
     public        Func<TValue?, TValue?>                                  CoerceValue     { get => _coerceValue; set => _coerceValue = value; }
-    public        TValue?                                                 Value           { get => _value;       set => SetValue( ref _value, value ); }
     public        bool                                                    IsValid         => CheckValue( _value );
+    public        TValue?                                                 Value           { get => _value; set => SetValue( ref _value, value ); }
 
 
     public ViewModelProperty( IEqualityComparer<TValue?> equalityComparer, TValue? value = default ) : this( equalityComparer, new None(), value ) { }

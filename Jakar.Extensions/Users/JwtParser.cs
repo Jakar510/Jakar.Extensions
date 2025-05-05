@@ -2,6 +2,7 @@
 // 4/5/2024  11:1
 
 using System.Security.Claims;
+using Jakar.Extensions.UserGuid;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -13,9 +14,9 @@ namespace Jakar.Extensions;
 
 public sealed class JwtParser( SigningCredentials credentials, TokenValidationParameters parameters, string appName, string issuer, AppVersion version )
 {
-    public const            string                                  VERIFY_EMAIL  = "VerifyEmail";
-    public const            string                                  VERIFY_DEVICE = "VerifyDevice";
     public const            string                                  SESSION       = "Session";
+    public const            string                                  VERIFY_DEVICE = "VerifyDevice";
+    public const            string                                  VERIFY_EMAIL  = "VerifyEmail";
     private static readonly ConcurrentDictionary<string, JwtParser> _parsers      = new(StringComparer.Ordinal);
     private readonly        AppVersion                              _version      = version;
     private readonly        JsonWebTokenHandler                     _handler      = new();
@@ -24,7 +25,6 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     private readonly        string                                  _issuer       = issuer;
     private readonly        TokenValidationParameters               _parameters   = parameters;
 
-    
 
     [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
@@ -47,7 +47,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     }
 
 
-    public Tokens<Guid> CreateToken( UserGuid.UserModel user, ISessionID<Guid> request, string authenticationType ) => CreateToken<UserGuid.UserModel, UserGuid.UserAddress, UserGuid.GroupModel, UserGuid.RoleModel, Guid>( user, request, authenticationType );
+    public Tokens<Guid> CreateToken( UserModel          user, ISessionID<Guid> request, string authenticationType ) => CreateToken<UserModel, UserAddress, GroupModel, RoleModel, Guid>( user, request, authenticationType );
     public Tokens<long> CreateToken( UserLong.UserModel user, ISessionID<long> request, string authenticationType ) => CreateToken<UserLong.UserModel, UserLong.UserAddress, UserLong.GroupModel, UserLong.RoleModel, long>( user, request, authenticationType );
     public Tokens<TID> CreateToken<TUser, TID>( TUser user, ISessionID<TID> request, string authenticationType )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
@@ -101,10 +101,10 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
 public static class JwtParserExtensions
 {
-    public const string VALID_ISSUER   = "TokenValidationParameters:ValidIssuer";
-    public const string VALID_AUDIENCE = "TokenValidationParameters:ValidAudience";
     public const string JWT            = "JWT";
     public const string JWT_KEY        = "JWT.key";
+    public const string VALID_AUDIENCE = "TokenValidationParameters:ValidAudience";
+    public const string VALID_ISSUER   = "TokenValidationParameters:ValidIssuer";
 
 
     [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]

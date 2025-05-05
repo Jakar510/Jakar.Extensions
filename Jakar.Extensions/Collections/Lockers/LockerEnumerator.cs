@@ -10,8 +10,8 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
     private const    int                                START_INDEX = 0;
     private readonly ILockedCollection<TValue, TCloser> _collection = collection;
     private          bool                               _isDisposed;
-    private          int                                _index = START_INDEX;
     private          FilterBuffer<TValue>?              _owner;
+    private          int                                _index = START_INDEX;
 
 
     private             ReadOnlyMemory<TValue> _Memory => _owner?.Memory ?? ReadOnlyMemory<TValue>.Empty;

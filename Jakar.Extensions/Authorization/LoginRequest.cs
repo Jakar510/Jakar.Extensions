@@ -3,8 +3,8 @@
 
 public interface ILoginRequestProvider
 {
-    public LoginRequest GetLoginRequest();
-    public LoginRequest<TValue> GetLoginRequest<TValue>(TValue value);
+    public LoginRequest         GetLoginRequest();
+    public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value );
 }
 
 
@@ -35,6 +35,6 @@ public class LoginRequest<TValue>( string userName, string password, TValue data
                                         : this.IsValidRequest();
 
 
-    public LoginRequest( ILoginRequest    request, TValue data ) : this( request.UserName, request.Password, data ) { }
+    public LoginRequest( ILoginRequest         request, TValue data ) : this( request.UserName, request.Password, data ) { }
     public LoginRequest( ILoginRequest<TValue> request ) : this( request.UserName, request.Password, request.Data ) { }
 }

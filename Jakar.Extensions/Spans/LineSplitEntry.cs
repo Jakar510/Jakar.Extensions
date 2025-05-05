@@ -12,9 +12,9 @@ public readonly ref struct LineSplitEntry<TValue>( scoped in ReadOnlySpan<TValue
 {
     public ReadOnlySpan<TValue> Value      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = line;
     public ParamsArray<TValue>  Separator  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = separator;
-    public int             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.Length; }
-    public bool            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.IsEmpty; }
-    public bool            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
+    public int                  Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.Length; }
+    public bool                 IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Value.IsEmpty; }
+    public bool                 IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
 
 
     // This method allow to deconstruct the type, so you can write any of the following code

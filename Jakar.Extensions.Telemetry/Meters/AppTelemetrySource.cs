@@ -10,7 +10,7 @@ namespace Jakar.Extensions.Telemetry.Meters;
 
 public sealed class AppTelemetrySource : IDisposable
 {
-    public readonly Activity                RootActivity;
+    public readonly TelemetryActivity       RootActivity;
     public readonly TelemetryActivitySource Source;
     public readonly AppVersion              Version;
     public readonly string                  Audience;
@@ -20,22 +20,22 @@ public sealed class AppTelemetrySource : IDisposable
     public readonly TelemetrySpan           App;
     public readonly Meters                  Meters;
 
+
     public static string? DeviceID { get; set; }
 
 
-    public AppTelemetrySource( Guid appID, string appName, AppVersion appVersion, string audience )
+    public AppTelemetrySource( AppContext appContext, string audience )
     {
-        ArgumentException.ThrowIfNullOrEmpty( appName );
+        ArgumentException.ThrowIfNullOrEmpty( appContext.Name );
 
         Activity.Current = null;
-        AppName          = appName;
-        Version          = appVersion;
-        AppID            = appID;
+        AppName          = appContext.Name;
+        Version          = appContext.Version;
+        AppID            = appContext.ID;
         Audience         = audience;
-        Source           = new TelemetryActivitySource( appName, appVersion.ToString() );
-        Meter            = new Meter( appName, appVersion.ToString() );
+        Source           = new TelemetryActivitySource( appContext );
         RootActivity     = GetActivity( AppName );
-        App              = CreateSubSpan( RootActivity, appName );
+        App              = CreateSubSpan( RootActivity, AppName );
         Meters           = new Meters( this );
     }
     public void Dispose()
@@ -47,14 +47,14 @@ public sealed class AppTelemetrySource : IDisposable
     }
 
 
-    public static implicit operator AppVersion( AppTelemetrySource              sources ) => sources.Version;
-    public static implicit operator Activity( AppTelemetrySource                sources ) => sources.RootActivity;
-    public static implicit operator Meter( AppTelemetrySource                   sources ) => sources.Meter;
-    public static implicit operator TelemetryActivitySource( AppTelemetrySource sources ) => sources.Source;
+    public static implicit operator AppVersion( AppTelemetrySource              sources ) { return sources.Version; }
+    public static implicit operator TelemetryActivity( AppTelemetrySource       sources ) { return sources.RootActivity; }
+    public static implicit operator Meter( AppTelemetrySource                   sources ) { return sources.Meter; }
+    public static implicit operator TelemetryActivitySource( AppTelemetrySource sources ) { return sources.Source; }
 
     // public static implicit operator Meters( AppSources sources ) => sources.Meters;
 
-    public static ActivityContext RandomContext() => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
+    public static ActivityContext RandomContext() { return new ActivityContext( ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded ); }
 
 
     public AppTelemetrySource SetActive()
@@ -64,8 +64,8 @@ public sealed class AppTelemetrySource : IDisposable
     }
 
 
-    [Pure] public TelemetrySpan CreateSubSpan( string   name )                                                           => App.CreateSubSpan( name );
-    [Pure] public TelemetrySpan CreateSubSpan( Activity parent, string name, ActivityKind kind = ActivityKind.Internal ) => new(this, parent, name);
+    [Pure] public TelemetrySpan CreateSubSpan( string            name )                                                           { return App.CreateSubSpan( name ); }
+    [Pure] public TelemetrySpan CreateSubSpan( TelemetryActivity parent, string name, ActivityKind kind = ActivityKind.Internal ) { return new TelemetrySpan( this, parent, name ); }
 
 
     [Pure]
@@ -125,7 +125,7 @@ public sealed class TelemetrySpan : BaseClass, IDisposable, IActivityTracer
     private readonly AppTelemetrySource _source;
     private readonly string             _endTag;
     private readonly TelemetryStopWatch _sw;
-    TelemetrySpan IActivityTracer.      Trace => this;
+    TelemetrySpan IActivityTracer.      Trace { get { return this; } }
 
 
     public TelemetrySpan( AppTelemetrySource source, TelemetryActivity parent, string name )
@@ -151,10 +151,10 @@ public sealed class TelemetrySpan : BaseClass, IDisposable, IActivityTracer
         Activity.Current = _parent;
     }
 
-    public static implicit operator TelemetryActivity( TelemetrySpan activity ) => activity.Activity;
+    public static implicit operator TelemetryActivity( TelemetrySpan activity ) { return activity.Activity; }
 
 
-    public void SetInactive() => TelemetryActivity.Current = _parent;
+    public void SetInactive() { TelemetryActivity.Current = _parent; }
     public void SetCurrent( [CallerMemberName] string caller = EMPTY )
     {
         Activity.Current = Activity;
@@ -162,19 +162,57 @@ public sealed class TelemetrySpan : BaseClass, IDisposable, IActivityTracer
     }
 
 
-    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                         = EMPTY ) => new(_source, Activity, caller);
-    [Pure] public static TelemetrySpan Create( AppTelemetrySource               source, Activity      parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent, caller);
-    [Pure] public static TelemetrySpan Create( AppTelemetrySource               source, TelemetrySpan parent, [CallerMemberName] string caller = EMPTY ) => new(source, parent.Activity, caller);
+    [Pure] public        TelemetrySpan CreateSubSpan( [CallerMemberName] string caller                                                             = EMPTY ) { return new TelemetrySpan( _source, Activity,        caller ); }
+    [Pure] public static TelemetrySpan Create( AppTelemetrySource               source, TelemetryActivity parent, [CallerMemberName] string caller = EMPTY ) { return new TelemetrySpan( source,  parent,          caller ); }
+    [Pure] public static TelemetrySpan Create( AppTelemetrySource               source, TelemetrySpan     parent, [CallerMemberName] string caller = EMPTY ) { return new TelemetrySpan( source,  parent.Activity, caller ); }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddTag( string     key, string? value ) => Activity.AddTag( key, (object?)value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddTag( string     key, object? value ) => Activity.AddTag( key, value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity SetTag( string     key, object? value ) => Activity.SetTag( key, value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddBaggage( string key, string? value ) => Activity.AddBaggage( key, value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity SetBaggage( string key, string? value ) => Activity.SetBaggage( key, value );
+    public TelemetrySpan AddTag( string key, string? value )
+    {
+        Activity.Tags.AddLast( new Pair( key, value ) );
+        return this;
+    }
+    public TelemetrySpan AddTag( string key, object? value )
+    {
+        Activity.Tags.AddLast( new Pair( key, value?.ToString() ) );
+        return this;
+    }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddEvent( ActivityEvent e )    => Activity.AddEvent( e );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddLink( ActivityLink   link ) => Activity.AddLink( link );
+    public TelemetrySpan SetTag( string key, object? value )
+    {
+        Pair pair = Activity.Tags.First( x => string.Equals( x.Key, key, StringComparison.Ordinal ) );
+        pair.Value = value?.ToString();
+        return this;
+    }
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public Activity AddException( Exception exception, in TagList tags = default, DateTimeOffset? timestamp = null ) => Activity.AddException( exception, in tags, timestamp ?? DateTimeOffset.UtcNow );
+    public TelemetrySpan AddBaggage( string key, string? value )
+    {
+        Activity.AddBaggage( key, value );
+        return this;
+    }
+
+    public TelemetrySpan SetBaggage( string key, string? value )
+    {
+        Activity.SetBaggage( key, value );
+        return this;
+    }
+
+
+    public TelemetrySpan AddEvent( ActivityEvent e )
+    {
+        Activity.AddEvent( e );
+        return this;
+    }
+
+    public TelemetrySpan AddLink( ActivityLink link )
+    {
+        Activity.AddLink( link );
+        return this;
+    }
+
+    public TelemetrySpan AddException( Exception exception, in TagList tags = default, DateTimeOffset? timestamp = null )
+    {
+        Activity.AddException( exception, in tags, timestamp ?? DateTimeOffset.UtcNow );
+        return this;
+    }
 }

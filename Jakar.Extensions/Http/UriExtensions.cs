@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 public static class UriExtensions

@@ -18,4 +18,3 @@ public sealed class NullableFloatConverter() : JsonConverter<float?>()
             _ => throw new OutOfRangeException( reader.Value )
         };
 }
-    

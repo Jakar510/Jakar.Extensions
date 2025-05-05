@@ -1,16 +1,12 @@
-﻿using System;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
 public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
 {
-    private            bool          _isTemporary;
     protected readonly DirectoryInfo _info;
     private readonly   string        _fullPath;
+    private            bool          _isTemporary;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
@@ -23,8 +19,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public required string FullPath
     {
         get => _fullPath;
-        [MemberNotNull( nameof(_fullPath) )]
-        [MemberNotNull( nameof(_info) )]
+        [MemberNotNull( nameof(_fullPath) ), MemberNotNull( nameof(_info) )]
         init
         {
             _info     = Directory.CreateDirectory( value );
@@ -531,6 +526,15 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
 
     [Serializable]
+    public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
+    {
+        public ConcurrentQueue() : base() { }
+        public ConcurrentQueue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+    }
+
+
+
+    [Serializable]
     public class Deque : ConcurrentDeque<LocalDirectory>
     {
         public Deque() : base() { }
@@ -554,15 +558,6 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     {
         public Queue() : base() { }
         public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
-    {
-        public ConcurrentQueue() : base() { }
-        public ConcurrentQueue( IEnumerable<LocalDirectory> items ) : base( items ) { }
     }
 
 

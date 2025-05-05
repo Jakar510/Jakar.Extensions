@@ -9,8 +9,8 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
 {
     private const string ALPHA          = "alpha";
     private const string BETA           = "beta";
-    private const string RC             = "rc";
     private const char   FLAG_SEPARATOR = '-';
+    private const string RC             = "rc";
     private const string STABLE         = "";
 
 

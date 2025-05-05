@@ -15,7 +15,7 @@ public static partial class Spans
     }
 
 
-    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, params  ReadOnlySpan<TValue> removed )
+    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, params ReadOnlySpan<TValue> removed )
         where TValue : unmanaged, IEquatable<TValue>
     {
         Span<TValue>         result = stackalloc TValue[source.Length];
@@ -127,8 +127,8 @@ public static partial class Spans
                        : 0;
 
             ReadOnlySpan<TValue> span = start + end - start >= source.Length
-                                       ? source[start..]
-                                       : source.Slice( start, end );
+                                            ? source[start..]
+                                            : source.Slice( start, end );
 
             span.CopyTo( result );
             length = span.Length;

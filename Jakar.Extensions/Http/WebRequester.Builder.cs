@@ -2,10 +2,6 @@
 // 05/03/2022  9:01 AM
 
 
-using Microsoft.Extensions.Hosting;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -16,42 +12,42 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
-    [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+    [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
     public class Builder( IHostInfo value ) : IHttpClientFactory
     {
-        private readonly WebHeaders                      _headers  = [];
         private readonly IHostInfo                       _hostInfo = value;
-        private          Encoding                        _encoding = Encoding.Default;
-        private          bool?                           _useProxy;
-        private          IWebProxy?                      _proxy;
+        private readonly WebHeaders                      _headers  = [];
+        private          AuthenticationHeaderValue?      _authenticationHeader;
         private          bool?                           _allowAutoRedirect;
-        private          int?                            _maxAutomaticRedirections;
-        private          ICredentials?                   _defaultProxyCredentials;
-        private          ICredentials?                   _credentials;
         private          bool?                           _preAuthenticate;
         private          bool?                           _useCookies;
+        private          bool?                           _useProxy;
         private          CookieContainer?                _cookieContainer;
-        private          int?                            _maxResponseHeadersLength;
-        private          int?                            _maxConnectionsPerServer;
-        private          AuthenticationHeaderValue?      _authenticationHeader;
-        private          TimeSpan?                       _connectTimeout;
-        private          RetryPolicy?                    _retryPolicy;
-        private          int?                            _maxResponseContentBufferSize;
-        private          ILogger?                        _logger;
-        private          SslClientAuthenticationOptions? _sslOptions;
-        private          TimeSpan?                       _responseDrainTimeout;
+        private          Encoding                        _encoding = Encoding.Default;
         private          HttpKeepAlivePingPolicy?        _keepAlivePingPolicy;
-        private          TimeSpan?                       _keepAlivePingTimeout;
-        private          TimeSpan?                       _keepAlivePingDelay;
-        private          TimeSpan?                       _pooledConnectionLifetime;
-        private          TimeSpan?                       _pooledConnectionIdleTimeout;
+        private          ICredentials?                   _credentials;
+        private          ICredentials?                   _defaultProxyCredentials;
+        private          ILogger?                        _logger;
+        private          int?                            _maxAutomaticRedirections;
+        private          int?                            _maxConnectionsPerServer;
+        private          int?                            _maxResponseContentBufferSize;
         private          int?                            _maxResponseDrainSize;
+        private          int?                            _maxResponseHeadersLength;
+        private          IWebProxy?                      _proxy;
+        private          RetryPolicy?                    _retryPolicy;
+        private          SslClientAuthenticationOptions? _sslOptions;
+        private          TimeSpan?                       _connectTimeout;
+        private          TimeSpan?                       _keepAlivePingDelay;
+        private          TimeSpan?                       _keepAlivePingTimeout;
+        private          TimeSpan?                       _pooledConnectionIdleTimeout;
+        private          TimeSpan?                       _pooledConnectionLifetime;
+        private          TimeSpan?                       _responseDrainTimeout;
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
-        public static Builder Create( Uri             value ) => Create(new HostHolder( value ));
-        public static Builder Create( Func<IHostInfo> value ) => Create(new HostHolder( value ));
-        public static Builder Create( Func<Uri>       value ) => Create(new HostHolder( value ));
+        public static Builder Create( Uri             value ) => Create( new HostHolder( value ) );
+        public static Builder Create( Func<IHostInfo> value ) => Create( new HostHolder( value ) );
+        public static Builder Create( Func<Uri>       value ) => Create( new HostHolder( value ) );
 
 
         [Pure] public Builder Reset() => Create( _hostInfo );

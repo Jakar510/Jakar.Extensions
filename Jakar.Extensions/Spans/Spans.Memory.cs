@@ -27,12 +27,12 @@ public static partial class Spans
     [Pure] public static bool TryAsSegment<TValue>( this Memory<TValue>         value, out ArraySegment<TValue> result ) => MemoryMarshal.TryGetArray( value, out result );
 
 
-    [Pure] public static Memory<TValue>            ToMemory<TValue>( this                          IEnumerable<TValue>     value ) => value as TValue[] ?? value.ToArray();
-    [Pure] public static ReadOnlyMemory<TValue>    ToReadOnlyMemory<TValue>( this                  IEnumerable<TValue>     value ) => value as TValue[] ?? value.ToArray();
-    [Pure] public static Memory<byte>         ToMemory( this scoped ref readonly         Span<byte>         value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<byte> ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte> value ) => value.ToArray();
-    [Pure] public static Memory<char>         ToMemory( this scoped ref readonly         ReadOnlySpan<char> value ) => value.ToArray();
-    [Pure] public static ReadOnlyMemory<char> ToReadOnlyMemory( this scoped ref readonly Span<char>         value ) => value.ToArray();
+    [Pure] public static Memory<TValue>         ToMemory<TValue>( this                     IEnumerable<TValue> value ) => value as TValue[] ?? value.ToArray();
+    [Pure] public static ReadOnlyMemory<TValue> ToReadOnlyMemory<TValue>( this             IEnumerable<TValue> value ) => value as TValue[] ?? value.ToArray();
+    [Pure] public static Memory<byte>           ToMemory( this scoped ref readonly         Span<byte>          value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<byte>   ToReadOnlyMemory( this scoped ref readonly ReadOnlySpan<byte>  value ) => value.ToArray();
+    [Pure] public static Memory<char>           ToMemory( this scoped ref readonly         ReadOnlySpan<char>  value ) => value.ToArray();
+    [Pure] public static ReadOnlyMemory<char>   ToReadOnlyMemory( this scoped ref readonly Span<char>          value ) => value.ToArray();
 
 
     [Pure]

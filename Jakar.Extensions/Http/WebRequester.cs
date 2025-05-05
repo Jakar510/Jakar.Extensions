@@ -67,16 +67,15 @@ public class TelemetryHttpClientHandler : HttpClientHandler
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) : IDisposable
 {
-    private readonly HttpClient   _client  = client;
-    private readonly IHostInfo    _host    = host;
-    private readonly ILogger?     _logger  = logger;
-    public readonly  Encoding     Encoding = encoding ?? Encoding.Default;
-    private          RetryPolicy? _retryPolicy;
+    public readonly  Encoding           Encoding = encoding ?? Encoding.Default;
+    private readonly HttpClient         _client  = client;
+    private readonly IHostInfo          _host    = host;
+    private readonly ILogger?           _logger  = logger;
+    public           HttpRequestHeaders DefaultRequestHeaders { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.DefaultRequestHeaders; }
 
 
-    public RetryPolicy?       Retries               { get => _retryPolicy; set => _retryPolicy = value; }
-    public HttpRequestHeaders DefaultRequestHeaders { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.DefaultRequestHeaders; }
-    public TimeSpan           Timeout               { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.Timeout; set => _client.Timeout = value; }
+    public RetryPolicy? Retries { get;                                                                         set; }
+    public TimeSpan     Timeout { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.Timeout; set => _client.Timeout = value; }
 
 
     public static  IServiceCollection AddSingleton( IServiceCollection       collection )                                                                 => collection.AddSingleton( Create );
@@ -97,7 +96,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
         _logger?.LogDebug( "Starting a {Method} request to {Uri}", method.Method, url.ToString() );
         return CreateHandler( new HttpRequestMessage( method, url ) { Content = value }, token );
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, _retryPolicy, token);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, Retries, token);
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, HttpContent                 value, CancellationToken token ) => Delete( CreateUrl( relativePath ), value, token );

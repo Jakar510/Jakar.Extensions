@@ -1,7 +1,3 @@
-using ZXing.Aztec.Internal;
-
-
-
 namespace Jakar.Extensions;
 
 

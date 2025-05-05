@@ -12,13 +12,13 @@ public readonly ref struct ParamsArray<TValue>( IMemoryOwner<TValue> owner, int 
 {
     private readonly IMemoryOwner<TValue> _owner  = owner;
     public readonly  ReadOnlySpan<TValue> Span    = owner.Memory.Span[..length];
-    public readonly  int             Length  = length;
-    public readonly  bool            IsEmpty = length <= 0;
+    public readonly  int                  Length  = length;
+    public readonly  bool                 IsEmpty = length <= 0;
 
 
     public ref readonly TValue this[ int index ] { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[index]; }
-    public          void                       Dispose()       => _owner.Dispose();
-    public override string                     ToString()      => $"ParamsArray<{typeof(TValue).Name}>({nameof(Length)}: {Length})";
+    public          void                            Dispose()       => _owner.Dispose();
+    public override string                          ToString()      => $"ParamsArray<{typeof(TValue).Name}>({nameof(Length)}: {Length})";
     [Pure] public   ReadOnlySpan<TValue>.Enumerator GetEnumerator() => Span.GetEnumerator();
 
 

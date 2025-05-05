@@ -3,8 +3,8 @@
 
 public static class Buffers
 {
-    public const int NOT_FOUND        = -1;
     public const int DEFAULT_CAPACITY = 64;
+    public const int NOT_FOUND        = -1;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

@@ -83,10 +83,13 @@ public readonly struct Closer( ILocker? locker ) : IDisposable
 [SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
 public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDisposable
 {
-    private readonly AutoResetEvent?       _autoResetEvent;
-    private readonly Barrier?              _barrier;
-    private readonly CountdownEvent?       _countdownEvent;
-    private readonly EventWaitHandle?      _eventWaitHandle;
+    private readonly AutoResetEvent?  _autoResetEvent;
+    private readonly Barrier?         _barrier;
+    private readonly CountdownEvent?  _countdownEvent;
+    private readonly EventWaitHandle? _eventWaitHandle;
+#if NET9_0_OR_GREATER
+    private readonly Lock? _lock;
+#endif
     private readonly ManualResetEvent?     _manualResetEvent;
     private readonly ManualResetEventSlim? _manualResetEventSlim;
     private readonly Mutex?                _mutex;
@@ -96,9 +99,6 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly SpinLock?             _spinLock;
     private readonly Type                  _index;
     private          bool                  _isTaken;
-#if NET9_0_OR_GREATER
-    private readonly Lock? _lock;
-#endif
 
     public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new SemaphoreSlim( 1, 1 ); }
     public        bool      IsTaken { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }

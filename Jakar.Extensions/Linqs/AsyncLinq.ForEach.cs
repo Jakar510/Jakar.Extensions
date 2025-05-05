@@ -93,7 +93,7 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        ActionBlock<TElement> block = new( action, options );
+        ActionBlock<TElement> block = new(action, options);
 
         await foreach ( TElement item in source ) { block.Post( item ); }
 
@@ -108,7 +108,7 @@ public static partial class AsyncLinq
 
         async Task AwaitItem( TElement item ) => await action( item, token );
 
-        ActionBlock<TElement> block = new( AwaitItem, options );
+        ActionBlock<TElement> block = new(AwaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -123,7 +123,7 @@ public static partial class AsyncLinq
 
         async Task AwaitItem( TElement item ) => await action( item, token );
 
-        ActionBlock<TElement> block = new( AwaitItem, options );
+        ActionBlock<TElement> block = new(AwaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -152,7 +152,7 @@ public static partial class AsyncLinq
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
 
-        ActionBlock<Task> block = new( x => x, options );
+        ActionBlock<Task> block = new(x => x, options);
         await foreach ( Task item in source ) { block.Post( item ); }
 
         block.Complete();
@@ -196,7 +196,7 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        ActionBlock<Task<TElement>> block = new( AwaitTask, options );
+        ActionBlock<Task<TElement>> block = new(AwaitTask, options);
         await foreach ( Task<TElement> item in source ) { block.Post( item ); }
 
         block.Complete();
@@ -219,7 +219,7 @@ public static partial class AsyncLinq
             results.Add( result );
         }
 
-        ActionBlock<TElement> block = new( AwaitItem, options );
+        ActionBlock<TElement> block = new(AwaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -234,7 +234,7 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        ActionBlock<TElement> block = new( AwaitItem, options );
+        ActionBlock<TElement> block = new(AwaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 

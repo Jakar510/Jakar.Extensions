@@ -8,10 +8,10 @@ public static partial class Tasks
     public static Task Delay( this TimeSpan delay, CancellationToken token = default ) => Task.Delay( delay, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    Task         task ) => task.GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue    CallSynchronously<TValue>( this Task<TValue>      task ) => task.GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void CallSynchronously( this    ValueTask    task ) => task.GetAwaiter().GetResult();
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue    CallSynchronously<TValue>( this ValueTask<TValue> task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void   CallSynchronously( this         Task              task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue CallSynchronously<TValue>( this Task<TValue>      task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void   CallSynchronously( this         ValueTask         task ) => task.GetAwaiter().GetResult();
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TValue CallSynchronously<TValue>( this ValueTask<TValue> task ) => task.GetAwaiter().GetResult();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
@@ -43,12 +43,12 @@ public static partial class Tasks
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<Task>                            func, CancellationToken token = default ) => Task.Run( func,                                 token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<ValueTask>                       func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<Task<TValue>>                         func, CancellationToken token = default ) => Task.Run( func,                                 token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task         Run( this         Func<Task>                                 func, CancellationToken token = default ) => Task.Run( func,                                      token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task         Run( this         Func<ValueTask>                            func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,         token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<Task<TValue>>                         func, CancellationToken token = default ) => Task.Run( func,                                      token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<ValueTask<TValue>>                    func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, Task>         func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task    Run( this    Func<CancellationToken, ValueTask>    func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,    token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task         Run( this         Func<CancellationToken, Task>              func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,         token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task         Run( this         Func<CancellationToken, ValueTask>         func, CancellationToken token = default ) => Task.Run( new Caller( func, token ).Execute,         token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<CancellationToken, Task<TValue>>      func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<CancellationToken, ValueTask<TValue>> func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
 
@@ -82,7 +82,7 @@ public static partial class Tasks
 
         while ( token.ShouldContinue() && list.Count > 0 )
         {
-            var task = await Task.WhenAny( list );
+            Task<TValue> task = await Task.WhenAny( list );
             list.Remove( task );
             yield return await task;
         }

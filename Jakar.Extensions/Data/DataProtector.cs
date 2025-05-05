@@ -30,20 +30,20 @@ public interface IDataProtector : IDisposable
     public string            Decrypt( string                          value );
     public string            Decrypt( string                          value, Encoding encoding );
     public byte[]            Decrypt( LocalFile                       file );
-    public string            Decrypt( LocalFile                       file,  Encoding                                                        encoding );
-    public TValue                 Decrypt<TValue>( LocalFile                    file,  Func<LocalFile.IReadHandler, IDataProtector, TValue>                 func );
-    public ValueTask<byte[]> DecryptAsync( LocalFile                  file,  CancellationToken                                               token                             = default );
-    public ValueTask<string> DecryptAsync( LocalFile                  file,  Encoding                                                        encoding, CancellationToken token = default );
-    public ValueTask<TValue>      DecryptAsync<TValue>( LocalFile               file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<TValue>> func );
-    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                       output, CancellationToken token                             = default );
-    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                       output, Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                          value,  CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                          value,  Encoding          encoding, CancellationToken token = default );
-    public ValueTask         EncryptAsync( LocalFile                  file,  byte[]                                                          value,  CancellationToken token = default );
-    public ValueTask<byte[]> EncryptAsync( LocalFile                  value, CancellationToken                                               token                                                         = default );
-    public ValueTask<string> EncryptAsync( LocalFile                  value, Encoding                                                        encoding, CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                       output,   CancellationToken token                             = default );
-    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                       output,   Encoding          encoding, CancellationToken token = default );
+    public string            Decrypt( LocalFile                       file,  Encoding                                                             encoding );
+    public TValue            Decrypt<TValue>( LocalFile               file,  Func<LocalFile.IReadHandler, IDataProtector, TValue>                 func );
+    public ValueTask<byte[]> DecryptAsync( LocalFile                  file,  CancellationToken                                                    token                             = default );
+    public ValueTask<string> DecryptAsync( LocalFile                  file,  Encoding                                                             encoding, CancellationToken token = default );
+    public ValueTask<TValue> DecryptAsync<TValue>( LocalFile          file,  Func<LocalFile.IAsyncReadHandler, IDataProtector, ValueTask<TValue>> func );
+    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                            output, CancellationToken token                             = default );
+    public ValueTask         DecryptAsync( LocalFile                  input, LocalFile                                                            output, Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                               value,  CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  string                                                               value,  Encoding          encoding, CancellationToken token = default );
+    public ValueTask         EncryptAsync( LocalFile                  file,  byte[]                                                               value,  CancellationToken token = default );
+    public ValueTask<byte[]> EncryptAsync( LocalFile                  value, CancellationToken                                                    token                                                         = default );
+    public ValueTask<string> EncryptAsync( LocalFile                  value, Encoding                                                             encoding, CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                            output,   CancellationToken token                             = default );
+    public ValueTask         EncryptAsync( LocalFile                  input, LocalFile                                                            output,   Encoding          encoding, CancellationToken token = default );
 }
 
 

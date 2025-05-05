@@ -36,8 +36,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
     public class AsyncReader( AsyncChannel<TValue> parent ) : ChannelReader<TValue?>
     {
         private readonly AsyncChannel<TValue>       _parent = parent;
-        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
         private          TaskCompletionSource<bool> _Completion => _parent._completion;
+        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
         public override  bool                       CanCount    => true;
         public override  bool                       CanPeek     => true;
         public override  Task                       Completion  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Completion.Task; }
@@ -76,8 +76,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
     public class AsyncWriter( AsyncChannel<TValue> parent ) : ChannelWriter<TValue>
     {
         private readonly AsyncChannel<TValue>       _parent = parent;
-        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
         private          TaskCompletionSource<bool> _Completion => _parent._completion;
+        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
 
 
         public override bool TryComplete( Exception? error = null ) => error is not null

@@ -23,7 +23,9 @@ public static class ArrayExtensions
 
 
 
-    /// <summary> <see href="https://stackoverflow.com/a/17308019/9530917"/> </summary>
+    /// <summary>
+    ///     <see href="https://stackoverflow.com/a/17308019/9530917"/>
+    /// </summary>
     internal static class ArrayAccessor<TElement>
     {
         private static Func<Collection<TElement>, List<TElement>>? _collectionGetter;
@@ -33,11 +35,11 @@ public static class ArrayExtensions
         internal static Func<Collection<TElement>, List<TElement>> CollectionGetter
         {
             [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
-            get { return _collectionGetter ??= GetCollectionGetter(); }
+            get => _collectionGetter ??= GetCollectionGetter();
         }
 
 
-        internal static Func<List<TElement>, TElement[]> Getter { [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.CreateGetter()" )] get { return _getter ??= CreateGetter(); } }
+        internal static Func<List<TElement>, TElement[]> Getter { [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.CreateGetter()" )] get => _getter ??= CreateGetter(); }
 
 
         [RequiresDynamicCode( "System.Reflection.Emit.DynamicMethod.DynamicMethod(String, MethodAttributes, CallingConventions, Type, Type[], Type, Boolean)" )]
@@ -45,7 +47,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(List<TElement>).GetField( "_items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            DynamicMethod dm = new( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new("get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(TElement[]), [typeof(List<TElement>)], typeof(ArrayAccessor<TElement>), true);
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument
@@ -61,7 +63,7 @@ public static class ArrayExtensions
         {
             FieldInfo field = typeof(Collection<TElement>).GetField( "items", BindingFlags.NonPublic | BindingFlags.Instance ) ?? throw new InvalidOperationException();
 
-            DynamicMethod dm = new( "get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true );
+            DynamicMethod dm = new("get", MethodAttributes.Static | MethodAttributes.Public, CallingConventions.Standard, typeof(List<TElement>), [typeof(Collection<TElement>)], typeof(ArrayAccessor<TElement>), true);
 
             ILGenerator il = dm.GetILGenerator();
             il.Emit( OpCodes.Ldarg_0 );      // Load List<TElement> argument

@@ -23,11 +23,11 @@ public partial class IniConfig
                 return result;
             }
         }
-        internal int    Longest => Keys.Max( static item => item.Length );
-        public   string Name    { get; }
+        internal int Longest => Keys.Max( static item => item.Length );
     #if NET9_0_OR_GREATER
-        public   AlternateLookup<ReadOnlySpan<char>> Lookup  => GetAlternateLookup<ReadOnlySpan<char>>();
+        public AlternateLookup<ReadOnlySpan<char>> Lookup => GetAlternateLookup<ReadOnlySpan<char>>();
     #endif
+        public string Name { get; }
 
         public Section( string sectionName ) : this( sectionName, StringComparer.OrdinalIgnoreCase ) { }
         public Section( string sectionName, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = sectionName;
@@ -163,19 +163,19 @@ public partial class IniConfig
         public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString( null, CultureInfo.CurrentCulture );
-        public void Add<TValue>( string key, IEnumerable<TValue>      values )                   => this[key] = values.ToJson();
-        public void Add( string    key, IEnumerable<string> values )                   => this[key] = values.ToJson();
-        public void Add( string    key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
-        public void Add( string    key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );
-        public void Add( string    key, TimeSpan            value ) => this[key] = value.ToString();
-        public void Add( string    key, DateTime            value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
-        public void Add( string    key, DateTimeOffset      value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
-        public void Add( string    key, IPAddress           value ) => this[key] = value.ToString();
-        public void Add( string    key, Guid                value ) => this[key] = value.ToString();
-        public void Add( string    key, bool                value ) => this[key] = value.ToString();
-        public void Add( string    key, AppVersion          value ) => this[key] = value.ToString();
-        public void Add( string    key, Version             value ) => this[key] = value.ToString();
-        public void Add( string    key, string?             value ) => this[key] = value;
+        public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
+        public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
+        public void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
+        public void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );
+        public void Add( string         key, TimeSpan            value ) => this[key] = value.ToString();
+        public void Add( string         key, DateTime            value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string         key, DateTimeOffset      value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string         key, IPAddress           value ) => this[key] = value.ToString();
+        public void Add( string         key, Guid                value ) => this[key] = value.ToString();
+        public void Add( string         key, bool                value ) => this[key] = value.ToString();
+        public void Add( string         key, AppVersion          value ) => this[key] = value.ToString();
+        public void Add( string         key, Version             value ) => this[key] = value.ToString();
+        public void Add( string         key, string?             value ) => this[key] = value;
 
 
         public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = null ) =>

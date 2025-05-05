@@ -41,7 +41,7 @@ public static class DictionaryExtensions
         where TAlternateKey : notnull, allows ref struct
     {
         Dictionary<TKey, TValue>.AlternateLookup<TAlternateKey> lookup = dictionary.GetAlternateLookup<TAlternateKey>();
-        ref TValue?                                             entry = ref CollectionsMarshal.GetValueRefOrAddDefault( lookup, key, out bool exists );
+        ref TValue?                                             entry  = ref CollectionsMarshal.GetValueRefOrAddDefault( lookup, key, out bool exists );
 
         if ( exists )
         {
@@ -68,7 +68,7 @@ public static class DictionaryExtensions
         where TAlternateKey : notnull, allows ref struct
     {
         Dictionary<TKey, TValue>.AlternateLookup<TAlternateKey> lookup = dictionary.GetAlternateLookup<TAlternateKey>();
-        ref TValue                                              entry = ref CollectionsMarshal.GetValueRefOrNullRef( lookup, key );
+        ref TValue                                              entry  = ref CollectionsMarshal.GetValueRefOrNullRef( lookup, key );
         if ( Unsafe.IsNullRef( ref entry ) ) { return false; }
 
         entry = value;

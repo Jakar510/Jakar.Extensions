@@ -3,13 +3,13 @@
 
 public static class Strings
 {
-    private static readonly char[] _ends = ['\n', '\r'];
     public static readonly ImmutableDictionary<char, char> _bracketPairs = new Dictionary<char, char>
                                                                            {
                                                                                { '(', ')' },
                                                                                { '{', '}' },
                                                                                { '[', ']' }
                                                                            }.ToImmutableDictionary();
+    private static readonly char[] _ends = ['\n', '\r'];
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
     public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
