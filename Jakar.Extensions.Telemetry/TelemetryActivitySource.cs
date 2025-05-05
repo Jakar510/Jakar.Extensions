@@ -29,6 +29,7 @@ public sealed class TelemetryActivitySource( AppContext appContext ) : IDisposab
         AppContext = appContext;
         foreach ( TelemetryActivity value in activities ) { _activities.TryAdd( value.OperationName, value ); }
     }
+  
     [SetsRequiredMembers]
     public TelemetryActivitySource( AppContext appContext, params ReadOnlySpan<TelemetryActivity> values ) : this( appContext )
     {
