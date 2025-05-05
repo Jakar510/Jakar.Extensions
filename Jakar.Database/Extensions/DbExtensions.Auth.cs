@@ -37,9 +37,9 @@ public static partial class DbExtensions
     public static bool TryParse( this ClaimsPrincipal principal, out RecordID<UserRecord> userID, out string userName ) { return TryParse( principal.Claims.ToArray(), out userID, out userName ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out RecordID<UserRecord> userID, out string userName )
     {
-        userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
+        userName = claims.FirstOrDefault( static ( ref readonly Claim x ) => x.IsUserName() )?.Value ?? string.Empty;
 
-        if ( Guid.TryParse( Spans.FirstOrDefault( claims, Claims.IsUserID )?.Value, out Guid id ) )
+        if ( Guid.TryParse( claims.FirstOrDefault( static ( ref readonly Claim x ) => x.IsUserID() )?.Value, out Guid id ) )
         {
             userID = RecordID<UserRecord>.Create( id );
             return true;
@@ -51,9 +51,9 @@ public static partial class DbExtensions
     public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName ) { return TryParse( principal.Claims.ToArray(), out userID, out userName ); }
     public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out RecordID<UserRecord>? userID, out string userName )
     {
-        userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
+        userName = claims.FirstOrDefault( static ( ref readonly Claim x ) => x.IsUserName() )?.Value ?? string.Empty;
 
-        if ( Guid.TryParse( Spans.FirstOrDefault( claims, Claims.IsUserID )?.Value, out Guid id ) )
+        if ( Guid.TryParse( claims.FirstOrDefault( static ( ref readonly Claim x ) => x.IsUserID() )?.Value, out Guid id ) )
         {
             userID = RecordID<UserRecord>.Create( id );
             return true;
@@ -67,9 +67,9 @@ public static partial class DbExtensions
     {
         roles    = claims.Where( Claims.IsRole ).ToArray();
         groups   = claims.Where( Claims.IsGroup ).ToArray();
-        userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
+        userName = claims.FirstOrDefault( Claims.IsUserName )?.Value ?? string.Empty;
 
-        if ( Guid.TryParse( Spans.FirstOrDefault( claims, Claims.IsUserID )?.Value, out Guid id ) )
+        if ( Guid.TryParse( claims.FirstOrDefault( Claims.IsUserID )?.Value, out Guid id ) )
         {
             userID = RecordID<UserRecord>.Create( id );
             return true;
@@ -83,9 +83,9 @@ public static partial class DbExtensions
     {
         roles    = claims.Where( Claims.IsRole ).ToArray();
         groups   = claims.Where( Claims.IsGroup ).ToArray();
-        userName = Spans.FirstOrDefault( claims, Claims.IsUserName )?.Value ?? string.Empty;
+        userName = claims.FirstOrDefault( Claims.IsUserName )?.Value ?? string.Empty;
 
-        if ( Guid.TryParse( Spans.FirstOrDefault( claims, Claims.IsUserID )?.Value, out Guid id ) )
+        if ( Guid.TryParse( claims.FirstOrDefault( Claims.IsUserID )?.Value, out Guid id ) )
         {
             userID = RecordID<UserRecord>.Create( id );
             return true;

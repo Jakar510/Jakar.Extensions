@@ -844,21 +844,21 @@ public sealed record UserRecord( string                        UserName,
     public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
-        parameters.Add( nameof(ID), Guid.Parse( claims.Single( Claims.IsUserID ).Value ) );
+        parameters.Add( nameof(ID), Guid.Parse( claims.Single( static ( ref readonly Claim x ) => x.IsUserID() ).Value ) );
 
-        if ( types.HasFlag( ClaimType.UserName ) ) { parameters.Add( nameof(UserName), claims.Single( Claims.IsUserName ).Value ); }
+        if ( types.HasFlag( ClaimType.UserName ) ) { parameters.Add( nameof(UserName), claims.Single( static ( ref readonly Claim x ) => x.IsUserName() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Single( Claims.IsFirstName ).Value ); }
+        if ( types.HasFlag( ClaimType.FirstName ) ) { parameters.Add( nameof(FirstName), claims.Single( static ( ref readonly Claim x ) => x.IsFirstName() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Single( Claims.IsLastName ).Value ); }
+        if ( types.HasFlag( ClaimType.LastName ) ) { parameters.Add( nameof(LastName), claims.Single( static ( ref readonly Claim x ) => x.IsLastName() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Single( Claims.IsFullName ).Value ); }
+        if ( types.HasFlag( ClaimType.FullName ) ) { parameters.Add( nameof(FullName), claims.Single( static ( ref readonly Claim x ) => x.IsFullName() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Single( Claims.IsEmail ).Value ); }
+        if ( types.HasFlag( ClaimType.Email ) ) { parameters.Add( nameof(Email), claims.Single( static ( ref readonly Claim x ) => x.IsEmail() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Single( Claims.IsMobilePhone ).Value ); }
+        if ( types.HasFlag( ClaimType.MobilePhone ) ) { parameters.Add( nameof(PhoneNumber), claims.Single( static ( ref readonly Claim x ) => x.IsMobilePhone() ).Value ); }
 
-        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( Claims.IsWebSite ).Value ); }
+        if ( types.HasFlag( ClaimType.WebSite ) ) { parameters.Add( nameof(Website), claims.Single( static ( ref readonly Claim x ) => x.IsWebSite() ).Value ); }
 
         return db.Users.Get( connection, transaction, true, parameters, token );
     }

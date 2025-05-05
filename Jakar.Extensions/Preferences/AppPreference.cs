@@ -75,9 +75,9 @@ public static class AppPreference
 
         try
         {
-            return string.IsNullOrWhiteSpace( value ) || string.Equals( value, defaultValue.OriginalString, StringComparison.OrdinalIgnoreCase )
-                       ? defaultValue
-                       : new Uri( value );
+            return Uri.TryCreate( value, UriKind.RelativeOrAbsolute, out Uri? host )
+                       ? host
+                       : defaultValue;
         }
         catch ( Exception e )
         {
