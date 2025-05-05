@@ -6,8 +6,8 @@ namespace Jakar.Extensions.Telemetry;
 
 public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable
 {
-    public string  Key   { get; } = key;
-    public string? Value { get; } = value;
+    public readonly string  Key   = key;
+    public readonly string? Value = value;
 
 
     public static ValueSorter<Pair>    Sorter    => ValueSorter<Pair>.Default;
@@ -41,7 +41,7 @@ public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, ICo
 
 
     public static bool operator ==( Pair left, Pair right ) => left.Equals( right );
-    public static bool operator !=( Pair left, Pair right ) => !left.Equals( right );
+    public static bool operator !=( Pair left, Pair right ) => left.Equals( right ) is false;
     public static bool operator <( Pair  left, Pair right ) => left.CompareTo( right ) < 0;
     public static bool operator >( Pair  left, Pair right ) => left.CompareTo( right ) > 0;
     public static bool operator <=( Pair left, Pair right ) => left.CompareTo( right ) <= 0;

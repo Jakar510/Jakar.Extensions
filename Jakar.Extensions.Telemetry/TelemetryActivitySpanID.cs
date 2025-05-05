@@ -6,12 +6,12 @@ namespace Jakar.Extensions.Telemetry;
 
 public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpanID>
 {
-    public const            int            SIZE       = sizeof(ulong);
-    public const            int            LENGTH     = sizeof(ulong) * 2;
-    private static readonly string         _empty     = new('0', LENGTH);
-    private readonly        string         _hexString = _empty;
-    private readonly        int            _hash      = _empty.GetHashCode();
+    public const            int                     SIZE       = sizeof(ulong);
+    public const            int                     LENGTH     = sizeof(ulong) * 2;
+    private static readonly string                  _empty     = new('0', LENGTH);
     public static readonly  TelemetryActivitySpanID Empty      = new(_empty);
+    private readonly        string                  _hexString = _empty;
+    private readonly        int                     _hash      = _empty.GetHashCode();
 
 
     internal TelemetryActivitySpanID( string hexString )
@@ -19,7 +19,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
         _hexString = hexString;
         _hash      = hexString.GetHashCode();
     }
-    private TelemetryActivitySpanID( ReadOnlySpan<byte> idData )
+    private TelemetryActivitySpanID( params ReadOnlySpan<byte> idData )
     {
         if ( idData.Length != LENGTH ) { throw new ArgumentOutOfRangeException( nameof(idData) ); }
 
@@ -37,14 +37,14 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
     }
 
 
-    public static TelemetryActivitySpanID CreateRandom()                                    => new(TelemetryActivityTraceID.CreateRandom( SIZE ));
-    public static TelemetryActivitySpanID CreateFromUtf8String( ReadOnlySpan<byte> idData ) => new(idData);
-    public static TelemetryActivitySpanID CreateFromBytes( ReadOnlySpan<byte> idData ) => idData.Length != SIZE
-                                                                                     ? throw new ArgumentOutOfRangeException( nameof(idData) )
-                                                                                     : new TelemetryActivitySpanID( Convert.ToHexStringLower( idData ) );
+    public static TelemetryActivitySpanID CreateRandom()                                           => new(TelemetryActivityTraceID.CreateRandom( SIZE ));
+    public static TelemetryActivitySpanID CreateFromUtf8String( params ReadOnlySpan<byte> idData ) => new(idData);
+    public static TelemetryActivitySpanID CreateFromBytes( params ReadOnlySpan<byte> idData ) => idData.Length != SIZE
+                                                                                                     ? throw new ArgumentOutOfRangeException( nameof(idData) )
+                                                                                                     : new TelemetryActivitySpanID( Convert.ToHexStringLower( idData ) );
     public static TelemetryActivitySpanID CreateFromString( string idData ) => idData.Length != LENGTH || TelemetryActivityTraceID.IsLowerCaseHexAndNotAllZeros( idData ) is false
-                                                                          ? throw new ArgumentOutOfRangeException( idData )
-                                                                          : new TelemetryActivitySpanID( idData );
+                                                                                   ? throw new ArgumentOutOfRangeException( idData )
+                                                                                   : new TelemetryActivitySpanID( idData );
     public override string ToString() => _hexString;
 
 
@@ -67,7 +67,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
 
         while ( current is not null )
         {
-            values.Add( current.context.spanID );
+            values.Add( current.context.SpanID );
             current = current.parent;
         }
 
@@ -79,7 +79,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
         List<TelemetryActivitySpanID> values = new(Buffers.DEFAULT_CAPACITY);
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( TelemetryActivityContext parent in span ) { values.Add( parent.spanID ); }
+        foreach ( TelemetryActivityContext parent in span ) { values.Add( parent.SpanID ); }
 
         values.Reverse();
         return Collate( values );
@@ -87,7 +87,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
     public static string Collate( params ReadOnlySpan<TelemetryActivityContext> span )
     {
         List<TelemetryActivitySpanID> values = new(span.Length);
-        foreach ( TelemetryActivityContext parent in span ) { values.Add( parent.spanID ); }
+        foreach ( TelemetryActivityContext parent in span ) { values.Add( parent.SpanID ); }
 
         values.Reverse();
         return Collate( values );

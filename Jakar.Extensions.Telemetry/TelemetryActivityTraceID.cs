@@ -6,12 +6,12 @@ namespace Jakar.Extensions.Telemetry;
 
 public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTraceID>
 {
-    public const            int            SIZE       = sizeof(ulong) * 2;
-    public const            int            LENGTH     = sizeof(ulong) * 4;
-    private static readonly string         _empty     = new('0', LENGTH);
-    private readonly        string         _hexString = _empty;
-    private readonly        int            _hash      = _empty.GetHashCode();
+    public const            int                     SIZE       = sizeof(ulong) * 2;
+    public const            int                     LENGTH     = sizeof(ulong) * 4;
+    private static readonly string                  _empty     = new('0', LENGTH);
     public static readonly  TelemetryActivitySpanID Empty      = new(_empty);
+    private readonly        string                  _hexString = _empty;
+    private readonly        int                     _hash      = _empty.GetHashCode();
 
 
     internal TelemetryActivityTraceID( string hexString ) => _hexString = hexString;
@@ -47,11 +47,11 @@ public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTr
     public static TelemetryActivityTraceID CreateRandom()                                    => new(CreateRandom( SIZE ));
     public static TelemetryActivityTraceID CreateFromUtf8String( ReadOnlySpan<byte> idData ) => new(idData);
     public static TelemetryActivityTraceID CreateFromBytes( ReadOnlySpan<byte> idData ) => idData.Length != SIZE
-                                                                                      ? throw new ArgumentOutOfRangeException( nameof(idData) )
-                                                                                      : new TelemetryActivityTraceID( Convert.ToHexStringLower( idData ) );
+                                                                                               ? throw new ArgumentOutOfRangeException( nameof(idData) )
+                                                                                               : new TelemetryActivityTraceID( Convert.ToHexStringLower( idData ) );
     public static TelemetryActivityTraceID CreateFromString( ReadOnlySpan<char> idData ) => idData.Length != LENGTH || IsLowerCaseHexAndNotAllZeros( idData ) is false
-                                                                                       ? throw new ArgumentOutOfRangeException( nameof(idData) )
-                                                                                       : new TelemetryActivityTraceID( idData.ToString() );
+                                                                                                ? throw new ArgumentOutOfRangeException( nameof(idData) )
+                                                                                                : new TelemetryActivityTraceID( idData.ToString() );
     public override string ToString() => _hexString;
 
     public bool Equals( TelemetryActivityTraceID traceId ) => _hexString == traceId._hexString;

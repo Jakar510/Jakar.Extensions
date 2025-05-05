@@ -51,10 +51,10 @@ public readonly struct AppContext : IEquatable<AppContext>, IComparable<AppConte
     public override int  GetHashCode()              => HashCode.Combine( Name, ID, Version );
 
 
+    public static bool operator ==( AppContext left, AppContext right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( AppContext left, AppContext right ) => Equalizer.Equals( left, right ) is false;
     public static bool operator <( AppContext  left, AppContext right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator >( AppContext  left, AppContext right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator <=( AppContext left, AppContext right ) => Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( AppContext left, AppContext right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator ==( AppContext left, AppContext right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( AppContext left, AppContext right ) => Equalizer.Equals( left, right ) is false;
 }

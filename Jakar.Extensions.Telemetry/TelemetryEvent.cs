@@ -6,9 +6,9 @@ namespace Jakar.Extensions.Telemetry;
 
 public readonly struct TelemetryEvent( string eventID, DateTimeOffset timestamp, params Pair[]? tags ) : IEquatable<TelemetryEvent>, IComparable<TelemetryEvent>, IComparable
 {
-    public Pair[]?        Tags      { get; } = tags;
-    public string         EventID   { get; } = eventID;
-    public DateTimeOffset Timestamp { get; } = timestamp;
+    public readonly Pair[]?        Tags      = tags;
+    public readonly string         EventID   = eventID;
+    public readonly DateTimeOffset Timestamp = timestamp;
 
 
     public static ValueSorter<TelemetryEvent>    Sorter    => ValueSorter<TelemetryEvent>.Default;
@@ -35,8 +35,10 @@ public readonly struct TelemetryEvent( string eventID, DateTimeOffset timestamp,
                    : throw new ArgumentException( $"Object must be of type {nameof(TelemetryEvent)}" );
     }
     public override int GetHashCode()                                             => HashCode.Combine( EventID, Timestamp );
-    public static   bool operator <( TelemetryEvent  left, TelemetryEvent right ) => left.CompareTo( right ) < 0;
-    public static   bool operator >( TelemetryEvent  left, TelemetryEvent right ) => left.CompareTo( right ) > 0;
-    public static   bool operator <=( TelemetryEvent left, TelemetryEvent right ) => left.CompareTo( right ) <= 0;
-    public static   bool operator >=( TelemetryEvent left, TelemetryEvent right ) => left.CompareTo( right ) >= 0;
+    public static   bool operator ==( TelemetryEvent left, TelemetryEvent right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( TelemetryEvent left, TelemetryEvent right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator <( TelemetryEvent  left, TelemetryEvent right ) => Sorter.Compare( left, right ) < 0;
+    public static   bool operator >( TelemetryEvent  left, TelemetryEvent right ) => Sorter.Compare( left, right ) > 0;
+    public static   bool operator <=( TelemetryEvent left, TelemetryEvent right ) => Sorter.Compare( left, right ) <= 0;
+    public static   bool operator >=( TelemetryEvent left, TelemetryEvent right ) => Sorter.Compare( left, right ) >= 0;
 }

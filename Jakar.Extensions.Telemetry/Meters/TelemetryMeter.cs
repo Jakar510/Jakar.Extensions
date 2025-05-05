@@ -2,7 +2,109 @@
 // 06/24/2024  19:06
 
 
+using Serilog.Core;
+using Serilog.Events;
+using System.Threading;
+
+
+
 namespace Jakar.Extensions.Telemetry.Meters;
+
+
+public sealed class Meters( AppTelemetrySource source ) : ILogEventEnricher, IDisposable
+{
+    private readonly AppTelemetrySource                               _source      = source;
+    private readonly Dictionary<Type, Dictionary<string, Instrument>> _instruments = new(Buffers.DEFAULT_CAPACITY);
+
+
+    public void Dispose()
+    {
+        foreach ( Dictionary<string, Instrument> instruments in _instruments.Values )
+        {
+            foreach ( Instrument instrument in instruments.Values ) { instrument.Dispose(); }
+
+            instruments.Clear();
+        }
+
+        _instruments.Clear();
+    }
+
+    public void Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
+    {
+        IEnumerable<LogEventProperty> properties = Save();
+        foreach ( LogEventProperty property in properties ) { logEvent.AddPropertyIfAbsent( property ); }
+    }
+
+    public Instrument<TValue> CreateMeter<TValue>( Type type, string name )
+    {
+        ref Dictionary<string, Instrument>? instruments = ref CollectionsMarshal.GetValueRefOrAddDefault( _instruments, type, out bool _ );
+        instruments ??= new Dictionary<string, Instrument>();
+
+        if ( instruments.TryGetValue( name, out Instrument? instrument ) ) { return (Instrument<TValue>)instrument; }
+
+        instrument        = new Instrument<TValue>( this, name );
+        instruments[name] = instrument;
+        return (Instrument<TValue>)instrument;
+    }
+    public IEnumerable<LogEventProperty> Save() => _instruments.Values.SelectMany( static x => x.Values ).Select( static x => x.Save() );
+
+
+
+    public enum Type
+    {
+        Save,
+        Refresh,
+        DBCall,
+        NetworkCall,
+        Navigation,
+    }
+
+
+
+    public abstract class Instrument( Meters meters, string name ) : IDisposable
+    {
+        protected readonly Lock                          _lock = new();
+        protected readonly string                        _name = $"{meters._source.AppName}.{nameof(Meters)}.{name}";
+        public             LogEventProperty              Save() => new(_name, new StructureValue( GetValues() ));
+        protected abstract IEnumerable<LogEventProperty> GetValues();
+        public virtual     void                          Dispose() => GC.SuppressFinalize( this );
+    }
+
+
+
+    public sealed class Instrument<TValue>( Meters meters, string name ) : Instrument( meters, name )
+    {
+        private readonly LinkedList<(TValue Value, DateTimeOffset TimeStamp)> _values = new();
+
+        public override void Dispose()
+        {
+            _values.Clear();
+            base.Dispose();
+        }
+        public void RecordMeasurement( TValue value )
+        {
+            lock (_lock) { _values.AddLast( (value, DateTimeOffset.UtcNow) ); }
+        }
+        protected override IEnumerable<LogEventProperty> GetValues()
+        {
+            lock (_lock)
+            {
+                LogEventProperty[] array = _values.Select( GetPair ).ToArray();
+                _values.Clear();
+                return array;
+            }
+        }
+        private LogEventProperty GetPair( (TValue Value, DateTimeOffset TimeStamp) x )
+        {
+            string      timeStamp = $"{x.TimeStamp:yyyy-MM-dd HH:mm:ss.fff}";
+            ScalarValue value     = new(x.Value);
+
+            // return new LogEventProperty( _name, new DictionaryValue( [new KeyValuePair<ScalarValue, LogEventPropertyValue>( timeStamp, value )] ) );
+            return new LogEventProperty( _name, new StructureValue( [new LogEventProperty( timeStamp, value )] ) );
+        }
+    }
+}
+
 
 
 public class TelemetryMeters : IDisposable

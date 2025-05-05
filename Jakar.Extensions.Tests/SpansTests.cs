@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Numerics;
+using System.Security.Claims;
 using System.Text;
 using static Jakar.Extensions.Randoms;
 
@@ -243,7 +244,7 @@ public class SpansTests : Assert
     public void First( params double[] values )
     {
         ReadOnlySpan<double> valueSpan = values;
-        double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
+        double               results   = valueSpan.SingleOrDefault( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
         this.AreEqual( values.First( IsDevisableByTwo ), results );
     }
 
@@ -252,7 +253,7 @@ public class SpansTests : Assert
     public void FirstOrDefault( params double[] values )
     {
         ReadOnlySpan<double> valueSpan = values;
-        double               results   = valueSpan.FirstOrDefault( IsDevisableByTwo );
+        double               results   = valueSpan.FirstOrDefault(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
         this.AreEqual( values.FirstOrDefault( IsDevisableByTwo ), results );
     }
 
@@ -267,14 +268,14 @@ public class SpansTests : Assert
             Catch( () =>
                    {
                        ReadOnlySpan<double> valueSpan = values;
-                       double               results   = valueSpan.Single( IsDevisableByTwo );
+                       double               results   = valueSpan.Single(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
                        this.AreEqual( values.Single( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
-            double               results   = valueSpan.Single( IsDevisableByTwo );
+            double               results   = valueSpan.Single(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
@@ -290,14 +291,14 @@ public class SpansTests : Assert
             Catch( () =>
                    {
                        ReadOnlySpan<double> valueSpan = values;
-                       double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
+                       double               results   = valueSpan.SingleOrDefault( static (ref readonly double x) => IsDevisableByTwo(x) );
                        this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
-            double               results   = valueSpan.SingleOrDefault( IsDevisableByTwo );
+            double               results   = valueSpan.SingleOrDefault( static (ref readonly double x) => IsDevisableByTwo(x) );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
