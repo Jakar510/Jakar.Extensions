@@ -54,7 +54,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
             value = Read();
             return value is not null;
         }
-        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => _Values.TryPeek( out value );
+        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => _Values.TryPeek( out value ) && value is not null;
         public override ValueTask<TValue?> ReadAsync( CancellationToken               token = default ) => new(Read());
         public override async IAsyncEnumerable<TValue> ReadAllAsync( [EnumeratorCancellation] CancellationToken token = default )
         {

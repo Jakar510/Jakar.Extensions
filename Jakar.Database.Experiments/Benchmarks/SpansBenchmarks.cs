@@ -104,7 +104,7 @@ public class SpansBenchmarks
 
     [Benchmark] public ReadOnlySpan<char> AsSpan() => Value;
 
-    [Benchmark] public ReadOnlySpan<char> Join() => LinkSpan.Join<char>( Value, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
 
     [Benchmark]
     public ReadOnlySpan<char> RemoveAll_Params()
@@ -118,7 +118,7 @@ public class SpansBenchmarks
 
 
     [Benchmark] public void               RemoveAll_Single() => Spans.RemoveAll( Value, '1' );
-    [Benchmark] public ReadOnlySpan<char> Replace()          => LinkSpan.Replace<char>( Value, OLD, NEW_VALUE );
+    [Benchmark] public ReadOnlySpan<char> Replace()          => Spans.Replace<char>( Value, OLD, NEW_VALUE );
 
 
     [Benchmark] public ReadOnlySpan<char> Slice_False() => Spans.Slice( Value, 'z', '4', false );
