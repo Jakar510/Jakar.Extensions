@@ -58,9 +58,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.60" />
-		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.60" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.60" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.70" />
+		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.70" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.70" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="11.2.0" />
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.0.2" />
@@ -69,16 +69,16 @@
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 		<PackageReference Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
 		<PackageReference Include="Plugin.Maui.Audio" Version="3.1.1" />
-		<PackageReference Include="UraniumUI" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Blurs" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Icons.SegoeFluent" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Material" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.11.1" />
-		<PackageReference Include="UraniumUI.WebComponents" Version="2.11.1" />
+		<PackageReference Include="UraniumUI" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Blurs" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Icons.FontAwesome" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Icons.MaterialIcons" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Icons.SegoeFluent" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Material" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.Validations.DataAnnotations" Version="2.12.1" />
+		<PackageReference Include="UraniumUI.WebComponents" Version="2.12.1" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="4.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.Cupertino" Version="4.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.Fluent" Version="4.0.0" />
@@ -91,7 +91,7 @@
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="4.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" Version="4.0.0" />
 		<PackageReference Include="AiForms.Maui.SettingsView" Version="1.0.17" />
-		<PackageReference Include="Jakar.Extensions" Version="9.7.3" />
+		<PackageReference Include="Jakar.Extensions" Version="9.8.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="WifiManager.Maui" Version="3.0.1" />
 		<PackageReference Include="Xam.Plugin.Media" Version="6.0.2" />
