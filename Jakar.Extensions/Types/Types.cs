@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public static partial class Types
@@ -25,7 +29,7 @@ public static partial class Types
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this         Type   value, scoped in ReadOnlySpan<Type> types ) => types.Any( value.IsEqualType );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this         Type   value, scoped in ReadOnlySpan<Type> types ) => types.AsValueEnumerable().Any( value.IsEqualType );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType<TValue>( this TValue value, scoped in ReadOnlySpan<Type> types ) => (value?.GetType() ?? typeof(TValue)).IsOneOfType( types );
 
 

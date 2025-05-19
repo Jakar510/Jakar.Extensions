@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+
+
+
+namespace Jakar.Extensions;
 
 
 public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exceptions.Networking.HeaderException
@@ -24,16 +28,16 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
 
         builder.AppendLine( key is null
                                 ? "The passed value was of an unexpected Type."
-                                : @$"For the key ""{key}"", the passed value was of an unexpected Type." );
+                                : $"""For the key "{key}", the passed value was of an unexpected Type.""" );
 
-        builder.AppendLine( @$"Actual type: ""{actual?.FullName ?? "null"}""." );
+        builder.AppendLine( $"""Actual type: "{actual?.FullName ?? "null"}".""" );
         builder.AppendLine( "It can be any of the following types: " );
         builder.AppendLine( GetTypes( in expected ) );
 
         return builder.ToString().Replace( "\r\n", "\n" );
     }
     protected static string    GetTypes( scoped ref readonly     ReadOnlySpan<Type> expected ) => GetTypeNames( in expected ).ToPrettyJson();
-    protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.Select( static item => item.FullName ).ToArray();
+    protected static string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.AsValueEnumerable().Select( static item => item.FullName ).ToArray();
 
 
     public static TValue Verify<TValue>( object? item, TKey key )

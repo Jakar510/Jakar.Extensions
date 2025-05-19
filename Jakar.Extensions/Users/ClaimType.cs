@@ -2,6 +2,7 @@
 // 4/1/2024  15:2
 
 using System.Security.Claims;
+using ZLinq;
 
 
 
@@ -100,8 +101,8 @@ public static class Claims
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
-        roles    = claims.Where( CheckRole ).ToArray();
-        groups   = claims.Where( CheckGroup ).ToArray();
+        roles    = claims.AsValueEnumerable().Where( CheckRole ).ToArray();
+        groups   = claims.AsValueEnumerable().Where( CheckGroup ).ToArray();
         userName = claims.FirstOrDefault( IsUserName )?.Value ?? string.Empty;
 
         if ( Guid.TryParse( claims.FirstOrDefault( IsUserID )?.Value, out Guid id ) )
@@ -112,14 +113,12 @@ public static class Claims
 
         userID = Guid.Empty;
         return false;
-        static bool CheckRole( Claim  claim ) => claim.IsRole();
-        static bool CheckGroup( Claim claim ) => claim.IsGroup();
     }
     public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out Guid? userID, out string userName, out Claim[] roles, out Claim[] groups ) => TryParse( principal.Claims.ToArray(), out userID, out userName, out roles, out groups );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, [NotNullWhen( true )] out Guid? userID, out string userName, out Claim[] roles, out Claim[] groups )
     {
-        roles    = claims.Where( CheckRole ).ToArray();
-        groups   = claims.Where( CheckGroup ).ToArray();
+        roles    = claims.AsValueEnumerable().Where( CheckRole ).ToArray();
+        groups   = claims.AsValueEnumerable().Where( CheckGroup ).ToArray();
         userName = claims.FirstOrDefault( IsUserName )?.Value ?? string.Empty;
 
         if ( Guid.TryParse( claims.FirstOrDefault( IsUserID )?.Value, out Guid id ) )
@@ -130,9 +129,9 @@ public static class Claims
 
         userID = null;
         return false;
-        static bool CheckRole( Claim  claim ) => claim.IsRole();
-        static bool CheckGroup( Claim claim ) => claim.IsGroup();
     }
+    public static bool CheckRole( Claim  claim ) => claim.IsRole();
+    public static bool CheckGroup( Claim claim ) => claim.IsGroup();
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool  IsAuthorized( this             IEnumerable<Claim> claims,    Guid userID ) => userID != Guid.Empty && string.Equals( claims.FirstOrDefault( static x => x.IsUserID() )?.Value, userID.ToString(), StringComparison.Ordinal ) is false;

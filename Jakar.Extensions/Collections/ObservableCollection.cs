@@ -444,13 +444,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     public virtual void Add( TValue                      value )            => InternalAdd( in value );
     public virtual void Add( TValue                      value, int count ) => InternalAdd( in value, count );
     public virtual void Add( params ReadOnlySpan<TValue> values ) => InternalAdd( values );
-    public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd( values );
-    public virtual void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
-    {
-        if ( values.KnownLength ) { EnsureCapacity( values.Length ); }
-
-        foreach ( TValue value in values ) { InternalAdd( in value ); }
-    }
+    public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd( values ); 
     public void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
     public void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 

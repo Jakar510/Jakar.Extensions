@@ -55,27 +55,26 @@ public interface ICollectionRemove<TValue>
 
 public interface ICollectionAdd<TValue>
 {
-    void Add( TValue                                                          value );
-    void Add( TValue                                                          value, int count );
-    void Add( params       ReadOnlySpan<TValue>                               values );
-    void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values );
-    void Add( ref readonly ReadOnlyMemory<TValue>                             values );
-    void Add( ref readonly ImmutableArray<TValue>                             values );
-    void Add( IEnumerable<TValue>                                             enumerable );
-    bool TryAdd( TValue                                                       value );
-    void AddOrUpdate( TValue                                                  value );
-    void AddOrUpdate( IEnumerable<TValue>                                     values );
-    void AddOrUpdate( ref readonly ReadOnlyMemory<TValue>                     values );
-    void AddOrUpdate( ref readonly ImmutableArray<TValue>                     values );
-    void AddOrUpdate( params       ReadOnlySpan<TValue>                       values );
-    void AddRange( TValue                                                     value, int count );
-    void AddRange( IEnumerable<TValue>                                        enumerable );
-    void Insert( int                                                          index, TValue                              value, int count = 1 );
-    void Insert( int                                                          index, IEnumerable<TValue>                 collection );
-    void Insert( int                                                          index, params       ReadOnlySpan<TValue>   collection );
-    void Insert( int                                                          index, ref readonly ReadOnlyMemory<TValue> collection );
-    void Insert( int                                                          index, ref readonly ImmutableArray<TValue> collection );
-    bool Exists( RefCheck<TValue>                                             match );
+    void Add( TValue                                      value );
+    void Add( TValue                                      value, int count );
+    void Add( params       ReadOnlySpan<TValue>           values );
+    void Add( ref readonly ReadOnlyMemory<TValue>         values );
+    void Add( ref readonly ImmutableArray<TValue>         values );
+    void Add( IEnumerable<TValue>                         enumerable );
+    bool TryAdd( TValue                                   value );
+    void AddOrUpdate( TValue                              value );
+    void AddOrUpdate( IEnumerable<TValue>                 values );
+    void AddOrUpdate( ref readonly ReadOnlyMemory<TValue> values );
+    void AddOrUpdate( ref readonly ImmutableArray<TValue> values );
+    void AddOrUpdate( params       ReadOnlySpan<TValue>   values );
+    void AddRange( TValue                                 value, int count );
+    void AddRange( IEnumerable<TValue>                    enumerable );
+    void Insert( int                                      index, TValue                              value, int count = 1 );
+    void Insert( int                                      index, IEnumerable<TValue>                 collection );
+    void Insert( int                                      index, params       ReadOnlySpan<TValue>   collection );
+    void Insert( int                                      index, ref readonly ReadOnlyMemory<TValue> collection );
+    void Insert( int                                      index, ref readonly ImmutableArray<TValue> collection );
+    bool Exists( RefCheck<TValue>                         match );
 }
 
 

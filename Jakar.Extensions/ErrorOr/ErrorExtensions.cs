@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 03/03/2025  13:03
 
+using ZLinq;
 using Microsoft.Extensions.Primitives;
 
 
@@ -45,7 +46,9 @@ public static class ErrorExtensions
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( errors.Length );
         Span<string?>               span  = owner.Memory.Span;
-        errors.Select<Error, string?>( GetMessage ).ConsumeInto( span );
+        int                         count = 0;
+
+        foreach ( string error in errors.AsValueEnumerable().Select( GetMessage ) ) { span[count++] = error; }
 
         StringBuilder sb = new(4096);
         sb.AppendJoin( '\n', span );

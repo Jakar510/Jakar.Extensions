@@ -205,13 +205,6 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using ( AcquireLock() ) { InternalAdd( values ); }
     }
-    public override void Add( ref readonly SpanEnumerable<TValue, EnumerableProducer<TValue>> values )
-    {
-        using ( AcquireLock() )
-        {
-            foreach ( TValue value in values ) { InternalAdd( in value ); }
-        }
-    }
 
 
     public override void AddOrUpdate( TValue value )
