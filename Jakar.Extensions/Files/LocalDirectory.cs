@@ -1,4 +1,10 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+using ZLinq.Linq;
+using ZLinq.Traversables;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -157,6 +163,14 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public IEnumerable<LocalFile> GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( LocalFile.Create );
     public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( LocalFile.Create );
     public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( LocalFile.Create );
+
+
+    public ValueEnumerable<Select<Descendants<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>> Descendants() => Info.Descendants().Select( GetFileOrDirectory );
+    public ValueEnumerable<Select<Children<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>    Children()    => Info.Children().Select( GetFileOrDirectory );
+    public ValueEnumerable<Select<Ancestors<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>   Ancestors()   => Info.Ancestors().Select( GetFileOrDirectory );
+    public static OneOf<LocalFile, LocalDirectory> GetFileOrDirectory( FileSystemInfo info ) => info is DirectoryInfo directory
+                                                                                                    ? Create( directory )
+                                                                                                    : LocalFile.Create( info );
 
 
     /// <summary> Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/> </summary>

@@ -5,10 +5,7 @@
 namespace Jakar.Extensions.Loggers;
 
 
-#if NET8_0_OR_GREATER
-
-
-
+/*
 [SuppressMessage( "ReSharper", "RedundantArgumentDefaultValue" )]
 public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> options ) : ILoggerProvider, IHostedService
 {
@@ -62,7 +59,7 @@ public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> opti
 
         if ( rolloverOptions.HasValue )
         {
-            while ( _queue.TryPeek( out LogEvent log ) )
+            while ( _queue.TryPeek( out LogEvent? log ) )
             {
                 string message = _options.Formatter( log );
                 if ( stream.Length + message.Length < rolloverOptions.Value.MaxSize ) { return; }
@@ -73,7 +70,7 @@ public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> opti
         }
         else
         {
-            while ( _queue.TryPop( out LogEvent log ) )
+            while ( _queue.TryPop( out LogEvent? log ) )
             {
                 string message = _options.Formatter( log );
                 await writer.WriteLineAsync( message ).ConfigureAwait( false );
@@ -106,7 +103,7 @@ public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> opti
 
 
 
-    public readonly record struct LogEvent( DateTimeOffset TimeStamp, LogLevel Level, EventId EventId, string Message, string Category )
+    public sealed record LogEvent( DateTimeOffset TimeStamp, LogLevel Level, EventId EventId, string Message, string Category )
     {
         public static   LogEvent Create( LogLevel level, EventId eventId, string message, string categoryName ) => new(DateTimeOffset.UtcNow, level, eventId, message, categoryName);
         public override string   ToString() => $"[ {TimeStamp} - {nameof(Category)}: {Category} - {nameof(Level)}: {Level} - {nameof(EventId)}: {EventId} ]: {Message}";
@@ -132,18 +129,5 @@ public sealed class FileLoggerProvider( IOptions<FileLoggerProviderOptions> opti
             _provider._queue.Push( LogEvent.Create( logLevel, eventId, message, _categoryName ) );
         }
     }
-
-
-
-    /// <summary> An empty scope without any logic </summary>
-    public sealed class NullScope : IDisposable
-    {
-        public static NullScope Instance { get; } = new();
-        private NullScope() { }
-        public void Dispose() { }
-    }
 }
-
-
-
-#endif
+*/
