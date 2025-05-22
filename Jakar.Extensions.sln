@@ -98,6 +98,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SettingsView", "SettingsVie
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DATABASE", "DATABASE", "{FA39CC57-3FCE-4420-A1B4-305EC857D1BE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.SignalR", "Jakar.Extensions.SignalR\Jakar.Extensions.SignalR.csproj", "{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -443,6 +445,18 @@ Global
 		{DE2FF30F-33A4-42A0-8F41-10A8B3DA4637}.Release|iPhone.Build.0 = Release|Any CPU
 		{DE2FF30F-33A4-42A0-8F41-10A8B3DA4637}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{DE2FF30F-33A4-42A0-8F41-10A8B3DA4637}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|iPhone.Build.0 = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{B953E9A5-528B-4EC8-8C97-E7ED65CDE6E1}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

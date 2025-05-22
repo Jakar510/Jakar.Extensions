@@ -13,9 +13,9 @@ namespace Jakar.Extensions;
 public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
     where TCloser : IDisposable
 {
-    Lock.Scope         AcquireLock();
-    TCloser            AcquireLock( CancellationToken      token );
-    ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
+    Lock.Scope         AcquireLock( in TelemetrySpan   parent );
+    TCloser            AcquireLock( in TelemetrySpan   parent, CancellationToken token );
+    ValueTask<TCloser> AcquireLockAsync( TelemetrySpan parent, CancellationToken token );
 
 
     [Pure, MustDisposeResource] FilterBuffer<TValue>                               Copy();
@@ -49,19 +49,25 @@ public interface ILocker
 [DefaultValue( nameof(Empty) )]
 public readonly struct LockCloser( Lock? locker ) : IDisposable
 {
-    private static readonly TimeSpan _timeOut = TimeSpan.FromMicroseconds( 10 );
+    private static readonly TimeSpan _timeOut = TimeSpan.FromMicroseconds( 100 );
     public static readonly  Closer   Empty    = new(null);
     private readonly        Lock?    _locker  = locker;
-    public                  void     Dispose() => _locker?.EnterScope();
+    public                  void     Dispose() => _locker?.Exit();
 
 
-    public static LockCloser Enter( Lock locker, CancellationToken token = default )
+    [Pure, MustDisposeResource]
+    public static LockCloser Enter( Lock locker, TelemetrySpan parent, CancellationToken token = default )
     {
+        using TelemetrySpan span = parent.SubSpan();
         locker.Enter();
+        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { }
+
         return new LockCloser( locker );
     }
-    public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
+    [Pure, MustDisposeResource]
+    public static async ValueTask<LockCloser> EnterAsync( Lock locker, TelemetrySpan parent, CancellationToken token = default )
     {
+        using TelemetrySpan span = parent.SubSpan();
         while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { await Task.Delay( 1, token ); }
 
         return new LockCloser( locker );

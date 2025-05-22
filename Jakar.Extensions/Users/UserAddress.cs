@@ -241,4 +241,5 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
             return false;
         }
     }
+    protected override int GetHashCodeInternal() => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID );
 }

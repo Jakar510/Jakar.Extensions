@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.Input;
+using Jakar.Extensions.Loggers;
 using Serilog.Core;
 
 
@@ -46,7 +47,8 @@ public sealed class FileLogs( string fileName, string[] lines ) : ObservableColl
 
     public static async ValueTask<FileLogs> Create( LocalFile file, CancellationToken token )
     {
-        string content = await file.ReadAsync().AsString( token );
+        using TelemetrySpan span    = TelemetrySpan.Create();
+        string              content = await file.ReadAsync().AsString(span, token);
         return new FileLogs( file.Name, content.Split( _separator, StringSplitOptions.RemoveEmptyEntries ) );
     }
 

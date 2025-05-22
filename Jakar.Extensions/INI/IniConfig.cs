@@ -46,21 +46,24 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
     }
 
 
-    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null )
+    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null, in TelemetrySpan parent = default )
     {
-        string content = file.Read().AsString();
+        using TelemetrySpan span    = parent.SubSpan();
+        string              content = file.Read().AsString( in span );
         return Parse( content, provider );
     }
-    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, CancellationToken token = default )
+    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        string content = await file.ReadAsync().AsString( token );
-        return Parse( content, provider );
+        using TelemetrySpan span    = parent.SubSpan();
+        string              content = await file.ReadAsync().AsString( span, token );
+        return Parse( content, provider, in span );
     }
 
-    public static IniConfig Parse( scoped in ReadOnlySpan<char> span ) => Parse( span, CultureInfo.InvariantCulture );
-    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider )
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, in TelemetrySpan parent = default ) => Parse( span, CultureInfo.InvariantCulture, parent );
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider, in TelemetrySpan parent = default )
     {
-        IniConfig config = new();
+        using TelemetrySpan telemetrySpan = parent.SubSpan();
+        IniConfig           config        = new();
 
         // $"-- {nameof(IniConfig)}.{nameof(Refresh)}.{nameof(content)} --\n{content.ToString()}".WriteToConsole();
         if ( span.IsEmpty ) { return config; }
@@ -74,7 +77,7 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
             if ( line.IsNullOrWhiteSpace() ) { continue; }
 
 
-            Debug.Assert( !line.Contains( '\n' ) );
+            Debug.Assert( line.Contains( '\n', '\r' ) is false );
 
             switch ( line[0] )
             {

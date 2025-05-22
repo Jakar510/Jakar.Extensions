@@ -108,16 +108,17 @@ public static class JwtParserExtensions
 
 
     [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
-    private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
+    private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        string? value = configuration.GetValue<string>( fileKey );
+        using TelemetrySpan span  = parent.SubSpan();
+        string?             value = configuration.GetValue<string>( fileKey );
 
         if ( string.IsNullOrWhiteSpace( value ) is false )
         {
             LocalFile file = value;
 
             return file.Exists
-                       ? await file.ReadAsync().AsBytes( token )
+                       ? await file.ReadAsync().AsBytes( span, token )
                        : throw new FileNotFoundException( file.FullPath );
         }
 

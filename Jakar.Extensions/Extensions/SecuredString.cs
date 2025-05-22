@@ -55,8 +55,9 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
 
 
         [RequiresUnreferencedCode( "Microsoft.Extensions.Configuration.ConfigurationBinder.GetValue<TValue>(String)" )]
-        public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token, string key = "Default", string section = "ConnectionStrings" )
+        public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, TelemetrySpan parent = default, CancellationToken token = default, string key = "Default", string section = "ConnectionStrings" )
         {
+            using TelemetrySpan span = parent.SubSpan();
             if ( _value0 is not null ) { return await _value0( token ); }
 
             if ( _value1 is not null ) { return await _value1( token ); }

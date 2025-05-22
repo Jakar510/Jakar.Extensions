@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions.Experiments.Benchmarks;
+﻿using Jakar.Extensions.Loggers;
+
+
+
+namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 #pragma warning disable CA1822 // Mark members as static
@@ -164,8 +168,9 @@ public class JsonNet_SystemTextJson_Benchmarks
 
     public static async ValueTask SaveAsync()
     {
-        LocalFile file = "test.json";
-        await file.WriteAsync( JSON );
+        using TelemetrySpan span = TelemetrySpan.Create();
+        LocalFile           file = "test.json";
+        await file.WriteAsync( JSON, span );
         Console.WriteLine( file.FullPath );
     }
 }
@@ -180,11 +185,11 @@ public sealed class NodeFaker : Faker<Node>
 
     public NodeFaker()
     {
-        RuleFor( x => x.Name,        f => f.Commerce.ProductName() );
-        RuleFor( x => x.Description, f => f.Commerce.ProductAdjective() );
-        RuleFor( x => x.Price,       f => f.Random.Double( 1, 100 ) );
-        RuleFor( x => x.Date,        f => DateTimeOffset.UtcNow - TimeSpan.FromDays( f.Random.Int( -10, 10 ) ) );
-        RuleFor( x => x.Children,    GetChildren );
+        RuleFor( static x => x.Name,        f => f.Commerce.ProductName() );
+        RuleFor( static x => x.Description, f => f.Commerce.ProductAdjective() );
+        RuleFor( static x => x.Price,       f => f.Random.Double( 1, 100 ) );
+        RuleFor( static x => x.Date,        f => DateTimeOffset.UtcNow - TimeSpan.FromDays( f.Random.Int( -10, 10 ) ) );
+        RuleFor( static x => x.Children,    GetChildren );
     }
     private Node[] GetChildren( Faker f )
     {

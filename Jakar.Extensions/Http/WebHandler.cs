@@ -129,8 +129,9 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
     {
+        using TelemetrySpan      span   = TelemetrySpan.Create();
         await using MemoryStream stream = await AsStream( response );
-        await file.WriteAsync( stream, Token );
+        await file.WriteAsync( stream, span, Token );
         return file;
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type )

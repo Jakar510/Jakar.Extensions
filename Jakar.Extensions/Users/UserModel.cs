@@ -280,7 +280,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
         return _company == other._company && _department == other._department && _email == other._email && _ext == other._ext && _firstName == other._firstName && _gender == other._gender && _lastName == other._lastName && _phoneNumber == other._phoneNumber && _rights == other._rights && _title == other._title && _userName == other._userName && _website == other._website && _description == other._description && _fullName == other._fullName && _preferredLanguage == other._preferredLanguage && Nullable.Equals( _createdBy, other._createdBy ) && Nullable.Equals( _escalateTo, other._escalateTo ) && Nullable.Equals( _imageID, other._imageID ) && Equals( UserID, other.UserID ) && Addresses.Equals( other.Addresses ) && Groups.Equals( other.Groups ) && ID.Equals( other.ID ) && Roles.Equals( other.Roles ) && Nullable.Equals( SubscriptionExpires, other.SubscriptionExpires );
     }
-    public override int GetHashCode()
+    protected override int GetHashCodeInternal()
     {
         HashCode hashCode = new();
         hashCode.Add( base.GetHashCode() );

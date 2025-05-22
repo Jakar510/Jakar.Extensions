@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public abstract class PreferenceFile<TClass> : ObservableClass, IAsyncDisposable
+public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDisposable
     where TClass : PreferenceFile<TClass>, new()
 {
 #if NET9_0_OR_GREATER

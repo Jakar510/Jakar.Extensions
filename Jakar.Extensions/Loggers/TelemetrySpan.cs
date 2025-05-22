@@ -10,17 +10,16 @@ namespace Jakar.Extensions.Loggers;
 
 public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
 {
-    private static         TelemetrySource? _current;
-    public static readonly ActivityContext  EmptyActivityContext = default;
-    public readonly        ActivitySource   Source;
-    public readonly        AppVersion       Version;
-    public readonly        Guid             AppID;
-    public readonly        Meter            Meter;
-    public readonly        string           AppName;
-    public                 string?          PackageName { get; set; }
+    public static readonly ActivityContext EmptyActivityContext = default;
+    public readonly        ActivitySource  Source;
+    public readonly        AppVersion      Version;
+    public readonly        Guid            AppID;
+    public readonly        Meter           Meter;
+    public readonly        string          AppName;
+    public                 string?         PackageName { get; set; }
 
 
-    public static TelemetrySource Current { get => _current ?? throw new InvalidOperationException( nameof(_current) ); set => _current = value; }
+    public static TelemetrySource? Current { get; set; }
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
@@ -112,19 +111,20 @@ public readonly struct TelemetrySpan : IDisposable
     public static readonly TelemetrySpan Empty  = new(null, EMPTY);
 
 
-    public static bool            Enabled      { get; set; }
-    public        TimeSpan        Elapsed      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
-    public        DateTimeOffset? CreateWindow { set => SetBaggage( CREATE_WINDOW, value?.ToString() ); }
-    public        DateTimeOffset? StartTime    { set => SetBaggage( ON_START,      value?.ToString() ); }
-    public        DateTimeOffset? ResumeTime   { set => SetBaggage( ON_RESUME,     value?.ToString() ); }
-    public        DateTimeOffset? SleepTime    { set => SetBaggage( ON_SLEEP,      value?.ToString() ); }
-    public        bool            IsValid      => _activity is not null;
+    public TimeSpan        Elapsed      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
+    public DateTimeOffset? CreateWindow { set => SetBaggage( CREATE_WINDOW, value?.ToString() ); }
+    public DateTimeOffset? StartTime    { set => SetBaggage( ON_START,      value?.ToString() ); }
+    public DateTimeOffset? ResumeTime   { set => SetBaggage( ON_RESUME,     value?.ToString() ); }
+    public DateTimeOffset? SleepTime    { set => SetBaggage( ON_SLEEP,      value?.ToString() ); }
+    public bool            IsValid      => _activity is not null;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     internal TelemetrySpan( Activity? parent, string name )
     {
-        if ( string.IsNullOrWhiteSpace( name ) )
+        TelemetrySource? source = TelemetrySource.Current;
+
+        if ( string.IsNullOrWhiteSpace( name ) || source is null )
         {
             _parent   = null;
             _activity = null;
@@ -135,14 +135,9 @@ public readonly struct TelemetrySpan : IDisposable
                          ? $"{parent.DisplayName}.{name}"
                          : name;
 
-        _parent = parent;
-
-        if ( Enabled )
-        {
-            _activity = Activity.Current = TelemetrySource.Current.StartActivity( key, parent );
-            _activity?.AddEvent( $"{_activity.DisplayName}.Start".GetEvent( new EventProperties { [START_STOP_ID] = _id } ) );
-        }
-        else { _activity = null; }
+        _parent   = parent;
+        _activity = Activity.Current = source.StartActivity( key, parent );
+        _activity?.AddEvent( $"{_activity.DisplayName}.Start".GetEvent( new EventProperties { [START_STOP_ID] = _id } ) );
     }
     public void Dispose()
     {
@@ -172,21 +167,13 @@ public readonly struct TelemetrySpan : IDisposable
     public ActivityLink Link( ActivityTagsCollection? tags = null ) => _activity is null
                                                                            ? new ActivityLink()
                                                                            : new ActivityLink( _activity.Context, tags );
-    public void SetInactive() => Activity.Current = _parent;
-    public void SetActive()
-    {
-        if ( _activity is null ) { return; }
-
-        Activity.Current = _activity;
-        _activity.AddEvent( new ActivityEvent( nameof(SetActive), DateTimeOffset.UtcNow ) );
-    }
 
 
     [Pure, MustDisposeResource] public        TelemetrySpan ParseJson()                                                                            => SubSpan();
     [Pure, MustDisposeResource] public        TelemetrySpan Navigation()                                                                           => SubSpan();
     [Pure, MustDisposeResource] public        TelemetrySpan WriteToFile()                                                                          => SubSpan();
-    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string  name                                     = EMPTY ) => new(_activity, name);
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string  name                                     = EMPTY ) => Create(Activity.Current, name);
+    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string  name                                     = EMPTY ) => Create( _activity ?? Activity.Current, name );
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string  name                                     = EMPTY ) => Create( Activity.Current,              name );
     [Pure, MustDisposeResource] public static TelemetrySpan Create( Activity?                   activity, [CallerMemberName] string name = EMPTY ) => new(activity, name);
     [Pure, MustDisposeResource] public static TelemetrySpan Create( ref readonly TelemetrySpan? parent,   [CallerMemberName] string name = EMPTY ) => parent?.SubSpan( name ) ?? Create( name );
 

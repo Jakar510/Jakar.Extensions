@@ -8,30 +8,18 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComparable<LocalDirectory>, IComparable, TempFile.ITempFile, IAsyncDisposable
+public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable
 {
     protected readonly DirectoryInfo _info;
-    private readonly   string        _fullPath;
+    public readonly    string        FullPath;
     private            bool          _isTemporary;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
-    public static Equalizer<LocalDirectory> Equalizer       => Equalizer<LocalDirectory>.Default;
-    public static Sorter<LocalDirectory>    Sorter          => Sorter<LocalDirectory>.Default;
-    public        DateTime                  CreationTimeUtc { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
-    public        bool                      DoesNotExist    => !Exists;
-    public        bool                      Exists          => Info.Exists;
-    public required string FullPath
-    {
-        get => _fullPath;
-        [MemberNotNull( nameof(_fullPath) ), MemberNotNull( nameof(_info) )]
-        init
-        {
-            _info     = Directory.CreateDirectory( value );
-            _fullPath = _info.FullName;
-        }
-    }
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);                set => Environment.CurrentDirectory = value.FullPath; }
+    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
+    public              bool            DoesNotExist      => !Exists;
+    public              bool            Exists            => Info.Exists;
     [JsonIgnore] public DirectoryInfo   Info              => _info;
     bool TempFile.ITempFile.            IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
     public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
@@ -41,18 +29,14 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     public              string          Root              => Directory.GetDirectoryRoot( FullPath );
 
 
-    public LocalDirectory() { }
-    [SetsRequiredMembers] public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ) ) { }
-    [SetsRequiredMembers] public LocalDirectory( string path ) => FullPath = path;
-
-#pragma warning disable CS8618, CS9264
-    [SetsRequiredMembers]
-    public LocalDirectory( DirectoryInfo path )
+    public LocalDirectory( string path ) : this( Directory.CreateDirectory( path ) ) { }
+    public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this( new DirectoryInfo( path.Combine( subFolders ) ) ) { }
+    public LocalDirectory( DirectoryInfo info )
     {
-        _info     = path;
-        _fullPath = path.FullName;
+        info.Create();
+        _info    = info;
+        FullPath = info.FullName;
     }
-#pragma warning restore CS8618, CS9264
 
 
     public void Dispose()
@@ -257,26 +241,26 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteAllRecursivelyAsync()
+    public Task DeleteAllRecursivelyAsync( in TelemetrySpan? parent = null )
     {
-        List<Task> tasks = new(64);
+        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
+        List<Task>          tasks = new(64);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteAllRecursivelyAsync() );
+            tasks.Add( dir.DeleteAllRecursivelyAsync( span ) );
         }
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteAllRecursivelyAsync() );
+            tasks.Add( dir.DeleteAllRecursivelyAsync( span ) );
             dir.Delete();
         }
 
         Delete();
-
-        return Task.WhenAll( tasks.ToArray() );
+        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
     }
 
     /// <summary> Asynchronously deletes files. </summary>
@@ -285,18 +269,19 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteFilesAsync()
+    public Task DeleteFilesAsync( in TelemetrySpan? parent = null )
     {
-        List<Task> tasks = new(DEFAULT_CAPACITY);
+        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
+        List<Task>          tasks = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteFilesAsync() );
+            tasks.Add( dir.DeleteFilesAsync( span ) );
         }
 
-        return Task.WhenAll( tasks.ToArray() );
+        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
     }
 
     /// <summary> Asynchronously deletes subdirectories. </summary>
@@ -305,22 +290,24 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteSubFoldersAsync()
+    public Task DeleteSubFoldersAsync( in TelemetrySpan? parent = null )
     {
-        List<Task> tasks = new(DEFAULT_CAPACITY);
+        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
+        List<Task>          tasks = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteSubFoldersAsync() );
+            tasks.Add( dir.DeleteSubFoldersAsync( span ) );
             dir.Delete();
         }
 
-        return Task.WhenAll( tasks.ToArray() );
+        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
     }
 
 
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
@@ -328,15 +315,16 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
-            using MemoryStream data   = await file.ReadAsync().AsStream( token );
+            using MemoryStream data   = await file.ReadAsync().AsStream( span, token );
 
             await data.CopyToAsync( stream, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
@@ -345,15 +333,16 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
 
             await stream.WriteAsync( data, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
@@ -362,15 +351,16 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
 
             await stream.WriteAsync( data, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
@@ -379,7 +369,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
 
             await stream.WriteAsync( data, token );
         }
@@ -470,26 +460,22 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
     /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
     /// <param name="output"> file path to write the zip to </param>
+    /// <param name="parent"> </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
-    public void Zip( in LocalFile output, CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
+    public void Zip( in LocalFile output, in TelemetrySpan parent = default, CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, parent, compression );
     /// <summary> </summary>
     /// <param name="output"> file path to write the zip to </param>
+    /// <param name="parent"> </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     /// <param name="encoding"> The encoding used for the file names </param>
-    public void Zip( in LocalFile output, Encoding encoding, CompressionLevel compression = CompressionLevel.Optimal ) => ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
-
-
-    public int CompareTo( object? other )
+    public void Zip( in LocalFile output, Encoding encoding, in TelemetrySpan parent = default, CompressionLevel compression = CompressionLevel.Optimal )
     {
-        if ( other is null ) { return 1; }
-
-        if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        return other is LocalDirectory value
-                   ? CompareTo( value )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(LocalDirectory) );
+        using TelemetrySpan span = parent.SubSpan();
+        ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
     }
-    public int CompareTo( LocalDirectory? other )
+
+
+    public override int CompareTo( LocalDirectory? other )
     {
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
@@ -497,7 +483,7 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
     }
-    public bool Equals( LocalDirectory? other )
+    public override bool Equals( LocalDirectory? other )
     {
         if ( other is null ) { return false; }
 
@@ -505,14 +491,13 @@ public class LocalDirectory : ObservableClass, IEquatable<LocalDirectory>, IComp
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-    public override bool Equals( object? other ) => other is LocalDirectory directory && Equals( directory );
-    public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
+    protected override int GetHashCodeInternal() => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
     public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Equals( left, right ) is false;
     public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Equalizer.Equals( left, right );
     public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) <= 0;
 

@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database.Experiments.Benchmarks;
+﻿using Jakar.Extensions.Loggers;
+
+
+
+namespace Jakar.Database.Experiments.Benchmarks;
 
 
 #pragma warning disable CA1822 // Mark members as static
@@ -150,22 +154,23 @@ public class JsonNet_SystemTextJson_Benchmarks
     private static readonly Node _node = JSON.FromJson<Node>();
 
 
-    [Benchmark, Category( "Serialize" )]  public string? ToStringSerialize()             => _node.ToString();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerialize()              => _node.ToJson();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
+    [Benchmark, Category( "Serialize" )] public string? ToStringSerialize()             => _node.ToString();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerialize()              => _node.ToJson();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
 
 
-    [Benchmark, Category( "Deserialize" )]  public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
-    [Benchmark, Category( "Deserialize" )]  public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
-    [Benchmark, Category( "Deserialize" )]  public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
+    [Benchmark, Category( "Deserialize" )] public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
+    [Benchmark, Category( "Deserialize" )] public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
+    [Benchmark, Category( "Deserialize" )] public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
 
 
     public static async ValueTask SaveAsync()
     {
-        LocalFile file = "test.json";
-        await file.WriteAsync( JSON );
+        using TelemetrySpan span = TelemetrySpan.Create();
+        LocalFile           file = "test.json";
+        await file.WriteAsync( JSON, span );
         Console.WriteLine( file.FullPath );
     }
 }

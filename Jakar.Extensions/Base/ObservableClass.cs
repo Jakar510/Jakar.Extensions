@@ -80,7 +80,8 @@
                        : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
         }
         public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass file && Equals( file );
-        public override        int  GetHashCode()           => RuntimeHelpers.GetHashCode( this );
+        public sealed override int  GetHashCode()           => GetHashCodeInternal();
+        protected abstract     int  GetHashCodeInternal();
     }
 
 

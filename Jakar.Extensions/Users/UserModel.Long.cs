@@ -40,6 +40,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
             return false;
         }
     }
+    protected override int GetHashCodeInternal() => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID, Address );
 }
 
 

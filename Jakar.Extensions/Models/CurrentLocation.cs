@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLocation<TID>>
+public interface ICurrentLocation<out TID> : IUniqueID<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     double?           Accuracy                { get; }
@@ -20,7 +20,7 @@ public interface ICurrentLocation<TID> : IUniqueID<TID>, IEquatable<ICurrentLoca
 
 
 [Serializable]
-public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
+public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICurrentLocation<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public       double?           Accuracy                { get; init; }
@@ -56,14 +56,10 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
 
     public static double CalculateDistance( double latitudeStart, double longitudeStart, ICurrentLocation<TID> locationEnd, DistanceUnit units ) =>
         CalculateDistance( latitudeStart, longitudeStart, locationEnd.Latitude, locationEnd.Longitude, units );
-
     public static double CalculateDistance( ICurrentLocation<TID> locationStart, double latitudeEnd, double longitudeEnd, DistanceUnit units ) =>
         CalculateDistance( locationStart.Latitude, locationStart.Longitude, latitudeEnd, longitudeEnd, units );
-
     public static double CalculateDistance( ICurrentLocation<TID> locationStart, ICurrentLocation<TID> locationEnd, DistanceUnit units ) =>
         CalculateDistance( locationStart.Latitude, locationStart.Longitude, locationEnd.Latitude, locationEnd.Longitude, units );
-
-
     public static double CalculateDistance( double latitudeStart, double longitudeStart, double latitudeEnd, double longitudeEnd, DistanceUnit unit ) =>
         unit switch
         {
@@ -71,15 +67,6 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
             DistanceUnit.Miles      => UnitConverters.CoordinatesToMiles( latitudeStart, longitudeStart, latitudeEnd, longitudeEnd ),
             _                       => throw new OutOfRangeException( unit )
         };
-    public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
-    public override bool Equals( object? obj )
-    {
-        if ( obj is null ) { return false; }
-
-        if ( ReferenceEquals( this, obj ) ) { return true; }
-
-        return obj is CurrentLocation<TID> location && Equals( location );
-    }
 
     // private CurrentLocation( Location? point )
     // {
@@ -132,7 +119,26 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
 
     public double CalculateDistance( ICurrentLocation<TID> locationStart, DistanceUnit units )                              => CalculateDistance( locationStart, this,           units );
     public double CalculateDistance( double                latitudeStart, double       longitudeStart, DistanceUnit units ) => CalculateDistance( latitudeStart, longitudeStart, this, units );
-    public override int GetHashCode()
+
+
+    public bool EqualInstance( ICurrentLocation<TID> other ) => InstanceID.Equals( other.InstanceID );
+    public override bool Equals( CurrentLocation<TID>? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) && Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) && IsFromMockProvider == other.IsFromMockProvider && AltitudeReferenceSystem == other.AltitudeReferenceSystem;
+    }
+    public override int CompareTo( CurrentLocation<TID>? other )
+    {
+        if ( other is null ) { return -1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return Timestamp.CompareTo( other.Timestamp );
+    }
+    protected override int GetHashCodeInternal()
     {
         HashCode hashCode = new();
         hashCode.Add( ID );
@@ -148,13 +154,5 @@ public sealed class CurrentLocation<TID> : JsonModel, ICurrentLocation<TID>
         hashCode.Add( IsFromMockProvider );
         hashCode.Add( (int)AltitudeReferenceSystem );
         return hashCode.ToHashCode();
-    }
-    public bool Equals( ICurrentLocation<TID>? other )
-    {
-        if ( other is null ) { return false; }
-
-        if ( ReferenceEquals( this, other ) ) { return true; }
-
-        return InstanceID.Equals( other.InstanceID ) && Timestamp.Equals( other.Timestamp ) && Latitude.Equals( other.Latitude ) && Longitude.Equals( other.Longitude ) && Nullable.Equals( Altitude, other.Altitude ) && Nullable.Equals( Accuracy, other.Accuracy ) && Nullable.Equals( VerticalAccuracy, other.VerticalAccuracy ) && Nullable.Equals( Speed, other.Speed ) && Nullable.Equals( Course, other.Course ) && IsFromMockProvider == other.IsFromMockProvider && AltitudeReferenceSystem == other.AltitudeReferenceSystem;
     }
 }

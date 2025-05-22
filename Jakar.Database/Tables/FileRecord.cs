@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 4/2/2024  17:43
 
+
 namespace Jakar.Database;
 
 
@@ -35,14 +36,15 @@ public sealed record FileRecord( string?              FileName,
     [Pure]
     public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
     {
+        using TelemetrySpan span = TelemetrySpan.Create();
         if ( string.IsNullOrWhiteSpace( FullPath ) ) { return new FileData( this, FileMetaData.Create( this ) ); }
 
         LocalFile file = FullPath;
         if ( MimeType != file.Mime ) { throw new InvalidOperationException( $"{nameof(MimeType)} mismatch. Got {file.Mime} but expected {MimeType}" ); }
 
         return file.Mime.IsText()
-                   ? await file.ReadAsync().AsString( token )
-                   : await file.ReadAsync().AsBytes( token );
+                   ? await file.ReadAsync().AsString(span, token)
+                   : await file.ReadAsync().AsBytes(span, token);
     }
 
 

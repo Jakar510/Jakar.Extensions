@@ -2,6 +2,7 @@
 // 01/06/2025  09:01
 
 using System.Runtime.InteropServices;
+using Jakar.Extensions.Loggers;
 using Serilog.Context;
 using Serilog.Debugging;
 
@@ -50,7 +51,8 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
     {
         if ( file?.Exists is not true ) { return; }
 
-        byte[] content = await file.ReadAsync().AsBytes( token );
+        using TelemetrySpan span    = TelemetrySpan.Create();
+        byte[]              content = await file.ReadAsync().AsBytes(span, token);
         file.Delete();
 
         disposables.Add( LogContext.PushProperty( file.Name, Convert.ToBase64String( content ) ) );

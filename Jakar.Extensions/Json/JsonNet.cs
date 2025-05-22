@@ -85,8 +85,9 @@ public static class JsonNet
         where TValue : notnull =>
         Task.Run( async () =>
                   {
-                      LocalFile file = LocalDirectory.Create( "DEBUG" ).Join( $"{caller}__{variableName}.value" );
+                      using TelemetrySpan span = TelemetrySpan.Create();
+                      LocalFile           file = LocalDirectory.Create( "DEBUG" ).Join( $"{caller}__{variableName}.value" );
 
-                      await file.WriteAsync( value.ToPrettyJson() );
+                      await file.WriteAsync( value.ToPrettyJson(), span );
                   } );
 }

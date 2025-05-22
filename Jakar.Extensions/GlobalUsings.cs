@@ -45,6 +45,7 @@ global using Nito.Collections;
 global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
+global using Jakar.Extensions.Loggers;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options; 
 global using OneOf;

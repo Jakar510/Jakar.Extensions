@@ -129,8 +129,9 @@ public class FilePaths : BaseClass, IDisposable
     public    Task<ReadOnlyMemory<byte>> ZipCacheAsync()      => Task.Run( ZipCache );
     public    ReadOnlyMemory<byte>       ZipData()            => Zip( AppData );
     public    Task<ReadOnlyMemory<byte>> ZipDataAsync()       => Task.Run( ZipData );
-    public static ReadOnlyMemory<byte> Zip( LocalDirectory? directory )
+    public static ReadOnlyMemory<byte> Zip( LocalDirectory? directory, in TelemetrySpan parent = default )
     {
+        using TelemetrySpan span = parent.SubSpan();
         if ( directory is null || directory.DoesNotExist ) { return ReadOnlyMemory<byte>.Empty; }
 
         Debug.Assert( directory.Exists );
@@ -141,24 +142,30 @@ public class FilePaths : BaseClass, IDisposable
     }
 
 
-    public async ValueTask<LocalFile> SaveFileAsync( string fileName, Stream stream, CancellationToken token )
+    public async ValueTask<LocalFile> SaveFileAsync( string fileName, Stream stream, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        LocalFile file = Cache.Join( fileName );
-        await file.WriteAsync( stream, token );
+        using TelemetrySpan span = parent.SubSpan();
+        LocalFile           file = Cache.Join( fileName );
+        await file.WriteAsync( stream, span, token );
         return file;
     }
-    public async ValueTask<LocalFile> SaveFileAsync( string fileName, ReadOnlyMemory<byte> payload, CancellationToken token )
+    public async ValueTask<LocalFile> SaveFileAsync( string fileName, ReadOnlyMemory<byte> payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        LocalFile file = Cache.Join( fileName );
-        await file.WriteAsync( payload, token );
+        using TelemetrySpan span = parent.SubSpan();
+        LocalFile           file = Cache.Join( fileName );
+        await file.WriteAsync( payload, span, token );
         return file;
     }
 
 
-    public        Task<LocalFile> ZipLogsToFile()                                                                  => Zip( Logs,    LogsZipFile );
-    public        Task<LocalFile> ZipCacheToFile()                                                                 => Zip( Cache,   AppCacheZipFile );
-    public        Task<LocalFile> ZipDataToFile()                                                                  => Zip( AppData, AppDataZipFile );
-    public static Task<LocalFile> Zip( LocalDirectory input, LocalFile output, CancellationToken token = default ) => input.ZipAsync( output, token );
+    public Task<LocalFile> ZipLogsToFile()  => Zip( Logs,    LogsZipFile );
+    public Task<LocalFile> ZipCacheToFile() => Zip( Cache,   AppCacheZipFile );
+    public Task<LocalFile> ZipDataToFile()  => Zip( AppData, AppDataZipFile );
+    public static Task<LocalFile> Zip( LocalDirectory input, LocalFile output, TelemetrySpan parent = default, CancellationToken token = default )
+    {
+        using TelemetrySpan span = parent.SubSpan();
+        return input.ZipAsync( output, span, token );
+    }
 
 
     public virtual IEnumerable<string> GetFilesPaths()

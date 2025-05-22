@@ -194,5 +194,9 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
         string content = await client.GetStringAsync( uri, token );
         SetBlockedPasswords( content );
     }
-    public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default ) => SetBlockedPasswords( await file.ReadAsync().AsString( token ) );
+    public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default )
+    {
+        using TelemetrySpan span = TelemetrySpan.Create();
+        SetBlockedPasswords( await file.ReadAsync().AsString(span, token) );
+    }
 }

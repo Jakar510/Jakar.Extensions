@@ -12,27 +12,24 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<LocalFile>, IComparable, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
 {
-    private   bool      _isTemporary;
-    protected FileInfo? _info;
+    public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
+    public readonly              string   FullPath     = info.FullName;
+    private                      bool     _isTemporary;
+    [JsonIgnore] public readonly FileInfo Info = info;
 
 
-    public static       Equalizer<LocalFile> Equalizer       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<LocalFile>.Default; }
-    public static       Sorter<LocalFile>    Sorter          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<LocalFile>.Default; }
-    public              string               ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
-    public              DateTimeOffset       CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
-    public              string?              DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
-    public              bool                 DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
-    public              bool                 Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
-    public              string               Extension       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
-    public              Encoding             FileEncoding    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; } = Encoding.Default;
-    public              string               FullPath        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    [JsonIgnore] public FileInfo             Info            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _info ??= new FileInfo( FullPath ); }
-    bool TempFile.ITempFile.                 IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
-    public DateTimeOffset                    LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
-    public MimeType                          Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
-    public string                            Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
+    public string           ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
+    public DateTimeOffset   CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
+    public string?          DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
+    public bool             DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
+    public bool             Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
+    public string           Extension       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
+    bool TempFile.ITempFile.IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
+    public DateTimeOffset   LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
+    public MimeType         Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
+    public string           Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
 
     [JsonIgnore]
     public LocalDirectory? Parent
@@ -49,21 +46,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public string Root { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Directory.GetDirectoryRoot( FullPath ); }
 
 
-    public LocalFile() => FullPath = string.Empty;
-    public LocalFile( Uri                       path ) : this( FromUri( path ) ) { }
-    public LocalFile( params ReadOnlySpan<char> path ) : this( path.ToString() ) { }
-    public LocalFile( FileSystemInfo            path ) : this( path.FullName ) { }
-    public LocalFile( FileInfo                  path ) : this( path.FullName ) { }
-    public LocalFile( string                    path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
-    public LocalFile( string                    path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
-    public LocalFile( DirectoryInfo             path, string                      fileName ) : this( path.Combine( fileName ) ) { }
-    public LocalFile( string                    path, string                      fileName ) : this( new DirectoryInfo( path ), fileName ) { }
-    public LocalFile( string path, Encoding? encoding = null )
-    {
-        this.SetNormal();
-        FullPath     = Path.GetFullPath( path );
-        FileEncoding = encoding ?? Encoding.Default;
-    }
+    public LocalFile( Uri            path, Encoding?                   encoding = null ) : this( FromUri( path ), encoding ) { }
+    public LocalFile( FileSystemInfo path, Encoding?                   encoding = null ) : this( path.FullName, encoding ) { }
+    public LocalFile( string         path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
+    public LocalFile( string         path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
+    public LocalFile( DirectoryInfo  path, string                      fileName, Encoding?                   encoding = null ) : this( path.Combine( fileName ), encoding ) { }
+    public LocalFile( string         path, string                      fileName, Encoding?                   encoding = null ) : this( new DirectoryInfo( path ), fileName, encoding ) { }
+    public LocalFile( string         path, Encoding?                   encoding = null ) : this( new FileInfo( path ), encoding ) { }
     public void Dispose()
     {
         Dispose( this.IsTempFile() );
@@ -79,7 +68,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     public static implicit operator LocalFile( FileInfo           info ) => new(info);
     public static implicit operator LocalFile( FileSystemInfo     info ) => new(info);
     public static implicit operator LocalFile( Uri                info ) => new(info);
-    public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info);
+    public static implicit operator LocalFile( ReadOnlySpan<char> info ) => new(info.ToString());
 
 
     public static LocalFile Create( FileSystemInfo file ) => new(file.FullName);
@@ -171,15 +160,17 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="path"> </param>
+    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="WebException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token = default )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        LocalFile file = new(path);
-        await file.WriteAsync( payload, token );
+        using TelemetrySpan span = parent.SubSpan();
+        LocalFile           file = new(path);
+        await file.WriteAsync( payload, span, token );
         return file;
     }
 
@@ -187,6 +178,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="path"> </param>
+    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="WebException"> </exception>
@@ -194,10 +186,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token = default )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        LocalFile file = new(path);
-        await file.WriteAsync( payload, token );
+        using TelemetrySpan span = parent.SubSpan();
+        LocalFile           file = new(path);
+        await file.WriteAsync( payload, span, token );
         return file;
     }
 
@@ -281,8 +274,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public          IAsyncReadHandler ReadAsync()   => this;
-    public override int               GetHashCode() => HashCode.Combine( FullPath, this.IsTempFile() );
+    public IAsyncReadHandler ReadAsync() => this;
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -497,35 +489,39 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> Copies this file to the <paramref name="newFile"/> </summary>
     /// <param name="newFile"> </param>
+    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <returns> </returns>
-    public async ValueTask Clone( LocalFile newFile, CancellationToken token = default )
+    public async ValueTask Clone( LocalFile newFile, TelemetrySpan parent = default, CancellationToken token = default )
     {
-        FileStream stream = OpenRead();
-        await newFile.WriteAsync( stream, token );
+        using TelemetrySpan span   = parent.SubSpan();
+        FileStream          stream = OpenRead();
+        await newFile.WriteAsync( stream, span, token );
     }
 
 
-    public async ValueTask<LocalFile> ZipAsync( CancellationToken token, ReadOnlyMemory<LocalFile> files )
+    public async ValueTask<LocalFile> ZipAsync( TelemetrySpan parent = default, CancellationToken token = default, params LocalFile[] files )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
         for ( int i = 0; i < files.Length; i++ )
         {
-            LocalFile            file   = files.Span[i];
+            LocalFile            file   = files[i];
             ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( span, token );
 
             await stream.WriteAsync( data, token );
         }
 
         return this;
     }
-    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token ) => ZipAsync( files.Select( static item => new LocalFile( item ) ), token );
-    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, CancellationToken token = default )
+    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, in TelemetrySpan parent = default, CancellationToken token = default ) => ZipAsync( files.Select( static x => new LocalFile( x ) ), parent, token );
+    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span      = parent.SubSpan();
         await using FileStream zipToOpen = File.Create( FullPath );
         using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
 
@@ -533,7 +529,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         {
             ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( span, token );
 
             await stream.WriteAsync( data, token );
         }
@@ -577,6 +573,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -584,10 +581,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( StringBuilder payload ) => Write( payload.ToString() );
+    public void Write( StringBuilder payload, in TelemetrySpan parent = default ) => Write( payload.ToString(), in parent );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -595,10 +593,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
+    public void Write( ValueStringBuilder payload, in TelemetrySpan parent = default ) => Write( payload.ToString(), in parent );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -606,33 +605,37 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( string payload )
+    public void Write( string payload, in TelemetrySpan parent = default )
     {
         if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
-        using FileStream   stream = Create();
-        using StreamWriter writer = new(stream, FileEncoding);
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    stream = Create();
+        using StreamWriter  writer = new(stream, FileEncoding);
         writer.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( byte[] payload )
+    public void Write( byte[] payload, in TelemetrySpan parent = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
-        using FileStream stream = Create();
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    stream = Create();
         stream.Write( payload, 0, payload.Length );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -640,7 +643,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( Span<byte> payload )
+    public void Write( scoped in Span<byte> payload, in TelemetrySpan parent = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
@@ -650,6 +653,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -657,16 +661,18 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ReadOnlySpan<byte> payload )
+    public void Write( scoped in ReadOnlySpan<byte> payload, in TelemetrySpan parent = default )
     {
         if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
-        using FileStream stream = Create();
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    stream = Create();
         stream.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -674,10 +680,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ReadOnlyMemory<byte> payload ) => Write( payload.Span );
+    public void Write( scoped in ReadOnlyMemory<byte> payload, in TelemetrySpan parent = default ) => Write( payload.Span, in parent );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -685,17 +692,19 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ReadOnlyMemory<char> payload )
+    public void Write( scoped in ReadOnlyMemory<char> payload, in TelemetrySpan parent = default )
     {
         if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
-        using FileStream   stream = Create();
-        using StreamWriter writer = new(stream, FileEncoding);
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    stream = Create();
+        using StreamWriter  writer = new(stream, FileEncoding);
         writer.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -703,19 +712,21 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( Stream payload )
+    public void Write( Stream payload, in TelemetrySpan parent = default )
     {
         if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
 
-        using MemoryStream memory = new();
+        using TelemetrySpan span   = parent.SubSpan();
+        using MemoryStream  memory = new((int)payload.Length);
         payload.CopyTo( memory );
         ReadOnlySpan<byte> data = memory.GetBuffer();
-        Write( data );
+        Write( data, in span );
     }
 
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -723,10 +734,11 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( StringBuilder payload, in TelemetrySpan parent = default ) => WriteAsync( payload.ToString(), parent );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -734,10 +746,12 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( ValueStringBuilder payload, in TelemetrySpan parent = default ) => WriteAsync( payload.ToString(), parent );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
+    /// <param name="token"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -745,28 +759,34 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( string payload )
+    public async ValueTask WriteAsync( string payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
         if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
+        using TelemetrySpan      span   = parent.SubSpan();
         await using FileStream   stream = Create();
         await using StreamWriter writer = new(stream, FileEncoding);
-        await writer.WriteAsync( payload );
+
+        using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent( payload.Length );
+        payload.AsSpan().CopyTo( owner.Memory.Span );
+        await writer.WriteAsync( owner.Memory, token );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( byte[] payload, CancellationToken token = default )
+    public async ValueTask WriteAsync( byte[] payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream stream = Create();
         await stream.WriteAsync( payload, token );
     }
@@ -774,16 +794,18 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token = default )
+    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
         if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
 
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream stream = Create();
         await stream.WriteAsync( payload, token );
     }
@@ -791,14 +813,16 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
+    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token = default )
+    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan      span   = parent.SubSpan();
         await using FileStream   stream = Create();
         await using StreamWriter writer = new(stream, FileEncoding);
 
@@ -807,6 +831,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
+    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
@@ -815,38 +840,43 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( Stream payload, CancellationToken token = default )
+    public async ValueTask WriteAsync( Stream payload, TelemetrySpan parent = default, CancellationToken token = default )
     {
         ArgumentNullException.ThrowIfNull( payload );
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream stream = Create();
         await payload.CopyToAsync( stream, token );
     }
 
 
-    async ValueTask<string> IAsyncReadHandler.AsString( CancellationToken token = default )
+    async ValueTask<string> IAsyncReadHandler.AsString( TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream file   = OpenRead();
         using StreamReader     stream = new(file, FileEncoding);
         return await stream.ReadToEndAsync( token );
     }
 
-    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>()
+    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( TelemetrySpan parent = default, CancellationToken token = default )
     {
-        using StreamReader stream  = new(OpenRead(), FileEncoding);
-        string             content = await stream.ReadToEndAsync();
+        using TelemetrySpan span    = parent.SubSpan();
+        using StreamReader  stream  = new(OpenRead(), FileEncoding);
+        string              content = await stream.ReadToEndAsync( token );
         return content.FromJson<TValue>();
     }
 
-    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
+    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan      span   = parent.SubSpan();
         await using FileStream   file   = OpenRead();
         await using MemoryStream stream = new();
         await file.CopyToAsync( stream, token );
         return stream.GetBuffer();
     }
 
-    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token = default )
+    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan      span   = parent.SubSpan();
         await using FileStream   file   = OpenRead();
         await using MemoryStream stream = new((int)file.Length);
         await file.CopyToAsync( stream, token );
@@ -854,16 +884,18 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         return results;
     }
 
-    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( CancellationToken token = default )
+    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream file   = OpenRead();
         MemoryStream           stream = new((int)file.Length);
         await file.CopyToAsync( stream, token );
         return stream;
     }
 
-    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines( [EnumeratorCancellation] CancellationToken token = default )
+    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines( [EnumeratorCancellation] TelemetrySpan parent = default, CancellationToken token = default )
     {
+        using TelemetrySpan    span   = parent.SubSpan();
         await using FileStream file   = OpenRead();
         using StreamReader     stream = new(file, FileEncoding);
 
@@ -871,63 +903,57 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
     }
 
 
-    TValue IReadHandler.AsJson<TValue>()
+    TValue IReadHandler.AsJson<TValue>( in TelemetrySpan parent = default )
     {
-        using StreamReader stream  = new(OpenRead(), FileEncoding);
-        string             content = stream.ReadToEnd();
+        using TelemetrySpan span    = parent.SubSpan();
+        using StreamReader  stream  = new(OpenRead(), FileEncoding);
+        string              content = stream.ReadToEnd();
         return content.FromJson<TValue>();
     }
 
-    string IReadHandler.AsString()
+    string IReadHandler.AsString( in TelemetrySpan parent = default )
     {
-        using StreamReader stream = new(OpenRead(), FileEncoding);
+        using TelemetrySpan span   = parent.SubSpan();
+        using StreamReader  stream = new(OpenRead(), FileEncoding);
         return stream.ReadToEnd();
     }
 
-    byte[] IReadHandler.AsBytes()
+    byte[] IReadHandler.AsBytes( in TelemetrySpan parent = default )
     {
-        using FileStream   file   = OpenRead();
-        using MemoryStream stream = new();
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    file   = OpenRead();
+        using MemoryStream  stream = new();
         file.CopyTo( stream );
         return stream.GetBuffer();
     }
 
-    ReadOnlyMemory<byte> IReadHandler.AsMemory()
+    ReadOnlyMemory<byte> IReadHandler.AsMemory( in TelemetrySpan parent = default )
     {
-        IReadHandler handler = this;
-        return handler.AsMemory();
+        using TelemetrySpan span    = parent.SubSpan();
+        IReadHandler        handler = this;
+        return handler.AsMemory( in span );
     }
     [Pure, MustDisposeResource]
-    Buffer<byte> IReadHandler.AsSpan()
+    Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
     {
-        using FileStream file   = OpenRead();
-        int              length = (int)file.Length;
-        Buffer<byte>     span   = new(length);
-        file.ReadExactly( span.Next );
-        return span;
+        using TelemetrySpan span   = parent.SubSpan();
+        using FileStream    file   = OpenRead();
+        int                 length = (int)file.Length;
+        Buffer<byte>        buffer = new(length);
+        file.ReadExactly( buffer.Span );
+        return buffer;
     }
 
 
-    public override bool Equals( object? other ) => other is LocalFile file && Equals( file );
-    public int CompareTo( object? other )
+    public override int CompareTo( LocalFile? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is LocalFile value
-                   ? CompareTo( value )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(LocalFile) );
-    }
-    public int CompareTo( LocalFile? other )
-    {
-        if ( ReferenceEquals( this, other ) ) { return 0; }
-
-        if ( ReferenceEquals( null, other ) ) { return 1; }
-
         return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
     }
-    public bool Equals( LocalFile? other )
+    public override bool Equals( LocalFile? other )
     {
         if ( other is null ) { return false; }
 
@@ -935,12 +961,13 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
+    protected override int GetHashCodeInternal() => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
     public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => Equalizer.Equals( left, right ) is false;
     public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => !Equalizer.Equals( left, right );
     public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) <= 0;
 
@@ -1022,25 +1049,26 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
 
     public interface IAsyncReadHandler
     {
-        IAsyncEnumerable<string> AsLines( CancellationToken token = default );
+        IAsyncEnumerable<string> AsLines( TelemetrySpan parent = default, CancellationToken token = default );
         /// <summary> Reads the contents of the file as a byte array. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
         /// <returns>
         ///     <see cref="byte[]"/>
         /// </returns>
-        ValueTask<byte[]> AsBytes( CancellationToken token = default );
+        ValueTask<byte[]> AsBytes( TelemetrySpan parent = default, CancellationToken token = default );
 
-        ValueTask<MemoryStream> AsStream( CancellationToken token = default );
+        ValueTask<MemoryStream> AsStream( TelemetrySpan parent = default, CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> , asynchronously. </summary>
+        /// <param name="parent"> </param>
         /// <param name="token"> </param>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
         /// <returns>
         ///     <see cref="ReadOnlyMemory{byte}"/>
         /// </returns>
-        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token = default );
+        ValueTask<ReadOnlyMemory<byte>> AsMemory( TelemetrySpan parent = default, CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , asynchronously. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1048,7 +1076,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        ValueTask<string> AsString( CancellationToken token = default );
+        ValueTask<string> AsString( TelemetrySpan parent = default, CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
@@ -1058,7 +1086,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>();
+        ValueTask<TValue> AsJson<TValue>( TelemetrySpan parent = default, CancellationToken token = default );
     }
 
 
@@ -1071,7 +1099,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="byte[]"/>
         /// </returns>
-        byte[] AsBytes();
+        byte[] AsBytes( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1079,7 +1107,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="ReadOnlyMemory{byte}"/>
         /// </returns>
-        ReadOnlyMemory<byte> AsMemory();
+        ReadOnlyMemory<byte> AsMemory( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="ReadOnlySpan{byte}"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1088,7 +1116,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         ///     <see cref="ReadOnlySpan{byte}"/>
         /// </returns>
         [MustDisposeResource]
-        Buffer<byte> AsSpan();
+        Buffer<byte> AsSpan( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1097,7 +1125,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        string AsString();
+        string AsString( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1105,7 +1133,7 @@ public class LocalFile : ObservableClass, IEquatable<LocalFile>, IComparable<Loc
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        TValue AsJson<TValue>();
+        TValue AsJson<TValue>( in TelemetrySpan parent = default );
     }
 
 

@@ -2,6 +2,7 @@
 // 02/11/2025  16:02
 
 using System.Net.Http;
+using Jakar.Extensions.Loggers;
 using Microsoft.Extensions.Options;
 using Serilog.Configuration;
 using Serilog.Formatting;
@@ -41,7 +42,7 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     SeriloggerOptions IOptions<SeriloggerOptions>.                           Value              => this;
     public ReadOnlyMemory<byte>                                              ScreenShotData     { get; internal set; }
     public bool                                                              IsValid            => AppID.IsValidID() && IsValidDeviceID && string.IsNullOrWhiteSpace( AppName ) is false && AppVersion.IsValid;
-    public bool                                                              IsValidDeviceID    => DeviceID.IsValidID() || DeviceIDLong                                                                != 0;
+    public bool                                                              IsValidDeviceID    => DeviceID.IsValidID() || DeviceIDLong != 0;
 
 
     // public RemoteLogs? RemoteLogServer { get; set; }
@@ -72,10 +73,11 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );
     public async ValueTask<LocalFile?> WriteScreenShot( ReadOnlyMemory<byte> memory, CancellationToken token = default )
     {
+        using TelemetrySpan span = TelemetrySpan.Create();
         if ( memory.IsEmpty ) { return null; }
 
         LocalFile file = Paths.Screenshot;
-        await file.WriteAsync( memory, token );
+        await file.WriteAsync( memory,span, token);
         return file;
     }
 
