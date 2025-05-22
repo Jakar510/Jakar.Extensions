@@ -46,12 +46,12 @@ public class EmbeddedResources<TValue>
     }
 
 
-    public ValueTask SaveToFile( string fileName, LocalDirectory directory, TelemetrySpan parent = default, CancellationToken token = default ) => SaveToFile( fileName, directory.Join( fileName ), parent, token );
-    public async ValueTask SaveToFile( string fileName, LocalFile file, TelemetrySpan parent = default, CancellationToken token = default )
+    public ValueTask SaveToFile( string fileName, LocalDirectory directory, CancellationToken token = default ) => SaveToFile( fileName, directory.Join( fileName ), token );
+    public async ValueTask SaveToFile( string fileName, LocalFile file, CancellationToken token = default )
     {
-        using TelemetrySpan span   = parent.SubSpan();
+        using TelemetrySpan telemetrySpan   = TelemetrySpan.Create();
         await using Stream  stream = GetResourceStream( fileName );
-        await file.WriteAsync( stream, span, token );
+        await file.WriteAsync( stream,  token );
     }
 
 

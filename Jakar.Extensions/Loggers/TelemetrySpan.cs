@@ -94,21 +94,20 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
 
 
 // [SupportedOSPlatform( "windows" )]
-[NotSerializable, DefaultValue( "Empty" )]
+[NotSerializable]
 public readonly struct TelemetrySpan : IDisposable
 {
-    public const           string        APP           = nameof(APP);
-    public const           string        ON_SLEEP      = nameof(ON_SLEEP);
-    public const           string        ON_RESUME     = nameof(ON_RESUME);
-    public const           string        ON_START      = nameof(ON_START);
-    public const           string        CREATE_WINDOW = nameof(CREATE_WINDOW);
-    public const           string        ELAPSED_TIME  = nameof(ELAPSED_TIME);
-    public const           string        START_STOP_ID = nameof(START_STOP_ID);
-    private readonly       Activity?     _parent;
-    private readonly       Activity?     _activity;
-    private readonly       long          _start = Stopwatch.GetTimestamp();
-    private readonly       string        _id    = RandomID();
-    public static readonly TelemetrySpan Empty  = new(null, EMPTY);
+    public const     string    APP           = nameof(APP);
+    public const     string    ON_SLEEP      = nameof(ON_SLEEP);
+    public const     string    ON_RESUME     = nameof(ON_RESUME);
+    public const     string    ON_START      = nameof(ON_START);
+    public const     string    CREATE_WINDOW = nameof(CREATE_WINDOW);
+    public const     string    ELAPSED_TIME  = nameof(ELAPSED_TIME);
+    public const     string    START_STOP_ID = nameof(START_STOP_ID);
+    private readonly Activity? _parent;
+    private readonly Activity? _activity;
+    private readonly long      _start = Stopwatch.GetTimestamp();
+    private readonly string    _id    = RandomID();
 
 
     public TimeSpan        Elapsed      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
@@ -117,11 +116,13 @@ public readonly struct TelemetrySpan : IDisposable
     public DateTimeOffset? ResumeTime   { set => SetBaggage( ON_RESUME,     value?.ToString() ); }
     public DateTimeOffset? SleepTime    { set => SetBaggage( ON_SLEEP,      value?.ToString() ); }
     public bool            IsValid      => _activity is not null;
+    public string?         Name         => _activity?.DisplayName;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    internal TelemetrySpan( Activity? parent, string name )
+    [Obsolete( "Use 'Name' constructor instead, as it doesn't work if 'Name' is empty" )] public TelemetrySpan() : this( EMPTY ) { }
+    public TelemetrySpan( string name, Activity? parent = null )
     {
+        parent ??= Activity.Current;
         TelemetrySource? source = TelemetrySource.Current;
 
         if ( string.IsNullOrWhiteSpace( name ) || source is null )
@@ -131,16 +132,18 @@ public readonly struct TelemetrySpan : IDisposable
             return;
         }
 
+
         string key = parent is not null
                          ? $"{parent.DisplayName}.{name}"
                          : name;
 
         _parent   = parent;
-        _activity = Activity.Current = source.StartActivity( key, parent );
+        _activity = Activity.Current = source.StartActivity( key );
         _activity?.AddEvent( $"{_activity.DisplayName}.Start".GetEvent( new EventProperties { [START_STOP_ID] = _id } ) );
     }
     public void Dispose()
     {
+        Activity.Current = _parent;
         if ( _activity is null ) { return; }
 
         EventProperties properties = new()
@@ -150,9 +153,7 @@ public readonly struct TelemetrySpan : IDisposable
                                      };
 
         _activity.AddEvent( $"{_activity.DisplayName}.End".GetEvent( properties ) );
-        _activity.Stop();
         _activity.Dispose();
-        Activity.Current = _parent;
     }
 
 
@@ -169,13 +170,14 @@ public readonly struct TelemetrySpan : IDisposable
                                                                            : new ActivityLink( _activity.Context, tags );
 
 
-    [Pure, MustDisposeResource] public        TelemetrySpan ParseJson()                                                                            => SubSpan();
-    [Pure, MustDisposeResource] public        TelemetrySpan Navigation()                                                                           => SubSpan();
-    [Pure, MustDisposeResource] public        TelemetrySpan WriteToFile()                                                                          => SubSpan();
-    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string  name                                     = EMPTY ) => Create( _activity ?? Activity.Current, name );
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string  name                                     = EMPTY ) => Create( Activity.Current,              name );
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( Activity?                   activity, [CallerMemberName] string name = EMPTY ) => new(activity, name);
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( ref readonly TelemetrySpan? parent,   [CallerMemberName] string name = EMPTY ) => parent?.SubSpan( name ) ?? Create( name );
+    [Pure, MustDisposeResource] public        TelemetrySpan ParseJson()                                                                           => new(nameof(ParseJson), _activity);
+    [Pure, MustDisposeResource] public        TelemetrySpan ToJson()                                                                              => new(nameof(ToJson), _activity);
+    [Pure, MustDisposeResource] public        TelemetrySpan Navigation()                                                                          => new(nameof(Navigation), _activity);
+    [Pure, MustDisposeResource] public        TelemetrySpan WriteToFile()                                                                         => new(nameof(WriteToFile), _activity);
+    [Pure, MustDisposeResource] public        TelemetrySpan ReadFromFile()                                                                        => new(nameof(ReadFromFile), _activity);
+    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string name                                     = EMPTY ) => new(name, _activity);
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string name                                     = EMPTY ) => new(name);
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( Activity?                  activity, [CallerMemberName] string name = EMPTY ) => new(name, activity);
 
 
     public void SetAttribute( string key, object? value )
@@ -264,7 +266,7 @@ public readonly struct TelemetrySpan : IDisposable
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public ValueTask Delay( long   ms,      CancellationToken token = default ) => Delay( TimeSpan.FromMilliseconds( ms ), token );
     public async ValueTask Delay( TimeSpan delay, CancellationToken token = default )
     {
-        using TelemetrySpan span = SubSpan();
+        using TelemetrySpan telemetrySpan = SubSpan();
         await Task.Delay( delay, token ).ConfigureAwait( false );
     }
 }

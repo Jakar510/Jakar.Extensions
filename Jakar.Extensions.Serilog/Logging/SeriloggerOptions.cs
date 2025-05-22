@@ -73,11 +73,11 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     public async ValueTask<LocalFile?> WriteScreenShot( CancellationToken token = default ) => await WriteScreenShot( ScreenShotData, token );
     public async ValueTask<LocalFile?> WriteScreenShot( ReadOnlyMemory<byte> memory, CancellationToken token = default )
     {
-        using TelemetrySpan span = TelemetrySpan.Create();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( memory.IsEmpty ) { return null; }
 
         LocalFile file = Paths.Screenshot;
-        await file.WriteAsync( memory,span, token);
+        await file.WriteAsync( memory, token);
         return file;
     }
 

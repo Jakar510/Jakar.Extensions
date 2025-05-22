@@ -8,7 +8,7 @@ public sealed class ScopeProvider : IExternalScopeProvider
 {
     private static readonly Lazy<ScopeProvider> _service      = new(static () => new ScopeProvider());
     private readonly        AsyncLocal<Scope?>  _currentScope = new();
-    public static           ScopeProvider       Current => _service.Value;
+
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
@@ -59,7 +59,7 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
 {
     private static readonly Lazy<ScopeProvider<TValue>> _service      = new(static () => new ScopeProvider<TValue>());
     private readonly        AsyncLocal<Scope?>          _currentScope = new();
-    public static           ScopeProvider<TValue>       Current => _service.Value;
+
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {

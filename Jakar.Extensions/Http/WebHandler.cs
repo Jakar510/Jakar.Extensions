@@ -41,7 +41,8 @@ public readonly record struct WebHandler : IDisposable
 
     public async ValueTask<HttpResponseMessage> SendAsync()
     {
-        HttpResponseMessage response = await _client.SendAsync( _request, Token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        HttpResponseMessage response      = await _client.SendAsync( _request, Token );
         _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
         return response;
     }
@@ -58,12 +59,14 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<bool> AsBool( HttpResponseMessage response )
     {
-        string content = await AsString( response );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = await AsString( response );
         return bool.TryParse( content, out bool result ) && result;
     }
     public async ValueTask<Guid?> AsGuid( HttpResponseMessage response )
     {
-        string content = await AsString( response );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = await AsString( response );
 
         return Guid.TryParse( content, out Guid result )
                    ? result
@@ -71,35 +74,41 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<byte[]> AsBytes( HttpResponseMessage response )
     {
-        await using MemoryStream stream = await AsStream( response );
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response );
         return stream.ToArray();
     }
     public async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
     {
-        await using MemoryStream stream = await AsStream( response );
-        using StreamReader       sr     = new(stream, Encoding);
-        await using JsonReader   reader = new JsonTextReader( sr );
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response );
+        using StreamReader       sr            = new(stream, Encoding);
+        await using JsonReader   reader        = new JsonTextReader( sr );
 
         return await JToken.ReadFromAsync( reader, settings, Token );
     }
     public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
     {
-        await using MemoryStream stream = await AsStream( response );
-        using StreamReader       sr     = new(stream, Encoding);
-        await using JsonReader   reader = new JsonTextReader( sr );
-        var                      result = serializer.Deserialize<TResult>( reader );
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response );
+        using StreamReader       sr            = new(stream, Encoding);
+        await using JsonReader   reader        = new JsonTextReader( sr );
+        var                      result        = serializer.Deserialize<TResult>( reader );
         return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
     {
-        await using MemoryStream stream = await AsStream( response );
-        await using FileStream   fs     = LocalFile.CreateTempFileAndOpen( out LocalFile file );
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response );
+        await using FileStream   fs            = LocalFile.CreateTempFileAndOpen( out LocalFile file );
         await stream.CopyToAsync( fs, Token );
 
         return file;
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         if ( response.Headers.Contains( fileNameHeader ) )
         {
             var mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
@@ -118,20 +127,21 @@ public readonly record struct WebHandler : IDisposable
 
         await using Stream     stream = await AsStream( response );
         await using FileStream fs     = LocalFile.CreateTempFileAndOpen( out LocalFile file );
-        await stream.CopyToAsync( fs, Token );
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( fs, Token ); }
 
         return file;
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
     {
-        LocalFile file = new(path);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        LocalFile           file          = new(path);
         return await AsFile( response, file );
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
     {
-        using TelemetrySpan      span   = TelemetrySpan.Create();
-        await using MemoryStream stream = await AsStream( response );
-        await file.WriteAsync( stream, span, Token );
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response ); 
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( stream, Token ); }
         return file;
     }
     public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
@@ -143,11 +153,12 @@ public readonly record struct WebHandler : IDisposable
     }
     public async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync( Token );
         MemoryStream       buffer  = new((int)stream.Length);
-        await stream.CopyToAsync( buffer, Token );
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( buffer, Token ); }
 
         buffer.Seek( 0, SeekOrigin.Begin );
         return buffer;
@@ -155,6 +166,7 @@ public readonly record struct WebHandler : IDisposable
     public async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes( response );
     public async ValueTask<string> AsString( HttpResponseMessage response )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
         return await content.ReadAsStringAsync( Token );

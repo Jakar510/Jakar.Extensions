@@ -4,11 +4,7 @@
 public class ConcurrentDeque<TValue> : IQueue<TValue>
 {
     protected readonly Deque<TValue> _queue;
-#if NET8_0
-    protected readonly object _lock;
-#else
-    protected readonly Lock _lock;
-#endif
+    protected readonly Lock          _lock = new();
 
 
     public int Count
@@ -36,23 +32,9 @@ public class ConcurrentDeque<TValue> : IQueue<TValue>
     }
 
     public ConcurrentDeque() : this( null ) { }
-    public ConcurrentDeque( IEnumerable<TValue>? enumerable,
-                            int                  capacity = DEFAULT_CAPACITY,
-                        #if NET8_0
-                            object? locker = null
-                        #else
-                            Lock? locker = null
-#endif
-    )
+    public ConcurrentDeque( IEnumerable<TValue>? enumerable, int capacity = DEFAULT_CAPACITY )
     {
         _queue = new Deque<TValue>( capacity );
-
-        _lock = locker ??
-            #if NET8_0
-                new object();
-            #else
-                new Lock();
-    #endif
 
         if ( enumerable is not null )
         {

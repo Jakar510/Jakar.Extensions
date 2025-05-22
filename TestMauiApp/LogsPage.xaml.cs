@@ -47,8 +47,8 @@ public sealed class FileLogs( string fileName, string[] lines ) : ObservableColl
 
     public static async ValueTask<FileLogs> Create( LocalFile file, CancellationToken token )
     {
-        using TelemetrySpan span    = TelemetrySpan.Create();
-        string              content = await file.ReadAsync().AsString(span, token);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = await file.ReadAsync().AsString( token );
         return new FileLogs( file.Name, content.Split( _separator, StringSplitOptions.RemoveEmptyEntries ) );
     }
 

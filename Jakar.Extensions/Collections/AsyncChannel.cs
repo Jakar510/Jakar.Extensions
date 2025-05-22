@@ -45,10 +45,9 @@ public sealed class AsyncChannel<TValue> : IDisposable
         public           bool                       IsEmpty     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Values.IsEmpty; }
 
 
-        public TValue? Read() =>
-            _Values.TryDequeue( out TValue? first )
-                ? first
-                : default;
+        public TValue? Read() => _Values.TryDequeue( out TValue? first )
+                                     ? first
+                                     : default;
         public override bool TryRead( [NotNullWhen( true )] out TValue? value )
         {
             value = Read();
@@ -58,6 +57,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
         public override ValueTask<TValue?> ReadAsync( CancellationToken               token = default ) => new(Read());
         public override async IAsyncEnumerable<TValue> ReadAllAsync( [EnumeratorCancellation] CancellationToken token = default )
         {
+            using TelemetrySpan telemetrySpan = TelemetrySpan.Create( "AsyncChannel.ReadAllAsync" );
+
             while ( token.ShouldContinue() && Completion.IsCompleted is false )
             {
                 if ( Count > 0 )
@@ -65,7 +66,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
                     while ( TryRead( out TValue? value ) ) { yield return value; }
                 }
 
-                await Task.Delay( 5, token ).ConfigureAwait( false );
+                await telemetrySpan.Delay( 5, token ).ConfigureAwait( false );
             }
         }
         public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(_Values.IsEmpty is false);

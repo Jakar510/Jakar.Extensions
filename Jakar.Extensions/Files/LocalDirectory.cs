@@ -241,21 +241,21 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteAllRecursivelyAsync( in TelemetrySpan? parent = null )
+    public Task DeleteAllRecursivelyAsync()
     {
-        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
-        List<Task>          tasks = new(64);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        List<Task>          tasks         = new(64);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteAllRecursivelyAsync( span ) );
+            tasks.Add( dir.DeleteAllRecursivelyAsync() );
         }
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteAllRecursivelyAsync( span ) );
+            tasks.Add( dir.DeleteAllRecursivelyAsync() );
             dir.Delete();
         }
 
@@ -269,16 +269,16 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteFilesAsync( in TelemetrySpan? parent = null )
+    public Task DeleteFilesAsync()
     {
-        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
-        List<Task>          tasks = new(DEFAULT_CAPACITY);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        List<Task>          tasks         = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteFilesAsync( span ) );
+            tasks.Add( dir.DeleteFilesAsync() );
         }
 
         return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
@@ -290,14 +290,14 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <exception cref="FileNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public Task DeleteSubFoldersAsync( in TelemetrySpan? parent = null )
+    public Task DeleteSubFoldersAsync()
     {
-        using TelemetrySpan span  = TelemetrySpan.Create( in parent );
-        List<Task>          tasks = new(DEFAULT_CAPACITY);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        List<Task>          tasks         = new(DEFAULT_CAPACITY);
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteSubFoldersAsync( span ) );
+            tasks.Add( dir.DeleteSubFoldersAsync() );
             dir.Delete();
         }
 
@@ -305,71 +305,71 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, TelemetrySpan parent = default, CancellationToken token = default )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token = default )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles() )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
-            using MemoryStream data   = await file.ReadAsync().AsStream( span, token );
+            using MemoryStream data   = await file.ReadAsync().AsStream( token );
 
             await data.CopyToAsync( stream, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, TelemetrySpan parent = default, CancellationToken token = default )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token = default )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, TelemetrySpan parent = default, CancellationToken token = default )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token = default )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
 
         return zipFilePath;
     }
-    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, TelemetrySpan parent = default, CancellationToken token = default )
+    public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token = default )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( zipFilePath.FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
         {
             ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( span, token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
@@ -460,17 +460,15 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
     /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
     /// <param name="output"> file path to write the zip to </param>
-    /// <param name="parent"> </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
-    public void Zip( in LocalFile output, in TelemetrySpan parent = default, CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, parent, compression );
+    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
     /// <summary> </summary>
     /// <param name="output"> file path to write the zip to </param>
-    /// <param name="parent"> </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
     /// <param name="encoding"> The encoding used for the file names </param>
-    public void Zip( in LocalFile output, Encoding encoding, in TelemetrySpan parent = default, CompressionLevel compression = CompressionLevel.Optimal )
+    public void Zip( in LocalFile output, Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
     {
-        using TelemetrySpan span = parent.SubSpan();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
     }
 

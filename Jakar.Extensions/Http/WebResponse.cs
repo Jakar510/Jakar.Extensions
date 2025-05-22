@@ -41,6 +41,7 @@ public sealed class WebResponse<TValue>
     public WebResponse( HttpResponseMessage response, Exception e, string error ) : this( response, default, e, error ) { }
     public WebResponse( HttpResponseMessage response, TValue? payload, Exception? exception = null, string? error = null )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         Errors            = ParseError( error ?? exception?.Message );
         Payload           = payload;
         Exception         = exception;
@@ -106,6 +107,7 @@ public sealed class WebResponse<TValue>
     internal static WebResponse<TValue> None( HttpResponseMessage response, Exception e ) => new(response, e, NO_RESPONSE);
     public static OneOf<JToken, string, Errors, None> ParseError( string? error )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( string.IsNullOrWhiteSpace( error ) ) { return UNKNOWN_ERROR; }
 
         const string ESCAPED_QUOTE = @"\""";
@@ -113,8 +115,10 @@ public sealed class WebResponse<TValue>
         if ( error.Contains( ESCAPED_QUOTE ) ) { error = error.Replace( ESCAPED_QUOTE, QUOTE ); }
 
         try { return error.FromJson<Errors>(); }
-        catch ( Exception )
+        catch ( Exception e )
         {
+            telemetrySpan.AddException( e );
+
             try { return error.FromJson(); }
             catch ( Exception ) { return error; }
         }
@@ -153,6 +157,8 @@ public sealed class WebResponse<TValue>
 
     public static async ValueTask<WebResponse<TValue>> Create( WebHandler handler, Func<HttpResponseMessage, ValueTask<TValue>> func )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         using ( handler )
         {
             using HttpResponseMessage response = await handler;
@@ -164,6 +170,8 @@ public sealed class WebResponse<TValue>
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( WebHandler handler, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         using ( handler )
         {
             using HttpResponseMessage response = await handler;
@@ -175,13 +183,19 @@ public sealed class WebResponse<TValue>
                 TValue result = await func( response, arg );
                 return new WebResponse<TValue>( response, result );
             }
-            catch ( HttpRequestException e ) { return await Create( response, e, handler.Token ); }
+            catch ( HttpRequestException e )
+            {
+                telemetrySpan.AddException( e );
+                return await Create( response, e, handler.Token );
+            }
         }
     }
 
 
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<TValue>> func, CancellationToken token )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         try
         {
             if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
@@ -189,10 +203,16 @@ public sealed class WebResponse<TValue>
             TValue result = await func( response );
             return new WebResponse<TValue>( response, result );
         }
-        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
+        catch ( HttpRequestException e )
+        {
+            telemetrySpan.AddException( e );
+            return await Create( response, e, token );
+        }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func, CancellationToken token )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         try
         {
             if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
@@ -200,14 +220,19 @@ public sealed class WebResponse<TValue>
             TValue result = await func( response, arg );
             return new WebResponse<TValue>( response, result );
         }
-        catch ( HttpRequestException e ) { return await Create( response, e, token ); }
+        catch ( HttpRequestException e )
+        {
+            telemetrySpan.AddException( e );
+            return await Create( response, e, token );
+        }
     }
 
 
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Func<HttpResponseMessage, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
     {
-        ushort          count      = 0;
-        List<Exception> exceptions = new(policy.MaxRetires);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        ushort              count         = 0;
+        List<Exception>     exceptions    = new(policy.MaxRetires);
 
         while ( count < policy.MaxRetires )
         {
@@ -220,16 +245,21 @@ public sealed class WebResponse<TValue>
             }
             catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
-            await policy.IncrementAndWait( ref count, token );
+            using ( telemetrySpan.SubSpan( nameof(policy.IncrementAndWait) ) ) { await policy.IncrementAndWait( ref count, token ); }
         }
 
         try { throw new AggregateException( exceptions.ToArray() ); }
-        catch ( AggregateException e ) { return await Create( response, e, token ); }
+        catch ( AggregateException e )
+        {
+            telemetrySpan.AddException( e );
+            return await Create( response, e, token );
+        }
     }
     public static async ValueTask<WebResponse<TValue>> Create<TArg>( HttpResponseMessage response, TArg arg, Func<HttpResponseMessage, TArg, ValueTask<TValue>> func, RetryPolicy policy, CancellationToken token )
     {
-        ushort          count      = 0;
-        List<Exception> exceptions = new(policy.MaxRetires);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        ushort              count         = 0;
+        List<Exception>     exceptions    = new(policy.MaxRetires);
 
         while ( count < policy.MaxRetires )
         {
@@ -242,17 +272,22 @@ public sealed class WebResponse<TValue>
             }
             catch ( HttpRequestException e ) { exceptions.Add( e ); }
 
-            await policy.IncrementAndWait( ref count, token );
+            using ( telemetrySpan.SubSpan( nameof(policy.IncrementAndWait) ) ) { await policy.IncrementAndWait( ref count, token ); }
         }
 
         try { throw new AggregateException( exceptions.ToArray() ); }
-        catch ( AggregateException e ) { return await Create( response, e, token ); }
+        catch ( AggregateException e )
+        {
+            telemetrySpan.AddException( e );
+            return await Create( response, e, token );
+        }
     }
 
 
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, CancellationToken token )
     {
-        await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await using Stream? stream        = await response.Content.ReadAsStreamAsync( token );
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
@@ -271,7 +306,8 @@ public sealed class WebResponse<TValue>
     }
     public static async ValueTask<WebResponse<TValue>> Create( HttpResponseMessage response, Exception e, CancellationToken token )
     {
-        await using Stream? stream = await response.Content.ReadAsStreamAsync( token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await using Stream? stream        = await response.Content.ReadAsStreamAsync( token );
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract

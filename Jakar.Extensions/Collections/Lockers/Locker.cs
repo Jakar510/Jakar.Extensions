@@ -13,9 +13,9 @@ namespace Jakar.Extensions;
 public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue>, IAsyncEnumerable<TValue>
     where TCloser : IDisposable
 {
-    Lock.Scope         AcquireLock( in TelemetrySpan   parent );
-    TCloser            AcquireLock( in TelemetrySpan   parent, CancellationToken token );
-    ValueTask<TCloser> AcquireLockAsync( TelemetrySpan parent, CancellationToken token );
+    Lock.Scope         AcquireLock();
+    TCloser            AcquireLock( CancellationToken      token );
+    ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
     [Pure, MustDisposeResource] FilterBuffer<TValue>                               Copy();
@@ -56,18 +56,18 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
 
 
     [Pure, MustDisposeResource]
-    public static LockCloser Enter( Lock locker, TelemetrySpan parent, CancellationToken token = default )
+    public static LockCloser Enter( Lock locker, CancellationToken token = default )
     {
-        using TelemetrySpan span = parent.SubSpan();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         locker.Enter();
         while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { }
 
         return new LockCloser( locker );
     }
     [Pure, MustDisposeResource]
-    public static async ValueTask<LockCloser> EnterAsync( Lock locker, TelemetrySpan parent, CancellationToken token = default )
+    public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
-        using TelemetrySpan span = parent.SubSpan();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { await Task.Delay( 1, token ); }
 
         return new LockCloser( locker );

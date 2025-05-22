@@ -101,8 +101,8 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
     public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileData<TID>?                data, TFileMetaData metaData );
 
 
-    public abstract static ValueTask<TClass> Create( LocalFile     file,     TelemetrySpan                     parent = default, CancellationToken token  = default );
-    public abstract static ValueTask<TClass> Create( TFileMetaData metaData, Stream                            content,          TelemetrySpan     parent = default, CancellationToken token = default );
+    public abstract static ValueTask<TClass> Create( LocalFile     file,     CancellationToken                 token                            = default );
+    public abstract static ValueTask<TClass> Create( TFileMetaData metaData, Stream                            content, CancellationToken token = default );
     public abstract static TClass            Create( TFileMetaData metaData, MemoryStream                      content );
     public abstract static TClass            Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content );
     public abstract static TClass            Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content );
@@ -204,15 +204,15 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     public static TClass? TryCreate( [NotNullIfNotNull( nameof(content) )] IFileData<TID>? content, TFileMetaData metaData ) => content is not null
                                                                                                                                     ? Create( content, metaData )
                                                                                                                                     : null;
-    public static async ValueTask<TClass> Create( LocalFile file, TelemetrySpan parent = default, CancellationToken token = default )
+    public static async ValueTask<TClass> Create( LocalFile file, CancellationToken token = default )
     {
-        using TelemetrySpan  span    = parent.SubSpan();
-        ReadOnlyMemory<byte> content = await file.ReadAsync().AsMemory( span, token );
+        using TelemetrySpan  telemetrySpan = TelemetrySpan.Create();
+        ReadOnlyMemory<byte> content       = await file.ReadAsync().AsMemory( token );
         return Create( TFileMetaData.Create( file ), content.Span );
     }
-    public static async ValueTask<TClass> Create( TFileMetaData metaData, Stream stream, TelemetrySpan parent = default, CancellationToken token = default )
+    public static async ValueTask<TClass> Create( TFileMetaData metaData, Stream stream, CancellationToken token = default )
     {
-        using TelemetrySpan span = parent.SubSpan();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek( 0, SeekOrigin.Begin );
         using MemoryStream memory = new((int)stream.Length);
         await stream.CopyToAsync( memory, token );

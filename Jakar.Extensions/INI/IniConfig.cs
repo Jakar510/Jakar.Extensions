@@ -46,23 +46,23 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
     }
 
 
-    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null, in TelemetrySpan parent = default )
+    public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null )
     {
-        using TelemetrySpan span    = parent.SubSpan();
-        string              content = file.Read().AsString( in span );
+        using TelemetrySpan telemetrySpan    = TelemetrySpan.Create();
+        string              content = file.Read().AsString(  );
         return Parse( content, provider );
     }
-    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, TelemetrySpan parent = default, CancellationToken token = default )
-    {
-        using TelemetrySpan span    = parent.SubSpan();
-        string              content = await file.ReadAsync().AsString( span, token );
-        return Parse( content, provider, in span );
+    public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, CancellationToken token = default )
+    { 
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = await file.ReadAsync().AsString(  token );
+        return Parse( content, provider );
     }
 
-    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, in TelemetrySpan parent = default ) => Parse( span, CultureInfo.InvariantCulture, parent );
-    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider, in TelemetrySpan parent = default )
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span ) => Parse( span, CultureInfo.InvariantCulture );
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider )
     {
-        using TelemetrySpan telemetrySpan = parent.SubSpan();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         IniConfig           config        = new();
 
         // $"-- {nameof(IniConfig)}.{nameof(Refresh)}.{nameof(content)} --\n{content.ToString()}".WriteToConsole();

@@ -160,17 +160,16 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="path"> </param>
-    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="WebException"> </exception>
     /// <exception cref="NotSupportedException"> </exception>
     /// <returns> </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, Stream payload, CancellationToken token = default )
     {
-        using TelemetrySpan span = parent.SubSpan();
-        LocalFile           file = new(path);
-        await file.WriteAsync( payload, span, token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        LocalFile           file          = new(path);
+        await file.WriteAsync( payload, token );
         return file;
     }
 
@@ -178,7 +177,6 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="path"> </param>
-    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="ArgumentNullException"> </exception>
     /// <exception cref="WebException"> </exception>
@@ -186,11 +184,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public static async ValueTask<LocalFile> SaveToFileAsync( string path, ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
-        using TelemetrySpan span = parent.SubSpan();
-        LocalFile           file = new(path);
-        await file.WriteAsync( payload, span, token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        LocalFile           file          = new(path);
+        await file.WriteAsync( payload, token );
         return file;
     }
 
@@ -489,47 +487,46 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     /// <summary> Copies this file to the <paramref name="newFile"/> </summary>
     /// <param name="newFile"> </param>
-    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <returns> </returns>
-    public async ValueTask Clone( LocalFile newFile, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask Clone( LocalFile newFile, CancellationToken token = default )
     {
-        using TelemetrySpan span   = parent.SubSpan();
-        FileStream          stream = OpenRead();
-        await newFile.WriteAsync( stream, span, token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        FileStream          stream        = OpenRead();
+        await newFile.WriteAsync( stream, token );
     }
 
 
-    public async ValueTask<LocalFile> ZipAsync( TelemetrySpan parent = default, CancellationToken token = default, params LocalFile[] files )
+    public async ValueTask<LocalFile> ZipAsync( CancellationToken token = default, params LocalFile[] files )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         for ( int i = 0; i < files.Length; i++ )
         {
             LocalFile            file   = files[i];
             ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( span, token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
 
         return this;
     }
-    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, in TelemetrySpan parent = default, CancellationToken token = default ) => ZipAsync( files.Select( static x => new LocalFile( x ) ), parent, token );
-    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, TelemetrySpan parent = default, CancellationToken token = default )
+    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token = default ) => ZipAsync( files.Select( static x => new LocalFile( x ) ), token );
+    public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, CancellationToken token = default )
     {
-        using TelemetrySpan    span      = parent.SubSpan();
-        await using FileStream zipToOpen = File.Create( FullPath );
-        using ZipArchive       archive   = new(zipToOpen, ZipArchiveMode.Update);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream zipToOpen     = File.Create( FullPath );
+        using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in files )
         {
             ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( span, token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
 
             await stream.WriteAsync( data, token );
         }
@@ -573,7 +570,6 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -581,11 +577,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( StringBuilder payload, in TelemetrySpan parent = default ) => Write( payload.ToString(), in parent );
+    public void Write( StringBuilder payload ) => Write( payload.ToString() );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -593,11 +588,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ValueStringBuilder payload, in TelemetrySpan parent = default ) => Write( payload.ToString(), in parent );
+    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -605,37 +599,35 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( string payload, in TelemetrySpan parent = default )
+    public void Write( string payload )
     {
         if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    stream = Create();
-        using StreamWriter  writer = new(stream, FileEncoding);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    stream        = Create();
+        using StreamWriter  writer        = new(stream, FileEncoding);
         writer.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( byte[] payload, in TelemetrySpan parent = default )
+    public void Write( byte[] payload )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    stream = Create();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    stream        = Create();
         stream.Write( payload, 0, payload.Length );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -643,9 +635,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( scoped in Span<byte> payload, in TelemetrySpan parent = default )
+    public void Write( scoped in Span<byte> payload )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
         using FileStream stream = Create();
         stream.Write( payload );
@@ -653,7 +645,6 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -661,18 +652,17 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( scoped in ReadOnlySpan<byte> payload, in TelemetrySpan parent = default )
+    public void Write( scoped in ReadOnlySpan<byte> payload )
     {
-        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    stream = Create();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    stream        = Create();
         stream.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -680,11 +670,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( scoped in ReadOnlyMemory<byte> payload, in TelemetrySpan parent = default ) => Write( payload.Span, in parent );
+    public void Write( scoped in ReadOnlyMemory<byte> payload ) => Write( payload.Span );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -692,19 +681,18 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( scoped in ReadOnlyMemory<char> payload, in TelemetrySpan parent = default )
+    public void Write( scoped in ReadOnlyMemory<char> payload )
     {
-        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    stream = Create();
-        using StreamWriter  writer = new(stream, FileEncoding);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    stream        = Create();
+        using StreamWriter  writer        = new(stream, FileEncoding);
         writer.Write( payload );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -712,21 +700,19 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( Stream payload, in TelemetrySpan parent = default )
+    public void Write( Stream payload )
     {
-        if ( payload is null ) { throw new ArgumentNullException( nameof(payload) ); }
-
-        using TelemetrySpan span   = parent.SubSpan();
-        using MemoryStream  memory = new((int)payload.Length);
+        ArgumentNullException.ThrowIfNull( payload );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using MemoryStream  memory        = new((int)payload.Length);
         payload.CopyTo( memory );
         ReadOnlySpan<byte> data = memory.GetBuffer();
-        Write( data, in span );
+        Write( data );
     }
 
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -734,11 +720,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( StringBuilder payload, in TelemetrySpan parent = default ) => WriteAsync( payload.ToString(), parent );
+    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="ArgumentNullException"> </exception>
@@ -746,11 +731,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( ValueStringBuilder payload, in TelemetrySpan parent = default ) => WriteAsync( payload.ToString(), parent );
+    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
@@ -759,13 +743,13 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( string payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask WriteAsync( string payload, CancellationToken token = default )
     {
         if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
 
-        using TelemetrySpan      span   = parent.SubSpan();
-        await using FileStream   stream = Create();
-        await using StreamWriter writer = new(stream, FileEncoding);
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using FileStream   stream        = Create();
+        await using StreamWriter writer        = new(stream, FileEncoding);
 
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent( payload.Length );
         payload.AsSpan().CopyTo( owner.Memory.Span );
@@ -775,63 +759,59 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( byte[] payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask WriteAsync( byte[] payload, CancellationToken token = default )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
-        using TelemetrySpan    span   = parent.SubSpan();
-        await using FileStream stream = Create();
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream stream        = Create();
         await stream.WriteAsync( payload, token );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.Length == 0", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
 
-        using TelemetrySpan    span   = parent.SubSpan();
-        await using FileStream stream = Create();
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream stream        = Create();
         await stream.WriteAsync( payload, token );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
     /// <param name="token"> </param>
-    /// <param name="parent"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
     /// <exception cref="FileNotFoundException"> </exception>
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask WriteAsync( ReadOnlyMemory<char> payload, CancellationToken token = default )
     {
-        using TelemetrySpan      span   = parent.SubSpan();
-        await using FileStream   stream = Create();
-        await using StreamWriter writer = new(stream, FileEncoding);
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using FileStream   stream        = Create();
+        await using StreamWriter writer        = new(stream, FileEncoding);
 
         await writer.WriteAsync( payload, token );
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
-    /// <param name="parent"> </param>
     /// <param name="token"> </param>
     /// <exception cref="NullReferenceException"> </exception>
     /// <exception cref="ArgumentException"> </exception>
@@ -840,64 +820,64 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public async ValueTask WriteAsync( Stream payload, TelemetrySpan parent = default, CancellationToken token = default )
+    public async ValueTask WriteAsync( Stream payload, CancellationToken token = default )
     {
         ArgumentNullException.ThrowIfNull( payload );
-        using TelemetrySpan    span   = parent.SubSpan();
-        await using FileStream stream = Create();
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream stream        = Create();
         await payload.CopyToAsync( stream, token );
     }
 
 
-    async ValueTask<string> IAsyncReadHandler.AsString( TelemetrySpan parent = default, CancellationToken token = default )
+    async ValueTask<string> IAsyncReadHandler.AsString( CancellationToken token = default )
     {
-        using TelemetrySpan    span   = parent.SubSpan();
-        await using FileStream file   = OpenRead();
-        using StreamReader     stream = new(file, FileEncoding);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream file          = OpenRead();
+        using StreamReader     stream        = new(file, FileEncoding);
         return await stream.ReadToEndAsync( token );
     }
 
-    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( TelemetrySpan parent = default, CancellationToken token = default )
+    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
     {
-        using TelemetrySpan span    = parent.SubSpan();
-        using StreamReader  stream  = new(OpenRead(), FileEncoding);
-        string              content = await stream.ReadToEndAsync( token );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using StreamReader  stream        = new(OpenRead(), FileEncoding);
+        string              content       = await stream.ReadToEndAsync( token );
         return content.FromJson<TValue>();
     }
 
-    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( TelemetrySpan parent = default, CancellationToken token = default )
+    async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
     {
-        using TelemetrySpan      span   = parent.SubSpan();
-        await using FileStream   file   = OpenRead();
-        await using MemoryStream stream = new();
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using FileStream   file          = OpenRead();
+        await using MemoryStream stream        = new();
         await file.CopyToAsync( stream, token );
         return stream.GetBuffer();
     }
 
-    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( TelemetrySpan parent = default, CancellationToken token = default )
+    async ValueTask<ReadOnlyMemory<byte>> IAsyncReadHandler.AsMemory( CancellationToken token = default )
     {
-        using TelemetrySpan      span   = parent.SubSpan();
-        await using FileStream   file   = OpenRead();
-        await using MemoryStream stream = new((int)file.Length);
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using FileStream   file          = OpenRead();
+        await using MemoryStream stream        = new((int)file.Length);
         await file.CopyToAsync( stream, token );
         ReadOnlyMemory<byte> results = stream.GetBuffer();
         return results;
     }
 
-    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( TelemetrySpan parent = default, CancellationToken token = default )
+    async ValueTask<MemoryStream> IAsyncReadHandler.AsStream( CancellationToken token = default )
     {
-        using TelemetrySpan    span   = parent.SubSpan();
+        using TelemetrySpan    span   = TelemetrySpan.Create();
         await using FileStream file   = OpenRead();
         MemoryStream           stream = new((int)file.Length);
         await file.CopyToAsync( stream, token );
         return stream;
     }
 
-    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines( [EnumeratorCancellation] TelemetrySpan parent = default, CancellationToken token = default )
+    async IAsyncEnumerable<string> IAsyncReadHandler.AsLines( [EnumeratorCancellation] CancellationToken token = default )
     {
-        using TelemetrySpan    span   = parent.SubSpan();
-        await using FileStream file   = OpenRead();
-        using StreamReader     stream = new(file, FileEncoding);
+        using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
+        await using FileStream file          = OpenRead();
+        using StreamReader     stream        = new(file, FileEncoding);
 
         while ( token.ShouldContinue() && stream.EndOfStream is false ) { yield return await stream.ReadLineAsync( token ) ?? string.Empty; }
     }
@@ -905,41 +885,41 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     TValue IReadHandler.AsJson<TValue>( in TelemetrySpan parent = default )
     {
-        using TelemetrySpan span    = parent.SubSpan();
-        using StreamReader  stream  = new(OpenRead(), FileEncoding);
-        string              content = stream.ReadToEnd();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using StreamReader  stream        = new(OpenRead(), FileEncoding);
+        string              content       = stream.ReadToEnd();
         return content.FromJson<TValue>();
     }
 
     string IReadHandler.AsString( in TelemetrySpan parent = default )
     {
-        using TelemetrySpan span   = parent.SubSpan();
-        using StreamReader  stream = new(OpenRead(), FileEncoding);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using StreamReader  stream        = new(OpenRead(), FileEncoding);
         return stream.ReadToEnd();
     }
 
     byte[] IReadHandler.AsBytes( in TelemetrySpan parent = default )
     {
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    file   = OpenRead();
-        using MemoryStream  stream = new();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    file          = OpenRead();
+        using MemoryStream  stream        = new();
         file.CopyTo( stream );
         return stream.GetBuffer();
     }
 
     ReadOnlyMemory<byte> IReadHandler.AsMemory( in TelemetrySpan parent = default )
     {
-        using TelemetrySpan span    = parent.SubSpan();
-        IReadHandler        handler = this;
-        return handler.AsMemory( in span );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        IReadHandler        handler       = this;
+        return handler.AsMemory();
     }
     [Pure, MustDisposeResource]
     Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
     {
-        using TelemetrySpan span   = parent.SubSpan();
-        using FileStream    file   = OpenRead();
-        int                 length = (int)file.Length;
-        Buffer<byte>        buffer = new(length);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using FileStream    file          = OpenRead();
+        int                 length        = (int)file.Length;
+        Buffer<byte>        buffer        = new(length);
         file.ReadExactly( buffer.Span );
         return buffer;
     }
@@ -1049,26 +1029,25 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     public interface IAsyncReadHandler
     {
-        IAsyncEnumerable<string> AsLines( TelemetrySpan parent = default, CancellationToken token = default );
+        IAsyncEnumerable<string> AsLines( CancellationToken token = default );
         /// <summary> Reads the contents of the file as a byte array. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
         /// <returns>
         ///     <see cref="byte[]"/>
         /// </returns>
-        ValueTask<byte[]> AsBytes( TelemetrySpan parent = default, CancellationToken token = default );
+        ValueTask<byte[]> AsBytes( CancellationToken token = default );
 
-        ValueTask<MemoryStream> AsStream( TelemetrySpan parent = default, CancellationToken token = default );
+        ValueTask<MemoryStream> AsStream( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="ReadOnlyMemory{byte}"/> , asynchronously. </summary>
-        /// <param name="parent"> </param>
         /// <param name="token"> </param>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
         /// <returns>
         ///     <see cref="ReadOnlyMemory{byte}"/>
         /// </returns>
-        ValueTask<ReadOnlyMemory<byte>> AsMemory( TelemetrySpan parent = default, CancellationToken token = default );
+        ValueTask<ReadOnlyMemory<byte>> AsMemory( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , asynchronously. </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
@@ -1076,7 +1055,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        ValueTask<string> AsString( TelemetrySpan parent = default, CancellationToken token = default );
+        ValueTask<string> AsString( CancellationToken token = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
@@ -1086,7 +1065,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( TelemetrySpan parent = default, CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
     }
 
 

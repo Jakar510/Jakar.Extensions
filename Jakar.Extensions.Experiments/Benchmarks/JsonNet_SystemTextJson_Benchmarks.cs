@@ -170,7 +170,7 @@ public class JsonNet_SystemTextJson_Benchmarks
     {
         using TelemetrySpan span = TelemetrySpan.Create();
         LocalFile           file = "test.json";
-        await file.WriteAsync( JSON, span );
+        await file.WriteAsync( JSON );
         Console.WriteLine( file.FullPath );
     }
 }

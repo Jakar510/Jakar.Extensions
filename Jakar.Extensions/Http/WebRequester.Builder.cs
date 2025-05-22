@@ -56,7 +56,7 @@ public partial class WebRequester
         protected virtual HttpClient GetClient()
         {
             HttpClient client = new(GetHandler());
-            foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
+            foreach ( (string key, IEnumerable<string> value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
 
             client.DefaultRequestHeaders.Authorization = _authenticationHeader;
             if ( _connectTimeout.HasValue ) { client.Timeout = _connectTimeout.Value; }

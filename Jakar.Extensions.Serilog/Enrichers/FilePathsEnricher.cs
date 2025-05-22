@@ -49,10 +49,10 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
     }
     private static async Task Handle( Disposables disposables, LocalFile? file, CancellationToken token = default )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( file?.Exists is not true ) { return; }
-
-        using TelemetrySpan span    = TelemetrySpan.Create();
-        byte[]              content = await file.ReadAsync().AsBytes(span, token);
+        
+        byte[]              content       = await file.ReadAsync().AsBytes( token);
         file.Delete();
 
         disposables.Add( LogContext.PushProperty( file.Name, Convert.ToBase64String( content ) ) );
