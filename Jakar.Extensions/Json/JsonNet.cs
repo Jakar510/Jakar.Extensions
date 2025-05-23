@@ -23,13 +23,11 @@ public static class JsonNet
     static JsonNet() => Settings = new JsonSerializerSettings();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this ReadOnlySpan<char> value )                            => FromJson( value.ToString() )    ?? throw new NullReferenceException( nameof(JToken.Parse) ); // TODO: optimize?
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this string             value )                            => FromJson( value, LoadSettings ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this string             value, JsonLoadSettings settings ) => JToken.Parse( value, settings ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object value )                            => JToken.FromObject( value, Serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object value, JsonSerializer serializer ) => JToken.FromObject( value, serializer ) ?? throw new NullReferenceException( nameof(JToken.Parse) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this ReadOnlySpan<char> value )                            => Validate.ThrowIfNull( FromJson( value.ToString() ) ); // TODO: optimize?
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this string             value )                            => Validate.ThrowIfNull( FromJson( value, LoadSettings ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this string             value, JsonLoadSettings settings ) => Validate.ThrowIfNull( JToken.Parse( value, settings ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object             value )                            => Validate.ThrowIfNull( JToken.FromObject( value, Serializer ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object             value, JsonSerializer serializer ) => Validate.ThrowIfNull( JToken.FromObject( value, serializer ) );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, _converters );
@@ -50,6 +48,39 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToPrettyJson( this object value ) => value.ToJson( Formatting.Indented );
 
 
+    public static async ValueTask<JToken> FromJson( this Stream jsonStream, Encoding encoding, CancellationToken token )
+    {
+        using StreamReader reader = new(jsonStream, encoding);
+        return await reader.FromJson( token );
+    }
+    public static async ValueTask<JToken> FromJson( this StreamReader reader, CancellationToken token )
+    {
+        // ReSharper disable once ConvertToUsingDeclaration
+        using ( JsonTextReader jsonReader = new(reader)
+                                            {
+                                                ArrayPool = JsonArrayPool<char>.Shared,
+                                                Culture   = CultureInfo.CurrentCulture
+                                            } ) { return await JToken.ReadFromAsync( jsonReader, LoadSettings, token ); }
+    }
+    public static TResult FromJson<TResult>( this Stream jsonStream, Encoding encoding )
+    {
+        using StreamReader reader = new(jsonStream, encoding);
+        return reader.FromJson<TResult>();
+    }
+    public static TResult FromJson<TResult>( this StreamReader reader ) => Serializer.FromJson<TResult>( reader );
+    public static TResult FromJson<TResult>( this JsonSerializer serializer, StreamReader reader )
+    {
+        // ReSharper disable once ConvertToUsingDeclaration
+        using ( JsonTextReader jsonReader = new(reader)
+                                            {
+                                                ArrayPool = JsonArrayPool<char>.Shared,
+                                                Culture   = CultureInfo.CurrentCulture
+                                            } )
+        {
+            TResult? result = serializer.Deserialize<TResult>( jsonReader );
+            return Validate.ThrowIfNull( result );
+        }
+    }
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TResult FromJson<TResult>( this ReadOnlySpan<char> value )                                     => FromJson<TResult>( value.ToString() );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TResult FromJson<TResult>( this string             value )                                     => FromJson<TResult>( value, Settings );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TResult FromJson<TResult>( this string             value, JsonSerializerSettings? settings )   => Validate.ThrowIfNull( JsonConvert.DeserializeObject<TResult>( value, settings ) );
@@ -86,7 +117,17 @@ public static class JsonNet
         Task.Run( async () =>
                   {
                       using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-                      LocalFile           file = LocalDirectory.Create( "DEBUG" ).Join( $"{caller}__{variableName}.value" );
+                      LocalFile           file          = LocalDirectory.Create( "DEBUG" ).Join( $"{caller}__{variableName}.value" );
                       await file.WriteAsync( value.ToPrettyJson() );
                   } );
+
+
+
+    public sealed class JsonArrayPool<T>() : IArrayPool<T>
+    {
+        public static readonly JsonArrayPool<T> Shared = new();
+        private readonly       ArrayPool<T>     _inner = Validate.ThrowIfNull( ArrayPool<T>.Shared );
+        public                 T[]              Rent( int    minimumLength ) => _inner.Rent( minimumLength );
+        public                 void             Return( T[]? array )         => _inner.Return( Validate.ThrowIfNull( array ) );
+    }
 }

@@ -114,12 +114,12 @@
 		<PackageReference Include="OneOf.Extended" Version="3.0.271" />
 		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
 		<PackageReference Include="ValueOf" Version="2.0.31" />
-		<PackageReference Include="ZLinq" Version="1.4.6" />
-		<PackageReference Include="ZLinq.DropInGenerator" Version="1.4.6">
+		<PackageReference Include="ZLinq" Version="1.4.7" />
+		<PackageReference Include="ZLinq.DropInGenerator" Version="1.4.7">
 		  <PrivateAssets>all</PrivateAssets>
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="ZLinq.FileSystem" Version="1.4.6" />
+		<PackageReference Include="ZLinq.FileSystem" Version="1.4.7" />
 		<PackageReference Include="ZXing.Net" Version="0.16.10" />
 	</ItemGroup>
 </Project>

@@ -67,15 +67,18 @@ public class TelemetryHttpClientHandler : HttpClientHandler
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
 public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) : IDisposable
 {
-    public readonly  Encoding           Encoding = encoding ?? Encoding.Default;
-    private readonly HttpClient         _client  = client;
-    private readonly IHostInfo          _host    = host;
-    private readonly ILogger?           _logger  = logger;
-    public           HttpRequestHeaders DefaultRequestHeaders { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.DefaultRequestHeaders; }
+    public readonly   Encoding   Encoding = encoding ?? Encoding.Default;
+    internal readonly HttpClient Client   = client;
+    private readonly  IHostInfo  _host    = host;
+    internal readonly ILogger?   Logger   = logger;
 
 
-    public RetryPolicy? Retries { get;                                                                         set; }
-    public TimeSpan     Timeout { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _client.Timeout; set => _client.Timeout = value; }
+    public HttpRequestHeaders DefaultRequestHeaders { get => Client.DefaultRequestHeaders; }
+    public RetryPolicy?       Retries               { get;                   set; }
+    public TimeSpan           Timeout               { get => Client.Timeout; set => Client.Timeout = value; }
+
+
+    public void Dispose() => Client.Dispose();
 
 
     public static  IServiceCollection AddSingleton( IServiceCollection       collection )                                                                 => collection.AddSingleton( Create );
@@ -88,82 +91,73 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     private static IHttpClientFactory GetHttpClientFactory( IServiceProvider provider ) => provider.GetRequiredService<IHttpClientFactory>();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                                    => new(_host.HostInfo, relativePath);
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method, CancellationToken token ) => CreateHandler( new HttpRequestMessage( method, url ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value, CancellationToken token )
-    {
-        _logger?.LogDebug( "Starting a {Method} request to {Uri}", method.Method, url.ToString() );
-        return CreateHandler( new HttpRequestMessage( method, url ) { Content = value }, token );
-    }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( HttpRequestMessage request, CancellationToken token ) => new(_logger, _client, request, Encoding, Retries, token);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                              => new(_host.HostInfo, relativePath);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method )                    => new(this, new HttpRequestMessage( method, url ));
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value ) => new(this, new HttpRequestMessage( method, url ) { Content = value });
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, HttpContent                 value, CancellationToken token ) => Delete( CreateUrl( relativePath ), value, token );
-    public                                                      WebHandler Delete( Uri            url,          HttpContent                 value, CancellationToken token ) => CreateHandler( url, HttpMethod.Delete, value, token );
-    public                                                      WebHandler Delete( Uri            url,          CancellationToken           token )                            => CreateHandler( url, HttpMethod.Delete, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, CancellationToken           token )                            => Delete( CreateUrl( relativePath ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, byte[]                      value,   CancellationToken token ) => Delete( relativePath,              new ByteArrayContent( value ),                       token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Delete( relativePath,              new ReadOnlyMemoryContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IDictionary<string, string> value,   CancellationToken token ) => Delete( relativePath,              new FormUrlEncodedContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, Stream                      value,   CancellationToken token ) => Delete( relativePath,              new StreamContent( value ),                          token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, MultipartContent            content, CancellationToken token ) => Delete( relativePath,              (HttpContent)content,                                token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, string                      value,   CancellationToken token ) => Delete( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, BaseClass                   value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, BaseRecord                  value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete<TValue>( string relativePath, ImmutableArray<TValue>      value,   CancellationToken token ) => Delete( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, HttpContent value ) => Delete( CreateUrl( relativePath ), value );
+    public                                                      WebHandler Delete( Uri            url,          HttpContent value ) => CreateHandler( url, HttpMethod.Delete, value );
+    public                                                      WebHandler Delete( Uri            url )                                               => CreateHandler( url, HttpMethod.Delete );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath )                                      => Delete( CreateUrl( relativePath ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, byte[]                      value )   => Delete( relativePath, new ByteArrayContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, in ReadOnlyMemory<byte>     value )   => Delete( relativePath, new ReadOnlyMemoryContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IDictionary<string, string> value )   => Delete( relativePath, new FormUrlEncodedContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, Stream                      value )   => Delete( relativePath, new StreamContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, MultipartContent            content ) => Delete( relativePath, (HttpContent)content );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, string                      value )   => Delete( relativePath, new StringContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, BaseClass                   value )   => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, BaseRecord                  value )   => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IEnumerable<BaseRecord>     value )   => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete( string         relativePath, IEnumerable<BaseClass>      value )   => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Delete<TValue>( string relativePath, in ImmutableArray<TValue>   value )   => Delete( relativePath, new JsonContent( value.ToPrettyJson(), Encoding ) );
 
 
-    public                                                      WebHandler Get( Uri    url,          CancellationToken token ) => CreateHandler( url, HttpMethod.Get, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Get( string relativePath, CancellationToken token ) => Get( CreateUrl( relativePath ), token );
+    public                                                      WebHandler Get( Uri    url )          => CreateHandler( url, HttpMethod.Get );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Get( string relativePath ) => Get( CreateUrl( relativePath ) );
 
 
-    public                                                      WebHandler Patch( Uri            url,          HttpContent                 value,   CancellationToken token ) => CreateHandler( url, HttpMethod.Patch, value, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, HttpContent                 value,   CancellationToken token ) => Patch( CreateUrl( relativePath ), value,                                               token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, byte[]                      value,   CancellationToken token ) => Patch( relativePath,              new ByteArrayContent( value ),                       token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Patch( relativePath,              new ReadOnlyMemoryContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IDictionary<string, string> value,   CancellationToken token ) => Patch( relativePath,              new FormUrlEncodedContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, Stream                      value,   CancellationToken token ) => Patch( relativePath,              new StreamContent( value ),                          token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, MultipartContent            content, CancellationToken token ) => Patch( relativePath,              (HttpContent)content,                                token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, string                      value,   CancellationToken token ) => Patch( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, BaseClass                   value,   CancellationToken token ) => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, BaseRecord                  value,   CancellationToken token ) => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch<TValue>( string relativePath, ImmutableArray<TValue>      value,   CancellationToken token ) => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public                                                      WebHandler Patch( Uri            url,          HttpContent                 value )   => CreateHandler( url, HttpMethod.Patch, value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, HttpContent                 value )   => Patch( CreateUrl( relativePath ), value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, byte[]                      value )   => Patch( relativePath,              new ByteArrayContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, in ReadOnlyMemory<byte>     value )   => Patch( relativePath,              new ReadOnlyMemoryContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IDictionary<string, string> value )   => Patch( relativePath,              new FormUrlEncodedContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, Stream                      value )   => Patch( relativePath,              new StreamContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, MultipartContent            content ) => Patch( relativePath,              (HttpContent)content );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, string                      value )   => Patch( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, BaseClass                   value )   => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, BaseRecord                  value )   => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IEnumerable<BaseRecord>     value )   => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch( string         relativePath, IEnumerable<BaseClass>      value )   => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Patch<TValue>( string relativePath, in ImmutableArray<TValue>   value )   => Patch( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
 
 
-    public                                                      WebHandler Post( Uri            url,          HttpContent                 value,   CancellationToken token ) => CreateHandler( url, HttpMethod.Post, value, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, HttpContent                 value,   CancellationToken token ) => Post( CreateUrl( relativePath ), value,                                               token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, byte[]                      value,   CancellationToken token ) => Post( relativePath,              new ByteArrayContent( value ),                       token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Post( relativePath,              new ReadOnlyMemoryContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IDictionary<string, string> value,   CancellationToken token ) => Post( relativePath,              new FormUrlEncodedContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, Stream                      value,   CancellationToken token ) => Post( relativePath,              new StreamContent( value ),                          token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, MultipartContent            content, CancellationToken token ) => Post( relativePath,              (HttpContent)content,                                token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, string                      value,   CancellationToken token ) => Post( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, BaseClass                   value,   CancellationToken token ) => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, BaseRecord                  value,   CancellationToken token ) => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post<TValue>( string relativePath, ImmutableArray<TValue>      value,   CancellationToken token ) => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
+    public                                                      WebHandler Post( Uri            url,          HttpContent                 value )   => CreateHandler( url, HttpMethod.Post, value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, HttpContent                 value )   => Post( CreateUrl( relativePath ), value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, byte[]                      value )   => Post( relativePath,              new ByteArrayContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, in ReadOnlyMemory<byte>     value )   => Post( relativePath,              new ReadOnlyMemoryContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IDictionary<string, string> value )   => Post( relativePath,              new FormUrlEncodedContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, Stream                      value )   => Post( relativePath,              new StreamContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, MultipartContent            content ) => Post( relativePath,              (HttpContent)content );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, string                      value )   => Post( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, BaseClass                   value )   => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, BaseRecord                  value )   => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IEnumerable<BaseClass>      value )   => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post( string         relativePath, IEnumerable<BaseRecord>     value )   => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Post<TValue>( string relativePath, in ImmutableArray<TValue>   value )   => Post( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
 
 
-    public                                                      WebHandler Put( Uri            url,          HttpContent                 value,   CancellationToken token ) => CreateHandler( url, HttpMethod.Put, value, token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, HttpContent                 value,   CancellationToken token ) => Put( CreateUrl( relativePath ), value,                                               token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, byte[]                      value,   CancellationToken token ) => Put( relativePath,              new ByteArrayContent( value ),                       token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, ReadOnlyMemory<byte>        value,   CancellationToken token ) => Put( relativePath,              new ReadOnlyMemoryContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IDictionary<string, string> value,   CancellationToken token ) => Put( relativePath,              new FormUrlEncodedContent( value ),                  token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, Stream                      value,   CancellationToken token ) => Put( relativePath,              new StreamContent( value ),                          token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, MultipartContent            content, CancellationToken token ) => Put( relativePath,              (HttpContent)content,                                token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, string                      value,   CancellationToken token ) => Put( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ), token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, BaseClass                   value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, BaseRecord                  value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IEnumerable<BaseClass>      value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IEnumerable<BaseRecord>     value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put<TValue>( string relativePath, ImmutableArray<TValue>      value,   CancellationToken token ) => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ),   token );
-
-
-    public void Dispose() => _client.Dispose();
+    public                                                      WebHandler Put( Uri            url,          HttpContent                 value )   => CreateHandler( url, HttpMethod.Put, value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, HttpContent                 value )   => Put( CreateUrl( relativePath ), value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, byte[]                      value )   => Put( relativePath,              new ByteArrayContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, in ReadOnlyMemory<byte>     value )   => Put( relativePath,              new ReadOnlyMemoryContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IDictionary<string, string> value )   => Put( relativePath,              new FormUrlEncodedContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, Stream                      value )   => Put( relativePath,              new StreamContent( value ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, MultipartContent            content ) => Put( relativePath,              (HttpContent)content );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, string                      value )   => Put( relativePath,              new StringContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, BaseClass                   value )   => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, BaseRecord                  value )   => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IEnumerable<BaseClass>      value )   => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put( string         relativePath, IEnumerable<BaseRecord>     value )   => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public WebHandler Put<TValue>( string relativePath, in ImmutableArray<TValue>   value )   => Put( relativePath,              new JsonContent( value.ToPrettyJson(), Encoding ) );
 }

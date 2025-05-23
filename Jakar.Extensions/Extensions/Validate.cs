@@ -122,10 +122,10 @@ public static partial class Validate
 
 
     // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static TValue ThrowIfNull<TValue>( TValue? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => value ?? throw new ArgumentNullException( name, caller );
+    public static TValue ThrowIfNull<TValue>( TValue? value, [CallerArgumentExpression( nameof(value) )] string? name = null, [CallerMemberName] string? caller = null ) => value ?? throw new ArgumentNullException( name, caller );
 
 
-    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace( value )
-                                                                                                                                                                  ? throw new ArgumentNullException( name, caller )
-                                                                                                                                                                  : value;
+    public static string ThrowIfNull( string? value, [CallerArgumentExpression( nameof(value) )] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace( value )
+                                                                                                                                                                        ? throw new ArgumentNullException( name, caller )
+                                                                                                                                                                        : value;
 }

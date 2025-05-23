@@ -5,171 +5,248 @@ namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public readonly record struct WebHandler : IDisposable
+public readonly struct WebHandler( WebRequester requester, HttpRequestMessage request ) : IDisposable
 {
-    public static readonly EventId            EventId = new(69420, nameof(SendAsync));
-    private readonly       HttpClient         _client;
-    private readonly       HttpRequestMessage _request;
-    private readonly       ILogger?           _logger;
+    public const           string             NO_RESPONSE = "NO RESPONSE";
+    public static readonly EventId            EventId     = new(69420, nameof(SendAsync));
+    private readonly       HttpRequestMessage _request    = request;
+    private readonly       WebRequester       _requester  = requester;
 
 
+    internal HttpClient          Client         => _requester.Client;
     public   HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
-    internal Encoding            Encoding       { get; }
+    internal Encoding            Encoding       => _requester.Encoding;
     public   HttpRequestHeaders  Headers        => _request.Headers;
+    internal ILogger?            Logger         => _requester.Logger;
     public   string              Method         => _request.Method.Method;
     public   HttpRequestOptions  Options        => _request.Options;
     public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
-    internal RetryPolicy?        RetryPolicy    { get; }
-    internal CancellationToken   Token          { get; }
-    public   AppVersion          Version        { get => _request.Version; set => _request.Version = value.ToVersion(); }
+    internal RetryPolicy?        RetryPolicy    => _requester.Retries;
+    public   AppVersion          Version        { get => _request.Version;       set => _request.Version = value.ToVersion(); }
+    public   HttpVersionPolicy   VersionPolicy  { get => _request.VersionPolicy; set => _request.VersionPolicy = value; }
 
 
-    public HttpVersionPolicy VersionPolicy { get => _request.VersionPolicy; set => _request.VersionPolicy = value; }
-
-
-    public WebHandler( ILogger? logger, HttpClient client, HttpRequestMessage request, Encoding encoding, RetryPolicy? retryPolicy, CancellationToken token )
-    {
-        _logger     = logger;
-        _request    = request;
-        _client     = client;
-        Encoding    = encoding;
-        Token       = token;
-        RetryPolicy = retryPolicy;
-    }
     public void Dispose() => _request.Dispose();
 
 
-    public async ValueTask<HttpResponseMessage> SendAsync()
+    public async ValueTask<HttpResponseMessage> SendAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        HttpResponseMessage response      = await _client.SendAsync( _request, Token );
-        _logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
+        HttpResponseMessage response      = await Client.SendAsync( _request, token );
+        Logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
         return response;
     }
-    public ValueTaskAwaiter<HttpResponseMessage> GetAwaiter() => SendAsync().GetAwaiter();
 
 
-    public async ValueTask NoResponse()
+    public async ValueTask<WebResponse<TValue>> CreateResponse<TValue>( Func<HttpResponseMessage, CancellationToken, ValueTask<TValue>> func, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( this )
+        {
+            using HttpResponseMessage response = await SendAsync( token ).ConfigureAwait( false );
+
+            try
+            {
+                RetryPolicy? policy = RetryPolicy;
+
+                return policy?.AllowRetries is true
+                           ? await WebResponse<TValue>.Create( response, func, policy.Value, token )
+                           : await WebResponse<TValue>.Create( response, func, token );
+            }
+            catch ( HttpRequestException e )
+            {
+                telemetrySpan.AddException( e );
+                return await WebResponse<TValue>.Create( response, e, token );
+            }
+        }
+    }
+    public async ValueTask<WebResponse<TValue>> CreateResponse<TValue, TArg>( Func<HttpResponseMessage, TArg, CancellationToken, ValueTask<TValue>> func, TArg arg, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( this )
+        {
+            using HttpResponseMessage response = await SendAsync( token ).ConfigureAwait( false );
+
+            try
+            {
+                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+
+                TValue result = await func( response, arg, token );
+                return new WebResponse<TValue>( response, result );
+            }
+            catch ( HttpRequestException e )
+            {
+                telemetrySpan.AddException( e );
+                return await WebResponse<TValue>.Create( response, e, token );
+            }
+        }
+    }
+    public async ValueTask<WebResponse<TValue>> CreateResponse<TValue, TArg, TArg2>( Func<HttpResponseMessage, TArg, TArg2, CancellationToken, ValueTask<TValue>> func, TArg arg1, TArg2 arg2, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        using ( this )
+        {
+            using HttpResponseMessage response = await SendAsync( token ).ConfigureAwait( false );
+
+            try
+            {
+                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+
+                TValue result = await func( response, arg1, arg2, token );
+                return new WebResponse<TValue>( response, result );
+            }
+            catch ( HttpRequestException e )
+            {
+                telemetrySpan.AddException( e );
+                return await WebResponse<TValue>.Create( response, e, token );
+            }
+        }
+    }
+
+
+    public ValueTask<WebResponse<bool>>                 AsBool( CancellationToken          token )                             => CreateResponse( AsBool,  token );
+    public ValueTask<WebResponse<byte[]>>               AsBytes( CancellationToken         token )                             => CreateResponse( AsBytes, token );
+    public ValueTask<WebResponse<JToken>>               AsJson( CancellationToken          token )                             => AsJson( JsonNet.LoadSettings, token );
+    public ValueTask<WebResponse<JToken>>               AsJson( JsonLoadSettings           settings, CancellationToken token ) => CreateResponse( AsJson, settings, Encoding, token );
+    public ValueTask<WebResponse<TResult>>              AsJson<TResult>( CancellationToken token )                               => AsJson<TResult>( JsonNet.Serializer, token );
+    public ValueTask<WebResponse<TResult>>              AsJson<TResult>( JsonSerializer    serializer, CancellationToken token ) => CreateResponse( AsJson<TResult>, serializer, Encoding, token );
+    public ValueTask<WebResponse<LocalFile>>            AsFile( CancellationToken          token )                                   => CreateResponse( AsFile, token );
+    public ValueTask<WebResponse<LocalFile>>            AsFile( string                     fileNameHeader, CancellationToken token ) => CreateResponse( AsFile, fileNameHeader, token );
+    public ValueTask<WebResponse<LocalFile>>            AsFile( FileInfo                   path,           CancellationToken token ) => CreateResponse( AsFile, path,           token );
+    public ValueTask<WebResponse<LocalFile>>            AsFile( LocalFile                  file,           CancellationToken token ) => CreateResponse( AsFile, file,           token );
+    public ValueTask<WebResponse<LocalFile>>            AsFile( MimeType                   type,           CancellationToken token ) => CreateResponse( AsFile, type,           token );
+    public ValueTask<WebResponse<MemoryStream>>         AsStream( CancellationToken        token ) => CreateResponse( AsStream, token );
+    public ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory( CancellationToken        token ) => CreateResponse( AsMemory, token );
+    public ValueTask<WebResponse<string>>               AsString( CancellationToken        token ) => CreateResponse( AsString, token );
+
+
+    public async ValueTask<ErrorOrResult> NoResponse( CancellationToken token )
     {
         using ( this )
         {
-            using HttpResponseMessage response = await this;
-            response.EnsureSuccessStatusCode();
+            using HttpResponseMessage response = await SendAsync( token );
+
+            return response.IsSuccessStatusCode
+                       ? true
+                       : Errors.Create( response.StatusCode.ToStatus() );
         }
     }
-    public async ValueTask<bool> AsBool( HttpResponseMessage response )
+    public static async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings, Encoding encoding, CancellationToken token )
+    {
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using MemoryStream stream        = await AsStream( response, token );
+        using StreamReader       sr            = new(stream, encoding);
+        await using JsonReader   reader        = new JsonTextReader( sr );
+        return await JToken.ReadFromAsync( reader, settings, token );
+    }
+    public static async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer, Encoding encoding, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = await AsString( response );
+        response.EnsureSuccessStatusCode();
+        HttpContent        content = response.Content;
+        await using Stream stream  = await content.ReadAsStreamAsync( token );
+        TResult            result  = stream.FromJson<TResult>( encoding );
+        return result;
+    }
+    public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = await AsString( response, token );
         return bool.TryParse( content, out bool result ) && result;
     }
-    public async ValueTask<Guid?> AsGuid( HttpResponseMessage response )
+    public static async ValueTask<Guid?> AsGuid( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = await AsString( response );
+        string              content       = await AsString( response, token );
 
         return Guid.TryParse( content, out Guid result )
                    ? result
                    : Guid.Empty;
     }
-    public async ValueTask<byte[]> AsBytes( HttpResponseMessage response )
+    public static async ValueTask<byte[]> AsBytes( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream( response );
+        await using MemoryStream stream        = await AsStream( response, token );
         return stream.ToArray();
     }
-    public async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings )
+    public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream( response );
-        using StreamReader       sr            = new(stream, Encoding);
-        await using JsonReader   reader        = new JsonTextReader( sr );
-
-        return await JToken.ReadFromAsync( reader, settings, Token );
-    }
-    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer )
-    {
-        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream( response );
-        using StreamReader       sr            = new(stream, Encoding);
-        await using JsonReader   reader        = new JsonTextReader( sr );
-        var                      result        = serializer.Deserialize<TResult>( reader );
-        return result ?? throw new NullReferenceException( nameof(JsonConvert.DeserializeObject) );
-    }
-    public async ValueTask<LocalFile> AsFile( HttpResponseMessage response )
-    {
-        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream( response );
+        await using MemoryStream stream        = await AsStream( response, token );
         await using FileStream   fs            = LocalFile.CreateTempFileAndOpen( out LocalFile file );
-        await stream.CopyToAsync( fs, Token );
+        await stream.CopyToAsync( fs, token );
 
         return file;
     }
-    public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader )
+    public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, string fileNameHeader, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         if ( response.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
+            MimeType mimeType = response.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
-            return await AsFile( response, mimeType );
+            return await AsFile( response, mimeType, token );
         }
 
 
         if ( response.Content.Headers.Contains( fileNameHeader ) )
         {
-            var mimeType = response.Content.Headers.GetValues( fileNameHeader ).First().ToMimeType();
+            MimeType mimeType = response.Content.Headers.GetValues( fileNameHeader ).First().ToMimeType();
 
-            return await AsFile( response, mimeType );
+            return await AsFile( response, mimeType, token );
         }
 
 
-        await using Stream     stream = await AsStream( response );
+        await using Stream     stream = await AsStream( response, token );
         await using FileStream fs     = LocalFile.CreateTempFileAndOpen( out LocalFile file );
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( fs, Token ); }
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( fs, token ); }
 
         return file;
     }
-    public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path )
+    public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, FileInfo path, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        return await AsFile( response, file );
+        return await AsFile( response, file, token );
     }
-    public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file )
+    public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, LocalFile file, CancellationToken token )
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream( response ); 
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( stream, Token ); }
+        await using MemoryStream stream        = await AsStream( response, token );
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( stream, token ); }
+
         return file;
     }
-    public async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type )
+    public static async ValueTask<LocalFile> AsFile( HttpResponseMessage response, MimeType type, CancellationToken token )
     {
-        await using MemoryStream stream = await AsStream( response );
+        await using MemoryStream stream = await AsStream( response, token );
         await using FileStream   fs     = LocalFile.CreateTempFileAndOpen( type, out LocalFile file );
-        await stream.CopyToAsync( fs, Token );
+        await stream.CopyToAsync( fs, token );
         return file;
     }
-    public async ValueTask<MemoryStream> AsStream( HttpResponseMessage response )
+    public static async ValueTask<MemoryStream> AsStream( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
-        await using Stream stream  = await content.ReadAsStreamAsync( Token );
+        await using Stream stream  = await content.ReadAsStreamAsync( token );
         MemoryStream       buffer  = new((int)stream.Length);
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( buffer, Token ); }
+        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( buffer, token ); }
 
         buffer.Seek( 0, SeekOrigin.Begin );
         return buffer;
     }
-    public async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response ) => await AsBytes( response );
-    public async ValueTask<string> AsString( HttpResponseMessage response )
+    public static async ValueTask<ReadOnlyMemory<byte>> AsMemory( HttpResponseMessage response, CancellationToken token ) => await AsBytes( response, token );
+    public static async ValueTask<string> AsString( HttpResponseMessage response, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent content = response.Content;
-        return await content.ReadAsStringAsync( Token );
+        return await content.ReadAsStringAsync( token );
     }
 
 
@@ -179,25 +256,9 @@ public readonly record struct WebHandler : IDisposable
     {
         await using MemoryStream stream = await AsStream( response );
 
-        TResult? result = await JsonSerializer.DeserializeAsync( stream, info, Token );
+        TResult? result = await JsonSerializer.DeserializeAsync( stream, info, token );
         return result ?? throw new NullReferenceException( nameof(JsonSerializer.DeserializeAsync) );
     }
 
 */
-
-
-    public       ValueTask<WebResponse<bool>>                 AsBool()                                     => WebResponse<bool>.Create( this, AsBool );
-    public       ValueTask<WebResponse<byte[]>>               AsBytes()                                    => WebResponse<byte[]>.Create( this, AsBytes );
-    public       ValueTask<WebResponse<JToken>>               AsJson()                                     => AsJson( JsonNet.LoadSettings );
-    public async ValueTask<WebResponse<JToken>>               AsJson( JsonLoadSettings settings )          => await WebResponse<JToken>.Create( this, settings, AsJson );
-    public       ValueTask<WebResponse<TResult>>              AsJson<TResult>()                            => AsJson<TResult>( JsonNet.Serializer );
-    public       ValueTask<WebResponse<TResult>>              AsJson<TResult>( JsonSerializer serializer ) => WebResponse<TResult>.Create( this, serializer, AsJson<TResult> );
-    public       ValueTask<WebResponse<LocalFile>>            AsFile()                                     => WebResponse<LocalFile>.Create( this, AsFile );
-    public       ValueTask<WebResponse<LocalFile>>            AsFile( string    fileNameHeader )           => WebResponse<LocalFile>.Create( this, fileNameHeader, AsFile );
-    public       ValueTask<WebResponse<LocalFile>>            AsFile( FileInfo  path )                     => WebResponse<LocalFile>.Create( this, path,           AsFile );
-    public       ValueTask<WebResponse<LocalFile>>            AsFile( LocalFile file )                     => WebResponse<LocalFile>.Create( this, file,           AsFile );
-    public       ValueTask<WebResponse<LocalFile>>            AsFile( MimeType  type )                     => WebResponse<LocalFile>.Create( this, type,           AsFile );
-    public       ValueTask<WebResponse<MemoryStream>>         AsStream()                                   => WebResponse<MemoryStream>.Create( this, AsStream );
-    public       ValueTask<WebResponse<ReadOnlyMemory<byte>>> AsMemory()                                   => WebResponse<ReadOnlyMemory<byte>>.Create( this, AsMemory );
-    public       ValueTask<WebResponse<string>>               AsString()                                   => WebResponse<string>.Create( this, AsString );
 }

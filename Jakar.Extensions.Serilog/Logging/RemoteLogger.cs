@@ -250,14 +250,12 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
         {
             ObjectDisposedException.ThrowIf( _disposed, this );
             Log[]                    logs     = batch.Select( Log.Create ).ToArray( batch.Length );
-            WebResponse<LogResponse> response = await _requester.Post( INGEST, logs, token ).AsJson<LogResponse>();
+            WebResponse<LogResponse> response = await _requester.Post( INGEST, logs ).AsJson<LogResponse>( token );
 
             if ( response.IsSuccessStatusCode ) { return response.Payload; }
 
-            Exception? e      = response.Exception;
-            string?    error  = response.ErrorMessage;
-            string     detail = $"Failed to send {logs.Length} logs due to '{error}'";
-            return new Error( response.StatusCode, e?.GetType().Name ?? response.StatusDescription, e?.Message, detail, _targetString, error );
+            Errors error = response.GetError();
+            return error;
         }
     }
 

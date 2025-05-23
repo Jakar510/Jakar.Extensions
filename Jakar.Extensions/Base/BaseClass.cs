@@ -21,3 +21,32 @@ public class BaseClass
         where TValue : class, IDisposable => Disposables.CastAndDisposeAsync( ref resource );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] protected static ValueTask CastAndDispose( IDisposable? resource ) => Disposables.CastAndDisposeAsync( resource );
 }
+
+
+
+[Serializable]
+public class BaseClass<TClass> : BaseClass, IParsable<TClass>
+    where TClass : BaseClass<TClass>
+{
+    public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace( json );
+        return json.FromJson<TClass>();
+    }
+    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TClass? result )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        try
+        {
+            result = json?.FromJson<TClass>();
+            return result is not null;
+        }
+        catch ( Exception e )
+        {
+            telemetrySpan.AddException( e );
+            result = null;
+            return false;
+        }
+    }
+}

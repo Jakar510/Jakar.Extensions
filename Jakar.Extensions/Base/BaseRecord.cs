@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Formats.Asn1;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -24,7 +28,7 @@ public record BaseRecord
 
 
 
-public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecord>, IComparable
+public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecord>, IComparable, IParsable<TRecord>
     where TRecord : BaseRecord<TRecord>
 {
     public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }
@@ -48,6 +52,29 @@ public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecor
     }
     public abstract int  CompareTo( TRecord? other );
     public abstract bool Equals( TRecord?    other );
+
+
+    public static TRecord Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace( json );
+        return json.FromJson<TRecord>();
+    }
+    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TRecord? result )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        try
+        {
+            result = json?.FromJson<TRecord>();
+            return result is not null;
+        }
+        catch ( Exception e )
+        {
+            telemetrySpan.AddException( e );
+            result = null;
+            return false;
+        }
+    }
 }
 
 
