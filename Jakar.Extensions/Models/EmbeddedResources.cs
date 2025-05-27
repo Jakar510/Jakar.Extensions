@@ -39,9 +39,10 @@ public class EmbeddedResources<TValue>
     public string GetResourceText( string fileName ) => GetResourceText( fileName, Encoding.Default );
     public string GetResourceText( string fileName, Encoding encoding )
     {
-        using Stream       stream = GetResourceStream( fileName );
-        using StreamReader reader = new(stream, encoding);
-        string             text   = reader.ReadToEnd();
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using Stream        stream        = GetResourceStream( fileName );
+        using StreamReader  reader        = new(stream, encoding);
+        string              text          = reader.ReadToEnd();
         return text;
     }
 
@@ -57,15 +58,17 @@ public class EmbeddedResources<TValue>
 
     public byte[] GetResourceBytes( string fileName )
     {
-        using Stream       stream = GetResourceStream( fileName );
-        using MemoryStream memory = new((int)stream.Length);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using Stream        stream        = GetResourceStream( fileName );
+        using MemoryStream  memory        = new((int)stream.Length);
         stream.CopyTo( memory );
         return memory.GetBuffer();
     }
     public async ValueTask<byte[]> GetResourceBytesAsync( string fileName )
     {
-        await using Stream       stream = GetResourceStream( fileName );
-        await using MemoryStream reader = new();
+        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
+        await using Stream       stream        = GetResourceStream( fileName );
+        await using MemoryStream reader        = new();
         await stream.CopyToAsync( stream );
         return reader.GetBuffer();
     }
@@ -74,8 +77,9 @@ public class EmbeddedResources<TValue>
     public async ValueTask<string> GetResourceTextAsync( string fileName ) => await GetResourceTextAsync( fileName, Encoding.Default );
     public async ValueTask<string> GetResourceTextAsync( string fileName, Encoding encoding )
     {
-        await using Stream stream = GetResourceStream( fileName );
-        using StreamReader reader = new(stream, encoding);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await using Stream  stream        = GetResourceStream( fileName );
+        using StreamReader  reader        = new(stream, encoding);
         return await reader.ReadToEndAsync();
     }
 
@@ -83,7 +87,8 @@ public class EmbeddedResources<TValue>
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName ) => await GetResourceJsonAsync<T>( fileName, Encoding.Default );
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
     {
-        string text = await GetResourceTextAsync( fileName, encoding );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              text          = await GetResourceTextAsync( fileName, encoding );
         return text.FromJson<T>();
     }
 }

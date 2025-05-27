@@ -3,25 +3,25 @@
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
 [Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ), JsonObject]
-public sealed class AppVersion : IComparable, IComparable<AppVersion>, IFuzzyEquals<AppVersion>, IReadOnlyCollection<int>, ICloneable, ISpanFormattable, ISpanParsable<AppVersion>
+public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISpanParsable<AppVersion>, IComparisonOperators<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, IComparable
 {
     private const          char                       SEPARATOR = '.';
     public static readonly AppVersion                 Default   = new();
     private                string?                    _string;
-    public static          Equalizer<AppVersion>      Equalizer             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
-    public static          FuzzyEqualizer<AppVersion> FuzzyEqualityComparer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public static          Sorter<AppVersion>         Sorter                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
-    public                 int?                       Build                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    int IReadOnlyCollection<int>.                     Count                 => Scheme.AsInt();
-    public              AppVersionFlags               Flags                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              bool                          IsValid               => ReferenceEquals( this, Default ) is false && this != Default;
-    [JsonIgnore] public int                           Length                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
-    public              int?                          Maintenance           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int                           Major                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          MajorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          Minor                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          MinorRevision         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              Format                        Scheme                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static          Equalizer<AppVersion>      Equalizer      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
+    public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public static          Sorter<AppVersion>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public                 int?                       Build          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    int IReadOnlyCollection<int>.                     Count          => Scheme.AsInt();
+    public              AppVersionFlags               Flags          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              bool                          IsValid        => ReferenceEquals( this, Default ) is false && this != Default;
+    [JsonIgnore] public int                           Length         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    public              int?                          Maintenance    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int                           Major          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MajorRevision  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          Minor          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MinorRevision  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              Format                        Scheme         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
 
 
     static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );

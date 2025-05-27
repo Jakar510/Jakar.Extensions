@@ -6,9 +6,9 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public sealed class LanguageApi : ObservableClass
+public class LanguageApi : ObservableClass
 {
-    private readonly WeakEventManager<Language> _weakEventManager = new();
+    protected readonly WeakEventManager<Language> _weakEventManager = new();
     private          Language.Collection        _languages        = new(Language.Supported);
     private          CultureInfo                _currentCulture   = CultureInfo.CurrentCulture;
     private          CultureInfo                _currentUiCulture = CultureInfo.CurrentUICulture;
@@ -17,7 +17,7 @@ public sealed class LanguageApi : ObservableClass
     private          Language?                  _selectedLanguage;
 
 
-    public CultureInfo CurrentCulture
+    public virtual CultureInfo CurrentCulture
     {
         get => _currentCulture;
         set
@@ -27,7 +27,7 @@ public sealed class LanguageApi : ObservableClass
             CultureInfo.CurrentCulture = value;
         }
     }
-    public CultureInfo CurrentUICulture
+    public virtual CultureInfo CurrentUICulture
     {
         get => _currentUiCulture;
         set
@@ -37,7 +37,7 @@ public sealed class LanguageApi : ObservableClass
             CultureInfo.CurrentUICulture = value;
         }
     }
-    public CultureInfo? DefaultThreadCurrentCulture
+    public virtual CultureInfo? DefaultThreadCurrentCulture
     {
         get => _defaultThreadCurrentCulture;
         set
@@ -47,7 +47,7 @@ public sealed class LanguageApi : ObservableClass
             CultureInfo.DefaultThreadCurrentCulture = value;
         }
     }
-    public CultureInfo? DefaultThreadCurrentUiCulture
+    public virtual CultureInfo? DefaultThreadCurrentUiCulture
     {
         get => _defaultThreadCurrentUiCulture;
         set
@@ -57,7 +57,7 @@ public sealed class LanguageApi : ObservableClass
             CultureInfo.DefaultThreadCurrentUICulture = value;
         }
     }
-    public Language.Collection Languages
+    public virtual Language.Collection Languages
     {
         get => _languages;
         set
@@ -69,7 +69,7 @@ public sealed class LanguageApi : ObservableClass
             value.Add( SelectedLanguage );
         }
     }
-    public Language SelectedLanguage
+    public virtual Language SelectedLanguage
     {
         get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
@@ -89,8 +89,6 @@ public sealed class LanguageApi : ObservableClass
     public LanguageApi( Language culture )
     {
         SelectedLanguage = culture;
-        if ( Languages.Contains( culture ) ) { return; }
-
-        Languages.Add( culture );
+        Languages.TryAdd( culture );
     }
 }

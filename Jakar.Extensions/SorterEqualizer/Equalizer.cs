@@ -18,7 +18,9 @@ public sealed class ValueEqualizer<TValue> : IEqualityComparer<TValue?>, IEquali
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 
-    public bool Equals( TValue?      left, TValue? right ) => Nullable.Equals( left, right );
+    public bool Equals( TValue? left, TValue? right ) => left.HasValue
+                                                             ? right.HasValue && Equals( left.Value, right.Value )
+                                                             : right is null;
     public int  GetHashCode( TValue? obj )                => obj.GetHashCode();
     public bool Equals( TValue       left, TValue right ) => left.Equals( right );
     public int  GetHashCode( TValue  obj ) => obj.GetHashCode();

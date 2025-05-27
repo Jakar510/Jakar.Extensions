@@ -12,6 +12,12 @@ public interface IDataProtectorProvider
 {
     public IDataProtector            GetProtector();
     public ValueTask<IDataProtector> GetProtectorAsync();
+    
+    // public IDataProtector            GetProtector<T>();
+    // public ValueTask<IDataProtector> GetProtectorAsync<T>();
+    // public IDataProtector            GetProtector( string      className );
+    // public ValueTask<IDataProtector> GetProtectorAsync( string className );
+
 }
 
 

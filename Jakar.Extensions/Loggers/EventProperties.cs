@@ -54,7 +54,9 @@ public sealed class EventProperties : ActivityTagsCollection
     public static JToken CreateToken<TApp>()
         where TApp : IAppID => JToken.FromObject( Create<TApp>() );
 
-    public static EventProperties Create( TelemetrySource sources, DeviceMetaData? deviceInfo = null )
+
+    public static EventProperties Create<TDeviceMetaData>( TelemetrySource sources, TDeviceMetaData? deviceInfo = default )
+        where TDeviceMetaData : IDeviceMetaData
     {
         Thread thread = Thread.CurrentThread;
 
@@ -88,12 +90,25 @@ public sealed class EventProperties : ActivityTagsCollection
 
         return properties;
     }
-    public static JToken CreateToken( TelemetrySource sources ) => JToken.FromObject( Create( sources ) );
+    public static JToken CreateToken<TDeviceMetaData>( TelemetrySource sources )
+        where TDeviceMetaData : IDeviceMetaData => JToken.FromObject( Create<TDeviceMetaData>( sources ) );
 }
 
 
 
-public sealed class DeviceMetaData
+public interface IDeviceMetaData
+{
+    string? DeviceAppVersion   { get; set; }
+    string? DeviceID           { get; set; }
+    string? DeviceManufacturer { get; set; }
+    string? DeviceModel        { get; set; }
+    string? DevicePlatform     { get; set; }
+    string? DeviceVersion      { get; set; }
+}
+
+
+
+public sealed class DeviceMetaData : IDeviceMetaData
 {
     public string? DeviceAppVersion   { get; set; }
     public string? DeviceID           { get; set; }

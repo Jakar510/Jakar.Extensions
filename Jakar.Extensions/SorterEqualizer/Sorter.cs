@@ -15,8 +15,14 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
 
         return left.CompareTo( right );
     }
-    public int Compare( TValue? left, TValue? right ) => Nullable.Compare( left, right );
-    public int Compare( TValue  left, TValue  right ) => left.CompareTo( right );
+    public int Compare( TValue? left, TValue? right ) => left.HasValue
+                                                             ? right.HasValue
+                                                                   ? Compare( left.Value, right.Value )
+                                                                   : 1
+                                                             : right.HasValue
+                                                                 ? -1
+                                                                 : 0;
+    public int Compare( TValue left, TValue right ) => left.CompareTo( right );
 }
 
 

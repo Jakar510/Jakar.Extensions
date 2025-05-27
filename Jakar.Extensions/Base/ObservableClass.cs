@@ -46,9 +46,8 @@ public abstract class ObservableClass<TClass> : ObservableClass, IEquatable<TCla
     public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
-    public static TClass? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TClass>();
-    public        string  ToJson()                                                    => this.ToJson( Formatting.None );
-    public        string  ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
+    public string ToJson()       => this.ToJson( Formatting.None );
+    public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
 
     public abstract bool Equals( TClass?    other );
@@ -95,8 +94,8 @@ public abstract class ObservableClass<TClass> : ObservableClass, IEquatable<TCla
 
 
 
-public abstract class ObservableClass<TRecord, TID> : ObservableClass<TRecord>, IUniqueID<TID>
-    where TRecord : ObservableClass<TRecord, TID>
+public abstract class ObservableClass<TClass, TID> : ObservableClass<TClass>, IUniqueID<TID>
+    where TClass : ObservableClass<TClass, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID _id;
@@ -109,6 +108,6 @@ public abstract class ObservableClass<TRecord, TID> : ObservableClass<TRecord>, 
     protected ObservableClass( TID id ) => ID = id;
 
 
-    protected bool SetID( TRecord record ) => SetID( record.ID );
-    protected bool SetID( TID     id )     => SetProperty( ref _id, id, ValueEqualizer<TID>.Default, nameof(ID) );
+    protected bool SetID( TClass record ) => SetID( record.ID );
+    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueEqualizer<TID>.Default, nameof(ID) );
 }

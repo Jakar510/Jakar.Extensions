@@ -24,9 +24,9 @@ public interface IGroupModel<out TValue, TID> : IGroupModel<TID>
 
 [Serializable]
 [method: JsonConstructor]
-public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : JsonModelRecord<TRecord, TID>( ID ), IGroupModel<TID>
+public record GroupModel<TClass, TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : JsonModelRecord<TClass, TID>( ID ), IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TRecord : GroupModel<TRecord, TID>, IGroupModel<TRecord, TID>
+    where TClass : GroupModel<TClass, TID>, IGroupModel<TClass, TID>, IComparisonOperators<TClass>
 
 {
     private string _nameOfGroup = NameOfGroup;
@@ -44,7 +44,7 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
     public GroupModel( IGroupModel<TID> model ) : this( model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights ) { }
 
 
-    public override int CompareTo( TRecord? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
@@ -55,7 +55,7 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
 
         return ID.CompareTo( other.ID );
     }
-    public override bool Equals( TRecord? other )
+    public override bool Equals( TClass? other )
     {
         if ( other is null ) { return false; }
 
@@ -69,9 +69,15 @@ public record GroupModel<TRecord, TID>( string NameOfGroup, TID? OwnerID, TID? C
 
 [Serializable]
 [method: JsonConstructor]
-public record GroupModel<TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : GroupModel<GroupModel<TID>, TID>( NameOfGroup, OwnerID, CreatedBy, ID, Rights ), IGroupModel<GroupModel<TID>, TID>
+public record GroupModel<TID>( string NameOfGroup, TID? OwnerID, TID? CreatedBy, TID ID, string Rights ) : GroupModel<GroupModel<TID>, TID>( NameOfGroup, OwnerID, CreatedBy, ID, Rights ), IGroupModel<GroupModel<TID>, TID>, IComparisonOperators<GroupModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public GroupModel( IGroupModel<TID>                    model ) : this( model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights ) { }
     public static GroupModel<TID> Create( IGroupModel<TID> model ) => new(model);
+
+    
+    public static bool operator >( GroupModel<TID>  left, GroupModel<TID> right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( GroupModel<TID> left, GroupModel<TID> right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( GroupModel<TID>  left, GroupModel<TID> right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( GroupModel<TID> left, GroupModel<TID> right ) => Sorter.Compare( left, right ) <= 0;
 }

@@ -2,7 +2,7 @@
 
 
 [Serializable, DebuggerDisplay( nameof(DisplayName) )]
-public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
+public sealed class Language : BaseClass, IComparisonOperators<Language>
 {
     private readonly CultureInfo _culture;
 
@@ -70,9 +70,9 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
 
     public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( Language? left, Language? right ) => Equalizer.Equals( left, right );
     public static bool operator >( Language?  left, Language? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( Language? left, Language? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator !=( Language? left, Language? right ) => Equalizer.Equals( left, right );
     public static bool operator <( Language?  left, Language? right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator <=( Language? left, Language? right ) => Sorter.Compare( left, right ) <= 0;
 

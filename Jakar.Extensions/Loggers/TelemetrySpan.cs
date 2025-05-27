@@ -8,7 +8,7 @@ using System.Diagnostics.Metrics;
 namespace Jakar.Extensions.Loggers;
 
 
-public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
+public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable, IEqualityOperators<TelemetrySource>
 {
     public static readonly ActivityContext EmptyActivityContext = default;
     public readonly        ActivitySource  Source;
@@ -16,10 +16,10 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
     public readonly        Guid            AppID;
     public readonly        Meter           Meter;
     public readonly        string          AppName;
-    public                 string?         PackageName { get; set; }
 
 
-    public static TelemetrySource? Current { get; set; }
+    public static TelemetrySource? Current     { get; set; }
+    public        string?          PackageName { get; set; }
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
@@ -41,10 +41,18 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
     }
 
 
-    public static implicit operator AppVersion( TelemetrySource     sources ) => sources.Version;
-    public static implicit operator Meter( TelemetrySource          sources ) => sources.Meter;
-    public static implicit operator ActivitySource( TelemetrySource sources ) => sources.Source;
+    /*
+    public void AddServices( IServiceCollection services )
+    {
+        services.AddOpenTelemetryTracing( b => b.AddSource( Source.Name )
+                                                .SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( AppName ) )
+                                                .AddAspNetCoreInstrumentation() // if using any server bits
+                                                .AddHttpClientInstrumentation()
+                                                .AddConsoleExporter() );
 
+        services.AddOpenTelemetryMetrics( b => b.AddMeter( Meter.Name ).SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( AppName ) ) );
+    }
+    */
 
     public bool Equals( AppVersion?     other ) => Version.Equals( other );
     public bool FuzzyEquals( AppVersion other ) => Version.FuzzyEquals( other );
@@ -77,18 +85,25 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable
     }
 
 
-    /*
-    public void AddServices( IServiceCollection services )
-    {
-        services.AddOpenTelemetryTracing( b => b.AddSource( Source.Name )
-                                                .SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( AppName ) )
-                                                .AddAspNetCoreInstrumentation() // if using any server bits
-                                                .AddHttpClientInstrumentation()
-                                                .AddConsoleExporter() );
+    public static implicit operator AppVersion( TelemetrySource     sources ) => sources.Version;
+    public static implicit operator Meter( TelemetrySource          sources ) => sources.Meter;
+    public static implicit operator ActivitySource( TelemetrySource sources ) => sources.Source;
 
-        services.AddOpenTelemetryMetrics( b => b.AddMeter( Meter.Name ).SetResourceBuilder( ResourceBuilder.CreateDefault().AddService( AppName ) ) );
+
+    public bool Equals( TelemetrySource? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals( this, other ) ) { return true; }
+
+        return Version.Equals( other.Version ) && AppID.Equals( other.AppID ) && AppName == other.AppName && PackageName == other.PackageName;
     }
-    */
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is TelemetrySource other && Equals( other );
+    public override int  GetHashCode()         => HashCode.Combine( Version, AppID, AppName, PackageName );
+
+
+    public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => Equalizer<AppVersion>.Default.Equals( left?.Version, right?.Version );
+    public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => Equalizer<AppVersion>.Default.Equals( left?.Version, right?.Version ) is false;
 }
 
 

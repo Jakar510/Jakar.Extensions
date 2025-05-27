@@ -28,17 +28,18 @@ public record BaseRecord
 
 
 
-public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecord>, IComparable, IParsable<TRecord>
-    where TRecord : BaseRecord<TRecord>
+public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
+    where TClass : BaseRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }
-    public static Sorter<TRecord>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TRecord>.Default; }
+    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
+    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
-    public static TRecord? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TRecord>();
-    public        string   ToJson()                                                    => this.ToJson( Formatting.None );
-    public        string   ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
+    public string ToJson()       => this.ToJson( Formatting.None );
+    public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
+    public abstract bool Equals( TClass?    other );
+    public abstract int  CompareTo( TClass? other );
 
     public int CompareTo( object? other )
     {
@@ -46,26 +47,24 @@ public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecor
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is TRecord t
+        return other is TClass t
                    ? CompareTo( t )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TRecord) );
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
     }
-    public abstract int  CompareTo( TRecord? other );
-    public abstract bool Equals( TRecord?    other );
 
 
-    public static TRecord Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( json );
-        return json.FromJson<TRecord>();
+        return json.FromJson<TClass>();
     }
-    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TRecord? result )
+    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TClass? result )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         try
         {
-            result = json?.FromJson<TRecord>();
+            result = json?.FromJson<TClass>();
             return result is not null;
         }
         catch ( Exception e )
@@ -79,8 +78,8 @@ public abstract record BaseRecord<TRecord> : BaseRecord, IEqualComparable<TRecor
 
 
 
-public abstract record BaseRecord<TRecord, TID> : BaseRecord<TRecord>, IUniqueID<TID>
-    where TRecord : BaseRecord<TRecord, TID>
+public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<TID>
+    where TClass : BaseRecord<TClass, TID>, IComparisonOperators<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID _id;
@@ -93,7 +92,7 @@ public abstract record BaseRecord<TRecord, TID> : BaseRecord<TRecord>, IUniqueID
     protected BaseRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TRecord record ) => SetID( record.ID );
+    protected bool SetID( TClass record ) => SetID( record.ID );
     protected bool SetID( TID id )
     {
         _id = id;

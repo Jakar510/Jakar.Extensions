@@ -25,9 +25,33 @@ public class BaseClass
 
 
 [Serializable]
-public class BaseClass<TClass> : BaseClass, IParsable<TClass>
-    where TClass : BaseClass<TClass>
+public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
+    where TClass : BaseClass<TClass>, IComparisonOperators<TClass>
 {
+    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
+    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+
+    public string ToJson()       => this.ToJson( Formatting.None );
+    public string ToPrettyJson() => this.ToJson( Formatting.Indented );
+
+    public abstract bool Equals( TClass?    other );
+    public abstract int  CompareTo( TClass? other );
+
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        return other is TClass t
+                   ? CompareTo( t )
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
+    }
+    public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass file && Equals( file );
+    public sealed override int  GetHashCode()           => GetHashCodeInternal();
+    protected abstract     int  GetHashCodeInternal();
+
+
     public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( json );

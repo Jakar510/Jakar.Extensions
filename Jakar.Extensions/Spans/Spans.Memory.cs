@@ -11,7 +11,8 @@ public static partial class Spans
     [Pure]
     public static async ValueTask<MemoryStream> ToMemoryStream( this Stream stream )
     {
-        MemoryStream buffer = new((int)stream.Length);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        MemoryStream        buffer        = new((int)stream.Length);
         await stream.CopyToAsync( buffer ).ConfigureAwait( false );
         buffer.Seek( 0, SeekOrigin.Begin );
         return buffer;

@@ -1,4 +1,8 @@
-﻿namespace Jakar.Extensions;
+﻿using System.Numerics;
+
+
+
+namespace Jakar.Extensions;
 
 
 [SuppressMessage( "ReSharper", "VirtualMemberNeverOverridden.Global" )]
@@ -38,14 +42,14 @@ public record ObservableRecord : BaseRecord, IObservableObject
 
 
 
-public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable, IParsable<TRecord>
-    where TRecord : ObservableRecord<TRecord>
+public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
+    where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }
-    public static Sorter<TRecord>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TRecord>.Default; }
+    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
+    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
-    public static TRecord? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TRecord>();
+    public static TClass? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TClass>();
     public        string   ToJson()                                                    => this.ToJson( Formatting.None );
     public        string   ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
 
@@ -56,26 +60,26 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
 
         if ( ReferenceEquals( this, other ) ) { return 0; }
 
-        return other is TRecord t
+        return other is TClass t
                    ? CompareTo( t )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TRecord) );
+                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
     }
-    public abstract int  CompareTo( TRecord? other );
-    public abstract bool Equals( TRecord?    other );
+    public abstract int  CompareTo( TClass? other );
+    public abstract bool Equals( TClass?    other );
 
 
-    public static TRecord Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace( json );
-        return json.FromJson<TRecord>();
+        return json.FromJson<TClass>();
     }
-    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TRecord? result )
+    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TClass? result )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
         try
         {
-            result = json?.FromJson<TRecord>();
+            result = json?.FromJson<TClass>();
             return result is not null;
         }
         catch ( Exception e )
@@ -89,8 +93,8 @@ public abstract record ObservableRecord<TRecord> : ObservableRecord, IEquatable<
 
 
 
-public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord>, IUniqueID<TID>
-    where TRecord : ObservableRecord<TRecord, TID>
+public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>, IUniqueID<TID>
+    where TClass : ObservableRecord<TClass, TID>, IComparisonOperators<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID _id;
@@ -103,6 +107,6 @@ public abstract record ObservableRecord<TRecord, TID> : ObservableRecord<TRecord
     protected ObservableRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TRecord record ) => SetID( record.ID );
+    protected bool SetID( TClass record ) => SetID( record.ID );
     protected bool SetID( TID     id )     => SetProperty( ref _id, id, ValueEqualizer<TID>.Default, nameof(ID) );
 }

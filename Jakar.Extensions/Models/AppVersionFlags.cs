@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Stable) )]
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IEquatable<AppVersionFlags?>, IComparable<AppVersionFlags>, IComparable<AppVersionFlags?>, ISpanParsable<AppVersionFlags>, IComparable, IFormattable
+public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IComparable<AppVersionFlags?>, IComparisonOperators<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
 {
     private const string ALPHA          = "alpha";
     private const string BETA           = "beta";

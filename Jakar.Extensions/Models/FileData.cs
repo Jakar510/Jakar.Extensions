@@ -14,7 +14,7 @@ public interface IFileMetaData : JsonModels.IJsonModel
 
 
 
-public interface IFileMetaData<TClass> : IFileMetaData, IEquatable<TClass>, IComparable<TClass>, IComparable
+public interface IFileMetaData<TClass> : IFileMetaData, IComparisonOperators<TClass>
     where TClass : class, IFileMetaData<TClass>
 {
     public abstract static Equalizer<TClass> Equalizer { get; }
@@ -214,8 +214,7 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek( 0, SeekOrigin.Begin );
-        using MemoryStream memory = new((int)stream.Length);
-        await stream.CopyToAsync( memory, token );
+        using MemoryStream memory = await stream.ToMemoryStream();
         return Create( metaData, memory );
     }
 
@@ -328,10 +327,10 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
     public override int GetHashCode() => HashCode.Combine( FileName, FileType, MimeType );
 
 
-    public static bool operator <( FileMetaData  left, FileMetaData right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator >( FileMetaData  left, FileMetaData right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator <=( FileMetaData left, FileMetaData right ) => Sorter.Compare( left, right ) <= 0;
-    public static bool operator >=( FileMetaData left, FileMetaData right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator ==( FileMetaData left, FileMetaData right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( FileMetaData left, FileMetaData right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator <( FileMetaData   left, FileMetaData  right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator >( FileMetaData   left, FileMetaData  right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator <=( FileMetaData  left, FileMetaData  right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator >=( FileMetaData  left, FileMetaData  right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator ==( FileMetaData? left, FileMetaData? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( FileMetaData? left, FileMetaData? right ) => Equalizer.Equals( left, right ) is false;
 }

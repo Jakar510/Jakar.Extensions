@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public sealed class Error : BaseClass, IErrorDetails, IEquatable<Error>, IComparable<Error>, IComparable
+public sealed class Error : BaseClass, IErrorDetails, IComparisonOperators<Error>
 {
     public const           string       ACCEPTED_TYPE                        = "Server.Accepted";
     public const           string       ALREADY_EXISTS_TYPE                  = "Server.AlreadyExists";
@@ -101,8 +101,8 @@ public sealed class Error : BaseClass, IErrorDetails, IEquatable<Error>, ICompar
     internal readonly      StringValues errors;
 
 
-    public static                  Equalizer<Error> Equalizer  => Equalizer<Error>.Default;
-    public static                  Sorter<Error>    Sorter     => Sorter<Error>.Default;
+    public static                  Equalizer<Error> Equalizer  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<Error>.Default; }
+    public static                  Sorter<Error>    Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<Error>.Default; }
     public static                  IErrorTitles     Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
     [JsonRequired] public required string?          Detail     { get;                                                      init; }
     [JsonRequired] public required StringValues     Errors     { get => errors;                                            init => errors = value; }
@@ -282,10 +282,10 @@ public sealed class Error : BaseClass, IErrorDetails, IEquatable<Error>, ICompar
     }
     public override bool Equals( object? other )                  => ReferenceEquals( this, other ) || other is Error error && Equals( error );
     public override int  GetHashCode()                            => HashCode.Combine( statusCode, Type, Title, Detail, Instance, errors );
-    public static   bool operator <( Error?  left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) < 0;
-    public static   bool operator >( Error?  left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) > 0;
-    public static   bool operator <=( Error? left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) <= 0;
-    public static   bool operator >=( Error? left, Error? right ) => Comparer<Error>.Default.Compare( left, right ) >= 0;
-    public static   bool operator ==( Error? left, Error? right ) => Equals( left, right );
-    public static   bool operator !=( Error? left, Error? right ) => !Equals( left, right );
+    public static   bool operator <( Error?  left, Error? right ) => Sorter.Compare( left, right ) < 0;
+    public static   bool operator >( Error?  left, Error? right ) => Sorter.Compare( left, right ) > 0;
+    public static   bool operator <=( Error? left, Error? right ) => Sorter.Compare( left, right ) <= 0;
+    public static   bool operator >=( Error? left, Error? right ) => Sorter.Compare( left, right ) >= 0;
+    public static   bool operator ==( Error? left, Error? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( Error? left, Error? right ) => Equalizer.Equals( left, right ) is false;
 }

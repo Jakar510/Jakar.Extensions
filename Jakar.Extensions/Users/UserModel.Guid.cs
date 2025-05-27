@@ -46,21 +46,29 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
 
 
 [Serializable]
-public sealed record GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>
+public sealed record GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IComparisonOperators<GroupModel>
 {
     public GroupModel( string                          NameOfGroup, Guid? OwnerID, Guid? CreatedBy, Guid ID, string Rights ) : base( NameOfGroup, OwnerID, CreatedBy, ID, Rights ) { }
     public GroupModel( IGroupModel<Guid>               model ) : base( model ) { }
-    public static GroupModel Create( IGroupModel<Guid> model ) => new(model);
+    public static GroupModel Create( IGroupModel<Guid> model )                  => new(model);
+    public static bool operator >( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) <= 0;
 }
 
 
 
 [Serializable]
-public sealed record RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>
+public sealed record RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IComparisonOperators<RoleModel>
 {
     public RoleModel( string                         NameOfRole, string Rights, Guid ID ) : base( NameOfRole, Rights, ID ) { }
     public RoleModel( IRoleModel<Guid>               model ) : base( model ) { }
-    public static RoleModel Create( IRoleModel<Guid> model ) => new(model);
+    public static RoleModel Create( IRoleModel<Guid> model )                 => new(model);
+    public static bool operator >( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) <= 0;
 }
 
 

@@ -1,7 +1,10 @@
 ﻿namespace Jakar.Extensions;
 
 
+
+
 public interface IFuzzyEquals<TValue> : IEquatable<TValue>
+    where TValue : IFuzzyEquals<TValue>
 {
     public bool FuzzyEquals( TValue other );
 }

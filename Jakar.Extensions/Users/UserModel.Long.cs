@@ -19,12 +19,12 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
     public static UserAddress Create( Match          match )                                                               => new(match);
     public static UserAddress Create( IAddress<long> address )                                                             => new(address);
     public static UserAddress Create( string         line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
-    public static UserAddress Parse( string value, IFormatProvider? provider )
+    public new static UserAddress Parse( string value, IFormatProvider? provider )
     {
         Match match = Validate.Re.Address.Match( value );
         return new UserAddress( match );
     }
-    public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress? result )
+    public new static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress? result )
     {
         try
         {
@@ -46,21 +46,29 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
 
 [Serializable]
-public sealed record GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>
+public sealed record GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IComparisonOperators<GroupModel>
 {
     public GroupModel( string                          NameOfGroup, long? OwnerID, long? CreatedBy, long ID, string Rights ) : base( NameOfGroup, OwnerID, CreatedBy, ID, Rights ) { }
     public GroupModel( IGroupModel<long>               model ) : base( model ) { }
-    public static GroupModel Create( IGroupModel<long> model ) => new(model);
+    public static GroupModel Create( IGroupModel<long> model )                  => new(model);
+    public static bool operator >( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) <= 0;
 }
 
 
 
 [Serializable]
-public sealed record RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>
+public sealed record RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IComparisonOperators<RoleModel>
 {
     public RoleModel( string                         NameOfRole, string Rights, long ID ) : base( NameOfRole, Rights, ID ) { }
     public RoleModel( IRoleModel<long>               model ) : base( model ) { }
-    public static RoleModel Create( IRoleModel<long> model ) => new(model);
+    public static RoleModel Create( IRoleModel<long> model )                 => new(model);
+    public static bool operator >( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) <= 0;
 }
 
 

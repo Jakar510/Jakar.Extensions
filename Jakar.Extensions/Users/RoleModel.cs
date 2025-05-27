@@ -23,9 +23,9 @@ public interface IRoleModel<out TValue, TID> : IRoleModel<TID>
 
 [Serializable]
 [method: JsonConstructor]
-public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID ) : ObservableRecord<TRecord, TID>( ID ), IRoleModel<TID>
+public record RoleModel<TClass, TID>( string NameOfRole, string Rights, TID ID ) : ObservableRecord<TClass, TID>( ID ), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TRecord : RoleModel<TRecord, TID>, IRoleModel<TRecord, TID>
+    where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IComparisonOperators<TClass>
 {
     private string _name   = NameOfRole;
     private string _rights = Rights;
@@ -38,7 +38,7 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
     public RoleModel( IRoleModel<TID> model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
 
 
-    public override int CompareTo( TRecord? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
@@ -49,7 +49,7 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 
         return ID.CompareTo( other.ID );
     }
-    public override bool Equals( TRecord? other )
+    public override bool Equals( TClass? other )
     {
         if ( other is null ) { return false; }
 
@@ -63,9 +63,15 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 
 [Serializable]
 [method: JsonConstructor]
-public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) : RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID ), IRoleModel<RoleModel<TID>, TID>
+public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) : RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID ), IRoleModel<RoleModel<TID>, TID>, IComparisonOperators<RoleModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public RoleModel( IRoleModel<TID>                    model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
     public static RoleModel<TID> Create( IRoleModel<TID> model ) => new(model);
+
+
+    public static bool operator >( RoleModel<TID>  left, RoleModel<TID> right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator >=( RoleModel<TID> left, RoleModel<TID> right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( RoleModel<TID>  left, RoleModel<TID> right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator <=( RoleModel<TID> left, RoleModel<TID> right ) => Sorter.Compare( left, right ) <= 0;
 }
