@@ -68,7 +68,7 @@
 		<PackageReference Include="ZXing.Net.Maui" Version="0.4.0" />
 		<PackageReference Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
 		<PackageReference Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
-		<PackageReference Include="Plugin.Maui.Audio" Version="3.1.1" />
+		<PackageReference Include="Plugin.Maui.Audio" Version="4.0.0" />
 		<PackageReference Include="UraniumUI" Version="2.12.1" />
 		<PackageReference Include="UraniumUI.Blurs" Version="2.12.1" />
 		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.12.1" />

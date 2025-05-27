@@ -2,7 +2,7 @@
 
 
 [Serializable, DebuggerDisplay( nameof(DisplayName) )]
-public sealed class Language : BaseClass, IComparisonOperators<Language>
+public sealed class Language : BaseClass, IEqualComparable<Language>
 {
     private readonly CultureInfo _culture;
 

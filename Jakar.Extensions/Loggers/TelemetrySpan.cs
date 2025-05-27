@@ -8,7 +8,7 @@ using System.Diagnostics.Metrics;
 namespace Jakar.Extensions.Loggers;
 
 
-public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IDisposable, IEqualityOperators<TelemetrySource>
+public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperators<TelemetrySource>, IDisposable
 {
     public static readonly ActivityContext EmptyActivityContext = default;
     public readonly        ActivitySource  Source;

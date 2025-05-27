@@ -5,19 +5,23 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Stable) )]
-public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : IComparable<AppVersionFlags?>, IComparisonOperators<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
+public readonly struct AppVersionFlags( string flag, uint iteration ) : IValueEqualComparable<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
 {
-    private const string ALPHA          = "alpha";
-    private const string BETA           = "beta";
-    private const char   FLAG_SEPARATOR = '-';
-    private const string RC             = "rc";
-    private const string STABLE         = "";
+    private const          string          ALPHA          = "alpha";
+    private const          string          BETA           = "beta";
+    private const          char            FLAG_SEPARATOR = '-';
+    private const          string          RC             = "rc";
+    private const          string          STABLE         = "";
+    public static readonly AppVersionFlags Stable         = new(STABLE, 0);
+    public readonly        string          Flag           = flag;
+    public readonly        uint            Iteration      = iteration;
 
 
-    public static readonly AppVersionFlags Stable = new(STABLE, 0);
-    public                 bool            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
-    public                 bool            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
-    public                 int             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
+    public static ValueEqualizer<AppVersionFlags> Equalizer  => ValueEqualizer<AppVersionFlags>.Default;
+    public static ValueSorter<AppVersionFlags>    Sorter     => ValueSorter<AppVersionFlags>.Default;
+    public        bool                            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
+    public        bool                            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
+    public        int                             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
 
 
     public override string ToString()                                                  => AsSpan().ToString();
@@ -223,18 +227,21 @@ public readonly record struct AppVersionFlags( string Flag, uint Iteration ) : I
         AppVersionFlags flags = other.Value;
         return Equals( flags );
     }
-    public          bool Equals( AppVersionFlags other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
-    public override int  GetHashCode()                   => Flag.GetHashCode();
+    public override bool Equals( [NotNullWhen( true )] object? other ) => other is AppVersionFlags flags                                        && Equals( flags );
+    public          bool Equals( AppVersionFlags               other ) => string.Equals( Flag, other.Flag, StringComparison.OrdinalIgnoreCase ) && Iteration.Equals( other.Iteration );
+    public override int  GetHashCode()                                 => Flag.GetHashCode();
 
 
-    public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right )                                     < 0;
-    public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => left.CompareTo( right )                                     > 0;
-    public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right )                                     <= 0;
-    public static bool operator >=( AppVersionFlags  left, AppVersionFlags  right ) => left.CompareTo( right )                                     >= 0;
-    public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) < 0;
-    public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) > 0;
-    public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) <= 0;
-    public static bool operator >=( AppVersionFlags? left, AppVersionFlags? right ) => ValueSorter<AppVersionFlags>.Default.Compare( left, right ) >= 0;
-    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => ValueEqualizer<AppVersionFlags>.Default.Equals( left, right );
-    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => ValueEqualizer<AppVersionFlags>.Default.Equals( left, right ) is false;
+    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( AppVersionFlags  left, AppVersionFlags  right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( AppVersionFlags  left, AppVersionFlags  right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator >=( AppVersionFlags  left, AppVersionFlags  right ) => Sorter.Compare( left, right ) >= 0;
+    public static bool operator <( AppVersionFlags?  left, AppVersionFlags? right ) => Sorter.Compare( left, right ) < 0;
+    public static bool operator >( AppVersionFlags?  left, AppVersionFlags? right ) => Sorter.Compare( left, right ) > 0;
+    public static bool operator <=( AppVersionFlags? left, AppVersionFlags? right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator >=( AppVersionFlags? left, AppVersionFlags? right ) => Sorter.Compare( left, right ) >= 0;
 }

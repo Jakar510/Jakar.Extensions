@@ -14,13 +14,9 @@ public interface IFileMetaData : JsonModels.IJsonModel
 
 
 
-public interface IFileMetaData<TClass> : IFileMetaData, IComparisonOperators<TClass>
+public interface IFileMetaData<TClass> : IFileMetaData, IEqualComparable<TClass>
     where TClass : class, IFileMetaData<TClass>
 {
-    public abstract static Equalizer<TClass> Equalizer { get; }
-    public abstract static Sorter<TClass>    Sorter    { get; }
-
-
     public abstract static TClass  Create( IFileMetaData                                        data );
     public abstract static TClass? TryCreate( [NotNullIfNotNull( nameof(data) )] IFileMetaData? data );
     public abstract static TClass  Create( LocalFile                                            file );

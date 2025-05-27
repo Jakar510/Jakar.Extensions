@@ -40,7 +40,7 @@ public readonly record struct Alert()
 
 [Serializable, DefaultValue( nameof(Empty) )]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass, IEquatable<Errors>
+public sealed class Errors() : BaseClass, IEqualityOperators<Errors>
 {
     private static readonly Error[] _details = [];
     public static readonly Errors Empty = new()
@@ -48,6 +48,7 @@ public sealed class Errors() : BaseClass, IEquatable<Errors>
                                               Alert   = null,
                                               Details = _details
                                           };
+    public static Equalizer<Errors> Equalizer => Equalizer<Errors>.Default;
 
 
     [JsonRequired] public required Alert?  Alert       { get; init; }
@@ -88,6 +89,6 @@ public sealed class Errors() : BaseClass, IEquatable<Errors>
     }
     public override bool Equals( object? obj )                      => ReferenceEquals( this, obj ) || obj is Errors other && Equals( other );
     public override int  GetHashCode()                              => HashCode.Combine( Alert, Details );
-    public static   bool operator ==( Errors? left, Errors? right ) => Equals( left, right );
-    public static   bool operator !=( Errors? left, Errors? right ) => !Equals( left, right );
+    public static   bool operator ==( Errors? left, Errors? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( Errors? left, Errors? right ) => Equalizer.Equals( left, right ) is false;
 }

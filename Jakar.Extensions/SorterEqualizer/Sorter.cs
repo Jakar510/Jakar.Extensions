@@ -22,7 +22,11 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
                                                              : right.HasValue
                                                                  ? -1
                                                                  : 0;
-    public int Compare( TValue left, TValue right ) => left.CompareTo( right );
+    public int  Compare( TValue              left, TValue right ) => left.CompareTo( right );
+    public bool LessThan( TValue             left, TValue right ) => Compare( left, right ) < 0;
+    public bool LessThanOrEqualTo( TValue    left, TValue right ) => Compare( left, right ) <= 0;
+    public bool GreaterThan( TValue          left, TValue right ) => Compare( left, right ) > 0;
+    public bool GreaterThanOrEqualTo( TValue left, TValue right ) => Compare( left, right ) >= 0;
 }
 
 
@@ -51,4 +55,8 @@ public sealed class Sorter<TValue> : IComparer<TValue>, IComparer
 
         return left.CompareTo( right );
     }
+    public bool LessThan( TValue             left, TValue right ) => Compare( left, right ) < 0;
+    public bool LessThanOrEqualTo( TValue    left, TValue right ) => Compare( left, right ) <= 0;
+    public bool GreaterThan( TValue          left, TValue right ) => Compare( left, right ) > 0;
+    public bool GreaterThanOrEqualTo( TValue left, TValue right ) => Compare( left, right ) >= 0;
 }

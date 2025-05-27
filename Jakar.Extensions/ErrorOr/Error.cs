@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable, DefaultValue( nameof(Empty) )]
-public sealed class Error : BaseClass, IErrorDetails, IComparisonOperators<Error>
+public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 {
     public const           string       ACCEPTED_TYPE                        = "Server.Accepted";
     public const           string       ALREADY_EXISTS_TYPE                  = "Server.AlreadyExists";
