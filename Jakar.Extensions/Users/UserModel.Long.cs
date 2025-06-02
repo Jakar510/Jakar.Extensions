@@ -40,41 +40,56 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
             return false;
         }
     }
-    protected override int GetHashCodeInternal() => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID, Address );
+    public override bool Equals( object?           other )                  => other is UserAddress x && Equals( x );
+    public override int  GetHashCode()                                      => base.GetHashCode();
+    public static   bool operator ==( UserAddress? left, UserAddress? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( UserAddress? left, UserAddress? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( UserAddress   left, UserAddress  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( UserAddress  left, UserAddress  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( UserAddress   left, UserAddress  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( UserAddress  left, UserAddress  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
 
 
 
 [Serializable]
-public sealed record GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IComparisonOperators<GroupModel>
+public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>
 {
-    public GroupModel( string                          NameOfGroup, long? OwnerID, long? CreatedBy, long ID, string Rights ) : base( NameOfGroup, OwnerID, CreatedBy, ID, Rights ) { }
-    public GroupModel( IGroupModel<long>               model ) : base( model ) { }
-    public static GroupModel Create( IGroupModel<long> model )                  => new(model);
-    public static bool operator >( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator >=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator <( GroupModel          left, GroupModel right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator <=( GroupModel         left, GroupModel right ) => Sorter.Compare( left, right ) <= 0;
+    public GroupModel( string                            nameOfGroup, long? ownerID, long? createdBy, long id, string rights ) : base( nameOfGroup, ownerID, createdBy, id, rights ) { }
+    public GroupModel( IGroupModel<long>                 model ) : base( model ) { }
+    public static   GroupModel Create( IGroupModel<long> model )            => new(model);
+    public override bool       Equals( object?           other )            => other is GroupModel x && Equals( x );
+    public override int        GetHashCode()                                => base.GetHashCode();
+    public static   bool operator ==( GroupModel? left, GroupModel? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( GroupModel? left, GroupModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( GroupModel   left, GroupModel  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( GroupModel  left, GroupModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( GroupModel   left, GroupModel  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( GroupModel  left, GroupModel  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
 
 
 
 [Serializable]
-public sealed record RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IComparisonOperators<RoleModel>
+public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>
 {
-    public RoleModel( string                         NameOfRole, string Rights, long ID ) : base( NameOfRole, Rights, ID ) { }
-    public RoleModel( IRoleModel<long>               model ) : base( model ) { }
-    public static RoleModel Create( IRoleModel<long> model )                 => new(model);
-    public static bool operator >( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator >=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator <( RoleModel         left, RoleModel right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator <=( RoleModel        left, RoleModel right ) => Sorter.Compare( left, right ) <= 0;
+    public RoleModel( string                           nameOfRole, string rights, long id ) : base( nameOfRole, rights, id ) { }
+    public RoleModel( IRoleModel<long>                 model ) : base( model ) { }
+    public static   RoleModel Create( IRoleModel<long> model )            => new(model);
+    public override bool      Equals( object?          other )            => other is UserModel x && Equals( x );
+    public override int       GetHashCode()                               => base.GetHashCode();
+    public static   bool operator ==( RoleModel? left, RoleModel? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( RoleModel? left, RoleModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( RoleModel   left, RoleModel  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( RoleModel  left, RoleModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( RoleModel   left, RoleModel  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( RoleModel  left, RoleModel  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
 
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>
+public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IEqualComparable<UserModel>
 {
     public UserModel() : base() { }
     public UserModel( IUserData<long> value ) : base( value ) { }
@@ -92,6 +107,14 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
         await user.Roles.Add( roles, token );
         return user;
     }
+    public override bool Equals( object? other )                          => other is UserModel x && Equals( x );
+    public override int  GetHashCode()                                    => base.GetHashCode();
+    public static   bool operator ==( UserModel? left, UserModel? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( UserModel? left, UserModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( UserModel   left, UserModel  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( UserModel  left, UserModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( UserModel   left, UserModel  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( UserModel  left, UserModel  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
 
 

@@ -29,8 +29,8 @@ public static partial class Types
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this         Type   value, scoped in ReadOnlySpan<Type> types ) => types.AsValueEnumerable().Any( value.IsEqualType );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType<TValue>( this TValue value, scoped in ReadOnlySpan<Type> types ) => (value?.GetType() ?? typeof(TValue)).IsOneOfType( types );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType( this         Type   value, params ReadOnlySpan<Type> types ) => types.AsValueEnumerable().Any( value.IsEqualType );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool IsOneOfType<TValue>( this TValue value, params ReadOnlySpan<Type> types ) => (value?.GetType() ?? typeof(TValue)).IsOneOfType( types );
 
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

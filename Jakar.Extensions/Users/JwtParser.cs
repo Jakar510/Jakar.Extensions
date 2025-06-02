@@ -51,7 +51,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public Tokens<long> CreateToken( UserLong.UserModel user, ISessionID<long> request, string authenticationType ) => CreateToken<UserLong.UserModel, UserLong.UserAddress, UserLong.GroupModel, UserLong.RoleModel, long>( user, request, authenticationType );
     public Tokens<TID> CreateToken<TUser, TID>( TUser user, ISessionID<TID> request, string authenticationType )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : UserModel<TUser, TID>, ICreateUserModel<TUser, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
+        where TUser : UserModel<TUser, TID>, ICreateUserModel<TUser, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<TUser>, new()
     {
         ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
         return CreateToken( user, request, identity );

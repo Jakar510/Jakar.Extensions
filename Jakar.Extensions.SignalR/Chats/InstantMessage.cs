@@ -69,7 +69,7 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
 
         return _hasBeenRead == other._hasBeenRead && _groupName == other._groupName && _message == other._message && Equals( _data, other._data ) && TimeStamp.Equals( other.TimeStamp );
     }
-    protected override int GetHashCodeInternal()
+    public override int GetHashCode()
     {
         HashCode hashCode = new();
         hashCode.Add( base.GetHashCode() );

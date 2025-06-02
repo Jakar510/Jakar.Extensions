@@ -4,17 +4,6 @@
 namespace Jakar.Extensions;
 
 
-public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEquatable<TClass>, IComparable<TClass>, IComparable
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : IAddress<TClass, TID>
-{
-    public abstract static TClass Create( Match         match );
-    public abstract static TClass Create( IAddress<TID> address );
-    public abstract static TClass Create( string        line1, string line2, string city, string postalCode, string country );
-}
-
-
-
 public interface IAddress<out TID> : IUniqueID<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
@@ -30,10 +19,21 @@ public interface IAddress<out TID> : IUniqueID<TID>
 
 
 
+public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqualComparable<TClass>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    where TClass : class, IAddress<TClass, TID>
+{
+    public abstract static TClass Create( Match         match );
+    public abstract static TClass Create( IAddress<TID> address );
+    public abstract static TClass Create( string        line1, string line2, string city, string postalCode, string country );
+}
+
+
+
 [Serializable]
 public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, JsonModels.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
+    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IEqualComparable<TClass>
 
 {
     private bool                          _isPrimary;
@@ -210,7 +210,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
 
 
 [Serializable]
-public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>
+public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>, IEqualComparable<UserAddress<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public UserAddress() { }
@@ -220,13 +220,16 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
     public static UserAddress<TID> Create( Match         match )                                                               => new(match);
     public static UserAddress<TID> Create( IAddress<TID> address )                                                             => new(address);
     public static UserAddress<TID> Create( string        line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
-    public static UserAddress<TID> Parse( string value, IFormatProvider? provider )
+    public new static UserAddress<TID> Parse( string value, IFormatProvider? provider )
     {
-        Match match = Validate.Re.Address.Match( value );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        Match               match         = Validate.Re.Address.Match( value );
         return new UserAddress<TID>( match );
     }
-    public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress<TID>? result )
+    public new static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen( true )] out UserAddress<TID>? result )
     {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
         try
         {
             result = string.IsNullOrWhiteSpace( value ) is false
@@ -235,11 +238,21 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
 
             return result is not null;
         }
-        catch ( Exception )
+        catch ( Exception e )
         {
+            telemetrySpan.AddException( e );
             result = null;
             return false;
         }
     }
-    protected override int GetHashCodeInternal() => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID );
+
+
+    public override bool Equals( object? other )                                        => other is UserAddress<TID> x && Equals( x );
+    public override int  GetHashCode()                                                  => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID );
+    public static   bool operator ==( UserAddress<TID>? left, UserAddress<TID>? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( UserAddress<TID>? left, UserAddress<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( UserAddress<TID>   left, UserAddress<TID>  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( UserAddress<TID>  left, UserAddress<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( UserAddress<TID>   left, UserAddress<TID>  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( UserAddress<TID>  left, UserAddress<TID>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

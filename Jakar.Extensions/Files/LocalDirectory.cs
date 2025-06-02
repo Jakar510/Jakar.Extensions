@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable
+public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
@@ -489,7 +489,8 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-    protected override int GetHashCodeInternal() => HashCode.Combine( FullPath, this.IsTempFile() );
+    public override bool Equals( object? other ) => other is LocalDirectory x && Equals( x );
+    public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
     public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Equalizer.Equals( left, right );

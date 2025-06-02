@@ -19,13 +19,21 @@ public interface IEqualComparable<TValue> : IEqualityOperators<TValue>, ICompari
 {
     public abstract static Equalizer<TValue> Equalizer { get; }
     public abstract static Sorter<TValue>    Sorter    { get; }
+
+
+    public bool Equals( object? other );
+    public int  GetHashCode();
 }
 
 
 
-public interface IValueEqualComparable<TValue> : IEqualityOperators<TValue>, IComparisonOperators<TValue>, IComparable<TValue?>, IEquatable<TValue?>
-    where TValue : struct, IValueEqualComparable<TValue>
+public interface IEqualComparableValue<TValue> : IEqualityOperators<TValue>, IComparisonOperators<TValue>, IComparable<TValue?>, IEquatable<TValue?>
+    where TValue : struct, IEqualComparableValue<TValue>
 {
     public abstract static ValueEqualizer<TValue> Equalizer { get; }
     public abstract static ValueSorter<TValue>    Sorter    { get; }
+
+
+    public bool Equals( object? other );
+    public int  GetHashCode();
 }

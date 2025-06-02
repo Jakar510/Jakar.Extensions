@@ -48,18 +48,18 @@ public sealed partial class IniConfig( IEqualityComparer<string> comparer, int c
 
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null )
     {
-        using TelemetrySpan telemetrySpan    = TelemetrySpan.Create();
-        string              content = file.Read().AsString(  );
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        string              content       = file.Read().AsString();
         return Parse( content, provider );
     }
     public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, CancellationToken token = default )
-    { 
+    {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = await file.ReadAsync().AsString(  token );
+        string              content       = await file.ReadAsync().AsString( token );
         return Parse( content, provider );
     }
 
-    public static IniConfig Parse( scoped in ReadOnlySpan<char> span ) => Parse( span, CultureInfo.InvariantCulture );
+    public static IniConfig Parse( scoped in ReadOnlySpan<char> span ) => Parse( in span, CultureInfo.InvariantCulture );
     public static IniConfig Parse( scoped in ReadOnlySpan<char> span, IFormatProvider? provider )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

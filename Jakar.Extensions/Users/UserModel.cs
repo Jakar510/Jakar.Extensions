@@ -10,7 +10,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      IDictionary<string, JToken?>? _additionalData;
@@ -83,19 +83,16 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         }
     }
 
-    [StringLength( UNICODE_CAPACITY )] public string                            FullName { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
-    [StringLength( UNICODE_CAPACITY )] public string                            Gender   { get => _gender;                     set => SetProperty( ref _gender,   value ); }
-    public                                    ObservableCollection<TGroupModel> Groups   { get;                                init; } = [];
-    public                                    TID?                              ImageID  { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
-
-
-    [JsonIgnore] public virtual bool IsValid            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsValidEmail                                && IsValidName && IsValidUserName; }
-    [JsonIgnore] public virtual bool IsValidEmail       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Email ) is false && Email.IsEmailAddress(); }
-    [JsonIgnore] public virtual bool IsValidName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( FullName ) is false; }
-    [JsonIgnore] public virtual bool IsValidPhoneNumber { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( PhoneNumber ) is false; }
-    [JsonIgnore] public virtual bool IsValidUserName    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false; }
-    [JsonIgnore] public virtual bool IsValidWebsite     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
-
+    [StringLength( UNICODE_CAPACITY )] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
+    [StringLength( UNICODE_CAPACITY )] public string                            Gender             { get => _gender;                     set => SetProperty( ref _gender,   value ); }
+    public                                    ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
+    public                                    TID?                              ImageID            { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
+    [JsonIgnore] public virtual               bool                              IsValid            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsValidEmail                                && IsValidName && IsValidUserName; }
+    [JsonIgnore] public virtual               bool                              IsValidEmail       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Email ) is false && Email.IsEmailAddress(); }
+    [JsonIgnore] public virtual               bool                              IsValidName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( FullName ) is false; }
+    [JsonIgnore] public virtual               bool                              IsValidPhoneNumber { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( PhoneNumber ) is false; }
+    [JsonIgnore] public virtual               bool                              IsValidUserName    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false; }
+    [JsonIgnore] public virtual               bool                              IsValidWebsite     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
 
     [Required, StringLength( 2000 )]
     public string LastName
@@ -169,7 +166,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Addresses.Add( addresses );
         return (TClass)this;
     }
-    public TClass With( scoped in ReadOnlySpan<TAddress> addresses )
+    public TClass With( params ReadOnlySpan<TAddress> addresses )
     {
         Addresses.Add( addresses );
         return (TClass)this;
@@ -179,7 +176,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Groups.Add( values );
         return (TClass)this;
     }
-    public TClass With( scoped in ReadOnlySpan<TGroupModel> values )
+    public TClass With( params ReadOnlySpan<TGroupModel> values )
     {
         Groups.Add( values );
         return (TClass)this;
@@ -189,7 +186,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Roles.Add( values );
         return (TClass)this;
     }
-    public TClass With( scoped in ReadOnlySpan<TRoleModel> values )
+    public TClass With( params ReadOnlySpan<TRoleModel> values )
     {
         Roles.Add( values );
         return (TClass)this;
@@ -280,7 +277,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
         return _company == other._company && _department == other._department && _email == other._email && _ext == other._ext && _firstName == other._firstName && _gender == other._gender && _lastName == other._lastName && _phoneNumber == other._phoneNumber && _rights == other._rights && _title == other._title && _userName == other._userName && _website == other._website && _description == other._description && _fullName == other._fullName && _preferredLanguage == other._preferredLanguage && Nullable.Equals( _createdBy, other._createdBy ) && Nullable.Equals( _escalateTo, other._escalateTo ) && Nullable.Equals( _imageID, other._imageID ) && Equals( UserID, other.UserID ) && Addresses.Equals( other.Addresses ) && Groups.Equals( other.Groups ) && ID.Equals( other.ID ) && Roles.Equals( other.Roles ) && Nullable.Equals( SubscriptionExpires, other.SubscriptionExpires );
     }
-    protected override int GetHashCodeInternal()
+    public override int GetHashCode()
     {
         HashCode hashCode = new();
         hashCode.Add( base.GetHashCode() );
@@ -318,7 +315,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 [Serializable]
 public abstract class UserModel<TClass, TID> : UserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : UserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
+    where TClass : UserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<TClass>, new()
 
 {
     protected UserModel() : base() { }
@@ -329,7 +326,7 @@ public abstract class UserModel<TClass, TID> : UserModel<TClass, TID, UserAddres
 
 
 [Serializable]
-public sealed class UserModel<TID> : UserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, ICreateUserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+public sealed class UserModel<TID> : UserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, ICreateUserModel<UserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<UserModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public UserModel() : base() { }
@@ -348,4 +345,14 @@ public sealed class UserModel<TID> : UserModel<UserModel<TID>, TID, UserAddress<
         await user.Roles.Add( roles, token );
         return user;
     }
+
+
+    public override bool Equals( object? other )                                    => other is UserModel<TID> x && Equals( x );
+    public override int  GetHashCode()                                              => base.GetHashCode();
+    public static   bool operator ==( UserModel<TID>? left, UserModel<TID>? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( UserModel<TID>? left, UserModel<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( UserModel<TID>   left, UserModel<TID>  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( UserModel<TID>  left, UserModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( UserModel<TID>   left, UserModel<TID>  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( UserModel<TID>  left, UserModel<TID>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

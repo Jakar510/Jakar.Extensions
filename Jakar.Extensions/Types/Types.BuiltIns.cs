@@ -43,7 +43,7 @@ public static partial class Types
                                                                                 typeof(decimal),
                                                                                 typeof(TimeSpan)
                                                                             ] );
-    public static bool IsGenericType( this  Type propertyType )                              => propertyType.IsGenericType( [typeof(JObject), typeof(JToken)] );
-    public static bool IsGenericType( this  Type propertyType, in ReadOnlySpan<Type> types ) => propertyType.IsAnyBuiltInType() || propertyType.IsGenericType || propertyType.IsOneOfType( types );
+    public static bool IsGenericType( this  Type propertyType )                                  => propertyType.IsGenericType( [typeof(JObject), typeof(JToken)] );
+    public static bool IsGenericType( this  Type propertyType, params ReadOnlySpan<Type> types ) => propertyType.IsAnyBuiltInType() || propertyType.IsGenericType || propertyType.IsOneOfType( types );
     public static bool IsNullableType( this Type type ) => type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
 }

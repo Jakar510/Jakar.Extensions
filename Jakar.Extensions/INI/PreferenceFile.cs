@@ -2,7 +2,7 @@
 
 
 public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDisposable
-    where TClass : PreferenceFile<TClass>, new()
+    where TClass : PreferenceFile<TClass>, IEqualComparable<TClass>, new()
 {
 #if NET9_0_OR_GREATER
     private readonly Lock _lock = new();

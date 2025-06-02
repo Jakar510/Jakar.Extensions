@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     public readonly              string   FullPath     = info.FullName;
@@ -941,7 +941,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-    protected override int GetHashCodeInternal() => HashCode.Combine( FullPath, this.IsTempFile() );
+    public override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is LocalFile x && Equals( x );
+    public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
     public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Equals( left, right );

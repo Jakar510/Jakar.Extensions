@@ -16,7 +16,7 @@ public readonly ref struct PasswordValidator
     public PasswordValidator( scoped in Requirements requirements ) => _requirements = requirements;
 
 
-    public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( password, Requirements );
+    public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( in password, Requirements );
     public static bool Check( scoped in ReadOnlySpan<char> password, scoped in Requirements requirements )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -25,7 +25,7 @@ public readonly ref struct PasswordValidator
     }
 
 
-    public bool Validate( scoped in ReadOnlySpan<char> span ) => Validate( span, out _ );
+    public bool Validate( scoped in ReadOnlySpan<char> span ) => Validate( in span, out _ );
     public bool Validate( scoped in ReadOnlySpan<char> span, out Results results )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

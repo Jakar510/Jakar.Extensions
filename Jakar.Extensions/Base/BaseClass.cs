@@ -26,16 +26,19 @@ public class BaseClass
 
 [Serializable]
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : BaseClass<TClass>, IComparisonOperators<TClass>
+    where TClass : BaseClass<TClass>, IEqualComparable<TClass>
 {
     public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
     public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
+
     public string ToJson()       => this.ToJson( Formatting.None );
     public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
+
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
+
 
     public int CompareTo( object? other )
     {
@@ -47,9 +50,8 @@ public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, ICompar
                    ? CompareTo( t )
                    : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
     }
-    public sealed override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass file && Equals( file );
-    public sealed override int  GetHashCode()           => GetHashCodeInternal();
-    protected abstract     int  GetHashCodeInternal();
+    public override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is TClass x && Equals( x );
+    public override int  GetHashCode()           => RuntimeHelpers.GetHashCode( this );
 
 
     public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )

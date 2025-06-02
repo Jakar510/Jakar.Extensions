@@ -29,7 +29,7 @@ public static class RightsExtensions
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void SetRights<TEnum>( this IUserRights user, scoped in ReadOnlySpan<TEnum> indexes )
+    public static void SetRights<TEnum>( this IUserRights user, params ReadOnlySpan<TEnum> indexes )
         where TEnum : struct, Enum => user.SetRights( user.GetRights<TEnum>().Add( indexes ) );
 
 

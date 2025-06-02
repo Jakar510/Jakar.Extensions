@@ -115,11 +115,11 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
     where TClass : ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
 {
     public TClass With( IEnumerable<TAddress>               values );
-    public TClass With( scoped in ReadOnlySpan<TAddress>    values );
+    public TClass With( params ReadOnlySpan<TAddress>    values );
     public TClass With( IEnumerable<TGroupModel>            values );
-    public TClass With( scoped in ReadOnlySpan<TGroupModel> values );
+    public TClass With( params ReadOnlySpan<TGroupModel> values );
     public TClass With( IEnumerable<TRoleModel>             values );
-    public TClass With( scoped in ReadOnlySpan<TRoleModel>  values );
+    public TClass With( params ReadOnlySpan<TRoleModel>  values );
     public TClass With( IDictionary<string, JToken?>?       data );
     public TClass With<TValue>( TValue value )
         where TValue : IUserData<TID>;

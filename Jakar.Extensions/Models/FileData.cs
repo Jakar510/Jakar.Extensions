@@ -32,31 +32,6 @@ public interface IFileData<out TID> : IUniqueID<TID>
     long   FileSize { get; }
     string Hash     { get; }
     string Payload  { get; }
-
-
-    /*
-    public static string GetHash( scoped in ReadOnlySpan<byte>   data )
-    {
-        Debug.Assert( data.Length > 0 );
-        using SHA256             hasher = SHA256.Create();
-        using IMemoryOwner<byte> owner  = MemoryPool<byte>.Shared.Rent( BaseRecord.UNICODE_CAPACITY );
-        Span<byte>               span   = owner.Memory.Span;
-        hasher.TryComputeHash( data, span, out int bytesWritten );
-        Debug.Assert( bytesWritten > 0 );
-
-        span = span[..bytesWritten];
-        Span<char>   hexChars     = stackalloc char[span.Length * 2];
-        const string HEX_ALPHABET = "0123456789ABCDEF";
-
-        for ( int i = 0; i < span.Length; i++ )
-        {
-            hexChars[i * 2]     = HEX_ALPHABET[span[i] >> 4];
-            hexChars[i * 2 + 1] = HEX_ALPHABET[span[i] & 0x0F];
-        }
-
-        return hexChars.ToString();
-    }
-    */
 }
 
 

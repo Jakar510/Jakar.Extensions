@@ -22,11 +22,13 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
                                                              : right.HasValue
                                                                  ? -1
                                                                  : 0;
-    public int  Compare( TValue              left, TValue right ) => left.CompareTo( right );
-    public bool LessThan( TValue             left, TValue right ) => Compare( left, right ) < 0;
-    public bool LessThanOrEqualTo( TValue    left, TValue right ) => Compare( left, right ) <= 0;
-    public bool GreaterThan( TValue          left, TValue right ) => Compare( left, right ) > 0;
-    public bool GreaterThanOrEqualTo( TValue left, TValue right ) => Compare( left, right ) >= 0;
+    public int Compare( TValue left, TValue right ) => left.CompareTo( right );
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool LessThan( TValue             left, TValue right ) => Compare( left, right ) < 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool LessThanOrEqualTo( TValue    left, TValue right ) => Compare( left, right ) <= 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool GreaterThan( TValue          left, TValue right ) => Compare( left, right ) > 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool GreaterThanOrEqualTo( TValue left, TValue right ) => Compare( left, right ) >= 0;
 }
 
 
@@ -49,14 +51,16 @@ public sealed class Sorter<TValue> : IComparer<TValue>, IComparer
     {
         if ( left is null ) { return 1; }
 
-        if ( right is null ) { return NOT_FOUND; }
+        if ( right is null ) { return -1; }
 
         if ( ReferenceEquals( left, right ) ) { return 0; }
 
         return left.CompareTo( right );
     }
-    public bool LessThan( TValue             left, TValue right ) => Compare( left, right ) < 0;
-    public bool LessThanOrEqualTo( TValue    left, TValue right ) => Compare( left, right ) <= 0;
-    public bool GreaterThan( TValue          left, TValue right ) => Compare( left, right ) > 0;
-    public bool GreaterThanOrEqualTo( TValue left, TValue right ) => Compare( left, right ) >= 0;
+
+
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool LessThan( TValue?             left, TValue? right ) => Compare( left, right ) < 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool LessThanOrEqualTo( TValue?    left, TValue? right ) => Compare( left, right ) <= 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool GreaterThan( TValue?          left, TValue? right ) => Compare( left, right ) > 0;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool GreaterThanOrEqualTo( TValue? left, TValue? right ) => Compare( left, right ) >= 0;
 }

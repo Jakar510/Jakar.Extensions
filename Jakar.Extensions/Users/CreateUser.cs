@@ -11,7 +11,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
 {
     private string _confirmPassword = string.Empty;
     private string _userPassword    = string.Empty;
@@ -111,7 +111,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 [Serializable]
 public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : CreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, new()
+    where TClass : CreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<TClass>, new()
 {
     protected CreateUserModel() : base() { }
     protected CreateUserModel( IUserData<TID> value ) : base( value ) { }
@@ -121,7 +121,7 @@ public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID
 
 
 [Serializable]
-public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, ICreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
+public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>, TID>, ICreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<CreateUserModel<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public CreateUserModel() : base() { }
@@ -140,4 +140,14 @@ public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>,
         await user.Roles.Add( roles, token );
         return user;
     }
+
+
+    public override bool Equals( object? other )                                                => other is CreateUserModel<TID> x && Equals( x );
+    public override int  GetHashCode()                                                          => base.GetHashCode();
+    public static   bool operator ==( CreateUserModel<TID>? left, CreateUserModel<TID>? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( CreateUserModel<TID>? left, CreateUserModel<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( CreateUserModel<TID>   left, CreateUserModel<TID>  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( CreateUserModel<TID>  left, CreateUserModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( CreateUserModel<TID>   left, CreateUserModel<TID>  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( CreateUserModel<TID>  left, CreateUserModel<TID>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

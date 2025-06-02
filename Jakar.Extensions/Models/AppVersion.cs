@@ -3,7 +3,7 @@
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
 [Serializable, JsonConverter( typeof(AppVersionJsonNetConverter) ), JsonObject]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISpanParsable<AppVersion>, IComparisonOperators<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, IComparable
+public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISpanParsable<AppVersion>, IComparisonOperators<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>
 {
     private const          char                       SEPARATOR = '.';
     public static readonly AppVersion                 Default   = new();
@@ -149,7 +149,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
 
     public static AppVersion Parse( string                    s, IFormatProvider? provider ) => Parse( s.AsSpan(), provider );
     public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse( value,     CultureInfo.CurrentUICulture );
-    public static AppVersion Parse( scoped ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( ref value, value, provider );
+    public static AppVersion Parse( scoped ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse( ref value, in value, provider );
     private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
         try

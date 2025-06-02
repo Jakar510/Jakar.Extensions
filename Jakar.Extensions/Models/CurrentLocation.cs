@@ -20,7 +20,7 @@ public interface ICurrentLocation<out TID> : IUniqueID<TID>
 
 
 [Serializable]
-public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICurrentLocation<TID>
+public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICurrentLocation<TID>, IEqualComparable<CurrentLocation<TID>>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public       double?           Accuracy                { get; init; }
@@ -138,7 +138,8 @@ public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICur
 
         return Timestamp.CompareTo( other.Timestamp );
     }
-    protected override int GetHashCodeInternal()
+    public override bool Equals( object? other ) => other is LocalDirectory x && Equals( x );
+    public override int GetHashCode()
     {
         HashCode hashCode = new();
         hashCode.Add( ID );
@@ -155,4 +156,10 @@ public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICur
         hashCode.Add( (int)AltitudeReferenceSystem );
         return hashCode.ToHashCode();
     }
+    public static   bool operator ==( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) => Equalizer.Equals( left, right );
+    public static   bool operator !=( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator >( CurrentLocation<TID>   left, CurrentLocation<TID>  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( CurrentLocation<TID>  left, CurrentLocation<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( CurrentLocation<TID>   left, CurrentLocation<TID>  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( CurrentLocation<TID>  left, CurrentLocation<TID>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
