@@ -9,7 +9,7 @@ public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<T
 {
     private readonly ReadOnlySpan<TValue> _span  = span;
     private readonly Func<TValue, TNext>  _func  = func;
-    private          int                  _index = NOT_FOUND;
+    private volatile int                  _index = -1;
 
     public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
@@ -28,7 +28,7 @@ public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<T
     }
     public void Reset()
     {
-        Interlocked.Exchange( ref _index, NOT_FOUND );
+        Interlocked.Exchange( ref _index, -1 );
         Current = default!;
     }
 }

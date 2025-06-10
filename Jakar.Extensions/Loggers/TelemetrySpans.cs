@@ -23,7 +23,7 @@ public interface IActivityTracer
 public static class TelemetrySpans
 {
     /*
-        private static IDisposable?                                          _activityListener;
+        private static  volatile  IDisposable?                               _activityListener;
         private static Action<ActivityListenerConfiguration>?                _configureActivityListener;
         private static Action<HttpRequestOutActivityInstrumentationOptions>? _configureHttpRequestOutActivityInstrumentation;
         public static Action<ActivityListenerConfiguration>? ConfigureActivityListener

@@ -15,7 +15,7 @@ namespace Jakar.Extensions;
 public sealed class Synchronized<TValue>( TValue value )
     where TValue : class
 {
-    private TValue _value = value;
+    private volatile TValue _value = value;
 
     public TValue Value { get => Interlocked.CompareExchange( ref _value!, null, null ); set => Interlocked.Exchange( ref _value, value ); }
 

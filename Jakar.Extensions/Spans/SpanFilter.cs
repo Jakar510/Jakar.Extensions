@@ -9,7 +9,7 @@ public ref struct SpanFilter<TValue>( scoped in ReadOnlySpan<TValue> span, Func<
 {
     private readonly ReadOnlySpan<TValue> _span  = span;
     private readonly Func<TValue, bool>   _func  = func;
-    private          int                  _index = NOT_FOUND;
+    private volatile int                  _index = -1;
 
     public TValue Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
@@ -28,7 +28,7 @@ public ref struct SpanFilter<TValue>( scoped in ReadOnlySpan<TValue> span, Func<
     }
     public void Reset()
     {
-        Interlocked.Exchange( ref _index, NOT_FOUND );
+        Interlocked.Exchange( ref _index, -1 );
         Current = default!;
     }
 }

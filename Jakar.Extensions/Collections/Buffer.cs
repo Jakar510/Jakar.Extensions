@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 public ref struct Buffer<TValue>( int capacity )
-    where TValue : IEquatable<TValue> 
+    where TValue : IEquatable<TValue>
 {
     private readonly TValue[] _array = ArrayPool<TValue>.Shared.Rent( Math.Max( capacity, DEFAULT_CAPACITY ) );
     private          long     _length;
