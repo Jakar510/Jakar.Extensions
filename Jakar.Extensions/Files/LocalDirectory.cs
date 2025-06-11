@@ -134,19 +134,19 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public IEnumerable<LocalDirectory> GetSubFolders()                                                              => Info.EnumerateDirectories().Select( Create );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories( searchPattern ).Select( Create );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories( searchPattern, searchOption ).Select( Create );
-    public IEnumerable<LocalDirectory> GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions ).Select( Create );
+    public LocalDirectory[] GetSubFolders()                                                              => Info.EnumerateDirectories().Select( Create ).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories( searchPattern ).Select( Create ).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories( searchPattern, searchOption ).Select( Create ).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions ).Select( Create ).ToArray();
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public IEnumerable<LocalFile> GetFiles()                                                              => Info.EnumerateFiles().Select( LocalFile.Create );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( LocalFile.Create );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( LocalFile.Create );
-    public IEnumerable<LocalFile> GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( LocalFile.Create );
+    public LocalFile[] GetFiles()                                                              => Info.EnumerateFiles().Select( LocalFile.Create ).ToArray();
+    public LocalFile[] GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( LocalFile.Create ).ToArray();
+    public LocalFile[] GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( LocalFile.Create ).ToArray();
+    public LocalFile[] GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( LocalFile.Create ).ToArray();
 
 
     public ValueEnumerable<Select<Descendants<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>> Descendants() => Info.Descendants().Select( GetFileOrDirectory );
@@ -508,8 +508,8 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     [Serializable]
     public class Collection : ObservableCollection<LocalDirectory>
     {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Collection() : base( Sorter ) { }
+        public Collection( params ReadOnlySpan<LocalDirectory> values ) : base( Sorter, values ) { }
     }
 
 
@@ -518,7 +518,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
         public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( IEnumerable<LocalDirectory> items ) : base( items, Sorter ) { }
+        public ConcurrentCollection( params ReadOnlySpan<LocalDirectory> values ) : base( Sorter, values ) { }
     }
 
 
@@ -527,7 +527,10 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
     {
         public ConcurrentQueue() : base() { }
-        public ConcurrentQueue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public ConcurrentQueue( params ReadOnlySpan<LocalDirectory> values ) : base()
+        {
+            foreach ( LocalDirectory value in values ) { Enqueue( value ); }
+        }
     }
 
 
@@ -536,17 +539,19 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class Deque : ConcurrentDeque<LocalDirectory>
     {
         public Deque() : base() { }
-        public Deque( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Deque( params ReadOnlySpan<LocalDirectory> values ) : base( values ) { }
     }
 
 
 
     [Serializable]
-    public class Directories : List<LocalDirectory>
+    public class Directories( int capacity ) : List<LocalDirectory>( capacity )
     {
-        public Directories() : base() { }
-        public Directories( int                         capacity ) : base( capacity ) { }
-        public Directories( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Directories() : this( DEFAULT_CAPACITY ) { }
+        public Directories( params ReadOnlySpan<LocalDirectory> values ) : this( values.Length )
+        {
+            foreach ( LocalDirectory value in values ) { Add( value ); }
+        }
     }
 
 
@@ -555,7 +560,10 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class Queue : Queue<LocalDirectory>
     {
         public Queue() : base() { }
-        public Queue( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Queue( params ReadOnlySpan<LocalDirectory> values ) : base()
+        {
+            foreach ( LocalDirectory value in values ) { Enqueue( value ); }
+        }
     }
 
 
@@ -564,8 +572,11 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class Set : HashSet<LocalDirectory>
     {
         public Set() : base() { }
-        public Set( int                         capacity ) : base( capacity ) { }
-        public Set( IEnumerable<LocalDirectory> items ) : base( items ) { }
+        public Set( int capacity ) : base( capacity ) { }
+        public Set( params ReadOnlySpan<LocalDirectory> values ) : base()
+        {
+            foreach ( LocalDirectory value in values ) { Add( value ); }
+        }
     }
 
 

@@ -981,8 +981,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     [Serializable]
     public class Collection : ObservableCollection<LocalFile>
     {
-        public Collection() : base() { }
-        public Collection( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Collection() : base( Sorter ) { }
+        public Collection( params ReadOnlySpan<LocalFile> values ) : base( Sorter, values ) { }
     }
 
 
@@ -991,7 +991,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
         public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( IEnumerable<LocalFile> items ) : base( items, Sorter ) { }
+        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base( Sorter, values ) { }
     }
 
 
@@ -1000,7 +1000,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class ConcurrentQueue : ConcurrentQueue<LocalFile>
     {
         public ConcurrentQueue() : base() { }
-        public ConcurrentQueue( IEnumerable<LocalFile> items ) : base( items ) { }
+        public ConcurrentQueue( params ReadOnlySpan<LocalFile> values ) : base()
+        {
+            foreach ( LocalFile value in values ) { Enqueue( value ); }
+        }
     }
 
 
@@ -1013,17 +1016,19 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class Deque : ConcurrentDeque<LocalFile>
     {
         public Deque() : base() { }
-        public Deque( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Deque( params ReadOnlySpan<LocalFile> values ) : base( values ) { }
     }
 
 
 
     [Serializable]
-    public class Files : List<LocalFile>
+    public class Files( int capacity ) : List<LocalFile>( capacity )
     {
-        public Files() : base() { }
-        public Files( int                    capacity ) : base( capacity ) { }
-        public Files( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Files() : this( DEFAULT_CAPACITY ) { }
+        public Files( params ReadOnlySpan<LocalFile> values ) : this( values.Length )
+        {
+            foreach ( LocalFile value in values ) { Add( value ); }
+        }
     }
 
 
@@ -1122,17 +1127,22 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class Queue : Queue<LocalFile>
     {
         public Queue() : base() { }
-        public Queue( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Queue( params ReadOnlySpan<LocalFile> values ) : base()
+        {
+            foreach ( LocalFile value in values ) { Enqueue( value ); }
+        }
     }
 
 
 
     [Serializable]
-    public class Set : HashSet<LocalFile>
+    public class Set( int capacity ) : HashSet<LocalFile>( capacity )
     {
-        public Set() : base() { }
-        public Set( int                    capacity ) : base( capacity ) { }
-        public Set( IEnumerable<LocalFile> items ) : base( items ) { }
+        public Set() : this( DEFAULT_CAPACITY ) { }
+        public Set( params ReadOnlySpan<LocalFile> values ) : this( values.Length )
+        {
+            foreach ( LocalFile value in values ) { Add( value ); }
+        }
     }
 
 

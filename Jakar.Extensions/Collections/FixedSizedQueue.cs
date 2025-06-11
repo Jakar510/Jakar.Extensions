@@ -4,61 +4,42 @@
 /// <summary>
 ///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name="TValue"> </typeparam>
-public class FixedSizedQueue<TValue>( int size,
-                                  #if NET8_0
-                                 object? locker = null
-                                  #else
-                                      Lock? locker = null
-#endif
-)
+public class FixedSizedQueue<TValue>( int size )
 {
-    protected readonly Queue<TValue> _q = new(size);
-#if NET8_0
-    protected readonly object _lock = locker ?? new object();
-#else
-    protected readonly Lock _lock = locker ?? new Lock();
-#endif
-
-    public int Size { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = size;
+    public readonly    int                   Length  = size;
+    protected readonly LockFreeStack<TValue> _values = new();
 
 
-    public bool Contains( TValue value )
+    public int  Count   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.Count; }
+    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+
+    
+    public virtual bool Contains( TValue value ) => _values.Contains( value );
+    public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) =>
+        token.IsCancellationRequested
+            ? ValueTask.FromCanceled<bool>( token )
+            : ValueTask.FromResult( _values.Contains( value ) );
+
+
+    public virtual TValue? Dequeue() => _values.TryPop();
+    public virtual ValueTask<TValue?> DequeueAsync( CancellationToken token = default ) =>
+        token.IsCancellationRequested
+            ? ValueTask.FromCanceled<TValue?>( token )
+            : ValueTask.FromResult( _values.TryPop() );
+
+
+    public virtual void Enqueue( TValue value )
     {
-        lock (_lock) { return _q.Contains( value ); }
+        _values.Push( value );
+        while ( _values.Count > Length ) { _values.TryPop( out _ ); }
     }
-    public ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
+    public virtual ValueTask EnqueueAsync( TValue value, CancellationToken token = default )
     {
-        lock (_lock) { return ValueTask.FromResult( _q.Contains( value ) ); }
-    }
+        _values.Push( value );
+        while ( _values.Count > Length ) { _values.TryPop( out _ ); }
 
-
-    public TValue Dequeue()
-    {
-        lock (_lock) { return _q.Dequeue(); }
-    }
-    public ValueTask<TValue> DequeueAsync( CancellationToken token = default )
-    {
-        lock (_lock) { return ValueTask.FromResult( _q.Dequeue() ); }
-    }
-
-
-    public void Enqueue( TValue value )
-    {
-        lock (_lock)
-        {
-            _q.Enqueue( value );
-            while ( _q.Count > Size ) { _q.Dequeue(); }
-        }
-    }
-    public ValueTask EnqueueAsync( TValue value, CancellationToken token = default )
-    {
-        lock (_lock)
-        {
-            _q.Enqueue( value );
-            while ( _q.Count > Size ) { _q.Dequeue(); }
-        }
-
-        return ValueTask.CompletedTask;
+        return token.IsCancellationRequested
+                   ? ValueTask.FromCanceled( token )
+                   : ValueTask.CompletedTask;
     }
 }

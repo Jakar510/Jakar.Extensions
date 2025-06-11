@@ -1,55 +1,42 @@
 ﻿namespace Jakar.Extensions;
 
 
-public class ConcurrentDeque<TValue> : IQueue<TValue>
+public class ConcurrentDeque<TValue>( int capacity = DEFAULT_CAPACITY ) : IQueue<TValue>
 {
-    protected readonly Deque<TValue> _queue;
-    protected readonly Lock          _lock = new();
+    protected readonly Deque<TValue> _values = new(capacity);
+    protected readonly Lock          _lock   = new();
 
 
     public int Count
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
         get
         {
-            lock (_lock) { return _queue.Count; }
+            lock (_lock) { return _values.Count; }
         }
     }
-    public bool IsEmpty
-    {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        get
-        {
-            lock (_lock) { return _queue.IsEmpty(); }
-        }
-    }
+    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
     public TValue Next
     {
         get
         {
-            lock (_lock) { return _queue[^1]; }
+            lock (_lock) { return _values[^1]; }
         }
     }
 
-    public ConcurrentDeque() : this( null ) { }
-    public ConcurrentDeque( IEnumerable<TValue>? enumerable, int capacity = DEFAULT_CAPACITY )
-    {
-        _queue = new Deque<TValue>( capacity );
 
-        if ( enumerable is not null )
-        {
-            foreach ( TValue x in enumerable ) { _queue.AddToBack( x ); }
-        }
+    public ConcurrentDeque( params ReadOnlySpan<TValue> values ) : this( values.Length )
+    {
+        foreach ( TValue x in values ) { _values.AddToBack( x ); }
     }
 
 
     public virtual void Add( TValue value )
     {
-        lock (_lock) { _queue.AddToBack( value ); }
+        lock (_lock) { _values.AddToBack( value ); }
     }
     public virtual ValueTask AddAsync( TValue value )
     {
-        lock (_lock) { _queue.AddToBack( value ); }
+        lock (_lock) { _values.AddToBack( value ); }
 
         return ValueTask.CompletedTask;
     }
@@ -59,13 +46,13 @@ public class ConcurrentDeque<TValue> : IQueue<TValue>
     {
         lock (_lock)
         {
-            if ( _queue.Count > 0 )
+            if ( _values.Count > 0 )
             {
-                TValue t = _queue.RemoveFromBack();
+                TValue x = _values.RemoveFromBack();
 
-                if ( t is not null )
+                if ( x is not null )
                 {
-                    value = t;
+                    value = x;
                     return true;
                 }
             }
@@ -80,9 +67,9 @@ public class ConcurrentDeque<TValue> : IQueue<TValue>
 
         lock (_lock)
         {
-            if ( _queue.Count > 0 )
+            if ( _values.Count > 0 )
             {
-                TValue t = _queue.RemoveFromBack();
+                TValue t = _values.RemoveFromBack();
 
                 if ( t is not null ) { value = t; }
             }
@@ -94,29 +81,34 @@ public class ConcurrentDeque<TValue> : IQueue<TValue>
 
     public virtual void Clear()
     {
-        lock (_lock) { _queue.Clear(); }
+        lock (_lock) { _values.Clear(); }
     }
     public virtual ValueTask ClearAsync()
     {
-        lock (_lock) { _queue.Clear(); }
-
-        return ValueTask.CompletedTask;
+        lock (_lock)
+        {
+            _values.Clear();
+            return ValueTask.CompletedTask;
+        }
     }
 
 
     public virtual bool Contains( TValue obj )
     {
-        lock (_lock) { return _queue.Contains( obj ); }
+        lock (_lock) { return _values.Contains( obj ); }
     }
     public virtual ValueTask<bool> ContainsAsync( TValue obj )
     {
-        lock (_lock) { return ValueTask.FromResult( _queue.Contains( obj ) ); }
+        lock (_lock) { return ValueTask.FromResult( _values.Contains( obj ) ); }
     }
 
 
     public IEnumerator<TValue> GetEnumerator()
     {
-        lock (_lock) { return _queue.GetEnumerator(); }
+        TValue[] values;
+        lock (_lock) { values = _values.ToArray(); }
+
+        foreach ( var value in values ) { yield return value; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }
