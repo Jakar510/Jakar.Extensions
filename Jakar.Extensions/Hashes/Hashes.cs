@@ -617,6 +617,8 @@ public static class Hashes
         ReadOnlySpan<char> span = data;
         return span.ToBytes( encoding );
     }
+
+
     [Pure]
     public static byte[] ToBytes( this ref readonly ReadOnlySpan<char> data, Encoding? encoding = null )
     {

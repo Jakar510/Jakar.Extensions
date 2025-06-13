@@ -34,6 +34,14 @@ public static class Constants // TODO: move to Jakar.Extensions.Sizes
 
         return code.ToHashCode();
     }
-    public static ulong   GetHash64( this  DynamicParameters parameters ) => Hashes.Hash( parameters.ParameterNames.ToArray() );
-    public static UInt128 GetHash128( this DynamicParameters parameters ) => Hashes.Hash128( parameters.ParameterNames.ToArray() );
+    public static ulong GetHash64( this DynamicParameters parameters )
+    {
+        ReadOnlySpan<string> values = new(parameters.ParameterNames.ToArray());
+        return Hashes.Hash( in values );
+    }
+    public static UInt128 GetHash128( this DynamicParameters parameters )
+    {
+        ReadOnlySpan<string> values = new(parameters.ParameterNames.ToArray());
+        return Hashes.Hash128( in values );
+    }
 }
