@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/10/2022  10:17 AM
 
+using System.Runtime.Intrinsics;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -166,6 +170,32 @@ public static partial class Spans
     }
 
 
+    [Experimental( nameof(ContainsVectorized) )]
+    public static bool ContainsVectorized<T>( this scoped ref readonly ReadOnlySpan<T> values, T value )
+        where T : IEquatable<T>
+    {
+        int vectorCount = Vector<T>.Count;
+
+        if ( Vector.IsHardwareAccelerated && values.Length >= vectorCount )
+        {
+            int       index  = 0;
+            Vector<T> target = new(value);
+
+            do
+            {
+                ReadOnlySpan<T> span    = values.Slice( index * vectorCount, vectorCount );
+                ref T           current = ref MemoryMarshal.GetReference( span );
+                if ( Vector.EqualsAny( target, Vector.LoadUnsafe( ref current ) ) ) { return true; }
+            }
+            while ( values.Length >= ++index * vectorCount );
+
+            int             start    = index * vectorCount;
+            ReadOnlySpan<T> leftOver = values.Slice( start, values.Length - start );
+            if ( leftOver.Contains( value ) ) { return true; }
+        }
+
+        return MemoryExtensions.Contains( values, value );
+    }
     public static bool ContainsNone<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, params ReadOnlySpan<TValue> values )
         where TValue : IEquatable<TValue>
     {
