@@ -5,6 +5,7 @@ using ZLinq;
 using ZLinq.Linq;
 
 
+
 namespace Jakar.SqlBuilder;
 
 
@@ -19,9 +20,10 @@ public record struct EasySqlBuilder()
 
     internal EasySqlBuilder AddRange<TValue>( char separator, params ReadOnlySpan<string?> names )
     {
-        using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.AsValueEnumerable().Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
-        return AddRange( separator, owner.Memory.Span[..names.Length] );
+        using IMemoryOwner<string?>                                           owner      = MemoryPool<string?>.Shared.Rent( names.Length );
+        ValueEnumerable<Select<FromSpan<string?>, string?, string?>, string?> enumerable = names.AsValueEnumerable().Select( KeyWords.GetName<TValue> );
+        int                                                                   count      = enumerable.CopyTo( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..count] );
     }
     internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
     {
@@ -37,9 +39,10 @@ public record struct EasySqlBuilder()
     }
     internal EasySqlBuilder AddRange<TValue>( string separator, params ReadOnlySpan<string?> names )
     {
-        using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.AsValueEnumerable().Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
-        return AddRange( separator, owner.Memory.Span[..names.Length] );
+        using IMemoryOwner<string?>                                           owner      = MemoryPool<string?>.Shared.Rent( names.Length );
+        ValueEnumerable<Select<FromSpan<string?>, string?, string?>, string?> enumerable = names.AsValueEnumerable().Select( KeyWords.GetName<TValue> );
+        int                                                                   count      = enumerable.CopyTo( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..count] );
     }
     internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )
     {

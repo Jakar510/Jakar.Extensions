@@ -569,37 +569,4 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
     public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity( buffer.Count + capacity );
     public virtual void TrimExcess()                   => buffer.TrimExcess();
-
-
-
-    public struct Enumerator( ObservableCollection<TValue> collection ) : IValueEnumerator<TValue>
-    {
-        private readonly ObservableCollection<TValue> _collection = collection;
-        private          int                          _index;
-
-
-        public void Dispose() { }
-        public bool TryGetNext( [NotNullWhen( true )] out TValue? current )
-        {
-            if ( ++_index < _collection.Count )
-            {
-                current = default;
-                return false;
-            }
-
-            current = default;
-            return false;
-        }
-        public bool TryGetNonEnumeratedCount( out int count )
-        {
-            count = _collection.Count;
-            return false;
-        }
-        public bool TryGetSpan( out ReadOnlySpan<TValue> span )
-        {
-            span = _collection.AsSpan();
-            return false;
-        }
-        public bool TryCopyTo( scoped Span<TValue> destination, Index offset ) => _collection.AsSpan( offset.Value, offset.Value ).CopyTo( destination );
-    }
 }

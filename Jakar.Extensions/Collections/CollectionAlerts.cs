@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 04/12/2022  1:54 PM
 
+using ZLinq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -8,7 +12,7 @@ public interface ICollectionAlerts : INotifyCollectionChanged, IObservableObject
 
 
 
-public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyCollection<TValue>, ICollectionAlerts
+public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyCollection<TValue>, IValueEnumerable<FilterBuffer<TValue>, TValue>, ICollectionAlerts
 {
     // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
@@ -46,7 +50,8 @@ public abstract class CollectionAlerts<TValue> : ObservableClass, IReadOnlyColle
     protected virtual bool Filter( int index, ref readonly TValue? value ) => true;
 
 
-    [Pure, MustDisposeResource] protected internal abstract FilterBuffer<TValue> FilteredValues();
+    [Pure, MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
+    [Pure, MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
 
 
     public virtual IEnumerator<TValue> GetEnumerator()
