@@ -2,7 +2,7 @@
 // 04/22/2024  14:04
 
 
-namespace Jakar.Extensions.Loggers;
+namespace Jakar.Extensions;
 
 
 

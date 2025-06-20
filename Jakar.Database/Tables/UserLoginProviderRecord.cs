@@ -72,6 +72,12 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     [Pure] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
 
+    public static bool operator >( UserLoginProviderRecord  left, UserLoginProviderRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( UserLoginProviderRecord left, UserLoginProviderRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( UserLoginProviderRecord  left, UserLoginProviderRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( UserLoginProviderRecord left, UserLoginProviderRecord right ) => Sorter.LessThanOrEqualTo( left, right );
+
+    
     public static implicit operator UserLoginInfo( UserLoginProviderRecord value ) => value.ToUserLoginInfo();
     public static implicit operator IdentityUserToken<string>( UserLoginProviderRecord value ) => new()
                                                                                                   {

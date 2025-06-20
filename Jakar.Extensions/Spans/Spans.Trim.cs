@@ -22,7 +22,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> span = memory.Span;
-        return memory.Slice( span.ClampStart( trimElement ) );
+        return memory[span.ClampStart( trimElement )..];
     }
 
     /// <summary> Removes all trailing occurrences of a specified element from the memory. </summary>
@@ -32,7 +32,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> span = memory.Span;
-        return memory.Slice( 0, span.ClampEnd( 0, trimElement ) );
+        return memory[..span.ClampEnd( 0, trimElement )];
     }
 
     /// <summary> Removes all leading and trailing occurrences of a specified element from the memory. </summary>
@@ -54,7 +54,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> span = memory.Span;
-        return memory.Slice( span.ClampStart( trimElement ) );
+        return memory[span.ClampStart( trimElement )..];
     }
 
     /// <summary> Removes all trailing occurrences of a specified element from the memory. </summary>
@@ -64,7 +64,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> span = memory.Span;
-        return memory.Slice( 0, span.ClampEnd( 0, trimElement ) );
+        return memory[..span.ClampEnd( 0, trimElement )];
     }
 
     /// <summary> Removes all leading and trailing occurrences of a specified element from the span. </summary>
@@ -86,7 +86,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> temp = span;
-        return span.Slice( temp.ClampStart( trimElement ) );
+        return span[temp.ClampStart( trimElement )..];
     }
 
     /// <summary> Removes all trailing occurrences of a specified element from the span. </summary>
@@ -96,7 +96,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> values = span;
-        return span.Slice( 0, values.ClampEnd( 0, trimElement ) );
+        return span[..values.ClampEnd( 0, trimElement )];
     }
 
     /// <summary> Removes all leading and trailing occurrences of a specified element from the span. </summary>
@@ -115,7 +115,7 @@ public static partial class Spans
     /// <param name="trimElement"> The specified element to look for and remove. </param>
     public static ReadOnlySpan<TValue> TrimStart<TValue>( this scoped ref readonly ReadOnlySpan<TValue> span, TValue trimElement )
         where TValue : IEquatable<TValue> =>
-        span.Slice( span.ClampStart( trimElement ) );
+        span[span.ClampStart( trimElement )..];
 
     /// <summary> Removes all trailing occurrences of a specified element from the span. </summary>
     /// <param name="span"> The source span from which the element is removed. </param>
@@ -124,7 +124,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue>
     {
         ReadOnlySpan<TValue> values = span;
-        return span.Slice( 0, values.ClampEnd( 0, trimElement ) );
+        return span[..values.ClampEnd( 0, trimElement )];
     }
 
     /// <summary> Delimits all leading occurrences of a specified element from the span. </summary>
@@ -217,7 +217,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = memory.Span;
-                return memory.Slice( values.ClampStart( trimElements ) );
+                return memory[values.ClampStart( trimElements )..];
             }
 
             case 1:  return memory.TrimStart( trimElements[0] );
@@ -237,7 +237,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = memory.Span;
-                return memory.Slice( 0, values.ClampEnd( 0, trimElements ) );
+                return memory[..values.ClampEnd( 0, trimElements )];
             }
 
             case 1:  return memory.TrimEnd( trimElements[0] );
@@ -279,7 +279,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = memory.Span;
-                return memory.Slice( values.ClampStart( trimElements ) );
+                return memory[values.ClampStart( trimElements )..];
             }
 
             case 1:  return memory.TrimStart( trimElements[0] );
@@ -299,7 +299,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = memory.Span;
-                return memory.Slice( 0, values.ClampEnd( 0, trimElements ) );
+                return memory[..values.ClampEnd( 0, trimElements )];
             }
 
             case 1:  return memory.TrimEnd( trimElements[0] );
@@ -341,7 +341,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = span;
-                return span.Slice( values.ClampStart( trimElements ) );
+                return span[values.ClampStart( trimElements )..];
             }
 
             case 1:  return span.TrimStart( trimElements[0] );
@@ -361,7 +361,7 @@ public static partial class Spans
             case > 1:
             {
                 ReadOnlySpan<TValue> values = span;
-                return span.Slice( 0, values.ClampEnd( 0, trimElements ) );
+                return span[..values.ClampEnd( 0, trimElements )];
             }
 
             case 1:  return span.TrimEnd( trimElements[0] );
@@ -399,7 +399,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue> =>
         trimElements.Length switch
         {
-            > 1 => span.Slice( span.ClampStart( trimElements ) ),
+            > 1 => span[span.ClampStart( trimElements )..],
             1   => span.TrimStart( trimElements[0] ),
             _   => span
         };
@@ -412,7 +412,7 @@ public static partial class Spans
         where TValue : IEquatable<TValue> =>
         trimElements.Length switch
         {
-            > 1 => span.Slice( 0, span.ClampEnd( 0, trimElements ) ),
+            > 1 => span[..span.ClampEnd( 0, trimElements )],
             1   => span.TrimStart( trimElements[0] ),
             _   => span
         };
@@ -468,7 +468,7 @@ public static partial class Spans
     public static Memory<char> TrimStart( this scoped ref readonly Memory<char> memory )
     {
         ReadOnlySpan<char> values = memory.Span;
-        return memory.Slice( values.ClampStart() );
+        return memory[values.ClampStart()..];
     }
 
     /// <summary> Removes all trailing white-space characters from the memory. </summary>
@@ -476,7 +476,7 @@ public static partial class Spans
     public static Memory<char> TrimEnd( this scoped ref readonly Memory<char> memory )
     {
         ReadOnlySpan<char> values = memory.Span;
-        return memory.Slice( 0, values.ClampEnd( 0 ) );
+        return memory[..values.ClampEnd( 0 )];
     }
 
     /// <summary> Removes all leading and trailing white-space characters from the memory. </summary>
@@ -494,7 +494,7 @@ public static partial class Spans
     public static ReadOnlyMemory<char> TrimStart( this scoped ref readonly ReadOnlyMemory<char> memory )
     {
         ReadOnlySpan<char> values = memory.Span;
-        return memory.Slice( values.ClampStart() );
+        return memory[values.ClampStart()..];
     }
 
     /// <summary> Removes all trailing white-space characters from the memory. </summary>
@@ -502,7 +502,7 @@ public static partial class Spans
     public static ReadOnlyMemory<char> TrimEnd( this scoped ref readonly ReadOnlyMemory<char> memory )
     {
         ReadOnlySpan<char> values = memory.Span;
-        return memory.Slice( 0, values.ClampEnd( 0 ) );
+        return memory[..values.ClampEnd( 0 )];
     }
 
     /// <summary> Removes all leading and trailing white-space characters from the span. </summary>
@@ -513,10 +513,10 @@ public static partial class Spans
         // Assume that in most cases input doesn't need trimming
         if ( span.Length == 0 || char.IsWhiteSpace( span[0] ) is false && char.IsWhiteSpace( span[^1] ) is false ) { return span; }
 
-        return TrimFallback( span );
+        return TrimFallback( in span );
 
         [MethodImpl( MethodImplOptions.NoInlining )]
-        static ReadOnlySpan<char> TrimFallback( ReadOnlySpan<char> span )
+        static ReadOnlySpan<char> TrimFallback( scoped ref readonly ReadOnlySpan<char> span )
         {
             int start = 0;
 
@@ -547,7 +547,7 @@ public static partial class Spans
             if ( char.IsWhiteSpace( span[start] ) is false ) { break; }
         }
 
-        return span.Slice( start );
+        return span[start..];
     }
 
     /// <summary> Removes all trailing white-space characters from the span. </summary>
@@ -561,7 +561,7 @@ public static partial class Spans
             if ( char.IsWhiteSpace( span[end] ) is false ) { break; }
         }
 
-        return span.Slice( 0, end + 1 );
+        return span[..(end + 1)];
     }
 
     /// <summary> Removes all leading and trailing occurrences of a specified character from the span. </summary>
@@ -598,7 +598,7 @@ public static partial class Spans
             if ( span[start] != trimChar ) { break; }
         }
 
-        return span.Slice( start );
+        return span[start..];
     }
 
     /// <summary> Removes all trailing occurrences of a specified character from the span. </summary>
@@ -613,7 +613,7 @@ public static partial class Spans
             if ( span[end] != trimChar ) { break; }
         }
 
-        return span.Slice( 0, end + 1 );
+        return span[..(end + 1)];
     }
 
     /// <summary> Removes all leading and trailing occurrences of a set of characters specified in a readonly span from the span. </summary>
@@ -651,7 +651,7 @@ public static partial class Spans
             */
         }
 
-        return span.Slice( start );
+        return span[start..];
     }
 
     /// <summary> Removes all trailing occurrences of a set of characters specified in a readonly span from the span. </summary>
@@ -679,7 +679,7 @@ public static partial class Spans
             */
         }
 
-        return span.Slice( 0, end + 1 );
+        return span[..(end + 1)];
     }
 
     /// <summary> Removes all leading and trailing white-space characters from the span. </summary>
@@ -718,7 +718,7 @@ public static partial class Spans
     public static Span<char> TrimStart( this scoped ref readonly Span<char> span )
     {
         ReadOnlySpan<char> values = span;
-        return span.Slice( values.ClampStart() );
+        return span[values.ClampStart()..];
     }
 
     /// <summary> Removes all trailing white-space characters from the span. </summary>
@@ -726,7 +726,7 @@ public static partial class Spans
     public static Span<char> TrimEnd( this scoped ref readonly Span<char> span )
     {
         ReadOnlySpan<char> values = span;
-        return span.Slice( 0, values.ClampEnd( 0 ) );
+        return span[..values.ClampEnd( 0 )];
     }
 
     /// <summary> Delimits all leading occurrences of whitespace characters from the span. </summary>

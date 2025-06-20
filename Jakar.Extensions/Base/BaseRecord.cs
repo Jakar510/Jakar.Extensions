@@ -1,8 +1,4 @@
-﻿using System.Formats.Asn1;
-
-
-
-namespace Jakar.Extensions;
+﻿namespace Jakar.Extensions;
 
 
 [Serializable]
@@ -29,7 +25,7 @@ public record BaseRecord
 
 
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : BaseRecord<TClass>, IComparisonOperators<TClass>
+    where TClass : BaseRecord<TClass>, IEqualComparable<TClass>
 {
     public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
     public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
@@ -38,9 +34,9 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
     public string ToJson()       => this.ToJson( Formatting.None );
     public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
+    
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
-
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -79,7 +75,7 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
 
 
 public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<TID>
-    where TClass : BaseRecord<TClass, TID>, IComparisonOperators<TClass>
+    where TClass : BaseRecord<TClass, TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID _id;

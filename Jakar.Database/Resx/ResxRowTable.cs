@@ -238,7 +238,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                                                    _                             => throw new OutOfRangeException( language )
                                                                } ??
                                                                Neutral;
-    public bool Equals( ResxRowRecord? other )
+    public override bool Equals( ResxRowRecord? other )
     {
         if ( other is null ) { return false; }
 
@@ -246,4 +246,10 @@ public sealed record ResxRowRecord( long                    KeyID,
 
         return Neutral == other.Neutral || ID == other.ID;
     }
+
+
+    public static bool operator >( ResxRowRecord  left, ResxRowRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( ResxRowRecord left, ResxRowRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( ResxRowRecord  left, ResxRowRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( ResxRowRecord left, ResxRowRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

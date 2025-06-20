@@ -25,7 +25,7 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqua
 {
     public abstract static TClass Create( Match         match );
     public abstract static TClass Create( IAddress<TID> address );
-    public abstract static TClass Create( string        line1, string line2, string city, string postalCode, string country );
+    public abstract static TClass Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default );
 }
 
 
@@ -156,8 +156,8 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
         PostalCode      = address.PostalCode;
         IsPrimary       = address.IsPrimary;
     }
-    protected UserAddress( Match match ) : this( match.Groups["StreetName"].Value, match.Groups["Apt"].Value, match.Groups["City"].Value, match.Groups["ZipCode"].Value, match.Groups["Country"].Value ) { }
-    protected UserAddress( string line1, string line2, string city, string postalCode, string country, TID id = default )
+    protected UserAddress( Match match ) : this( match.Groups["StreetName"].Value, match.Groups["Apt"].Value, match.Groups["City"].Value, match.Groups["State"].Value, match.Groups["ZipCode"].Value, match.Groups["Country"].Value ) { }
+    protected UserAddress( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default )
     {
         ID         = id;
         Line1      = line1;
@@ -216,10 +216,10 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
     public UserAddress() { }
     public UserAddress( Match                            match ) : base( match ) { }
     public UserAddress( IAddress<TID>                    address ) : base( address ) { }
-    public UserAddress( string                           line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
-    public static UserAddress<TID> Create( Match         match )                                                               => new(match);
-    public static UserAddress<TID> Create( IAddress<TID> address )                                                             => new(address);
-    public static UserAddress<TID> Create( string        line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
+    public UserAddress( string                           line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) : base( line1, line2, city, stateOrProvince, postalCode, country, id ) { }
+    public static UserAddress<TID> Create( Match         match )                                                                                                         => new(match);
+    public static UserAddress<TID> Create( IAddress<TID> address )                                                                                                       => new(address);
+    public static UserAddress<TID> Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) => new(line1, line2, city, stateOrProvince, postalCode, country, id);
     public new static UserAddress<TID> Parse( string value, IFormatProvider? provider )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

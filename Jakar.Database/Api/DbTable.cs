@@ -11,19 +11,19 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord> : IConnectableDb
-    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public partial class DbTable<TClass> : IConnectableDb
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
     protected readonly IConnectableDbRoot _database;
     protected readonly FusionCache        _cache;
 
 
-    public static TRecord[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
+    public static TClass[]                Empty                     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
     public        IsolationLevel           TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.TransactionIsolationLevel; }
-    public static ImmutableArray<TRecord>  EmptyArray                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
-    public static FrozenSet<TRecord>       Set                       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TRecord>.Empty; }
+    public static ImmutableArray<TClass>  EmptyArray                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => []; }
+    public static FrozenSet<TClass>       Set                       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FrozenSet<TClass>.Empty; }
     public        int?                     CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _database.CommandTimeout; }
-    public        RecordGenerator<TRecord> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public        RecordGenerator<TClass> Records                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
     public        FusionCacheEntryOptions? Options                   { get; set; }
 
 
@@ -31,7 +31,7 @@ public partial class DbTable<TRecord> : IConnectableDb
     {
         _database = database;
         _cache    = cache;
-        if ( TRecord.TableName != typeof(TRecord).GetTableName() ) { throw new InvalidOperationException( $"{TRecord.TableName} != {typeof(TRecord).GetTableName()}" ); }
+        if ( TClass.TableName != typeof(TClass).GetTableName() ) { throw new InvalidOperationException( $"{TClass.TableName} != {typeof(TClass).GetTableName()}" ); }
     }
     public virtual ValueTask DisposeAsync()
     {
@@ -43,12 +43,12 @@ public partial class DbTable<TRecord> : IConnectableDb
     public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync( token );
 
 
-    public IAsyncEnumerable<TRecord> All( CancellationToken token = default ) => this.Call( All, token );
-    public virtual async IAsyncEnumerable<TRecord> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<TClass> All( CancellationToken token = default ) => this.Call( All, token );
+    public virtual async IAsyncEnumerable<TClass> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand               command = TRecord.SQL.GetAll();
+        SqlCommand               command = TClass.SQL.GetAll();
         await using DbDataReader reader  = await _database.ExecuteReaderAsync( connection, transaction, command, token );
-        await foreach ( TRecord record in TRecord.CreateAsync( reader, token ) ) { yield return record; }
+        await foreach ( TClass record in TClass.CreateAsync( reader, token ) ) { yield return record; }
     }
 
 

@@ -125,10 +125,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected virtual DbTable<TRecord> Create<TRecord>()
-        where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    protected virtual DbTable<TClass> Create<TClass>()
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
     {
-        DbTable<TRecord> table = new(this, _cache);
+        DbTable<TClass> table = new(this, _cache);
         return AddDisposable( table );
     }
 
@@ -234,7 +234,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public virtual async IAsyncEnumerable<TValue> Where<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TValue : IDbReaderMapping<TValue>, IRecordPair
+        where TValue : class, IDbReaderMapping<TValue>, IRecordPair
     {
         DbDataReader reader;
 

@@ -2,6 +2,12 @@
 // 1/10/2024  14:10
 
 
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
+
+
+
 namespace Jakar.Database;
 
 
@@ -14,16 +20,16 @@ public static class DbServices
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsValid<TRecord>( this TRecord value )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    public static bool IsValid<TClass>( this TClass value )
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
     {
         return value.ID.IsValid();
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static bool IsNotValid<TRecord>( this TRecord value )
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+    public static bool IsNotValid<TClass>( this TClass value )
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
     {
         return value.IsValid() is false;
     }

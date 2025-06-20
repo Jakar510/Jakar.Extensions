@@ -7,19 +7,19 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
-    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnumerable<TClass>, IAsyncEnumerator<TClass>
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly AsyncKeyGenerator<TRecord> _generator = new(table);
-    private readonly DbTable<TRecord>           _table     = table;
+    private readonly AsyncKeyGenerator<TClass> _generator = new(table);
+    private readonly DbTable<TClass>           _table     = table;
     private          CancellationToken          _token;
-    private          TRecord?                   _current;
+    private          TClass?                   _current;
 
 
-    public TRecord Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
+    public TClass Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _current ?? throw new NullReferenceException( nameof(_current) ); }
 
 
-    public RecordGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
+    public RecordGenerator( DbTable<TClass> table, CancellationToken token ) : this( table ) => _token = token;
     public async ValueTask DisposeAsync()
     {
         _current = null;
@@ -47,8 +47,8 @@ public sealed class RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncE
     }
 
 
-    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
-    public RecordGenerator<TRecord> WithCancellation( CancellationToken token )
+    IAsyncEnumerator<TClass> IAsyncEnumerable<TClass>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
+    public RecordGenerator<TClass> WithCancellation( CancellationToken token )
     {
         _token = token;
         _generator.WithCancellation( token );

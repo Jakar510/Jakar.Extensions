@@ -41,7 +41,7 @@ public interface IConnectableDb : IDbTable, IDbOptions
 public interface IConnectableDbRoot : IConnectableDb
 {
     public IAsyncEnumerable<TValue> Where<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TValue : IDbReaderMapping<TValue>, IRecordPair;
+        where TValue : class, IDbReaderMapping<TValue>, IRecordPair;
     public IAsyncEnumerable<TValue> WhereValue<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct;
 

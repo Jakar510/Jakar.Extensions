@@ -5,7 +5,7 @@ using OpenTelemetry.Trace;
 
 
 
-namespace Jakar.Extensions.Loggers;
+namespace Jakar.Extensions;
 
 
 /*

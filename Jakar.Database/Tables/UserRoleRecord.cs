@@ -34,4 +34,8 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static bool operator >( UserRoleRecord  left, UserRoleRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( UserRoleRecord left, UserRoleRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( UserRoleRecord  left, UserRoleRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( UserRoleRecord left, UserRoleRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

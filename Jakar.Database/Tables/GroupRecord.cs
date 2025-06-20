@@ -4,19 +4,21 @@
 [Serializable, Table( TABLE_NAME )]
 public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<GroupRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
-    public const  int                                    MAX_SIZE   = 1024;
-    public const  string                                 TABLE_NAME = "Groups";
-    public static string                                 TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    Guid? ICreatedByUser<Guid>.                          CreatedBy => CreatedBy?.value;
-    Guid? IGroupModel<Guid>.                             OwnerID   => CreatedBy?.value;
-    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
+    public const  int                                                           MAX_SIZE   = 1024;
+    public const  string                                                        TABLE_NAME = "Groups";
+    public static string                                                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    Guid? ICreatedByUser<Guid>.                                                 CreatedBy      => CreatedBy?.value;
+    Guid? IGroupModel<Guid>.                                                    OwnerID        => CreatedBy?.value;
+    [StringLength( IUserRights.MAX_SIZE )] public string                        Rights         { get; set; } = Rights;
+    [JsonExtensionData]                    public IDictionary<string, JToken?>? AdditionalData { get; set; }
 
 
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID ) : this( customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow ) { }
     public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, string rights ) : this( customerID, nameOfGroup, rights, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow ) { }
     public GroupModel<Guid> ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()
-        where TGroupModel : IGroupModel<TGroupModel, Guid> => TGroupModel.Create( this );
+        where TGroupModel : class, IGroupModel<TGroupModel, Guid> => TGroupModel.Create( this );
+
 
     public GroupRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
         where TEnum : struct, Enum
@@ -57,4 +59,8 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
 
     [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
     [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.Users, this, token );
+    public static       bool operator >( GroupRecord                        left,       GroupRecord    right ) => Sorter.GreaterThan( left, right );
+    public static       bool operator >=( GroupRecord                       left,       GroupRecord    right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static       bool operator <( GroupRecord                        left,       GroupRecord    right ) => Sorter.LessThan( left, right );
+    public static       bool operator <=( GroupRecord                       left,       GroupRecord    right ) => Sorter.LessThanOrEqualTo( left, right );
 }

@@ -15,10 +15,10 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
     public UserAddress() : base() { }
     public UserAddress( Match                        match ) : base( match ) { }
     public UserAddress( IAddress<long>               address ) : base( address ) { }
-    public UserAddress( string                       line1, string line2, string city, string postalCode, string country ) : base( line1, line2, city, postalCode, country ) { }
-    public static UserAddress Create( Match          match )                                                               => new(match);
-    public static UserAddress Create( IAddress<long> address )                                                             => new(address);
-    public static UserAddress Create( string         line1, string line2, string city, string postalCode, string country ) => new(line1, line2, city, postalCode, country);
+    public UserAddress( string                       line1, string line2, string city, string stateOrProvince, string postalCode, string country, long id = 0 ) : base( line1, line2, city, stateOrProvince, postalCode, country, id ) { }
+    public static UserAddress Create( Match          match )                                                                                                          => new(match);
+    public static UserAddress Create( IAddress<long> address )                                                                                                        => new(address);
+    public static UserAddress Create( string         line1, string line2, string city, string stateOrProvince, string postalCode, string country, long id = 0 ) => new(line1, line2, city, stateOrProvince, postalCode, country, id);
     public new static UserAddress Parse( string value, IFormatProvider? provider )
     {
         Match match = Validate.Re.Address.Match( value );

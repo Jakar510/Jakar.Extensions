@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
+using ZLinq;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -440,13 +444,13 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
     }
 
 
-    public virtual bool TryAdd( TValue                   value )            => InternalTryAdd( in value );
-    public virtual void Add( TValue                      value )            => InternalAdd( in value );
-    public virtual void Add( TValue                      value, int count ) => InternalAdd( in value, count );
-    public virtual void Add( params ReadOnlySpan<TValue> values ) => InternalAdd( values );
-    public virtual void Add( IEnumerable<TValue>         values ) => InternalAdd( values ); 
-    public void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
-    public void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
+    public virtual bool TryAdd( TValue                           value )            => InternalTryAdd( in value );
+    public virtual void Add( TValue                              value )            => InternalAdd( in value );
+    public virtual void Add( TValue                              value, int count ) => InternalAdd( in value, count );
+    public virtual void Add( params ReadOnlySpan<TValue>         values ) => InternalAdd( values );
+    public virtual void Add( IEnumerable<TValue>                 values ) => InternalAdd( values );
+    public         void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd( values.Span );
+    public         void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd( values.AsSpan() );
 
 
     public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate( in value );
@@ -565,4 +569,37 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
 
     public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity( buffer.Count + capacity );
     public virtual void TrimExcess()                   => buffer.TrimExcess();
+
+
+
+    public struct Enumerator( ObservableCollection<TValue> collection ) : IValueEnumerator<TValue>
+    {
+        private readonly ObservableCollection<TValue> _collection = collection;
+        private          int                          _index;
+
+
+        public void Dispose() { }
+        public bool TryGetNext( [NotNullWhen( true )] out TValue? current )
+        {
+            if ( ++_index < _collection.Count )
+            {
+                current = default;
+                return false;
+            }
+
+            current = default;
+            return false;
+        }
+        public bool TryGetNonEnumeratedCount( out int count )
+        {
+            count = _collection.Count;
+            return false;
+        }
+        public bool TryGetSpan( out ReadOnlySpan<TValue> span )
+        {
+            span = _collection.AsSpan();
+            return false;
+        }
+        public bool TryCopyTo( scoped Span<TValue> destination, Index offset ) => _collection.AsSpan( offset.Value, offset.Value ).CopyTo( destination );
+    }
 }

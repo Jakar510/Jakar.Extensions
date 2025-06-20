@@ -5,55 +5,55 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+public partial class DbTable<TClass>
 {
-    public IAsyncEnumerable<TRecord> Insert( ImmutableArray<TRecord>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public IAsyncEnumerable<TRecord> Insert( IEnumerable<TRecord>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public IAsyncEnumerable<TRecord> Insert( IAsyncEnumerable<TRecord> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public ValueTask<TRecord>        Insert( TRecord                   record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
+    public IAsyncEnumerable<TClass> Insert( ImmutableArray<TClass>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
+    public IAsyncEnumerable<TClass> Insert( IEnumerable<TClass>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
+    public IAsyncEnumerable<TClass> Insert( IAsyncEnumerable<TClass> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
+    public ValueTask<TClass>        Insert( TClass                   record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
 
 
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
+        foreach ( TClass record in records ) { yield return await Insert( connection, transaction, record, token ); }
     }
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, ReadOnlyMemory<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ReadOnlyMemory<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         for ( int i = 0; i < records.Length; i++ ) { yield return await Insert( connection, transaction, records.Span[i], token ); }
     }
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        foreach ( TRecord record in records ) { yield return await Insert( connection, transaction, record, token ); }
+        foreach ( TClass record in records ) { yield return await Insert( connection, transaction, record, token ); }
     }
-    public virtual async IAsyncEnumerable<TRecord> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TRecord> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TRecord record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
+        await foreach ( TClass record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord> Insert( DbConnection connection, DbTransaction transaction, TRecord record, CancellationToken token = default )
+    public virtual async ValueTask<TClass> Insert( DbConnection connection, DbTransaction transaction, TClass record, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Insert( record );
+        SqlCommand sql = TClass.SQL.Insert( record );
 
         try
         {
             CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TRecord> id      = RecordID<TRecord>.Create( await connection.ExecuteScalarAsync<Guid>( command ) );
+            RecordID<TClass> id      = RecordID<TClass>.Create( await connection.ExecuteScalarAsync<Guid>( command ) );
             return record.NewID( id );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> TryInsert( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> TryInsert( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.TryInsert( record, matchAll, parameters );
+        SqlCommand sql = TClass.SQL.TryInsert( record, matchAll, parameters );
 
         try
         {
             CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TRecord>? id      = RecordID<TRecord>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            RecordID<TClass>? id      = RecordID<TClass>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
             if ( id is null ) { return Error.NotFound(); }
 
             return record.NewID( id.Value );
@@ -63,14 +63,14 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TRecord record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.InsertOrUpdate( record, matchAll, parameters );
+        SqlCommand sql = TClass.SQL.InsertOrUpdate( record, matchAll, parameters );
 
         try
         {
             CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TRecord>? id      = RecordID<TRecord>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            RecordID<TClass>? id      = RecordID<TClass>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
             if ( id is null ) { return Error.NotFound(); }
 
             return record.NewID( id.Value );

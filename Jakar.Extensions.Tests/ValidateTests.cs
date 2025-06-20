@@ -81,7 +81,7 @@ public class ValidateTests : Assert
     }
 
 
-    [Test, TestCase( "1.1.1.1", true ), TestCase( "1.1.1.1 ", false ), TestCase( " 1.1.1.1", false ), TestCase( " 1.1.1.1 ", false ), TestCase( "1.1 .1.1", false ), TestCase( "1.1..1.1", false ), TestCase( "1.111.1.1", true ), TestCase( "1.1111.1.1", false ), TestCase( "11.11.11.11", true ), TestCase( "111.111.111.111", true ), TestCase( "111.111.111.1111", false )]
+    [Test, TestCase( "1.1.1.1", true ), TestCase( "1.1.1.1 ", true ), TestCase( " 1.1.1.1", true ), TestCase( " 1.1.1.1 ", true ), TestCase( "1.1 .1.1", false ), TestCase( "1.1..1.1", false ), TestCase( "1.111.1.1", true ), TestCase( "1.1111.1.1", false ), TestCase( "11.11.11.11", true ), TestCase( "111.111.111.111", true ), TestCase( "111.111.111.1111", false )]
     public void Ip( string value, bool expected )
     {
         Console.WriteLine( $"{nameof(value)}: '{value}'" );

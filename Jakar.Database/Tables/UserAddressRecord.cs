@@ -21,12 +21,12 @@ public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, 
     [Pure]
     public static UserAddressRecord Create( DbDataReader reader )
     {
-        RecordID<UserRecord>        key          = new( reader.GetFieldValue<Guid>( nameof(KeyID) ) );
-        RecordID<AddressRecord>     value        = new( reader.GetFieldValue<Guid>( nameof(ValueID) ) );
+        RecordID<UserRecord>        key          = new(reader.GetFieldValue<Guid>( nameof(KeyID) ));
+        RecordID<AddressRecord>     value        = new(reader.GetFieldValue<Guid>( nameof(ValueID) ));
         DateTimeOffset              dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
         DateTimeOffset?             lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserAddressRecord> id           = new( reader.GetFieldValue<Guid>( nameof(ID) ) );
-        UserAddressRecord           record       = new( key, value, id, dateCreated, lastModified );
+        RecordID<UserAddressRecord> id           = new(reader.GetFieldValue<Guid>( nameof(ID) ));
+        UserAddressRecord           record       = new(key, value, id, dateCreated, lastModified);
         return record.Validate();
     }
     [Pure]
@@ -34,4 +34,10 @@ public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, 
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    public static bool operator >( UserAddressRecord  left, UserAddressRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( UserAddressRecord left, UserAddressRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( UserAddressRecord  left, UserAddressRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( UserAddressRecord left, UserAddressRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

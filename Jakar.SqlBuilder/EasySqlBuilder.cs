@@ -1,9 +1,8 @@
 ﻿using System.Buffers;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using NoAlloq;
-using NoAlloq.Producers;
-
+using ZLinq;
+using ZLinq.Linq;
 
 
 namespace Jakar.SqlBuilder;
@@ -21,7 +20,7 @@ public record struct EasySqlBuilder()
     internal EasySqlBuilder AddRange<TValue>( char separator, params ReadOnlySpan<string?> names )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
+        names.AsValueEnumerable().Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
         return AddRange( separator, owner.Memory.Span[..names.Length] );
     }
     internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
@@ -39,7 +38,7 @@ public record struct EasySqlBuilder()
     internal EasySqlBuilder AddRange<TValue>( string separator, params ReadOnlySpan<string?> names )
     {
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent( names.Length );
-        names.Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
+        names.AsValueEnumerable().Select( KeyWords.GetName<TValue> ).ConsumeInto( owner.Memory.Span );
         return AddRange( separator, owner.Memory.Span[..names.Length] );
     }
     internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )

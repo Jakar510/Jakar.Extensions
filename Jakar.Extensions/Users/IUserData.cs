@@ -112,15 +112,15 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
+    where TClass : class, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>
 {
-    public TClass With( IEnumerable<TAddress>               values );
+    public TClass With( IEnumerable<TAddress>            values );
     public TClass With( params ReadOnlySpan<TAddress>    values );
-    public TClass With( IEnumerable<TGroupModel>            values );
+    public TClass With( IEnumerable<TGroupModel>         values );
     public TClass With( params ReadOnlySpan<TGroupModel> values );
-    public TClass With( IEnumerable<TRoleModel>             values );
+    public TClass With( IEnumerable<TRoleModel>          values );
     public TClass With( params ReadOnlySpan<TRoleModel>  values );
-    public TClass With( IDictionary<string, JToken?>?       data );
+    public TClass With( IDictionary<string, JToken?>?    data );
     public TClass With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 
@@ -132,9 +132,9 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
 
 
 
-public interface ICreateUserModel<out TClass, TID> : IUserData<TID>
+public interface ICreateUserModel<TClass, TID> : IUserData<TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : ICreateUserModel<TClass, TID>
+    where TClass : class, ICreateUserModel<TClass, TID>
 {
     public abstract static TClass Create( IUserData<TID> model );
 }

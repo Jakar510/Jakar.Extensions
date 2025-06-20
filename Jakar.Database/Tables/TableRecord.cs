@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
+using System.Formats.Asn1;
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Database;
 
 
@@ -11,13 +16,13 @@ public interface IRecordPair : IUniqueID<Guid>
 
 
 
-public interface IDbReaderMapping<out TRecord>
-    where TRecord : IDbReaderMapping<TRecord>, IRecordPair
+public interface IDbReaderMapping<TClass> : IEqualComparable<TClass>
+    where TClass : class, IDbReaderMapping<TClass>, IRecordPair
 {
-    public abstract static        string                    TableName { [Pure] get; }
-    [Pure] public abstract static TRecord                   Create( DbDataReader      reader );
-    [Pure] public abstract static IAsyncEnumerable<TRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
-    [Pure] public                 DynamicParameters         ToDynamicParameters();
+    public abstract static        string                   TableName { [Pure] get; }
+    [Pure] public abstract static TClass                   Create( DbDataReader      reader );
+    [Pure] public abstract static IAsyncEnumerable<TClass> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    [Pure] public                 DynamicParameters        ToDynamicParameters();
 }
 
 
@@ -36,34 +41,34 @@ public interface IOwnedTableRecord : ITableRecord
 
 
 
-public interface ITableRecord<TRecord> : ITableRecord
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public interface ITableRecord<TClass> : ITableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    public abstract static SqlCache<TRecord> SQL { get; }
-    Guid IUniqueID<Guid>.                    ID  => ID.value;
-    public new RecordID<TRecord>             ID  { get; }
+    public abstract static SqlCache<TClass> SQL { get; }
+    Guid IUniqueID<Guid>.                   ID  => ID.value;
+    public new RecordID<TClass>             ID  { get; }
 
 
-    [Pure] public RecordPair<TRecord> ToPair();
-    [Pure] public UInt128             GetHash();
-    public        TRecord             NewID( RecordID<TRecord> id );
+    [Pure] public RecordPair<TClass> ToPair();
+    [Pure] public UInt128            GetHash();
+    public        TClass             NewID( RecordID<TClass> id );
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord, ITableRecord<TRecord>, IComparable<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord<TClass>, ITableRecord<TClass>
+    where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    protected internal static readonly PropertyInfo[]    Properties    = typeof(TRecord).GetProperties( BindingFlags.Instance | BindingFlags.Public );
-    public static readonly             SqlCache<TRecord> SQLCache      = new();
-    protected                          DateTimeOffset?   _lastModified = LastModified;
-    private                            RecordID<TRecord> _id           = ID;
+    protected internal static readonly PropertyInfo[]   Properties    = typeof(TClass).GetProperties( BindingFlags.Instance | BindingFlags.Public );
+    public static readonly             SqlCache<TClass> SQLCache      = new();
+    protected                          DateTimeOffset?  _lastModified = LastModified;
+    private                            RecordID<TClass> _id           = ID;
 
 
-    public static SqlCache<TRecord> SQL          => SQLCache;
-    [Key] public  RecordID<TRecord> ID           { get => _id;           init => _id = value; }
-    public        DateTimeOffset?   LastModified { get => _lastModified; init => _lastModified = value; }
+    public static SqlCache<TClass> SQL          => SQLCache;
+    [Key] public  RecordID<TClass> ID           { get => _id;           init => _id = value; }
+    public        DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
 
 
     [Pure]
@@ -72,33 +77,33 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
         ReadOnlySpan<char> json = this.ToJson();
         return json.Hash128();
     }
-    public TRecord Modified()
+    public TClass Modified()
     {
         _lastModified = DateTimeOffset.UtcNow;
-        return (TRecord)this;
+        return (TClass)this;
     }
-    public TRecord NewID( RecordID<TRecord> id )
+    public TClass NewID( RecordID<TClass> id )
     {
         _id = id;
-        return (TRecord)this;
+        return (TClass)this;
     }
-    [Pure] public RecordPair<TRecord> ToPair() => new(ID, DateCreated);
+    [Pure] public RecordPair<TClass> ToPair() => new(ID, DateCreated);
 
 
     [Pure]
-    protected internal TRecord Validate()
+    protected internal TClass Validate()
     {
-        if ( Debugger.IsAttached is false ) { return (TRecord)this; }
+        if ( Debugger.IsAttached is false ) { return (TClass)this; }
 
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
-        if ( length == Properties.Length ) { return (TRecord)this; }
+        if ( length == Properties.Length ) { return (TClass)this; }
 
         HashSet<string> missing = [..Properties.Select( static x => x.Name )];
         missing.ExceptWith( parameters.ParameterNames );
 
         string message = $"""
-                          {typeof(TRecord).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(Properties)}.Length ({Properties.Length})
+                          {typeof(TClass).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(Properties)}.Length ({Properties.Length})
                           {missing.ToPrettyJson()}
                           """;
 
@@ -106,8 +111,8 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
     }
 
 
-    public static DynamicParameters GetDynamicParameters( TRecord record ) => GetDynamicParameters( in record._id );
-    public static DynamicParameters GetDynamicParameters( ref readonly RecordID<TRecord> id )
+    public static DynamicParameters GetDynamicParameters( TClass record ) => GetDynamicParameters( in record._id );
+    public static DynamicParameters GetDynamicParameters( ref readonly RecordID<TClass> id )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(ID), id.value );
@@ -132,7 +137,7 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
     }
 
 
-    public virtual int CompareTo( TRecord? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
@@ -147,18 +152,18 @@ public abstract record TableRecord<TRecord>( ref readonly RecordID<TRecord> ID, 
 
 
     [Serializable]
-    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TRecord>( capacity )
+    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TClass>( capacity )
     {
-        public RecordCollection( params ReadOnlySpan<TRecord> values ) : this() => Add( values );
-        public RecordCollection( IEnumerable<TRecord>         values ) : this() => Add( values );
+        public RecordCollection( params ReadOnlySpan<TClass> values ) : this() => Add( values );
+        public RecordCollection( IEnumerable<TClass>         values ) : this() => Add( values );
     }
 }
 
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TRecord>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TRecord> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TRecord>( in ID, in DateCreated, in LastModified ), IOwnedTableRecord
-    where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>( in ID, in DateCreated, in LastModified ), IOwnedTableRecord
+    where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> 
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
 
@@ -169,7 +174,7 @@ public abstract record OwnedTableRecord<TRecord>( ref readonly RecordID<UserReco
         parameters.Add( nameof(CreatedBy), user.ID.value );
         return parameters;
     }
-    protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TRecord> record )
+    protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TClass> record )
     {
         DynamicParameters parameters = new();
         parameters.Add( nameof(CreatedBy), record.CreatedBy );
@@ -188,12 +193,12 @@ public abstract record OwnedTableRecord<TRecord>( ref readonly RecordID<UserReco
     public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, CreatedBy, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TRecord WithOwner( UserRecord  user )   => (TRecord)(this with { CreatedBy = user.ID });
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    Owns( UserRecord       record ) => CreatedBy == record.ID;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool    DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public TClass WithOwner( UserRecord  user )   => (TClass)(this with { CreatedBy = user.ID });
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool   Owns( UserRecord       record ) => CreatedBy == record.ID;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool   DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
-    public override int CompareTo( TRecord? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 

@@ -5,23 +5,49 @@ namespace Jakar.Database;
 
 
 [Table( TABLE_NAME )]
-public sealed record AddressRecord( [property: ProtectedPersonalData] string Line1,
-                                    [property: ProtectedPersonalData] string Line2,
-                                    [property: ProtectedPersonalData] string City,
-                                    [property: ProtectedPersonalData] string StateOrProvince,
-                                    [property: ProtectedPersonalData] string Country,
-                                    [property: ProtectedPersonalData] string PostalCode,
-                                    [property: ProtectedPersonalData] string Address,
-                                    bool                                     IsPrimary,
-                                    IDictionary<string, JToken?>?            AdditionalData,
-                                    RecordID<AddressRecord>                  ID,
-                                    RecordID<UserRecord>?                    CreatedBy,
-                                    DateTimeOffset                           DateCreated,
-                                    DateTimeOffset?                          LastModified = null ) : OwnedTableRecord<AddressRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IAddress<Guid>, IDbReaderMapping<AddressRecord>
+public sealed record AddressRecord( [property: ProtectedPersonalData] string  Line1,
+                                    [property: ProtectedPersonalData] string  Line2,
+                                    [property: ProtectedPersonalData] string  City,
+                                    [property: ProtectedPersonalData] string  StateOrProvince,
+                                    [property: ProtectedPersonalData] string  Country,
+                                    [property: ProtectedPersonalData] string  PostalCode,
+                                    [property: ProtectedPersonalData] string? Address,
+                                    bool                                      IsPrimary,
+                                    IDictionary<string, JToken?>?             AdditionalData,
+                                    RecordID<AddressRecord>                   ID,
+                                    RecordID<UserRecord>?                     CreatedBy,
+                                    DateTimeOffset                            DateCreated,
+                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IAddress<AddressRecord, Guid>, IDbReaderMapping<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
     public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+
+    public AddressRecord( IAddress<Guid> address ) : this( address.Line1,
+                                                           address.Line2,
+                                                           address.City,
+                                                           address.StateOrProvince,
+                                                           address.Country,
+                                                           address.PostalCode,
+                                                           address.Address ?? EMPTY,
+                                                           address.IsPrimary,
+                                                           null,
+                                                           RecordID<AddressRecord>.Create( address.ID ),
+                                                           null,
+                                                           DateTimeOffset.UtcNow ) { }
+    public AddressRecord( Match match ) : this( match.Groups["StreetName"].Value, match.Groups["Apt"].Value, match.Groups["City"].Value, match.Groups["State"].Value, match.Groups["ZipCode"].Value, match.Groups["Country"].Value ) { }
+    public AddressRecord( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid? id = null ) : this( line1,
+                                                                                                                                                        line2,
+                                                                                                                                                        city,
+                                                                                                                                                        stateOrProvince,
+                                                                                                                                                        postalCode,
+                                                                                                                                                        country,
+                                                                                                                                                        null,
+                                                                                                                                                        true,
+                                                                                                                                                        null,
+                                                                                                                                                        RecordID<AddressRecord>.Create( id ),
+                                                                                                                                                        null,
+                                                                                                                                                        DateTimeOffset.UtcNow ) { }
 
 
     [Pure]
@@ -37,6 +63,20 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
         parameters.Add( nameof(Address),         Address );
         return parameters;
     }
+
+
+    [Pure] public static AddressRecord Create( Match          match )   => new(match);
+    [Pure] public static AddressRecord Create( IAddress<Guid> address ) => new(address);
+    [Pure]
+    public static AddressRecord Create( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid id = default ) => new(line1,
+                                                                                                                                                                       line2,
+                                                                                                                                                                       city,
+                                                                                                                                                                       stateOrProvince,
+                                                                                                                                                                       postalCode,
+                                                                                                                                                                       country,
+                                                                                                                                                                       id.IsValidID()
+                                                                                                                                                                           ? id
+                                                                                                                                                                           : Guid.NewGuid());
 
     [Pure]
     public static AddressRecord Create( DbDataReader reader )
@@ -142,7 +182,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
 
     public UserAddress<Guid> ToAddressModel() => UserAddress<Guid>.Create( this );
     public TAddress ToAddressModel<TAddress>()
-        where TAddress : IAddress<TAddress, Guid> => TAddress.Create( this );
+        where TAddress : class, IAddress<TAddress, Guid> => TAddress.Create( this );
 
 
     [Pure]
@@ -156,13 +196,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
             Country = value.Country,
             PostalCode = value.PostalCode
         };
-    public bool Equals( IAddress<Guid>? other )
-    {
-        if ( other is null ) { return false; }
-
-        return Line1 == other.Line1 && Line2 == other.Line2 && City == other.City && PostalCode == other.PostalCode && StateOrProvince == other.StateOrProvince && Country == other.Country && Address == other.Address;
-    }
-    public bool Equals( AddressRecord? other )
+    public override bool Equals( AddressRecord? other )
     {
         if ( other is null ) { return false; }
 
@@ -171,4 +205,10 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string Lin
         return base.Equals( other ) && Line1 == other.Line1 && Line2 == other.Line2 && City == other.City && PostalCode == other.PostalCode && StateOrProvince == other.StateOrProvince && Country == other.Country && Address == other.Address;
     }
     public override int GetHashCode() => HashCode.Combine( base.GetHashCode(), Line1, Line2, City, PostalCode, StateOrProvince, Country, Address );
+
+
+    public static bool operator >( AddressRecord  left, AddressRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( AddressRecord left, AddressRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( AddressRecord  left, AddressRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( AddressRecord left, AddressRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

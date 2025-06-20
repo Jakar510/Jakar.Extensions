@@ -5,31 +5,31 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+public partial class DbTable<TClass>
 {
-    public ValueTask<ErrorOrResult<TRecord>> First( CancellationToken          token = default ) => this.Call( First,          token );
-    public ValueTask<ErrorOrResult<TRecord>> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
+    public ValueTask<ErrorOrResult<TClass>> First( CancellationToken          token = default ) => this.Call( First,          token );
+    public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
 
 
-    public virtual async ValueTask<ErrorOrResult<TRecord>> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.GetFirst();
+        SqlCommand sql = TClass.SQL.GetFirst();
 
         try
         {
             CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command );
+            return await connection.QueryFirstAsync<TClass>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
-    public virtual async ValueTask<ErrorOrResult<TRecord>> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.GetFirst();
+        SqlCommand sql = TClass.SQL.GetFirst();
 
         try
         {
             CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            TRecord?          record  = await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+            TClass?          record  = await connection.QueryFirstOrDefaultAsync<TClass>( command );
 
             return record is null
                        ? Error.NotFound()

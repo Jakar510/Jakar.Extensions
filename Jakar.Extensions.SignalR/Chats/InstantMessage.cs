@@ -15,12 +15,12 @@ public interface IInstantMessage
 
 
 [Serializable]
-public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage
+public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage, IEqualComparable<InstantMessage>
 {
     private bool        _hasBeenRead;
+    private FileData[]? _data;
     private string      _groupName = string.Empty;
     private string      _message   = string.Empty;
-    private FileData[]? _data;
 
 
     public                                             FileData[]?    Data        { get => _data;        set => SetProperty( ref _data,        value ); }
@@ -69,6 +69,7 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
 
         return _hasBeenRead == other._hasBeenRead && _groupName == other._groupName && _message == other._message && Equals( _data, other._data ) && TimeStamp.Equals( other.TimeStamp );
     }
+    public override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is InstantMessage message && Equals( message );
     public override int GetHashCode()
     {
         HashCode hashCode = new();
@@ -80,6 +81,14 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
         hashCode.Add( TimeStamp );
         return hashCode.ToHashCode();
     }
+
+
+    public static bool operator >( InstantMessage   left, InstantMessage  right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( InstantMessage  left, InstantMessage  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( InstantMessage   left, InstantMessage  right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( InstantMessage  left, InstantMessage  right ) => Sorter.LessThanOrEqualTo( left, right );
+    public static bool operator ==( InstantMessage? left, InstantMessage? right ) => Equalizer.Equals( left, right );
+    public static bool operator !=( InstantMessage? left, InstantMessage? right ) => Equalizer.Equals( left, right ) is false;
 
 
 

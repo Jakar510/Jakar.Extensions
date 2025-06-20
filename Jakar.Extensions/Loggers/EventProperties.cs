@@ -1,7 +1,7 @@
 ﻿// TrueLogic :: TrueLogic.Common
 // 01/02/2025  12:01
 
-namespace Jakar.Extensions.Loggers;
+namespace Jakar.Extensions;
 
 
 public sealed class EventProperties : ActivityTagsCollection

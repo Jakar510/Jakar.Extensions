@@ -11,9 +11,10 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
                                  DateTimeOffset                          DateCreated,
                                  DateTimeOffset?                         LastModified = null ) : OwnedTableRecord<RoleRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<RoleRecord>, IRoleModel<Guid>
 {
-    public const                                  string TABLE_NAME = "roles";
-    public static                                 string TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
+    public const                                  string                        TABLE_NAME = "roles";
+    public static                                 string                        TableName      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [JsonExtensionData]                    public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [StringLength( IUserRights.MAX_SIZE )] public string                        Rights         { get; set; } = Rights;
 
 
     public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this( role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller ) { }
@@ -24,7 +25,7 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
     public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = null ) : this( name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow ) { }
     public RoleModel<Guid> ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
-        where TRoleModel : IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
+        where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create( this );
 
     public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
         where TEnum : struct, Enum
@@ -92,4 +93,10 @@ public sealed record RoleRecord( [property: StringLength( 1024 )] string NameOfR
 
         return base.CompareTo( other );
     }
+
+
+    public static bool operator >( RoleRecord  left, RoleRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( RoleRecord left, RoleRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( RoleRecord  left, RoleRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( RoleRecord left, RoleRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

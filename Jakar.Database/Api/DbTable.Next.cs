@@ -5,22 +5,22 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+public partial class DbTable<TClass>
 {
-    public ValueTask<ErrorOrResult<TRecord>>           Next( RecordPair<TRecord>    pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
-    public ValueTask<Guid?>                            NextID( RecordPair<TRecord>  pair, CancellationToken token = default ) => this.Call( NextID, pair, token );
-    public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
+    public ValueTask<ErrorOrResult<TClass>>           Next( RecordPair<TClass>    pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
+    public ValueTask<Guid?>                            NextID( RecordPair<TClass>  pair, CancellationToken token = default ) => this.Call( NextID, pair, token );
+    public ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Next( in pair );
+        SqlCommand sql = TClass.SQL.Next( in pair );
 
         try
         {
             CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            var               record  = await connection.ExecuteScalarAsync<TRecord>( command );
+            var               record  = await connection.ExecuteScalarAsync<TClass>( command );
 
             return record is null
                        ? Error.NotFound()
@@ -31,14 +31,14 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.SortedID();
+        SqlCommand sql = TClass.SQL.SortedID();
 
         try
         {
             CommandDefinition                command = _database.GetCommand( in sql, transaction, token );
-            IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
+            IEnumerable<RecordPair<TClass>> pairs   = await connection.QueryAsync<RecordPair<TClass>>( command );
             return pairs;
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -46,9 +46,9 @@ public partial class DbTable<TRecord>
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.NextID( in pair );
+        SqlCommand sql = TClass.SQL.NextID( in pair );
 
         try
         {

@@ -1,8 +1,4 @@
-﻿using Jakar.Extensions.Loggers;
-
-
-
-namespace Jakar.Extensions.Experiments.Benchmarks;
+﻿namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 #pragma warning disable CA1822 // Mark members as static

@@ -5,39 +5,39 @@ namespace Jakar.Database;
 
 
 [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+public partial class DbTable<TClass>
 {
-    public ValueTask<ErrorOrResult<TRecord>> Random( CancellationToken token                                                                                                     = default ) => this.Call( Random, token );
-    public IAsyncEnumerable<TRecord>         Random( int               count, [EnumeratorCancellation] CancellationToken token                                                   = default ) => this.Call( Random, count, token );
-    public IAsyncEnumerable<TRecord>         Random( UserRecord        user,  int                                        count, [EnumeratorCancellation] CancellationToken token = default ) => this.Call( Random, user,  count, token );
+    public ValueTask<ErrorOrResult<TClass>> Random( CancellationToken token                                                                                                     = default ) => this.Call( Random, token );
+    public IAsyncEnumerable<TClass>         Random( int               count, [EnumeratorCancellation] CancellationToken token                                                   = default ) => this.Call( Random, count, token );
+    public IAsyncEnumerable<TClass>         Random( UserRecord        user,  int                                        count, [EnumeratorCancellation] CancellationToken token = default ) => this.Call( Random, user,  count, token );
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<ErrorOrResult<TRecord>> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Random();
+        SqlCommand sql = TClass.SQL.Random();
 
         try
         {
             CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command );
+            return await connection.QueryFirstAsync<TClass>( command );
         }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Random( user, count );
+        SqlCommand sql = TClass.SQL.Random( user, count );
         return Where( connection, transaction, sql, token );
     }
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual IAsyncEnumerable<TRecord> Random( DbConnection connection, DbTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Random( DbConnection connection, DbTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = TRecord.SQL.Random( count );
+        SqlCommand sql = TClass.SQL.Random( count );
         return Where( connection, transaction, sql, token );
     }
 }

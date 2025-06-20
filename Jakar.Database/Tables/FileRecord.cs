@@ -43,8 +43,8 @@ public sealed record FileRecord( string?              FileName,
         if ( MimeType != file.Mime ) { throw new InvalidOperationException( $"{nameof(MimeType)} mismatch. Got {file.Mime} but expected {MimeType}" ); }
 
         return file.Mime.IsText()
-                   ? await file.ReadAsync().AsString(telemetrySpan, token)
-                   : await file.ReadAsync().AsBytes(telemetrySpan, token);
+                   ? await file.ReadAsync().AsString( token )
+                   : await file.ReadAsync().AsBytes( token );
     }
 
 
@@ -153,4 +153,8 @@ public sealed record FileRecord( string?              FileName,
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+    public static bool operator >( FileRecord  left, FileRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( FileRecord left, FileRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( FileRecord  left, FileRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( FileRecord left, FileRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

@@ -105,6 +105,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     }
 
 
+    public static bool operator >( RecoveryCodeRecord  left, RecoveryCodeRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( RecoveryCodeRecord left, RecoveryCodeRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( RecoveryCodeRecord  left, RecoveryCodeRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( RecoveryCodeRecord left, RecoveryCodeRecord right ) => Sorter.LessThanOrEqualTo( left, right );
+
+
 
     public sealed class Codes( int count ) : IReadOnlyDictionary<string, RecoveryCodeRecord>
     {
@@ -148,4 +154,10 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    public static bool operator >( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( UserRecoveryCodeRecord left, UserRecoveryCodeRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( UserRecoveryCodeRecord left, UserRecoveryCodeRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

@@ -30,8 +30,8 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
 
         return properties.ToFrozenDictionary( static x => x.Name, Create ).ToFrozenDictionary( StringComparer.Ordinal );
     }
-    public static FrozenDictionary<string, Descriptor> CreateMapping<TRecord>()
-        where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord> => CreateMapping( typeof(TRecord) );
+    public static FrozenDictionary<string, Descriptor> CreateMapping<TClass>()
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass> => CreateMapping( typeof(TClass) );
     public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name.ToSnakeCase() );
     public static Descriptor Create( PropertyInfo property, in string name )
     {

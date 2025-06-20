@@ -13,10 +13,10 @@ namespace Jakar.Database.DbMigrations;
 ///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
 ///     </para>
 /// </summary>
-public abstract class Migration<TRecord> : Migration
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract class Migration<TClass> : Migration
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    public string TableName { get; } = typeof(TRecord).GetTableName();
+    public string TableName { get; } = typeof(TClass).GetTableName();
 
 
     protected Migration() : base() { }
@@ -33,9 +33,9 @@ public abstract class Migration<TRecord> : Migration
     {
         ICreateTableWithColumnSyntax? table = Create.Table( TableName );
 
-        table.WithColumn( nameof(ITableRecord<TRecord>.ID) ).AsGuid().PrimaryKey();
-        table.WithColumn( nameof(ITableRecord<TRecord>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
-        table.WithColumn( nameof(ITableRecord<TRecord>.LastModified) ).AsDateTimeOffset().Nullable();
+        table.WithColumn( nameof(ITableRecord<TClass>.ID) ).AsGuid().PrimaryKey();
+        table.WithColumn( nameof(ITableRecord<TClass>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
+        table.WithColumn( nameof(ITableRecord<TClass>.LastModified) ).AsDateTimeOffset().Nullable();
 
         return table;
     }
@@ -61,13 +61,13 @@ public abstract class Migration<TRecord> : Migration
 
 
 [SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
-public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
-    where TRecord : Mapping<TRecord, TKey, TValue>, ITableRecord<TRecord>, IDbReaderMapping<TRecord>, ICreateMapping<TRecord, TKey, TValue>
+public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
+    where TClass : Mapping<TClass, TKey, TValue>, ITableRecord<TClass>, IDbReaderMapping<TClass>, ICreateMapping<TClass, TKey, TValue>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
     where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
 {
-    public static readonly string KeyForeignKeyName   = $"{TRecord.TableName}-{TKey.TableName}.{nameof(IRecordPair.ID)}";
-    public static readonly string ValueForeignKeyName = $"{TRecord.TableName}-{TValue.TableName}.{nameof(IRecordPair.ID)}";
+    public static readonly string KeyForeignKeyName   = $"{TClass.TableName}-{TKey.TableName}.{nameof(IRecordPair.ID)}";
+    public static readonly string ValueForeignKeyName = $"{TClass.TableName}-{TValue.TableName}.{nameof(IRecordPair.ID)}";
     protected Migration() : base() { }
 
 
@@ -75,8 +75,8 @@ public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID) ).NotNullable();
-        table.WithColumn( nameof(Mapping<TRecord, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID) ).NotNullable();
+        table.WithColumn( nameof(Mapping<TClass, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID) ).NotNullable();
+        table.WithColumn( nameof(Mapping<TClass, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID) ).NotNullable();
 
         return table;
     }
@@ -84,8 +84,8 @@ public abstract class Migration<TRecord, TKey, TValue> : Migration<TRecord>
 
 
 
-public abstract class OwnedMigration<TRecord> : Migration<TRecord>
-    where TRecord : IOwnedTableRecord, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public abstract class OwnedMigration<TClass> : Migration<TClass>
+    where TClass : class, IOwnedTableRecord, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {

@@ -207,13 +207,13 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
 
 
 [Experimental( "SqlTableBuilder" )]
-public ref struct SqlTableBuilder<TRecord>
-    where TRecord : ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public ref struct SqlTableBuilder<TClass>
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
     private Buffer<ColumnMetaData> _columns = new();
 
     public SqlTableBuilder() { }
-    public static SqlTableBuilder<TRecord> Create() => new();
+    public static SqlTableBuilder<TClass> Create() => new();
     public void Dispose()
     {
         _columns.Dispose();
@@ -221,17 +221,17 @@ public ref struct SqlTableBuilder<TRecord>
     }
 
 
-    public SqlTableBuilder<TRecord> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn( ColumnMetaData.Indexed( columnName, indexColumnName ) );
+    public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn( ColumnMetaData.Indexed( columnName, indexColumnName ) );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public SqlTableBuilder<TRecord> WithColumn<TValue>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
+    public SqlTableBuilder<TClass> WithColumn<TValue>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
     {
         DbType         dbType = GetDataType<TValue>( out bool isNullable, ref length );
         ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);
         return WithColumn( column );
     }
-    public SqlTableBuilder<TRecord> WithColumn( ColumnMetaData column )
+    public SqlTableBuilder<TClass> WithColumn( ColumnMetaData column )
     {
         _columns.Add( column );
         return this;
@@ -275,9 +275,9 @@ public ref struct SqlTableBuilder<TRecord>
             return DbType.String;
         }
 
-        if ( typeof(TValue) == typeof(Guid) || typeof(TValue) == typeof(RecordID<TRecord>) ) { return DbType.Guid; }
+        if ( typeof(TValue) == typeof(Guid) || typeof(TValue) == typeof(RecordID<TClass>) ) { return DbType.Guid; }
 
-        if ( typeof(TValue) == typeof(Guid?) || typeof(TValue) == typeof(RecordID<TRecord>?) )
+        if ( typeof(TValue) == typeof(Guid?) || typeof(TValue) == typeof(RecordID<TClass>?) )
         {
             isNullable = true;
             return DbType.Guid;
@@ -421,7 +421,7 @@ public ref struct SqlTableBuilder<TRecord>
         StringBuilder                query   = new(10240);
 
         query.Append( "CREATE TABLE " );
-        query.Append( TRecord.TableName );
+        query.Append( TClass.TableName );
         query.Append( " (" );
 
         foreach ( ColumnMetaData column in columns )
@@ -430,7 +430,7 @@ public ref struct SqlTableBuilder<TRecord>
             {
                 query.Append( column.IndexColumnName ?? $"{column.Name}_index" );
                 query.Append( " ON " );
-                query.Append( TRecord.TableName );
+                query.Append( TClass.TableName );
                 query.Append( " (" );
                 query.Append( column.Name );
                 query.Append( ");" );

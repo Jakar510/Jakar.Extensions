@@ -2,33 +2,33 @@
 
 
 [Serializable]
-public class RecordCollection<TRecord>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TRecord>
-    where TRecord : TableRecord<TRecord>, IDbReaderMapping<TRecord>
+public class RecordCollection<TClass>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TClass>
+    where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly List<TRecord> _records = new(capacity);
+    private readonly List<TClass> _records = new(capacity);
 
 
     public int Count => _records.Count;
-    public TRecord this[ int index ] => _records[index];
+    public TClass this[ int index ] => _records[index];
 
 
-    public RecordCollection( params ReadOnlySpan<TRecord> values ) : this() => Add( values );
-    public RecordCollection( IEnumerable<TRecord>         values ) : this() => Add( values );
+    public RecordCollection( params ReadOnlySpan<TClass> values ) : this() => Add( values );
+    public RecordCollection( IEnumerable<TClass>         values ) : this() => Add( values );
 
 
-    public RecordCollection<TRecord> Add( params ReadOnlySpan<TRecord> values )
+    public RecordCollection<TClass> Add( params ReadOnlySpan<TClass> values )
     {
-        foreach ( TRecord value in values ) { Add( value ); }
+        foreach ( TClass value in values ) { Add( value ); }
 
         return this;
     }
-    public RecordCollection<TRecord> Add( IEnumerable<TRecord> values )
+    public RecordCollection<TClass> Add( IEnumerable<TClass> values )
     {
-        foreach ( TRecord value in values ) { Add( value ); }
+        foreach ( TClass value in values ) { Add( value ); }
 
         return this;
     }
-    public RecordCollection<TRecord> Add( TRecord value )
+    public RecordCollection<TClass> Add( TClass value )
     {
         if ( value.IsValidID() )
         {
@@ -37,12 +37,12 @@ public class RecordCollection<TRecord>( int capacity = Buffers.DEFAULT_CAPACITY 
         }
 
 
-        _records.Add( value.NewID( RecordID<TRecord>.New() ) );
+        _records.Add( value.NewID( RecordID<TClass>.New() ) );
 
         return this;
     }
 
 
-    public IEnumerator<TRecord> GetEnumerator() => _records.GetEnumerator();
+    public IEnumerator<TClass> GetEnumerator() => _records.GetEnumerator();
     IEnumerator IEnumerable.    GetEnumerator() => GetEnumerator();
 }

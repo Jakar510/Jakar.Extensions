@@ -7,11 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jakar.Extensions" Version="9.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.5" />
+    <PackageReference Include="Jakar.Extensions" Version="9.10.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.6" />
   </ItemGroup>
 
 </Project>

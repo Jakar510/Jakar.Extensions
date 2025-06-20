@@ -21,8 +21,8 @@ public enum SubscriptionStatus
 public abstract partial class Database
 {
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(record.SubscriptionExpires);
-    public virtual ValueTask<ErrorOrResult<TRecord>> TryGetSubscription<TRecord>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
-        where TRecord : UserSubscription<TRecord>, IDbReaderMapping<TRecord> => default;
+    public virtual ValueTask<ErrorOrResult<TClass>> TryGetSubscription<TClass>( DbConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
+        where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass> => default;
 
 
     /// <summary> </summary>

@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Hosting;
-
-
-
-namespace Jakar.Extensions.Loggers;
+﻿namespace Jakar.Extensions;
 
 
 /*

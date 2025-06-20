@@ -5,7 +5,7 @@ using System.Diagnostics.Metrics;
 
 
 
-namespace Jakar.Extensions.Loggers;
+namespace Jakar.Extensions;
 
 
 public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperators<TelemetrySource>, IDisposable

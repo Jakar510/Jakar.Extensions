@@ -529,24 +529,30 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
+    public static bool operator >( UserRecord  left, UserRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( UserRecord left, UserRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( UserRecord  left, UserRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( UserRecord left, UserRecord right ) => Sorter.LessThanOrEqualTo( left, right );
+
+
     public UserModel ToUserModel() => ToUserModel<UserModel>();
     public TClass ToUserModel<TClass>()
         where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>();
     public TClass ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>()
-        where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
-        where TGroupModel : IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TAddress, Guid>, IEquatable<TAddress> => TClass.Create( this );
+        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+        where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
+        where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
+        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TClass.Create( this );
 
 
     public ValueTask<UserModel> ToUserModel( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>( connection, transaction, db, token );
     public ValueTask<TClass> ToUserModel<TClass>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
         where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>( connection, transaction, db, token );
     public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
-        where TGroupModel : IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TAddress, Guid>, IEquatable<TAddress>
+        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+        where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
+        where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
+        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress>
     {
         TClass model = TClass.Create( this );
 
@@ -612,10 +618,10 @@ public sealed record UserRecord( string                        UserName,
             : Error.Create( Status.Gone, StringValues.Empty );
 
 
-    public bool DoesNotOwn<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.CreatedBy != ID;
-    public bool Owns<TRecord>( TRecord record )
-        where TRecord : OwnedTableRecord<TRecord>, IDbReaderMapping<TRecord> => record.CreatedBy == ID;
+    public bool DoesNotOwn<TClass>( TClass record )
+        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => record.CreatedBy != ID;
+    public bool Owns<TClass>( TClass record )
+        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => record.CreatedBy == ID;
 
     #endregion
 
