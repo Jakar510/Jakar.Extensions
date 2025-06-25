@@ -4,6 +4,7 @@
 namespace Jakar.Extensions.Telemetry;
 
 
+[Serializable, StructLayout( LayoutKind.Auto )]
 public readonly struct Pair( string key, string? value ) : IEqualityOperators<Pair>, IComparisonOperators<Pair>
 {
     public readonly string  Key   = key;
@@ -38,7 +39,7 @@ public readonly struct Pair( string key, string? value ) : IEqualityOperators<Pa
     public override bool Equals( object? obj )   => obj is Pair other && Equals( other );
     public override int  GetHashCode()           => HashCode.Combine( Key, Value );
 
-    
+
     public static bool operator ==( Pair  left, Pair  right ) => Sorter.Equals( left, right );
     public static bool operator !=( Pair  left, Pair  right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator ==( Pair? left, Pair? right ) => Sorter.Equals( left, right );

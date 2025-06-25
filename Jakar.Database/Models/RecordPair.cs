@@ -1,11 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/11/2023  11:20 PM
 
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Database;
 
 
 // ReSharper disable once InconsistentNaming
-public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset dateCreated ) : IRecordPair, IEqualComparableValue<RecordPair<TClass>>
+public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset dateCreated ) : IRecordPair, IEqualityOperators<RecordPair<TClass>>, IComparisonOperators<RecordPair<TClass>>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
     public readonly  RecordID<TClass> id          = id;
@@ -13,8 +17,7 @@ public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset d
     private readonly int              _hash       = HashCode.Combine( id, dateCreated );
 
 
-    public static ValueEqualizer<RecordPair<TClass>> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueEqualizer<RecordPair<TClass>>.Default; }
-    public static ValueSorter<RecordPair<TClass>>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<RecordPair<TClass>>.Default; }
+    public static ValueSorter<RecordPair<TClass>> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<RecordPair<TClass>>.Default; }
 
 
     public static string    TableName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TClass.TableName; }
@@ -68,10 +71,12 @@ public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset d
     }
 
 
-    public static bool operator >( RecordPair<TClass>  left, RecordPair<TClass> right ) => Sorter.GreaterThan( left, right );
-    public static bool operator >=( RecordPair<TClass> left, RecordPair<TClass> right ) => Sorter.GreaterThanOrEqualTo( left, right );
-    public static bool operator <( RecordPair<TClass>  left, RecordPair<TClass> right ) => Sorter.LessThan( left, right );
-    public static bool operator <=( RecordPair<TClass> left, RecordPair<TClass> right ) => Sorter.LessThanOrEqualTo( left, right );
-    public static bool operator ==( RecordPair<TClass> left, RecordPair<TClass> right ) =>  Sorter.Equals( left, right );
-    public static bool operator !=( RecordPair<TClass> left, RecordPair<TClass> right ) =>  Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.Equals( left, right );
+    public static bool operator !=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( RecordPair<TClass>? left, RecordPair<TClass>? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( RecordPair<TClass>? left, RecordPair<TClass>? right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator >( RecordPair<TClass>   left, RecordPair<TClass>  right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( RecordPair<TClass>   left, RecordPair<TClass>  right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( RecordPair<TClass>  left, RecordPair<TClass>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

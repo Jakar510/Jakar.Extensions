@@ -2,7 +2,7 @@
 
 
 public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>, IComparer, IEqualityComparer<TValue?>, IEqualityComparer<TValue>, IEqualityComparer
-    where TValue : struct, IComparable<TValue>
+    where TValue : struct, IComparable<TValue>, IEquatable<TValue>
 {
     public static readonly ValueSorter<TValue> Default = new();
 

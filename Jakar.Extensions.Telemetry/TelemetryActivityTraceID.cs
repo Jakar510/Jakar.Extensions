@@ -4,14 +4,15 @@
 namespace Jakar.Extensions.Telemetry;
 
 
+[Serializable, StructLayout( LayoutKind.Auto )]
 public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTraceID>
 {
-    public const            int                     SIZE       = sizeof(ulong) * 2;
-    public const            int                     LENGTH     = sizeof(ulong) * 4;
-    private static readonly string                  _empty     = new('0', LENGTH);
-    public static readonly  TelemetryActivitySpanID Empty      = new(_empty);
-    private readonly        string                  _hexString = _empty;
-    private readonly        int                     _hash      = _empty.GetHashCode();
+    public const            int                      SIZE       = sizeof(ulong) * 2;
+    public const            int                      LENGTH     = sizeof(ulong) * 4;
+    private static readonly string                   _empty     = new('0', LENGTH);
+    public static readonly  TelemetryActivityTraceID Empty      = new(_empty);
+    private readonly        string                   _hexString = _empty;
+    private readonly        int                      _hash      = _empty.GetHashCode();
 
 
     internal TelemetryActivityTraceID( string hexString ) => _hexString = hexString;

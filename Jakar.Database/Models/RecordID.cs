@@ -15,7 +15,6 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     public                 Guid             Value { get => value; }
 
 
-    public static ValueEqualizer<RecordID<TClass>> Equalizer { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueEqualizer<RecordID<TClass>>.Default; }
     public static ValueSorter<RecordID<TClass>>    Sorter    { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<RecordID<TClass>>.Default; }
 
 

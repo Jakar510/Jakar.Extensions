@@ -11,11 +11,10 @@ public sealed class AppContext : IEquatable<AppContext>, IComparable<AppContext>
     internal readonly AppVersion version;
 
 
-    public static   Sorter<AppContext>    Sorter    => Sorter<AppContext>.Default;
-    public static   Equalizer<AppContext> Equalizer => Equalizer<AppContext>.Default;
-    public required string                Name      { get => name;    [MemberNotNull( nameof(name) )] init => name = value; }
-    public required Guid                  ID        { get => id;      init => id = value; }
-    public required AppVersion            Version   { get => version; [MemberNotNull( nameof(version) )] init => version = value; }
+    public static   Sorter<AppContext> Sorter  => Sorter<AppContext>.Default;
+    public required string             Name    { get => name;    [MemberNotNull( nameof(name) )] init => name = value; }
+    public required Guid               ID      { get => id;      init => id = value; }
+    public required AppVersion         Version { get => version; [MemberNotNull( nameof(version) )] init => version = value; }
 
 
     public static AppContext Create<TApp>()
@@ -60,8 +59,8 @@ public sealed class AppContext : IEquatable<AppContext>, IComparable<AppContext>
     public override int  GetHashCode()           => HashCode.Combine( Name, ID, Version );
 
 
-    public static bool operator ==( AppContext left, AppContext right ) =>  Sorter.Equals( left, right );
-    public static bool operator !=( AppContext left, AppContext right ) =>  Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( AppContext left, AppContext right ) => Sorter.Equals( left, right );
+    public static bool operator !=( AppContext left, AppContext right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator <( AppContext  left, AppContext right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator >( AppContext  left, AppContext right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator <=( AppContext left, AppContext right ) => Sorter.Compare( left, right ) <= 0;

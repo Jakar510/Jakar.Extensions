@@ -27,4 +27,10 @@ public record ActivityRecord( string ApplicationName, RecordID<ApplicationRecord
     {
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
+
+
+    public static bool operator >( ActivityRecord  left, ActivityRecord right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( ActivityRecord left, ActivityRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( ActivityRecord  left, ActivityRecord right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( ActivityRecord left, ActivityRecord right ) => Sorter.LessThanOrEqualTo( left, right );
 }

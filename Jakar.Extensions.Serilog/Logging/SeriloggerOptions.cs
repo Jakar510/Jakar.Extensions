@@ -2,7 +2,6 @@
 // 02/11/2025  16:02
 
 using System.Net.Http;
-using Jakar.Extensions.Loggers;
 using Microsoft.Extensions.Options;
 using Serilog.Configuration;
 using Serilog.Formatting;

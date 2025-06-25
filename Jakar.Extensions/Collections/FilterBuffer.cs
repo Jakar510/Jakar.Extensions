@@ -36,7 +36,7 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     }
 
 
-    [Pure, MustDisposeResource] public ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
+    [Pure] public ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
     public bool TryGetNext( out TValue current )
     {
         if ( _index < length )

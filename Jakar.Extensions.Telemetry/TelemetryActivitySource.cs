@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 06/25/2024  10:06
 
+using System.Diagnostics;
+
+
+
 namespace Jakar.Extensions.Telemetry;
 
 
@@ -29,7 +33,7 @@ public sealed class TelemetryActivitySource( AppContext appContext ) : IDisposab
         AppContext = appContext;
         foreach ( TelemetryActivity value in activities ) { _activities.TryAdd( value.OperationName, value ); }
     }
-  
+
     [SetsRequiredMembers]
     public TelemetryActivitySource( AppContext appContext, params ReadOnlySpan<TelemetryActivity> values ) : this( appContext )
     {
@@ -49,7 +53,15 @@ public sealed class TelemetryActivitySource( AppContext appContext ) : IDisposab
     public bool TryGetValue( ReadOnlySpan<char> operationName, [NotNullWhen( true )] out TelemetryActivity? value ) => _activities.GetAlternateLookup<ReadOnlySpan<char>>().TryGetValue( operationName, out value );
 
 
-    public TelemetryActivity GetOrAddActivity( string operationName, TelemetryActivityContext context ) => _activities.GetOrAdd( operationName, TelemetryActivity.Create, context );
+    public TelemetryActivity GetOrAddActivity( string operationName ) => GetOrAddActivity( operationName, TelemetryActivityContext.Create( operationName ) );
+    public TelemetryActivity GetOrAddActivity( string operationName, TelemetryActivityContext context )
+    {
+        ArgumentException.ThrowIfNullOrEmpty( operationName );
+        return _activities.GetOrAdd( operationName, TelemetryActivity.Create, context );
+    }
+
+
+    public bool HasListeners() { return false; }
 
 
     public static TelemetryActivitySource Create<TApp>()

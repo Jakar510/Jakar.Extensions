@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
-using NoAlloq;
+using ZLinq;
 
 
 
@@ -122,7 +122,7 @@ public sealed class DebugLogEvent( string source, string message, string caller,
         {
             get
             {
-                using ( AcquireLock() ) { return [..CollectionsMarshal.AsSpan( buffer ).Select( static x => x.Source )]; }
+                using ( AcquireLock() ) { return [..buffer.AsValueEnumerable().Select( static x => x.Source )]; }
             }
         }
 
