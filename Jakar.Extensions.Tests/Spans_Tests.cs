@@ -13,7 +13,7 @@ namespace Jakar.Extensions.Tests;
 
 
 [TestFixture, TestOf( typeof(Spans) )]
-public class SpansTests : Assert
+public class Spans_Tests : Assert
 {
     private static bool IsDevisableByTwo<TValue>( TValue x )
         where TValue : INumber<TValue> => x % (TValue.One + TValue.One) == TValue.Zero;
@@ -253,7 +253,7 @@ public class SpansTests : Assert
     public void FirstOrDefault( params double[] values )
     {
         ReadOnlySpan<double> valueSpan = values;
-        double               results   = valueSpan.FirstOrDefault(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
+        double               results   = valueSpan.FirstOrDefault( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
         this.AreEqual( values.FirstOrDefault( IsDevisableByTwo ), results );
     }
 
@@ -268,14 +268,14 @@ public class SpansTests : Assert
             Catch( () =>
                    {
                        ReadOnlySpan<double> valueSpan = values;
-                       double               results   = valueSpan.Single(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
+                       double               results   = valueSpan.Single( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
                        this.AreEqual( values.Single( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
-            double               results   = valueSpan.Single(  static ( ref readonly double x ) => IsDevisableByTwo( x )  );
+            double               results   = valueSpan.Single( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
@@ -291,14 +291,14 @@ public class SpansTests : Assert
             Catch( () =>
                    {
                        ReadOnlySpan<double> valueSpan = values;
-                       double               results   = valueSpan.SingleOrDefault( static (ref readonly double x) => IsDevisableByTwo(x) );
+                       double               results   = valueSpan.SingleOrDefault( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
                        this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
                    } );
         }
         else
         {
             ReadOnlySpan<double> valueSpan = values;
-            double               results   = valueSpan.SingleOrDefault( static (ref readonly double x) => IsDevisableByTwo(x) );
+            double               results   = valueSpan.SingleOrDefault( static ( ref readonly double x ) => IsDevisableByTwo( x ) );
             this.AreEqual( values.SingleOrDefault( IsDevisableByTwo ), results );
         }
     }
@@ -307,7 +307,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void Where( params double[] values )
     {
-        ReadOnlySpan<double> results = Spans.Where<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> span    = values;
+        ReadOnlySpan<double> results = Spans.Where( in span, IsDevisableByTwo );
         this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
@@ -315,7 +316,8 @@ public class SpansTests : Assert
     [Test, TestCase( 1d ), TestCase( 1, 2 ), TestCase( 1, 2, 3 ), TestCase( 1, 2, 3, 4 ), TestCase( 1, 2, 3, 4, 5 )]
     public void WhereValues( params double[] values )
     {
-        ReadOnlySpan<double> results = Spans.Where<double>( values, IsDevisableByTwo );
+        ReadOnlySpan<double> span    = values;
+        ReadOnlySpan<double> results = Spans.Where( in span, IsDevisableByTwo );
         this.AreEqual( values.Where( IsDevisableByTwo ).ToArray(), results );
     }
 
