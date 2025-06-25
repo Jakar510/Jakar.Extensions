@@ -156,8 +156,8 @@ public sealed class CurrentLocation<TID> : JsonModel<CurrentLocation<TID>>, ICur
         hashCode.Add( (int)AltitudeReferenceSystem );
         return hashCode.ToHashCode();
     }
-    public static   bool operator ==( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( CurrentLocation<TID>? left, CurrentLocation<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( CurrentLocation<TID>   left, CurrentLocation<TID>  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( CurrentLocation<TID>  left, CurrentLocation<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( CurrentLocation<TID>   left, CurrentLocation<TID>  right ) => Sorter.LessThan( left, right );

@@ -19,7 +19,7 @@ public static class Properties
 
 
     public static ViewModelProperty<TCommand, bool> Bool<TCommand>( bool value )
-        where TCommand : class, ICommand => new(ValueEqualizer<bool>.Default, value);
+        where TCommand : class, ICommand => new(ValueSorter<bool>.Default, value);
     public static EmailProperty<TCommand> Email<TCommand>( MaskedTextProvider? mask, string value = EMPTY )
         where TCommand : class, ICommand => new(StringComparer.Ordinal, value, mask);
     public static StringProperty<TCommand> String<TCommand>( string value = EMPTY )

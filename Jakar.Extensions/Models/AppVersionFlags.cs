@@ -1,11 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 4/2/2024  13:31
 
+using Newtonsoft.Json.Linq;
+
+
+
 namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Stable) )]
-public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualComparableValue<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
+public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualityOperators<AppVersionFlags>, IComparisonOperators<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
 {
     private const          string          ALPHA          = "alpha";
     private const          string          BETA           = "beta";
@@ -17,11 +21,10 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualCo
     public readonly        uint            Iteration      = iteration;
 
 
-    public static ValueEqualizer<AppVersionFlags> Equalizer  => ValueEqualizer<AppVersionFlags>.Default;
-    public static ValueSorter<AppVersionFlags>    Sorter     => ValueSorter<AppVersionFlags>.Default;
-    public        bool                            IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
-    public        bool                            IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
-    public        int                             Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
+    public static ValueSorter<AppVersionFlags> Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<AppVersionFlags>.Default; }
+    public        bool                         IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
+    public        bool                         IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
+    public        int                          Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
 
 
     public override string ToString()                                                  => AsSpan().ToString();
@@ -232,10 +235,10 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualCo
     public override int  GetHashCode()                                 => Flag.GetHashCode();
 
 
-    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => Equalizer.Equals( left, right ) is false;
-    public static bool operator ==( AppVersionFlags  left, AppVersionFlags  right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( AppVersionFlags  left, AppVersionFlags  right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( AppVersionFlags? left, AppVersionFlags? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( AppVersionFlags? left, AppVersionFlags? right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( AppVersionFlags  left, AppVersionFlags  right ) => Sorter.Equals( left, right );
+    public static bool operator !=( AppVersionFlags  left, AppVersionFlags  right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator <( AppVersionFlags   left, AppVersionFlags  right ) => Sorter.Compare( left, right ) < 0;
     public static bool operator >( AppVersionFlags   left, AppVersionFlags  right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator <=( AppVersionFlags  left, AppVersionFlags  right ) => Sorter.Compare( left, right ) <= 0;

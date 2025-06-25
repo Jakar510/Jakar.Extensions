@@ -87,8 +87,8 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
     public static bool operator >=( InstantMessage  left, InstantMessage  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static bool operator <( InstantMessage   left, InstantMessage  right ) => Sorter.LessThan( left, right );
     public static bool operator <=( InstantMessage  left, InstantMessage  right ) => Sorter.LessThanOrEqualTo( left, right );
-    public static bool operator ==( InstantMessage? left, InstantMessage? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( InstantMessage? left, InstantMessage? right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( InstantMessage? left, InstantMessage? right ) =>  Sorter.Equals( left, right );
+    public static bool operator !=( InstantMessage? left, InstantMessage? right ) =>  Sorter.DoesNotEqual( left, right );
 
 
 

@@ -4,14 +4,14 @@
 namespace Jakar.Extensions;
 
 
-public class  LockFreeStack<TValue> : IReadOnlyCollection<TValue>
+public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 {
     private Node? _head;
     private int   _count;
 
     public int Count => Interlocked.CompareExchange( ref _count, 0, 0 );
 
-    
+
     public void Push( TValue value )
     {
         Node node = new(value);
@@ -45,7 +45,7 @@ public class  LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 
 
 
-    protected sealed class Node( TValue value ) : IEquatable<Node>
+    protected sealed class Node( TValue value ) : IEqualityOperators<Node>
     {
         public readonly TValue Value = value;
         public          Node?  next;
@@ -54,8 +54,8 @@ public class  LockFreeStack<TValue> : IReadOnlyCollection<TValue>
         public          bool Equals( Node?   other )                => ReferenceEquals( this, other );
         public override bool Equals( object? obj )                  => ReferenceEquals( this, obj ) || Equals( obj as Node );
         public override int  GetHashCode()                          => HashCode.Combine( Value );
-        public static   bool operator ==( Node? left, Node? right ) => Equals( left, right );
-        public static   bool operator !=( Node? left, Node? right ) => !Equals( left, right );
+        public static   bool operator ==( Node? left, Node? right ) => left?.Equals( right ) is true;
+        public static   bool operator !=( Node? left, Node? right ) => left?.Equals( right ) is not true;
     }
 
 

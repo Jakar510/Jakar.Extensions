@@ -349,8 +349,8 @@ public sealed class UserModel<TID> : UserModel<UserModel<TID>, TID, UserAddress<
 
     public override bool Equals( object? other )                                    => other is UserModel<TID> x && Equals( x );
     public override int  GetHashCode()                                              => base.GetHashCode();
-    public static   bool operator ==( UserModel<TID>? left, UserModel<TID>? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( UserModel<TID>? left, UserModel<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( UserModel<TID>? left, UserModel<TID>? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( UserModel<TID>? left, UserModel<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( UserModel<TID>   left, UserModel<TID>  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( UserModel<TID>  left, UserModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( UserModel<TID>   left, UserModel<TID>  right ) => Sorter.LessThan( left, right );

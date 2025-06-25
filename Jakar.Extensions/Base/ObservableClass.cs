@@ -91,5 +91,5 @@ public abstract class ObservableClass<TClass, TID> : ObservableClass<TClass>, IU
 
 
     protected bool SetID( TClass record ) => SetID( record.ID );
-    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueEqualizer<TID>.Default, nameof(ID) );
+    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueSorter<TID>.Default, nameof(ID) );
 }

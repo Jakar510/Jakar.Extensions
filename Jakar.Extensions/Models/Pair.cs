@@ -14,8 +14,7 @@ public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, ICo
     public readonly string? Value = value;
 
 
-    public static ValueSorter<Pair>    Sorter    => ValueSorter<Pair>.Default;
-    public static ValueEqualizer<Pair> Equalizer => ValueEqualizer<Pair>.Default;
+    public static ValueSorter<Pair>    Sorter    => ValueSorter<Pair>.Default; 
 
 
     public static implicit operator KeyValuePair<string, string?>( Pair tag ) => new(tag.Key, tag.Value);
@@ -61,8 +60,7 @@ public readonly struct Pair<TValue>( string key, TValue value ) : IEquatable<Pai
     public readonly TValue Value = value;
 
 
-    public static ValueSorter<Pair<TValue>>    Sorter    => ValueSorter<Pair<TValue>>.Default;
-    public static ValueEqualizer<Pair<TValue>> Equalizer => ValueEqualizer<Pair<TValue>>.Default;
+    public static ValueSorter<Pair<TValue>> Sorter => ValueSorter<Pair<TValue>>.Default;
 
 
     public static implicit operator KeyValuePair<string, TValue>( Pair<TValue> tag ) => new(tag.Key, tag.Value);
@@ -91,10 +89,12 @@ public readonly struct Pair<TValue>( string key, TValue value ) : IEquatable<Pai
     public override int  GetHashCode()                => HashCode.Combine( Key, Value );
 
 
-    public static bool operator ==( Pair<TValue> left, Pair<TValue> right ) => left.Equals( right );
-    public static bool operator !=( Pair<TValue> left, Pair<TValue> right ) => !left.Equals( right );
-    public static bool operator <( Pair<TValue>  left, Pair<TValue> right ) => left.CompareTo( right ) < 0;
-    public static bool operator >( Pair<TValue>  left, Pair<TValue> right ) => left.CompareTo( right ) > 0;
-    public static bool operator <=( Pair<TValue> left, Pair<TValue> right ) => left.CompareTo( right ) <= 0;
-    public static bool operator >=( Pair<TValue> left, Pair<TValue> right ) => left.CompareTo( right ) >= 0;
+    public static bool operator ==( Pair<TValue>  left, Pair<TValue>  right ) => Sorter.Equals( left, right );
+    public static bool operator !=( Pair<TValue>  left, Pair<TValue>  right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( Pair<TValue>? left, Pair<TValue>? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( Pair<TValue>? left, Pair<TValue>? right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator >( Pair<TValue>   left, Pair<TValue>  right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( Pair<TValue>  left, Pair<TValue>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( Pair<TValue>   left, Pair<TValue>  right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( Pair<TValue>  left, Pair<TValue>  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

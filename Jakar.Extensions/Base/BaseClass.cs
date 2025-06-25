@@ -28,8 +28,7 @@ public class BaseClass
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseClass<TClass>, IEqualComparable<TClass>
 {
-    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
-    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public static Sorter<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
     public string ToJson()       => this.ToJson( Formatting.None );

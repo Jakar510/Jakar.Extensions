@@ -73,8 +73,8 @@ public sealed class RoleModel<TID>( string nameOfRole, string rights, TID id ) :
     
     public override bool Equals( object?          other )                 => other is RoleModel<TID> x && Equals( x );
     public override int  GetHashCode()                                    => HashCode.Combine( NameOfRole, ID, Rights );
-    public static   bool operator ==( RoleModel<TID>? left, RoleModel<TID>? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( RoleModel<TID>? left, RoleModel<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( RoleModel<TID>? left, RoleModel<TID>? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( RoleModel<TID>? left, RoleModel<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( RoleModel<TID>   left, RoleModel<TID>  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( RoleModel<TID>  left, RoleModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( RoleModel<TID>   left, RoleModel<TID>  right ) => Sorter.LessThan( left, right );

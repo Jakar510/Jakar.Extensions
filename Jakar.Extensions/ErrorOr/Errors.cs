@@ -40,7 +40,7 @@ public readonly record struct Alert()
 
 [Serializable, DefaultValue( nameof(Empty) )]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass, IEqualityOperators<Errors>
+public sealed class Errors() : BaseClass, IEqualComparable<Errors>
 {
     private static readonly Error[] _details = [];
     public static readonly Errors Empty = new()
@@ -48,7 +48,7 @@ public sealed class Errors() : BaseClass, IEqualityOperators<Errors>
                                               Alert   = null,
                                               Details = _details
                                           };
-    public static Equalizer<Errors> Equalizer => Equalizer<Errors>.Default;
+    public static Sorter<Errors> Sorter => Sorter<Errors>.Default;
 
 
     [JsonRequired] public required Alert?  Alert       { get; init; }
@@ -87,8 +87,23 @@ public sealed class Errors() : BaseClass, IEqualityOperators<Errors>
 
         return ReferenceEquals( this, other ) || Nullable.Equals( Alert, other.Alert ) && Error.Equals( Details, other.Details );
     }
+    public int CompareTo( Errors? other ) => string.CompareOrdinal( Description, other?.Description );
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        if ( other is Errors errors ) { return CompareTo( errors ); }
+
+        throw new ExpectedValueTypeException( nameof(other), other, typeof(Errors) );
+    }
     public override bool Equals( object? obj )                      => ReferenceEquals( this, obj ) || obj is Errors other && Equals( other );
     public override int  GetHashCode()                              => HashCode.Combine( Alert, Details );
-    public static   bool operator ==( Errors? left, Errors? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( Errors? left, Errors? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( Errors? left, Errors? right ) => Sorter.Equals( left, right );
+    public static   bool operator !=( Errors? left, Errors? right ) => Sorter.DoesNotEqual( left, right );
+    public static   bool operator >( Errors   left, Errors  right ) => Sorter.GreaterThan( left, right );
+    public static   bool operator >=( Errors  left, Errors  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static   bool operator <( Errors   left, Errors  right ) => Sorter.LessThan( left, right );
+    public static   bool operator <=( Errors  left, Errors  right ) => Sorter.LessThanOrEqualTo( left, right );
 }

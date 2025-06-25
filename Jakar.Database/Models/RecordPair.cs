@@ -72,6 +72,6 @@ public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset d
     public static bool operator >=( RecordPair<TClass> left, RecordPair<TClass> right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static bool operator <( RecordPair<TClass>  left, RecordPair<TClass> right ) => Sorter.LessThan( left, right );
     public static bool operator <=( RecordPair<TClass> left, RecordPair<TClass> right ) => Sorter.LessThanOrEqualTo( left, right );
-    public static bool operator ==( RecordPair<TClass> left, RecordPair<TClass> right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( RecordPair<TClass> left, RecordPair<TClass> right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( RecordPair<TClass> left, RecordPair<TClass> right ) =>  Sorter.Equals( left, right );
+    public static bool operator !=( RecordPair<TClass> left, RecordPair<TClass> right ) =>  Sorter.DoesNotEqual( left, right );
 }

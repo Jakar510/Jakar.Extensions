@@ -8,7 +8,6 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     private const          char                       SEPARATOR = '.';
     public static readonly AppVersion                 Default   = new();
     private                string?                    _string;
-    public static          Equalizer<AppVersion>      Equalizer      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<AppVersion>.Default; }
     public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
     public static          Sorter<AppVersion>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
     public                 int?                       Build          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
@@ -275,14 +274,14 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
 
-    // public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance.Equals( left, right );
-    // public static bool operator !=( AppVersion  left, AppVersion  right ) => !Equalizer.Instance.Equals( left, right );
+    // public static bool operator ==( AppVersion  left, AppVersion  right ) => Equalizer.Instance. Sorter.Equals( left, right );
+    // public static bool operator !=( AppVersion  left, AppVersion  right ) => !Equalizer.Instance. Sorter.Equals( left, right );
     // public static bool operator >( AppVersion   left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) > 0;
     // public static bool operator >=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) >= 0;
     // public static bool operator <( AppVersion   left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) < 0;
     // public static bool operator <=( AppVersion  left, AppVersion  right ) => Sorter.Instance.Compare( left, right ) <= 0;
-    public static bool operator ==( AppVersion? left, AppVersion? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( AppVersion? left, AppVersion? right ) => !Equalizer.Equals( left, right );
+    public static bool operator ==( AppVersion? left, AppVersion? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( AppVersion? left, AppVersion? right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator >( AppVersion?  left, AppVersion? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( AppVersion? left, AppVersion? right ) => Sorter.Compare( left, right ) >= 0;
     public static bool operator <( AppVersion?  left, AppVersion? right ) => Sorter.Compare( left, right ) < 0;

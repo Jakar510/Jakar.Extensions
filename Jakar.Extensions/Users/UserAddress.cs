@@ -249,8 +249,8 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
 
     public override bool Equals( object? other )                                        => other is UserAddress<TID> x && Equals( x );
     public override int  GetHashCode()                                                  => HashCode.Combine( Line1, Line2, City, PostalCode, Country, ID );
-    public static   bool operator ==( UserAddress<TID>? left, UserAddress<TID>? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( UserAddress<TID>? left, UserAddress<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( UserAddress<TID>? left, UserAddress<TID>? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( UserAddress<TID>? left, UserAddress<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( UserAddress<TID>   left, UserAddress<TID>  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( UserAddress<TID>  left, UserAddress<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( UserAddress<TID>   left, UserAddress<TID>  right ) => Sorter.LessThan( left, right );

@@ -45,13 +45,12 @@ public record ObservableRecord : BaseRecord, IObservableObject
 public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
-    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public static Sorter<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
     public static TClass? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TClass>();
-    public        string   ToJson()                                                    => this.ToJson( Formatting.None );
-    public        string   ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
+    public        string  ToJson()                                                    => this.ToJson( Formatting.None );
+    public        string  ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
 
 
     public int CompareTo( object? other )
@@ -108,5 +107,5 @@ public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>,
 
 
     protected bool SetID( TClass record ) => SetID( record.ID );
-    protected bool SetID( TID     id )     => SetProperty( ref _id, id, ValueEqualizer<TID>.Default, nameof(ID) );
+    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueSorter<TID>.Default, nameof(ID) );
 }

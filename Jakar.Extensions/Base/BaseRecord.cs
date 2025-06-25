@@ -27,14 +27,13 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseRecord<TClass>, IEqualComparable<TClass>
 {
-    public static Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
-    public static Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public static Sorter<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
 
 
     public string ToJson()       => this.ToJson( Formatting.None );
     public string ToPrettyJson() => this.ToJson( Formatting.Indented );
 
-    
+
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
     public int CompareTo( object? other )

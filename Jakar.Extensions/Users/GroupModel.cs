@@ -79,8 +79,8 @@ public class GroupModel<TID>( string nameOfGroup, TID? ownerID, TID? createdBy, 
 
     public override bool Equals( object? other )                                      => other is GroupModel<TID> x && Equals( x );
     public override int  GetHashCode()                                                => HashCode.Combine( NameOfGroup, ID, Rights );
-    public static   bool operator ==( GroupModel<TID>? left, GroupModel<TID>? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( GroupModel<TID>? left, GroupModel<TID>? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( GroupModel<TID>? left, GroupModel<TID>? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( GroupModel<TID>? left, GroupModel<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( GroupModel<TID>   left, GroupModel<TID>  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( GroupModel<TID>  left, GroupModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( GroupModel<TID>   left, GroupModel<TID>  right ) => Sorter.LessThan( left, right );

@@ -101,7 +101,7 @@ public static class ObservableObjects
                     ? minDate
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateTime>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? Sorter<DateTime>.Default, propertyName );
     }
     public static bool SetPropertyNotify( this IObservableObject observable, ref DateTime? backingStore, DateTime? value, in DateTime minDate, IEqualityComparer<DateTime?>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
@@ -109,7 +109,7 @@ public static class ObservableObjects
                     ? null
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateTime>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueSorter<DateTime>.Default, propertyName );
     }
 
 
@@ -119,7 +119,7 @@ public static class ObservableObjects
                     ? minDate
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateTimeOffset>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? Sorter<DateTimeOffset>.Default, propertyName );
     }
     public static bool SetPropertyNotify( this IObservableObject observable, ref DateTimeOffset? backingStore, DateTimeOffset? value, in DateTimeOffset minDate, IEqualityComparer<DateTimeOffset?>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
@@ -127,7 +127,7 @@ public static class ObservableObjects
                     ? null
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateTimeOffset>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueSorter<DateTimeOffset>.Default, propertyName );
     }
 
 
@@ -137,7 +137,7 @@ public static class ObservableObjects
                     ? minValue
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateOnly>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? Sorter<DateOnly>.Default, propertyName );
     }
     public static bool SetPropertyNotify( this IObservableObject observable, ref DateOnly? backingStore, DateOnly? value, in DateOnly? minValue, IEqualityComparer<DateOnly?>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
@@ -145,7 +145,7 @@ public static class ObservableObjects
                     ? null
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<DateOnly>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueSorter<DateOnly>.Default, propertyName );
     }
 
 
@@ -155,7 +155,7 @@ public static class ObservableObjects
                     ? minValue
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<TimeOnly>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? Sorter<TimeOnly>.Default, propertyName );
     }
     public static bool SetPropertyNotify( this IObservableObject observable, ref TimeOnly? backingStore, TimeOnly? value, in TimeOnly? minValue, IEqualityComparer<TimeOnly?>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
@@ -163,7 +163,7 @@ public static class ObservableObjects
                     ? null
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<TimeOnly>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueSorter<TimeOnly>.Default, propertyName );
     }
 
 
@@ -173,7 +173,7 @@ public static class ObservableObjects
                     ? minValue
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<TimeSpan>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? Sorter<TimeSpan>.Default, propertyName );
     }
     public static bool SetPropertyNotify( this IObservableObject observable, ref TimeSpan? backingStore, TimeSpan? value, in TimeSpan? minValue, IEqualityComparer<TimeSpan?>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY )
     {
@@ -181,7 +181,7 @@ public static class ObservableObjects
                     ? null
                     : value;
 
-        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueEqualizer<TimeSpan>.Default, propertyName );
+        return observable.SetProperty( ref backingStore, value, equalityComparer ?? ValueSorter<TimeSpan>.Default, propertyName );
     }
 
 

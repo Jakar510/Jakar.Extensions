@@ -8,7 +8,7 @@ using System.Diagnostics.Metrics;
 namespace Jakar.Extensions;
 
 
-public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperators<TelemetrySource>, IDisposable
+public sealed class TelemetrySource : IFuzzyEquals<TelemetrySource>, IDisposable
 {
     public static readonly ActivityContext EmptyActivityContext = default;
     public readonly        ActivitySource  Source;
@@ -18,8 +18,10 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperato
     public readonly        string          AppName;
 
 
-    public static TelemetrySource? Current     { get; set; }
-    public        string?          PackageName { get; set; }
+    public static FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<TelemetrySource>.Default; }
+    public static Sorter<TelemetrySource>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TelemetrySource>.Default; }
+    public static TelemetrySource?                Current        { get; set; }
+    public        string?                         PackageName    { get; set; }
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
@@ -90,6 +92,33 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperato
     public static implicit operator ActivitySource( TelemetrySource sources ) => sources.Source;
 
 
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        if ( other is TelemetrySource source ) { return CompareTo( source ); }
+
+        throw new ExpectedValueTypeException( nameof(other), other, typeof(TelemetrySource) );
+    }
+    public int CompareTo( TelemetrySource? other )
+    {
+        if ( ReferenceEquals( this, other ) ) { return 0; }
+
+        if ( other is null ) { return 1; }
+
+        int appNameComparison = string.Compare( AppName, other.AppName, StringComparison.Ordinal );
+        if ( appNameComparison != 0 ) { return appNameComparison; }
+
+        int appIDComparison = AppID.CompareTo( other.AppID );
+        if ( appIDComparison != 0 ) { return appIDComparison; }
+
+        int versionComparison = Version.CompareTo( other.Version );
+        if ( versionComparison != 0 ) { return versionComparison; }
+
+        return string.Compare( PackageName, other.PackageName, StringComparison.Ordinal );
+    }
     public bool Equals( TelemetrySource? other )
     {
         if ( other is null ) { return false; }
@@ -98,12 +127,17 @@ public sealed class TelemetrySource : IFuzzyEquals<AppVersion>, IEqualityOperato
 
         return Version.Equals( other.Version ) && AppID.Equals( other.AppID ) && AppName == other.AppName && PackageName == other.PackageName;
     }
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is TelemetrySource other && Equals( other );
-    public override int  GetHashCode()         => HashCode.Combine( Version, AppID, AppName, PackageName );
+    public override bool Equals( object? obj )                => ReferenceEquals( this, obj ) || obj is TelemetrySource other && Equals( other );
+    public override int  GetHashCode()                        => HashCode.Combine( Version, AppID, AppName, PackageName );
+    public          bool FuzzyEquals( TelemetrySource other ) => Version.FuzzyEquals( other.Version );
 
 
-    public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => Equalizer<AppVersion>.Default.Equals( left?.Version, right?.Version );
-    public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => Equalizer<AppVersion>.Default.Equals( left?.Version, right?.Version ) is false;
+    public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => Sorter.DoesNotEqual( left, right );
+    public static bool operator >( TelemetrySource   left, TelemetrySource  right ) => Sorter.GreaterThan( left, right );
+    public static bool operator >=( TelemetrySource  left, TelemetrySource  right ) => Sorter.GreaterThanOrEqualTo( left, right );
+    public static bool operator <( TelemetrySource   left, TelemetrySource  right ) => Sorter.LessThan( left, right );
+    public static bool operator <=( TelemetrySource  left, TelemetrySource  right ) => Sorter.LessThanOrEqualTo( left, right );
 }
 
 
@@ -189,8 +223,8 @@ public readonly struct TelemetrySpan : IDisposable
     [Pure, MustDisposeResource] public        TelemetrySpan GoBack()                                                                                    => SubSpan();
     [Pure, MustDisposeResource] public        TelemetrySpan Navigation()                                                                                => SubSpan();
     [Pure, MustDisposeResource] public        TelemetrySpan WriteToFile()                                                                               => SubSpan();
-    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(_activity, name);
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(Activity.Current, name);
+    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, _activity);
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
     [Pure, MustDisposeResource] public static TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan( name ) ?? Create( name );
 
 

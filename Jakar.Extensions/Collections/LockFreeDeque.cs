@@ -82,7 +82,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
 
 
 
-    protected sealed class Node( TValue value ) : IEquatable<Node>
+    protected sealed class Node( TValue value ) : IEqualityOperators<Node>
     {
         public static readonly Node   Empty = new(null!);
         public readonly        TValue Value = value;
@@ -92,7 +92,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
         public          bool Equals( Node?   other )                => ReferenceEquals( this, other );
         public override bool Equals( object? obj )                  => ReferenceEquals( this, obj ) || Equals( obj as Node );
         public override int  GetHashCode()                          => HashCode.Combine( Value );
-        public static   bool operator ==( Node? left, Node? right ) => Equals( left, right );
-        public static   bool operator !=( Node? left, Node? right ) => !Equals( left, right );
+        public static   bool operator ==( Node? left, Node? right ) => left?.Equals( right ) is true;
+        public static   bool operator !=( Node? left, Node? right ) => left?.Equals( right ) is not true;
     }
 }

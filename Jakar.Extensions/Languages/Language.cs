@@ -7,15 +7,14 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
     private readonly CultureInfo _culture;
 
 
-    public static Equalizer<Language> Equalizer        => Equalizer<Language>.Default;
-    public static Sorter<Language>    Sorter           => Sorter<Language>.Default;
-    public        string              DisplayName      { get; init; }
-    public        string              EnglishName      { get; init; }
-    public        bool                IsNeutralCulture { get; init; }
-    public        string              Name             { get; init; }
-    public        string              ThreeLetterISO   { get; init; }
-    public        string              TwoLetterISO     { get; init; }
-    public        SupportedLanguage?  Version          { get; init; }
+    public static Sorter<Language>   Sorter           => Sorter<Language>.Default;
+    public        string             DisplayName      { get; init; }
+    public        string             EnglishName      { get; init; }
+    public        bool               IsNeutralCulture { get; init; }
+    public        string             Name             { get; init; }
+    public        string             ThreeLetterISO   { get; init; }
+    public        string             TwoLetterISO     { get; init; }
+    public        SupportedLanguage? Version          { get; init; }
 
 
     public Language( CultureInfo culture, SupportedLanguage? version = null )
@@ -69,8 +68,8 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
     public override int  GetHashCode()         => HashCode.Combine( DisplayName, Name, Version );
 
 
-    public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( Language? left, Language? right ) => Equalizer.Equals( left, right );
+    public static bool operator ==( Language? left, Language? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( Language? left, Language? right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator >( Language?  left, Language? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( Language? left, Language? right ) => Sorter.Compare( left, right ) >= 0;
     public static bool operator <( Language?  left, Language? right ) => Sorter.Compare( left, right ) < 0;

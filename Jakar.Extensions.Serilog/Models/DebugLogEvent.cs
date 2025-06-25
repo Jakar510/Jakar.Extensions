@@ -9,15 +9,14 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class DebugLogEvent( string source, string message, string caller, LogEventLevel level, DateTimeOffset timeStamp, EventDetails? details = null ) : BaseClass, ILastModified, IComparable<DebugLogEvent>, IEquatable<DebugLogEvent>
 {
-    public        DateTimeOffset           TimeStamp    { get; } = timeStamp;
-    public        LogEventLevel            Level        { get; } = level;
-    public        string                   Caller       { get; } = caller;
-    public        string                   Description  { get; } = $"[{level}] {source}.{caller} -> {message}";
-    public        string                   Message      { get; } = message;
-    public        string                   Source       { get; } = source;
-    public static Equalizer<DebugLogEvent> Equalizer    => Equalizer<DebugLogEvent>.Default;
-    public static Sorter<DebugLogEvent>    Sorter       => Sorter<DebugLogEvent>.Default;
-    DateTimeOffset? ILastModified.         LastModified => TimeStamp;
+    public        DateTimeOffset        TimeStamp    { get; } = timeStamp;
+    public        LogEventLevel         Level        { get; } = level;
+    public        string                Caller       { get; } = caller;
+    public        string                Description  { get; } = $"[{level}] {source}.{caller} -> {message}";
+    public        string                Message      { get; } = message;
+    public        string                Source       { get; } = source;
+    public static Sorter<DebugLogEvent> Sorter       => Sorter<DebugLogEvent>.Default;
+    DateTimeOffset? ILastModified.      LastModified => TimeStamp;
 
 
     private DebugLogEvent( MemberInfo source, string message, string caller, LogEventLevel level, EventDetails? details = null ) : this( source.Name, message, caller, level, details ) { }
@@ -68,8 +67,8 @@ public sealed class DebugLogEvent( string source, string message, string caller,
     }
     public override bool Equals( object? obj )                                    => ReferenceEquals( this, obj ) || obj is DebugLogEvent other && Equals( other );
     public override int  GetHashCode()                                            => HashCode.Combine( Description, Source, Message, Caller, (int)Level, TimeStamp );
-    public static   bool operator ==( DebugLogEvent? left, DebugLogEvent? right ) => Equals( left, right );
-    public static   bool operator !=( DebugLogEvent? left, DebugLogEvent? right ) => !Equals( left, right );
+    public static   bool operator ==( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Equals( left, right );
+    public static   bool operator !=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.DoesNotEqual( left, right );
     public static   bool operator <( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) < 0;
     public static   bool operator >( DebugLogEvent?  left, DebugLogEvent? right ) => Sorter.Compare( left, right ) > 0;
     public static   bool operator <=( DebugLogEvent? left, DebugLogEvent? right ) => Sorter.Compare( left, right ) <= 0;

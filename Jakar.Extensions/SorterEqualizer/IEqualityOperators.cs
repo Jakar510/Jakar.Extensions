@@ -15,23 +15,9 @@ public interface IComparisonOperators<TValue> : IComparisonOperators<TValue, TVa
 
 
 public interface IEqualComparable<TValue> : IEqualityOperators<TValue>, IComparisonOperators<TValue>
-    where TValue : class, IEqualComparable<TValue>
+    where TValue : IEqualComparable<TValue>
 {
-    public abstract static Equalizer<TValue> Equalizer { get; }
-    public abstract static Sorter<TValue>    Sorter    { get; }
-
-
-    public bool Equals( object? other );
-    public int  GetHashCode();
-}
-
-
-
-public interface IEqualComparableValue<TValue> : IEqualityOperators<TValue>, IComparisonOperators<TValue>, IComparable<TValue?>, IEquatable<TValue?>
-    where TValue : struct, IEqualComparableValue<TValue>
-{
-    public abstract static ValueEqualizer<TValue> Equalizer { get; }
-    public abstract static ValueSorter<TValue>    Sorter    { get; }
+    public abstract static Sorter<TValue> Sorter { get; }
 
 
     public bool Equals( object? other );

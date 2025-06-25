@@ -945,8 +945,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
 
 
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => Sorter.DoesNotEqual( left, right );
     public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) >= 0;
     public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) < 0;

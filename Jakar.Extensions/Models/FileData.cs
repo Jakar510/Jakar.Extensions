@@ -62,8 +62,7 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : class, IFileData<TClass, TID, TFileMetaData>
 {
-    public abstract static Equalizer<TClass> Equalizer { get; }
-    public abstract static Sorter<TClass>    Sorter    { get; }
+    public abstract static Sorter<TClass> Sorter { get; }
 
 
     public abstract static TClass  Create( IFileData<TID, TFileMetaData>                                        data );
@@ -90,14 +89,13 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : FileData<TClass, TID, TFileMetaData>, IFileData<TClass, TID, TFileMetaData>
 {
-    public static                                      Equalizer<TClass> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TClass>.Default; }
-    public static                                      Sorter<TClass>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
-    public required                                    long              FileSize  { get; init; } = fileSize;
-    [StringLength( UNICODE_CAPACITY )] public required string            Hash      { get; init; } = hash;
-    public required                                    TID               ID        { get; init; } = id;
-    public required                                    TFileMetaData     MetaData  { get; init; } = metaData;
-    protected internal                                 MimeType          Mime      => MetaData.MimeType ?? MimeType.Text;
-    [StringLength( UNICODE_CAPACITY )] public required string            Payload   { get; init; } = payload;
+    public static                                      Sorter<TClass> Sorter   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public required                                    long           FileSize { get; init; } = fileSize;
+    [StringLength( UNICODE_CAPACITY )] public required string         Hash     { get; init; } = hash;
+    public required                                    TID            ID       { get; init; } = id;
+    public required                                    TFileMetaData  MetaData { get; init; } = metaData;
+    protected internal                                 MimeType       Mime     => MetaData.MimeType ?? MimeType.Text;
+    [StringLength( UNICODE_CAPACITY )] public required string         Payload  { get; init; } = payload;
 
 
     public virtual LocalFile GetFile( LocalDirectory directory )
@@ -213,7 +211,7 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
 
         if ( ReferenceEquals( this, other ) ) { return true; }
 
-        return FileSize == other.FileSize && Hash == other.Hash && Payload == other.Payload && TFileMetaData.Equalizer.Equals( MetaData, other.MetaData );
+        return FileSize == other.FileSize && Hash == other.Hash && Payload == other.Payload && TFileMetaData.Sorter.Equals( MetaData, other.MetaData );
     }
     public override int GetHashCode() => HashCode.Combine( FileSize, Hash, Payload, MetaData );
     public void Deconstruct( out long fileSize, out string hash, out string payload, out TID id, out TFileMetaData metaData )
@@ -231,7 +229,6 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
 [Serializable, SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
 {
-    public static                             Equalizer<FileMetaData>       Equalizer       => Equalizer<FileMetaData>.Default;
     public static                             Sorter<FileMetaData>          Sorter          => Sorter<FileMetaData>.Default;
     [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData  { get; set; }
     [StringLength( UNICODE_CAPACITY )] public string?                       FileDescription { get; set; }  = fileDescription;
@@ -302,6 +299,6 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
     public static bool operator >( FileMetaData   left, FileMetaData  right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator <=( FileMetaData  left, FileMetaData  right ) => Sorter.Compare( left, right ) <= 0;
     public static bool operator >=( FileMetaData  left, FileMetaData  right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator ==( FileMetaData? left, FileMetaData? right ) => Equalizer.Equals( left, right );
-    public static bool operator !=( FileMetaData? left, FileMetaData? right ) => Equalizer.Equals( left, right ) is false;
+    public static bool operator ==( FileMetaData? left, FileMetaData? right ) => Sorter.Equals( left, right );
+    public static bool operator !=( FileMetaData? left, FileMetaData? right ) => Sorter.DoesNotEqual( left, right );
 }

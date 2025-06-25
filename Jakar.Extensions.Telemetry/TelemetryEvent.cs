@@ -35,8 +35,8 @@ public readonly struct TelemetryEvent( string eventID, DateTimeOffset timestamp,
                    : throw new ArgumentException( $"Object must be of type {nameof(TelemetryEvent)}" );
     }
     public override int GetHashCode()                                             => HashCode.Combine( EventID, Timestamp );
-    public static   bool operator ==( TelemetryEvent left, TelemetryEvent right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( TelemetryEvent left, TelemetryEvent right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( TelemetryEvent left, TelemetryEvent right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( TelemetryEvent left, TelemetryEvent right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator <( TelemetryEvent  left, TelemetryEvent right ) => Sorter.Compare( left, right ) < 0;
     public static   bool operator >( TelemetryEvent  left, TelemetryEvent right ) => Sorter.Compare( left, right ) > 0;
     public static   bool operator <=( TelemetryEvent left, TelemetryEvent right ) => Sorter.Compare( left, right ) <= 0;

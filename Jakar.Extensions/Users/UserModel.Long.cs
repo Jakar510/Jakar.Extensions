@@ -42,8 +42,8 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
     }
     public override bool Equals( object?           other )                  => other is UserAddress x && Equals( x );
     public override int  GetHashCode()                                      => base.GetHashCode();
-    public static   bool operator ==( UserAddress? left, UserAddress? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( UserAddress? left, UserAddress? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( UserAddress? left, UserAddress? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( UserAddress? left, UserAddress? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( UserAddress   left, UserAddress  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( UserAddress  left, UserAddress  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( UserAddress   left, UserAddress  right ) => Sorter.LessThan( left, right );
@@ -60,8 +60,8 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
     public static   GroupModel Create( IGroupModel<long> model )            => new(model);
     public override bool       Equals( object?           other )            => other is GroupModel x && Equals( x );
     public override int        GetHashCode()                                => base.GetHashCode();
-    public static   bool operator ==( GroupModel? left, GroupModel? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( GroupModel? left, GroupModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( GroupModel? left, GroupModel? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( GroupModel? left, GroupModel? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( GroupModel   left, GroupModel  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( GroupModel  left, GroupModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( GroupModel   left, GroupModel  right ) => Sorter.LessThan( left, right );
@@ -78,8 +78,8 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
     public static   RoleModel Create( IRoleModel<long> model )            => new(model);
     public override bool      Equals( object?          other )            => other is UserModel x && Equals( x );
     public override int       GetHashCode()                               => base.GetHashCode();
-    public static   bool operator ==( RoleModel? left, RoleModel? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( RoleModel? left, RoleModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( RoleModel? left, RoleModel? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( RoleModel? left, RoleModel? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( RoleModel   left, RoleModel  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( RoleModel  left, RoleModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( RoleModel   left, RoleModel  right ) => Sorter.LessThan( left, right );
@@ -109,8 +109,8 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
     }
     public override bool Equals( object? other )                          => other is UserModel x && Equals( x );
     public override int  GetHashCode()                                    => base.GetHashCode();
-    public static   bool operator ==( UserModel? left, UserModel? right ) => Equalizer.Equals( left, right );
-    public static   bool operator !=( UserModel? left, UserModel? right ) => Equalizer.Equals( left, right ) is false;
+    public static   bool operator ==( UserModel? left, UserModel? right ) =>  Sorter.Equals( left, right );
+    public static   bool operator !=( UserModel? left, UserModel? right ) =>  Sorter.DoesNotEqual( left, right );
     public static   bool operator >( UserModel   left, UserModel  right ) => Sorter.GreaterThan( left, right );
     public static   bool operator >=( UserModel  left, UserModel  right ) => Sorter.GreaterThanOrEqualTo( left, right );
     public static   bool operator <( UserModel   left, UserModel  right ) => Sorter.LessThan( left, right );
