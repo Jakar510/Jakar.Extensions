@@ -5,7 +5,7 @@ using System.Net;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Collections;
 
 
 [TestFixture, TestOf( typeof(IniConfig) )]

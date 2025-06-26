@@ -102,7 +102,7 @@ public class AppVersion_Tests : Assert
             return;
         }
 
-        this.False( shouldWork );
+        this.IsFalse( shouldWork );
     }
 
 
@@ -134,7 +134,7 @@ public class AppVersion_Tests : Assert
             return;
         }
 
-        this.False( shouldWork );
+        this.IsFalse( shouldWork );
     }
 
 

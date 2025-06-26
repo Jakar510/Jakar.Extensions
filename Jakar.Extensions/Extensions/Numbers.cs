@@ -3,6 +3,14 @@
 
 public static class Numbers
 {
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static double  Round( this double  value ) => Math.Round( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static float   Round( this float   value ) => (float)Math.Round( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static decimal Round( this decimal value ) => Math.Round( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static double  Floor( this double  value ) => Math.Floor( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static float   Floor( this float   value ) => (float)Math.Floor( value );
+    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure]  public static decimal Floor( this decimal value ) => Math.Floor( value );
+
+
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static TResult As<TResult>( this string? value, TResult defaultValue )
         where TResult : struct, INumber<TResult> => TResult.TryParse( value, CultureInfo.CurrentUICulture, out TResult result )

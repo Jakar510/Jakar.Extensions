@@ -15,8 +15,8 @@ public static class AssertExtensions
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void NotEqual<TValue>( this Assert _, TValue                         expected, TValue                         actual ) => Assert.That( actual,                           Is.Not.EqualTo( expected ) );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void NotNull<TValue>( this  Assert _, TValue                         actual ) => Assert.That( actual, Is.Not.Null );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void IsNull<TValue>( this   Assert _, TValue                         actual ) => Assert.That( actual, Is.Null );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void False( this            Assert _, bool                           actual ) => Assert.That( actual, Is.False );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void True( this             Assert _, bool                           actual ) => Assert.That( actual, Is.True );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void IsFalse( this          Assert _, bool                           actual ) => Assert.That( actual, Is.False );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static void IsTrue( this           Assert _, bool                           actual ) => Assert.That( actual, Is.True );
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]

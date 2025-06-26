@@ -125,7 +125,7 @@ public class Spans_Tests : Assert
     public void AsSegment( string value )
     {
         ReadOnlyMemory<byte> array = Encoding.UTF8.GetBytes( value );
-        this.True( array.TryAsSegment( out ArraySegment<byte> segment ) );
+        this.IsTrue( array.TryAsSegment( out ArraySegment<byte> segment ) );
         this.AreEqual( array.Span, segment.Array );
     }
 
@@ -146,7 +146,7 @@ public class Spans_Tests : Assert
     {
         Span<char>         span      = stackalloc char[expected.Length];
         ReadOnlySpan<char> valueSpan = value;
-        this.True( Spans.TryCopyTo( in valueSpan, ref span, c ) );
+        this.IsTrue( Spans.TryCopyTo( in valueSpan, ref span, c ) );
         string result = span.ToString();
         this.AreEqual<char>( expected, result );
     }

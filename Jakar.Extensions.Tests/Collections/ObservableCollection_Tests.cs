@@ -3,11 +3,10 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Collections;
 
 
 [TestFixture, TestOf( typeof(ObservableCollection<>) )]
@@ -61,10 +60,10 @@ public class ObservableCollection_Tests : Assert
     {
         ObservableCollection<TValue> collection = [];
         collection.Add( value );
-        this.True( collection.Contains( value ) );
-        this.False( collection.TryAdd( value ) );
-        this.True( collection.Remove( value ) );
-        this.False( collection.Contains( value ) );
+        this.IsTrue( collection.Contains( value ) );
+        this.IsFalse( collection.TryAdd( value ) );
+        this.IsTrue( collection.Remove( value ) );
+        this.IsFalse( collection.Contains( value ) );
         collection.Add( value );
         collection.Clear();
         this.AreEqual( collection.Count, 0 );

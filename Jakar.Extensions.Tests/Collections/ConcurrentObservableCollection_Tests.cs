@@ -1,11 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Collections;
 
 
 [TestFixture, TestOf( typeof(ConcurrentObservableCollection<>) )]
@@ -155,10 +154,10 @@ public class ConcurrentObservableCollection_Tests : Assert
     {
         ConcurrentObservableCollection<TValue> collection = [];
         collection.Add( value );
-        this.False( collection.TryAdd( value ) );
-        this.True( collection.Contains( value ) );
-        this.True( collection.Remove( value ) );
-        this.False( collection.Contains( value ) );
+        this.IsFalse( collection.TryAdd( value ) );
+        this.IsTrue( collection.Contains( value ) );
+        this.IsTrue( collection.Remove( value ) );
+        this.IsFalse( collection.Contains( value ) );
         collection.Add( value );
         collection.Clear();
         this.AreEqual( collection.Count, 0 );
@@ -169,10 +168,10 @@ public class ConcurrentObservableCollection_Tests : Assert
     {
         ConcurrentObservableCollection<TValue> collection = [];
         await collection.AddAsync( value );
-        this.False( await collection.TryAddAsync( value ) );
-        this.True( await collection.ContainsAsync( value ) );
-        this.True( await collection.RemoveAsync( value ) );
-        this.False( await collection.ContainsAsync( value ) );
+        this.IsFalse( await collection.TryAddAsync( value ) );
+        this.IsTrue( await collection.ContainsAsync( value ) );
+        this.IsTrue( await collection.RemoveAsync( value ) );
+        this.IsFalse( await collection.ContainsAsync( value ) );
         await collection.AddAsync( value );
         await collection.ClearAsync();
         this.AreEqual( collection.Count, 0 );

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 
 
-namespace Jakar.Extensions.Tests;
+namespace Jakar.Extensions.Tests.Reflections;
 
 
 [TestFixture, TestOf( typeof(Types) )]
