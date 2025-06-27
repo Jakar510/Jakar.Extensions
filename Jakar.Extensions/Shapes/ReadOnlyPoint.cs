@@ -2,7 +2,7 @@
 
 
 [DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint, double>
+public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint, double>, IMathOperators<ReadOnlyPoint>
 {
     public static readonly ReadOnlyPoint Invalid = new(double.NaN, double.NaN);
     public static readonly ReadOnlyPoint Zero    = new(0, 0);

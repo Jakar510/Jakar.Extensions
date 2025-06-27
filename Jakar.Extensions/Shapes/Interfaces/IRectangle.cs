@@ -5,30 +5,31 @@
 namespace Jakar.Extensions;
 
 
-public interface IRectangle<TSelf, TSize, TPoint, TNumber> : IGenericShape<TSelf>, IShapeSize<TNumber>, IShapeLocation<TNumber>
-    where TSelf : IRectangle<TSelf, TSize, TPoint, TNumber>
+public interface IRectangle<TSelf, TSize, TPoint, TThickness, TNumber> : IGenericShape<TSelf>, IShapeSize<TNumber>, IShapeLocation<TNumber>
+    where TSelf : IRectangle<TSelf, TSize, TPoint, TThickness, TNumber>
     where TSize : ISize<TSize, TNumber>
     where TPoint : IPoint<TPoint, TNumber>
+    where TThickness : IThickness<TThickness, TNumber>
     where TNumber : INumber<TNumber>
 {
-    public                 TNumber Bottom   { get; }
-    public                 TNumber Left     { get; }
-    public                 TNumber Right    { get; }
-    public                 TNumber Top      { get; }
-    public                 TPoint  Center   { get; }
-    public                 TPoint  Location { get; }
-    public                 TSize   Size     { get; }
+    public TNumber Bottom   { get; }
+    public TNumber Left     { get; }
+    public TNumber Right    { get; }
+    public TNumber Top      { get; }
+    public TPoint  Center   { get; }
+    public TPoint  Location { get; }
+    public TSize   Size     { get; }
 
 
     public static bool CheckIfEmpty( in TSelf rectangle ) => TNumber.IsNaN( rectangle.X ) || TNumber.IsNaN( rectangle.Y ) || TNumber.IsNegative( rectangle.Width ) || TNumber.IsNaN( rectangle.Height ) || TNumber.IsNaN( rectangle.Width ) || TNumber.IsNegative( rectangle.Height );
 
 
     [Pure] public abstract static TSelf Create( params ReadOnlySpan<TPoint> points );
-    [Pure] public abstract static TSelf Create( in     TPoint               point,     in TSize             size );
-    [Pure] public abstract static TSelf Create( in     TPoint               topLeft,   in TPoint            bottomRight );
-    [Pure] public abstract static TSelf Create( in     TSelf                rectangle, in ReadOnlyThickness padding );
-    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber              y, in TSize size );
-    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber              y, TNumber  width, TNumber height );
+    [Pure] public abstract static TSelf Create( in     TPoint               point,     in TSize      size );
+    [Pure] public abstract static TSelf Create( in     TPoint               topLeft,   in TPoint     bottomRight );
+    [Pure] public abstract static TSelf Create( in     TSelf                rectangle, in TThickness padding );
+    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber       y, in TSize size );
+    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber       y, TNumber  width, TNumber height );
 
 
     [Pure] public bool  IsAtLeast( in      TSize  other );

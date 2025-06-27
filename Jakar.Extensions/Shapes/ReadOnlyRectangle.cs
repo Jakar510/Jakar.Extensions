@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [StructLayout( LayoutKind.Sequential ), DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, double>
+public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, ReadOnlyThickness, double>, IMathOperators<ReadOnlyRectangle>
 {
     public static readonly ReadOnlyRectangle Invalid = new(double.NaN, double.NaN, double.NaN, double.NaN);
     public static readonly ReadOnlyRectangle Zero    = new(0, 0, 0, 0);
@@ -20,7 +20,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     static        ReadOnlyRectangle IGenericShape<ReadOnlyRectangle>.Invalid => Invalid;
 
 
-    public bool                   IsEmpty  => IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, double>.CheckIfEmpty( in this );
+    public bool                   IsEmpty  => IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, ReadOnlyThickness, double>.CheckIfEmpty( in this );
     double IShapeLocation<double>.X        => X;
     double IShapeLocation<double>.Y        => Y;
     double IShapeSize<double>.    Width    => Width;
@@ -70,7 +70,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public override bool   Equals( object?           other )                           => other is ReadOnlyRectangle x && Equals( x );
     public override int    GetHashCode()                                               => HashCode.Combine( X, Y, Width, Height );
     public override string ToString()                                                  => ToString( null, null );
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, double>.ToString( this, format );
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<ReadOnlyRectangle, ReadOnlySize, ReadOnlyPoint, ReadOnlyThickness, double>.ToString( this, format );
 
 
     [Pure] public bool              IsAtLeast( in      ReadOnlySize      other ) => other.Width <= Width      && other.Height <= Height;

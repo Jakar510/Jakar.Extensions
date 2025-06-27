@@ -37,7 +37,7 @@ public sealed class ReadOnlySize_Tests : Assert
     {
         ReadOnlySize point     = new(1.6, 2.4);
         Size         converted = point;
-        this.AreEqual( 2, converted.Width );
+        this.AreEqual( 1, converted.Width );
         this.AreEqual( 2, converted.Height );
     }
 

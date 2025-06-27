@@ -2,7 +2,7 @@
 
 
 [DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadOnlySize, double>
+public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadOnlySize, double>, IMathOperators<ReadOnlySize>
 {
     public static readonly ReadOnlySize Invalid = new(double.NaN, double.NaN);
     public static readonly ReadOnlySize Zero    = new(0, 0);
@@ -13,8 +13,8 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static Sorter<ReadOnlySize>                     Sorter      => Sorter<ReadOnlySize>.Default;
     static        ReadOnlySize IGenericShape<ReadOnlySize>.Zero        => Zero;
     static        ReadOnlySize IGenericShape<ReadOnlySize>.Invalid     => Invalid;
-    public        bool                                     IsValid     => IsEmpty is false && IsNaN is false;
-    public        bool                                     IsEmpty     => Width == 0       && Height == 0;
+    public        bool                                     IsValid     => IsNaN is false;
+    public        bool                                     IsEmpty     => Width == 0 && Height == 0;
     public        bool                                     IsLandscape => Width < Height;
     public        bool                                     IsNaN       => double.IsNaN( Width ) || double.IsNaN( Height );
     public        bool                                     IsPortrait  => Width > Height;

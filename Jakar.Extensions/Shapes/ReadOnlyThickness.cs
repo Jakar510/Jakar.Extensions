@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness, double>
+public readonly struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness, double>, IThickness<ReadOnlyThickness, float>, IMathOperators<ReadOnlyThickness>
 {
     public static readonly ReadOnlyThickness Invalid             = new(double.NaN, double.NaN, double.NaN, double.NaN);
     public static readonly ReadOnlyThickness Zero                = new(0);
@@ -29,6 +29,12 @@ public readonly struct ReadOnlyThickness( double left, double top, double right,
     double IThickness<ReadOnlyThickness, double>.                    Top                 => Top;
     double IThickness<ReadOnlyThickness, double>.                    HorizontalThickness => HorizontalThickness;
     double IThickness<ReadOnlyThickness, double>.                    VerticalThickness   => VerticalThickness;
+    float IThickness<ReadOnlyThickness, float>.                      Bottom              => Bottom.AsFloat();
+    float IThickness<ReadOnlyThickness, float>.                      Left                => Left.AsFloat();
+    float IThickness<ReadOnlyThickness, float>.                      Right               => Right.AsFloat();
+    float IThickness<ReadOnlyThickness, float>.                      Top                 => Top.AsFloat();
+    float IThickness<ReadOnlyThickness, float>.                      HorizontalThickness => HorizontalThickness.AsFloat();
+    float IThickness<ReadOnlyThickness, float>.                      VerticalThickness   => VerticalThickness.AsFloat();
 
 
     public ReadOnlyThickness( double uniformSize ) : this( uniformSize, uniformSize, uniformSize, uniformSize ) { }

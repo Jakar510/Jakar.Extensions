@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF, float>
+public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF, float>, IMathOperators<ReadOnlySizeF>
 {
     public static readonly ReadOnlySizeF Invalid = new(float.NaN, float.NaN);
     public static readonly ReadOnlySizeF Zero    = new(0, 0);
@@ -16,8 +16,8 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static Sorter<ReadOnlySizeF>                      Sorter      => Sorter<ReadOnlySizeF>.Default;
     static        ReadOnlySizeF IGenericShape<ReadOnlySizeF>.Zero        => Zero;
     static        ReadOnlySizeF IGenericShape<ReadOnlySizeF>.Invalid     => Invalid;
-    public        bool                                       IsValid     => IsEmpty is false && IsNaN is false;
-    public        bool                                       IsEmpty     => Width == 0       && Height == 0;
+    public        bool                                       IsValid     => IsNaN is false;
+    public        bool                                       IsEmpty     => Width == 0 && Height == 0;
     public        bool                                       IsLandscape => Width < Height;
     public        bool                                       IsNaN       => float.IsNaN( Width ) || float.IsNaN( Height );
     public        bool                                       IsPortrait  => Width > Height;

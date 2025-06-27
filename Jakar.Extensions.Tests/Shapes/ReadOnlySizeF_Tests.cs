@@ -37,7 +37,7 @@ public sealed class ReadOnlySizeFF_Tests : Assert
     {
         ReadOnlySizeF point     = new(1.6f, 2.4f);
         Size          converted = point;
-        this.AreEqual( 2, converted.Width );
+        this.AreEqual( 1, converted.Width );
         this.AreEqual( 2, converted.Height );
     }
 

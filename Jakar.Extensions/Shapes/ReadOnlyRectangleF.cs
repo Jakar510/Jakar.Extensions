@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [StructLayout( LayoutKind.Sequential ), DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyRectangleF( float x, float y, float width, float height ) : IRectangle<ReadOnlyRectangleF, ReadOnlySizeF, ReadOnlyPointF, float>
+public readonly struct ReadOnlyRectangleF( float x, float y, float width, float height ) : IRectangle<ReadOnlyRectangleF, ReadOnlySizeF, ReadOnlyPointF, ReadOnlyThickness, float>, IMathOperators<ReadOnlyRectangleF>
 {
     public static readonly ReadOnlyRectangleF Invalid = new(float.NaN, float.NaN, float.NaN, float.NaN);
     public static readonly ReadOnlyRectangleF Zero    = new(0, 0, 0, 0);
@@ -20,7 +20,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     static        ReadOnlyRectangleF IGenericShape<ReadOnlyRectangleF>.Invalid => Invalid;
 
 
-    public bool                 IsEmpty  => IRectangle<ReadOnlyRectangleF, ReadOnlySizeF, ReadOnlyPointF, float>.CheckIfEmpty( in this );
+    public bool                 IsEmpty  => IRectangle<ReadOnlyRectangleF, ReadOnlySizeF, ReadOnlyPointF, ReadOnlyThickness, float>.CheckIfEmpty( in this );
     float IShapeLocation<float>.X        => X;
     float IShapeLocation<float>.Y        => Y;
     float IShapeSize<float>.    Width    => Width;

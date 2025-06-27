@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF, float>
+public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF, float>, IMathOperators<ReadOnlyPointF>
 {
     public static readonly ReadOnlyPointF Invalid = new(float.NaN, float.NaN);
     public static readonly ReadOnlyPointF Zero    = new(0, 0);

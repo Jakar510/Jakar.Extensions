@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IShapeOperators<TSelf> : IMathOperators<TSelf, TSelf>, IMathOperators<TSelf, double>, IMathOperators<TSelf, float>, IMathOperators<TSelf, int>, IMathOperators<TSelf, (double xOffset, double yOffset)>, IMathOperators<TSelf, (float xOffset, float yOffset)>, IMathOperators<TSelf, (int xOffset, int yOffset)>
+public interface IShapeOperators<TSelf> : IMathOperators<TSelf, double>, IMathOperators<TSelf, float>, IMathOperators<TSelf, int>, IMathOperators<TSelf, (double xOffset, double yOffset)>, IMathOperators<TSelf, (float xOffset, float yOffset)>, IMathOperators<TSelf, (int xOffset, int yOffset)>
     where TSelf : IShapeOperators<TSelf>;
 
 
