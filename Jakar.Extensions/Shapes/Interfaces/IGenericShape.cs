@@ -9,28 +9,31 @@ public interface IShapeOperators<TSelf> : IMathOperators<TSelf, double>, IMathOp
 
 
 
-public interface IGenericShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSelf>, IShapeOperators<TSelf>
-    where TSelf : IGenericShape<TSelf>
+public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSelf>
+    where TSelf : IShape<TSelf>
 {
-    public abstract static TSelf Invalid { get; }
-    public abstract static TSelf Zero    { get; }
-    public                 bool  IsNaN   { get; }
+    public abstract static ref readonly TSelf Invalid { get; }
+    public abstract static ref readonly TSelf Zero    { get; }
+    public                              bool  IsNaN   { get; }
 }
 
 
 
-public interface IShapeSize<out TNumber>
-    where TNumber : INumber<TNumber>
+public interface IGenericShape<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
+    where TSelf : IGenericShape<TSelf>;
+
+
+
+public interface IShapeSize
 {
-    public TNumber Width  { get; }
-    public TNumber Height { get; }
+    public double Width  { get; }
+    public double Height { get; }
 }
 
 
 
-public interface IShapeLocation<out TNumber>
-    where TNumber : INumber<TNumber>
+public interface IShapeLocation
 {
-    public TNumber X { get; }
-    public TNumber Y { get; }
+    public double X { get; }
+    public double Y { get; }
 }

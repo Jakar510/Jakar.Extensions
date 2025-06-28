@@ -4,15 +4,14 @@
 namespace Jakar.Extensions;
 
 
-public interface ISize<TSelf, TNumber> : IGenericShape<TSelf>, IShapeSize<TNumber>
-    where TSelf : ISize<TSelf, TNumber>
-    where TNumber : INumber<TNumber>
+public interface ISize<TSelf> : IGenericShape<TSelf>, IShapeSize
+    where TSelf : ISize<TSelf>
 {
     public bool IsLandscape { get; }
     public bool IsPortrait  { get; }
 
 
-    [Pure] public abstract static TSelf Create( TNumber width, TNumber height );
+    [Pure] public abstract static TSelf Create( double width, double height );
 
     [Pure] public TSelf Reverse();
     [Pure] public TSelf Round();

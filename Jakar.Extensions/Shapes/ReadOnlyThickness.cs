@@ -4,8 +4,8 @@
 namespace Jakar.Extensions;
 
 
-[DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness, double>, IThickness<ReadOnlyThickness, float>, IMathOperators<ReadOnlyThickness>
+[DefaultValue(nameof(Zero))]
+public readonly struct ReadOnlyThickness( double left, double top, double right, double bottom ) : IThickness<ReadOnlyThickness>, IMathOperators<ReadOnlyThickness>
 {
     public static readonly ReadOnlyThickness Invalid             = new(double.NaN, double.NaN, double.NaN, double.NaN);
     public static readonly ReadOnlyThickness Zero                = new(0);
@@ -17,32 +17,28 @@ public readonly struct ReadOnlyThickness( double left, double top, double right,
     public readonly        double            VerticalThickness   = top  + bottom;
 
 
-    public static Sorter<ReadOnlyThickness>                          Sorter              => Sorter<ReadOnlyThickness>.Default;
-    static        ReadOnlyThickness IGenericShape<ReadOnlyThickness>.Zero                => Zero;
-    static        ReadOnlyThickness IGenericShape<ReadOnlyThickness>.Invalid             => Invalid;
-    public        bool                                               IsEmpty             => Left == 0 && Top == 0 && Right == 0 && Bottom == 0;
-    public        bool                                               IsNaN               => double.IsNaN( Left ) || double.IsNaN( Top ) || double.IsNaN( Right ) || double.IsNaN( Bottom );
-    public        bool                                               IsValid             => IsNaN is false;
-    double IThickness<ReadOnlyThickness, double>.                    Bottom              => Bottom;
-    double IThickness<ReadOnlyThickness, double>.                    Left                => Left;
-    double IThickness<ReadOnlyThickness, double>.                    Right               => Right;
-    double IThickness<ReadOnlyThickness, double>.                    Top                 => Top;
-    double IThickness<ReadOnlyThickness, double>.                    HorizontalThickness => HorizontalThickness;
-    double IThickness<ReadOnlyThickness, double>.                    VerticalThickness   => VerticalThickness;
-    float IThickness<ReadOnlyThickness, float>.                      Bottom              => Bottom.AsFloat();
-    float IThickness<ReadOnlyThickness, float>.                      Left                => Left.AsFloat();
-    float IThickness<ReadOnlyThickness, float>.                      Right               => Right.AsFloat();
-    float IThickness<ReadOnlyThickness, float>.                      Top                 => Top.AsFloat();
-    float IThickness<ReadOnlyThickness, float>.                      HorizontalThickness => HorizontalThickness.AsFloat();
-    float IThickness<ReadOnlyThickness, float>.                      VerticalThickness   => VerticalThickness.AsFloat();
+    public static       Sorter<ReadOnlyThickness>                   Sorter              => Sorter<ReadOnlyThickness>.Default;
+    static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Zero                => ref Zero;
+    static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Invalid             => ref Invalid;
+    public              bool                                        IsEmpty             => Left == 0 && Top == 0 && Right == 0 && Bottom == 0;
+    public              bool                                        IsNaN               => double.IsNaN(Left) || double.IsNaN(Top) || double.IsNaN(Right) || double.IsNaN(Bottom);
+    public              bool                                        IsValid             => IsNaN is false;
+    double IThickness<ReadOnlyThickness>.                           Bottom              => Bottom;
+    double IThickness<ReadOnlyThickness>.                           Left                => Left;
+    double IThickness<ReadOnlyThickness>.                           Right               => Right;
+    double IThickness<ReadOnlyThickness>.                           Top                 => Top;
+    double IThickness<ReadOnlyThickness>.                           HorizontalThickness => HorizontalThickness;
+    double IThickness<ReadOnlyThickness>.                           VerticalThickness   => VerticalThickness;
 
 
-    public ReadOnlyThickness( double uniformSize ) : this( uniformSize, uniformSize, uniformSize, uniformSize ) { }
-    public ReadOnlyThickness( double horizontalSize, double verticalSize ) : this( horizontalSize / 2, verticalSize / 2, horizontalSize / 2, verticalSize / 2 ) { }
+    public ReadOnlyThickness( double uniformSize ) : this(uniformSize, uniformSize, uniformSize, uniformSize) { }
+    public ReadOnlyThickness( double horizontalSize, double verticalSize ) : this(horizontalSize / 2, verticalSize / 2, horizontalSize / 2, verticalSize / 2) { }
 
 
-    public void Deconstruct( out double left,             out double top, out double right, out double bottom ) => (left, top, right, bottom) = (Left, Top, Right, Bottom);
-    public void Deconstruct( out double horizontalMargin, out double verticalMargin ) => (horizontalMargin, verticalMargin) = (HorizontalThickness, VerticalThickness);
+    public void Deconstruct( out float  left,             out float  top, out float right, out float bottom ) => ( left, top, right, bottom ) = ( Left.AsFloat(), Top.AsFloat(), Right.AsFloat(), Bottom.AsFloat() );
+    public void Deconstruct( out float  horizontalMargin, out float  verticalMargin )                           => ( horizontalMargin, verticalMargin ) = ( HorizontalThickness.AsFloat(), VerticalThickness.AsFloat() );
+    public void Deconstruct( out double left,             out double top, out double right, out double bottom ) => ( left, top, right, bottom ) = ( Left, Top, Right, Bottom );
+    public void Deconstruct( out double horizontalMargin, out double verticalMargin ) => ( horizontalMargin, verticalMargin ) = ( HorizontalThickness, VerticalThickness );
 
 
     public static implicit operator ReadOnlySize( ReadOnlyThickness size )        => new(size.HorizontalThickness, size.VerticalThickness);
@@ -52,38 +48,38 @@ public readonly struct ReadOnlyThickness( double left, double top, double right,
 
     public int CompareTo( ReadOnlyThickness other )
     {
-        int bottomComparison = Bottom.CompareTo( other.Bottom );
+        int bottomComparison = Bottom.CompareTo(other.Bottom);
         if ( bottomComparison != 0 ) { return bottomComparison; }
 
-        int leftComparison = Left.CompareTo( other.Left );
+        int leftComparison = Left.CompareTo(other.Left);
         if ( leftComparison != 0 ) { return leftComparison; }
 
-        int rightComparison = Right.CompareTo( other.Right );
+        int rightComparison = Right.CompareTo(other.Right);
         if ( rightComparison != 0 ) { return rightComparison; }
 
-        return Top.CompareTo( other.Top );
+        return Top.CompareTo(other.Top);
     }
     public int CompareTo( object? obj )
     {
         if ( obj is null ) { return 1; }
 
         return obj is ReadOnlyThickness other
-                   ? CompareTo( other )
-                   : throw new ArgumentException( $"Object must be of type {nameof(ReadOnlyThickness)}" );
+                   ? CompareTo(other)
+                   : throw new ArgumentException($"Object must be of type {nameof(ReadOnlyThickness)}");
     }
-    public          bool   Equals( ReadOnlyThickness other )                           => Bottom.Equals( other.Bottom )  && Left.Equals( other.Left ) && Right.Equals( other.Right ) && Top.Equals( other.Top );
-    public override bool   Equals( object?           obj )                             => obj is ReadOnlyThickness other && Equals( other );
-    public override int    GetHashCode()                                               => HashCode.Combine( Bottom, Left, Right, Top );
-    public override string ToString()                                                  => ToString( null, null );
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => IThickness<ReadOnlyThickness, double>.ToString( this, format );
+    public          bool   Equals( ReadOnlyThickness other )                           => Bottom.Equals(other.Bottom)    && Left.Equals(other.Left) && Right.Equals(other.Right) && Top.Equals(other.Top);
+    public override bool   Equals( object?           obj )                             => obj is ReadOnlyThickness other && Equals(other);
+    public override int    GetHashCode()                                               => HashCode.Combine(Bottom, Left, Right, Top);
+    public override string ToString()                                                  => ToString(null, null);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => IThickness<ReadOnlyThickness>.ToString(this, format);
 
 
-    public static bool operator ==( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.Equals( self, value );
-    public static bool operator !=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.DoesNotEqual( self, value );
-    public static bool operator >( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.GreaterThan( self, value );
-    public static bool operator >=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.GreaterThanOrEqualTo( self, value );
-    public static bool operator <( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.LessThan( self, value );
-    public static bool operator <=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.LessThanOrEqualTo( self, value );
+    public static bool operator ==( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.Equals(self, value);
+    public static bool operator !=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.DoesNotEqual(self, value);
+    public static bool operator >( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.GreaterThan(self, value);
+    public static bool operator >=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.GreaterThanOrEqualTo(self, value);
+    public static bool operator <( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.LessThan(self, value);
+    public static bool operator <=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.LessThanOrEqualTo(self, value);
     public static ReadOnlyThickness operator +( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left + value.Left, self.Top + value.Top, self.Right + value.Right, self.Bottom + value.Bottom);
     public static ReadOnlyThickness operator -( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left - value.Left, self.Top - value.Top, self.Right - value.Right, self.Bottom - value.Bottom);
     public static ReadOnlyThickness operator *( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left * value.Left, self.Top * value.Top, self.Right * -value.Right, self.Bottom * value.Bottom);

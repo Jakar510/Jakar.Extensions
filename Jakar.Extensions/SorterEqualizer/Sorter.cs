@@ -15,13 +15,18 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
 
         return left.CompareTo( right );
     }
-    public int Compare( TValue? left, TValue? right ) => left.HasValue
-                                                             ? right.HasValue
-                                                                   ? Compare( left.Value, right.Value )
-                                                                   : 1
-                                                             : right.HasValue
-                                                                 ? -1
-                                                                 : 0;
+    public int Compare( TValue? left, TValue? right )
+    {
+        if ( left is IStructuralComparable comparable ) { return comparable.CompareTo( right, this ); }
+
+        return left.HasValue
+                   ? right.HasValue
+                         ? Compare( left.Value, right.Value )
+                         : 1
+                   : right.HasValue
+                       ? -1
+                       : 0;
+    }
     public int Compare( TValue left, TValue right ) => left.CompareTo( right );
 
 
@@ -48,9 +53,14 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue  left, TValue  right ) => Equals( left, right ) is false;
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue? left, TValue? right ) => Equals( left, right ) is false;
-    public bool Equals( TValue? left, TValue? right ) => left.HasValue
-                                                             ? right.HasValue && Equals( left.Value, right.Value )
-                                                             : right is null;
+    public bool Equals( TValue? left, TValue? right )
+    {
+        if ( left is IStructuralEquatable comparable ) { return comparable.Equals( right, this ); }
+
+        return left.HasValue
+                   ? right.HasValue && Equals( left.Value, right.Value )
+                   : right is null;
+    }
 }
 
 
@@ -72,6 +82,8 @@ public sealed class Sorter<TValue> : IComparer<TValue>, IComparer, IEqualityComp
 
     public int Compare( TValue? left, TValue? right )
     {
+        if ( left is IStructuralComparable comparable ) { return comparable.CompareTo( right, this ); }
+
         if ( typeof(TValue).IsByRef && ReferenceEquals( left, right ) ) { return 0; }
 
         if ( left is null && right is null ) { return 0; }
@@ -91,6 +103,8 @@ public sealed class Sorter<TValue> : IComparer<TValue>, IComparer, IEqualityComp
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue?              left, TValue? right ) => Equals( left, right ) is false;
     public bool Equals( TValue? left, TValue? right )
     {
+        if ( left is IStructuralEquatable comparable ) { return comparable.Equals( right, this ); }
+
         if ( typeof(TValue).IsByRef && ReferenceEquals( left, right ) ) { return true; }
 
         if ( left is null && right is null ) { return true; }

@@ -5,51 +5,34 @@
 namespace Jakar.Extensions;
 
 
-public interface IRectangle<TSelf, TSize, TPoint, TThickness, TNumber> : IGenericShape<TSelf>, IShapeSize<TNumber>, IShapeLocation<TNumber>
-    where TSelf : IRectangle<TSelf, TSize, TPoint, TThickness, TNumber>
-    where TSize : ISize<TSize, TNumber>
-    where TPoint : IPoint<TPoint, TNumber>
-    where TThickness : IThickness<TThickness, TNumber>
-    where TNumber : INumber<TNumber>
+public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
+    where TSelf : IRectangle<TSelf>
 {
-    public TNumber Bottom   { get; }
-    public TNumber Left     { get; }
-    public TNumber Right    { get; }
-    public TNumber Top      { get; }
-    public TPoint  Center   { get; }
-    public TPoint  Location { get; }
-    public TSize   Size     { get; }
+    public double        Bottom   { get; }
+    public double        Left     { get; }
+    public double        Right    { get; }
+    public double        Top      { get; }
+    public ReadOnlyPoint Center   { get; }
+    public ReadOnlyPoint Location { get; }
+    public ReadOnlySize  Size     { get; }
 
 
-    public static bool CheckIfEmpty( in TSelf rectangle ) => TNumber.IsNaN( rectangle.X ) || TNumber.IsNaN( rectangle.Y ) || TNumber.IsNegative( rectangle.Width ) || TNumber.IsNaN( rectangle.Height ) || TNumber.IsNaN( rectangle.Width ) || TNumber.IsNegative( rectangle.Height );
+    public static bool CheckIfEmpty( in TSelf rectangle ) => double.IsNaN(rectangle.Bottom) || double.IsNaN(rectangle.Top) || double.IsNegative(rectangle.Left) || double.IsNaN(rectangle.Left) || double.IsNaN(rectangle.Right) || double.IsNegative(rectangle.Right);
 
 
-    [Pure] public abstract static TSelf Create( params ReadOnlySpan<TPoint> points );
-    [Pure] public abstract static TSelf Create( in     TPoint               point,     in TSize      size );
-    [Pure] public abstract static TSelf Create( in     TPoint               topLeft,   in TPoint     bottomRight );
-    [Pure] public abstract static TSelf Create( in     TSelf                rectangle, in TThickness padding );
-    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber       y, in TSize size );
-    [Pure] public abstract static TSelf Create( TNumber                     x,         TNumber       y, TNumber  width, TNumber height );
+    [Pure] public abstract static TSelf Create( params ReadOnlySpan<ReadOnlyPoint> points );
+    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               point,     in ReadOnlySize      size );
+    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               topLeft,   in ReadOnlyPoint     bottomRight );
+    [Pure] public abstract static TSelf Create( in     TSelf                       rectangle, in ReadOnlyThickness padding );
+    [Pure] public abstract static TSelf Create( double                             x,         double               y, in ReadOnlySize size );
+    [Pure] public abstract static TSelf Create( double                             x,         double               y, double          width, double height );
+    [Pure]
+    public abstract static TSelf Create<T>( ref readonly T rect )
+        where T : IRectangle<T>;
 
 
-    [Pure] public bool  IsAtLeast( in      TSize  other );
-    [Pure] public bool  Contains( in       TPoint other );
-    [Pure] public bool  Contains( in       TSelf  other );
-    [Pure] public bool  IntersectsWith( in TSelf  other );
-    [Pure] public TSelf Union( in          TSelf  other );
-    [Pure] public TSelf Round();
-
-
-    [Pure] public TSelf Intersection( in TSelf other );
-
-
-    [Pure] public bool Contains( params ReadOnlySpan<TPoint> points );
-
-    [Pure] public bool DoesLineIntersect( in TPoint source, in TPoint target );
-
-
-    public void Deconstruct( out TNumber x,     out TNumber y, out TNumber width, out TNumber height );
-    public void Deconstruct( out TPoint  point, out TSize   size );
+    public void Deconstruct( out double        x,     out double       y, out double width, out double height );
+    public void Deconstruct( out ReadOnlyPoint point, out ReadOnlySize size );
 
 
     public static string ToString( TSelf self, string? format )
@@ -61,8 +44,11 @@ public interface IRectangle<TSelf, TSize, TPoint, TThickness, TNumber> : IGeneri
             case "Json":
                 return self.ToJson();
 
-            case ",": return $"{self.X},{self.Y},{self.Width},{self.Height}";
-            case "-": return $"{self.X}-{self.Y}-{self.Width}-{self.Height}";
+            case ",":
+                return $"{self.X},{self.Y},{self.Width},{self.Height}";
+
+            case "-":
+                return $"{self.X}-{self.Y}-{self.Width}-{self.Height}";
 
             case EMPTY:
             case null:

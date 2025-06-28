@@ -4,9 +4,8 @@
 namespace Jakar.Extensions;
 
 
-public interface IThickness<TSelf, TNumber> : IGenericShape<TSelf>
-    where TSelf : IThickness<TSelf, TNumber>
-    where TNumber : INumber<TNumber>
+public interface IThickness<TSelf> : IGenericShape<TSelf>
+    where TSelf : IThickness<TSelf>
 {
     public double Bottom              { get; }
     public double Left                { get; }
@@ -16,8 +15,8 @@ public interface IThickness<TSelf, TNumber> : IGenericShape<TSelf>
     public double VerticalThickness   { get; }
 
 
-    void Deconstruct( out TNumber left,             out TNumber top, out TNumber right, out TNumber bottom );
-    void Deconstruct( out TNumber horizontalMargin, out TNumber verticalMargin );
+    void Deconstruct( out double left,             out double top, out double right, out double bottom );
+    void Deconstruct( out double horizontalMargin, out double verticalMargin );
 
 
     public static string ToString( TSelf self, string? format )

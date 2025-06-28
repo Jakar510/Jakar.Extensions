@@ -4,8 +4,8 @@
 namespace Jakar.Extensions;
 
 
-[DefaultValue( nameof(Zero) )]
-public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF, float>, IMathOperators<ReadOnlySizeF>
+[DefaultValue(nameof(Zero))]
+public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF>, IMathOperators<ReadOnlySizeF>
 {
     public static readonly ReadOnlySizeF Invalid = new(float.NaN, float.NaN);
     public static readonly ReadOnlySizeF Zero    = new(0, 0);
@@ -13,16 +13,16 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public readonly        float         Width   = width;
 
 
-    public static Sorter<ReadOnlySizeF>                      Sorter      => Sorter<ReadOnlySizeF>.Default;
-    static        ReadOnlySizeF IGenericShape<ReadOnlySizeF>.Zero        => Zero;
-    static        ReadOnlySizeF IGenericShape<ReadOnlySizeF>.Invalid     => Invalid;
-    public        bool                                       IsValid     => IsNaN is false;
-    public        bool                                       IsEmpty     => Width == 0 && Height == 0;
-    public        bool                                       IsLandscape => Width < Height;
-    public        bool                                       IsNaN       => float.IsNaN( Width ) || float.IsNaN( Height );
-    public        bool                                       IsPortrait  => Width > Height;
-    float IShapeSize<float>.                                 Width       => Width;
-    float IShapeSize<float>.                                 Height      => Height;
+    public static       Sorter<ReadOnlySizeF>               Sorter      => Sorter<ReadOnlySizeF>.Default;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
+    public              bool                                IsValid     => IsNaN is false;
+    public              bool                                IsEmpty     => Width == 0 && Height == 0;
+    public              bool                                IsLandscape => Width < Height;
+    public              bool                                IsNaN       => float.IsNaN(Width) || float.IsNaN(Height);
+    public              bool                                IsPortrait  => Width > Height;
+    double IShapeSize.                                      Width       => Width;
+    double IShapeSize.                                      Height      => Height;
 
 
     public static implicit operator Size( ReadOnlySizeF         rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
@@ -33,7 +33,8 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static implicit operator ReadOnlySizeF( SizeF        size )      => new(size.Width, size.Height);
 
 
-    [Pure] public static ReadOnlySizeF Create( float x, float y ) => new(x, y);
+    [Pure] public static ReadOnlySizeF Create( float  x, float  y ) => new(x, y);
+    [Pure] public static ReadOnlySizeF Create( double x, double y ) => new((float)x, (float)y);
     [Pure] public        ReadOnlySizeF Reverse() => new(Height, Width);
     [Pure] public        ReadOnlySizeF Round()   => new(Width.Round(), Height.Round());
     [Pure] public        ReadOnlySizeF Floor()   => new(Width.Floor(), Height.Floor());
@@ -41,32 +42,32 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
 
     public int CompareTo( ReadOnlySizeF other )
     {
-        int widthComparison = Width.CompareTo( other.Width );
+        int widthComparison = Width.CompareTo(other.Width);
         if ( widthComparison != 0 ) { return widthComparison; }
 
-        return Height.CompareTo( other.Height );
+        return Height.CompareTo(other.Height);
     }
     public int CompareTo( object? obj )
     {
         if ( obj is null ) { return 1; }
 
         return obj is ReadOnlySizeF other
-                   ? CompareTo( other )
-                   : throw new ArgumentException( $"Object must be of type {nameof(ReadOnlySizeF)}" );
+                   ? CompareTo(other)
+                   : throw new ArgumentException($"Object must be of type {nameof(ReadOnlySizeF)}");
     }
-    public          bool   Equals( ReadOnlySizeF other )                               => Height.Equals( other.Height ) && Width.Equals( other.Width );
-    public override bool   Equals( object?       obj )                                 => obj is ReadOnlySizeF other    && Equals( other );
-    public override int    GetHashCode()                                               => HashCode.Combine( Height, Width );
-    public override string ToString()                                                  => ToString( null, null );
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF, float>.ToString( this, format );
+    public          bool   Equals( ReadOnlySizeF other )                               => Height.Equals(other.Height) && Width.Equals(other.Width);
+    public override bool   Equals( object?       obj )                                 => obj is ReadOnlySizeF other  && Equals(other);
+    public override int    GetHashCode()                                               => HashCode.Combine(Height, Width);
+    public override string ToString()                                                  => ToString(null, null);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF>.ToString(this, format);
 
 
-    public static bool operator ==( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.Equals( left, value );
-    public static bool operator !=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.DoesNotEqual( left, value );
-    public static bool operator >( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.GreaterThan( left, value );
-    public static bool operator >=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.GreaterThanOrEqualTo( left, value );
-    public static bool operator <( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.LessThan( left, value );
-    public static bool operator <=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.LessThanOrEqualTo( left, value );
+    public static bool operator ==( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.Equals(left, value);
+    public static bool operator !=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.DoesNotEqual(left, value);
+    public static bool operator >( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.GreaterThan(left, value);
+    public static bool operator >=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.GreaterThanOrEqualTo(left, value);
+    public static bool operator <( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.LessThan(left, value);
+    public static bool operator <=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.LessThanOrEqualTo(left, value);
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, Size                             value ) => new(size.Width + value.Width, size.Height             + value.Height);
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, SizeF                            value ) => new(size.Width + value.Width, size.Height             + value.Height);
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width + value.Width, size.Height             + value.Height);

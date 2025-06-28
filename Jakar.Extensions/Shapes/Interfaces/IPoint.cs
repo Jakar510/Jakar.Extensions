@@ -4,18 +4,17 @@
 namespace Jakar.Extensions;
 
 
-public interface IPoint<TSelf, TNumber> : IGenericShape<TSelf>, IShapeLocation<TNumber>
-    where TSelf : IPoint<TSelf, TNumber>
-    where TNumber : INumber<TNumber>
+public interface IPoint<TSelf> : IGenericShape<TSelf>, IShapeLocation
+    where TSelf : IPoint<TSelf>
 {
-    [Pure] public abstract static TSelf Create( TNumber x, TNumber y );
+    [Pure] public abstract static TSelf Create( double x, double y );
 
-    [Pure] public TSelf   Reverse();
-    [Pure] public TSelf   Round();
-    [Pure] public TSelf   Floor();
-    [Pure] public TNumber DistanceTo( in TSelf other );
-    
-    
+    [Pure] public TSelf  Reverse();
+    [Pure] public TSelf  Round();
+    [Pure] public TSelf  Floor();
+    [Pure] public double DistanceTo( in TSelf other );
+
+
     public static string ToString( TSelf self, string? format )
     {
         switch ( format )

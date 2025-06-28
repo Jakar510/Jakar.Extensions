@@ -40,6 +40,14 @@ public static class Numbers
 
         return value;
     }
+    public static T Min<T>( this T value, T other )
+        where T : IComparisonOperators<T, T, bool> => value < other
+                                                          ? other
+                                                          : value;
+    public static T Max<T>( this T value, T other )
+        where T : IComparisonOperators<T, T, bool> => value > other
+                                                          ? other
+                                                          : value;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
