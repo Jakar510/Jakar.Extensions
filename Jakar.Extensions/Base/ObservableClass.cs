@@ -4,10 +4,6 @@
 [Serializable]
 public abstract class ObservableClass : BaseClass, IObservableObject
 {
-    public static DateTime SQLMinDate     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDate; }
-    public static DateOnly SQLMinDateOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDateOnly; }
-
-
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
@@ -15,22 +11,62 @@ public abstract class ObservableClass : BaseClass, IObservableObject
 #pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property.GetPropertyChangedEventArgs() );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs   e )                => OnPropertyChanged( e );
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs   e )                => PropertyChanged?.Invoke( this, e );
-    protected internal                                  void                   OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property.GetPropertyChangingEventArgs() );
-    void IObservableObject.                                                    OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property );
-    [NotifyPropertyChangedInvocator] void IObservableObject.                   OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging( e );
-    protected internal               void                                      OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke( this, e );
+
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property);
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs  e )                => OnPropertyChanged(e);
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
 
 
-    bool IObservableObject.SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => SetProperty( ref backingStore, value, equalityComparer, propertyName );
-    protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => this.SetPropertyNotify( ref backingStore, value, equalityComparer );
+    protected internal void                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
+    void IObservableObject.                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property);
+    [NotifyPropertyChangedInvocator] void IObservableObject.OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging(e);
+    protected internal               void                   OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
 
 
-    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
-    protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => ObservableObjects.SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
+    protected internal static bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
+    {
+        backingStore = value;
+        return true;
+    }
+    protected internal static bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        backingStore = value;
+        return true;
+    }
+    protected internal bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
+    {
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TValue : IComparisonOperators<TValue, TValue, bool>
+        where TComparer : IEqualityComparer<TValue>
+    {
+        value = value < minValue
+                    ? minValue
+                    : value;
+
+        return SetProperty(ref backingStore, value, comparer, propertyName);
+    }
+
 
 #pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
@@ -42,10 +78,6 @@ public abstract class ObservableClass : BaseClass, IObservableObject
 public abstract class ObservableClass<TClass> : BaseClass<TClass>, IObservableObject
     where TClass : ObservableClass<TClass>, IEqualComparable<TClass>
 {
-    public static DateTime SQLMinDate     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDate; }
-    public static DateOnly SQLMinDateOnly { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ObservableRecord.SQLMinDateOnly; }
-
-
     public event PropertyChangedEventHandler?  PropertyChanged;
     public event PropertyChangingEventHandler? PropertyChanging;
 
@@ -53,22 +85,62 @@ public abstract class ObservableClass<TClass> : BaseClass<TClass>, IObservableOb
 #pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property.GetPropertyChangedEventArgs() );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs   e )                => OnPropertyChanged( e );
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs   e )                => PropertyChanged?.Invoke( this, e );
-    protected internal                                  void                   OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property.GetPropertyChangingEventArgs() );
-    void IObservableObject.                                                    OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property );
-    [NotifyPropertyChangedInvocator] void IObservableObject.                   OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging( e );
-    protected internal               void                                      OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke( this, e );
+
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property);
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs  e )                => OnPropertyChanged(e);
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
 
 
-    bool IObservableObject.SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => SetProperty( ref backingStore, value, equalityComparer, propertyName );
-    protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => this.SetPropertyNotify( ref backingStore, value, equalityComparer );
+    protected internal void                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
+    void IObservableObject.                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property);
+    [NotifyPropertyChangedInvocator] void IObservableObject.OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging(e);
+    protected internal               void                   OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
 
 
-    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
-    protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => ObservableObjects.SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
+    protected internal static bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
+    {
+        backingStore = value;
+        return true;
+    }
+    protected internal static bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        backingStore = value;
+        return true;
+    }
+    protected internal bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
+    {
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TValue : IComparisonOperators<TValue, TValue, bool>
+        where TComparer : IEqualityComparer<TValue>
+    {
+        value = value < minValue
+                    ? minValue
+                    : value;
+
+        return SetProperty(ref backingStore, value, comparer, propertyName);
+    }
+
 
 #pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
@@ -90,6 +162,6 @@ public abstract class ObservableClass<TClass, TID> : ObservableClass<TClass>, IU
     protected ObservableClass( TID id ) => ID = id;
 
 
-    protected bool SetID( TClass record ) => SetID( record.ID );
-    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueSorter<TID>.Default, nameof(ID) );
+    protected bool SetID( TClass record ) => SetID(record.ID);
+    protected bool SetID( TID    id )     => SetProperty(ref _id, id, nameof(ID));
 }

@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IPoint<TSelf> : IGenericShape<TSelf>, IShapeLocation
+public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
     where TSelf : IPoint<TSelf>
 {
     [Pure] public abstract static TSelf Create( double x, double y );
@@ -24,8 +24,11 @@ public interface IPoint<TSelf> : IGenericShape<TSelf>, IShapeLocation
             case "Json":
                 return self.ToJson();
 
-            case ",": return $"{self.X},{self.Y}";
-            case "-": return $"{self.X}-{self.Y}";
+            case ",":
+                return $"{self.X},{self.Y}";
+
+            case "-":
+                return $"{self.X}-{self.Y}";
 
             case EMPTY:
             case null:

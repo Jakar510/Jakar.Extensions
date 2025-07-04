@@ -9,6 +9,26 @@ public readonly struct ReadOnlyThickness( double left, double top, double right,
 {
     public static readonly ReadOnlyThickness Invalid             = new(double.NaN, double.NaN, double.NaN, double.NaN);
     public static readonly ReadOnlyThickness Zero                = new(0);
+    public static readonly ReadOnlyThickness One                 = 1;
+    public static readonly ReadOnlyThickness Two                 = 2;
+    public static readonly ReadOnlyThickness Three               = 3;
+    public static readonly ReadOnlyThickness Four                = 4;
+    public static readonly ReadOnlyThickness Five                = 5;
+    public static readonly ReadOnlyThickness Six                 = 6;
+    public static readonly ReadOnlyThickness Seven               = 7;
+    public static readonly ReadOnlyThickness Eight               = 8;
+    public static readonly ReadOnlyThickness Nine                = 9;
+    public static readonly ReadOnlyThickness Ten                 = 10;
+    public static readonly ReadOnlyThickness NegativeOne         = -1;
+    public static readonly ReadOnlyThickness NegativeTwo         = -2;
+    public static readonly ReadOnlyThickness NegativeThree       = -3;
+    public static readonly ReadOnlyThickness NegativeFour        = -4;
+    public static readonly ReadOnlyThickness NegativeFive        = -5;
+    public static readonly ReadOnlyThickness NegativeSix         = -6;
+    public static readonly ReadOnlyThickness NegativeSeven       = -7;
+    public static readonly ReadOnlyThickness NegativeEight       = -8;
+    public static readonly ReadOnlyThickness NegativeNine        = -9;
+    public static readonly ReadOnlyThickness NegativeTen         = -10;
     public readonly        double            Bottom              = bottom;
     public readonly        double            Left                = left;
     public readonly        double            Right               = right;

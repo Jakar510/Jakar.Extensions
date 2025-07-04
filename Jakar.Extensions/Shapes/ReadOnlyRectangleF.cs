@@ -7,12 +7,32 @@ namespace Jakar.Extensions;
 [StructLayout(LayoutKind.Sequential), DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlyRectangleF( float x, float y, float width, float height ) : IShape<ReadOnlyRectangleF>, IShapeSize, IShapeLocation
 {
-    public static readonly ReadOnlyRectangleF Invalid = new(float.NaN, float.NaN, float.NaN, float.NaN);
-    public static readonly ReadOnlyRectangleF Zero    = new(0, 0, 0, 0);
-    public readonly        float              X       = x;
-    public readonly        float              Y       = y;
-    public readonly        float              Width   = width;
-    public readonly        float              Height  = height;
+    public static readonly ReadOnlyRectangleF Invalid       = new(float.NaN, float.NaN, float.NaN, float.NaN);
+    public static readonly ReadOnlyRectangleF Zero          = new(0, 0, 0, 0);
+    public static readonly ReadOnlyRectangleF  One           = 1;
+    public static readonly ReadOnlyRectangleF  Two           = 2;
+    public static readonly ReadOnlyRectangleF  Three         = 3;
+    public static readonly ReadOnlyRectangleF  Four          = 4;
+    public static readonly ReadOnlyRectangleF  Five          = 5;
+    public static readonly ReadOnlyRectangleF  Six           = 6;
+    public static readonly ReadOnlyRectangleF  Seven         = 7;
+    public static readonly ReadOnlyRectangleF  Eight         = 8;
+    public static readonly ReadOnlyRectangleF  Nine          = 9;
+    public static readonly ReadOnlyRectangleF  Ten           = 10;
+    public static readonly ReadOnlyRectangleF  NegativeOne   = -1;
+    public static readonly ReadOnlyRectangleF  NegativeTwo   = -2;
+    public static readonly ReadOnlyRectangleF  NegativeThree = -3;
+    public static readonly ReadOnlyRectangleF  NegativeFour  = -4;
+    public static readonly ReadOnlyRectangleF  NegativeFive  = -5;
+    public static readonly ReadOnlyRectangleF  NegativeSix   = -6;
+    public static readonly ReadOnlyRectangleF  NegativeSeven = -7;
+    public static readonly ReadOnlyRectangleF  NegativeEight = -8;
+    public static readonly ReadOnlyRectangleF  NegativeNine  = -9;
+    public static readonly ReadOnlyRectangleF  NegativeTen   = -10;
+    public readonly        float              X             = x;
+    public readonly        float              Y             = y;
+    public readonly        float              Width         = width;
+    public readonly        float              Height        = height;
 
 
     public static       Sorter<ReadOnlyRectangleF>                    Sorter  => Sorter<ReadOnlyRectangleF>.Default;
@@ -36,6 +56,16 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public float          Top      => Y;
 
 
+    public static implicit operator Rectangle( ReadOnlyRectangleF  rectangle ) => rectangle.ToDrawingRect();
+    public static implicit operator RectangleF( ReadOnlyRectangleF rectangle ) => rectangle.ToDrawingRectF();
+    public static implicit operator ReadOnlyRectangleF( Rectangle  rectangle ) => new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+    public static implicit operator ReadOnlyRectangleF( RectangleF rectangle ) => new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+    public static implicit operator ReadOnlyRectangleF( int        value )     => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangleF( long       value )     => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangleF( float      value )     => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangleF( double     value )     => value.AsFloat();
+
+
     [Pure]
     public static ReadOnlySize AddMargin( in ReadOnlySize value, in ReadOnlyThickness margin )
     {
@@ -45,8 +75,8 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     }
 
 
-    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPoint>  points )                                 => RectangleD.Create(points);
-    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPointF> points )                                 => RectangleD.Create(points);
+    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPoint>  points )                                 => MutableRectangle.Create(points);
+    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPointF> points )                                 => MutableRectangle.Create(points);
     [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPoint                point,   in ReadOnlySize   size )        => new(point.X.AsFloat(), point.Y.AsFloat(), size.Width.AsFloat(), size.Height.AsFloat());
     [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPointF               point,   in ReadOnlySizeF  size )        => new(point.X, point.Y, size.Width, size.Height);
     [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPoint                topLeft, in ReadOnlyPoint  bottomRight ) => new(topLeft.X.AsFloat(), topLeft.Y.AsFloat(), ( bottomRight.X - topLeft.X ).AsFloat(), ( bottomRight.Y - topLeft.Y ).AsFloat());
@@ -153,16 +183,9 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     }
 
 
-    public RectangleD ToRectD()        => new(X, Y, Width, Height);
-    public Rectangle  ToDrawingRect()  => new((int)X.Round(), (int)Y.Round(), (int)Width.Round(), (int)Height.Round());
-    public RectangleF ToDrawingRectF() => new(X, Y, Width, Height);
-
-
-    public static implicit operator Rectangle( ReadOnlyRectangleF  rectangle ) => rectangle.ToDrawingRect();
-    public static implicit operator RectangleF( ReadOnlyRectangleF rectangle ) => rectangle.ToDrawingRectF();
-    public static implicit operator RectangleD( ReadOnlyRectangleF rectangle ) => rectangle.ToRectD();
-    public static implicit operator ReadOnlyRectangleF( Rectangle  rectangle ) => new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
-    public static implicit operator ReadOnlyRectangleF( RectangleF rectangle ) => new(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+    public MutableRectangle ToRectD()        => new(X, Y, Width, Height);
+    public Rectangle        ToDrawingRect()  => new((int)X.Round(), (int)Y.Round(), (int)Width.Round(), (int)Height.Round());
+    public RectangleF       ToDrawingRectF() => new(X, Y, Width, Height);
 
 
     public static bool operator ==( ReadOnlyRectangleF left, ReadOnlyRectangleF right ) => Sorter.Equals(left, right);

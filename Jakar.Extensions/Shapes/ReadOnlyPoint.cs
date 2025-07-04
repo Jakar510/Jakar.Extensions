@@ -4,10 +4,30 @@
 [DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>
 {
-    public static readonly ReadOnlyPoint Invalid = new(double.NaN, double.NaN);
-    public static readonly ReadOnlyPoint Zero    = new(0, 0);
-    public readonly        double        X       = x;
-    public readonly        double        Y       = y;
+    public static readonly ReadOnlyPoint Invalid       = new(double.NaN, double.NaN);
+    public static readonly ReadOnlyPoint Zero          = 0;
+    public static readonly ReadOnlyPoint One           = 1;
+    public static readonly ReadOnlyPoint Two           = 2;
+    public static readonly ReadOnlyPoint Three         = 3;
+    public static readonly ReadOnlyPoint Four          = 4;
+    public static readonly ReadOnlyPoint Five          = 5;
+    public static readonly ReadOnlyPoint Six           = 6;
+    public static readonly ReadOnlyPoint Seven         = 7;
+    public static readonly ReadOnlyPoint Eight         = 8;
+    public static readonly ReadOnlyPoint Nine          = 9;
+    public static readonly ReadOnlyPoint Ten           = 10;
+    public static readonly ReadOnlyPoint NegativeOne   = -1;
+    public static readonly ReadOnlyPoint NegativeTwo   = -2;
+    public static readonly ReadOnlyPoint NegativeThree = -3;
+    public static readonly ReadOnlyPoint NegativeFour  = -4;
+    public static readonly ReadOnlyPoint NegativeFive  = -5;
+    public static readonly ReadOnlyPoint NegativeSix   = -6;
+    public static readonly ReadOnlyPoint NegativeSeven = -7;
+    public static readonly ReadOnlyPoint NegativeEight = -8;
+    public static readonly ReadOnlyPoint NegativeNine  = -9;
+    public static readonly ReadOnlyPoint NegativeTen   = -10;
+    public readonly        double        X             = x;
+    public readonly        double        Y             = y;
 
 
     public static       Sorter<ReadOnlyPoint>               Sorter  => Sorter<ReadOnlyPoint>.Default;
@@ -26,6 +46,10 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public static implicit operator ReadOnlyPoint( ReadOnlyPointF point ) => new(point.X, point.Y);
     public static implicit operator ReadOnlyPoint( Point          point ) => new(point.X, point.Y);
     public static implicit operator ReadOnlyPoint( PointF         point ) => new(point.X, point.Y);
+    public static implicit operator ReadOnlyPoint( int            value ) => new(value, value );
+    public static implicit operator ReadOnlyPoint( long           value ) => new(value, value );
+    public static implicit operator ReadOnlyPoint( float          value ) => new(value, value );
+    public static implicit operator ReadOnlyPoint( double         value ) => new(value, value );
 
 
     [Pure] public static ReadOnlyPoint Create( float  x, float  y ) => new(x, y);

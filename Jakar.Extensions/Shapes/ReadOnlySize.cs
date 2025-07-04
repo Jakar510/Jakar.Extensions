@@ -4,10 +4,30 @@
 [DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadOnlySize>, IMathOperators<ReadOnlySize>
 {
-    public static readonly ReadOnlySize Invalid = new(double.NaN, double.NaN);
-    public static readonly ReadOnlySize Zero    = new(0, 0);
-    public readonly        double       Height  = height;
-    public readonly        double       Width   = width;
+    public static readonly ReadOnlySize Invalid       = new(double.NaN, double.NaN);
+    public static readonly ReadOnlySize Zero          = 0;
+    public static readonly ReadOnlySize One           = 1;
+    public static readonly ReadOnlySize Two           = 2;
+    public static readonly ReadOnlySize Three         = 3;
+    public static readonly ReadOnlySize Four          = 4;
+    public static readonly ReadOnlySize Five          = 5;
+    public static readonly ReadOnlySize Six           = 6;
+    public static readonly ReadOnlySize Seven         = 7;
+    public static readonly ReadOnlySize Eight         = 8;
+    public static readonly ReadOnlySize Nine          = 9;
+    public static readonly ReadOnlySize Ten           = 10;
+    public static readonly ReadOnlySize NegativeOne   = -1;
+    public static readonly ReadOnlySize NegativeTwo   = -2;
+    public static readonly ReadOnlySize NegativeThree = -3;
+    public static readonly ReadOnlySize NegativeFour  = -4;
+    public static readonly ReadOnlySize NegativeFive  = -5;
+    public static readonly ReadOnlySize NegativeSix   = -6;
+    public static readonly ReadOnlySize NegativeSeven = -7;
+    public static readonly ReadOnlySize NegativeEight = -8;
+    public static readonly ReadOnlySize NegativeNine  = -9;
+    public static readonly ReadOnlySize NegativeTen   = -10;
+    public readonly        double       Height        = height;
+    public readonly        double       Width         = width;
 
 
     public static       Sorter<ReadOnlySize>              Sorter      => Sorter<ReadOnlySize>.Default;
@@ -51,10 +71,14 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySize>.ToString(this, format);
 
 
-    public static implicit operator Size( ReadOnlySize  rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
-    public static implicit operator SizeF( ReadOnlySize rectangle ) => new((float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlySize( Size  size )      => new(size.Width, size.Height);
-    public static implicit operator ReadOnlySize( SizeF size )      => new(size.Width, size.Height);
+    public static implicit operator Size( ReadOnlySize   rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
+    public static implicit operator SizeF( ReadOnlySize  rectangle ) => new((float)rectangle.Width, (float)rectangle.Height);
+    public static implicit operator ReadOnlySize( Size   size )      => new(size.Width, size.Height);
+    public static implicit operator ReadOnlySize( SizeF  size )      => new(size.Width, size.Height);
+    public static implicit operator ReadOnlySize( int    value )     => new(value, value );
+    public static implicit operator ReadOnlySize( long   value )     => new(value, value );
+    public static implicit operator ReadOnlySize( float  value )     => new(value, value );
+    public static implicit operator ReadOnlySize( double value )     => new(value, value );
 
 
     public static bool operator ==( ReadOnlySize        left, ReadOnlySize                     value ) => Sorter.Equals(left, value);

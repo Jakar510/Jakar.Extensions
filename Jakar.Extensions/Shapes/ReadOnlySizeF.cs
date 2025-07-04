@@ -7,10 +7,30 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF>, IMathOperators<ReadOnlySizeF>
 {
-    public static readonly ReadOnlySizeF Invalid = new(float.NaN, float.NaN);
-    public static readonly ReadOnlySizeF Zero    = new(0, 0);
-    public readonly        float         Height  = height;
-    public readonly        float         Width   = width;
+    public static readonly ReadOnlySizeF Invalid       = new(float.NaN, float.NaN);
+    public static readonly ReadOnlySizeF Zero          = 0;
+    public static readonly ReadOnlySizeF One           = 1;
+    public static readonly ReadOnlySizeF Two           = 2;
+    public static readonly ReadOnlySizeF Three         = 3;
+    public static readonly ReadOnlySizeF Four          = 4;
+    public static readonly ReadOnlySizeF Five          = 5;
+    public static readonly ReadOnlySizeF Six           = 6;
+    public static readonly ReadOnlySizeF Seven         = 7;
+    public static readonly ReadOnlySizeF Eight         = 8;
+    public static readonly ReadOnlySizeF Nine          = 9;
+    public static readonly ReadOnlySizeF Ten           = 10;
+    public static readonly ReadOnlySizeF NegativeOne   = -1;
+    public static readonly ReadOnlySizeF NegativeTwo   = -2;
+    public static readonly ReadOnlySizeF NegativeThree = -3;
+    public static readonly ReadOnlySizeF NegativeFour  = -4;
+    public static readonly ReadOnlySizeF NegativeFive  = -5;
+    public static readonly ReadOnlySizeF NegativeSix   = -6;
+    public static readonly ReadOnlySizeF NegativeSeven = -7;
+    public static readonly ReadOnlySizeF NegativeEight = -8;
+    public static readonly ReadOnlySizeF NegativeNine  = -9;
+    public static readonly ReadOnlySizeF NegativeTen   = -10;
+    public readonly        float         Height        = height;
+    public readonly        float         Width         = width;
 
 
     public static       Sorter<ReadOnlySizeF>               Sorter      => Sorter<ReadOnlySizeF>.Default;
@@ -31,6 +51,10 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static implicit operator ReadOnlySizeF( ReadOnlySize size )      => new((float)size.Width, (float)size.Height);
     public static implicit operator ReadOnlySizeF( Size         size )      => new(size.Width, size.Height);
     public static implicit operator ReadOnlySizeF( SizeF        size )      => new(size.Width, size.Height);
+    public static implicit operator ReadOnlySizeF( int          value )     => new(value, value);
+    public static implicit operator ReadOnlySizeF( long         value )     => new(value, value);
+    public static implicit operator ReadOnlySizeF( float        value )     => new(value, value);
+    public static implicit operator ReadOnlySizeF( double       value )     => new(value.AsFloat(), value.AsFloat());
 
 
     [Pure] public static ReadOnlySizeF Create( float  x, float  y ) => new(x, y);

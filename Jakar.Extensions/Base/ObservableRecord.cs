@@ -1,15 +1,11 @@
-﻿using System.Numerics;
+﻿namespace Jakar.Extensions;
 
 
-
-namespace Jakar.Extensions;
-
-
-[SuppressMessage( "ReSharper", "VirtualMemberNeverOverridden.Global" )]
+[SuppressMessage("ReSharper", "VirtualMemberNeverOverridden.Global")]
 public record ObservableRecord : BaseRecord, IObservableObject
 {
-    public static readonly DateTime SQLMinDate = DateTime.Parse( "1/1/1753 12:00:00 AM", CultureInfo.InvariantCulture );
-    public static          DateOnly SQLMinDateOnly => SQLMinDate.AsDateOnly();
+    public static ref readonly DateTimeOffset SQLMinDate     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref BaseClass.SQLMinDate; }
+    public static ref readonly DateOnly       SQLMinDateOnly { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref BaseClass.SQLMinDateOnly; }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -19,22 +15,62 @@ public record ObservableRecord : BaseRecord, IObservableObject
 #pragma warning disable CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property.GetPropertyChangedEventArgs() );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string  property = EMPTY ) => OnPropertyChanged( property );
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs   e )                => OnPropertyChanged( e );
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs   e )                => PropertyChanged?.Invoke( this, e );
-    protected internal                                  void                   OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property.GetPropertyChangingEventArgs() );
-    void IObservableObject.                                                    OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging( property );
-    [NotifyPropertyChangedInvocator] void IObservableObject.                   OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging( e );
-    protected internal               void                                      OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke( this, e );
+
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property);
+    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs  e )                => OnPropertyChanged(e);
+    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
 
 
-    bool IObservableObject.SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => SetProperty( ref backingStore, value, equalityComparer, propertyName );
-    protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null, [CallerMemberName] string propertyName = EMPTY ) => this.SetPropertyNotify( ref backingStore, value, equalityComparer );
+    protected internal void                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
+    void IObservableObject.                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property);
+    [NotifyPropertyChangedInvocator] void IObservableObject.OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging(e);
+    protected internal               void                   OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
 
 
-    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
-    protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value, IEqualityComparer<TValue>? equalityComparer = null ) => ObservableObjects.SetPropertyWithoutNotify( ref backingStore, value, equalityComparer );
+    protected internal static bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
+    {
+        backingStore = value;
+        return true;
+    }
+    protected internal static bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        backingStore = value;
+        return true;
+    }
+    protected internal bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
+    {
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TComparer : IEqualityComparer<TValue>
+    {
+        if ( comparer.Equals(backingStore, value) ) { return false; }
+
+        OnPropertyChanging(propertyName);
+        backingStore = value;
+        OnPropertyChanged(propertyName);
+
+        return true;
+    }
+    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TValue : IComparisonOperators<TValue, TValue, bool>
+        where TComparer : IEqualityComparer<TValue>
+    {
+        value = value < minValue
+                    ? minValue
+                    : value;
+
+        return SetProperty(ref backingStore, value, comparer, propertyName);
+    }
+
 
 #pragma warning restore CS4026 // The CallerMemberNameAttribute will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 #pragma warning restore CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
@@ -45,34 +81,34 @@ public record ObservableRecord : BaseRecord, IObservableObject
 public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Sorter<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public Sorter<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Sorter<TClass>.Default; }
 
 
-    public static TClass? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TClass>();
-    public        string  ToJson()                                                    => this.ToJson( Formatting.None );
-    public        string  ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
+    public TClass? FromJson( [NotNullIfNotNull(nameof(json))] string? json ) => json?.FromJson<TClass>();
+    public string  ToJson()                                                  => this.ToJson(Formatting.None);
+    public string  ToPrettyJson()                                            => this.ToJson(Formatting.Indented);
 
 
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
         return other is TClass t
-                   ? CompareTo( t )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
+                   ? CompareTo(t)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
     public abstract int  CompareTo( TClass? other );
     public abstract bool Equals( TClass?    other );
 
 
-    public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace( json );
+        ArgumentException.ThrowIfNullOrWhiteSpace(json);
         return json.FromJson<TClass>();
     }
-    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TClass? result )
+    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
@@ -83,7 +119,7 @@ public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<T
         }
         catch ( Exception e )
         {
-            telemetrySpan.AddException( e );
+            telemetrySpan.AddException(e);
             result = null;
             return false;
         }
@@ -106,6 +142,6 @@ public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>,
     protected ObservableRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TClass record ) => SetID( record.ID );
-    protected bool SetID( TID    id )     => SetProperty( ref _id, id, ValueSorter<TID>.Default, nameof(ID) );
+    protected bool SetID( TClass record ) => SetID(record.ID);
+    protected bool SetID( TID    id )     => SetProperty(ref _id, id, nameof(ID));
 }
