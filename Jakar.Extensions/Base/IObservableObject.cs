@@ -6,18 +6,23 @@ namespace Jakar.Extensions;
 
 public interface IObservableObject : INotifyPropertyChanging, INotifyPropertyChanged
 {
-    /*
-    public bool SetProperty<TValue>( ref TValue backingStore, TValue value, TComparer equalityComparer , [CallerMemberName] string propertyName = EMPTY );
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY );
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e );
 
 
-    public bool SetProperty<TValue>( ref TValue backingStore, TValue value, TComparer equalityComparer );
-    */
+    public void OnPropertyChanging( [CallerMemberName] string property = EMPTY );
+    public void OnPropertyChanging( PropertyChangingEventArgs e );
 
 
-    [NotifyPropertyChangedInvocator] void OnPropertyChanged( [CallerMemberName]  string property = EMPTY );
-    void                                  OnPropertyChanging( [CallerMemberName] string property = EMPTY );
-    [NotifyPropertyChangedInvocator] void OnPropertyChanged( PropertyChangedEventArgs   e );
-    void                                  OnPropertyChanging( PropertyChangingEventArgs e );
+    bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value );
+    bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
+        where TComparer : IEqualityComparer<TValue>;
+    bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY );
+    bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TComparer : IEqualityComparer<TValue>;
+    bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TValue : IComparisonOperators<TValue, TValue, bool>
+        where TComparer : IEqualityComparer<TValue>;
 }
 
 

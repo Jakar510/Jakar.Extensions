@@ -16,32 +16,29 @@ public record ObservableRecord : BaseRecord, IObservableObject
 #pragma warning disable CS1066 // The default value specified will have no effect because it applies to a member that is used in contexts that do not allow optional arguments
 
 
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property);
-    [NotifyPropertyChangedInvocator]                    void IObservableObject.OnPropertyChanged( PropertyChangedEventArgs  e )                => OnPropertyChanged(e);
-    [NotifyPropertyChangedInvocator] protected internal void                   OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( [CallerMemberName] string property = EMPTY ) => OnPropertyChanged(property.GetPropertyChangedEventArgs());
+    [NotifyPropertyChangedInvocator] public void OnPropertyChanged( PropertyChangedEventArgs  e )                => PropertyChanged?.Invoke(this, e);
 
 
-    protected internal void                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
-    void IObservableObject.                                 OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property);
-    [NotifyPropertyChangedInvocator] void IObservableObject.OnPropertyChanging( PropertyChangingEventArgs e )                => OnPropertyChanging(e);
-    protected internal               void                   OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
+    public void OnPropertyChanging( [CallerMemberName] string property = EMPTY ) => OnPropertyChanging(property.GetPropertyChangingEventArgs());
+    public void OnPropertyChanging( PropertyChangingEventArgs e )                => PropertyChanging?.Invoke(this, e);
 
 
-    protected internal static bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
+    bool IObservableObject.SetPropertyWithoutNotify<TValue>( ref            TValue backingStore, TValue value )                                                                                                                         => SetPropertyWithoutNotify(ref backingStore, value);
+    bool IObservableObject.SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer                 comparer )                                                                                     => SetPropertyWithoutNotify(ref backingStore, value, comparer);
+    bool IObservableObject.SetProperty<TValue>( ref                         TValue backingStore, TValue value, [CallerMemberName] string propertyName                                                                         = EMPTY ) => SetProperty(ref backingStore, value, propertyName);
+    bool IObservableObject.SetProperty<TValue, TComparer>( ref              TValue backingStore, TValue value, TComparer                 comparer, [CallerMemberName] string propertyName                                     = EMPTY ) => SetProperty(ref backingStore, value, comparer,    propertyName);
+    bool IObservableObject.SetProperty<TValue, TComparer>( ref              TValue backingStore, TValue value, in TValue                 minValue, TComparer                 comparer, [CallerMemberName] string propertyName = EMPTY ) => SetProperty(ref backingStore, value, in minValue, comparer, propertyName);
+
+
+    protected virtual bool SetPropertyWithoutNotify<TValue>( ref TValue backingStore, TValue value )
     {
         backingStore = value;
         return true;
     }
-    protected internal static bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue>
-    {
-        if ( comparer.Equals(backingStore, value) ) { return false; }
-
-        backingStore = value;
-        return true;
-    }
-    protected internal bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
+    protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
+        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value);
+    protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
         OnPropertyChanging(propertyName);
         backingStore = value;
@@ -49,18 +46,9 @@ public record ObservableRecord : BaseRecord, IObservableObject
 
         return true;
     }
-    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue>
-    {
-        if ( comparer.Equals(backingStore, value) ) { return false; }
-
-        OnPropertyChanging(propertyName);
-        backingStore = value;
-        OnPropertyChanged(propertyName);
-
-        return true;
-    }
-    protected internal bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+    protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
+        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value, propertyName);
+    protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
         where TComparer : IEqualityComparer<TValue>
     {
