@@ -291,7 +291,7 @@ public static partial class AsyncLinq
 
     public static void ForEach<TElement>( this ReadOnlySpan<TElement> source, Action<TElement> action )
     {
-        foreach ( TElement item in source ) { action( item ); }
+        foreach ( ref readonly TElement item in source ) { action( item ); }
     }
 
 

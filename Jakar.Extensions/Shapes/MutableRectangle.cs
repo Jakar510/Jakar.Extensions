@@ -71,6 +71,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static implicit operator MutableRectangle( RectangleF         rect )      => new(rect.X, rect.Y, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( ReadOnlySize       rect )      => new(0, 0, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( ReadOnlySizeF      rect )      => new(0, 0, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( MutableSize        rect )      => new(0, 0, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( ReadOnlyPoint      rect )      => new(rect.X, rect.Y, 0, 0);
     public static implicit operator MutableRectangle( ReadOnlyPointF     rect )      => new(rect.X, rect.Y, 0, 0);
     public static implicit operator MutableRectangle( int                value )     => new(value, value, value, value);
@@ -159,38 +160,9 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public readonly string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<MutableRectangle>.ToString(this, format);
 
 
-    [Pure] public readonly bool IsAtLeast( in       ReadOnlySize                other )  => other.Width <= Width && other.Height <= Height;
-    [Pure] public readonly bool IsAtLeast( in       ReadOnlySizeF               other )  => other.Width <= Width && other.Height <= Height;
-    [Pure] public readonly bool Contains( in        ReadOnlyPoint               other )  => other.X     >= X     && other.X      < Right && other.Y >= Y && other.Y < Bottom;
-    [Pure] public readonly bool Contains( in        ReadOnlyPointF              other )  => other.X     >= X     && other.X      < Right && other.Y >= Y && other.Y < Bottom;
-    public readonly        bool ContainsAny( params ReadOnlySpan<ReadOnlyPoint> others ) => ContainsAny(in this, others);
-    public static bool ContainsAny<T>( ref readonly T rect, params ReadOnlySpan<ReadOnlyPoint> others )
-        where T : IRectangle<T>
-    {
-        MutableRectangle rectangle = Create(in rect);
-
-        foreach ( ref readonly ReadOnlyPoint point in others )
-        {
-            if ( rectangle.Contains(in point) ) { return true; }
-        }
-
-        return false;
-    }
-    public readonly bool ContainsAll( params ReadOnlySpan<ReadOnlyPoint> others ) => ContainsAll(in this, others);
-    public static bool ContainsAll<T>( ref readonly T rect, params ReadOnlySpan<ReadOnlyPoint> others )
-        where T : IRectangle<T>
-    {
-        MutableRectangle rectangle = Create(in rect);
-
-        foreach ( ref readonly ReadOnlyPoint point in others )
-        {
-            if ( rectangle.Contains(in point) is false ) { return false; }
-        }
-
-        return true;
-    }
     [Pure] public readonly bool Contains( in       MutableRectangle other ) => Left <= other.Left && Right >= other.Right && Top <= other.Top && Bottom >= other.Bottom;
     [Pure] public readonly bool IntersectsWith( in MutableRectangle other ) => ( Left >= other.Right || Right <= other.Left || Top >= other.Bottom || Bottom <= other.Top ) is false;
+
 
     public MutableRectangle Round()
     {
@@ -199,164 +171,6 @@ public struct MutableRectangle( double x, double y, double width, double height 
         Width  = Width.Round();
         Height = Height.Round();
         return this;
-    }
-
-    [Pure]
-    public MutableRectangle Union( in MutableRectangle other )
-    {
-        double x      = Math.Min(X, other.X);
-        double y      = Math.Min(Y, other.Y);
-        double width  = Math.Max(Right,  other.Right)  - X;
-        double height = Math.Max(Bottom, other.Bottom) - Y;
-
-        return width < 0 || height < 0
-                   ? Zero
-                   : new MutableRectangle(x, y, width, height);
-    }
-    [Pure]
-    public MutableRectangle Intersection( in MutableRectangle other )
-    {
-        double x      = Math.Max(X, other.X);
-        double y      = Math.Max(Y, other.Y);
-        double width  = Math.Min(Right,  other.Right)  - x;
-        double height = Math.Min(Bottom, other.Bottom) - y;
-
-        return width < 0 || height < 0
-                   ? Zero
-                   : new MutableRectangle(x, y, width, height);
-    }
-
-    [Pure]
-    public readonly bool Contains( params ReadOnlySpan<ReadOnlyPoint> points )
-    {
-        foreach ( ref readonly ReadOnlyPoint point in points )
-        {
-            if ( Contains(in point) ) { return true; }
-        }
-
-        return false;
-    }
-
-    [Pure]
-    public readonly bool Contains( params ReadOnlySpan<ReadOnlyPointF> points )
-    {
-        foreach ( ref readonly ReadOnlyPointF point in points )
-        {
-            if ( Contains(in point) ) { return true; }
-        }
-
-        return false;
-    }
-
-    [Pure]
-    public readonly bool DoesLineIntersect( in ReadOnlyPoint source, in ReadOnlyPoint target )
-    {
-        double               t0          = 0.0;
-        double               t1          = 1.0;
-        double               dx          = target.X - source.X;
-        double               dy          = target.Y - source.Y;
-        ReadOnlySpan<double> boundariesX = [X, X + Width];
-        ReadOnlySpan<double> boundariesY = [Y, Y + Height];
-
-        for ( int i = 0; i < 2; i++ )
-        {
-            double pX = i == 0
-                            ? -dx
-                            : dx;
-
-            double pY = i == 0
-                            ? -dy
-                            : dy;
-
-            for ( int j = 0; j < 2; j++ )
-            {
-                double qX = j == 0
-                                ? source.X       - boundariesX[i]
-                                : boundariesX[i] - source.X;
-
-                double qY = j == 0
-                                ? source.Y       - boundariesY[i]
-                                : boundariesY[i] - source.Y;
-
-                if ( pX == 0 && qX < 0 ) { return false; } // Line is parallel to the rectangle's horizontal edge and outside of it
-
-                if ( pY == 0 && qY < 0 ) { return false; } // Line is parallel to the rectangle's vertical edge and outside of it
-
-                double rX = pX != 0
-                                ? qX / pX
-                                : double.MaxValue;
-
-                double rY = pY != 0
-                                ? qY / pY
-                                : double.MaxValue;
-
-                if ( pX < 0 ) { t0 = Math.Max(t0, rX); }
-                else { t1          = Math.Min(t1, rX); }
-
-                if ( pY < 0 ) { t0 = Math.Max(t0, rY); }
-                else { t1          = Math.Min(t1, rY); }
-
-                if ( t0 > t1 ) { return false; }
-            }
-        }
-
-        return true;
-    }
-
-
-    [Pure]
-    public readonly bool DoesLineIntersect( in ReadOnlyPointF source, in ReadOnlyPointF target )
-    {
-        double               t0          = 0.0;
-        double               t1          = 1.0;
-        double               dx          = target.X - source.X;
-        double               dy          = target.Y - source.Y;
-        ReadOnlySpan<double> boundariesX = [X, X + Width];
-        ReadOnlySpan<double> boundariesY = [Y, Y + Height];
-
-        for ( int i = 0; i < 2; i++ )
-        {
-            double pX = i == 0
-                            ? -dx
-                            : dx;
-
-            double pY = i == 0
-                            ? -dy
-                            : dy;
-
-            for ( int j = 0; j < 2; j++ )
-            {
-                double qX = j == 0
-                                ? source.X       - boundariesX[i]
-                                : boundariesX[i] - source.X;
-
-                double qY = j == 0
-                                ? source.Y       - boundariesY[i]
-                                : boundariesY[i] - source.Y;
-
-                if ( pX == 0 && qX < 0 ) { return false; } // Line is parallel to the rectangle's horizontal edge and outside of it
-
-                if ( pY == 0 && qY < 0 ) { return false; } // Line is parallel to the rectangle's vertical edge and outside of it
-
-                double rX = pX != 0
-                                ? qX / pX
-                                : double.MaxValue;
-
-                double rY = pY != 0
-                                ? qY / pY
-                                : double.MaxValue;
-
-                if ( pX < 0 ) { t0 = Math.Max(t0, rX); }
-                else { t1          = Math.Min(t1, rX); }
-
-                if ( pY < 0 ) { t0 = Math.Max(t0, rY); }
-                else { t1          = Math.Min(t1, rY); }
-
-                if ( t0 > t1 ) { return false; }
-            }
-        }
-
-        return true;
     }
 
 
@@ -368,6 +182,16 @@ public struct MutableRectangle( double x, double y, double width, double height 
         height = Height;
     }
     public readonly void Deconstruct( out ReadOnlyPoint point, out ReadOnlySize size )
+    {
+        point = Location;
+        size  = Size;
+    }
+    public readonly void Deconstruct( out ReadOnlyPoint point, out MutableSize size )
+    {
+        point = Location;
+        size  = Size;
+    }
+    public readonly void Deconstruct( out ReadOnlyPointF point, out MutableSize size )
     {
         point = Location;
         size  = Size;
@@ -405,6 +229,10 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
     public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
     public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
     public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width, rectangle.Height);
     public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width, rectangle.Height);
     public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width, rectangle.Height);
@@ -429,6 +257,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static        MutableRectangle operator &( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
     public static        MutableRectangle operator &( MutableRectangle rectangle, Size                             other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
     public static        MutableRectangle operator &( MutableRectangle rectangle, SizeF                            other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
+    public static        MutableRectangle operator &( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
     [Pure] public static MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyThickness                margin ) => new(rectangle.X                               - margin.Left, rectangle.Y - margin.Top, rectangle.Width + margin.Right, rectangle.Height + margin.Bottom);
     [Pure] public static MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyThickness                margin ) => new(rectangle.X                               + margin.Left, rectangle.Y + margin.Top, rectangle.Width - margin.Right, rectangle.Height - margin.Bottom);
     public static        MutableRectangle operator +( MutableRectangle rectangle, int                              value )  => new(rectangle.X, rectangle.Y, rectangle.Width + value, rectangle.Height  + value);

@@ -17,6 +17,12 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     public ReadOnlySize  Size     { get; }
 
 
+    public abstract static implicit operator TSelf( int    value );
+    public abstract static implicit operator TSelf( long   value );
+    public abstract static implicit operator TSelf( float  value );
+    public abstract static implicit operator TSelf( double value );
+
+    
     public static bool CheckIfEmpty( in TSelf rectangle ) => double.IsNaN(rectangle.Bottom) || double.IsNaN(rectangle.Top) || double.IsNegative(rectangle.Left) || double.IsNaN(rectangle.Left) || double.IsNaN(rectangle.Right) || double.IsNegative(rectangle.Right);
 
 

@@ -13,7 +13,7 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> The value type. </typeparam>
 public sealed class Synchronized<TValue>( TValue value )
-    where TValue : class
+    where TValue : class?
 {
     private volatile TValue _value = value;
 

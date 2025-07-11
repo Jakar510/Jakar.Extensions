@@ -15,7 +15,7 @@ public static partial class Spans
         TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
         int      index  = 0;
 
-        foreach ( TValue value in span )
+        foreach ( ref readonly TValue value in span )
         {
             if ( selector( in value ) ) { buffer[index++] = value; }
         }
@@ -32,7 +32,7 @@ public static partial class Spans
         TNext[] buffer = GC.AllocateUninitializedArray<TNext>( span.Length );
         int     index  = 0;
 
-        foreach ( TValue value in span ) { buffer[index++] = func( in value ); }
+        foreach ( ref readonly TValue value in span ) { buffer[index++] = func( in value ); }
 
         return buffer;
     }
@@ -47,7 +47,7 @@ public static partial class Spans
         TNext[] buffer = GC.AllocateUninitializedArray<TNext>( span.Length );
         int     index  = 0;
 
-        foreach ( TValue value in span )
+        foreach ( ref readonly TValue value in span )
         {
             if ( selector( in value ) ) { buffer[index++] = func( in value ); }
         }
@@ -112,7 +112,7 @@ public static partial class Spans
         TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
         int      index  = 0;
 
-        foreach ( TValue equatable in span )
+        foreach ( ref readonly TValue equatable in span )
         {
             if ( equatable.Equals( value ) is false ) { buffer[index++] = equatable; }
         }
@@ -128,7 +128,7 @@ public static partial class Spans
         TValue[] buffer = GC.AllocateUninitializedArray<TValue>( span.Length );
         int      index  = 0;
 
-        foreach ( TValue equatable in span )
+        foreach ( ref readonly TValue equatable in span )
         {
             if ( equatable.IsOneOf( values ) is false ) { buffer[index++] = equatable; }
         }
@@ -146,7 +146,7 @@ public static partial class Spans
     [Pure]
     public static TValue First<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( value ) ) { return value; }
         }
@@ -162,7 +162,7 @@ public static partial class Spans
     [Pure]
     public static TValue? FirstOrDefault<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( value ) ) { return value; }
         }
@@ -180,7 +180,7 @@ public static partial class Spans
     [Pure]
     public static TValue First<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) ) { return value; }
         }
@@ -196,7 +196,7 @@ public static partial class Spans
     [Pure]
     public static TValue? FirstOrDefault<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) ) { return value; }
         }
@@ -258,7 +258,7 @@ public static partial class Spans
     [Pure]
     public static bool All<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( value ) is false ) { return false; }
         }
@@ -276,7 +276,7 @@ public static partial class Spans
     [Pure]
     public static bool All<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) is false ) { return false; }
         }
@@ -294,7 +294,7 @@ public static partial class Spans
     [Pure]
     public static bool Any<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) ) { return true; }
         }
@@ -312,7 +312,7 @@ public static partial class Spans
     [Pure]
     public static TValue Single<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) ) { return value; }
         }
@@ -328,7 +328,7 @@ public static partial class Spans
     [Pure]
     public static TValue? SingleOrDefault<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, RefCheck<TValue> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly TValue value in values )
         {
             if ( selector( in value ) ) { return value; }
         }
@@ -346,7 +346,7 @@ public static partial class Spans
     [Pure]
     public static TValue Single<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly  TValue value in values )
         {
             if ( selector( value ) ) { return value; }
         }
@@ -362,7 +362,7 @@ public static partial class Spans
     [Pure]
     public static TValue? SingleOrDefault<TValue>( this scoped ref readonly ReadOnlySpan<TValue> values, Func<TValue, bool> selector )
     {
-        foreach ( TValue value in values )
+        foreach ( ref readonly  TValue value in values )
         {
             if ( selector( value ) ) { return value; }
         }
@@ -384,7 +384,7 @@ public static partial class Spans
     {
         int result = 0;
 
-        foreach ( TValue v in span )
+        foreach ( ref readonly  TValue v in span )
         {
             if ( v.Equals( value ) ) { result++; }
         }
@@ -397,7 +397,7 @@ public static partial class Spans
     {
         int result = 0;
 
-        foreach ( TValue v in span )
+        foreach ( ref readonly  TValue v in span )
         {
             if ( check( in v ) ) { result++; }
         }
