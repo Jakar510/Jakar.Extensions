@@ -17,13 +17,15 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     public ReadOnlySize  Size     { get; }
 
 
-    public abstract static implicit operator TSelf( int    value );
-    public abstract static implicit operator TSelf( long   value );
-    public abstract static implicit operator TSelf( float  value );
-    public abstract static implicit operator TSelf( double value );
+    public abstract static implicit operator Rectangle( TSelf  self );
+    public abstract static implicit operator RectangleF( TSelf self );
+    public abstract static implicit operator TSelf( int        value );
+    public abstract static implicit operator TSelf( long       value );
+    public abstract static implicit operator TSelf( float      value );
+    public abstract static implicit operator TSelf( double     value );
 
-    
-    public static bool CheckIfEmpty( in TSelf rectangle ) => double.IsNaN(rectangle.Bottom) || double.IsNaN(rectangle.Top) || double.IsNegative(rectangle.Left) || double.IsNaN(rectangle.Left) || double.IsNaN(rectangle.Right) || double.IsNegative(rectangle.Right);
+
+    public static bool CheckIfEmpty( in TSelf self ) => double.IsNaN(self.Bottom) || double.IsNaN(self.Top) || double.IsNegative(self.Left) || double.IsNaN(self.Left) || double.IsNaN(self.Right) || double.IsNegative(self.Right);
 
 
     [Pure] public abstract static TSelf Create( params ReadOnlySpan<ReadOnlyPoint> points );
@@ -37,11 +39,13 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
         where T : IRectangle<T>;
 
 
-    public void Deconstruct( out double        x,     out double       y, out double width, out double height );
-    public void Deconstruct( out ReadOnlyPoint point, out ReadOnlySize size );
+    public void Deconstruct( out float          x,     out float         y, out float  width, out float  height );
+    public void Deconstruct( out double         x,     out double        y, out double width, out double height );
+    public void Deconstruct( out ReadOnlyPoint  point, out ReadOnlySize  size );
+    public void Deconstruct( out ReadOnlyPointF point, out ReadOnlySizeF size );
 
 
-    public static string ToString( TSelf self, string? format )
+    public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )
         {

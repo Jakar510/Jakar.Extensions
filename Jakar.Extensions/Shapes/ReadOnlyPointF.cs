@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Zero))]
-public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>
+public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF>, IShapeOperators<ReadOnlyPointF>
 {
     public static readonly ReadOnlyPointF Invalid       = new(float.NaN, float.NaN);
     public static readonly ReadOnlyPointF Zero          = 0;
@@ -94,13 +94,45 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public override bool   Equals( object?        obj )                                => obj is ReadOnlyPointF other && Equals(other);
     public override int    GetHashCode()                                               => HashCode.Combine(X, Y);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPointF>.ToString(this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPointF>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlyPointF left, ReadOnlyPointF value ) => Sorter.Equals(left, value);
-    public static bool operator !=( ReadOnlyPointF left, ReadOnlyPointF value ) => Sorter.DoesNotEqual(left, value);
-    public static bool operator >( ReadOnlyPointF  left, ReadOnlyPointF value ) => Sorter.GreaterThan(left, value);
-    public static bool operator >=( ReadOnlyPointF left, ReadOnlyPointF value ) => Sorter.GreaterThanOrEqualTo(left, value);
-    public static bool operator <( ReadOnlyPointF  left, ReadOnlyPointF value ) => Sorter.LessThan(left, value);
-    public static bool operator <=( ReadOnlyPointF left, ReadOnlyPointF value ) => Sorter.LessThanOrEqualTo(left, value);
+    public static bool operator ==( ReadOnlyPointF          left, ReadOnlyPointF                   value ) => Sorter.Equals(left, value);
+    public static bool operator !=( ReadOnlyPointF          left, ReadOnlyPointF                   value ) => Sorter.DoesNotEqual(left, value);
+    public static bool operator >( ReadOnlyPointF           left, ReadOnlyPointF                   value ) => Sorter.GreaterThan(left, value);
+    public static bool operator >=( ReadOnlyPointF          left, ReadOnlyPointF                   value ) => Sorter.GreaterThanOrEqualTo(left, value);
+    public static bool operator <( ReadOnlyPointF           left, ReadOnlyPointF                   value ) => Sorter.LessThan(left, value);
+    public static bool operator <=( ReadOnlyPointF          left, ReadOnlyPointF                   value ) => Sorter.LessThanOrEqualTo(left, value);
+    public static ReadOnlyPointF operator +( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X + value.X ), (float)( size.Y + value.Y ));
+    public static ReadOnlyPointF operator -( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X - value.X ), (float)( size.Y - value.Y ));
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X * value.X ), (float)( size.Y * value.Y ));
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X / value.X ), (float)( size.Y / value.Y ));
+    public static ReadOnlyPointF operator +( ReadOnlyPointF size, ReadOnlyPointF                   value ) => new(size.X + value.X, size.Y + value.Y);
+    public static ReadOnlyPointF operator -( ReadOnlyPointF size, ReadOnlyPointF                   value ) => new(size.X - value.X, size.Y - value.Y);
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, ReadOnlyPointF                   value ) => new(size.X * value.X, size.Y * value.Y);
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, ReadOnlyPointF                   value ) => new(size.X / value.X, size.Y / value.Y);
+    public static ReadOnlyPointF operator +( ReadOnlyPointF size, (int xOffset, int yOffset)       value ) => new(size.X + value.xOffset, size.Y + value.yOffset);
+    public static ReadOnlyPointF operator -( ReadOnlyPointF size, (int xOffset, int yOffset)       value ) => new(size.X - value.xOffset, size.Y - value.yOffset);
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, (int xOffset, int yOffset)       value ) => new(size.X / value.xOffset, size.Y / value.yOffset);
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, (int xOffset, int yOffset)       value ) => new(size.X * value.xOffset, size.Y * value.yOffset);
+    public static ReadOnlyPointF operator +( ReadOnlyPointF size, (float xOffset, float yOffset)   value ) => new(size.X + value.xOffset, size.Y + value.yOffset);
+    public static ReadOnlyPointF operator -( ReadOnlyPointF size, (float xOffset, float yOffset)   value ) => new(size.X - value.xOffset, size.Y - value.yOffset);
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, (float xOffset, float yOffset)   value ) => new(size.X / value.xOffset, size.Y / value.yOffset);
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, (float xOffset, float yOffset)   value ) => new(size.X * value.xOffset, size.Y * value.yOffset);
+    public static ReadOnlyPointF operator +( ReadOnlyPointF size, (double xOffset, double yOffset) value ) => new((float)( size.X + value.xOffset ), (float)( size.Y + value.yOffset ));
+    public static ReadOnlyPointF operator -( ReadOnlyPointF size, (double xOffset, double yOffset) value ) => new((float)( size.X - value.xOffset ), (float)( size.Y - value.yOffset ));
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, (double xOffset, double yOffset) value ) => new((float)( size.X * value.xOffset ), (float)( size.Y * value.yOffset ));
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, (double xOffset, double yOffset) value ) => new((float)( size.X / value.xOffset ), (float)( size.Y / value.yOffset ));
+    public static ReadOnlyPointF operator +( ReadOnlyPointF left, double                           value ) => new((float)( left.X + value ), (float)( left.Y + value ));
+    public static ReadOnlyPointF operator -( ReadOnlyPointF left, double                           value ) => new((float)( left.X - value ), (float)( left.Y - value ));
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, double                           value ) => new((float)( size.X * value ), (float)( size.Y * value ));
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, double                           value ) => new((float)( size.X / value ), (float)( size.Y / value ));
+    public static ReadOnlyPointF operator +( ReadOnlyPointF left, float                            value ) => new(left.X + value, left.Y + value);
+    public static ReadOnlyPointF operator -( ReadOnlyPointF left, float                            value ) => new(left.X - value, left.Y - value);
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, float                            value ) => new(size.X / value, size.Y / value);
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, float                            value ) => new(size.X * value, size.Y * value);
+    public static ReadOnlyPointF operator +( ReadOnlyPointF left, int                              value ) => new(left.X + value, left.Y + value);
+    public static ReadOnlyPointF operator -( ReadOnlyPointF left, int                              value ) => new(left.X - value, left.Y - value);
+    public static ReadOnlyPointF operator /( ReadOnlyPointF size, int                              value ) => new(size.X / value, size.Y / value);
+    public static ReadOnlyPointF operator *( ReadOnlyPointF size, int                              value ) => new(size.X * value, size.Y * value);
 }

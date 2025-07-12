@@ -4,33 +4,33 @@
 [DefaultValue(nameof(Zero))]
 public struct MutableRectangle( double x, double y, double width, double height ) : IMutableRectangle<MutableRectangle>
 {
-    public static readonly MutableRectangle Invalid       = new(double.NaN, double.NaN, double.NaN, double.NaN);
-    public static readonly MutableRectangle Zero          = new(0, 0, 0, 0);
-    public static readonly MutableRectangle One           = 1;
-    public static readonly MutableRectangle Two           = 2;
-    public static readonly MutableRectangle Three         = 3;
-    public static readonly MutableRectangle Four          = 4;
-    public static readonly MutableRectangle Five          = 5;
-    public static readonly MutableRectangle Six           = 6;
-    public static readonly MutableRectangle Seven         = 7;
-    public static readonly MutableRectangle Eight         = 8;
-    public static readonly MutableRectangle Nine          = 9;
-    public static readonly MutableRectangle Ten           = 10;
-    public static readonly MutableRectangle NegativeOne   = -1;
-    public static readonly MutableRectangle NegativeTwo   = -2;
-    public static readonly MutableRectangle NegativeThree = -3;
-    public static readonly MutableRectangle NegativeFour  = -4;
-    public static readonly MutableRectangle NegativeFive  = -5;
-    public static readonly MutableRectangle NegativeSix   = -6;
-    public static readonly MutableRectangle NegativeSeven = -7;
-    public static readonly MutableRectangle NegativeEight = -8;
-    public static readonly MutableRectangle NegativeNine  = -9;
-    public static readonly MutableRectangle NegativeTen   = -10;
+    public static readonly MutableRectangle Invalid = new(double.NaN, double.NaN, double.NaN, double.NaN);
+    public static readonly MutableRectangle Zero    = new(0, 0, 0, 0);
+    public static readonly MutableRectangle One     = 1;
+    public static readonly MutableRectangle Two     = 2;
+    public static readonly MutableRectangle Three   = 3;
+    public static readonly MutableRectangle Four    = 4;
+    public static readonly MutableRectangle Five    = 5;
+    public static readonly MutableRectangle Six     = 6;
+    public static readonly MutableRectangle Seven   = 7;
+    public static readonly MutableRectangle Eight   = 8;
+    public static readonly MutableRectangle Nine    = 9;
+    public static readonly MutableRectangle Ten     = 10;
 
 
     public static                Sorter<MutableRectangle>                  Sorter  => Sorter<MutableRectangle>.Default;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Zero    => ref Zero;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Invalid => ref Invalid;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.One     => ref One;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Two     => ref Two;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Three   => ref Three;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Four    => ref Four;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Five    => ref Five;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Six     => ref Six;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Seven   => ref Seven;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Eight   => ref Eight;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Nine    => ref Nine;
+    static ref readonly          MutableRectangle IShape<MutableRectangle>.Ten     => ref Ten;
     public                       double                                    X       { get; set; } = x;
     public                       double                                    Y       { get; set; } = y;
     public                       double                                    Width   { get; set; } = width;
@@ -63,21 +63,21 @@ public struct MutableRectangle( double x, double y, double width, double height 
     [JsonIgnore] public readonly double Top => Y;
 
 
-    public static implicit operator Rectangle( MutableRectangle          rectangle ) => new((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
-    public static implicit operator RectangleF( MutableRectangle         rectangle ) => new((float)rectangle.X, (float)rectangle.Y, (float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlyRectangleF( MutableRectangle rectangle ) => new((float)rectangle.X, (float)rectangle.Y, (float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlyRectangle( MutableRectangle  rect )      => new(rect.X, rect.Y, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( Rectangle          rect )      => new(rect.X, rect.Y, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( RectangleF         rect )      => new(rect.X, rect.Y, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( ReadOnlySize       rect )      => new(0, 0, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( ReadOnlySizeF      rect )      => new(0, 0, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( MutableSize        rect )      => new(0, 0, rect.Width, rect.Height);
-    public static implicit operator MutableRectangle( ReadOnlyPoint      rect )      => new(rect.X, rect.Y, 0, 0);
-    public static implicit operator MutableRectangle( ReadOnlyPointF     rect )      => new(rect.X, rect.Y, 0, 0);
-    public static implicit operator MutableRectangle( int                value )     => new(value, value, value, value);
-    public static implicit operator MutableRectangle( long               value )     => new(value, value, value, value);
-    public static implicit operator MutableRectangle( float              value )     => new(value, value, value, value);
-    public static implicit operator MutableRectangle( double             value )     => new(value, value, value, value);
+    public static implicit operator Rectangle( MutableRectangle          self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());
+    public static implicit operator RectangleF( MutableRectangle         self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
+    public static implicit operator ReadOnlyRectangleF( MutableRectangle self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
+    public static implicit operator ReadOnlyRectangle( MutableRectangle  rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( Rectangle          rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( RectangleF         rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( ReadOnlySize       rect )  => new(0, 0, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( ReadOnlySizeF      rect )  => new(0, 0, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( MutableSize        rect )  => new(0, 0, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( ReadOnlyPoint      rect )  => new(rect.X, rect.Y, 0, 0);
+    public static implicit operator MutableRectangle( ReadOnlyPointF     rect )  => new(rect.X, rect.Y, 0, 0);
+    public static implicit operator MutableRectangle( int                value ) => new(value, value, value, value);
+    public static implicit operator MutableRectangle( long               value ) => new(value, value, value, value);
+    public static implicit operator MutableRectangle( float              value ) => new(value, value, value, value);
+    public static implicit operator MutableRectangle( double             value ) => new(value, value, value, value);
 
 
     [Pure]
@@ -85,36 +85,36 @@ public struct MutableRectangle( double x, double y, double width, double height 
     {
         if ( points.Length <= 0 ) { return Zero; }
 
-        MutableRectangle rectangle = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
+        MutableRectangle self = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
 
         foreach ( ReadOnlyPoint point in points )
         {
-            if ( point.X      < rectangle.Left ) { rectangle.X      = point.X; }
-            else if ( point.X > rectangle.Right ) { rectangle.Width = point.X - rectangle.Left; }
+            if ( point.X      < self.Left ) { self.X      = point.X; }
+            else if ( point.X > self.Right ) { self.Width = point.X - self.Left; }
 
-            if ( point.Y      < rectangle.Top ) { rectangle.Y         = point.Y; }
-            else if ( point.Y > rectangle.Bottom ) { rectangle.Height = point.Y - rectangle.Top; }
+            if ( point.Y      < self.Top ) { self.Y         = point.Y; }
+            else if ( point.Y > self.Bottom ) { self.Height = point.Y - self.Top; }
         }
 
-        return rectangle;
+        return self;
     }
     [Pure]
     public static MutableRectangle Create( params ReadOnlySpan<ReadOnlyPointF> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
-        MutableRectangle rectangle = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
+        MutableRectangle self = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
 
         foreach ( ReadOnlyPointF point in points )
         {
-            if ( point.X      < rectangle.Left ) { rectangle.X      = point.X; }
-            else if ( point.X > rectangle.Right ) { rectangle.Width = point.X - rectangle.Left; }
+            if ( point.X      < self.Left ) { self.X      = point.X; }
+            else if ( point.X > self.Right ) { self.Width = point.X - self.Left; }
 
-            if ( point.Y      < rectangle.Top ) { rectangle.Y         = point.Y; }
-            else if ( point.Y > rectangle.Bottom ) { rectangle.Height = point.Y - rectangle.Top; }
+            if ( point.Y      < self.Top ) { self.Y         = point.Y; }
+            else if ( point.Y > self.Bottom ) { self.Height = point.Y - self.Top; }
         }
 
-        return rectangle;
+        return self;
     }
 
     [Pure]
@@ -157,7 +157,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public override bool   Equals( object?          other )                            => other is MutableRectangle x && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(X, Y, Width, Height);
     public override string ToString()                                                  => ToString(null, null);
-    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<MutableRectangle>.ToString(this, format);
+    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<MutableRectangle>.ToString(in this, format);
 
 
     [Pure] public readonly bool Contains( in       MutableRectangle other ) => Left <= other.Left && Right >= other.Right && Top <= other.Top && Bottom >= other.Bottom;
@@ -174,6 +174,13 @@ public struct MutableRectangle( double x, double y, double width, double height 
     }
 
 
+    public void Deconstruct( out float x, out float y, out float width, out float height )
+    {
+        x      = X.AsFloat();
+        y      = Y.AsFloat();
+        width  = Width.AsFloat();
+        height = Height.AsFloat();
+    }
     public readonly void Deconstruct( out double x, out double y, out double width, out double height )
     {
         x      = X;
@@ -182,6 +189,11 @@ public struct MutableRectangle( double x, double y, double width, double height 
         height = Height;
     }
     public readonly void Deconstruct( out ReadOnlyPoint point, out ReadOnlySize size )
+    {
+        point = Location;
+        size  = Size;
+    }
+    public readonly void Deconstruct( out ReadOnlyPointF point, out ReadOnlySizeF size )
     {
         point = Location;
         size  = Size;
@@ -196,92 +208,87 @@ public struct MutableRectangle( double x, double y, double width, double height 
         point = Location;
         size  = Size;
     }
-    public readonly void Deconstruct( out ReadOnlyPointF point, out ReadOnlySizeF size )
-    {
-        point = Location;
-        size  = Size;
-    }
 
 
-    public static        bool operator ==( MutableRectangle            left,      MutableRectangle                 right )  => Sorter.Equals(left, right);
-    public static        bool operator !=( MutableRectangle            left,      MutableRectangle                 right )  => Sorter.DoesNotEqual(left, right);
-    public static        bool operator >( MutableRectangle             left,      MutableRectangle                 right )  => Sorter.GreaterThan(left, right);
-    public static        bool operator >=( MutableRectangle            left,      MutableRectangle                 right )  => Sorter.GreaterThanOrEqualTo(left, right);
-    public static        bool operator <( MutableRectangle             left,      MutableRectangle                 right )  => Sorter.LessThan(left, right);
-    public static        bool operator <=( MutableRectangle            left,      MutableRectangle                 right )  => Sorter.LessThanOrEqualTo(left, right);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, MutableRectangle                 other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, MutableRectangle                 other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, MutableRectangle                 other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, MutableRectangle                 other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyRectangle                other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyRectangle                other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlyRectangle                other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlyRectangle                other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyRectangleF               other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyRectangleF               other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlyRectangleF               other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlyRectangleF               other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlySize                     other )  => new(rectangle.X, rectangle.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlySize                     other )  => new(rectangle.X, rectangle.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlySize                     other )  => new(rectangle.X, rectangle.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlySize                     other )  => new(rectangle.X, rectangle.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width + other.Width, rectangle.Height + other.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width - other.Width, rectangle.Height - other.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width * other.Width, rectangle.Height * other.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, rectangle.Width / other.Width, rectangle.Height / other.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyPointF                   other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyPointF                   other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, ReadOnlyPointF                   other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, ReadOnlyPointF                   other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, PointF                           other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, PointF                           other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, PointF                           other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, PointF                           other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, Point                            other )  => new(rectangle.X + other.X, rectangle.Y + other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, Point                            other )  => new(rectangle.X - other.X, rectangle.Y - other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, Point                            other )  => new(rectangle.X * other.X, rectangle.Y * other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, Point                            other )  => new(rectangle.X / other.X, rectangle.Y / other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, ReadOnlyPointF                   other )  => new(other.X, other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, ReadOnlyPoint                    other )  => new(other.X, other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, PointF                           other )  => new(other.X, other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, Point                            other )  => new(other.X, other.Y, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, ReadOnlySize                     other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, ReadOnlySizeF                    other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, Size                             other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, SizeF                            other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
-    public static        MutableRectangle operator &( MutableRectangle rectangle, MutableSize                      other )  => new(rectangle.X, rectangle.Y, other.Width, other.Height);
-    [Pure] public static MutableRectangle operator +( MutableRectangle rectangle, ReadOnlyThickness                margin ) => new(rectangle.X                               - margin.Left, rectangle.Y - margin.Top, rectangle.Width + margin.Right, rectangle.Height + margin.Bottom);
-    [Pure] public static MutableRectangle operator -( MutableRectangle rectangle, ReadOnlyThickness                margin ) => new(rectangle.X                               + margin.Left, rectangle.Y + margin.Top, rectangle.Width - margin.Right, rectangle.Height - margin.Bottom);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, int                              value )  => new(rectangle.X, rectangle.Y, rectangle.Width + value, rectangle.Height  + value);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, float                            value )  => new(rectangle.X, rectangle.Y, rectangle.Width + value, rectangle.Height  + value);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, double                           value )  => new(rectangle.X, rectangle.Y, rectangle.Width + value, rectangle.Height  + value);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, int                              value )  => new(rectangle.X, rectangle.Y, rectangle.Width - value, rectangle.Height  - value);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, float                            value )  => new(rectangle.X, rectangle.Y, rectangle.Width - value, rectangle.Height  - value);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, double                           value )  => new(rectangle.X, rectangle.Y, rectangle.Width - value, rectangle.Height  - value);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, int                              value )  => new(rectangle.X, rectangle.Y, rectangle.Width * value, rectangle.Height * value);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, float                            value )  => new(rectangle.X, rectangle.Y, rectangle.Width * value, rectangle.Height * value);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, double                           value )  => new(rectangle.X, rectangle.Y, rectangle.Width * value, rectangle.Height * value);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, int                              value )  => new(rectangle.X, rectangle.Y, rectangle.Width / value, rectangle.Height / value);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, float                            value )  => new(rectangle.X, rectangle.Y, rectangle.Width / value, rectangle.Height / value);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, double                           value )  => new(rectangle.X, rectangle.Y, rectangle.Width / value, rectangle.Height / value);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, (int xOffset, int yOffset)       value )  => new(rectangle.X + value.xOffset, rectangle.Y + value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, (float xOffset, float yOffset)   value )  => new(rectangle.X + value.xOffset, rectangle.Y + value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator +( MutableRectangle rectangle, (double xOffset, double yOffset) value )  => new(rectangle.X + value.xOffset, rectangle.Y + value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, (int xOffset, int yOffset)       value )  => new(rectangle.X - value.xOffset, rectangle.Y - value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, (float xOffset, float yOffset)   value )  => new(rectangle.X - value.xOffset, rectangle.Y - value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator -( MutableRectangle rectangle, (double xOffset, double yOffset) value )  => new(rectangle.X - value.xOffset, rectangle.Y - value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, (int xOffset, int yOffset)       value )  => new(rectangle.X * value.xOffset, rectangle.Y * value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, (float xOffset, float yOffset)   value )  => new(rectangle.X * value.xOffset, rectangle.Y * value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator *( MutableRectangle rectangle, (double xOffset, double yOffset) value )  => new(rectangle.X * value.xOffset, rectangle.Y * value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, (int xOffset, int yOffset)       value )  => new(rectangle.X / value.xOffset, rectangle.Y / value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, (float xOffset, float yOffset)   value )  => new(rectangle.X / value.xOffset, rectangle.Y / value.yOffset, rectangle.Width, rectangle.Height);
-    public static        MutableRectangle operator /( MutableRectangle rectangle, (double xOffset, double yOffset) value )  => new(rectangle.X / value.xOffset, rectangle.Y / value.yOffset, rectangle.Width, rectangle.Height);
+    public static        bool operator ==( MutableRectangle            left, MutableRectangle                 right )  => Sorter.Equals(left, right);
+    public static        bool operator !=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.DoesNotEqual(left, right);
+    public static        bool operator >( MutableRectangle             left, MutableRectangle                 right )  => Sorter.GreaterThan(left, right);
+    public static        bool operator >=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.GreaterThanOrEqualTo(left, right);
+    public static        bool operator <( MutableRectangle             left, MutableRectangle                 right )  => Sorter.LessThan(left, right);
+    public static        bool operator <=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.LessThanOrEqualTo(left, right);
+    public static        MutableRectangle operator +( MutableRectangle self, MutableRectangle                 other )  => new(self.X + other.X, self.Y + other.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, MutableRectangle                 other )  => new(self.X - other.X, self.Y - other.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, MutableRectangle                 other )  => new(self.X * other.X, self.Y * other.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, MutableRectangle                 other )  => new(self.X / other.X, self.Y / other.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlyRectangle                other )  => new(self.X + other.X, self.Y + other.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlyRectangle                other )  => new(self.X - other.X, self.Y - other.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlyRectangle                other )  => new(self.X * other.X, self.Y * other.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlyRectangle                other )  => new(self.X / other.X, self.Y / other.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlyRectangleF               other )  => new(self.X + other.X, self.Y + other.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlyRectangleF               other )  => new(self.X - other.X, self.Y - other.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlyRectangleF               other )  => new(self.X * other.X, self.Y * other.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlyRectangleF               other )  => new(self.X / other.X, self.Y / other.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlySize                     other )  => new(self.X, self.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlySize                     other )  => new(self.X, self.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlySize                     other )  => new(self.X, self.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlySize                     other )  => new(self.X, self.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlySizeF                    other )  => new(self.X, self.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlySizeF                    other )  => new(self.X, self.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlySizeF                    other )  => new(self.X, self.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlySizeF                    other )  => new(self.X, self.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, MutableSize                      other )  => new(self.X, self.Y, self.Width + other.Width, self.Height + other.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, MutableSize                      other )  => new(self.X, self.Y, self.Width - other.Width, self.Height - other.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, MutableSize                      other )  => new(self.X, self.Y, self.Width * other.Width, self.Height * other.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, MutableSize                      other )  => new(self.X, self.Y, self.Width / other.Width, self.Height / other.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlyPoint                    other )  => new(self.X + other.X, self.Y + other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlyPoint                    other )  => new(self.X - other.X, self.Y - other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlyPoint                    other )  => new(self.X * other.X, self.Y * other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlyPoint                    other )  => new(self.X / other.X, self.Y / other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, ReadOnlyPointF                   other )  => new(self.X + other.X, self.Y + other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, ReadOnlyPointF                   other )  => new(self.X - other.X, self.Y - other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, ReadOnlyPointF                   other )  => new(self.X * other.X, self.Y * other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, ReadOnlyPointF                   other )  => new(self.X / other.X, self.Y / other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, PointF                           other )  => new(self.X + other.X, self.Y + other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, PointF                           other )  => new(self.X - other.X, self.Y - other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, PointF                           other )  => new(self.X * other.X, self.Y * other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, PointF                           other )  => new(self.X / other.X, self.Y / other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, Point                            other )  => new(self.X + other.X, self.Y + other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, Point                            other )  => new(self.X - other.X, self.Y - other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, Point                            other )  => new(self.X * other.X, self.Y * other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, Point                            other )  => new(self.X / other.X, self.Y / other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, ReadOnlyPointF                   other )  => new(other.X, other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, ReadOnlyPoint                    other )  => new(other.X, other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, PointF                           other )  => new(other.X, other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, Point                            other )  => new(other.X, other.Y, self.Width, self.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, ReadOnlySize                     other )  => new(self.X, self.Y, other.Width, other.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, ReadOnlySizeF                    other )  => new(self.X, self.Y, other.Width, other.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, Size                             other )  => new(self.X, self.Y, other.Width, other.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, SizeF                            other )  => new(self.X, self.Y, other.Width, other.Height);
+    public static        MutableRectangle operator &( MutableRectangle self, MutableSize                      other )  => new(self.X, self.Y, other.Width, other.Height);
+    [Pure] public static MutableRectangle operator +( MutableRectangle self, ReadOnlyThickness                margin ) => new(self.X                     - margin.Left, self.Y - margin.Top, self.Width + margin.Right, self.Height + margin.Bottom);
+    [Pure] public static MutableRectangle operator -( MutableRectangle self, ReadOnlyThickness                margin ) => new(self.X                     + margin.Left, self.Y + margin.Top, self.Width - margin.Right, self.Height - margin.Bottom);
+    public static        MutableRectangle operator +( MutableRectangle self, int                              value )  => new(self.X, self.Y, self.Width + value, self.Height  + value);
+    public static        MutableRectangle operator +( MutableRectangle self, float                            value )  => new(self.X, self.Y, self.Width + value, self.Height  + value);
+    public static        MutableRectangle operator +( MutableRectangle self, double                           value )  => new(self.X, self.Y, self.Width + value, self.Height  + value);
+    public static        MutableRectangle operator -( MutableRectangle self, int                              value )  => new(self.X, self.Y, self.Width - value, self.Height  - value);
+    public static        MutableRectangle operator -( MutableRectangle self, float                            value )  => new(self.X, self.Y, self.Width - value, self.Height  - value);
+    public static        MutableRectangle operator -( MutableRectangle self, double                           value )  => new(self.X, self.Y, self.Width - value, self.Height  - value);
+    public static        MutableRectangle operator *( MutableRectangle self, int                              value )  => new(self.X, self.Y, self.Width * value, self.Height * value);
+    public static        MutableRectangle operator *( MutableRectangle self, float                            value )  => new(self.X, self.Y, self.Width * value, self.Height * value);
+    public static        MutableRectangle operator *( MutableRectangle self, double                           value )  => new(self.X, self.Y, self.Width * value, self.Height * value);
+    public static        MutableRectangle operator /( MutableRectangle self, int                              value )  => new(self.X, self.Y, self.Width / value, self.Height / value);
+    public static        MutableRectangle operator /( MutableRectangle self, float                            value )  => new(self.X, self.Y, self.Width / value, self.Height / value);
+    public static        MutableRectangle operator /( MutableRectangle self, double                           value )  => new(self.X, self.Y, self.Width / value, self.Height / value);
+    public static        MutableRectangle operator +( MutableRectangle self, (int xOffset, int yOffset)       value )  => new(self.X + value.xOffset, self.Y + value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, (float xOffset, float yOffset)   value )  => new(self.X + value.xOffset, self.Y + value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator +( MutableRectangle self, (double xOffset, double yOffset) value )  => new(self.X + value.xOffset, self.Y + value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, (int xOffset, int yOffset)       value )  => new(self.X - value.xOffset, self.Y - value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, (float xOffset, float yOffset)   value )  => new(self.X - value.xOffset, self.Y - value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator -( MutableRectangle self, (double xOffset, double yOffset) value )  => new(self.X - value.xOffset, self.Y - value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, (int xOffset, int yOffset)       value )  => new(self.X * value.xOffset, self.Y * value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, (float xOffset, float yOffset)   value )  => new(self.X * value.xOffset, self.Y * value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator *( MutableRectangle self, (double xOffset, double yOffset) value )  => new(self.X * value.xOffset, self.Y * value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, (int xOffset, int yOffset)       value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, (float xOffset, float yOffset)   value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static        MutableRectangle operator /( MutableRectangle self, (double xOffset, double yOffset) value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
 }

@@ -7,37 +7,37 @@ namespace Jakar.Extensions;
 [StructLayout(LayoutKind.Sequential), DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle>
 {
-    public static readonly ReadOnlyRectangle Invalid       = new(double.NaN, double.NaN, double.NaN, double.NaN);
-    public static readonly ReadOnlyRectangle Zero          = new(0, 0, 0, 0);
-    public static readonly ReadOnlyRectangle One           = 1;
-    public static readonly ReadOnlyRectangle Two           = 2;
-    public static readonly ReadOnlyRectangle Three         = 3;
-    public static readonly ReadOnlyRectangle Four          = 4;
-    public static readonly ReadOnlyRectangle Five          = 5;
-    public static readonly ReadOnlyRectangle Six           = 6;
-    public static readonly ReadOnlyRectangle Seven         = 7;
-    public static readonly ReadOnlyRectangle Eight         = 8;
-    public static readonly ReadOnlyRectangle Nine          = 9;
-    public static readonly ReadOnlyRectangle Ten           = 10;
-    public static readonly ReadOnlyRectangle NegativeOne   = -1;
-    public static readonly ReadOnlyRectangle NegativeTwo   = -2;
-    public static readonly ReadOnlyRectangle NegativeThree = -3;
-    public static readonly ReadOnlyRectangle NegativeFour  = -4;
-    public static readonly ReadOnlyRectangle NegativeFive  = -5;
-    public static readonly ReadOnlyRectangle NegativeSix   = -6;
-    public static readonly ReadOnlyRectangle NegativeSeven = -7;
-    public static readonly ReadOnlyRectangle NegativeEight = -8;
-    public static readonly ReadOnlyRectangle NegativeNine  = -9;
-    public static readonly ReadOnlyRectangle NegativeTen   = -10;
-    public readonly        double            X             = x;
-    public readonly        double            Y             = y;
-    public readonly        double            Width         = width;
-    public readonly        double            Height        = height;
+    public static readonly ReadOnlyRectangle Invalid = new(double.NaN, double.NaN, double.NaN, double.NaN);
+    public static readonly ReadOnlyRectangle Zero    = new(0, 0, 0, 0);
+    public static readonly ReadOnlyRectangle One     = 1;
+    public static readonly ReadOnlyRectangle Two     = 2;
+    public static readonly ReadOnlyRectangle Three   = 3;
+    public static readonly ReadOnlyRectangle Four    = 4;
+    public static readonly ReadOnlyRectangle Five    = 5;
+    public static readonly ReadOnlyRectangle Six     = 6;
+    public static readonly ReadOnlyRectangle Seven   = 7;
+    public static readonly ReadOnlyRectangle Eight   = 8;
+    public static readonly ReadOnlyRectangle Nine    = 9;
+    public static readonly ReadOnlyRectangle Ten     = 10;
+    public readonly        double            X       = x;
+    public readonly        double            Y       = y;
+    public readonly        double            Width   = width;
+    public readonly        double            Height  = height;
 
 
     public static       Sorter<ReadOnlyRectangle>                   Sorter   => Sorter<ReadOnlyRectangle>.Default;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Two      => ref Two;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Three    => ref Three;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Four     => ref Four;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Five     => ref Five;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Six      => ref Six;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Seven    => ref Seven;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Eight    => ref Eight;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Nine     => ref Nine;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Ten      => ref Ten;
     public              bool                                        IsEmpty  => IRectangle<ReadOnlyRectangle>.CheckIfEmpty(in this);
     double IShapeLocation.                                          X        => X;
     double IShapeLocation.                                          Y        => Y;
@@ -54,13 +54,13 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public double                                                   Top      => Y;
 
 
-    public static implicit operator Rectangle( ReadOnlyRectangle          rectangle ) => new((int)rectangle.X.Round(), (int)rectangle.Y.Round(), (int)rectangle.Width.Round(), (int)rectangle.Height.Round());
-    public static implicit operator RectangleF( ReadOnlyRectangle         rectangle ) => new((float)rectangle.X, (float)rectangle.Y, (float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlyRectangleF( ReadOnlyRectangle rectangle ) => new((float)rectangle.X, (float)rectangle.Y, (float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlyRectangle( int                value )     => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( long               value )     => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( float              value )     => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( double             value )     => new(value, value, value, value);
+    public static implicit operator Rectangle( ReadOnlyRectangle          self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());
+    public static implicit operator RectangleF( ReadOnlyRectangle         self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
+    public static implicit operator ReadOnlyRectangleF( ReadOnlyRectangle self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
+    public static implicit operator ReadOnlyRectangle( int                value ) => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangle( long               value ) => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangle( float              value ) => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangle( double             value ) => new(value, value, value, value);
 
 
     [Pure]
@@ -108,7 +108,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public override bool   Equals( object?           other )                           => other is ReadOnlyRectangle x && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(X, Y, Width, Height);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<ReadOnlyRectangle>.ToString(this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => IRectangle<ReadOnlyRectangle>.ToString(in this, format);
 
 
     public void Deconstruct( out float x, out float y, out float width, out float height )
@@ -126,6 +126,11 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
         height = Height;
     }
     public void Deconstruct( out ReadOnlyPoint point, out ReadOnlySize size )
+    {
+        point = Location;
+        size  = Size;
+    }
+    public void Deconstruct( out ReadOnlyPointF point, out ReadOnlySizeF size )
     {
         point = Location;
         size  = Size;

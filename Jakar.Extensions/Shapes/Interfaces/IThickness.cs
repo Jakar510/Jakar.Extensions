@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IThickness<TSelf> : IGenericShape<TSelf>
+public interface IThickness<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
     where TSelf : IThickness<TSelf>
 {
     public double Bottom              { get; }
@@ -19,7 +19,7 @@ public interface IThickness<TSelf> : IGenericShape<TSelf>
     void Deconstruct( out double horizontalMargin, out double verticalMargin );
 
 
-    public static string ToString( TSelf self, string? format )
+    public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )
         {

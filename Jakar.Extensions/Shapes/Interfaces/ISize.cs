@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface ISize<TSelf> : IGenericShape<TSelf>, IShapeSize
+public interface ISize<TSelf> : IShape<TSelf>, IShapeSize
     where TSelf : ISize<TSelf>
 {
     public bool IsLandscape { get; }
@@ -18,7 +18,7 @@ public interface ISize<TSelf> : IGenericShape<TSelf>, IShapeSize
     [Pure] public TSelf Floor();
 
 
-    public static string ToString( TSelf self, string? format )
+    public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )
         {
@@ -27,8 +27,11 @@ public interface ISize<TSelf> : IGenericShape<TSelf>, IShapeSize
             case "Json":
                 return self.ToJson();
 
-            case ",": return $"{self.Width},{self.Height}";
-            case "-": return $"{self.Width}-{self.Height}";
+            case ",":
+                return $"{self.Width},{self.Height}";
+
+            case "-":
+                return $"{self.Width}-{self.Height}";
 
             case EMPTY:
             case null:

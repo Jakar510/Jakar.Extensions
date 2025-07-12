@@ -91,7 +91,7 @@ public readonly struct ReadOnlyThickness( double left, double top, double right,
     public override bool   Equals( object?           obj )                             => obj is ReadOnlyThickness other && Equals(other);
     public override int    GetHashCode()                                               => HashCode.Combine(Bottom, Left, Right, Top);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => IThickness<ReadOnlyThickness>.ToString(this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => IThickness<ReadOnlyThickness>.ToString(in this, format);
 
 
     public static bool operator ==( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.Equals(self, value);

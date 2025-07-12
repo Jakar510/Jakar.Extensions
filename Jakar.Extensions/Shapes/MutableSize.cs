@@ -34,13 +34,23 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static                Sorter<MutableSize>             Sorter      => Sorter<MutableSize>.Default;
     static ref readonly          MutableSize IShape<MutableSize>.Zero        => ref Zero;
     static ref readonly          MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
+    static ref readonly          MutableSize IShape<MutableSize>.One         => ref One;
+    static ref readonly          MutableSize IShape<MutableSize>.Two         => ref Two;
+    static ref readonly          MutableSize IShape<MutableSize>.Three       => ref Three;
+    static ref readonly          MutableSize IShape<MutableSize>.Four        => ref Four;
+    static ref readonly          MutableSize IShape<MutableSize>.Five        => ref Five;
+    static ref readonly          MutableSize IShape<MutableSize>.Six         => ref Six;
+    static ref readonly          MutableSize IShape<MutableSize>.Seven       => ref Seven;
+    static ref readonly          MutableSize IShape<MutableSize>.Eight       => ref Eight;
+    static ref readonly          MutableSize IShape<MutableSize>.Nine        => ref Nine;
+    static ref readonly          MutableSize IShape<MutableSize>.Ten         => ref Ten;
     public                       bool                            IsLandscape => Width < Height;
     public                       bool                            IsPortrait  => Width > Height;
     public                       double                          Width       { get; set; } = width;
     public                       double                          Height      { get; set; } = height;
     public readonly              bool                            IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
-    public readonly              bool                            IsValid     => IsNaN is false && Width      >= 0 && Height                         >= 0;
-    [JsonIgnore] public readonly bool                            IsEmpty     => double.IsNaN(Width) || Width <= 0 || double.IsNaN(Height) || Height <= 0;
+    public readonly              bool                            IsValid     => IsNaN is false && IsEmpty is false;
+    [JsonIgnore] public readonly bool                            IsEmpty     => IsNaN || Width < 0 || Height < 0;
 
 
     public static implicit operator MutableSize( Size          rect )  => new(rect.Width, rect.Height);
@@ -142,7 +152,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public override bool   Equals( object?     other )                                 => other is MutableSize x    && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(Width, Height);
     public override string ToString()                                                  => ToString(null, null);
-    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => ISize<MutableSize>.ToString(this, format);
+    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => ISize<MutableSize>.ToString(in this, format);
 
 
     [Pure] public readonly bool IsAtLeast( in ReadOnlySize  other ) => other.Width <= Width && other.Height <= Height;

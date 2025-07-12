@@ -7,37 +7,37 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Zero))]
 public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF>, IMathOperators<ReadOnlySizeF>
 {
-    public static readonly ReadOnlySizeF Invalid       = new(float.NaN, float.NaN);
-    public static readonly ReadOnlySizeF Zero          = 0;
-    public static readonly ReadOnlySizeF One           = 1;
-    public static readonly ReadOnlySizeF Two           = 2;
-    public static readonly ReadOnlySizeF Three         = 3;
-    public static readonly ReadOnlySizeF Four          = 4;
-    public static readonly ReadOnlySizeF Five          = 5;
-    public static readonly ReadOnlySizeF Six           = 6;
-    public static readonly ReadOnlySizeF Seven         = 7;
-    public static readonly ReadOnlySizeF Eight         = 8;
-    public static readonly ReadOnlySizeF Nine          = 9;
-    public static readonly ReadOnlySizeF Ten           = 10;
-    public static readonly ReadOnlySizeF NegativeOne   = -1;
-    public static readonly ReadOnlySizeF NegativeTwo   = -2;
-    public static readonly ReadOnlySizeF NegativeThree = -3;
-    public static readonly ReadOnlySizeF NegativeFour  = -4;
-    public static readonly ReadOnlySizeF NegativeFive  = -5;
-    public static readonly ReadOnlySizeF NegativeSix   = -6;
-    public static readonly ReadOnlySizeF NegativeSeven = -7;
-    public static readonly ReadOnlySizeF NegativeEight = -8;
-    public static readonly ReadOnlySizeF NegativeNine  = -9;
-    public static readonly ReadOnlySizeF NegativeTen   = -10;
-    public readonly        float         Height        = height;
-    public readonly        float         Width         = width;
+    public static readonly ReadOnlySizeF Invalid = new(float.NaN, float.NaN);
+    public static readonly ReadOnlySizeF Zero    = 0;
+    public static readonly ReadOnlySizeF One     = 1;
+    public static readonly ReadOnlySizeF Two     = 2;
+    public static readonly ReadOnlySizeF Three   = 3;
+    public static readonly ReadOnlySizeF Four    = 4;
+    public static readonly ReadOnlySizeF Five    = 5;
+    public static readonly ReadOnlySizeF Six     = 6;
+    public static readonly ReadOnlySizeF Seven   = 7;
+    public static readonly ReadOnlySizeF Eight   = 8;
+    public static readonly ReadOnlySizeF Nine    = 9;
+    public static readonly ReadOnlySizeF Ten     = 10;
+    public readonly        float         Height  = height;
+    public readonly        float         Width   = width;
 
 
     public static       Sorter<ReadOnlySizeF>               Sorter      => Sorter<ReadOnlySizeF>.Default;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
-    public              bool                                IsValid     => IsNaN is false;
-    public              bool                                IsEmpty     => Width == 0 && Height == 0;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Two         => ref Two;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Three       => ref Three;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Four        => ref Four;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Five        => ref Five;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Six         => ref Six;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Seven       => ref Seven;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Eight       => ref Eight;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Nine        => ref Nine;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Ten         => ref Ten;
+    public              bool                                IsValid     => IsNaN is false && IsEmpty is false;
+    [JsonIgnore] public bool                                IsEmpty     => IsNaN || Width < 0   || Height < 0;
     public              bool                                IsLandscape => Width < Height;
     public              bool                                IsNaN       => float.IsNaN(Width) || float.IsNaN(Height);
     public              bool                                IsPortrait  => Width > Height;
@@ -83,7 +83,7 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public override bool   Equals( object?       obj )                                 => obj is ReadOnlySizeF other  && Equals(other);
     public override int    GetHashCode()                                               => HashCode.Combine(Height, Width);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF>.ToString(this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF>.ToString(in this, format);
 
 
     public static bool operator ==( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.Equals(left, value);

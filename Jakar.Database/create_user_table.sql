@@ -34,7 +34,7 @@ CREATE TABLE "public"."Users" (
 	, "IsPhoneNumberConfirmed" boolean NOT NULL
 	, "IsTwoFactorEnabled" boolean NOT NULL
 	, "SecurityStamp" NVARCHAR(256000) NOT NULL
-	, "ConcurrencyStamp" TEXT(MAX) NOT NULL
+	, "ConcurrencyStamp" VARCHAR(4096) NOT NULL
 	, "AdditionalData" JSON
 	, "PasswordHash" NVARCHAR(256000) NOT NULL
 	, "Rights" NVARCHAR(256000) NOT NULL

@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
+public interface IPoint<TSelf> : INegativeShapes<TSelf>, IShapeLocation
     where TSelf : IPoint<TSelf>
 {
     [Pure] public abstract static TSelf Create( double x, double y );
@@ -15,7 +15,9 @@ public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
     [Pure] public double DistanceTo( in TSelf other );
 
 
-    public static string ToString( TSelf self, string? format )
+
+
+    public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )
         {
