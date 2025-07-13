@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
+	  <ImplicitUsings>disable</ImplicitUsings>
+	  <Version>9.0.0</Version>
+	  <Title>Jakar.Shapes</Title>
+	  <PackageId>Jakar.Shapes</PackageId>
+	  <Authors>Tyler Stegmaier</Authors>
+	  <PackageIcon>icon.png</PackageIcon>
+	  <Company></Company>
+	  <PackageReleaseNotes>Bug Fixes</PackageReleaseNotes>
+	  <Description>Extensions to aid in development.</Description>
+	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+	  <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+	  <PackageReadmeFile>README.md</PackageReadmeFile>
+	  <RepositoryType>git</RepositoryType>
+	  <RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+	  <Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
+	  <PackageTags>Geometry Shape Point Line Circle Rectangle Jakar Extensions</PackageTags>
+	  <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+	  <GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+	  <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+	  <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+	  <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+	  <EnableNETAnalyzers>true</EnableNETAnalyzers>
+	  <NeutralLanguage>en</NeutralLanguage>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <StripSymbols>false</StripSymbols>
+	  <IncludeSymbols>true</IncludeSymbols>
+	  <IsAotCompatible>true</IsAotCompatible>
+	  <OptimizationPreference>Speed</OptimizationPreference>
+	  <EventSourceSupport>true</EventSourceSupport>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Jakar.Extensions" Version="9.13.0" />
+  </ItemGroup>
+
+</Project>

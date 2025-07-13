@@ -105,13 +105,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.81" />
-		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.81" />
-		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.81" />
+		<PackageReference Include="Microsoft.Maui.Controls" Version="9.0.82" />
+		<PackageReference Include="Microsoft.Maui.Controls.Core" Version="9.0.82" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.82" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0" />
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.6" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
 		<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
 		<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
 		<PackageReference Include="Serilog.Enrichers.Memory" Version="1.0.4" />
