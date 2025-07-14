@@ -6,15 +6,15 @@ namespace Jakar.Shapes;
 
 public static class Shapes
 {
-    public static bool IsAtLeast<TRectangle, TSize>( this ref readonly TRectangle self, in TSize other )
+    public static bool IsAtLeast<TRectangle, TSize>( this TRectangle self, in TSize other )
         where TRectangle : IRectangle<TRectangle>
         where TSize : ISize<TSize> => other.Width <= self.Width && other.Height <= self.Height;
-    public static bool Contains<TRectangle, TPoint>( this ref readonly TRectangle self, in TPoint other )
+    public static bool Contains<TRectangle, TPoint>( this TRectangle self, in TPoint other )
         where TRectangle : IRectangle<TRectangle>
         where TPoint : IPoint<TPoint> => other.X >= self.X && other.X < self.Right && other.Y >= self.Y && other.Y < self.Bottom;
 
 
-    public static bool Contains<TRectangle, TPoint>( this ref readonly TRectangle self, params ReadOnlySpan<TPoint> points )
+    public static bool Contains<TRectangle, TPoint>( this TRectangle self, params ReadOnlySpan<TPoint> points )
         where TRectangle : IRectangle<TRectangle>
         where TPoint : IPoint<TPoint>
     {
@@ -27,7 +27,7 @@ public static class Shapes
     }
 
 
-    public static bool ContainsAny<TRectangle, TPoint>( this ref readonly TRectangle self, params ReadOnlySpan<TPoint> others )
+    public static bool ContainsAny<TRectangle, TPoint>( this TRectangle self, params ReadOnlySpan<TPoint> others )
         where TRectangle : IRectangle<TRectangle>
         where TPoint : IPoint<TPoint>
     {
@@ -38,7 +38,7 @@ public static class Shapes
 
         return false;
     }
-    public static bool ContainsAll<TRectangle, TPoint>( this ref readonly TRectangle self, params ReadOnlySpan<TPoint> others )
+    public static bool ContainsAll<TRectangle, TPoint>( this TRectangle self, params ReadOnlySpan<TPoint> others )
         where TRectangle : IRectangle<TRectangle>
         where TPoint : IPoint<TPoint>
     {
@@ -52,7 +52,7 @@ public static class Shapes
 
 
     [Pure]
-    public static TRectangle Union<TRectangle, TOther>( this ref readonly TRectangle self, in TOther other )
+    public static TRectangle Union<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
         where TOther : IRectangle<TOther>
     {
@@ -68,7 +68,7 @@ public static class Shapes
 
 
     [Pure]
-    public static TRectangle Intersection<TRectangle, TOther>( this ref readonly TRectangle self, in TOther other )
+    public static TRectangle Intersection<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
         where TOther : IRectangle<TOther>
     {
@@ -83,12 +83,12 @@ public static class Shapes
     }
 
 
-    public static bool IntersectsWith<TRectangle, TOther>( this ref readonly TRectangle self, in TOther other )
+    public static bool IntersectsWith<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
         where TOther : IRectangle<TOther> => ( self.Left >= other.Right || self.Right <= other.Left || self.Top >= other.Bottom || self.Bottom <= other.Top ) is false;
 
 
-    public static bool DoesLineIntersect<TRectangle, TPoint>( this ref readonly TRectangle self, in TPoint source, in TPoint target )
+    public static bool DoesLineIntersect<TRectangle, TPoint>( this TRectangle self, in TPoint source, in TPoint target )
         where TRectangle : IRectangle<TRectangle>
         where TPoint : IPoint<TPoint>
     {
