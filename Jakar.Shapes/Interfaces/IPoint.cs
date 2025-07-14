@@ -12,8 +12,10 @@ public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
     [Pure] public TSelf  Reverse();
     [Pure] public TSelf  Round();
     [Pure] public TSelf  Floor();
-    [Pure] public double DistanceTo( in TSelf other );
-
+    [Pure] public double DistanceTo( in TSelf         other );
+    [Pure] public double Dot( in        ReadOnlyPoint other );
+    [Pure] public double Magnitude();
+    public        double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 );
 
     public static string ToString( ref readonly TSelf self, string? format )
     {

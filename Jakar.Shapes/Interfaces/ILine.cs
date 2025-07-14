@@ -10,6 +10,7 @@ public interface ILine<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
     ReadOnlyPoint Start    { get; }
     ReadOnlyPoint End      { get; }
     bool          IsFinite { get; }
+    double        Length   { get; }
 
 
     [Pure] public abstract static TSelf Create( in ReadOnlyPoint start, in ReadOnlyPoint end, bool isFinite = true );

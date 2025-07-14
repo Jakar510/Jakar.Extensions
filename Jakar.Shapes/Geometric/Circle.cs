@@ -4,6 +4,7 @@
 namespace Jakar.Shapes;
 
 
+// [Experimental("Jakar_Shapes_Circle")]
 [DefaultValue(nameof(Zero))]
 public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<Circle>, IMathOperators<Circle>
 {

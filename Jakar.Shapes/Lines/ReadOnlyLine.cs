@@ -25,6 +25,7 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public bool                                           IsEmpty  => Start.IsEmpty || End.IsEmpty;
     public bool                                           IsNaN    => Start.IsNaN   || End.IsNaN;
     public bool                                           IsValid  => IsNaN is false && Start != End;
+    public double                                         Length   => Start.DistanceTo(in End);
 
 
     public static implicit operator ReadOnlyLine( int    other ) => new(ReadOnlyPoint.Zero, other);

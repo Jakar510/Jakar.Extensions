@@ -2,6 +2,8 @@
 // 01/19/2025  21:01
 
 
+using System;
+
 namespace Jakar.Shapes;
 
 
@@ -46,13 +48,31 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     [Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public double DistanceTo( in ReadOnlyPointF other )
     {
-        float x      = X - other.X;
-        float y      = Y - other.Y;
-        float x2     = x * x;
-        float y2     = y * y;
-        float result = (float)Math.Sqrt(x2 + y2);
+        double x      = X - other.X;
+        double y      = Y - other.Y;
+        double x2     = x * x;
+        double y2     = y * y;
+        double result = Math.Sqrt(x2 + y2);
         return result;
     }
+    [Pure] public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
+    [Pure] public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
+    public double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 )
+    {
+        ReadOnlyPoint v1 = this - p1;
+        ReadOnlyPoint v2 = this - p2;
+
+        double dot  = v1.Dot(in v2);
+        double mag1 = v1.Magnitude();
+        double mag2 = v2.Magnitude();
+        if ( mag1 == 0 || mag2 == 0 ) { return 0; }
+
+        double cosTheta = dot / ( mag1 * mag2 );
+        cosTheta = Math.Clamp(cosTheta, -1.0, 1.0); // Avoid NaN due to precision
+
+        return Math.Acos(cosTheta); // In radians
+    }
+
 
 
     public int CompareTo( ReadOnlyPointF other )

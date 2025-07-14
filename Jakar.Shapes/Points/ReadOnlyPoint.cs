@@ -30,15 +30,15 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public readonly        double        Y             = y;
 
 
-    public static       Sorter<ReadOnlyPoint>                        Sorter        => Sorter<ReadOnlyPoint>.Default;
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.         Zero          => ref Zero;
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.         Invalid       => ref Invalid;
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.         One           => ref One; 
-    public              bool                                         IsEmpty       => X == 0 && Y == 0;
-    public              bool                                         IsNaN         => double.IsNaN(X) || double.IsNaN(Y);
-    public              bool                                         IsValid       => IsNaN is false;
-    double IShapeLocation.                                           X             => X;
-    double IShapeLocation.                                           Y             => Y;
+    public static       Sorter<ReadOnlyPoint>               Sorter  => Sorter<ReadOnlyPoint>.Default;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero    => ref Zero;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid => ref Invalid;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One     => ref One;
+    public              bool                                IsEmpty => X == 0 && Y == 0;
+    public              bool                                IsNaN   => double.IsNaN(X) || double.IsNaN(Y);
+    public              bool                                IsValid => IsNaN is false;
+    double IShapeLocation.                                  X       => X;
+    double IShapeLocation.                                  Y       => Y;
 
 
     public static implicit operator Point( ReadOnlyPoint          point ) => new((int)point.X.Round(), (int)point.Y.Round());
@@ -60,7 +60,7 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     [Pure] public        ReadOnlyPoint Floor()   => new(X.Floor(), Y.Floor());
 
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    [Pure]
     public double DistanceTo( in ReadOnlyPoint other )
     {
         double x      = X - other.X;
@@ -69,6 +69,23 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
         double y2     = y * y;
         double result = Math.Sqrt(x2 + y2);
         return result;
+    }
+    [Pure] public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
+    [Pure] public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
+    public double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 )
+    {
+        ReadOnlyPoint v1 = this - p1;
+        ReadOnlyPoint v2 = this - p2;
+
+        double dot  = v1.Dot(in v2);
+        double mag1 = v1.Magnitude();
+        double mag2 = v2.Magnitude();
+        if ( mag1 == 0 || mag2 == 0 ) { return 0; }
+
+        double cosTheta = dot / ( mag1 * mag2 );
+        cosTheta = Math.Clamp(cosTheta, -1.0, 1.0); // Avoid NaN due to precision
+
+        return Math.Acos(cosTheta); // In radians
     }
 
 
