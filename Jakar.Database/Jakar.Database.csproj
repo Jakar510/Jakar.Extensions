@@ -71,7 +71,7 @@
 		<PackageReference Include="dbup-sqlserver" Version="6.0.0" />
 		<PackageReference Include="FluentMigrator.Abstractions" Version="7.1.0" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.4.0" />
-		<PackageReference Include="Jakar.Extensions" Version="9.13.0" />
+		<PackageReference Include="Jakar.Extensions" Version="9.13.1" />
 		<PackageReference Include="FluentMigrator" Version="7.1.0" />
 		<PackageReference Include="FluentMigrator.Runner" Version="7.1.0" />
 		<PackageReference Include="MailKit" Version="4.13.0" />

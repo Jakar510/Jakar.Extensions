@@ -91,7 +91,7 @@
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="4.0.0" />
 		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" Version="4.0.0" />
 		<PackageReference Include="AiForms.Maui.SettingsView" Version="1.0.17" />
-		<PackageReference Include="Jakar.Extensions" Version="9.13.0" />
+		<PackageReference Include="Jakar.Extensions" Version="9.13.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="WifiManager.Maui" Version="9.0.2" />
 		<PackageReference Include="Xam.Plugin.Media" Version="6.0.2" />
