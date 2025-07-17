@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/27/2025  11:34
 
-using System.Numerics;
-
-
-
 namespace Jakar.Extensions;
 
 

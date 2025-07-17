@@ -4,8 +4,38 @@
 namespace Jakar.Shapes;
 
 
+public delegate TOutput RefSelect<TInput, out TOutput>( in TInput value );
+
+
+
 public static class Shapes
 {
+    public static TInput[]? Create<TInput>( this ref readonly TInput[]? self, RefSelect<TInput, TInput> func )
+    {
+        ReadOnlySpan<TInput> span = self;
+        if ( span.IsEmpty ) { return null; }
+
+        TInput[] buffer = GC.AllocateUninitializedArray<TInput>(span.Length);
+        int      index  = 0;
+
+        foreach ( ref readonly TInput value in span ) { buffer[index++] = func(in value); }
+
+        return buffer;
+    }
+    public static TOutput[]? Create<TInput, TOutput>( this ref readonly TInput[]? self, RefSelect<TInput, TOutput> func )
+    {
+        ReadOnlySpan<TInput> span = self;
+        if ( span.IsEmpty ) { return null; }
+
+        TOutput[] buffer = GC.AllocateUninitializedArray<TOutput>(span.Length);
+        int       index  = 0;
+
+        foreach ( ref readonly TInput value in span ) { buffer[index++] = func(in value); }
+
+        return buffer;
+    }
+
+
     public static bool IsAtLeast<TRectangle, TSize>( this TRectangle self, in TSize other )
         where TRectangle : IRectangle<TRectangle>
         where TSize : ISize<TSize> => other.Width <= self.Width && other.Height <= self.Height;

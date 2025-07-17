@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Serilog
 // 03/10/2025  16:03
 
-using Google.Protobuf.WellKnownTypes;
-
-
-
 namespace Jakar.Extensions.Serilog;
 
 

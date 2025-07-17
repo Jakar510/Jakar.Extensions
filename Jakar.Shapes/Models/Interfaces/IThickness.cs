@@ -4,7 +4,7 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IThickness<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
+public interface IThickness<TSelf> : IShape<TSelf>
     where TSelf : IThickness<TSelf>
 {
     public double Bottom              { get; }
@@ -28,8 +28,11 @@ public interface IThickness<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
             case "Json":
                 return self.ToJson();
 
-            case ",": return $"{self.Left},{self.Top},{self.Right},{self.Bottom}";
-            case "-": return $"{self.Left}-{self.Top}-{self.Right}-{self.Bottom}";
+            case ",":
+                return $"{self.Left},{self.Top},{self.Right},{self.Bottom}";
+
+            case "-":
+                return $"{self.Left}-{self.Top}-{self.Right}-{self.Bottom}";
 
             case EMPTY:
             case null:

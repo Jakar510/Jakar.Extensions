@@ -6,7 +6,6 @@ using Jakar.Extensions.Serilog.Server.Data;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
 using Serilog;
-using SerilogTracing;
 
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder( args );

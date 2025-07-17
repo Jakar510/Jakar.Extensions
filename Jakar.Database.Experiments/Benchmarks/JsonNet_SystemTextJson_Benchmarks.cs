@@ -1,8 +1,4 @@
-﻿using Jakar.Extensions;
-
-
-
-namespace Jakar.Database.Experiments.Benchmarks;
+﻿namespace Jakar.Database.Experiments.Benchmarks;
 
 
 #pragma warning disable CA1822 // Mark members as static

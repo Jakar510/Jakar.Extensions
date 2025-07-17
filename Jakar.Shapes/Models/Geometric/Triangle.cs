@@ -2,7 +2,6 @@
 // 07/14/2025  10:08
 
 using System.Diagnostics.CodeAnalysis;
-using Jakar.Shapes.Interfaces;
 
 
 
@@ -68,26 +67,38 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ITriangle<Triangle>.ToString(in this, format);
 
 
-    public static bool operator ==( Triangle    left, Triangle right ) => Sorter.Equals(left, right);
-    public static bool operator !=( Triangle    left, Triangle right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( Triangle     left, Triangle right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( Triangle    left, Triangle right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( Triangle     left, Triangle right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( Triangle    left, Triangle right ) => Sorter.LessThanOrEqualTo(left, right);
-    public static Triangle operator *( Triangle self, Triangle other ) => new(self.A * other.A, self.B * other.B, self.C * other.B);
-    public static Triangle operator +( Triangle self, Triangle other ) => new(self.A + other.A, self.B + other.B, self.C + other.B);
-    public static Triangle operator -( Triangle self, Triangle other ) => new(self.A - other.A, self.B - other.B, self.C - other.B);
-    public static Triangle operator /( Triangle self, Triangle other ) => new(self.A / other.A, self.B / other.B, self.C / other.B);
-    public static Triangle operator *( Triangle self, int      other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator *( Triangle self, float    other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator *( Triangle self, double   other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator /( Triangle self, int      other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator /( Triangle self, float    other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator /( Triangle self, double   other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator +( Triangle self, int      other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, float    other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, double   other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator -( Triangle self, int      other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, float    other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, double   other ) => new(self.A - other, self.B - other, self.C - other);
+    public static bool operator ==( Triangle    left, Triangle                         right ) => Sorter.Equals(left, right);
+    public static bool operator !=( Triangle    left, Triangle                         right ) => Sorter.DoesNotEqual(left, right);
+    public static bool operator >( Triangle     left, Triangle                         right ) => Sorter.GreaterThan(left, right);
+    public static bool operator >=( Triangle    left, Triangle                         right ) => Sorter.GreaterThanOrEqualTo(left, right);
+    public static bool operator <( Triangle     left, Triangle                         right ) => Sorter.LessThan(left, right);
+    public static bool operator <=( Triangle    left, Triangle                         right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static Triangle operator *( Triangle self, Triangle                         other ) => new(self.A * other.A, self.B * other.B, self.C * other.B);
+    public static Triangle operator +( Triangle self, Triangle                         other ) => new(self.A + other.A, self.B + other.B, self.C + other.B);
+    public static Triangle operator -( Triangle self, Triangle                         other ) => new(self.A - other.A, self.B - other.B, self.C - other.B);
+    public static Triangle operator /( Triangle self, Triangle                         other ) => new(self.A / other.A, self.B / other.B, self.C / other.B);
+    public static Triangle operator *( Triangle self, int                              other ) => new(self.A * other, self.B   * other, self.C   * other);
+    public static Triangle operator *( Triangle self, float                            other ) => new(self.A * other, self.B   * other, self.C   * other);
+    public static Triangle operator *( Triangle self, double                           other ) => new(self.A * other, self.B   * other, self.C   * other);
+    public static Triangle operator /( Triangle self, int                              other ) => new(self.A / other, self.B   / other, self.C   / other);
+    public static Triangle operator /( Triangle self, float                            other ) => new(self.A / other, self.B   / other, self.C   / other);
+    public static Triangle operator /( Triangle self, double                           other ) => new(self.A / other, self.B   / other, self.C   / other);
+    public static Triangle operator +( Triangle self, int                              other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator +( Triangle self, float                            other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator +( Triangle self, double                           other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator -( Triangle self, int                              other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator -( Triangle self, float                            other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator -( Triangle self, double                           other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator +( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator +( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator +( Triangle self, (double xOffset, double yOffset) other ) => new(self.A + other, self.B + other, self.C + other);
+    public static Triangle operator -( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator -( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator -( Triangle self, (double xOffset, double yOffset) other ) => new(self.A - other, self.B - other, self.C - other);
+    public static Triangle operator *( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A * other, self.B * other, self.C * other);
+    public static Triangle operator *( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A * other, self.B * other, self.C * other);
+    public static Triangle operator *( Triangle self, (double xOffset, double yOffset) other ) => new(self.A * other, self.B * other, self.C * other);
+    public static Triangle operator /( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A / other, self.B / other, self.C / other);
+    public static Triangle operator /( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A / other, self.B / other, self.C / other);
+    public static Triangle operator /( Triangle self, (double xOffset, double yOffset) other ) => new(self.A / other, self.B / other, self.C / other);
 }

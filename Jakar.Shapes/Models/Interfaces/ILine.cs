@@ -4,7 +4,7 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface ILine<TSelf> : IShape<TSelf>, IShapeOperators<TSelf>
+public interface ILine<TSelf> : IShape<TSelf>
     where TSelf : struct, ILine<TSelf>
 {
     ReadOnlyPoint Start    { get; }

@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )

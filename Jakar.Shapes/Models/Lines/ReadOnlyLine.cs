@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Shapes
 // 07/12/2025  19:15
 
+
 namespace Jakar.Shapes;
 
 

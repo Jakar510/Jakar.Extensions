@@ -13,13 +13,13 @@ public interface IMutableRectangle<TSelf> : IRectangle<TSelf>
     public new double Height { get; set; }
 
 
-    TSelf       Round();
-    public void Deconstruct( out ReadOnlyPoint  point, out MutableSize size );
-    public void Deconstruct( out ReadOnlyPointF point, out MutableSize size );
+    public TSelf Reverse();
+    public TSelf Round();
+    public TSelf Floor();
+    public void  Deconstruct( out ReadOnlyPoint  point, out MutableSize size );
+    public void  Deconstruct( out ReadOnlyPointF point, out MutableSize size );
 
 
-    public abstract static implicit operator Rectangle( TSelf          self );
-    public abstract static implicit operator RectangleF( TSelf         self );
     public abstract static implicit operator ReadOnlyRectangleF( TSelf self );
     public abstract static implicit operator ReadOnlyRectangle( TSelf  rect );
     public abstract static implicit operator TSelf( Rectangle          rect );

@@ -4,11 +4,6 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IShapeOperators<TSelf> : IMathOperators<TSelf, double>, IMathOperators<TSelf, float>, IMathOperators<TSelf, int>, IMathOperators<TSelf, (double xOffset, double yOffset)>, IMathOperators<TSelf, (float xOffset, float yOffset)>, IMathOperators<TSelf, (int xOffset, int yOffset)>
-    where TSelf : IShapeOperators<TSelf>;
-
-
-
 public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSelf>
     where TSelf : IShape<TSelf>
 {
@@ -16,6 +11,32 @@ public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSel
     public abstract static ref readonly TSelf Zero    { get; }
     public abstract static ref readonly TSelf One     { get; }
     public                              bool  IsNaN   { get; }
+
+
+    public abstract static TSelf operator +( TSelf self, int                              other );
+    public abstract static TSelf operator +( TSelf self, float                            other );
+    public abstract static TSelf operator +( TSelf self, double                           other );
+    public abstract static TSelf operator -( TSelf self, int                              other );
+    public abstract static TSelf operator -( TSelf self, float                            other );
+    public abstract static TSelf operator -( TSelf self, double                           other );
+    public abstract static TSelf operator *( TSelf self, int                              other );
+    public abstract static TSelf operator *( TSelf self, float                            other );
+    public abstract static TSelf operator *( TSelf self, double                           other );
+    public abstract static TSelf operator /( TSelf self, int                              other );
+    public abstract static TSelf operator /( TSelf self, float                            other );
+    public abstract static TSelf operator /( TSelf self, double                           other );
+    public abstract static TSelf operator +( TSelf self, (int xOffset, int yOffset)       other );
+    public abstract static TSelf operator +( TSelf self, (float xOffset, float yOffset)   other );
+    public abstract static TSelf operator +( TSelf self, (double xOffset, double yOffset) other );
+    public abstract static TSelf operator -( TSelf self, (int xOffset, int yOffset)       other );
+    public abstract static TSelf operator -( TSelf self, (float xOffset, float yOffset)   other );
+    public abstract static TSelf operator -( TSelf self, (double xOffset, double yOffset) other );
+    public abstract static TSelf operator *( TSelf self, (int xOffset, int yOffset)       other );
+    public abstract static TSelf operator *( TSelf self, (float xOffset, float yOffset)   other );
+    public abstract static TSelf operator *( TSelf self, (double xOffset, double yOffset) other );
+    public abstract static TSelf operator /( TSelf self, (int xOffset, int yOffset)       other );
+    public abstract static TSelf operator /( TSelf self, (float xOffset, float yOffset)   other );
+    public abstract static TSelf operator /( TSelf self, (double xOffset, double yOffset) other );
 }
 
 

@@ -25,6 +25,10 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     [JsonIgnore] public readonly bool                            IsEmpty     => IsNaN || Width < 0 || Height < 0;
 
 
+    public static implicit operator ReadOnlySize( MutableSize  rect )  => new(rect.Width, rect.Height);
+    public static implicit operator ReadOnlySizeF( MutableSize rect )  => new((float)rect.Width, (float)rect.Height);
+    public static implicit operator Size( MutableSize          rect )  => new((int)rect.Width, (int)rect.Height);
+    public static implicit operator SizeF( MutableSize         rect )  => new((float)rect.Width, (float)rect.Height);
     public static implicit operator MutableSize( Size          rect )  => new(rect.Width, rect.Height);
     public static implicit operator MutableSize( SizeF         rect )  => new(rect.Width, rect.Height);
     public static implicit operator MutableSize( ReadOnlySize  rect )  => new(rect.Width, rect.Height);

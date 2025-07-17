@@ -45,7 +45,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     [JsonIgnore] public readonly double Top => Y;
 
 
-    public static implicit operator Rectangle( MutableRectangle          self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());
+    public static implicit operator Rectangle( MutableRectangle          self )  => new((int)self.X, (int)self.Y, (int)self.Width, (int)self.Height);
     public static implicit operator RectangleF( MutableRectangle         self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
     public static implicit operator ReadOnlyRectangleF( MutableRectangle self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
     public static implicit operator ReadOnlyRectangle( MutableRectangle  rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
@@ -152,6 +152,26 @@ public struct MutableRectangle( double x, double y, double width, double height 
         Y      = Y.Round();
         Width  = Width.Round();
         Height = Height.Round();
+        return this;
+    }
+    public MutableRectangle Floor()
+    {
+        X      = X.Floor();
+        Y      = Y.Floor();
+        Width  = Width.Floor();
+        Height = Height.Floor();
+        return this;
+    }
+    public MutableRectangle Reverse()
+    {
+        double x      = X;
+        double y      = Y;
+        double width  = Width;
+        double height = Height;
+        X      = y;
+        Y      = x;
+        Width  = height;
+        Height = width;
         return this;
     }
 

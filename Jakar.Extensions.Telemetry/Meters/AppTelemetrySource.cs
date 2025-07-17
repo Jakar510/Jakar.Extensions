@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Telemetry
 // 05/04/2025  23:59
 
-using System.Diagnostics.Metrics;
-
-
-
 namespace Jakar.Extensions.Telemetry.Meters;
 
 

@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-
-
-
-namespace Jakar.SettingsView.Abstractions;
+﻿namespace Jakar.SettingsView.Abstractions;
 
 
 public interface ISvCell : ISvCellTitle

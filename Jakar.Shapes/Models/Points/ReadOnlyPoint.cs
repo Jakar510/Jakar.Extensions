@@ -2,7 +2,7 @@
 
 
 [DefaultValue(nameof(Zero))]
-public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>, IShapeOperators<ReadOnlyPoint>
+public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint> 
 {
     public static readonly ReadOnlyPoint Invalid       = new(double.NaN, double.NaN);
     public static readonly ReadOnlyPoint Zero          = 0;
@@ -55,9 +55,11 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
 
     [Pure] public static ReadOnlyPoint Create( float  x, float  y ) => new(x, y);
     [Pure] public static ReadOnlyPoint Create( double x, double y ) => new(x, y);
-    [Pure] public        ReadOnlyPoint Reverse() => new(Y, X);
-    [Pure] public        ReadOnlyPoint Round()   => new(X.Round(), Y.Round());
-    [Pure] public        ReadOnlyPoint Floor()   => new(X.Floor(), Y.Floor());
+
+
+    [Pure] public ReadOnlyPoint Reverse() => new(Y, X);
+    [Pure] public ReadOnlyPoint Round()   => new(X.Round(), Y.Round());
+    [Pure] public ReadOnlyPoint Floor()   => new(X.Floor(), Y.Floor());
 
 
     [Pure]

@@ -2,7 +2,6 @@
 // 01/03/2025  14:01
 
 using Microsoft.Extensions.Logging;
-using Serilog.Context;
 using ILogger = Serilog.ILogger;
 
 

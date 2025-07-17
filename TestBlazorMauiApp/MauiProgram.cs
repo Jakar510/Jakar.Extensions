@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace TestBlazorMauiApp;
+﻿namespace TestBlazorMauiApp;
 public static class MauiProgram
 {
     public static MauiApp CreateMauiApp()

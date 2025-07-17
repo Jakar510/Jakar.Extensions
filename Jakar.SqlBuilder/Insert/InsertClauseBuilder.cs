@@ -1,8 +1,4 @@
-﻿using System.Buffers;
-
-
-
-namespace Jakar.SqlBuilder;
+﻿namespace Jakar.SqlBuilder;
 
 
 public struct InsertClauseBuilder( ref EasySqlBuilder builder )

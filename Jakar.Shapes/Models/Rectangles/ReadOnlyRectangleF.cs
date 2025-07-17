@@ -156,10 +156,34 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     }
 
 
-    public static bool operator ==( ReadOnlyRectangleF left, ReadOnlyRectangleF right ) => Sorter.Equals(left, right);
-    public static bool operator !=( ReadOnlyRectangleF left, ReadOnlyRectangleF right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( ReadOnlyRectangleF  left, ReadOnlyRectangleF right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( ReadOnlyRectangleF left, ReadOnlyRectangleF right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( ReadOnlyRectangleF  left, ReadOnlyRectangleF right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( ReadOnlyRectangleF left, ReadOnlyRectangleF right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.Equals(left, right);
+    public static bool operator !=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.DoesNotEqual(left, right);
+    public static bool operator >( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Sorter.GreaterThan(left, right);
+    public static bool operator >=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.GreaterThanOrEqualTo(left, right);
+    public static bool operator <( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Sorter.LessThan(left, right);
+    public static bool operator <=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, int                              value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, float                            value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, double                           value ) => new(self.X, self.Y, (float)( self.Width + value ), (float)( self.Height + value ));
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, int                              value ) => new(self.X, self.Y, self.Width - value, self.Height - value);
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, float                            value ) => new(self.X, self.Y, self.Width - value, self.Height - value);
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, double                           value ) => new(self.X, self.Y, (float)( self.Width - value ), (float)( self.Height - value ));
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, int                              value ) => new(self.X, self.Y, self.Width * value, self.Height * value);
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, float                            value ) => new(self.X, self.Y, self.Width * value, self.Height * value);
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, double                           value ) => new(self.X, self.Y, (float)( self.Width * value ), (float)( self.Height * value ));
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, int                              value ) => new(self.X, self.Y, self.Width / value, self.Height / value);
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, float                            value ) => new(self.X, self.Y, self.Width / value, self.Height / value);
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, double                           value ) => new(self.X, self.Y, (float)( self.Width / value ), (float)( self.Height / value ));
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, (int xOffset, int yOffset)       value ) => new(self.X + value.xOffset, self.Y + value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, (float xOffset, float yOffset)   value ) => new(self.X + value.xOffset, self.Y + value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, (double xOffset, double yOffset) value ) => new((float)( self.X + value.xOffset ), (float)( self.Y + value.yOffset ), self.Width, self.Height);
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, (int xOffset, int yOffset)       value ) => new(self.X - value.xOffset, self.Y - value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, (float xOffset, float yOffset)   value ) => new(self.X - value.xOffset, self.Y - value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator -( ReadOnlyRectangleF self, (double xOffset, double yOffset) value ) => new((float)( self.X - value.xOffset ), (float)( self.Y - value.yOffset ), self.Width, self.Height);
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, (int xOffset, int yOffset)       value ) => new(self.X * value.xOffset, self.Y * value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, (float xOffset, float yOffset)   value ) => new(self.X * value.xOffset, self.Y * value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator *( ReadOnlyRectangleF self, (double xOffset, double yOffset) value ) => new((float)( self.X * value.xOffset ), (float)( self.Y * value.yOffset ), self.Width, self.Height);
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (int xOffset, int yOffset)       value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (float xOffset, float yOffset)   value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (double xOffset, double yOffset) value ) => new((float)( self.X / value.xOffset ), (float)( self.Y / value.yOffset ), self.Width, self.Height);
 }

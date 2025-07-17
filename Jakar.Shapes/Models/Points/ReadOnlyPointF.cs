@@ -2,13 +2,11 @@
 // 01/19/2025  21:01
 
 
-using System;
-
 namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
-public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF>, IShapeOperators<ReadOnlyPointF>
+public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF> 
 {
     public static readonly ReadOnlyPointF Invalid = new(float.NaN, float.NaN);
     public static readonly ReadOnlyPointF Zero    = 0;
@@ -40,6 +38,8 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
 
     [Pure] public static ReadOnlyPointF Create( float  x, float  y ) => new(x, y);
     [Pure] public static ReadOnlyPointF Create( double x, double y ) => new(x.AsFloat(), y.AsFloat());
+    
+    
     [Pure] public        ReadOnlyPointF Reverse() => new(Y, X);
     [Pure] public        ReadOnlyPointF Round()   => new(X.Round(), Y.Round());
     [Pure] public        ReadOnlyPointF Floor()   => new(X.Floor(), Y.Floor());
@@ -72,7 +72,6 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
 
         return Math.Acos(cosTheta); // In radians
     }
-
 
 
     public int CompareTo( ReadOnlyPointF other )
