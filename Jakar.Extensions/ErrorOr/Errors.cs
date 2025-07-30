@@ -48,7 +48,7 @@ public sealed class Errors() : BaseClass, IEqualComparable<Errors>
                                               Alert   = null,
                                               Details = _details
                                           };
-    public static Sorter<Errors> Sorter => Sorter<Errors>.Default;
+    public static EqualComparer<Errors> Sorter => EqualComparer<Errors>.Default;
 
 
     [JsonRequired] public required Alert?  Alert       { get; init; }

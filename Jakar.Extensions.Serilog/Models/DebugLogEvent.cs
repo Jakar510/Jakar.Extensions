@@ -14,7 +14,7 @@ public sealed class DebugLogEvent( string source, string message, string caller,
     public        string                Description  { get; } = $"[{level}] {source}.{caller} -> {message}";
     public        string                Message      { get; } = message;
     public        string                Source       { get; } = source;
-    public static Sorter<DebugLogEvent> Sorter       => Sorter<DebugLogEvent>.Default;
+    public static EqualComparer<DebugLogEvent> Sorter       => EqualComparer<DebugLogEvent>.Default;
     DateTimeOffset? ILastModified.      LastModified => TimeStamp;
 
 

@@ -15,7 +15,7 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public readonly        float          Y       = y;
 
 
-    public static       Sorter<ReadOnlyPointF>                Sorter  => Sorter<ReadOnlyPointF>.Default;
+    public static       EqualComparer<ReadOnlyPointF>                Sorter  => EqualComparer<ReadOnlyPointF>.Default;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Zero    => ref Zero;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One     => ref One;

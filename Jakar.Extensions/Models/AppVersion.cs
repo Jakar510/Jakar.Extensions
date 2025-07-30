@@ -9,7 +9,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public static readonly AppVersion                 Default   = new();
     private                string?                    _string;
     public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public static          Sorter<AppVersion>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<AppVersion>.Default; }
+    public static          EqualComparer<AppVersion>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<AppVersion>.Default; }
     public                 int?                       Build          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
     int IReadOnlyCollection<int>.                     Count          => Scheme.AsInt();
     public              AppVersionFlags               Flags          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }

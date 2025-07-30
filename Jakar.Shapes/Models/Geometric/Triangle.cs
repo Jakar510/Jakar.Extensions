@@ -20,7 +20,7 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public readonly        ReadOnlyPoint C       = c;
 
 
-    public static       Sorter<Triangle>          Sorter   => Sorter<Triangle>.Default;
+    public static       EqualComparer<Triangle>          Sorter   => EqualComparer<Triangle>.Default;
     static ref readonly Triangle IShape<Triangle>.Zero     => ref Zero;
     static ref readonly Triangle IShape<Triangle>.One      => ref One;
     static ref readonly Triangle IShape<Triangle>.Invalid  => ref Invalid;

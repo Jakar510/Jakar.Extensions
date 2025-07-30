@@ -22,7 +22,7 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public readonly        double            VerticalThickness   = top  + bottom;
 
 
-    public static       Sorter<ReadOnlyThickness>                   Sorter              => Sorter<ReadOnlyThickness>.Default;
+    public static       EqualComparer<ReadOnlyThickness>            Sorter              => EqualComparer<ReadOnlyThickness>.Default;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Zero                => ref Zero;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Invalid             => ref Invalid;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.One                 => ref One;

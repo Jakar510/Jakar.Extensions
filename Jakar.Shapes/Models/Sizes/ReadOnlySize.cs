@@ -11,7 +11,7 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public readonly        double       Width   = width;
 
 
-    public static       Sorter<ReadOnlySize>              Sorter      => Sorter<ReadOnlySize>.Default;
+    public static       EqualComparer<ReadOnlySize>              Sorter      => EqualComparer<ReadOnlySize>.Default;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Zero        => ref Zero;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid     => ref Invalid;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.One         => ref One; 

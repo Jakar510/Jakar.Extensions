@@ -16,7 +16,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public readonly        float              Height  = height;
 
 
-    public static       Sorter<ReadOnlyRectangleF>                    Sorter   => Sorter<ReadOnlyRectangleF>.Default;
+    public static       EqualComparer<ReadOnlyRectangleF>                    Sorter   => EqualComparer<ReadOnlyRectangleF>.Default;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.One      => ref One;

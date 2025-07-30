@@ -12,7 +12,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static readonly MutableSize One     = 1;
 
 
-    public static                Sorter<MutableSize>             Sorter      => Sorter<MutableSize>.Default;
+    public static                EqualComparer<MutableSize>             Sorter      => EqualComparer<MutableSize>.Default;
     static ref readonly          MutableSize IShape<MutableSize>.Zero        => ref Zero;
     static ref readonly          MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
     static ref readonly          MutableSize IShape<MutableSize>.One         => ref One;

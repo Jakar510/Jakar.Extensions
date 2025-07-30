@@ -27,7 +27,7 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseRecord<TClass>, IEqualComparable<TClass>
 {
-    public static Sorter<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public static EqualComparer<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<TClass>.Default; }
 
 
     public string ToJson()       => this.ToJson( Formatting.None );

@@ -69,7 +69,7 @@ public record ObservableRecord : BaseRecord, IObservableObject
 public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Sorter<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Sorter<TClass>.Default; }
+    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
 
 
     public TClass? FromJson( [NotNullIfNotNull(nameof(json))] string? json ) => json?.FromJson<TClass>();

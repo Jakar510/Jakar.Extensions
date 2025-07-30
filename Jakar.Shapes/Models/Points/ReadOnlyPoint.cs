@@ -30,7 +30,7 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public readonly        double        Y             = y;
 
 
-    public static       Sorter<ReadOnlyPoint>               Sorter  => Sorter<ReadOnlyPoint>.Default;
+    public static       EqualComparer<ReadOnlyPoint>               Sorter  => EqualComparer<ReadOnlyPoint>.Default;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero    => ref Zero;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One     => ref One;

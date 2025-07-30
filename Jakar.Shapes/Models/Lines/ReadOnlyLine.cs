@@ -16,7 +16,7 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public readonly        bool          IsFinite = isFinite;
 
 
-    public static       Sorter<ReadOnlyLine>              Sorter   => Sorter<ReadOnlyLine>.Default;
+    public static       EqualComparer<ReadOnlyLine>              Sorter   => EqualComparer<ReadOnlyLine>.Default;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Zero     => ref Zero;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.One      => ref One;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Invalid  => ref Invalid;

@@ -120,10 +120,10 @@ public abstract class ValidValueOf<TClass, TValue> : IComparable<ValidValueOf<TC
     }
 
 
-    public static bool operator ==( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.Equals( left.Value, right.Value );
-    public static bool operator !=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.Equals( left.Value, right.Value ) is false;
-    public static bool operator >( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.GreaterThan( left.Value, right.Value );
-    public static bool operator >=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.GreaterThanOrEqualTo( left.Value, right.Value );
-    public static bool operator <( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.LessThan( left.Value, right.Value );
-    public static bool operator <=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => Sorter<TValue>.Default.LessThanOrEqualTo( left.Value, right.Value );
+    public static bool operator ==( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.Equals( left.Value, right.Value );
+    public static bool operator !=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.Equals( left.Value, right.Value ) is false;
+    public static bool operator >( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.GreaterThan( left.Value, right.Value );
+    public static bool operator >=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.GreaterThanOrEqualTo( left.Value, right.Value );
+    public static bool operator <( ValidValueOf<TClass, TValue>  left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.LessThan( left.Value, right.Value );
+    public static bool operator <=( ValidValueOf<TClass, TValue> left, ValidValueOf<TClass, TValue> right ) => EqualComparer<TValue>.Default.LessThanOrEqualTo( left.Value, right.Value );
 }

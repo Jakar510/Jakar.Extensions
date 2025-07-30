@@ -9,7 +9,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static readonly MutableRectangle One     = 1;
 
 
-    public static                Sorter<MutableRectangle>                  Sorter  => Sorter<MutableRectangle>.Default;
+    public static                EqualComparer<MutableRectangle>                  Sorter  => EqualComparer<MutableRectangle>.Default;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Zero    => ref Zero;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Invalid => ref Invalid;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.One     => ref One;

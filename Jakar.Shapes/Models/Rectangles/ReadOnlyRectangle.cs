@@ -16,7 +16,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public readonly        double            Height  = height;
 
 
-    public static       Sorter<ReadOnlyRectangle>                   Sorter   => Sorter<ReadOnlyRectangle>.Default;
+    public static       EqualComparer<ReadOnlyRectangle>                   Sorter   => EqualComparer<ReadOnlyRectangle>.Default;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;

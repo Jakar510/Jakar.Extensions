@@ -4,13 +4,13 @@
 namespace Jakar.Shapes;
 
 
-public delegate TOutput RefSelect<TInput, out TOutput>( in TInput value );
+public delegate TOutput RefSelect<TInput, out TOutput>( ref readonly TInput value );
 
 
 
 public static class Shapes
 {
-    public static TInput[]? Create<TInput>( this ref readonly TInput[]? self, RefSelect<TInput, TInput> func )
+    public static TInput[]? Create<TInput>( this TInput[]? self, RefSelect<TInput, TInput> func )
     {
         ReadOnlySpan<TInput> span = self;
         if ( span.IsEmpty ) { return null; }
@@ -22,7 +22,7 @@ public static class Shapes
 
         return buffer;
     }
-    public static TOutput[]? Create<TInput, TOutput>( this ref readonly TInput[]? self, RefSelect<TInput, TOutput> func )
+    public static TOutput[]? Create<TInput, TOutput>( this TInput[]? self, RefSelect<TInput, TOutput> func )
     {
         ReadOnlySpan<TInput> span = self;
         if ( span.IsEmpty ) { return null; }

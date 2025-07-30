@@ -15,7 +15,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public readonly        double        Radius  = radius;
 
 
-    public static       Sorter<Circle>        Sorter  => Sorter<Circle>.Default;
+    public static       EqualComparer<Circle>        Sorter  => EqualComparer<Circle>.Default;
     static ref readonly Circle IShape<Circle>.Zero    => ref Zero;
     static ref readonly Circle IShape<Circle>.One     => ref One;
     static ref readonly Circle IShape<Circle>.Invalid => ref Invalid;
