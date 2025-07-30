@@ -49,7 +49,7 @@ public struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 
         _parent   = parent;
         _activity = Activity.Current = source.StartActivity(DisplayName);
-        _activity?.AddEvent($"{DisplayName}.Start".GetEvent(new ActivityTagsCollection { [START_STOP_ID] = _id }));
+        _activity?.AddEvent(new ActivityEvent("Start", DateTimeOffset.UtcNow));
     }
     public void Dispose()
     {
@@ -64,13 +64,7 @@ public struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 
         if ( self._activity is not null )
         {
-            ActivityTagsCollection properties = new()
-                                                {
-                                                    [START_STOP_ID] = _id,
-                                                    [ELAPSED_TIME]  = Elapsed
-                                                };
-
-            self._activity.AddEvent($"{self.DisplayName}.End".GetEvent(properties));
+            self._activity.AddEvent(new ActivityEvent(Duration.Create(self.Elapsed).ToString("End. Duration: "), DateTimeOffset.UtcNow));
             self._activity.Dispose();
             self._activity = null;
         }
