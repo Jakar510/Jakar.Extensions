@@ -21,7 +21,7 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
     private readonly Lock                       _stateLock       = new(); // These fields are used by the write side to signal shutdown. A mutex is required because the queue writer `Complete()` call is not idempotent and will throw if called multiple times, e.g. via multiple `Dispose()` calls on this sink.
     private readonly Queue<LogEvent>            _currentBatch    = new(BATCH_SIZE_LIMIT);
     private          CancellationToken          _shutdownSignal  = CancellationToken.None;
-    private          ILoggingFailureListener    _failureListener = SelfLog.FailureListener;
+    private          ILoggingFailureListener    _failureListener = global::Serilog.Debugging.SelfLog.FailureListener;
     private          Task<bool>?                _cachedWaitToRead;
 
 

@@ -22,7 +22,7 @@ public sealed class TelemetrySource : IFuzzyEquals<TelemetrySource>, IDisposable
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-    public TelemetrySource( AppInfo info )
+    public TelemetrySource( in AppInfo info )
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
         Activity.Current = null;
@@ -54,8 +54,12 @@ public sealed class TelemetrySource : IFuzzyEquals<TelemetrySource>, IDisposable
     public bool FuzzyEquals( AppVersion other ) => Info.Version.FuzzyEquals(other);
 
 
-    public Activity? StartActivity( string name, Activity? parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded ) => StartActivity(name, ( parent ?? Activity.Current )?.Context ?? EmptyActivityContext, tags, links, kind, idFormat, traceFlags);
-    public Activity? StartActivity( string name, ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
+    public Activity? StartActivity( string name, Activity? parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
+    {
+        ActivityContext parentContext = ( parent ?? Activity.Current )?.Context ?? EmptyActivityContext;
+        return StartActivity(name, in parentContext, tags, links, kind, idFormat, traceFlags);
+    }
+    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
         if ( Source.HasListeners() is false ) { return null; }

@@ -46,12 +46,12 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     ISeriloggerSettings ISerilogger.Settings       => Settings;
 
 
-    static Serilogger() => SelfLog.Enable( static message =>
-                                           {
-                                               // System.Diagnostics.Debug.WriteLine( message );
-                                               // Console.WriteLine( message );
-                                               Console.Error.WriteLine( message );
-                                           } );
+    static Serilogger() => global::Serilog.Debugging.SelfLog.Enable( static message =>
+                                                                     {
+                                                                         // System.Diagnostics.Debug.WriteLine( message );
+                                                                         // Console.WriteLine( message );
+                                                                         Console.Error.WriteLine( message );
+                                                                     } );
     protected Serilogger( SeriloggerOptions options )
     {
         Options = options;

@@ -1,6 +1,6 @@
 ﻿Console.WriteLine(DateTimeOffset.UtcNow.ToString());
 
-Console.WriteLine(Duration.Create(TimeSpan.FromHours(1.1243123)).ToString("End. Duration: "));
+Console.WriteLine(SpanDuration.ToString(TimeSpan.FromHours(1.1243123), "End. Duration: "));
 
 /*
 CancellationTokenSource source = new(TimeSpan.FromSeconds( 5 ));

@@ -4,8 +4,8 @@
 namespace Jakar.Extensions;
 
 
-[NotSerializable, DefaultValue("Empty")]
-public struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
+[NotSerializable, DefaultValue(nameof(Empty))]
+public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 {
     public const           string        APP           = nameof(APP);
     public const           string        ON_SLEEP      = nameof(ON_SLEEP);
@@ -15,23 +15,25 @@ public struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
     public const           string        ELAPSED_TIME  = nameof(ELAPSED_TIME);
     public const           string        START_STOP_ID = nameof(START_STOP_ID);
     public static readonly TelemetrySpan Empty         = new(EMPTY, null);
-    private                Activity?     _parent;
-    private                Activity?     _activity;
-    private readonly       long          _start = Stopwatch.GetTimestamp();
-    private readonly       string        _id    = RandomID();
+    private readonly       Activity?     _parent;
+    private readonly       Activity?     _activity;
+    private readonly       long          _start;
+    private readonly       string        _id;
     public readonly        string        DisplayName;
 
 
-    public readonly TimeSpan        Elapsed      => Stopwatch.GetElapsedTime(_start, Stopwatch.GetTimestamp());
-    public readonly DateTimeOffset? CreateWindow { set => SetBaggage(CREATE_WINDOW, value?.ToString()); }
-    public readonly DateTimeOffset? StartTime    { set => SetBaggage(ON_START,      value?.ToString()); }
-    public readonly DateTimeOffset? ResumeTime   { set => SetBaggage(ON_RESUME,     value?.ToString()); }
-    public readonly DateTimeOffset? SleepTime    { set => SetBaggage(ON_SLEEP,      value?.ToString()); }
-    public          bool            IsValid      => _activity is not null;
+    public static int             RandomIDLength { get; set; } = 16;
+    public        TimeSpan        Elapsed        => Stopwatch.GetElapsedTime(_start, Stopwatch.GetTimestamp());
+    public        DateTimeOffset? CreateWindow   { set => SetBaggage(CREATE_WINDOW, value?.ToString()); }
+    public        DateTimeOffset? StartTime      { set => SetBaggage(ON_START,      value?.ToString()); }
+    public        DateTimeOffset? ResumeTime     { set => SetBaggage(ON_RESUME,     value?.ToString()); }
+    public        DateTimeOffset? SleepTime      { set => SetBaggage(ON_SLEEP,      value?.ToString()); }
+    public        bool            IsValid        => _activity is not null;
 
 
-    public TelemetrySpan( string name, Activity? parent )
+    public TelemetrySpan( string name, Activity? parent, int? randomIDLength = null )
     {
+        _start    = Stopwatch.GetTimestamp();
         TelemetrySource? source = TelemetrySource.Current;
 
         if ( string.IsNullOrWhiteSpace(name) || source is null )
@@ -39,152 +41,123 @@ public struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
             _parent     = null;
             _activity   = null;
             DisplayName = string.Empty;
+            _id         = string.Empty;
             return;
         }
-
 
         DisplayName = parent is not null
                           ? $"{parent.DisplayName}.{name}"
                           : name;
 
         _parent   = parent;
+        _id       = RandomID(randomIDLength ?? RandomIDLength);
         _activity = Activity.Current = source.StartActivity(DisplayName);
         _activity?.AddEvent(new ActivityEvent("Start", DateTimeOffset.UtcNow));
     }
     public void Dispose()
     {
-        TelemetrySpan self = this;
-        this = default;
+        if ( _activity?.IsStopped is null or true ) { return; }
 
-        if ( self._parent is not null )
-        {
-            Activity.Current = self._parent;
-            self._parent     = null;
-        }
+        if ( _parent is not null ) { Activity.Current = _parent; }
 
-        if ( self._activity is not null )
-        {
-            self._activity.AddEvent(new ActivityEvent(Duration.Create(self.Elapsed).ToString("End. Duration: "), DateTimeOffset.UtcNow));
-            self._activity.Dispose();
-            self._activity = null;
-        }
+        _activity.AddEvent(new ActivityEvent(SpanDuration.ToString(Elapsed, "End. Duration: "), DateTimeOffset.UtcNow));
+        _activity.Stop();
+        _activity.Dispose();
     }
 
 
-    public static string RandomID()
+    public static string RandomID( int length )
     {
-        Span<byte> span = stackalloc byte[40];
+        if ( length < 1 ) { throw new ArgumentOutOfRangeException(nameof(length), "Length must be greater than 0."); }
+
+        Span<byte> span = stackalloc byte[length];
         RandomNumberGenerator.Fill(span);
         return Convert.ToHexString(span);
     }
 
 
-    public readonly ActivityLink Link( ActivityTagsCollection? tags = null ) => _activity is null
-                                                                                    ? new ActivityLink()
-                                                                                    : new ActivityLink(_activity.Context, tags);
+    public ActivityLink Link( ActivityTagsCollection? tags = null ) => _activity is null
+                                                                           ? new ActivityLink()
+                                                                           : new ActivityLink(_activity.Context, tags);
 
 
-    [Pure, MustDisposeResource] public readonly TelemetrySpan ParseJson()                                                                                 => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan CreatePage()                                                                                => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan GoHome()                                                                                    => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan GoBack()                                                                                    => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan Navigation()                                                                                => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan WriteToFile()                                                                               => SubSpan();
-    [Pure, MustDisposeResource] public readonly TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, _activity);
-    [Pure, MustDisposeResource] public static   TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
-    [Pure, MustDisposeResource] public static   TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
+    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, _activity);
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
+    [Pure, MustDisposeResource] public static TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
 
 
-    public readonly void SetAttribute( string key, object? value )
+    public TelemetrySpan AddTag( string key, string? value )
     {
-        if ( _activity is null ) { return; }
-
-        Debug.Assert(_activity.ActivityTraceFlags is ActivityTraceFlags.Recorded);
-        _activity.SetTag(key, value);
-    }
-    public readonly void AddAttribute( string key, object? value )
-    {
-        if ( _activity is null ) { return; }
-
-        Debug.Assert(_activity.ActivityTraceFlags is ActivityTraceFlags.Recorded);
-        _activity.AddTag(key, value);
-    }
-
-
-    public readonly TelemetrySpan AddTag( string key, string? value )
-    {
-        if ( _activity is null ) { return this; }
-
-        _activity.AddTag(key, (object?)value);
+        _activity?.AddTag(key, (object?)value);
         return this;
     }
-    public readonly TelemetrySpan AddTag( string key, object? value )
+    public TelemetrySpan AddTag( string key, object? value )
     {
-        if ( _activity is null ) { return this; }
-
-        _activity.AddTag(key, value);
+        _activity?.AddTag(key, value);
         return this;
     }
-    public readonly TelemetrySpan SetTag( string key, object? value )
+    public TelemetrySpan SetTag( string key, object? value )
     {
-        if ( _activity is null ) { return this; }
-
-        _activity.SetTag(key, value);
+        _activity?.SetTag(key, value);
         return this;
     }
 
 
-    public readonly TelemetrySpan AddBaggage( string key, string? value )
+    public TelemetrySpan AddBaggage( string key, string? value )
     {
-        if ( _activity is null ) { return this; }
-
-        _activity.AddBaggage(key, value);
+        _activity?.AddBaggage(key, value);
         return this;
     }
-    public readonly TelemetrySpan SetBaggage( string key, string? value )
+    public TelemetrySpan SetBaggage( string key, string? value )
     {
-        if ( _activity is null ) { return this; }
-
-        _activity.SetBaggage(key, value);
+        _activity?.SetBaggage(key, value);
         return this;
     }
 
 
-    public readonly TelemetrySpan AddEvent( ActivityTagsCollection? properties = null, [CallerMemberName] string eventType  = EMPTY ) => AddEvent(eventType.GetEvent(properties));
-    public readonly TelemetrySpan AddEvent( string                  eventType,         ActivityTagsCollection?   properties = null )  => AddEvent(eventType.GetEvent(properties));
-    public readonly TelemetrySpan AddEvent( in ActivityEvent e )
+    public TelemetrySpan AddEvent( ActivityTagsCollection? properties = null, [CallerMemberName] string eventType  = EMPTY ) => AddEvent(new ActivityEvent(eventType, DateTimeOffset.UtcNow, properties));
+    public TelemetrySpan AddEvent( string                  eventType,         ActivityTagsCollection?   properties = null )  => AddEvent(new ActivityEvent(eventType, DateTimeOffset.UtcNow, properties));
+    public TelemetrySpan AddEvent( in ActivityEvent e )
     {
-        if ( _activity is null ) { return this; }
-
-        _activity.AddEvent(e);
+        _activity?.AddEvent(e);
         return this;
     }
-    public readonly TelemetrySpan AddLink( in ActivityLink link )
+    public TelemetrySpan AddEvent( params ReadOnlySpan<ActivityEvent> events )
     {
-        if ( _activity is null ) { return this; }
+        foreach ( ref readonly ActivityEvent e in events ) { _activity?.AddEvent(e); }
 
-        _activity.AddLink(link);
         return this;
     }
 
 
-    public readonly TelemetrySpan AddException( Exception exception, in TagList tags = default, DateTimeOffset? timestamp = null )
+    public TelemetrySpan AddLink( in ActivityLink link )
     {
-        if ( _activity is null ) { return this; }
+        _activity?.AddLink(link);
+        return this;
+    }
+    public TelemetrySpan AddLink( params ReadOnlySpan<ActivityLink> links )
+    {
+        foreach ( ref readonly ActivityLink e in links ) { _activity?.AddLink(e); }
 
-        _activity.AddException(exception, in tags, timestamp ?? DateTimeOffset.UtcNow);
         return this;
     }
 
 
-    public readonly async ValueTask WaitForNextTickAsync( PeriodicTimer timer, CancellationToken token )
+    public TelemetrySpan AddException( Exception exception, in TagList tags = default, DateTimeOffset? timestamp = null )
+    {
+        _activity?.AddException(exception, in tags, timestamp ?? DateTimeOffset.UtcNow);
+        return this;
+    }
+
+
+    public async ValueTask WaitForNextTickAsync( PeriodicTimer timer, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = SubSpan();
         await timer.WaitForNextTickAsync(token).ConfigureAwait(false);
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly ValueTask Delay( double seconds, CancellationToken token = default ) => Delay(TimeSpan.FromSeconds(seconds), token);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public readonly ValueTask Delay( long   ms,      CancellationToken token = default ) => Delay(TimeSpan.FromMilliseconds(ms), token);
-    public readonly async ValueTask Delay( TimeSpan delay, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask Delay( double seconds, CancellationToken token = default ) => Delay(TimeSpan.FromSeconds(seconds), token);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public ValueTask Delay( long   ms,      CancellationToken token = default ) => Delay(TimeSpan.FromMilliseconds(ms), token);
+    public async ValueTask Delay( TimeSpan delay, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = SubSpan();
         await Task.Delay(delay, token).ConfigureAwait(false);

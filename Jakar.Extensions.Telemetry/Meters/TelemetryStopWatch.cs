@@ -15,20 +15,15 @@ public readonly struct TelemetryStopWatch( string caller, TextWriter? writer = n
     private readonly long        _start  = Stopwatch.GetTimestamp();
     public readonly  string      ID      = Guids.NewBase64();
 
-    public TimeSpan Elapsed { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Stopwatch.GetElapsedTime( _start, Stopwatch.GetTimestamp() ); }
+    public TimeSpan Elapsed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Stopwatch.GetElapsedTime(_start, Stopwatch.GetTimestamp()); }
 
 
     public void Dispose()
     {
-        if ( _writer is not null ) { _writer.WriteLine( ToString() ); }
-        else { Debug.WriteLine( ToString() ); }
+        if ( _writer is not null ) { _writer.WriteLine(ToString()); }
+        else { Serilog.Debugging.SelfLog.WriteLine(ToString()); }
     }
-    public override string ToString()
-    {
-        TimeSpan                            elapsed = Elapsed;
-        (double Value, StopWatch.Unit Unit) range   = StopWatch.GetRangeWithUnit( in elapsed );
-        return $"[{_caller}] {range.Value} {range.Unit}";
-    }
+    public override string ToString() => SpanDuration.ToString(Elapsed, $"[{_caller}] ");
 
 
     public static TelemetryStopWatch Start( [CallerMemberName] string caller                                   = BaseRecord.EMPTY ) => new(caller);
