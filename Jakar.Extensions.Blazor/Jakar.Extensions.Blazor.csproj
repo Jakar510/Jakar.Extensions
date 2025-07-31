@@ -60,14 +60,14 @@
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
 		<PackageReference Include="PanoramicData.Blazor" Version="9.0.230" />
 		<PackageReference Include="Radzen.Blazor" Version="7.1.6" />
-		<PackageReference Include="Jakar.Extensions" Version="9.14.2" />
+		<PackageReference Include="Jakar.Extensions" Version="9.14.3" />
 		<PackageReference Include="Hardware.Info" Version="101.0.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.3" />
-		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.5" />
+		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
 		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
