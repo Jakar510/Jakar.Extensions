@@ -65,7 +65,7 @@
 		<PackageReference Include="CommunityToolkit.Maui" Version="12.1.0" />
 		<PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="6.1.1" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.90" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
     </ItemGroup>
 
 </Project>

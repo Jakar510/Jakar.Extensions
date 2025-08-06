@@ -55,32 +55,32 @@
 		<PackageReference Include="BlazorPro.BlazorSize" Version="9.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Cropper.Blazor" Version="1.4.2" />
-		<PackageReference Include="MudBlazor" Version="8.10.0" />
-		<PackageReference Include="MudBlazor.Markdown" Version="8.9.0" />
+		<PackageReference Include="MudBlazor" Version="8.11.0" />
+		<PackageReference Include="MudBlazor.Markdown" Version="8.11.0" />
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
-		<PackageReference Include="PanoramicData.Blazor" Version="9.0.230" />
-		<PackageReference Include="Radzen.Blazor" Version="7.1.6" />
+		<PackageReference Include="PanoramicData.Blazor" Version="9.0.248" />
+		<PackageReference Include="Radzen.Blazor" Version="7.1.7" />
 		<PackageReference Include="Jakar.Extensions" Version="9.14.3" />
 		<PackageReference Include="Hardware.Info" Version="101.0.1.1" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.3" />
 		<PackageReference Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.7" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
 	</ItemGroup>
 
 </Project>

@@ -47,8 +47,8 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Jakar.Extensions" Version="9.14.3" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.8" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
 	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
 	<PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
@@ -60,7 +60,7 @@
 	<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
 	<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
 	<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-	<PackageReference Include="Serilog.Sinks.Http" Version="9.1.1" />
+	<PackageReference Include="Serilog.Sinks.Http" Version="9.2.0" />
 	<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
 	<PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
   </ItemGroup>

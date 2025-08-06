@@ -4,28 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public static class AppPreferenceExtensions
-{
-    private static readonly ShareKeyCollection _sharedKeys = new();
-    public static           string             GetSharedKey( this string sharedName, string key ) => _sharedKeys.GetOrAdd( sharedName, key );
-
-
-
-    /// <summary> A collection of sharedName -> key -> $"{sharedName}.{key}". </summary>
-    private sealed class ShareKeyCollection : ConcurrentDictionary<(string SharedName, string Key), string>
-    {
-        private static string CreateKey( (string SharedName, string Key) pair )                   => $"{pair.SharedName}.{pair.Key}";
-        public         string GetOrAdd( string                           sharedName, string key ) => GetOrAdd( (sharedName, key), CreateKey );
-    }
-}
-
-
-
-public interface IAppPreferences
+public interface IAppPreferences : IAsyncDisposable
 {
     bool ContainsKey( string key, string sharedName );
-    void Remove( string      key, string sharedName, string? oldKey = null );
+    void Remove( string      key, string sharedName, string? alternateKey = null );
     void Clear( string       sharedName );
+    void Clear();
 
 
     void Set( string key, string value, string sharedName );
@@ -36,10 +20,10 @@ public interface IAppPreferences
         where TValue : IParsable<TValue>, IFormattable;
 
 
-    TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? oldKey = null )
+    TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? alternateKey = null )
         where TValue : IParsable<TValue>, IFormattable;
-    string Get( string key, string sharedName,   string? oldKey = null, string  defaultValue = EMPTY );
-    Uri    Get( string key, Uri    defaultValue, string  sharedName,    string? oldKey       = null );
-    bool   Get( string key, bool   defaultValue, string  sharedName,    string? oldKey       = null );
-    bool?  Get( string key, bool?  defaultValue, string  sharedName,    string? oldKey       = null );
+    string Get( string key, string sharedName,   string? alternateKey = null, string  defaultValue = EMPTY );
+    Uri    Get( string key, Uri    defaultValue, string  sharedName,          string? alternateKey = null );
+    bool   Get( string key, bool   defaultValue, string  sharedName,          string? alternateKey = null );
+    bool?  Get( string key, bool?  defaultValue, string  sharedName,          string? alternateKey = null );
 }

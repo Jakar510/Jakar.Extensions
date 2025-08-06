@@ -77,7 +77,7 @@
 		<PackageReference Include="MailKit" Version="4.13.0" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" Version="9.7.0" />
-		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Identity.Client" Version="4.74.1" />
 		<PackageReference Include="Microsoft.Identity.Web" Version="3.12.0" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.13.0" />
@@ -103,32 +103,32 @@
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="3.1.0" />
 		<PackageReference Include="Otp.NET" Version="1.4.0" />
 		<PackageReference Include="Sigil" Version="5.0.0" />
-		<PackageReference Include="System.IO.Hashing" Version="9.0.7" />
+		<PackageReference Include="System.IO.Hashing" Version="9.0.8" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="2.3.0" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.3.0" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.3.0" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="2.3.0" />
 		<PackageReference Include="ZXing.Net" Version="0.16.10" />
 		<PackageReference Include="Hardware.Info" Version="101.0.1.1" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.7" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="9.0.8" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.7" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="9.7.0" />
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" Version="9.4.0" />
 	</ItemGroup>

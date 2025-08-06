@@ -14,10 +14,10 @@
 
   <ItemGroup>
     <PackageReference Include="Jakar.Extensions.Blazor" Version="9.0.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.7" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.7" />
-    <PackageReference Include="System.Formats.Asn1" Version="9.0.7" />
-    <PackageReference Include="System.Text.Json" Version="9.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
+    <PackageReference Include="System.Formats.Asn1" Version="9.0.8" />
+    <PackageReference Include="System.Text.Json" Version="9.0.8" />
   </ItemGroup>
 
   <ItemGroup>

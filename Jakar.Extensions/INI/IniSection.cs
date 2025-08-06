@@ -1,76 +1,78 @@
 ﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "MemberHidesStaticFromOuterClass" )]
+[SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
 public partial class IniConfig
 {
-    internal const string CLOSE  = " ]";
-    internal const string EQUALS = " = ";
-    internal const string OPEN   = "[ ";
+    internal const         string CLOSE   = " ]";
+    internal const         string EQUALS  = " = ";
+    internal const         string OPEN    = "[ ";
+    public static readonly int    Padding = CLOSE.Length + OPEN.Length + EQUALS.Length;
 
 
 
-    public sealed class Section : ConcurrentDictionary<string, string?>
+    public sealed class Section( string sectionName ) : IReadOnlyDictionary<string, string?>
     {
-        public int Length
-        {
-            get
-            {
-                int title  = Name.Length + OPEN.Length + CLOSE.Length;
-                int keys   = (Longest + EQUALS.Length) * Keys.Count;
-                int values = Values.Sum( x => x?.Length ?? 0 );
-                int result = title + keys + values + Keys.Count;
-                return result;
-            }
-        }
-        internal int Longest => Keys.Max( static item => item.Length );
-    #if NET9_0_OR_GREATER
-        public AlternateLookup<ReadOnlySpan<char>> Lookup => GetAlternateLookup<ReadOnlySpan<char>>();
-    #endif
-        public string Name { get; }
+        private readonly ConcurrentDictionary<string, string?>                                     _dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
+        public           int                                                                       Length  => GetLength(out _);
+        internal         int                                                                       Longest => _dictionary.Keys.Max(static item => item.Length);
+        public           ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+        public           string                                                                    Name    { get; } = sectionName;
+        public           int                                                                       Count   => _dictionary.Count;
+        public string? this[ string key ] { get => _dictionary[key]; set => _dictionary[key] = value; }
+        public IEnumerable<string>  Keys   => _dictionary.Keys;
+        public IEnumerable<string?> Values => _dictionary.Values;
 
-        public Section( string sectionName ) : this( sectionName, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string sectionName, IEqualityComparer<string>                  comparer ) : base( comparer ) => Name = sectionName;
-        public Section( string sectionName, IDictionary<string, string?>               dictionary ) : this( sectionName, dictionary, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string sectionName, IDictionary<string, string?>               dictionary, IEqualityComparer<string> comparer ) : base( dictionary, comparer ) => Name = sectionName;
-        public Section( string sectionName, IEnumerable<KeyValuePair<string, string?>> collection ) : this( sectionName, collection, StringComparer.OrdinalIgnoreCase ) { }
-        public Section( string sectionName, IEnumerable<KeyValuePair<string, string?>> collection, IEqualityComparer<string> comparer ) : base( collection, comparer ) => Name = sectionName;
 
         public static implicit operator Section( string sectionName ) => new(sectionName);
 
 
-        public override string ToString() => ToString( null, CultureInfo.CurrentCulture );
+        public static Section Create( string sectionName ) => new(sectionName);
+
+
+        public override string ToString() => ToString(null, CultureInfo.CurrentCulture);
         public string ToString( string? format, IFormatProvider? formatProvider )
         {
             Span<char> span = stackalloc char[Length + 1];
+            if ( TryFormat(span, out int charsWritten, format, formatProvider) ) { return span[..charsWritten].ToString(); }
 
-            if ( TryFormat( span, out int charsWritten, format, formatProvider ) ) { return span[..charsWritten].ToString(); }
-
-            throw new InvalidOperationException( "Cannot convert to string" );
+            throw new InvalidOperationException("Cannot convert to string");
+        }
+        private int GetLength( out int longest )
+        {
+            int count = _dictionary.Keys.Count;
+            longest = Longest;
+            int keys   = ( longest + EQUALS.Length ) * count;
+            int values = _dictionary.Values.Sum(static x => x?.Length ?? 0);
+            int result = Padding + keys + values + count;
+            return result;
         }
 
 
-        [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
         {
-            Debug.Assert( destination.Length > Length );
+            int length = GetLength(out int longest);
+            Debug.Assert(destination.Length > length);
             charsWritten = 0;
-            int longest = Longest;
 
-            foreach ( char t in OPEN ) { destination[charsWritten++] = t; }
+            OPEN.CopyTo(destination[charsWritten..]);
+            charsWritten += OPEN.Length;
 
-            foreach ( char t in Name ) { destination[charsWritten++] = t; }
+            Name.CopyTo(destination[charsWritten..]);
+            charsWritten += Name.Length;
 
-            foreach ( char t in CLOSE ) { destination[charsWritten++] = t; }
+            CLOSE.CopyTo(destination[charsWritten..]);
+            charsWritten += CLOSE.Length;
 
             destination[charsWritten++] = '\n';
 
 
-            foreach ( (string sKey, string? sValue) in this )
+            foreach ( ( string sKey, string? sValue ) in _dictionary )
             {
                 ReadOnlySpan<char> sectionValue = sValue;
 
-                foreach ( char c in sKey.PadRight( longest ) ) { destination[charsWritten++] = c; }
+                foreach ( char c in sKey.PadRight(longest) ) { destination[charsWritten++] = c; }
 
                 foreach ( char c in EQUALS ) { destination[charsWritten++] = c; }
 
@@ -83,20 +85,30 @@ public partial class IniConfig
         }
 
 
+        public bool ContainsKey( string key )                    => _dictionary.ContainsKey(key);
+        public bool TryGetValue( string key, out string? value ) => _dictionary.TryGetValue(key, out value);
+        public bool TryRemove( string   key, out string? value ) => _dictionary.TryRemove(key, out value);
+        public void Clear() => _dictionary.Clear();
+
+
+        public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() => _dictionary.GetEnumerator();
+        IEnumerator IEnumerable.                          GetEnumerator() => GetEnumerator();
+
+
 
         #region Gets
 
-        public bool ValueAs<TValue>( string key, [NotNullWhen( true )] out TValue? value )
+        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
         {
             string? s = this[key];
 
-            value = string.IsNullOrEmpty( s )
+            value = string.IsNullOrEmpty(s)
                         ? default
                         : s.FromJson<TValue>();
 
             return value is not null;
         }
-        public bool ValueAs<TValue>( string key, [NotNullWhen( true )] out TValue[]? value )
+        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue[]? value )
         {
             value = this[key]?.FromJson<TValue[]>();
 
@@ -104,36 +116,36 @@ public partial class IniConfig
         }
 
 
-        public bool ValueAsNumber<TNumber>( string key, [NotNullWhen( true )] out TNumber? value )
-            where TNumber : INumber<TNumber> => TNumber.TryParse( this[key], null, out value );
+        public bool ValueAsNumber<TNumber>( string key, [NotNullWhen(true)] out TNumber? value )
+            where TNumber : INumber<TNumber> => TNumber.TryParse(this[key], null, out value);
 
 
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value )
+        public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
             value = this[key]?.FromJson<string[]>();
 
             return value is not null;
         }
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, char separator )
+        public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value, char separator )
         {
             string? s = this[key];
 
-            if ( !string.IsNullOrEmpty( s ) && s.Contains( separator ) )
+            if ( !string.IsNullOrEmpty(s) && s.Contains(separator) )
             {
-                value = s.Split( separator );
+                value = s.Split(separator);
                 return true;
             }
 
             value = null;
             return false;
         }
-        public bool ValueAs( string key, [NotNullWhen( true )] out string[]? value, string separator )
+        public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value, string separator )
         {
             string? s = this[key];
 
-            if ( !string.IsNullOrEmpty( s ) && s.Contains( separator ) )
+            if ( !string.IsNullOrEmpty(s) && s.Contains(separator) )
             {
-                value = s.Split( separator );
+                value = s.Split(separator);
                 return true;
             }
 
@@ -142,15 +154,15 @@ public partial class IniConfig
         }
 
 
-        public bool ValueAs( string key, [NotNullWhen( true )] out IPAddress?  value )                   => IPAddress.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       TimeSpan    value )                   => TimeSpan.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse( this[key], info, out value );
-        public bool ValueAs( string key, out                       DateTime    value )                                          => DateTime.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse( this[key], info, styles, out value );
-        public bool ValueAs( string key, out                       Guid        value ) => Guid.TryParse( this[key], out value );
-        public bool ValueAs( string key, out                       bool        value ) => bool.TryParse( this[key], out value );
-        public bool ValueAs( string key, [NotNullWhen( true )] out AppVersion? value ) => AppVersion.TryParse( this[key], out value );
-        public bool ValueAs( string key, [NotNullWhen( true )] out Version?    value ) => Version.TryParse( this[key], out value );
+        public bool ValueAs( string key, [NotNullWhen(true)] out IPAddress?  value )                   => IPAddress.TryParse(this[key], out value);
+        public bool ValueAs( string key, out                     TimeSpan    value )                   => TimeSpan.TryParse(this[key], out value);
+        public bool ValueAs( string key, out                     TimeSpan    value, CultureInfo info ) => TimeSpan.TryParse(this[key], info, out value);
+        public bool ValueAs( string key, out                     DateTime    value )                                          => DateTime.TryParse(this[key], out value);
+        public bool ValueAs( string key, out                     DateTime    value, CultureInfo info, DateTimeStyles styles ) => DateTime.TryParse(this[key], info, styles, out value);
+        public bool ValueAs( string key, out                     Guid        value ) => Guid.TryParse(this[key], out value);
+        public bool ValueAs( string key, out                     bool        value ) => bool.TryParse(this[key], out value);
+        public bool ValueAs( string key, [NotNullWhen(true)] out AppVersion? value ) => AppVersion.TryParse(this[key], out value);
+        public bool ValueAs( string key, [NotNullWhen(true)] out Version?    value ) => Version.TryParse(this[key], out value);
 
         #endregion
 
@@ -162,14 +174,14 @@ public partial class IniConfig
             where TValue : class => this[key] = value.ToJson();
         public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
-            where TNumber : INumber<TNumber> => this[key] = value.ToString( null, CultureInfo.CurrentCulture );
+            where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
         public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
         public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
-        public void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join( separator, values );
-        public void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join( separator, values );
+        public void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
+        public void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
         public void Add( string         key, TimeSpan            value ) => this[key] = value.ToString();
-        public void Add( string         key, DateTime            value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
-        public void Add( string         key, DateTimeOffset      value ) => this[key] = value.ToString( CultureInfo.CurrentCulture );
+        public void Add( string         key, DateTime            value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
+        public void Add( string         key, DateTimeOffset      value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
         public void Add( string         key, IPAddress           value ) => this[key] = value.ToString();
         public void Add( string         key, Guid                value ) => this[key] = value.ToString();
         public void Add( string         key, bool                value ) => this[key] = value.ToString();
@@ -181,17 +193,17 @@ public partial class IniConfig
         public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
                             ? value.ToString()
-                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
+                            : value.ToString(format, culture ?? CultureInfo.CurrentCulture);
 
         public void Add( string key, DateTime value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
-                            ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
-                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
+                            ? value.ToString(culture         ?? CultureInfo.CurrentCulture)
+                            : value.ToString(format, culture ?? CultureInfo.CurrentCulture);
 
         public void Add( string key, DateTimeOffset value, string? format, CultureInfo? culture = null ) =>
             this[key] = format is null
-                            ? value.ToString( culture         ?? CultureInfo.CurrentCulture )
-                            : value.ToString( format, culture ?? CultureInfo.CurrentCulture );
+                            ? value.ToString(culture         ?? CultureInfo.CurrentCulture)
+                            : value.ToString(format, culture ?? CultureInfo.CurrentCulture);
 
         #endregion
     }
