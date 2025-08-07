@@ -11,9 +11,12 @@ public readonly struct Radians( double value ) : IFormattable, IEquatable<Radian
     public readonly                 double  Value = value;
     public static implicit operator Radians( Degrees degrees ) => new(degrees.Value * ( Math.PI / 180.0 ));
 
-    public          bool   Equals( Radians other )                                     => Value.Equals(other.Value);
-    public override bool   Equals( object? obj )                                       => obj is Radians other && Equals(other);
-    public override int    GetHashCode()                                               => Value.GetHashCode();
-    public override string ToString()                                                  => $"{Value} rad";
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ToString();
+    
+    public          bool   Equals( Radians other )                                      => Value.Equals(other.Value);
+    public override bool   Equals( object? obj )                                        => obj is Radians other && Equals(other);
+    public override int    GetHashCode()                                                => Value.GetHashCode();
+    public override string ToString()                                                   => $"{Value} rad";
+    public          string ToString( string?  format, IFormatProvider? formatProvider ) => ToString();
+    public static   bool operator ==( Radians left,   Radians          right )          => left.Equals(right);
+    public static   bool operator !=( Radians left,   Radians          right )          => left.Equals(right) is false;
 }

@@ -4,21 +4,25 @@
 namespace Jakar.Shapes;
 
 
+public delegate TValue RefSelect<TValue>( ref readonly TValue value );
+
+
+
 public delegate TOutput RefSelect<TInput, out TOutput>( ref readonly TInput value );
 
 
 
 public static class Shapes
 {
-    public static TInput[]? Create<TInput>( this TInput[]? self, RefSelect<TInput, TInput> func )
+    public static TValue[]? Create<TValue>( this TValue[]? self, RefSelect<TValue> func )
     {
-        ReadOnlySpan<TInput> span = self;
+        ReadOnlySpan<TValue> span = self;
         if ( span.IsEmpty ) { return null; }
 
-        TInput[] buffer = GC.AllocateUninitializedArray<TInput>(span.Length);
+        TValue[] buffer = GC.AllocateUninitializedArray<TValue>(span.Length);
         int      index  = 0;
 
-        foreach ( ref readonly TInput value in span ) { buffer[index++] = func(in value); }
+        foreach ( ref readonly TValue value in span ) { buffer[index++] = func(in value); }
 
         return buffer;
     }

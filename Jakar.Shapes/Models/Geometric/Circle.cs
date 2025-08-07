@@ -15,7 +15,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public readonly        double        Radius  = radius;
 
 
-    public static       EqualComparer<Circle>        Sorter  => EqualComparer<Circle>.Default;
+    public static       EqualComparer<Circle> Sorter  => EqualComparer<Circle>.Default;
     static ref readonly Circle IShape<Circle>.Zero    => ref Zero;
     static ref readonly Circle IShape<Circle>.One     => ref One;
     static ref readonly Circle IShape<Circle>.Invalid => ref Invalid;
@@ -43,6 +43,95 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     [Pure] public        Circle Floor() => new(Center, Radius.Floor());
 
 
+    public bool IsTangent( ref readonly  ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Tangent;
+    public bool IsSecant( ref readonly   ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Secant;
+    public bool IsDisjoint( ref readonly ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Disjoint;
+
+
+    public bool IsTangent( ref readonly  CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Tangent;
+    public bool IsSecant( ref readonly   CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Secant;
+    public bool IsDisjoint( ref readonly CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Disjoint;
+
+
+    public CircleLineRelation GetLineRelation( ref readonly ReadOnlyLine line )
+    {
+        double dx           = line.End.X   - line.Start.X;
+        double dy           = line.End.Y   - line.Start.Y;
+        double fx           = line.Start.X - Center.X;
+        double fy           = line.Start.Y - Center.Y;
+        double a            = dx * dx      + dy * dy;
+        double b            = 2 * ( fx * dx + fy * dy );
+        double c            = fx * fx + fy * fy - Radius * Radius;
+        double discriminant = b                          * b - 4 * a * c;
+        if ( discriminant < 0 ) { return CircleLineRelation.Disjoint; }
+
+        if ( line.IsFinite is false )
+        {
+            return discriminant == 0
+                       ? CircleLineRelation.Tangent
+                       : CircleLineRelation.Secant;
+        }
+
+        // Finite segment: check if intersection lies on segment
+        discriminant = Math.Sqrt(discriminant);
+        double t1 = ( -b - discriminant ) / ( 2 * a );
+        double t2 = ( -b + discriminant ) / ( 2 * a );
+
+        bool onSegment1 = t1 is >= 0 and <= 1;
+        bool onSegment2 = t2 is >= 0 and <= 1;
+
+        if ( onSegment1 && onSegment2 ) { return CircleLineRelation.Secant; }
+
+        if ( onSegment1 || onSegment2 )
+        {
+            return discriminant == 0
+                       ? CircleLineRelation.Tangent
+                       : CircleLineRelation.Secant;
+        }
+
+        return CircleLineRelation.Disjoint;
+    }
+    public CircleLineRelation GetLineRelation( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 )
+    {
+        double cx          = Center.X;
+        double cy          = Center.Y;
+        double r2          = Radius * Radius;
+        double range       = xMax - xMin;
+        bool   foundOn     = false;
+        bool   foundInside = false;
+
+        for ( int i = 0; i <= samples; i++ )
+        {
+            double x = xMin + range * i / samples;
+            double y = curve[x];
+
+            if ( double.IsNaN(y) || double.IsInfinity(y) ) { continue; }
+
+            double dx    = x       - cx;
+            double dy    = y       - cy;
+            double dist2 = dx * dx + dy * dy;
+            double diff  = dist2   - r2;
+
+            if ( Math.Abs(diff) < tolerance ) { foundOn = true; }
+            else if ( diff      < 0 ) { foundInside     = true; }
+
+            if ( foundInside && foundOn ) { return CircleLineRelation.Secant; }
+        }
+
+        if ( foundOn ) { return CircleLineRelation.Tangent; }
+
+        return CircleLineRelation.Disjoint;
+    }
+
+
+    public ReadOnlyLine Bisector( ref readonly Degrees degrees ) => new();
+    public ReadOnlyLine Bisector( ref readonly Radians radians ) => new();
+
+
+    public ReadOnlyLine Diameter( ref readonly Degrees degrees ) => new();
+    public ReadOnlyLine Diameter( ref readonly Radians radians ) => new();
+
+
     [Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public double DistanceTo( in Circle other )
     {
@@ -54,6 +143,11 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
         return result;
     }
 
+    public void Deconstruct( out ReadOnlyPoint start, out double radius )
+    {
+        start  = Center;
+        radius = Radius;
+    }
 
     public int CompareTo( Circle other )
     {

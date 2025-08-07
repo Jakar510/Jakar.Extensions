@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Shapes
 // 07/14/2025  10:08
 
-using System.Diagnostics.CodeAnalysis;
-
-
-
 namespace Jakar.Shapes;
 
 

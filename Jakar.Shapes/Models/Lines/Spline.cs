@@ -24,9 +24,6 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public ref ReadOnlyPoint this[ int index ] => ref Points[index];
 
 
-    public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
-
-
     public static       EqualComparer<Spline>       Sorter  => EqualComparer<Spline>.Default;
     static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
     static ref readonly Spline IShape<Spline>.      One     => ref One;
@@ -45,10 +42,7 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public bool IsValid => IsEmpty is false && IsNaN is false;
 
 
-    public static implicit operator Spline( int    other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( long   other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( float  other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( double other ) => new(ReadOnlyPoint.Zero, other);
+    public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
 
 
     [Pure] public static Spline                                                   Create( params ReadOnlyPoint[]? points ) => new(points);
