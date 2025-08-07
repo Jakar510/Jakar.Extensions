@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  18:56
 
+using System.Security.Cryptography;
+using JetBrains.Annotations;
+
+
+
 namespace Jakar.Shapes;
 
 
@@ -37,10 +42,10 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public static implicit operator Circle( double         other ) => new(ReadOnlyPoint.Zero, other);
 
 
-    [Pure] public static Circle Create( float  x, float  y ) => new(x, y);
-    [Pure] public static Circle Create( double x, double y ) => new(x, y);
-    [Pure] public        Circle Round() => new(Center, Radius.Round());
-    [Pure] public        Circle Floor() => new(Center, Radius.Floor());
+    [System.Diagnostics.Contracts.Pure] public static Circle Create( float  x, float  y ) => new(x, y);
+    [System.Diagnostics.Contracts.Pure] public static Circle Create( double x, double y ) => new(x, y);
+    [System.Diagnostics.Contracts.Pure] public        Circle Round() => new(Center, Radius.Round());
+    [System.Diagnostics.Contracts.Pure] public        Circle Floor() => new(Center, Radius.Floor());
 
 
     public bool IsTangent( ref readonly  ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Tangent;
@@ -93,22 +98,20 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     }
     public CircleLineRelation GetLineRelation( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 )
     {
-        double cx          = Center.X;
-        double cy          = Center.Y;
-        double r2          = Radius * Radius;
-        double range       = xMax - xMin;
+        double r2          = Radius          * Radius;
+        double range       = ( xMax - xMin ) / samples;
         bool   foundOn     = false;
         bool   foundInside = false;
 
         for ( int i = 0; i <= samples; i++ )
         {
-            double x = xMin + range * i / samples;
+            double x = xMin + range * i;
             double y = curve[x];
 
             if ( double.IsNaN(y) || double.IsInfinity(y) ) { continue; }
 
-            double dx    = x       - cx;
-            double dy    = y       - cy;
+            double dx    = x       - Center.X;
+            double dy    = y       - Center.Y;
             double dist2 = dx * dx + dy * dy;
             double diff  = dist2   - r2;
 
@@ -124,6 +127,86 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     }
 
 
+    [MustDisposeResource]
+    public FilterBuffer<ReadOnlyPoint> Intersections( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 )
+    {
+        double                      r2            = Radius * Radius;
+        FilterBuffer<ReadOnlyPoint> intersections = new(samples);
+        double                      step          = ( xMax - xMin ) / samples;
+
+        double prevX = xMin;
+        double prevD = Helper(prevX, in curve, in Center, in r2);
+
+        for ( int i = 1; i <= samples; i++ )
+        {
+            double currX = xMin + i * step;
+            double currD = Helper(currX, in curve, in Center, in r2);
+
+            if ( double.IsNaN(prevD) || double.IsNaN(currD) )
+            {
+                prevX = currX;
+                prevD = currD;
+                continue;
+            }
+
+            // Check for sign change or very close to zero
+            if ( Math.Abs(prevD) < tolerance )
+            {
+                ReadOnlyPoint point = new(prevX, curve[prevX]);
+                intersections.Add(in point);
+            }
+            else if ( prevD * currD < 0 ) // sign change → root in between
+            {
+                double        root  = Bisection(prevX, currX, in tolerance, 50, in curve, in Center, in r2);
+                ReadOnlyPoint point = new(root, curve[root]);
+                intersections.Add(in point);
+            }
+
+            prevX = currX;
+            prevD = currD;
+        }
+
+        return intersections;
+
+        static double Helper( double x, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
+        {
+            double y = curve[x];
+            if ( double.IsNaN(y) || double.IsInfinity(y) ) { return double.NaN; }
+
+            double dx = x - center.X;
+            double dy = y - center.Y;
+            return dx * dx + dy * dy - r2;
+        }
+
+        static double Bisection( double a, double b, in double tolerance, int maxIter, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
+        {
+            double fa  = Helper(a, in curve, in center, in r2);
+            double fb  = Helper(b, in curve, in center, in r2);
+            double mid = 0.5 * ( a + b );
+
+            for ( int i = 0; i < maxIter; i++ )
+            {
+                double fm = Helper(mid, in curve, in center, in r2);
+
+                if ( Math.Abs(fm) < tolerance ) { return mid; }
+
+                if ( fa * fm < 0 )
+                {
+                    b  = mid;
+                    fb = fm;
+                }
+                else
+                {
+                    a  = mid;
+                    fa = fm;
+                }
+            }
+
+            return mid;
+        }
+    }
+
+
     public ReadOnlyLine Bisector( ref readonly Degrees degrees ) => new();
     public ReadOnlyLine Bisector( ref readonly Radians radians ) => new();
 
@@ -132,7 +215,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public ReadOnlyLine Diameter( ref readonly Radians radians ) => new();
 
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    [System.Diagnostics.Contracts.Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public double DistanceTo( in Circle other )
     {
         double x      = Center.X - other.Center.X;
