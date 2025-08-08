@@ -64,7 +64,14 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     [Pure] public static ReadOnlyRectangle Create( float                              x,         float                y, float           width, float  height ) => new(x, y, width, height);
     [Pure] public static ReadOnlyRectangle Create( double                             x,         double               y, double          width, double height ) => new(x, y, width, height);
 
-
+    
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
+    
+    
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }

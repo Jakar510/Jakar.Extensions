@@ -14,7 +14,7 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public readonly        float         Width   = width;
 
 
-    public static       EqualComparer<ReadOnlySizeF>               Sorter      => EqualComparer<ReadOnlySizeF>.Default;
+    public static       EqualComparer<ReadOnlySizeF>        Sorter      => EqualComparer<ReadOnlySizeF>.Default;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
@@ -44,6 +44,13 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     [Pure] public        ReadOnlySizeF Reverse() => new(Height, Width);
     [Pure] public        ReadOnlySizeF Round()   => new(Width.Round(), Height.Round());
     [Pure] public        ReadOnlySizeF Floor()   => new(Width.Floor(), Height.Floor());
+
+
+    public void Deconstruct( out double width, out double height )
+    {
+        width  = Width;
+        height = Height;
+    }
 
 
     public int CompareTo( ReadOnlySizeF other )

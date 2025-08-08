@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  15:58
 
+using Jakar.Shapes.Interfaces;
+
+
+
 namespace Jakar.Shapes;
 
 
@@ -14,6 +18,53 @@ public delegate TOutput RefSelect<TInput, out TOutput>( ref readonly TInput valu
 
 public static class Shapes
 {
+    public static ReadOnlyLine RadiusLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle> => new(self.Center, new ReadOnlyPoint(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value)));
+    public static CalculatedLine RadiusCalculatedLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
+    {
+        ref readonly ReadOnlyPoint start = ref self.Center;
+        ReadOnlyPoint              end   = new(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value));
+
+        double dx = end.X - start.X;
+        double dy = end.Y - start.Y;
+
+        if ( Math.Abs(dx) < double.Epsilon ) { return CalculatedLine.Create(x => self.Center.X); }
+
+        double m = dy / dx;
+        double b = start.Y - m * start.X;
+
+        return CalculatedLine.Create(x => m * x + b);
+    }
+
+
+    public static ReadOnlyLine DiameterLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
+    {
+        ref readonly ReadOnlyPoint center = ref self.Center;
+        ReadOnlyPoint              start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint              end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
+        return new ReadOnlyLine(start, end);
+    }
+    public static CalculatedLine DiameterCalculatedLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
+    {
+        ReadOnlyPoint center = self.Center;
+        ReadOnlyPoint start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
+
+        double dx = end.X - start.X;
+        double dy = end.Y - start.Y;
+
+        if ( Math.Abs(dx) < double.Epsilon ) { return CalculatedLine.Create(x => start.X); }
+
+        double m = dy / dx;
+        double b = start.Y - m * start.X;
+
+        return CalculatedLine.Create(x => m * x + b);
+    }
+
+
     public static TValue[]? Create<TValue>( this TValue[]? self, RefSelect<TValue> func )
     {
         ReadOnlySpan<TValue> span = self;

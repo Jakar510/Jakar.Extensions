@@ -6,7 +6,7 @@ namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
-public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF> 
+public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF>
 {
     public static readonly ReadOnlyPointF Invalid = new(float.NaN, float.NaN);
     public static readonly ReadOnlyPointF Zero    = 0;
@@ -15,7 +15,7 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public readonly        float          Y       = y;
 
 
-    public static       EqualComparer<ReadOnlyPointF>                Sorter  => EqualComparer<ReadOnlyPointF>.Default;
+    public static       EqualComparer<ReadOnlyPointF>         Sorter  => EqualComparer<ReadOnlyPointF>.Default;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Zero    => ref Zero;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One     => ref One;
@@ -38,14 +38,13 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
 
     [Pure] public static ReadOnlyPointF Create( float  x, float  y ) => new(x, y);
     [Pure] public static ReadOnlyPointF Create( double x, double y ) => new(x.AsFloat(), y.AsFloat());
-    
-    
-    [Pure] public        ReadOnlyPointF Reverse() => new(Y, X);
-    [Pure] public        ReadOnlyPointF Round()   => new(X.Round(), Y.Round());
-    [Pure] public        ReadOnlyPointF Floor()   => new(X.Floor(), Y.Floor());
 
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    [Pure] public ReadOnlyPointF Reverse() => new(Y, X);
+    [Pure] public ReadOnlyPointF Round()   => new(X.Round(), Y.Round());
+    [Pure] public ReadOnlyPointF Floor()   => new(X.Floor(), Y.Floor());
+
+
     public double DistanceTo( in ReadOnlyPointF other )
     {
         double x      = X - other.X;
@@ -55,8 +54,8 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
         double result = Math.Sqrt(x2 + y2);
         return result;
     }
-    [Pure] public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
-    [Pure] public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
+    public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
+    public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
     public double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 )
     {
         ReadOnlyPoint v1 = this - p1;
@@ -71,6 +70,13 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
         cosTheta = Math.Clamp(cosTheta, -1.0, 1.0); // Avoid NaN due to precision
 
         return Math.Acos(cosTheta); // In radians
+    }
+
+
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
     }
 
 

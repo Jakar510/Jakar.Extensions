@@ -9,7 +9,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static readonly MutableRectangle One     = 1;
 
 
-    public static                EqualComparer<MutableRectangle>                  Sorter  => EqualComparer<MutableRectangle>.Default;
+    public static                EqualComparer<MutableRectangle>           Sorter  => EqualComparer<MutableRectangle>.Default;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Zero    => ref Zero;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Invalid => ref Invalid;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.One     => ref One;
@@ -113,6 +113,12 @@ public struct MutableRectangle( double x, double y, double width, double height 
     [Pure] public static MutableRectangle Create( in ReadOnlyPointF   topLeft,   in ReadOnlyPointF    bottomRight ) => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
     [Pure] public static MutableRectangle Create( in MutableRectangle rectangle, in ReadOnlyThickness padding )     => rectangle + padding;
 
+
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
 
     public readonly int CompareTo( object? other )
     {

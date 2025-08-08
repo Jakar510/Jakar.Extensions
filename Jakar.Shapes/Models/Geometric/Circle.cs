@@ -13,11 +13,12 @@ namespace Jakar.Shapes;
 [DefaultValue(nameof(Zero))]
 public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<Circle>, IMathOperators<Circle>
 {
-    public static readonly Circle        Invalid = new(double.NaN, double.NaN);
-    public static readonly Circle        Zero    = 0;
-    public static readonly Circle        One     = 1;
-    public readonly        ReadOnlyPoint Center  = center;
-    public readonly        double        Radius  = radius;
+    private const          double        TOLERANCE = 1e-8;
+    public static readonly Circle        Invalid   = new(ReadOnlyPoint.Invalid, double.NaN);
+    public static readonly Circle        Zero      = 0;
+    public static readonly Circle        One       = 1;
+    public readonly        ReadOnlyPoint Center    = center;
+    public readonly        double        Radius    = radius;
 
 
     public static       EqualComparer<Circle> Sorter  => EqualComparer<Circle>.Default;
@@ -53,9 +54,9 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public bool IsDisjoint( ref readonly ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Disjoint;
 
 
-    public bool IsTangent( ref readonly  CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Tangent;
-    public bool IsSecant( ref readonly   CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Secant;
-    public bool IsDisjoint( ref readonly CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Disjoint;
+    public bool IsTangent( ref readonly  CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Tangent;
+    public bool IsSecant( ref readonly   CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Secant;
+    public bool IsDisjoint( ref readonly CalculatedLine line, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE ) => GetLineRelation(in line, in xMin, in xMax, in samples, in tolerance) is CircleLineRelation.Disjoint;
 
 
     public CircleLineRelation GetLineRelation( ref readonly ReadOnlyLine line )
@@ -96,7 +97,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
 
         return CircleLineRelation.Disjoint;
     }
-    public CircleLineRelation GetLineRelation( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 )
+    public CircleLineRelation GetLineRelation( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE )
     {
         double r2          = Radius          * Radius;
         double range       = ( xMax - xMin ) / samples;
@@ -128,7 +129,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
 
 
     [MustDisposeResource]
-    public FilterBuffer<ReadOnlyPoint> Intersections( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = 1e-8 )
+    public FilterBuffer<ReadOnlyPoint> Intersections( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE )
     {
         double                      r2            = Radius * Radius;
         FilterBuffer<ReadOnlyPoint> intersections = new(samples);
@@ -207,30 +208,22 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     }
 
 
-    public ReadOnlyLine Bisector( ref readonly Degrees degrees ) => new();
-    public ReadOnlyLine Bisector( ref readonly Radians radians ) => new();
+    public double DistanceTo( in Circle        other ) => DistanceTo(in other.Center);
+    public double DistanceTo( in ReadOnlyPoint other ) => Center.DistanceTo(in other);
 
 
-    public ReadOnlyLine Diameter( ref readonly Degrees degrees ) => new();
-    public ReadOnlyLine Diameter( ref readonly Radians radians ) => new();
-
-
-    [System.Diagnostics.Contracts.Pure, MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public double DistanceTo( in Circle other )
+    public void Deconstruct( out double x, out double y ) => Center.Deconstruct(out x, out y);
+    public void Deconstruct( out double x, out double y, out double radius )
     {
-        double x      = Center.X - other.Center.X;
-        double y      = Center.Y - other.Center.Y;
-        double x2     = x * x;
-        double y2     = y * y;
-        double result = Math.Sqrt(x2 + y2);
-        return result;
+        Center.Deconstruct(out x, out y);
+        radius = Radius;
     }
-
     public void Deconstruct( out ReadOnlyPoint start, out double radius )
     {
         start  = Center;
         radius = Radius;
     }
+
 
     public int CompareTo( Circle other )
     {
