@@ -4,9 +4,10 @@
 namespace Jakar.Extensions.Telemetry;
 
 
-[Serializable, StructLayout( LayoutKind.Auto )]
-public readonly struct TelemetryActivityLink( in TelemetryActivityContext context, in TagsList tags )
+[Serializable, StructLayout(LayoutKind.Auto)]
+public readonly struct TelemetryActivityLink( in TelemetryActivityContext context, in Pairs tags )
 {
     public readonly TelemetryActivityContext Context = context;
-    public readonly TagsList                 Tags    = tags;
+    public readonly Pairs                    Tags    = tags;
+    public TelemetryActivityLink( in TelemetryActivityContext context ) : this(context, in Pairs.Empty) { }
 }

@@ -50,7 +50,7 @@ public partial class Database
             Error  provider = Error.NotFound( nameof(UserLoginProviderRecord.LoginProvider), login.LoginProvider );
             Error  key      = Error.NotFound( nameof(UserLoginProviderRecord.ProviderKey),   login.ProviderKey );
             Error  userID   = Error.NotFound( nameof(UserLoginProviderRecord.CreatedBy),     user.ID.value.ToString() );
-            Errors errors   = Errors.Create( [provider, key, userID] );
+            Errors errors   = Errors.Create(provider, key, userID);
             return ErrorOrResult<UserLoginProviderRecord>.Create( errors );
         }
 

@@ -19,7 +19,7 @@ public sealed class AppTelemetrySource : IDisposable
     public        TelemetryActivity RootActivity => _rootActivity ??= GetActivity( AppName );
 
 
-    public AppTelemetrySource( AppContext appContext, string audience )
+    public AppTelemetrySource( AppInfo appContext, string audience )
     {
         ArgumentException.ThrowIfNullOrEmpty( appContext.Name );
 
@@ -118,12 +118,12 @@ public readonly struct TelemetrySpan : IDisposable, IActivityTracer
         _source  = source;
         _parent  = parent;
         TelemetryStopWatch sw         = _sw = TelemetryStopWatch.Start( name );
-        TagsList           collection = [new Pair( START_STOP_ID, sw.ID )];
+        Pairs           collection = [new Pair( START_STOP_ID, sw.ID )];
         Activity.AddEvent( GetEvent( $"{Activity.DisplayName}.Start", collection ) );
     }
     public void Dispose()
     {
-        TagsList collection = [new Pair( START_STOP_ID, _sw.ID ), new Pair( ELAPSED_TIME, _sw.Elapsed.ToString() )];
+        Pairs collection = [new Pair( START_STOP_ID, _sw.ID ), new Pair( ELAPSED_TIME, _sw.Elapsed.ToString() )];
         Activity.AddEvent( GetEvent( _endTag, collection ) );
         Activity.Stop();
         TelemetryActivity.Current = _parent;
@@ -132,7 +132,7 @@ public readonly struct TelemetrySpan : IDisposable, IActivityTracer
     public static implicit operator TelemetryActivity( TelemetrySpan activity ) => activity.Activity;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TelemetryEvent GetEvent( string name, TagsList tags ) => new(name, DateTimeOffset.UtcNow, tags);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static TelemetryEvent GetEvent( string name, Pairs tags ) => new(name, DateTimeOffset.UtcNow, tags);
     public                                                             void           SetInactive() => TelemetryActivity.Current = _parent;
     public void SetCurrent( [CallerMemberName] string caller = BaseRecord.EMPTY )
     {
@@ -187,7 +187,7 @@ public readonly struct TelemetrySpan : IDisposable, IActivityTracer
         return this;
     }
 
-    public TelemetrySpan AddException( Exception exception, in TagsList tags = default, DateTimeOffset? timestamp = null )
+    public TelemetrySpan AddException( Exception exception, in Pairs tags = default, DateTimeOffset? timestamp = null )
     {
         Activity.AddException( exception, in tags, timestamp ?? DateTimeOffset.UtcNow );
         return this;
