@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/29/2025  14:39
 
+using Serilog.Core;
+using Serilog.Events;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -106,4 +111,22 @@ public abstract class DeviceMetaData<T> : DeviceMetaData
             _property = default;
         }
     }
+}
+
+
+
+public sealed class DeviceInfo : DeviceMetaData<LogEventProperty>, ILogEventEnricher
+{
+    public LogEventProperty ToProperty() =>
+        _property ??= new LogEventProperty(nameof(DeviceInfo),
+                                           new StructureValue([
+                                                                  Enricher.GetProperty(DeviceAppVersion,   nameof(DeviceAppVersion)),
+                                                                  Enricher.GetProperty(DeviceID,           nameof(DeviceID)),
+                                                                  Enricher.GetProperty(DeviceManufacturer, nameof(DeviceManufacturer)),
+                                                                  Enricher.GetProperty(DeviceModel,        nameof(DeviceModel)),
+                                                                  Enricher.GetProperty(DevicePlatform,     nameof(DevicePlatform)),
+                                                                  Enricher.GetProperty(DeviceVersion,      nameof(DeviceVersion)),
+                                                                  Enricher.GetProperty(PackageName,        nameof(PackageName))
+                                                              ]));
+    public void Enrich( LogEvent log, ILogEventPropertyFactory propertyFactory ) => log.AddPropertyIfAbsent(ToProperty());
 }

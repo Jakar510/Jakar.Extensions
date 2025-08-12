@@ -4,13 +4,14 @@
 namespace Jakar.Extensions;
 
 
-[StructLayout(LayoutKind.Auto), Serializable]
+[StructLayout(LayoutKind.Auto), Serializable, DefaultValue(nameof(Invalid))]
 public readonly record struct AppInfo( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IComparable, IComparable<AppInfo>
 {
-    public readonly AppVersion Version     = Version;
-    public readonly Guid       AppID       = AppID;
-    public readonly string     AppName     = AppName;
-    public readonly string?    PackageName = PackageName;
+    public static readonly AppInfo    Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
+    public readonly        AppVersion Version     = Version;
+    public readonly        Guid       AppID       = AppID;
+    public readonly        string     AppName     = AppName;
+    public readonly        string?    PackageName = PackageName;
 
 
     public int CompareTo( object? other )

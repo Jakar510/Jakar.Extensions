@@ -46,10 +46,10 @@ public interface ILocker
 
 
 
-[DefaultValue( nameof(Empty) )]
+[DefaultValue(nameof(Empty))]
 public readonly struct LockCloser( Lock? locker ) : IDisposable
 {
-    private static readonly TimeSpan _timeOut = TimeSpan.FromMicroseconds( 100 );
+    private static readonly TimeSpan _timeOut = TimeSpan.FromMicroseconds(100);
     public static readonly  Closer   Empty    = new(null);
     private readonly        Lock?    _locker  = locker;
     public                  void     Dispose() => _locker?.Exit();
@@ -60,23 +60,23 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         locker.Enter();
-        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { }
+        while ( token.ShouldContinue() && locker.TryEnter(_timeOut) is false ) { }
 
-        return new LockCloser( locker );
+        return new LockCloser(locker);
     }
     [Pure, MustDisposeResource]
     public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        while ( token.ShouldContinue() && locker.TryEnter( _timeOut ) is false ) { await Task.Delay( 1, token ); }
+        while ( token.ShouldContinue() && locker.TryEnter(_timeOut) is false ) { await Task.Delay(1, token); }
 
-        return new LockCloser( locker );
+        return new LockCloser(locker);
     }
 }
 
 
 
-[DefaultValue( nameof(Empty) )]
+[DefaultValue(nameof(Empty))]
 public readonly struct Closer( ILocker? locker ) : IDisposable
 {
     public static readonly Closer   Empty   = new(null);
@@ -86,7 +86,7 @@ public readonly struct Closer( ILocker? locker ) : IDisposable
 
 
 
-[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
+[SuppressMessage("ReSharper", "NullableWarningSuppressionIsUsed")]
 public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDisposable
 {
     private readonly AutoResetEvent?  _autoResetEvent;
@@ -106,26 +106,26 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Type                  _index;
     private          bool                  _isTaken;
 
-    public static Locker    Default { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => new SemaphoreSlim( 1, 1 ); }
-    public        bool      IsTaken { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTaken; }
-    public        TimeSpan? TimeOut { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static Locker    Default { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => new SemaphoreSlim(1, 1); }
+    public        bool      IsTaken { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => _isTaken; }
+    public        TimeSpan? TimeOut { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
 
 
-    public Locker() : this( Type.Object ) { }
+    public Locker() : this(Type.Object) { }
     private Locker( Type                type ) => _index = type;
-    public Locker( SemaphoreSlim        value ) : this( Type.SemaphoreSlim ) => _semaphoreSlim = value;
-    public Locker( Semaphore            value ) : this( Type.Semaphore ) => _semaphore = value;
-    public Locker( ReaderWriterLockSlim value ) : this( Type.ReaderWriterLockSlim ) => _readerWriterLockSlim = value;
-    public Locker( Mutex                value ) : this( Type.Mutex ) => _mutex = value;
-    public Locker( SpinLock             value ) : this( Type.SpinLock ) => _spinLock = value;
-    public Locker( EventWaitHandle      value ) : this( Type.EventWaitHandle ) => _eventWaitHandle = value;
-    public Locker( AutoResetEvent       value ) : this( Type.AutoResetEvent ) => _autoResetEvent = value;
-    public Locker( ManualResetEvent     value ) : this( Type.ManualResetEvent ) => _manualResetEvent = value;
-    public Locker( ManualResetEventSlim value ) : this( Type.ManualResetEventSlim ) => _manualResetEventSlim = value;
-    public Locker( Barrier              value ) : this( Type.Barrier ) => _barrier = value;
-    public Locker( CountdownEvent       value ) : this( Type.CountdownEvent ) => _countdownEvent = value;
+    public Locker( SemaphoreSlim        value ) : this(Type.SemaphoreSlim) => _semaphoreSlim = value;
+    public Locker( Semaphore            value ) : this(Type.Semaphore) => _semaphore = value;
+    public Locker( ReaderWriterLockSlim value ) : this(Type.ReaderWriterLockSlim) => _readerWriterLockSlim = value;
+    public Locker( Mutex                value ) : this(Type.Mutex) => _mutex = value;
+    public Locker( SpinLock             value ) : this(Type.SpinLock) => _spinLock = value;
+    public Locker( EventWaitHandle      value ) : this(Type.EventWaitHandle) => _eventWaitHandle = value;
+    public Locker( AutoResetEvent       value ) : this(Type.AutoResetEvent) => _autoResetEvent = value;
+    public Locker( ManualResetEvent     value ) : this(Type.ManualResetEvent) => _manualResetEvent = value;
+    public Locker( ManualResetEventSlim value ) : this(Type.ManualResetEventSlim) => _manualResetEventSlim = value;
+    public Locker( Barrier              value ) : this(Type.Barrier) => _barrier = value;
+    public Locker( CountdownEvent       value ) : this(Type.CountdownEvent) => _countdownEvent = value;
 #if NET9_0_OR_GREATER
-    public Locker( Lock value ) : this( Type.ThreadingLock ) => _lock = value;
+    public Locker( Lock value ) : this(Type.ThreadingLock) => _lock = value;
 #endif
 
 
@@ -158,33 +158,25 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     public async ValueTask DisposeAsync()
     {
         Exit();
-        if ( _autoResetEvent is not null ) { await CastAndDispose( _autoResetEvent ); }
+        if ( _autoResetEvent is not null ) { await Disposables.CastAndDisposeAsync(_autoResetEvent); }
 
-        if ( _barrier is not null ) { await CastAndDispose( _barrier ); }
+        if ( _barrier is not null ) { await Disposables.CastAndDisposeAsync(_barrier); }
 
-        if ( _countdownEvent is not null ) { await CastAndDispose( _countdownEvent ); }
+        if ( _countdownEvent is not null ) { await Disposables.CastAndDisposeAsync(_countdownEvent); }
 
-        if ( _eventWaitHandle is not null ) { await CastAndDispose( _eventWaitHandle ); }
+        if ( _eventWaitHandle is not null ) { await Disposables.CastAndDisposeAsync(_eventWaitHandle); }
 
-        if ( _manualResetEvent is not null ) { await CastAndDispose( _manualResetEvent ); }
+        if ( _manualResetEvent is not null ) { await Disposables.CastAndDisposeAsync(_manualResetEvent); }
 
-        if ( _manualResetEventSlim is not null ) { await CastAndDispose( _manualResetEventSlim ); }
+        if ( _manualResetEventSlim is not null ) { await Disposables.CastAndDisposeAsync(_manualResetEventSlim); }
 
-        if ( _mutex is not null ) { await CastAndDispose( _mutex ); }
+        if ( _mutex is not null ) { await Disposables.CastAndDisposeAsync(_mutex); }
 
-        if ( _readerWriterLockSlim is not null ) { await CastAndDispose( _readerWriterLockSlim ); }
+        if ( _readerWriterLockSlim is not null ) { await Disposables.CastAndDisposeAsync(_readerWriterLockSlim); }
 
-        if ( _semaphore is not null ) { await CastAndDispose( _semaphore ); }
+        if ( _semaphore is not null ) { await Disposables.CastAndDisposeAsync(_semaphore); }
 
-        if ( _semaphoreSlim is not null ) { await CastAndDispose( _semaphoreSlim ); }
-
-        return;
-
-        static async ValueTask CastAndDispose( IDisposable resource )
-        {
-            if ( resource is IAsyncDisposable resourceAsyncDisposable ) { await resourceAsyncDisposable.DisposeAsync(); }
-            else { resource.Dispose(); }
-        }
+        if ( _semaphoreSlim is not null ) { await Disposables.CastAndDisposeAsync(_semaphoreSlim); }
     }
 
 
@@ -194,125 +186,126 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         {
             case Type.Object:
             {
-                Monitor.Enter( this, ref _isTaken );
-                return new Closer( this );
+                Monitor.Enter(this, ref _isTaken);
+                return new Closer(this);
             }
 
             case Type.SemaphoreSlim:
             {
-                Debug.Assert( _semaphoreSlim is not null, $"{nameof(_semaphoreSlim)} is not null" );
+                Debug.Assert(_semaphoreSlim is not null, $"{nameof(_semaphoreSlim)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _semaphoreSlim.Wait( TimeOut.Value,    token )
-                               : _semaphoreSlim.Wait( Timeout.Infinite, token );
+                               ? _semaphoreSlim.Wait(TimeOut.Value,    token)
+                               : _semaphoreSlim.Wait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Semaphore:
             {
-                Debug.Assert( _semaphore is not null, $"{nameof(_semaphore)} is not null" );
+                Debug.Assert(_semaphore is not null, $"{nameof(_semaphore)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _semaphore.WaitOne( TimeOut.Value )
-                               : _semaphore.WaitOne( Timeout.Infinite );
+                               ? _semaphore.WaitOne(TimeOut.Value)
+                               : _semaphore.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ReaderWriterLockSlim:
             {
-                Debug.Assert( _readerWriterLockSlim is not null, $"{nameof(_readerWriterLockSlim)} is not null" );
+                Debug.Assert(_readerWriterLockSlim is not null, $"{nameof(_readerWriterLockSlim)} is not null");
                 _readerWriterLockSlim.EnterWriteLock();
                 _isTaken = true;
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Mutex:
             {
-                Debug.Assert( _mutex is not null, $"{nameof(_mutex)} is not null" );
+                Debug.Assert(_mutex is not null, $"{nameof(_mutex)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _mutex.WaitOne( TimeOut.Value )
-                               : _mutex.WaitOne( Timeout.Infinite );
+                               ? _mutex.WaitOne(TimeOut.Value)
+                               : _mutex.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.SpinLock:
             {
-                Debug.Assert( _spinLock is not null, $"{nameof(_spinLock)} is not null" );
-                _spinLock.Value.Enter( ref _isTaken );
-                return new Closer( this );
+                Debug.Assert(_spinLock is not null, $"{nameof(_spinLock)} is not null");
+                _spinLock.Value.Enter(ref _isTaken);
+                return new Closer(this);
             }
 
             case Type.EventWaitHandle:
             {
-                Debug.Assert( _eventWaitHandle is not null, $"{nameof(_eventWaitHandle)} is not null" );
+                Debug.Assert(_eventWaitHandle is not null, $"{nameof(_eventWaitHandle)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _eventWaitHandle.WaitOne( TimeOut.Value )
-                               : _eventWaitHandle.WaitOne( Timeout.Infinite );
+                               ? _eventWaitHandle.WaitOne(TimeOut.Value)
+                               : _eventWaitHandle.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.AutoResetEvent:
             {
-                Debug.Assert( _autoResetEvent is not null, $"{nameof(_autoResetEvent)} is not null" );
+                Debug.Assert(_autoResetEvent is not null, $"{nameof(_autoResetEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _autoResetEvent.WaitOne( TimeOut.Value )
-                               : _autoResetEvent.WaitOne( Timeout.Infinite );
+                               ? _autoResetEvent.WaitOne(TimeOut.Value)
+                               : _autoResetEvent.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ManualResetEvent:
             {
-                Debug.Assert( _manualResetEvent is not null, $"{nameof(_manualResetEvent)} is not null" );
+                Debug.Assert(_manualResetEvent is not null, $"{nameof(_manualResetEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _manualResetEvent.WaitOne( TimeOut.Value )
-                               : _manualResetEvent.WaitOne( Timeout.Infinite );
+                               ? _manualResetEvent.WaitOne(TimeOut.Value)
+                               : _manualResetEvent.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ManualResetEventSlim:
             {
-                Debug.Assert( _manualResetEventSlim is not null, $"{nameof(_manualResetEventSlim)}  null" );
+                Debug.Assert(_manualResetEventSlim is not null, $"{nameof(_manualResetEventSlim)}  null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _manualResetEventSlim.Wait( TimeOut.Value,    token )
-                               : _manualResetEventSlim.Wait( Timeout.Infinite, token );
+                               ? _manualResetEventSlim.Wait(TimeOut.Value,    token)
+                               : _manualResetEventSlim.Wait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Barrier:
             {
-                Debug.Assert( _barrier is not null, $"{nameof(_barrier)} is not null" );
+                Debug.Assert(_barrier is not null, $"{nameof(_barrier)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _barrier.SignalAndWait( TimeOut.Value,    token )
-                               : _barrier.SignalAndWait( Timeout.Infinite, token );
+                               ? _barrier.SignalAndWait(TimeOut.Value,    token)
+                               : _barrier.SignalAndWait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.CountdownEvent:
             {
-                Debug.Assert( _countdownEvent is not null, $"{nameof(_countdownEvent)} is not null" );
+                Debug.Assert(_countdownEvent is not null, $"{nameof(_countdownEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _countdownEvent.Wait( TimeOut.Value,    token )
-                               : _countdownEvent.Wait( Timeout.Infinite, token );
+                               ? _countdownEvent.Wait(TimeOut.Value,    token)
+                               : _countdownEvent.Wait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
-            default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
+            default:
+                throw new InvalidOperationException($"{nameof(Locker)} is not initialized");
         }
     }
     public async ValueTask<Closer> EnterAsync( CancellationToken token = default )
@@ -321,137 +314,138 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         {
             case Type.Object:
             {
-                Monitor.Enter( this, ref _isTaken );
-                return new Closer( this );
+                Monitor.Enter(this, ref _isTaken);
+                return new Closer(this);
             }
 
             case Type.SemaphoreSlim:
             {
-                Debug.Assert( _semaphoreSlim is not null, $"{nameof(_semaphoreSlim)} is not null" );
+                Debug.Assert(_semaphoreSlim is not null, $"{nameof(_semaphoreSlim)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? await _semaphoreSlim.WaitAsync( TimeOut.Value,    token )
-                               : await _semaphoreSlim.WaitAsync( Timeout.Infinite, token );
+                               ? await _semaphoreSlim.WaitAsync(TimeOut.Value,    token)
+                               : await _semaphoreSlim.WaitAsync(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Semaphore:
             {
-                Debug.Assert( _semaphore is not null, $"{nameof(_semaphore)} is not null" );
+                Debug.Assert(_semaphore is not null, $"{nameof(_semaphore)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _semaphore.WaitOne( TimeOut.Value )
-                               : _semaphore.WaitOne( Timeout.Infinite );
+                               ? _semaphore.WaitOne(TimeOut.Value)
+                               : _semaphore.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ReaderWriterLockSlim:
             {
-                Debug.Assert( _readerWriterLockSlim is not null, $"{nameof(_readerWriterLockSlim)} is not null" );
+                Debug.Assert(_readerWriterLockSlim is not null, $"{nameof(_readerWriterLockSlim)} is not null");
                 _readerWriterLockSlim.EnterWriteLock();
                 _isTaken = true;
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Mutex:
             {
-                Debug.Assert( _mutex is not null, $"{nameof(_mutex)} is not null" );
+                Debug.Assert(_mutex is not null, $"{nameof(_mutex)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _mutex.WaitOne( TimeOut.Value )
-                               : _mutex.WaitOne( Timeout.Infinite );
+                               ? _mutex.WaitOne(TimeOut.Value)
+                               : _mutex.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.SpinLock:
             {
-                Debug.Assert( _spinLock is not null, $"{nameof(_spinLock)} is not null" );
-                _spinLock.Value.Enter( ref _isTaken );
-                return new Closer( this );
+                Debug.Assert(_spinLock is not null, $"{nameof(_spinLock)} is not null");
+                _spinLock.Value.Enter(ref _isTaken);
+                return new Closer(this);
             }
 
             case Type.EventWaitHandle:
             {
-                Debug.Assert( _eventWaitHandle is not null, $"{nameof(_eventWaitHandle)} is not null" );
+                Debug.Assert(_eventWaitHandle is not null, $"{nameof(_eventWaitHandle)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _eventWaitHandle.WaitOne( TimeOut.Value )
-                               : _eventWaitHandle.WaitOne( Timeout.Infinite );
+                               ? _eventWaitHandle.WaitOne(TimeOut.Value)
+                               : _eventWaitHandle.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.AutoResetEvent:
             {
-                Debug.Assert( _autoResetEvent is not null, $"{nameof(_autoResetEvent)} is not null" );
+                Debug.Assert(_autoResetEvent is not null, $"{nameof(_autoResetEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _autoResetEvent.WaitOne( TimeOut.Value )
-                               : _autoResetEvent.WaitOne( Timeout.Infinite );
+                               ? _autoResetEvent.WaitOne(TimeOut.Value)
+                               : _autoResetEvent.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ManualResetEvent:
             {
-                Debug.Assert( _manualResetEvent is not null, $"{nameof(_manualResetEvent)} is not null" );
+                Debug.Assert(_manualResetEvent is not null, $"{nameof(_manualResetEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _manualResetEvent.WaitOne( TimeOut.Value )
-                               : _manualResetEvent.WaitOne( Timeout.Infinite );
+                               ? _manualResetEvent.WaitOne(TimeOut.Value)
+                               : _manualResetEvent.WaitOne(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.ManualResetEventSlim:
             {
-                Debug.Assert( _manualResetEventSlim is not null, $"{nameof(_manualResetEventSlim)} is not null" );
+                Debug.Assert(_manualResetEventSlim is not null, $"{nameof(_manualResetEventSlim)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _manualResetEventSlim.Wait( TimeOut.Value,    token )
-                               : _manualResetEventSlim.Wait( Timeout.Infinite, token );
+                               ? _manualResetEventSlim.Wait(TimeOut.Value,    token)
+                               : _manualResetEventSlim.Wait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.Barrier:
             {
-                Debug.Assert( _barrier is not null, $"{nameof(_barrier)} is not null" );
+                Debug.Assert(_barrier is not null, $"{nameof(_barrier)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _barrier.SignalAndWait( TimeOut.Value,    token )
-                               : _barrier.SignalAndWait( Timeout.Infinite, token );
+                               ? _barrier.SignalAndWait(TimeOut.Value,    token)
+                               : _barrier.SignalAndWait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
             case Type.CountdownEvent:
             {
-                Debug.Assert( _countdownEvent is not null, $"{nameof(_countdownEvent)} is not null" );
+                Debug.Assert(_countdownEvent is not null, $"{nameof(_countdownEvent)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _countdownEvent.Wait( TimeOut.Value,    token )
-                               : _countdownEvent.Wait( Timeout.Infinite, token );
+                               ? _countdownEvent.Wait(TimeOut.Value,    token)
+                               : _countdownEvent.Wait(Timeout.Infinite, token);
 
-                return new Closer( this );
+                return new Closer(this);
             }
 
         #if NET9_0_OR_GREATER
             case Type.ThreadingLock:
             {
-                Debug.Assert( _lock is not null, $"{nameof(_lock)} is not null" );
+                Debug.Assert(_lock is not null, $"{nameof(_lock)} is not null");
 
                 _isTaken = TimeOut.HasValue
-                               ? _lock.TryEnter( TimeOut.Value )
-                               : _lock.TryEnter( Timeout.Infinite );
+                               ? _lock.TryEnter(TimeOut.Value)
+                               : _lock.TryEnter(Timeout.Infinite);
 
-                return new Closer( this );
+                return new Closer(this);
             }
         #endif
-            default: throw new InvalidOperationException( $"{nameof(Locker)} is not initialized" );
+            default:
+                throw new InvalidOperationException($"{nameof(Locker)} is not initialized");
         }
     }
 
@@ -464,73 +458,74 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         {
             case Type.Object:
             {
-                Monitor.Exit( this );
-                Monitor.PulseAll( this );
+                Monitor.Exit(this);
+                Monitor.PulseAll(this);
                 return;
             }
 
             case Type.SemaphoreSlim:
-                Debug.Assert( _semaphoreSlim is not null, nameof(_semaphoreSlim) + " is not null" );
+                Debug.Assert(_semaphoreSlim is not null, nameof(_semaphoreSlim) + " is not null");
                 _semaphoreSlim.Release();
                 return;
 
             case Type.Semaphore:
-                Debug.Assert( _semaphore is not null, nameof(_semaphore) + " is not null" );
+                Debug.Assert(_semaphore is not null, nameof(_semaphore) + " is not null");
                 _semaphore.Release();
                 return;
 
             case Type.ReaderWriterLockSlim:
-                Debug.Assert( _readerWriterLockSlim is not null, nameof(_readerWriterLockSlim) + " is not null" );
+                Debug.Assert(_readerWriterLockSlim is not null, nameof(_readerWriterLockSlim) + " is not null");
                 _readerWriterLockSlim.ExitWriteLock();
                 return;
 
             case Type.Mutex:
-                Debug.Assert( _mutex is not null, nameof(_mutex) + " is not null" );
+                Debug.Assert(_mutex is not null, nameof(_mutex) + " is not null");
                 _mutex.ReleaseMutex();
                 return;
 
             case Type.SpinLock:
-                Debug.Assert( _spinLock is not null, nameof(_spinLock) + " is not null" );
+                Debug.Assert(_spinLock is not null, nameof(_spinLock) + " is not null");
                 _spinLock.Value.Exit();
                 return;
 
             case Type.EventWaitHandle:
-                Debug.Assert( _eventWaitHandle is not null, nameof(_eventWaitHandle) + " is not null" );
+                Debug.Assert(_eventWaitHandle is not null, nameof(_eventWaitHandle) + " is not null");
                 _eventWaitHandle.Set();
                 return;
 
             case Type.AutoResetEvent:
-                Debug.Assert( _autoResetEvent is not null, nameof(_autoResetEvent) + " is not null" );
+                Debug.Assert(_autoResetEvent is not null, nameof(_autoResetEvent) + " is not null");
                 _autoResetEvent.Set();
                 return;
 
             case Type.ManualResetEvent:
-                Debug.Assert( _manualResetEvent is not null, nameof(_manualResetEvent) + " is not null" );
+                Debug.Assert(_manualResetEvent is not null, nameof(_manualResetEvent) + " is not null");
                 _manualResetEvent.Set();
                 return;
 
             case Type.ManualResetEventSlim:
-                Debug.Assert( _manualResetEventSlim is not null, nameof(_manualResetEventSlim) + " is not null" );
+                Debug.Assert(_manualResetEventSlim is not null, nameof(_manualResetEventSlim) + " is not null");
                 _manualResetEventSlim.Set();
                 return;
 
             case Type.Barrier:
-                Debug.Assert( _barrier is not null, nameof(_barrier) + " is not null" );
+                Debug.Assert(_barrier is not null, nameof(_barrier) + " is not null");
                 _barrier.SignalAndWait();
                 return;
 
             case Type.CountdownEvent:
-                Debug.Assert( _countdownEvent is not null, nameof(_countdownEvent) + " is not null" );
+                Debug.Assert(_countdownEvent is not null, nameof(_countdownEvent) + " is not null");
                 _countdownEvent.Reset();
                 return;
 
         #if NET9_0_OR_GREATER
             case Type.ThreadingLock:
-                Debug.Assert( _lock is not null, nameof(_lock) + " is not null" );
+                Debug.Assert(_lock is not null, nameof(_lock) + " is not null");
                 _lock.Exit();
                 return;
         #endif
-            default: throw new OutOfRangeException( _index );
+            default:
+                throw new OutOfRangeException(_index);
         }
     }
 
@@ -626,7 +621,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         #if NET9_0_OR_GREATER
             Type.ThreadingLock => _lock?.ToString(),
         #endif
-            _ => throw new OutOfRangeException( _index )
+            _ => throw new OutOfRangeException(_index)
         } ??
         string.Empty;
     public override int GetHashCode()
@@ -650,33 +645,33 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                             _ => null
                         };
 
-        return (nullable.GetValueOrDefault( 0 ) * 397) ^ _index.GetHashCode();
+        return ( nullable.GetValueOrDefault(0) * 397 ) ^ _index.GetHashCode();
     }
-    public override bool Equals( object? other ) => Equals( other as Locker );
+    public override bool Equals( object? other ) => Equals(other as Locker);
     public bool Equals( Locker? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
         if ( _index != other._index ) { return false; }
 
         bool check = _index switch
                      {
-                         Type.SemaphoreSlim        => Equals( _semaphoreSlim,        other._semaphoreSlim ),
-                         Type.Semaphore            => Equals( _semaphore,            other._semaphore ),
-                         Type.ReaderWriterLockSlim => Equals( _readerWriterLockSlim, other._readerWriterLockSlim ),
-                         Type.Mutex                => Equals( _mutex,                other._mutex ),
-                         Type.SpinLock             => Nullable.Equals( _spinLock, other._spinLock ),
-                         Type.EventWaitHandle      => Equals( _eventWaitHandle,      other._eventWaitHandle ),
-                         Type.AutoResetEvent       => Equals( _autoResetEvent,       other._autoResetEvent ),
-                         Type.ManualResetEvent     => Equals( _manualResetEvent,     other._manualResetEvent ),
-                         Type.ManualResetEventSlim => Equals( _manualResetEventSlim, other._manualResetEventSlim ),
-                         Type.Barrier              => Equals( _barrier,              other._barrier ),
-                         Type.CountdownEvent       => Equals( _countdownEvent,       other._countdownEvent ),
+                         Type.SemaphoreSlim        => Equals(_semaphoreSlim,        other._semaphoreSlim),
+                         Type.Semaphore            => Equals(_semaphore,            other._semaphore),
+                         Type.ReaderWriterLockSlim => Equals(_readerWriterLockSlim, other._readerWriterLockSlim),
+                         Type.Mutex                => Equals(_mutex,                other._mutex),
+                         Type.SpinLock             => Nullable.Equals(_spinLock, other._spinLock),
+                         Type.EventWaitHandle      => Equals(_eventWaitHandle,      other._eventWaitHandle),
+                         Type.AutoResetEvent       => Equals(_autoResetEvent,       other._autoResetEvent),
+                         Type.ManualResetEvent     => Equals(_manualResetEvent,     other._manualResetEvent),
+                         Type.ManualResetEventSlim => Equals(_manualResetEventSlim, other._manualResetEventSlim),
+                         Type.Barrier              => Equals(_barrier,              other._barrier),
+                         Type.CountdownEvent       => Equals(_countdownEvent,       other._countdownEvent),
                      #if NET9_0_OR_GREATER
                      #pragma warning disable CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
-                         Type.ThreadingLock => Equals( _lock, other._lock ),
+                         Type.ThreadingLock => Equals(_lock, other._lock),
                      #pragma warning restore CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
                      #endif
                          _ => false
