@@ -46,51 +46,51 @@ Initial Release</PackageReleaseNotes>
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Syncfusion.Blazor.BarcodeGenerator" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.BulletChart" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Buttons" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Calendars" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Cards" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Chart3D" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Charts" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.CircularGauge" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Data" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.DataForm" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.DataVizCommon" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Diagram" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.DropDowns" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.FileManager" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.FileManager.PhysicalFileProvider" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Gantt" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Grid" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.HeatMap" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.ImageEditor" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.InPlaceEditor" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Kanban" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Layouts" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.LinearGauge" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Lists" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Maps" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Notifications" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.PivotTable" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Popups" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.ProgressBar" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.QueryBuilder" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.RangeNavigator" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.RichTextEditor" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Schedule" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.SmithChart" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Sparkline" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Spinner" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.SplitButtons" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.StockChart" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.Themes" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.TreeGrid" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.TreeMap" Version="30.1.42" />
-		<PackageReference Include="Syncfusion.Blazor.WordProcessor" Version="30.1.42" />
+		<PackageReference Include="Syncfusion.Blazor.BarcodeGenerator" />
+		<PackageReference Include="Syncfusion.Blazor.BulletChart" />
+		<PackageReference Include="Syncfusion.Blazor.Buttons" />
+		<PackageReference Include="Syncfusion.Blazor.Calendars" />
+		<PackageReference Include="Syncfusion.Blazor.Cards" />
+		<PackageReference Include="Syncfusion.Blazor.Chart3D" />
+		<PackageReference Include="Syncfusion.Blazor.Charts" />
+		<PackageReference Include="Syncfusion.Blazor.CircularGauge" />
+		<PackageReference Include="Syncfusion.Blazor.Data" />
+		<PackageReference Include="Syncfusion.Blazor.DataForm" />
+		<PackageReference Include="Syncfusion.Blazor.DataVizCommon" />
+		<PackageReference Include="Syncfusion.Blazor.Diagram" />
+		<PackageReference Include="Syncfusion.Blazor.DropDowns" />
+		<PackageReference Include="Syncfusion.Blazor.FileManager" />
+		<PackageReference Include="Syncfusion.Blazor.FileManager.PhysicalFileProvider" />
+		<PackageReference Include="Syncfusion.Blazor.Gantt" />
+		<PackageReference Include="Syncfusion.Blazor.Grid" />
+		<PackageReference Include="Syncfusion.Blazor.HeatMap" />
+		<PackageReference Include="Syncfusion.Blazor.ImageEditor" />
+		<PackageReference Include="Syncfusion.Blazor.InPlaceEditor" />
+		<PackageReference Include="Syncfusion.Blazor.Inputs" />
+		<PackageReference Include="Syncfusion.Blazor.Kanban" />
+		<PackageReference Include="Syncfusion.Blazor.Layouts" />
+		<PackageReference Include="Syncfusion.Blazor.LinearGauge" />
+		<PackageReference Include="Syncfusion.Blazor.Lists" />
+		<PackageReference Include="Syncfusion.Blazor.Maps" />
+		<PackageReference Include="Syncfusion.Blazor.Navigations" />
+		<PackageReference Include="Syncfusion.Blazor.Notifications" />
+		<PackageReference Include="Syncfusion.Blazor.PivotTable" />
+		<PackageReference Include="Syncfusion.Blazor.Popups" />
+		<PackageReference Include="Syncfusion.Blazor.ProgressBar" />
+		<PackageReference Include="Syncfusion.Blazor.QueryBuilder" />
+		<PackageReference Include="Syncfusion.Blazor.RangeNavigator" />
+		<PackageReference Include="Syncfusion.Blazor.RichTextEditor" />
+		<PackageReference Include="Syncfusion.Blazor.Schedule" />
+		<PackageReference Include="Syncfusion.Blazor.SfPdfViewer" />
+		<PackageReference Include="Syncfusion.Blazor.SmithChart" />
+		<PackageReference Include="Syncfusion.Blazor.Sparkline" />
+		<PackageReference Include="Syncfusion.Blazor.Spinner" />
+		<PackageReference Include="Syncfusion.Blazor.SplitButtons" />
+		<PackageReference Include="Syncfusion.Blazor.StockChart" />
+		<PackageReference Include="Syncfusion.Blazor.Themes" />
+		<PackageReference Include="Syncfusion.Blazor.TreeGrid" />
+		<PackageReference Include="Syncfusion.Blazor.TreeMap" />
+		<PackageReference Include="Syncfusion.Blazor.WordProcessor" />
 	</ItemGroup>
 
 </Project>
