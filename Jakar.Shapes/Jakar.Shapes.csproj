@@ -65,7 +65,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="9.14.3" />
+		<PackageReference Include="Jakar.Extensions" Version="9.15.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 	</ItemGroup>
 </Project>

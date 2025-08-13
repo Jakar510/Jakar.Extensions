@@ -60,7 +60,7 @@
 		<PackageReference Include="MudBlazor.ThemeManager" Version="3.0.0" />
 		<PackageReference Include="PanoramicData.Blazor" Version="9.0.249" />
 		<PackageReference Include="Radzen.Blazor" Version="7.2.0" />
-		<PackageReference Include="Jakar.Extensions" Version="9.14.3" />
+		<PackageReference Include="Jakar.Extensions" Version="9.15.0" />
 		<PackageReference Include="Hardware.Info" Version="101.0.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.8" />
 		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
