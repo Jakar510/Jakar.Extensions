@@ -2,6 +2,7 @@
 // 08/12/2025  16:43
 
 using Serilog;
+using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 using Serilog.Formatting;
@@ -15,43 +16,7 @@ using Serilog.Sinks.SystemConsole.Themes;
 namespace Jakar.Extensions;
 
 
-public sealed class ScreenShot( ReadOnlyMemory<byte> data ) : ILogEventEnricher
-{
-    public const    int                  MAX_SIZE    = 1024 * 1024 * 5;
-    public readonly ReadOnlyMemory<byte> Data        = data;
-    public readonly string               ReferenceID = CreateID(data.Span);
-    public readonly string               Value       = Convert.ToBase64String(data.Span);
-    private         LogEventProperty?    __property;
-
-
-    public static bool      EnableLogging { get; set; }
-    public        bool      IsEmpty       => Data.IsEmpty;
-    public static LocalFile File          => AppLoggerOptions.Current.Paths.Screenshot;
-
-
-    public static implicit operator ScreenShot( ReadOnlyMemory<byte> data ) => new(data);
-    public static implicit operator ScreenShot( byte[]               data ) => new(data);
-
-
-    public LogEventProperty ToProperty() => __property ??= new LogEventProperty(nameof(ReferenceID), new ScalarValue(ReferenceID));
-    public void Enrich( LogEvent log, ILogEventPropertyFactory propertyFactory )
-    {
-        if ( EnableLogging ) { log.AddPropertyIfAbsent(ToProperty()); }
-    }
-
-
-    public static string CreateID( params ReadOnlySpan<byte> data ) => data.Hash().ToString();
-    public static string CreateID()
-    {
-        Span<byte> span = stackalloc byte[16];
-        RandomNumberGenerator.Fill(span);
-        return Convert.ToHexString(span);
-    }
-}
-
-
-
-public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, IAsyncDisposable, ITelemetryActivityEnricher
+public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposable, IAsyncDisposable, IOpenTelemetryActivityEnricher
 {
     public const           string             CONSOLE_DEFAULT_OUTPUT_TEMPLATE     = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
     public const           string             DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
@@ -64,7 +29,7 @@ public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, 
     private                LocalDirectory?    __seqBuffer;
 
 
-    public static AppLoggerOptions             Current       { get; set; } = new();
+    public static AppLoggerOptions             Current       { get; private set; } = new();
     public        Action<LoggerConfiguration>? AddNativeLogs { get; set; }
     public        string?                      AppBuild      { get; set; }
     public LocalDirectory AppDataDirectory
@@ -88,7 +53,11 @@ public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, 
             Directory.CreateDirectory(value);
         }
     }
-    public DeviceInfo DeviceInfo { get; set; } = new();
+    public ConfigureLogger     ConfigureLogger { get; set; } = DefaultConfigureLogger;
+    public DeviceInfo          DeviceInfo      { get; set; } = new();
+    public ILogEventEnricher[] Enrichers       { get; set; } = [];
+    public ITextFormatter      Formatter       { get; set; } = new CompactJsonFormatter();
+    public FileLifecycleHooks? Hooks           { get; set; }
     public ref readonly AppInfo Info
     {
         get
@@ -100,9 +69,6 @@ public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, 
                            : ref current.Info;
         }
     }
-    public ILogEventEnricher[]        Enrichers  { get;               set; } = [];
-    public ITextFormatter             Formatter  { get;               set; } = new CompactJsonFormatter();
-    public FileLifecycleHooks?        Hooks      { get;               set; }
     public IAsyncLogEventSinkMonitor? Monitor    { get;               set; }
     public FilePaths                  Paths      { get => GetPaths(); set => __paths = value; }
     public ScreenShot?                ScreenShot { get;               set; }
@@ -115,27 +81,27 @@ public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, 
             Directory.CreateDirectory(value);
         }
     }
-    public Func<CancellationToken, ValueTask<ScreenShot?>> TakeScreenShot { get; set; } = TakeEmptyScreenShot;
-    public ConsoleTheme?                                   Theme          { get; set; }
-    AppLoggerOptions IOptions<AppLoggerOptions>.           Value          => this;
+    public TakeScreenShotAsync                  TakeScreenShot { get; set; } = ScreenShot.Empty;
+    public ConsoleTheme?                        Theme          { get; set; }
+    AppLoggerOptions IOptions<AppLoggerOptions>.Value          => this;
 
 
-    public void Dispose()
+    public AppLoggerOptions() => Current = this;
+    public virtual void Dispose()
     {
-        __appDataDirectory?.Dispose();
-        __cacheDirectory?.Dispose();
-        __seqBuffer?.Dispose();
-        __paths?.Dispose();
+        Disposables.ClearAndDispose(ref __appDataDirectory);
+        Disposables.ClearAndDispose(ref __cacheDirectory);
+        Disposables.ClearAndDispose(ref __seqBuffer);
+        Disposables.ClearAndDispose(ref __paths);
+        GC.SuppressFinalize(this);
     }
-    public async ValueTask DisposeAsync()
+    public virtual async ValueTask DisposeAsync()
     {
-        if ( __appDataDirectory is not null ) { await __appDataDirectory.DisposeAsync(); }
-
-        if ( __cacheDirectory is not null ) { await __cacheDirectory.DisposeAsync(); }
-
-        if ( __seqBuffer is not null ) { await __seqBuffer.DisposeAsync(); }
-
-        if ( __paths is not null ) { await Disposables.CastAndDisposeAsync(ref __paths); }
+        await Disposables.ClearAndDisposeAsync(ref __appDataDirectory);
+        await Disposables.ClearAndDisposeAsync(ref __cacheDirectory);
+        await Disposables.ClearAndDisposeAsync(ref __seqBuffer);
+        await Disposables.ClearAndDisposeAsync(ref __paths);
+        GC.SuppressFinalize(this);
     }
 
 
@@ -145,52 +111,38 @@ public sealed class AppLoggerOptions : IOptions<AppLoggerOptions>, IDisposable, 
     private LocalDirectory GetSeqBuffer()        => __seqBuffer ??= Path.Join(AppDataDirectory, SEQ_BUFFER_DIRECTORY);
 
 
-    private static ValueTask<ScreenShot?> TakeEmptyScreenShot( CancellationToken token ) => new(default(ScreenShot));
-
-
     public Logger CreateLogger( TelemetrySource source )
     {
-        // const int EVENT_BODY_LIMIT_BYTES = 262144 + ScreenShot.MAX_SIZE;
-        // EVENT_BODY_LIMIT_BYTES.WriteToDebug();
-        // , eventBodyLimitBytes: EVENT_BODY_LIMIT_BYTES
-
         LoggerConfiguration builder = new();
 
-        builder.MinimumLevel.Verbose();
-        builder.MinimumLevel.Override(nameof(Microsoft), LogEventLevel.Warning);
-        builder.MinimumLevel.Override(nameof(System),    LogEventLevel.Warning);
-
-        builder.Destructure.ToMaximumDepth(1000);
-        builder.Destructure.ToMaximumStringLength(int.MaxValue);
-        builder.Destructure.ToMaximumCollectionCount(99999);
-
-        builder.Enrich.FromLogContext();
-
-        builder.Enrich.With(new TelemetryActivityEnricher(this, source));
-
-        builder.WriteTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
-
-        builder.WriteTo.File(Formatter, Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
+        ConfigureLogger.Invoke(this, builder.MinimumLevel, builder.WriteTo, builder.AuditTo, builder.Enrich, builder.Filter, builder.Destructure, in source);
 
         AddNativeLogs?.Invoke(builder);
+
         return builder.CreateLogger();
     }
 
 
-
-    public sealed class DeviceMetaData : DeviceMetaData<LogEventProperty>, ILogEventEnricher
+    public static void DefaultConfigureLogger( in AppLoggerOptions options, in LoggerMinimumLevelConfiguration minimumLevel, in LoggerSinkConfiguration sinkTo, in LoggerAuditSinkConfiguration auditTo, in LoggerEnrichmentConfiguration enrichment, in LoggerFilterConfiguration filter, in LoggerDestructuringConfiguration destructure, in TelemetrySource source )
     {
-        public LogEventProperty ToProperty() =>
-            _property ??= new LogEventProperty(nameof(DeviceInfo),
-                                               new StructureValue([
-                                                                      Enricher.GetProperty(DeviceAppVersion,   nameof(DeviceAppVersion)),
-                                                                      Enricher.GetProperty(DeviceID,           nameof(DeviceID)),
-                                                                      Enricher.GetProperty(DeviceManufacturer, nameof(DeviceManufacturer)),
-                                                                      Enricher.GetProperty(DeviceModel,        nameof(DeviceModel)),
-                                                                      Enricher.GetProperty(DevicePlatform,     nameof(DevicePlatform)),
-                                                                      Enricher.GetProperty(DeviceVersion,      nameof(DeviceVersion)),
-                                                                      Enricher.GetProperty(PackageName,        nameof(PackageName))
-                                                                  ]));
-        public void Enrich( LogEvent log, ILogEventPropertyFactory propertyFactory ) => log.AddPropertyIfAbsent(ToProperty());
+        minimumLevel.Verbose();
+        minimumLevel.Override(nameof(Microsoft), LogEventLevel.Warning);
+        minimumLevel.Override(nameof(System),    LogEventLevel.Warning);
+
+        destructure.ToMaximumDepth(1000);
+        destructure.ToMaximumStringLength(int.MaxValue);
+        destructure.ToMaximumCollectionCount(99999);
+
+        enrichment.FromLogContext();
+        OpenTelemetryActivityEnricher.Create(in enrichment, in options, in source);
+
+        Debug(in sinkTo);
+        File(in sinkTo, in options);
     }
+    public static void Debug( in LoggerSinkConfiguration sinkTo )                              => sinkTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
+    public static void File( in  LoggerSinkConfiguration sinkTo, in AppLoggerOptions options ) => sinkTo.File(options.Formatter, options.Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: options.Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
 }
+
+
+
+public delegate void ConfigureLogger( in AppLoggerOptions options, in LoggerMinimumLevelConfiguration minimumLevel, in LoggerSinkConfiguration sinkTo, in LoggerAuditSinkConfiguration auditTo, in LoggerEnrichmentConfiguration enrichment, in LoggerFilterConfiguration filter, in LoggerDestructuringConfiguration destructure, in TelemetrySource source );

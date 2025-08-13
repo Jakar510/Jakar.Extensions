@@ -8,7 +8,7 @@ using ZLinq;
 namespace Jakar.Extensions;
 
 
-public sealed class LinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<LinkedList<T>.ValueEnumerator, T>
+public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<ValueLinkedList<T>.ValueEnumerator, T>
 {
     private readonly Lock  __lock = new();
     private          int   __count;
@@ -27,9 +27,9 @@ public sealed class LinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<Lin
     public ValueEnumerator Values     => new(this);
 
 
-    public LinkedList() { }
-    public LinkedList( T firstValue ) => __last = First = new Node(firstValue);
-    public LinkedList( IEnumerator<T> enumerator )
+    public ValueLinkedList() { }
+    public ValueLinkedList( T firstValue ) => __last = First = new Node(firstValue);
+    public ValueLinkedList( IEnumerator<T> enumerator )
     {
         Debug.Assert(enumerator is not null);
         __last = First = new Node(enumerator.Current);
@@ -229,30 +229,37 @@ public sealed class LinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<Lin
     }
 
 
-    public Enumerator                          GetEnumerator()     => new(First);
+    public Enumerator                          GetEnumerator()     => new(this);
     IEnumerator<T> IEnumerable<T>.             GetEnumerator()     => GetEnumerator();
     IEnumerator IEnumerable.                   GetEnumerator()     => GetEnumerator();
-    public ValueEnumerable<ValueEnumerator, T> AsValueEnumerable() => new(new ValueEnumerator(this));
+    public ValueEnumerable<ValueEnumerator, T> AsValueEnumerable() => new(Values);
 
 
 
-    public sealed class Enumerator( Node? head ) : IEnumerator<T>
+    public sealed class Enumerator( ValueLinkedList<T> list ) : IEnumerator<T>
     {
-        private static readonly Node  __s_Empty     = new(default!);
-        private                 Node  __currentNode = __s_Empty;
-        private                 Node? __nextNode    = head;
+        private readonly ValueLinkedList<T> __list     = list;
+        private          Node?              __nextNode = list.First;
+        private          Node?              __currentNode;
+        private          bool               __isDisposed;
 
 
-        public ref T        Current => ref __currentNode.value;
+        public ref T Current => ref __currentNode is null
+                                        ? ref Unsafe.NullRef<T>()
+                                        : ref __currentNode.value;
+
+        
         T IEnumerator<T>.   Current => Current;
         object? IEnumerator.Current => Current;
 
 
         public bool MoveNext()
         {
+            ObjectDisposedException.ThrowIf(__isDisposed, this);
+
             if ( __nextNode == null )
             {
-                __currentNode = __s_Empty;
+                __currentNode = null;
                 return false;
             }
 
@@ -261,11 +268,18 @@ public sealed class LinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<Lin
             return true;
         }
 
-        public void Reset() { }
+        
+        public void Reset()
+        {
+            ObjectDisposedException.ThrowIf(__isDisposed, this);
+            __currentNode = null;
+            __nextNode    = __list.First;
+        }
         public void Dispose()
         {
             __nextNode    = null;
-            __currentNode = __s_Empty;
+            __currentNode = null;
+            __isDisposed  = true;
         }
     }
 
@@ -279,11 +293,11 @@ public sealed class LinkedList<T> : IReadOnlyCollection<T>, IValueEnumerable<Lin
 
 
 
-    public struct ValueEnumerator( LinkedList<T> list ) : IValueEnumerator<T>
+    public struct ValueEnumerator( ValueLinkedList<T> list ) : IValueEnumerator<T>
     {
-        private readonly LinkedList<T> __list     = list;
-        private          Node?         __nextNode = list.First;
-        private          Node?         __currentNode;
+        private readonly ValueLinkedList<T> __list     = list;
+        private          Node?              __nextNode = list.First;
+        private          Node?              __currentNode;
 
 
         public readonly ref T Current => ref __currentNode is null

@@ -25,23 +25,23 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void CastAndDispose<TValue>( ref TValue? resource )
+    public static void ClearAndDispose<TValue>( ref TValue? resource )
         where TValue : IDisposable
     {
         resource?.Dispose();
         resource = default;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static ValueTask CastAndDisposeAsync<TValue>( ref TValue? resource )
-        where TValue : class, IDisposable
+    public static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
+        where TValue : IDisposable
     {
         ValueTask task = CastAndDisposeAsync(resource);
-        resource = null;
+        resource = default;
         return task;
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask CastAndDisposeAsync<TValue>( TValue? resource )
-        where TValue : class, IDisposable
+        where TValue : IDisposable
     {
         switch ( resource )
         {

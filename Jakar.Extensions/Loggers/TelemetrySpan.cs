@@ -33,15 +33,15 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 
     public TelemetrySpan( string name, Activity? parent, int? randomIDLength = null )
     {
-        __start    = Stopwatch.GetTimestamp();
+        __start = Stopwatch.GetTimestamp();
         TelemetrySource? source = TelemetrySource.Current;
 
         if ( string.IsNullOrWhiteSpace(name) || source is null )
         {
-            __parent     = null;
-            __activity   = null;
+            __parent    = null;
+            __activity  = null;
             DisplayName = string.Empty;
-            __id         = string.Empty;
+            __id        = string.Empty;
             return;
         }
 
@@ -50,7 +50,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
                           : name;
 
         __parent   = parent;
-        __id       = RandomID(randomIDLength ?? RandomIDLength);
+        __id       = Randoms.Hex(randomIDLength ?? RandomIDLength);
         __activity = Activity.Current = source.StartActivity(DisplayName);
         __activity?.AddEvent(new ActivityEvent("Start", DateTimeOffset.UtcNow));
     }
@@ -63,16 +63,6 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
         __activity.AddEvent(new ActivityEvent(SpanDuration.ToString(Elapsed, "End. Duration: "), DateTimeOffset.UtcNow));
         __activity.Stop();
         __activity.Dispose();
-    }
-
-
-    public static string RandomID( int length )
-    {
-        if ( length < 1 ) { throw new ArgumentOutOfRangeException(nameof(length), "Length must be greater than 0."); }
-
-        Span<byte> span = stackalloc byte[length];
-        RandomNumberGenerator.Fill(span);
-        return Convert.ToHexString(span);
     }
 
 
@@ -165,7 +155,7 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 
 
     public          bool Equals( TelemetrySpan other )                          => string.Equals(__id, other.__id, StringComparison.Ordinal) && Equals(__activity, other.__activity) && Equals(__parent, other.__parent);
-    public override bool Equals( object?       obj )                            => obj is TelemetrySpan other                              && Equals(other);
+    public override bool Equals( object?       obj )                            => obj is TelemetrySpan other                                && Equals(other);
     public override int  GetHashCode()                                          => HashCode.Combine(__id, __activity, __parent);
     public static   bool operator ==( TelemetrySpan left, TelemetrySpan right ) => left.Equals(right);
     public static   bool operator !=( TelemetrySpan left, TelemetrySpan right ) => !left.Equals(right);

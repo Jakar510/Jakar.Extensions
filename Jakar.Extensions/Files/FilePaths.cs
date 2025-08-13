@@ -36,7 +36,7 @@ public class FilePaths : BaseClass, IDisposable
 
 
     public LocalFile                               AccountsFile    { get => GetAccountsFile(); set => _accountsFile = value; }
-    public ConcurrentDictionary<string, LocalFile> AdditionalFiles => _additionalFiles ??= new ConcurrentDictionary<string, LocalFile>( Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal );
+    public ConcurrentDictionary<string, LocalFile> AdditionalFiles => _additionalFiles ??= new ConcurrentDictionary<string, LocalFile>(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.Ordinal);
     public LocalFile                               AppCacheZipFile { get => GetAppCacheZipFile(); set => _appCacheZipFile = value; }
     public LocalFile                               AppDataZipFile  { get => GetAppDataZipFile();  set => _appDataZipFile = value; }
     public LocalFile                               AppStateFile    { get => GetAppStateFile();    set => _appStateFile = value; }
@@ -58,17 +58,17 @@ public class FilePaths : BaseClass, IDisposable
     public ReadOnlyMemory<byte> ScreenshotData { get => _screenshotData; set => _screenshotData = value; }
 
 
-    public FilePaths() : this( LocalDirectory.CurrentDirectory ) { }
-    public FilePaths( LocalDirectory currentDirectory ) : this( currentDirectory.Combine( APP_DATA_DIRECTORY ), currentDirectory.Combine( CACHE_DIRECTORY ) ) { }
-    public FilePaths( LocalDirectory appData, LocalDirectory cache ) : this( appData, cache, cache.Combine( LOGS_DIRECTORY ) ) { }
+    public FilePaths() : this(LocalDirectory.CurrentDirectory) { }
+    public FilePaths( LocalDirectory currentDirectory ) : this(currentDirectory.Combine(APP_DATA_DIRECTORY), currentDirectory.Combine(CACHE_DIRECTORY)) { }
+    public FilePaths( LocalDirectory appData, LocalDirectory cache ) : this(appData, cache, cache.Combine(LOGS_DIRECTORY)) { }
     public FilePaths( LocalDirectory appData, LocalDirectory cache, LocalDirectory logs )
     {
         AppData = appData;
         Cache   = cache;
         Logs    = logs;
-        Directory.CreateDirectory( Cache );
-        Directory.CreateDirectory( AppData );
-        Directory.CreateDirectory( Logs );
+        Directory.CreateDirectory(Cache);
+        Directory.CreateDirectory(AppData);
+        Directory.CreateDirectory(Logs);
     }
 
 
@@ -76,17 +76,17 @@ public class FilePaths : BaseClass, IDisposable
     {
         if ( disposing is false ) { return; }
 
-        ClearAndDispose( ref _accountsFile );
-        ClearAndDispose( ref _appCacheZipFile );
-        ClearAndDispose( ref _appDataZipFile );
-        ClearAndDispose( ref _appStateFile );
-        ClearAndDispose( ref _crashFile );
-        ClearAndDispose( ref _feedbackFile );
-        ClearAndDispose( ref _incomingFile );
-        ClearAndDispose( ref _logsFile );
-        ClearAndDispose( ref _outgoingFile );
-        ClearAndDispose( ref _logsZipFile );
-        ClearAndDispose( ref _screenshot );
+        Disposables.ClearAndDispose(ref _accountsFile);
+        Disposables.ClearAndDispose(ref _appCacheZipFile);
+        Disposables.ClearAndDispose(ref _appDataZipFile);
+        Disposables.ClearAndDispose(ref _appStateFile);
+        Disposables.ClearAndDispose(ref _crashFile);
+        Disposables.ClearAndDispose(ref _feedbackFile);
+        Disposables.ClearAndDispose(ref _incomingFile);
+        Disposables.ClearAndDispose(ref _logsFile);
+        Disposables.ClearAndDispose(ref _outgoingFile);
+        Disposables.ClearAndDispose(ref _logsZipFile);
+        Disposables.ClearAndDispose(ref _screenshot);
         AppData.Dispose();
         Cache.Dispose();
         Logs.Dispose();
@@ -101,8 +101,8 @@ public class FilePaths : BaseClass, IDisposable
     }
     public void Dispose()
     {
-        Dispose( true );
-        GC.SuppressFinalize( this );
+        Dispose(true);
+        GC.SuppressFinalize(this);
     }
 
 
@@ -112,31 +112,31 @@ public class FilePaths : BaseClass, IDisposable
     }
 
 
-    protected LocalFile                  GetAppCacheZipFile() => _appCacheZipFile ??= AppData.Join( APP_CACHE_ZIP_FILE );
-    protected LocalFile                  GetAppDataZipFile()  => _appDataZipFile ??= Cache.Join( APP_DATA_ZIP_FILE );
-    protected LocalFile                  GetAppStateFile()    => _appStateFile ??= Cache.Join( APP_STATE_FILE );
-    protected LocalFile                  GetCrashFile()       => _crashFile ??= Cache.Join( CRASH_DATA );
-    protected LocalFile                  GetAccountsFile()    => _accountsFile ??= Cache.Join( ACCOUNTS_FILE );
-    protected LocalFile                  GetIncomingFile()    => _incomingFile ??= Cache.Join( INCOMING_FILE );
-    protected LocalFile                  GetFeedbackFile()    => _feedbackFile ??= Cache.Join( FEEDBACK_FILE );
-    protected LocalFile                  GetLogsFile()        => _logsFile ??= Logs.Join( LOGS_FILE );
-    protected LocalFile                  GetLogsZipFile()     => _logsZipFile ??= AppData.Join( LOGS_ZIP_FILE_NAME );
-    protected LocalFile                  GetOutgoingFile()    => _outgoingFile ??= Cache.Join( OUTGOING_FILE );
-    protected LocalFile                  GetScreenshotFile()  => _screenshot ??= Cache.Join( SCREEN_SHOT_FILE );
-    public    ReadOnlyMemory<byte>       ZipLogs()            => Zip( Logs );
-    public    Task<ReadOnlyMemory<byte>> ZipLogsAsync()       => Task.Run( ZipLogs );
-    public    ReadOnlyMemory<byte>       ZipCache()           => Zip( Cache );
-    public    Task<ReadOnlyMemory<byte>> ZipCacheAsync()      => Task.Run( ZipCache );
-    public    ReadOnlyMemory<byte>       ZipData()            => Zip( AppData );
-    public    Task<ReadOnlyMemory<byte>> ZipDataAsync()       => Task.Run( ZipData );
+    protected LocalFile                  GetAppCacheZipFile() => _appCacheZipFile ??= AppData.Join(APP_CACHE_ZIP_FILE);
+    protected LocalFile                  GetAppDataZipFile()  => _appDataZipFile ??= Cache.Join(APP_DATA_ZIP_FILE);
+    protected LocalFile                  GetAppStateFile()    => _appStateFile ??= Cache.Join(APP_STATE_FILE);
+    protected LocalFile                  GetCrashFile()       => _crashFile ??= Cache.Join(CRASH_DATA);
+    protected LocalFile                  GetAccountsFile()    => _accountsFile ??= Cache.Join(ACCOUNTS_FILE);
+    protected LocalFile                  GetIncomingFile()    => _incomingFile ??= Cache.Join(INCOMING_FILE);
+    protected LocalFile                  GetFeedbackFile()    => _feedbackFile ??= Cache.Join(FEEDBACK_FILE);
+    protected LocalFile                  GetLogsFile()        => _logsFile ??= Logs.Join(LOGS_FILE);
+    protected LocalFile                  GetLogsZipFile()     => _logsZipFile ??= AppData.Join(LOGS_ZIP_FILE_NAME);
+    protected LocalFile                  GetOutgoingFile()    => _outgoingFile ??= Cache.Join(OUTGOING_FILE);
+    protected LocalFile                  GetScreenshotFile()  => _screenshot ??= Cache.Join(SCREEN_SHOT_FILE);
+    public    ReadOnlyMemory<byte>       ZipLogs()            => Zip(Logs);
+    public    Task<ReadOnlyMemory<byte>> ZipLogsAsync()       => Task.Run(ZipLogs);
+    public    ReadOnlyMemory<byte>       ZipCache()           => Zip(Cache);
+    public    Task<ReadOnlyMemory<byte>> ZipCacheAsync()      => Task.Run(ZipCache);
+    public    ReadOnlyMemory<byte>       ZipData()            => Zip(AppData);
+    public    Task<ReadOnlyMemory<byte>> ZipDataAsync()       => Task.Run(ZipData);
     public static ReadOnlyMemory<byte> Zip( LocalDirectory? directory )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( directory is null || directory.DoesNotExist ) { return ReadOnlyMemory<byte>.Empty; }
 
-        Debug.Assert( directory.Exists );
+        Debug.Assert(directory.Exists);
         using MemoryStream destination = new(10240);
-        ZipFile.CreateFromDirectory( directory.FullPath, destination, CompressionLevel.SmallestSize, true, Encoding.Default );
+        ZipFile.CreateFromDirectory(directory.FullPath, destination, CompressionLevel.SmallestSize, true, Encoding.Default);
 
         return destination.ToArray();
     }
@@ -145,26 +145,26 @@ public class FilePaths : BaseClass, IDisposable
     public async ValueTask<LocalFile> SaveFileAsync( string fileName, Stream stream, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        LocalFile           file = Cache.Join( fileName );
-        await file.WriteAsync( stream,  token );
+        LocalFile           file          = Cache.Join(fileName);
+        await file.WriteAsync(stream, token);
         return file;
     }
     public async ValueTask<LocalFile> SaveFileAsync( string fileName, ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        LocalFile           file = Cache.Join( fileName );
-        await file.WriteAsync( payload,  token );
+        LocalFile           file          = Cache.Join(fileName);
+        await file.WriteAsync(payload, token);
         return file;
     }
 
 
-    public Task<LocalFile> ZipLogsToFile()  => Zip( Logs,    LogsZipFile );
-    public Task<LocalFile> ZipCacheToFile() => Zip( Cache,   AppCacheZipFile );
-    public Task<LocalFile> ZipDataToFile()  => Zip( AppData, AppDataZipFile );
+    public Task<LocalFile> ZipLogsToFile()  => Zip(Logs,    LogsZipFile);
+    public Task<LocalFile> ZipCacheToFile() => Zip(Cache,   AppCacheZipFile);
+    public Task<LocalFile> ZipDataToFile()  => Zip(AppData, AppDataZipFile);
     public static Task<LocalFile> Zip( LocalDirectory input, LocalFile output, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return input.ZipAsync( output,  token );
+        return input.ZipAsync(output, token);
     }
 
 

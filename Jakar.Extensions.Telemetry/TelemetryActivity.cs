@@ -36,7 +36,7 @@ public sealed class TelemetryActivity( string operationName, in TelemetryActivit
     public string                     DisplayName       { get => __displayName ?? OperationName; set => __displayName = value; }
     public TimeSpan?                  Duration          { get => __duration;                     init => __duration = value; }
     public DateTimeOffset?            EndTimeUtc        { get => __endTimeUtc;                   init => __endTimeUtc = value; }
-    public LinkedList<TelemetryEvent> Events            { get;                                   init; } = [];
+    public ValueLinkedList<TelemetryEvent> Events            { get;                                   init; } = [];
     public bool                       IsStopped         { get => __isStopped;                    init => __isStopped = value; }
     public ActivityKind               Kind              { get => __kind;                         init => __kind = value; }
     public TelemetryMeters            Meters            { get;                                   init; } = new();

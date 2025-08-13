@@ -77,7 +77,7 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
     public sealed class Instrument<TValue>( Meters meters, string name ) : Instrument(meters, name)
         where TValue : IEquatable<TValue>
     {
-        private readonly LinkedList<Reading<TValue>> __values = [];
+        private readonly ValueLinkedList<Reading<TValue>> __values = [];
 
 
         public override void Dispose()

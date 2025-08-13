@@ -10,16 +10,6 @@ public record BaseRecord
     public const int    MAX_STRING_SIZE  = int.MaxValue;
     public const string NULL             = "null";
     public const int    UNICODE_CAPACITY = 4000;
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected static void ClearAndDispose<TValue>( ref TValue? field )
-        where TValue : IDisposable => Disposables.CastAndDispose( ref field );
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
-        where TValue : class, IDisposable => Disposables.CastAndDisposeAsync( ref resource );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] protected static ValueTask CastAndDispose( IDisposable? resource ) => Disposables.CastAndDisposeAsync( resource );
 }
 
 
@@ -27,11 +17,11 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseRecord<TClass>, IEqualComparable<TClass>
 {
-    public static EqualComparer<TClass> Sorter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<TClass>.Default; }
+    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
 
 
-    public string ToJson()       => this.ToJson( Formatting.None );
-    public string ToPrettyJson() => this.ToJson( Formatting.Indented );
+    public string ToJson()       => this.ToJson(Formatting.None);
+    public string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
 
     public abstract bool Equals( TClass?    other );
@@ -40,20 +30,20 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
         return other is TClass t
-                   ? CompareTo( t )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TClass) );
+                   ? CompareTo(t)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
 
 
-    public static TClass Parse( [NotNullIfNotNull( nameof(json) )] string? json, IFormatProvider? provider )
+    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace( json );
+        ArgumentException.ThrowIfNullOrWhiteSpace(json);
         return json.FromJson<TClass>();
     }
-    public static bool TryParse( [NotNullWhen( true )] string? json, IFormatProvider? provider, [NotNullWhen( true )] out TClass? result )
+    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
@@ -64,7 +54,7 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
         }
         catch ( Exception e )
         {
-            telemetrySpan.AddException( e );
+            telemetrySpan.AddException(e);
             result = null;
             return false;
         }
@@ -87,7 +77,7 @@ public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<T
     protected BaseRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TClass record ) => SetID( record.ID );
+    protected bool SetID( TClass record ) => SetID(record.ID);
     protected bool SetID( TID id )
     {
         _id = id;

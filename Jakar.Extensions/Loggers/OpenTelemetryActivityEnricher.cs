@@ -1,6 +1,7 @@
-﻿// TrueLogic :: TrueLogic.Models
-// 07/29/2025  09:23
+﻿// Jakar.Extensions :: Jakar.Extensions
+// 08/13/2025  10:16
 
+using Serilog.Configuration;
 using Serilog.Core;
 using Serilog.Events;
 
@@ -9,16 +10,8 @@ using Serilog.Events;
 namespace Jakar.Extensions;
 
 
-public interface ITelemetryActivityEnricher
-{
-    DeviceInfo           DeviceInfo { get; }
-    ref readonly AppInfo Info       { get; }
-}
-
-
-
 /// <summary> A log event enricher which adds span information from the current <see cref="Activity"/>. </summary>
-public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher options, TelemetrySource source ) : ILogEventEnricher
+public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher options, TelemetrySource source ) : ILogEventEnricher
 {
     public const     string                     PARENT_ID     = "ParentId";
     public const     string                     PARENT_ID_KEY = "Serilog.ParentId";
@@ -27,17 +20,19 @@ public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher option
     public const     string                     TRACE_ID_KEY  = "Serilog.TraceId";
     public const     string                     TRACE_ID      = "TraceId";
     private readonly LogEventProperty           __appInfo     = Enricher.GetProperty(in source.Info);
-    private readonly ITelemetryActivityEnricher __options     = options;
+    private readonly IOpenTelemetryActivityEnricher __options     = options;
 
 
-    public static ILogEventEnricher[] Enrichers { get; set; } = [];
+
+
+    public static void Create( in LoggerEnrichmentConfiguration enrichment, in AppLoggerOptions options, in TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));
 
 
     /// <summary> Enrich the log event. </summary>
     /// <param name="log"> The log event to enrich. </param>
     /// <param name="factory"> Factory for creating new properties to add to the event. </param>
-    public void Enrich( LogEvent log, ILogEventPropertyFactory factory ) => Enrich(log, factory, Enrichers);
-    public void Enrich( LogEvent log, ILogEventPropertyFactory factory, params ReadOnlySpan<ILogEventEnricher> enrichers )
+    public void Enrich( LogEvent log, ILogEventPropertyFactory factory ) => Enrich(log, factory, __options.Enrichers);
+    public virtual void Enrich( LogEvent log, ILogEventPropertyFactory factory, params ReadOnlySpan<ILogEventEnricher> enrichers )
     {
         ArgumentNullException.ThrowIfNull(log);
 
@@ -56,19 +51,19 @@ public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher option
         Activity? activity = Activity.Current;
         if ( activity is null ) { return; }
 
-        AddSpanId(log, activity);
-        AddTraceId(log, activity);
-        AddParentId(log, activity);
-        AddActivityKind(log, activity);
-        AddOperationName(log, activity);
-        AddTraceFlags(log, activity);
-        AddBaggage(log, activity);
-        AddTags(log, activity);
-        AddEvents(log, activity);
+        AddSpanId(in log, in activity);
+        AddTraceId(in log, in activity);
+        AddParentId(in log, in activity);
+        AddActivityKind(in log, in activity);
+        AddOperationName(in log, in activity);
+        AddTraceFlags(in log, in activity);
+        AddBaggage(in log, in activity);
+        AddTags(in log, in activity);
+        AddEvents(in log, in activity);
     }
 
 
-    private static void AddSpanId( LogEvent log, Activity activity )
+    protected virtual void AddSpanId( ref readonly LogEvent log, ref readonly Activity activity )
     {
         object? property = activity.GetCustomProperty(SPAN_ID_KEY);
 
@@ -80,7 +75,7 @@ public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher option
 
         log.AddPropertyIfAbsent(logProperty);
     }
-    private static void AddTraceId( LogEvent log, Activity activity )
+    protected virtual void AddTraceId( ref readonly LogEvent log, ref readonly Activity activity )
     {
         object? property = activity.GetCustomProperty(TRACE_ID_KEY);
 
@@ -92,7 +87,7 @@ public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher option
 
         log.AddPropertyIfAbsent(logProperty);
     }
-    private static void AddParentId( LogEvent log, Activity activity )
+    protected virtual void AddParentId( ref readonly LogEvent log, ref readonly Activity activity )
     {
         object? property = activity.GetCustomProperty(PARENT_ID_KEY);
 
@@ -104,10 +99,10 @@ public sealed class TelemetryActivityEnricher( ITelemetryActivityEnricher option
 
         log.AddOrUpdateProperty(logProperty);
     }
-    private static void AddEvents( LogEvent        log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Events,             nameof(Activity.Events)));
-    private static void AddOperationName( LogEvent log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.OperationName,      nameof(Activity.OperationName)));
-    private static void AddTags( LogEvent          log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Tags,               nameof(Activity.Tags)));
-    private static void AddBaggage( LogEvent       log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Baggage,            nameof(Activity.Baggage)));
-    private static void AddTraceFlags( LogEvent    log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.ActivityTraceFlags, nameof(Activity.ActivityTraceFlags)));
-    private static void AddActivityKind( LogEvent  log, Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.StatusDescription,  activity.Status));
+    protected virtual void AddEvents( ref readonly        LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Events,             nameof(Activity.Events)));
+    protected virtual void AddOperationName( ref readonly LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.OperationName,      nameof(Activity.OperationName)));
+    protected virtual void AddTags( ref readonly          LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Tags,               nameof(Activity.Tags)));
+    protected virtual void AddBaggage( ref readonly       LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.Baggage,            nameof(Activity.Baggage)));
+    protected virtual void AddTraceFlags( ref readonly    LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.ActivityTraceFlags, nameof(Activity.ActivityTraceFlags)));
+    protected virtual void AddActivityKind( ref readonly  LogEvent log, ref readonly Activity activity ) => log.AddPropertyIfAbsent(Enricher.GetProperty(activity.StatusDescription,  activity.Status));
 }
