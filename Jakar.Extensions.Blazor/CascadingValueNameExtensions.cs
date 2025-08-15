@@ -18,14 +18,14 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddScoped<TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -35,14 +35,14 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddScoped<TInterface, TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -53,14 +53,14 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddScoped<TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -70,14 +70,14 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddScoped<TInterface, TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -88,30 +88,30 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddSingleton<TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
     public static IServiceCollection TryAddCascadingValueSingleton<TClass>( this IServiceCollection services, TClass instance )
         where TClass : class, INotifyPropertyChanged
     {
-        services.TryAddSingleton( instance );
+        services.TryAddSingleton(instance);
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -123,14 +123,14 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddSingleton<TInterface, TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -138,16 +138,16 @@ public static class CascadingValueNameExtensions
         where TInterface : class, INotifyPropertyChanged
         where TClass : class, TInterface
     {
-        services.TryAddSingleton<TInterface>( instance );
+        services.TryAddSingleton<TInterface>(instance);
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
@@ -158,30 +158,30 @@ public static class CascadingValueNameExtensions
     {
         services.TryAddSingleton<TClass>();
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }
     public static IServiceCollection TryAddCascadingValueSingletonNamed<TClass>( this IServiceCollection services, TClass instance )
         where TClass : class, INotifyPropertyChanged, ICascadingValueName
     {
-        services.TryAddSingleton( instance );
+        services.TryAddSingleton(instance);
 
-        services.TryAddCascadingValue( static provider =>
-                                       {
-                                           ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                           TClass                       value  = provider.GetRequiredService<TClass>();
-                                           CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
-                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget( logger );
-                                           return source;
-                                       } );
+        services.TryAddCascadingValue(static provider =>
+                                      {
+                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
+                                          TClass                       value  = provider.GetRequiredService<TClass>();
+                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
+                                          return source;
+                                      });
 
         return services;
     }

@@ -8,7 +8,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>9.0.1</Version>
+		<Version>9.1.0</Version>
 		<PackageId>Jakar.Extensions.Blazor</PackageId>
 		<Company>Tyler Stegmaier</Company>
 		<Authors>Tyler Stegmaier</Authors>
@@ -19,7 +19,7 @@
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReleaseNotes>Jakar.Extensions.Blazor 9.0.0</PackageReleaseNotes>
+		<PackageReleaseNotes>Jakar.Extensions.Blazor 9.1.0</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Jakar.Extensions.Blazor</Title>

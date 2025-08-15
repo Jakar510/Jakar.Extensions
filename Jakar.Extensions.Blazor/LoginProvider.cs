@@ -27,18 +27,18 @@ public class LoginUserState( HttpContext context, IAuthenticationService authent
     public const       string                    KEY             = nameof(LoginUserState);
     protected readonly HttpContext               _context        = context;
     protected readonly IAuthenticationService    _authentication = authentication;
-    private            UserModel?                _model;
-    private            Guid?                     _userID;
-    private            string?                   _userName;
-    private            AuthenticationProperties? _properties;
+    private            UserModel?                __model;
+    private            Guid?                     __userID;
+    private            string?                   __userName;
+    private            AuthenticationProperties? __properties;
 
 
     public static  string                    CascadingName        => KEY;
     public static  string                    AuthenticationScheme { get;                set; } = JwtBearerDefaults.AuthenticationScheme;
-    public virtual UserModel?                Model                { get => _model;      set => SetProperty( ref _model,      value ); }
-    public virtual Guid?                     UserID               { get => _userID;     set => SetProperty( ref _userID,     value ); }
-    public virtual string?                   UserName             { get => _userName;   set => SetProperty( ref _userName,   value ); }
-    public virtual AuthenticationProperties? Properties           { get => _properties; set => SetProperty( ref _properties, value ); }
+    public virtual UserModel?                Model                { get => __model;      set => SetProperty( ref __model,      value ); }
+    public virtual Guid?                     UserID               { get => __userID;     set => SetProperty( ref __userID,     value ); }
+    public virtual string?                   UserName             { get => __userName;   set => SetProperty( ref __userName,   value ); }
+    public virtual AuthenticationProperties? Properties           { get => __properties; set => SetProperty( ref __properties, value ); }
 
 
     public static LoginUserState Get( IServiceProvider provider ) => provider.GetRequiredService<LoginUserState>();
