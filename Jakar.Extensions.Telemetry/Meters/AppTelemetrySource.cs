@@ -15,12 +15,12 @@ public sealed class TelemetrySource : Jakar.Extensions.TelemetrySource, IDisposa
     public        TelemetryActivity RootActivity => __rootActivity ??= GetActivity(Info.AppName);
 
 
-    public TelemetrySource( in AppInfo info ) : base(in info)
+    public TelemetrySource( in AppInformation info ) : base(in info)
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
 
         Activity.Current = null;
-        Source           = new TelemetryActivitySource(info);
+        Source           = new TelemetryActivitySource(in info);
         App              = CreateSubSpan(RootActivity, Info.AppName);
         Meters           = new Meters(this);
     }

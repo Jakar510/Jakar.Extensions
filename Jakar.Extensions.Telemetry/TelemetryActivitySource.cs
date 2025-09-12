@@ -11,14 +11,14 @@ namespace Jakar.Extensions.Telemetry;
 
 
 [method: SetsRequiredMembers]
-public sealed class TelemetryActivitySource( AppInfo appContext ) : IValueEnumerable<TelemetryActivitySource.Enumerator, TelemetryActivity>, IDisposable
+public sealed class TelemetryActivitySource( in AppInformation appContext ) : IValueEnumerable<TelemetryActivitySource.Enumerator, TelemetryActivity>, IDisposable
 {
-    internal readonly AppInfo                                         appContext   = appContext;
+    internal readonly AppInformation                                  appContext   = appContext;
     private readonly  ConcurrentDictionary<string, TelemetryActivity> __activities = new(Environment.ProcessorCount, Buffers.DEFAULT_CAPACITY, StringComparer.Ordinal);
 
 
     public          IEnumerable<TelemetryActivity> Activities  => __activities.Values;
-    public required AppInfo                        AppContext  { get => appContext; init => appContext = value; }
+    public required AppInformation                 AppContext  { get => appContext; init => appContext = value; }
     public          List<FileData>                 Attachments { get;               init; } = [];
     public          int                            Count       => __activities.Count;
     public TelemetryActivity this[ string operationName, TelemetryActivityContext context ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => GetOrAddActivity(operationName, context); }
@@ -29,13 +29,13 @@ public sealed class TelemetryActivitySource( AppInfo appContext ) : IValueEnumer
 
 
     [JsonConstructor, SetsRequiredMembers]
-    public TelemetryActivitySource( AppInfo appContext, IEnumerable<TelemetryActivity> activities ) : this(appContext)
+    public TelemetryActivitySource( AppInformation appContext, IEnumerable<TelemetryActivity> activities ) : this(appContext)
     {
         AppContext = appContext;
         foreach ( TelemetryActivity value in activities ) { __activities.TryAdd(value.OperationName, value); }
     }
     [SetsRequiredMembers]
-    public TelemetryActivitySource( AppInfo appContext, params ReadOnlySpan<TelemetryActivity> values ) : this(appContext)
+    public TelemetryActivitySource( AppInformation appContext, params ReadOnlySpan<TelemetryActivity> values ) : this(appContext)
     {
         AppContext = appContext;
         foreach ( TelemetryActivity value in values ) { __activities.TryAdd(value.OperationName, value); }
@@ -47,8 +47,8 @@ public sealed class TelemetryActivitySource( AppInfo appContext ) : IValueEnumer
         __activities.Clear();
     }
     public static TelemetryActivitySource Create<TApp>( string? packageName = null )
-        where TApp : IAppID => new(new AppInfo(TApp.AppVersion, TApp.AppID, TApp.AppName, packageName));
-    public static TelemetryActivitySource Create( AppInfo context ) => new(context);
+        where TApp : IAppID => new(new AppInformation(TApp.AppVersion, TApp.AppID, TApp.AppName, packageName));
+    public static TelemetryActivitySource Create( AppInformation context ) => new(context);
 
 
     public bool              ContainsKey( string             key )                                                             => __activities.ContainsKey(key);
