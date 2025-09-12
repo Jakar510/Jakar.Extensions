@@ -30,7 +30,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public static async ValueTask<JwtParser> GetOrCreateParser<TApp>( IWebAppSettings settings, string authenticationType )
         where TApp : IAppName
     {
-        if ( _parsers.TryGetValue( authenticationType, out JwtParser? parser ) is false ) { _parsers[authenticationType] = parser = await CreateAsync<TApp>( settings, authenticationType ); }
+        if ( !_parsers.TryGetValue( authenticationType, out JwtParser? parser ) ) { _parsers[authenticationType] = parser = await CreateAsync<TApp>( settings, authenticationType ); }
 
         return parser;
     }
@@ -113,7 +113,7 @@ public static class JwtParserExtensions
         using TelemetrySpan telemetrySpan  = TelemetrySpan.Create();
         string?             value = configuration.GetValue<string>( fileKey );
 
-        if ( string.IsNullOrWhiteSpace( value ) is false )
+        if ( !string.IsNullOrWhiteSpace( value ) )
         {
             LocalFile file = value;
 
@@ -124,7 +124,7 @@ public static class JwtParserExtensions
 
         value = configuration.GetValue<string>( jwt );
 
-        return string.IsNullOrWhiteSpace( value ) is false
+        return !string.IsNullOrWhiteSpace( value )
                    ? Encoding.UTF8.GetBytes( value )
                    : throw new KeyNotFoundException( $"Keys not found: [ {nameof(jwt)}: {jwt}, {nameof(fileKey)}: {fileKey} ]" );
     }

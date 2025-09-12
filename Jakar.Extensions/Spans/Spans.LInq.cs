@@ -54,7 +54,7 @@ public static partial class Spans
     public static void Replace<TValue>( this scoped ReadOnlySpan<TValue> source, scoped ReadOnlySpan<TValue> oldValue, scoped ReadOnlySpan<TValue> newValue, scoped ref Buffer<TValue> buffer )
         where TValue : unmanaged, IEquatable<TValue>
     {
-        if ( source.ContainsExact(oldValue) is false )
+        if ( !source.ContainsExact(oldValue) )
         {
             source.CopyTo(buffer.Next);
             return;
@@ -84,7 +84,7 @@ public static partial class Spans
 
         foreach ( ref readonly TValue equatable in span )
         {
-            if ( equatable.Equals(value) is false ) { buffer[index++] = equatable; }
+            if ( !equatable.Equals(value) ) { buffer[index++] = equatable; }
         }
 
         return new ReadOnlySpan<TValue>(buffer, 0, index);
@@ -100,7 +100,7 @@ public static partial class Spans
 
         foreach ( ref readonly TValue equatable in span )
         {
-            if ( equatable.IsOneOf(values) is false ) { buffer[index++] = equatable; }
+            if ( !equatable.IsOneOf(values) ) { buffer[index++] = equatable; }
         }
 
         return new ReadOnlySpan<TValue>(buffer, 0, index);
@@ -230,7 +230,7 @@ public static partial class Spans
     {
         foreach ( ref readonly TValue value in values )
         {
-            if ( selector(value) is false ) { return false; }
+            if ( !selector(value) ) { return false; }
         }
 
         return true;
@@ -248,7 +248,7 @@ public static partial class Spans
     {
         foreach ( ref readonly TValue value in values )
         {
-            if ( selector(in value) is false ) { return false; }
+            if ( !selector(in value) ) { return false; }
         }
 
         return true;

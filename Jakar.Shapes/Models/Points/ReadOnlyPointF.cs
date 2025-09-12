@@ -21,7 +21,7 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One     => ref One;
     public              bool                                  IsEmpty => X == 0 && Y == 0;
     public              bool                                  IsNaN   => float.IsNaN(X) || float.IsNaN(Y);
-    public              bool                                  IsValid => IsNaN is false;
+    public              bool                                  IsValid => !IsNaN;
     double IShapeLocation.                                    X       => X;
     double IShapeLocation.                                    Y       => Y;
 

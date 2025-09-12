@@ -29,7 +29,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     ReadOnlyPoint ICircle<Circle>.            Center  => Center;
     public bool                               IsEmpty => Center.IsEmpty || double.IsNaN(Radius);
     public bool                               IsNaN   => Center.IsNaN   || double.IsNaN(Radius);
-    public bool                               IsValid => IsNaN is false && Radius >= 0;
+    public bool                               IsValid => !IsNaN && Radius >= 0;
     double IShapeLocation.                    X       => Center.X;
     double IShapeLocation.                    Y       => Center.Y;
 
@@ -71,7 +71,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
         double discriminant = b                          * b - 4 * a * c;
         if ( discriminant < 0 ) { return CircleLineRelation.Disjoint; }
 
-        if ( line.IsFinite is false )
+        if ( !line.IsFinite )
         {
             return discriminant == 0
                        ? CircleLineRelation.Tangent

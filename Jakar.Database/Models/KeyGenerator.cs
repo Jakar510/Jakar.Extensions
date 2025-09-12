@@ -23,7 +23,7 @@ public record struct KeyGenerator<TClass> : IEnumerator<RecordID<TClass>>, IEnum
 
     public   void                                                        Dispose()       => this = default;
     public   void                                                        Reset()         => _index = -1;
-    public   bool                                                        MoveNext()      => _pairs.IsEmpty is false && ++_index < _pairs.Length;
+    public   bool                                                        MoveNext()      => !_pairs.IsEmpty && ++_index < _pairs.Length;
     readonly IEnumerator<RecordID<TClass>> IEnumerable<RecordID<TClass>>.GetEnumerator() => this;
     readonly IEnumerator IEnumerable.                                    GetEnumerator() => this;
 

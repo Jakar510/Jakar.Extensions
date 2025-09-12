@@ -18,7 +18,7 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
-    public              bool                                IsValid     => IsNaN is false && IsEmpty is false;
+    public              bool                                IsValid     => !IsNaN && !IsEmpty;
     [JsonIgnore] public bool                                IsEmpty     => IsNaN || Width < 0 || Height < 0;
     public              bool                                IsLandscape => Width < Height;
     public              bool                                IsNaN       => float.IsNaN(Width) || float.IsNaN(Height);

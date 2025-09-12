@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>9.15.0</Version>
+		<Version>9.16.0</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -84,8 +84,7 @@
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-		<PackageReference Include="Microsoft.CSharp" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+ 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Http" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />

@@ -23,7 +23,7 @@ public partial class WebRequester
 
         public Task IncrementAndWait( ref ushort count, CancellationToken token )
         {
-            if ( AllowRetries is false || count > MaxRetires ) { return Task.CompletedTask; }
+            if ( !AllowRetries || count > MaxRetires ) { return Task.CompletedTask; }
 
             count++;
             TimeSpan scale = Scale * count;

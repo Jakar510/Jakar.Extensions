@@ -91,7 +91,7 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
 
             for ( int i = 0; i < span.Length; i++ )
             {
-                if ( char.IsLetterOrDigit( span[i] ) is false || char.IsPunctuation( span[i] ) ) { span[i] = ' '; }
+                if ( !char.IsLetterOrDigit( span[i] ) || char.IsPunctuation( span[i] ) ) { span[i] = ' '; }
             }
 
             return span.IsNullOrWhiteSpace();
@@ -232,7 +232,7 @@ public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddr
 
         try
         {
-            result = string.IsNullOrWhiteSpace( value ) is false
+            result = !string.IsNullOrWhiteSpace( value )
                          ? Parse( value, provider )
                          : null;
 

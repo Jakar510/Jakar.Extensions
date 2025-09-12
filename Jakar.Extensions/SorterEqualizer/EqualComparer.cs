@@ -39,7 +39,7 @@ public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqual
     [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool GreaterThan( TValue?               left, TValue? right ) => Compare( left, right ) > 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool GreaterThanOrEqualTo( TValue?      left, TValue? right ) => Compare( left, right ) >= 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining )] public int  GetHashCode( [DisallowNull] TValue obj )                 => obj.GetHashCode();
-    [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue?              left, TValue? right ) => Equals( left, right ) is false;
+    [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue?              left, TValue? right ) => !Equals( left, right );
     public bool Equals( TValue? left, TValue? right )
     {
         if ( left is IStructuralEquatable comparable ) { return comparable.Equals( right, this ); }

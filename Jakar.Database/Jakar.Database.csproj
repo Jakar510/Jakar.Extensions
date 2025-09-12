@@ -133,6 +133,18 @@
 		<PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="Dapper">
+	    <HintPath>C:\Users\jakar\.nuget\packages\dapper\2.1.66\lib\net8.0\Dapper.dll</HintPath>
+	  </Reference>
+	  <Reference Include="InterpolatedSql.Dapper">
+	    <HintPath>C:\Users\jakar\.nuget\packages\interpolatedsql.dapper\2.4.0\lib\net7.0\InterpolatedSql.Dapper.dll</HintPath>
+	  </Reference>
+	  <Reference Include="OneOf">
+	    <HintPath>C:\Users\jakar\.nuget\packages\oneof\3.0.271\lib\netstandard2.0\OneOf.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 	<!--
 	<ItemGroup>
 		<ProjectReference Include="..\Jakar.Database.Generators\Jakar.Database.Generators.csproj"

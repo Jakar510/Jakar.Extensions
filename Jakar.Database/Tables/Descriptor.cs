@@ -23,7 +23,7 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
     public static FrozenDictionary<string, Descriptor> CreateMapping( Type type )
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
-        PropertyInfo[]     properties = type.GetProperties( ATTRIBUTES ).Where( static x => x.HasAttribute<DataBaseIgnoreAttribute>() is false ).ToArray();
+        PropertyInfo[]     properties = type.GetProperties( ATTRIBUTES ).Where( static x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
 
         Debug.Assert( properties.Length > 0 );
         Debug.Assert( properties.Any( IsDbKey ) );
@@ -35,7 +35,7 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
     public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name.ToSnakeCase() );
     public static Descriptor Create( PropertyInfo property, in string name )
     {
-        if ( string.Equals( name.ToSnakeCase(), name ) is false ) { throw new ArgumentException( $"The name '{name}' is not in snake case." ); }
+        if ( !string.Equals( name.ToSnakeCase(), name ) ) { throw new ArgumentException( $"The name '{name}' is not in snake case." ); }
 
         return new Descriptor( name, IsDbKey( property ), $" {name} ", $" @{name} ", $" {name} = @{name} ", GetTablePropertyValue( property ) );
     }

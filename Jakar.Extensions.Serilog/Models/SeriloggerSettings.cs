@@ -113,7 +113,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
     public static TClass Clone( SeriloggerOptions options, ISeriloggerSettings settings )
     {
         TClass result = TClass.Create( options, settings );
-        Debug.Assert( ReferenceEquals( settings, result ) is false );
+        Debug.Assert( !ReferenceEquals( settings, result ) );
         result.SetPreferences();
         return result;
     }
@@ -161,7 +161,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
             get => _value;
             set
             {
-                if ( SetProperty( ref _value, value ) is false ) { return; }
+                if ( !SetProperty( ref _value, value ) ) { return; }
 
                 OnPropertyChanged( nameof(Hint) );
                 _action?.Invoke( value );

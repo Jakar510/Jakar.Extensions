@@ -51,8 +51,8 @@ public sealed class ValueSorter<TValue> : IComparer<TValue?>, IComparer<TValue>,
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue  left, TValue  right ) => Equals( left, right ) is false;
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue? left, TValue? right ) => Equals( left, right ) is false;
+    [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue  left, TValue  right ) => !Equals( left, right );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )] public bool DoesNotEqual( TValue? left, TValue? right ) => !Equals( left, right );
     public bool Equals( TValue? left, TValue? right )
     {
         if ( left is IStructuralEquatable comparable ) { return comparable.Equals( right, this ); }

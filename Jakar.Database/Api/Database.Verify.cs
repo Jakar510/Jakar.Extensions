@@ -38,7 +38,7 @@ public abstract partial class Database
 
         try
         {
-            if ( UserRecord.VerifyPassword( ref record, request ) is false )
+            if ( !UserRecord.VerifyPassword( ref record, request ) )
             {
                 record = record.MarkBadLogin();
                 return Error.Unauthorized( request.UserName );

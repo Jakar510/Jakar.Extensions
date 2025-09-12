@@ -127,7 +127,7 @@ public static partial class Spans
 
         foreach ( TValue c in values )
         {
-            if ( span.Contains( c ) is false ) { return false; }
+            if ( !span.Contains( c ) ) { return false; }
         }
 
         return true;
@@ -200,9 +200,9 @@ public static partial class Spans
 
 
     public static bool EndsWith<TValue>( scoped ref readonly Span<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => span.IsEmpty is false && span[^1].Equals( value );
+        where TValue : IEquatable<TValue> => !span.IsEmpty && span[^1].Equals( value );
     public static bool EndsWith<TValue>( scoped ref readonly ReadOnlySpan<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => span.IsEmpty is false && span[^1].Equals( value );
+        where TValue : IEquatable<TValue> => !span.IsEmpty && span[^1].Equals( value );
     public static bool EndsWith<TValue>( scoped ref readonly Span<TValue> span, params ReadOnlySpan<TValue> value )
         where TValue : IEquatable<TValue>
     {
@@ -220,7 +220,7 @@ public static partial class Spans
 
         for ( int i = 0; i < value.Length; i++ )
         {
-            if ( temp[i].Equals( value[i] ) is false ) { return false; }
+            if ( !temp[i].Equals( value[i] ) ) { return false; }
         }
 
         return true;
@@ -228,9 +228,9 @@ public static partial class Spans
 
 
     public static bool StartsWith<TValue>( scoped ref readonly Span<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => span.IsEmpty is false && span[0].Equals( value );
+        where TValue : IEquatable<TValue> => !span.IsEmpty && span[0].Equals( value );
     public static bool StartsWith<TValue>( scoped ref readonly ReadOnlySpan<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => span.IsEmpty is false && span[0].Equals( value );
+        where TValue : IEquatable<TValue> => !span.IsEmpty && span[0].Equals( value );
     public static bool StartsWith<TValue>( scoped ref readonly Span<TValue> span, params ReadOnlySpan<TValue> value )
         where TValue : IEquatable<TValue>
     {
@@ -248,7 +248,7 @@ public static partial class Spans
 
         for ( int i = 0; i < value.Length; i++ )
         {
-            if ( temp[i].Equals( value[i] ) is false ) { return false; }
+            if ( !temp[i].Equals( value[i] ) ) { return false; }
         }
 
         return true;

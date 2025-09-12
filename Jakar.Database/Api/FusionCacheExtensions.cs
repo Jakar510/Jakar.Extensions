@@ -16,7 +16,7 @@ public static class FusionCacheExtensions
         if ( maybeValue.HasValue ) { return maybeValue.Value; }
 
         ErrorOrResult<TResult> result = await factory( definition, token );
-        if ( result.TryGetValue( out TResult? record, out Errors? errors ) is false ) { return errors; }
+        if ( !result.TryGetValue( out TResult? record, out Errors? errors ) ) { return errors; }
 
         await cache.SetAsync( idKey, record, options, token );
         return record;

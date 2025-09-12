@@ -27,7 +27,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.Screenshot ) );
 
                 ReadOnlyMemory<byte> data = _logger.ScreenShotData;
-                if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
+                if ( !data.IsEmpty ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
             if ( _logger.Settings.IncludeAppStateOnError )

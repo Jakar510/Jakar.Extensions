@@ -28,7 +28,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
     {
         try
         {
-            result = string.IsNullOrWhiteSpace( value ) is false
+            result = !string.IsNullOrWhiteSpace( value )
                          ? Parse( value, provider )
                          : null;
 

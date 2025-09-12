@@ -22,14 +22,14 @@ public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTr
 
         Span<ulong> span = stackalloc ulong[2];
 
-        if ( Utf8Parser.TryParse( idData[..16], out span[0], out _, 'x' ) is false )
+        if ( !Utf8Parser.TryParse( idData[..16], out span[0], out _, 'x' ) )
         {
             // Invalid Id, use random https://github.com/dotnet/runtime/issues/29859
             _hexString = CreateRandom()._hexString;
             return;
         }
 
-        if ( Utf8Parser.TryParse( idData.Slice( 16, 16 ), out span[1], out _, 'x' ) is false )
+        if ( !Utf8Parser.TryParse( idData.Slice( 16, 16 ), out span[1], out _, 'x' ) )
         {
             // Invalid Id, use random https://github.com/dotnet/runtime/issues/29859
             _hexString = CreateRandom()._hexString;
@@ -50,7 +50,7 @@ public readonly struct TelemetryActivityTraceID : IEquatable<TelemetryActivityTr
     public static TelemetryActivityTraceID CreateFromBytes( ReadOnlySpan<byte> idData ) => idData.Length != SIZE
                                                                                                ? throw new ArgumentOutOfRangeException( nameof(idData) )
                                                                                                : new TelemetryActivityTraceID( Convert.ToHexStringLower( idData ) );
-    public static TelemetryActivityTraceID CreateFromString( ReadOnlySpan<char> idData ) => idData.Length != LENGTH || IsLowerCaseHexAndNotAllZeros( idData ) is false
+    public static TelemetryActivityTraceID CreateFromString( ReadOnlySpan<char> idData ) => idData.Length != LENGTH || !IsLowerCaseHexAndNotAllZeros( idData )
                                                                                                 ? throw new ArgumentOutOfRangeException( nameof(idData) )
                                                                                                 : new TelemetryActivityTraceID( idData.ToString() );
     public override string ToString() => _hexString;

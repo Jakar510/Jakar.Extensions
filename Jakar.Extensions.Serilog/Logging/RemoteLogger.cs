@@ -194,7 +194,7 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
         // Not ideal, uses some CPU capacity unnecessarily and doesn't complete in bounded time.
         // The goal is to reduce memory pressure on the client if the server is offline for extended periods.
         // May be worth reviewing and possibly abandoning this.
-        while ( _queue.Reader.TryRead( out LogEvent? logEvent ) && (ignoreShutdownSignal || _shutdownSignal.IsCancellationRequested is false) )
+        while ( _queue.Reader.TryRead( out LogEvent? logEvent ) && (ignoreShutdownSignal || !_shutdownSignal.IsCancellationRequested) )
         {
             buffer.Add( logEvent );
             if ( buffer.Count != BUFFER_LIMIT ) { continue; }

@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 public interface IOpenTelemetryActivityEnricher
 {
-    DeviceInfo                       DeviceInfo { get; }
-    ref readonly AppInfo             Info       { get; }
+    DeviceInformation                DeviceInfo { get; }
+    ref readonly AppInformation      Info       { get; }
     public       ILogEventEnricher[] Enrichers  { get; }
 }

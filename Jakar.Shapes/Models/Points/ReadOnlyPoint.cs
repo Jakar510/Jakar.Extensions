@@ -36,7 +36,7 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One     => ref One;
     public              bool                                IsEmpty => X == 0 && Y == 0;
     public              bool                                IsNaN   => double.IsNaN(X) || double.IsNaN(Y);
-    public              bool                                IsValid => IsNaN is false;
+    public              bool                                IsValid => !IsNaN;
     double IShapeLocation.                                  X       => X;
     double IShapeLocation.                                  Y       => Y;
 

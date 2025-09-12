@@ -29,7 +29,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
     {
         if ( idData.Length != LENGTH ) { throw new ArgumentOutOfRangeException(nameof(idData)); }
 
-        if ( Utf8Parser.TryParse(idData, out ulong id, out _, 'x') is false )
+        if ( !Utf8Parser.TryParse(idData, out ulong id, out _, 'x') )
         {
             _hexString = CreateRandom()._hexString;
             return;
@@ -48,7 +48,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
     public static TelemetryActivitySpanID CreateFromBytes( params ReadOnlySpan<byte> idData ) => idData.Length != SIZE
                                                                                                      ? throw new ArgumentOutOfRangeException(nameof(idData))
                                                                                                      : new TelemetryActivitySpanID(Convert.ToHexStringLower(idData));
-    public static TelemetryActivitySpanID CreateFromString( string idData ) => idData.Length != LENGTH || TelemetryActivityTraceID.IsLowerCaseHexAndNotAllZeros(idData) is false
+    public static TelemetryActivitySpanID CreateFromString( string idData ) => idData.Length != LENGTH || !TelemetryActivityTraceID.IsLowerCaseHexAndNotAllZeros(idData)
                                                                                    ? throw new ArgumentOutOfRangeException(idData)
                                                                                    : new TelemetryActivitySpanID(idData);
     public override string ToString() => _hexString;
@@ -87,7 +87,7 @@ public readonly struct TelemetryActivitySpanID : IEquatable<TelemetryActivitySpa
     public static string Collate<TEnumerator>( ValueEnumerable<TEnumerator, TelemetryActivitySpanID> spans )
         where TEnumerator : struct, IValueEnumerator<TelemetryActivitySpanID>, allows ref struct
     {
-        if ( spans.TryGetNonEnumeratedCount(out int count) is false ) { throw new InvalidOperationException("The enumerator does not support non-enumerated count retrieval."); }
+        if ( !spans.TryGetNonEnumeratedCount(out int count) ) { throw new InvalidOperationException("The enumerator does not support non-enumerated count retrieval."); }
 
         using IMemoryOwner<string?> owner = MemoryPool<string?>.Shared.Rent(count);
         Span<string?>               ids   = owner.Memory.Span[..count];

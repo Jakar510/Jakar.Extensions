@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 06/13/2024  20:06
 
+using System.Linq.Expressions;
+
+
+
 namespace Jakar.Extensions.Blazor;
 
 
@@ -20,4 +24,22 @@ public abstract class Widget : ComponentBase, IWidget
     [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
 
     // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
+}
+
+
+
+public class BlazorSetting<T>( T value ) : ObservableClass
+{
+    private T _value = value;
+    public T Value
+    {
+        get => _value;
+        set
+        {
+            SetProperty(ref _value, value);
+            _ = ValueChanged.InvokeAsync(value);
+        }
+    }
+    public EventCallback<T>     ValueChanged    { get; set; }
+    public Expression<Func<T>>? ValueExpression { get; set; }
 }

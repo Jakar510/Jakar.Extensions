@@ -19,9 +19,9 @@ public sealed class AttributeException : Exception
         sb.Append( propInfo.Name );
         sb.Append( '"' );
 
-        if ( propInfo.CanRead is false ) { sb.Append( " cannot be read from. It's of type " ); }
+        if ( !propInfo.CanRead ) { sb.Append( " cannot be read from. It's of type " ); }
 
-        else if ( propInfo.CanWrite is false ) { sb.Append( " cannot be written to. It's of type " ); }
+        else if ( !propInfo.CanWrite ) { sb.Append( " cannot be written to. It's of type " ); }
 
         else { sb.Append( "  " ); }
 

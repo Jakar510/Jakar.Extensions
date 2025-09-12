@@ -48,7 +48,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public virtual async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
-        if ( DoesNotExist || this.IsTempFile() is false ) { return; }
+        if ( DoesNotExist || !this.IsTempFile() ) { return; }
 
         await DeleteAllRecursivelyAsync();
     }
@@ -494,7 +494,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
 
     public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Sorter.Equals( left, right );
-    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Equals( left, right ) is false;
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Sorter.Equals( left, right );
     public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) > 0;
     public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) >= 0;
     public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) < 0;

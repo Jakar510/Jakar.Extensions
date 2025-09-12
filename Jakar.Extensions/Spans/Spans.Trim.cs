@@ -427,7 +427,7 @@ public static partial class Spans
 
         for ( ; start < span.Length; start++ )
         {
-            if ( trimElements.Contains( span[start] ) is false ) { break; }
+            if ( !trimElements.Contains( span[start] ) ) { break; }
         }
 
         return start;
@@ -511,7 +511,7 @@ public static partial class Spans
     public static ReadOnlySpan<char> Trim( this scoped ref readonly ReadOnlySpan<char> span )
     {
         // Assume that in most cases input doesn't need trimming
-        if ( span.Length == 0 || char.IsWhiteSpace( span[0] ) is false && char.IsWhiteSpace( span[^1] ) is false ) { return span; }
+        if ( span.Length == 0 || !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) { return span; }
 
         return TrimFallback( in span );
 
@@ -544,7 +544,7 @@ public static partial class Spans
 
         for ( ; start < span.Length; start++ )
         {
-            if ( char.IsWhiteSpace( span[start] ) is false ) { break; }
+            if ( !char.IsWhiteSpace( span[start] ) ) { break; }
         }
 
         return span[start..];
@@ -558,7 +558,7 @@ public static partial class Spans
 
         for ( ; end >= 0; end-- )
         {
-            if ( char.IsWhiteSpace( span[end] ) is false ) { break; }
+            if ( !char.IsWhiteSpace( span[end] ) ) { break; }
         }
 
         return span[..(end + 1)];
@@ -638,7 +638,7 @@ public static partial class Spans
 
         for ( ; start < span.Length; start++ )
         {
-            if ( trimChars.Contains( span[start] ) is false ) { break; }
+            if ( !trimChars.Contains( span[start] ) ) { break; }
 
             /*
             foreach ( char c in trimChars )
@@ -666,7 +666,7 @@ public static partial class Spans
 
         for ( ; end >= 0; end-- )
         {
-            if ( trimChars.Contains( span[span[end]] ) is false ) { break; }
+            if ( !trimChars.Contains( span[span[end]] ) ) { break; }
 
             /*
             for ( int i = 0; i < trimChars.Length; i++ )
@@ -688,7 +688,7 @@ public static partial class Spans
     public static Span<char> Trim( this scoped ref readonly Span<char> span )
     {
         // Assume that in most cases input doesn't need trimming
-        if ( span.Length == 0 || char.IsWhiteSpace( span[0] ) is false && char.IsWhiteSpace( span[^1] ) is false ) { return span; }
+        if ( span.Length == 0 || !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) { return span; }
 
         return TrimFallback( span );
 
@@ -699,14 +699,14 @@ public static partial class Spans
 
             for ( ; start < span.Length; start++ )
             {
-                if ( char.IsWhiteSpace( span[start] ) is false ) { break; }
+                if ( !char.IsWhiteSpace( span[start] ) ) { break; }
             }
 
             int end = span.Length - 1;
 
             for ( ; end > start; end-- )
             {
-                if ( char.IsWhiteSpace( span[end] ) is false ) { break; }
+                if ( !char.IsWhiteSpace( span[end] ) ) { break; }
             }
 
             return span.Slice( start, end - start + 1 );
@@ -737,7 +737,7 @@ public static partial class Spans
 
         for ( ; start < span.Length; start++ )
         {
-            if ( char.IsWhiteSpace( span[start] ) is false ) { break; }
+            if ( !char.IsWhiteSpace( span[start] ) ) { break; }
         }
 
         return start;
@@ -755,7 +755,7 @@ public static partial class Spans
 
         for ( ; end >= start; end-- )
         {
-            if ( char.IsWhiteSpace( span[end] ) is false ) { break; }
+            if ( !char.IsWhiteSpace( span[end] ) ) { break; }
         }
 
         return end - start + 1;

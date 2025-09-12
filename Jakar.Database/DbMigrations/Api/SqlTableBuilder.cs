@@ -1,6 +1,8 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 3/1/2024  23:20
 
+using Jakar.Extensions;
+
 namespace Jakar.Database.DbMigrations;
 
 
@@ -113,7 +115,7 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
         {
             DbType.String or DbType.StringFixedLength when Length is { IsT0        : true, AsT0: > Constants.UNICODE_CAPACITY } => throw new OutOfRangeException( Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}" ),
             DbType.AnsiString or DbType.AnsiStringFixedLength when Length is { IsT0: true, AsT0: > Constants.ANSI_CAPACITY }    => throw new OutOfRangeException( Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when Length.IsT0 || Length.IsT1 is false || IsInvalidScopedPrecision()                      => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
+            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()                                    => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
             _ => DbType switch
                  {
                      DbType.Binary => Length.IsT0
@@ -159,9 +161,9 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
     public string GetDataTypePostgresSql() =>
         DbType switch
         {
-            DbType.String or DbType.StringFixedLength when IsValidLength() is false                  => throw new OutOfRangeException( Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}" ),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when IsValidLength() is false          => throw new OutOfRangeException( Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when Length.IsT0 || Length.IsT1 is false || IsInvalidScopedPrecision() => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
+            DbType.String or DbType.StringFixedLength when !IsValidLength()                  => throw new OutOfRangeException( Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}" ),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when !IsValidLength()          => throw new OutOfRangeException( Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}" ),
+            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision() => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
 
             _ => DbType switch
                  {

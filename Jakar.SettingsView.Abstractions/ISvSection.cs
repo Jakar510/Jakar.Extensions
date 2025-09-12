@@ -38,7 +38,7 @@ public static class SvSectionExtensions
         {
             if ( cell is not IValidator validator ) { continue; }
 
-            if ( validator.IsValid is false ) { return false; }
+            if ( !validator.IsValid ) { return false; }
         }
 
         return true;

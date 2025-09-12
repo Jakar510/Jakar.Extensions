@@ -33,7 +33,7 @@ public abstract class ObservableClass : BaseClass, IObservableObject
         return true;
     }
     protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
     protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
         OnPropertyChanging(propertyName);
@@ -43,7 +43,7 @@ public abstract class ObservableClass : BaseClass, IObservableObject
         return true;
     }
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value, propertyName);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
         where TComparer : IEqualityComparer<TValue>
@@ -95,7 +95,7 @@ public abstract class ObservableClass<TClass> : BaseClass<TClass>, IObservableOb
         return true;
     }
     protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
     protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
         OnPropertyChanging(propertyName);
@@ -105,7 +105,7 @@ public abstract class ObservableClass<TClass> : BaseClass<TClass>, IObservableOb
         return true;
     }
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value, propertyName);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
         where TComparer : IEqualityComparer<TValue>

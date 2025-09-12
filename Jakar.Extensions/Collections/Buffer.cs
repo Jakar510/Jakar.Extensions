@@ -522,7 +522,7 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         public bool TryCopyTo( Span<TValue> destination, Index offset )
         {
             ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator));
-            if ( EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) is false ) { return false; }
+            if ( !EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 
             slice.CopyTo(destination);
             return true;
@@ -578,7 +578,7 @@ public struct ValueEnumerator<TValue>( in ReadOnlyMemory<TValue> source ) : IVal
     public bool TryCopyTo( Span<TValue> destination, Index offset )
     {
         ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator<TValue>));
-        if ( EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) is false ) { return false; }
+        if ( !EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 
         slice.CopyTo(destination);
         return true;

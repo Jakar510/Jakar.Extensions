@@ -12,7 +12,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static readonly MutableSize One     = 1;
 
 
-    public static                EqualComparer<MutableSize>             Sorter      => EqualComparer<MutableSize>.Default;
+    public static                EqualComparer<MutableSize>      Sorter      => EqualComparer<MutableSize>.Default;
     static ref readonly          MutableSize IShape<MutableSize>.Zero        => ref Zero;
     static ref readonly          MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
     static ref readonly          MutableSize IShape<MutableSize>.One         => ref One;
@@ -21,7 +21,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public                       double                          Width       { get; set; } = width;
     public                       double                          Height      { get; set; } = height;
     public readonly              bool                            IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
-    public readonly              bool                            IsValid     => IsNaN is false && IsEmpty is false;
+    public readonly              bool                            IsValid     => !IsNaN && !IsEmpty;
     [JsonIgnore] public readonly bool                            IsEmpty     => IsNaN || Width < 0 || Height < 0;
 
 

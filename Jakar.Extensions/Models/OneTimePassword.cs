@@ -19,10 +19,10 @@ public class OneTimePassword( string key, string issuer ) : Randoms
     protected readonly string _secret_Key = key;
 
 
-    public static OneTimePassword Create( string          key, string issuer ) => new(key, issuer);
-    public static OneTimePassword Create( string          issuer ) => Create(GenerateToken(20), issuer);
-    public static OneTimePassword Create( TelemetrySource source ) => Create(in source.Info);
-    public static OneTimePassword Create( in AppInfo      info )   => Create(info.AppName);
+    public static OneTimePassword Create( string            key, string issuer ) => new(key, issuer);
+    public static OneTimePassword Create( string            issuer ) => Create(GenerateToken(20), issuer);
+    public static OneTimePassword Create( TelemetrySource   source ) => Create(in source.Info);
+    public static OneTimePassword Create( in AppInformation info )   => Create(info.AppName);
     public static OneTimePassword Create<TApp>()
         where TApp : IAppName => Create(TApp.AppName);
 

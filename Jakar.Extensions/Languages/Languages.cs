@@ -16,7 +16,7 @@ public static class Languages
 
 
     public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo defaultValue ) =>
-        language is SupportedLanguage.Unspecified || All.Contains(language) is false
+        language is SupportedLanguage.Unspecified || !All.Contains(language)
             ? defaultValue
             : new CultureInfo(language.GetShortName());
 

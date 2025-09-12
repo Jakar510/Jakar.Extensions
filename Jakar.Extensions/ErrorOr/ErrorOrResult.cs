@@ -87,12 +87,12 @@ public readonly record struct ErrorOrResult( bool? Value, Errors? Error ) : IErr
     public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
         errors = Error?.Details;
-        return errors.IsEmpty is false;
+        return !errors.IsEmpty;
     }
     public bool TryGetValue( out ReadOnlySpan<Error> errors )
     {
         errors = Error?.Details;
-        return errors.IsEmpty is false;
+        return !errors.IsEmpty;
     }
 
 
@@ -181,12 +181,12 @@ public readonly record struct ErrorOrResult<TValue>( TValue? Value, Errors? Erro
     public bool TryGetValue( out ReadOnlyMemory<Error> errors )
     {
         errors = Error?.Details;
-        return errors.IsEmpty is false;
+        return !errors.IsEmpty;
     }
     public bool TryGetValue( out ReadOnlySpan<Error> errors )
     {
         errors = Error?.Details;
-        return errors.IsEmpty is false;
+        return !errors.IsEmpty;
     }
 
 

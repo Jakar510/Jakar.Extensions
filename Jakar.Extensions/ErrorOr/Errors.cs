@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 public readonly record struct Alert()
 {
     public static readonly Alert Empty = new(null);
-    public                 bool  IsNotValid => CheckIsValid( Title, Message ) is false;
+    public                 bool  IsNotValid => !CheckIsValid(Title, Message);
 
 
     public bool      IsValid => CheckIsValid( Title, Message );
@@ -28,7 +28,7 @@ public readonly record struct Alert()
         Message = message;
         TTL     = ttl;
     }
-    public static bool CheckIsValid( string? title, string? message ) => string.IsNullOrWhiteSpace( title ) is false || string.IsNullOrWhiteSpace( message ) is false;
+    public static bool CheckIsValid( string? title, string? message ) => !string.IsNullOrWhiteSpace(title) || !string.IsNullOrWhiteSpace(message);
 
     public static implicit operator Alert( string? value ) => new(value);
 
@@ -54,7 +54,7 @@ public sealed class Errors() : BaseClass, IEqualComparable<Errors>
     [JsonRequired] public required Alert?  Alert       { get; init; }
     public                         string  Description => Details.GetMessage();
     [JsonRequired] public required Error[] Details     { get; init; }
-    public                         bool    IsValid     => Alert?.IsValid is true || ReferenceEquals( Details, _details ) is false && Details.Length > 0;
+    public                         bool    IsValid     => Alert?.IsValid is true || !ReferenceEquals(Details, _details) && Details.Length > 0;
 
 
     public static Errors Create( params Error[]? details ) => Create( null,                                       details );

@@ -297,7 +297,7 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            if ( enumerator.Current.TryFormat(Next, out int charsWritten, format, provider) is false ) { continue; }
+            if ( !enumerator.Current.TryFormat(Next, out int charsWritten, format, provider) ) { continue; }
 
             _chars.Length  += charsWritten;
             shouldContinue =  enumerator.MoveNext();
@@ -317,7 +317,7 @@ public ref struct ValueStringBuilder
 
         while ( shouldContinue )
         {
-            if ( enumerator.Current.TryFormat(_chars.Next, out int charsWritten, format, provider) is false ) { continue; }
+            if ( !enumerator.Current.TryFormat(_chars.Next, out int charsWritten, format, provider) ) { continue; }
 
             _chars.Length  += charsWritten;
             shouldContinue =  enumerator.MoveNext();

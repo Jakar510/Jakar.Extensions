@@ -13,19 +13,18 @@ namespace Jakar.Extensions;
 /// <summary> A log event enricher which adds span information from the current <see cref="Activity"/>. </summary>
 public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher options, TelemetrySource source ) : ILogEventEnricher
 {
-    public const     string                     PARENT_ID     = "ParentId";
-    public const     string                     PARENT_ID_KEY = "Serilog.ParentId";
-    public const     string                     SPAN_ID_KEY   = "Serilog.SpanId";
-    public const     string                     SPAN_ID       = "SpanId";
-    public const     string                     TRACE_ID_KEY  = "Serilog.TraceId";
-    public const     string                     TRACE_ID      = "TraceId";
-    private readonly LogEventProperty           __appInfo     = Enricher.GetProperty(in source.Info);
+    public const     string                         PARENT_ID     = "ParentId";
+    public const     string                         PARENT_ID_KEY = "Serilog.ParentId";
+    public const     string                         SPAN_ID_KEY   = "Serilog.SpanId";
+    public const     string                         SPAN_ID       = "SpanId";
+    public const     string                         TRACE_ID_KEY  = "Serilog.TraceId";
+    public const     string                         TRACE_ID      = "TraceId";
+    private readonly LogEventProperty               __appInfo     = Enricher.GetProperty(in source.Info);
     private readonly IOpenTelemetryActivityEnricher __options     = options;
+    private readonly TelemetrySource                _source       = source;
 
 
-
-
-    public static void Create( in LoggerEnrichmentConfiguration enrichment, in AppLoggerOptions options, in TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));
+    public static void Create( LoggerEnrichmentConfiguration enrichment, AppLoggerOptions options, TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));
 
 
     /// <summary> Enrich the log event. </summary>
@@ -48,6 +47,8 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
         foreach ( ref readonly ILogEventEnricher enricher in enrichers ) { enricher.Enrich(log, factory); }
 
+        TryAddDeviceInformation(in log);
+
         Activity? activity = Activity.Current;
         if ( activity is null ) { return; }
 
@@ -60,6 +61,13 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
         AddBaggage(in log, in activity);
         AddTags(in log, in activity);
         AddEvents(in log, in activity);
+    }
+
+
+    protected virtual void TryAddDeviceInformation( ref readonly LogEvent log )
+    {
+        DeviceInformation? device = _source.GetDeviceInformation();
+        if ( device is not null ) { log.AddOrUpdateProperty(device.ToProperty()); }
     }
 
 

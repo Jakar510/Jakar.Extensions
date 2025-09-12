@@ -64,7 +64,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
             if ( line.IsNullOrWhiteSpace() ) { continue; }
 
 
-            Debug.Assert(line.Contains('\n', '\r') is false);
+            Debug.Assert(!line.Contains('\n', '\r'));
 
             switch ( line[0] )
             {
@@ -198,7 +198,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
         Span<char> span = stackalloc char[Length + 10];
-        if ( TryFormat(span, out int charsWritten, format, formatProvider) is false ) { throw new InvalidOperationException("Cannot convert to string"); }
+        if ( !TryFormat(span, out int charsWritten, format, formatProvider) ) { throw new InvalidOperationException("Cannot convert to string"); }
 
         ReadOnlySpan<char> result = span[..charsWritten];
         return result.ToString();
@@ -215,7 +215,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         {
             Span<char> span = destination[charsWritten..];
 
-            if ( section.TryFormat(span, out int sectionCharsWritten, format, provider) is false ) { throw new InvalidOperationException($"Cannot convert section '{section.Name}' to string"); }
+            if ( !section.TryFormat(span, out int sectionCharsWritten, format, provider) ) { throw new InvalidOperationException($"Cannot convert section '{section.Name}' to string"); }
 
             charsWritten                += sectionCharsWritten;
             destination[charsWritten++] =  '\n';

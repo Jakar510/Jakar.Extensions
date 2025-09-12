@@ -36,5 +36,5 @@ public readonly struct CalculatedLine( Func<double, double> func ) : IEqualityOp
 
 
     public static bool operator ==( CalculatedLine left, CalculatedLine right ) => left.Equals(right);
-    public static bool operator !=( CalculatedLine left, CalculatedLine right ) => left.Equals(right) is false;
+    public static bool operator !=( CalculatedLine left, CalculatedLine right ) => !left.Equals(right);
 }

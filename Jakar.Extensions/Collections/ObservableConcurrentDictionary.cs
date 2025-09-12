@@ -72,7 +72,7 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public bool TryAdd( KeyValuePair<TKey, TValue> pair ) => TryAdd( pair.Key, pair.Value );
     public bool TryAdd( TKey key, TValue value )
     {
-        if ( buffer.TryAdd( key, value ) is false ) { return false; }
+        if ( !buffer.TryAdd( key, value ) ) { return false; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Added( in pair, -1 );
@@ -103,9 +103,9 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
-        if ( buffer.ContainsKey( key ) is false ) { return false; }
+        if ( !buffer.ContainsKey( key ) ) { return false; }
 
-        if ( buffer.TryRemove( key, out TValue? value ) is false ) { return false; }
+        if ( !buffer.TryRemove( key, out TValue? value ) ) { return false; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Removed( in pair, -1 );

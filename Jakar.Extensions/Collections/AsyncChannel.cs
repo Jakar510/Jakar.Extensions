@@ -59,7 +59,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
         {
             using TelemetrySpan telemetrySpan = TelemetrySpan.Create( "AsyncChannel.ReadAllAsync" );
 
-            while ( token.ShouldContinue() && Completion.IsCompleted is false )
+            while ( token.ShouldContinue() && !Completion.IsCompleted )
             {
                 if ( Count > 0 )
                 {
@@ -69,7 +69,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
                 await telemetrySpan.Delay( 5, token ).ConfigureAwait( false );
             }
         }
-        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(_Values.IsEmpty is false);
+        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(!_Values.IsEmpty);
     }
 
 

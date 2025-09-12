@@ -71,7 +71,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create( response, token ); }
 
                 TValue result = await func( response, arg, token );
                 return new WebResponse<TValue>( response, result );
@@ -93,7 +93,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create( response, token ); }
 
                 TValue result = await func( response, arg1, arg2, token );
                 return new WebResponse<TValue>( response, result );

@@ -8,19 +8,19 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     private const          char                       SEPARATOR = '.';
     public static readonly AppVersion                 Default   = new();
     private                string?                    _string;
-    public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
-    public static          EqualComparer<AppVersion>         Sorter         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<AppVersion>.Default; }
-    public                 int?                       Build          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => FuzzyEqualizer<AppVersion>.Default; }
+    public static          EqualComparer<AppVersion>  Sorter         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => EqualComparer<AppVersion>.Default; }
+    public                 int?                       Build          { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
     int IReadOnlyCollection<int>.                     Count          => Scheme.AsInt();
     public              AppVersionFlags               Flags          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              bool                          IsValid        => ReferenceEquals( this, Default ) is false && this != Default;
-    [JsonIgnore] public int                           Length         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
-    public              int?                          Maintenance    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int                           Major          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          MajorRevision  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          Minor          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              int?                          MinorRevision  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
-    public              Format                        Scheme         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; init; }
+    public              bool                          IsValid        => !ReferenceEquals( this, Default ) && this != Default;
+    [JsonIgnore] public int                           Length         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Flags.Length + 65; }
+    public              int?                          Maintenance    { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int                           Major          { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MajorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          Minor          { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              int?                          MinorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
+    public              Format                        Scheme         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get; init; }
 
 
     static AppVersion() => JsonNet.Serializer.Converters.Add( AppVersionJsonNetConverter.Instance );
@@ -119,7 +119,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen( true )] out AppVersion? version ) => TryParse( value, CultureInfo.CurrentCulture, out version );
     public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen( true )] out AppVersion? version )
     {
-        if ( value.IsEmpty is false )
+        if ( !value.IsEmpty )
         {
             try
             {
@@ -199,10 +199,10 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public override string ToString() => ToString( null, CultureInfo.CurrentCulture );
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
-        if ( string.IsNullOrEmpty( _string ) is false ) { return _string; }
+        if ( !string.IsNullOrEmpty( _string ) ) { return _string; }
 
         Span<char> span = stackalloc char[Length + 1];
-        if ( TryFormat( span, out int charsWritten, format, formatProvider ) is false ) { throw new InvalidOperationException( "Conversion failed" ); }
+        if ( !TryFormat( span, out int charsWritten, format, formatProvider ) ) { throw new InvalidOperationException( "Conversion failed" ); }
 
         Span<char> result = span[..charsWritten];
         return _string = result.ToString();

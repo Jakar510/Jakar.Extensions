@@ -113,9 +113,9 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     }
     public async Task WriteToAsync( Stream stream, CancellationToken token )
     {
-        if ( stream.CanWrite is false ) { throw new ArgumentException( "Stream is not writable" ); }
+        if ( !stream.CanWrite ) { throw new ArgumentException( "Stream is not writable" ); }
 
-        if ( stream.CanSeek is false ) { throw new ArgumentException( "Stream is not seekable" ); }
+        if ( !stream.CanSeek ) { throw new ArgumentException( "Stream is not seekable" ); }
 
         stream.Seek( 0, SeekOrigin.Begin );
         OneOf<byte[], string> data = GetData();
@@ -132,9 +132,9 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     }
     public void WriteTo( Stream stream )
     {
-        if ( stream.CanWrite is false ) { throw new ArgumentException( "Stream is not writable" ); }
+        if ( !stream.CanWrite ) { throw new ArgumentException( "Stream is not writable" ); }
 
-        if ( stream.CanSeek is false ) { throw new ArgumentException( "Stream is not seekable" ); }
+        if ( !stream.CanSeek ) { throw new ArgumentException( "Stream is not seekable" ); }
 
         stream.Seek( 0, SeekOrigin.Begin );
         OneOf<byte[], string> data = GetData();

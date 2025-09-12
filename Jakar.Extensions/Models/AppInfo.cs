@@ -5,22 +5,22 @@ namespace Jakar.Extensions;
 
 
 [StructLayout(LayoutKind.Auto), Serializable, DefaultValue(nameof(Invalid))]
-public readonly record struct AppInfo( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IComparable, IComparable<AppInfo>
+public readonly record struct AppInformation( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IComparable, IComparable<AppInformation>
 {
-    public static readonly AppInfo    Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
-    public readonly        AppVersion Version     = Version;
-    public readonly        Guid       AppID       = AppID;
-    public readonly        string     AppName     = AppName;
-    public readonly        string?    PackageName = PackageName;
+    public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
+    public readonly        AppVersion     Version     = Version;
+    public readonly        Guid           AppID       = AppID;
+    public readonly        string         AppName     = AppName;
+    public readonly        string?        PackageName = PackageName;
 
 
     public int CompareTo( object? other )
     {
-        if ( other is AppInfo source ) { return CompareTo(source); }
+        if ( other is AppInformation source ) { return CompareTo(source); }
 
-        throw new ExpectedValueTypeException(nameof(other), other, typeof(AppInfo));
+        throw new ExpectedValueTypeException(nameof(other), other, typeof(AppInformation));
     }
-    public int CompareTo( AppInfo other )
+    public int CompareTo( AppInformation other )
     {
         int appNameComparison = string.Compare(AppName, other.AppName, StringComparison.Ordinal);
         if ( appNameComparison != 0 ) { return appNameComparison; }

@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
+
   <ItemGroup>
     <PackageVersion Include="AathifMahir.Maui.MauiIcons.Cupertino" Version="4.0.0" />
     <PackageVersion Include="AathifMahir.Maui.MauiIcons.Fluent" Version="4.0.0" />
@@ -45,7 +46,7 @@
     <PackageVersion Include="Hardware.Info" Version="101.0.1.1" />
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
-    <PackageVersion Include="Jakar.Database" Version="7.0.0.27-beta" />
+    <PackageVersion Include="Jakar.Database" Version="9.0.0.3-beta" />
     <PackageVersion Include="Jakar.Extensions" Version="9.15.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.0.1" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
@@ -59,7 +60,7 @@
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.100" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.90" />
     <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.8" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.8" />
@@ -94,9 +95,9 @@
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.13.1" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.13.1" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.13.1" />
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.100" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.100" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.100" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.90" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.90" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
@@ -136,7 +137,7 @@
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.SystemMetrics" Version="3.1.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="7.2.1" />
+    <PackageVersion Include="Radzen.Blazor" Version="7.2.0" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Enrichers.GlobalLogContext" Version="3.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />

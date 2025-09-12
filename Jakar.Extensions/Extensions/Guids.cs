@@ -137,7 +137,7 @@ public static class Guids
         Guard.IsGreaterThanOrEqualTo(result.Length, 22);
         Span<byte> base64Bytes = stackalloc byte[24];
         Span<byte> idBytes     = stackalloc byte[16];
-        if ( value.TryWriteBytes(idBytes) is false ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
+        if ( !value.TryWriteBytes(idBytes) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
 
         System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out int bytesWritten);
         result = result[..bytesWritten];
@@ -224,7 +224,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
         span.Clear();
 
-        if ( BitConverter.TryWriteBytes(span, value) is false ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }
@@ -234,7 +234,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
         span.Clear();
 
-        if ( BitConverter.TryWriteBytes(span, value) is false ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }
@@ -244,7 +244,7 @@ public static class Guids
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( value.TryFormat(span, out int bytesWritten) is false ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }
@@ -252,7 +252,7 @@ public static class Guids
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( value.TryFormat(span, out int bytesWritten) is false ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
         return new Guid(span);
     }

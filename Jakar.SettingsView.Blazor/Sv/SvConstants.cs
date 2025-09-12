@@ -44,11 +44,11 @@ public static class SvConstants
     }
     public static string ToggleClass( this string classValue, bool isToggle )
     {
-        if ( isToggle is false ) { return classValue; }
+        if ( !isToggle ) { return classValue; }
 
         const string ACTIVE = $" {SV_ACTIVE}";
 
-        return classValue.Contains( SV_ACTIVE, StringComparison.Ordinal ) is false
+        return !classValue.Contains( SV_ACTIVE, StringComparison.Ordinal )
                    ? classValue + ACTIVE
                    : classValue.Replace( ACTIVE, string.Empty, StringComparison.Ordinal );
     }

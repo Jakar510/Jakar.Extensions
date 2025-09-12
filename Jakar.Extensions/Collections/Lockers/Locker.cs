@@ -60,7 +60,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         locker.Enter();
-        while ( token.ShouldContinue() && locker.TryEnter(_timeOut) is false ) { }
+        while ( token.ShouldContinue() && !locker.TryEnter(_timeOut) ) { }
 
         return new LockCloser(locker);
     }
@@ -68,7 +68,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        while ( token.ShouldContinue() && locker.TryEnter(_timeOut) is false ) { await Task.Delay(1, token); }
+        while ( token.ShouldContinue() && !locker.TryEnter(_timeOut) ) { await Task.Delay(1, token); }
 
         return new LockCloser(locker);
     }

@@ -16,7 +16,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public readonly        double            Height  = height;
 
 
-    public static       EqualComparer<ReadOnlyRectangle>                   Sorter   => EqualComparer<ReadOnlyRectangle>.Default;
+    public static       EqualComparer<ReadOnlyRectangle>            Sorter   => EqualComparer<ReadOnlyRectangle>.Default;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;
@@ -26,7 +26,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     double IShapeSize.                                              Width    => Width;
     double IShapeSize.                                              Height   => Height;
     public bool                                                     IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                     IsValid  => IsNaN is false && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public bool                                                     IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
     public ReadOnlyPoint                                            Center   => new(Right / 2, Bottom / 2);
     public ReadOnlyPoint                                            Location => new(X, Y);
     public ReadOnlySize                                             Size     => new(Width, Height);

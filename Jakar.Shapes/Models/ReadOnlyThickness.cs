@@ -28,7 +28,7 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.One                 => ref One;
     public              bool                                        IsEmpty             => Left == 0 && Top == 0 && Right == 0 && Bottom == 0;
     public              bool                                        IsNaN               => double.IsNaN(Left) || double.IsNaN(Top) || double.IsNaN(Right) || double.IsNaN(Bottom);
-    public              bool                                        IsValid             => IsNaN is false;
+    public              bool                                        IsValid             => !IsNaN;
     double IThickness<ReadOnlyThickness>.                           Bottom              => Bottom;
     double IThickness<ReadOnlyThickness>.                           Left                => Left;
     double IThickness<ReadOnlyThickness>.                           Right               => Right;

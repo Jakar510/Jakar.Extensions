@@ -39,7 +39,7 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
             return span.Any(static ( ref readonly ReadOnlyPoint x ) => x.IsNaN);
         }
     }
-    public bool IsValid => IsEmpty is false && IsNaN is false;
+    public bool IsValid => !IsEmpty && !IsNaN;
 
 
     public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
@@ -77,11 +77,11 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     }
     public bool Equals( Spline other )
     {
-        if ( Length.Equals(other.Length) is false ) { return false; }
+        if ( !Length.Equals(other.Length) ) { return false; }
 
         for ( int i = 0; i < Length; i++ )
         {
-            if ( Points[i].Equals(other.Points[i]) is false ) { return false; }
+            if ( !Points[i].Equals(other.Points[i]) ) { return false; }
         }
 
         return true;

@@ -10,9 +10,16 @@ namespace Jakar.Extensions;
 
 public interface ITelemetrySource
 {
-    public ref readonly AppInfo        Info   { get; }
+    public ref readonly AppInformation Info   { get; }
     public ref readonly Meter          Meter  { get; }
     public ref readonly ActivitySource Source { get; }
+
+
+    public Activity?          StartActivity( string name, Activity?          parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
+    public Activity?          StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
+
+
+    public DeviceInformation? GetDeviceInformation();
 }
 
 
@@ -34,20 +41,20 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
 
     public static readonly ActivityContext                 EmptyActivityContext = default;
     public readonly        ActivitySource                  Source;
-    public readonly        AppInfo                         Info;
+    public readonly        AppInformation                  Info;
     public readonly        Meter                           Meter;
     public static          TelemetrySource?                Current        { get; set; }
     public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<TelemetrySource>.Default; }
     public static          EqualComparer<TelemetrySource>  Sorter         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TelemetrySource>.Default; }
 
 
-    ref readonly AppInfo ITelemetrySource.       Info   => ref Info;
+    ref readonly AppInformation ITelemetrySource.Info   => ref Info;
     ref readonly Meter ITelemetrySource.         Meter  => ref Meter;
     ref readonly ActivitySource ITelemetrySource.Source => ref Source;
 
 
     static TelemetrySource() => Activity.DefaultIdFormat = ActivityIdFormat.Hierarchical;
-    public TelemetrySource( in AppInfo info )
+    public TelemetrySource( in AppInformation info )
     {
         ArgumentException.ThrowIfNullOrEmpty(info.AppName);
         Activity.Current = null;
@@ -61,6 +68,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
         Source.Dispose();
         GC.SuppressFinalize(this);
     }
+
 
     public static implicit operator AppVersion( TelemetrySource     sources ) => sources.Info.Version;
     public static implicit operator Guid( TelemetrySource           sources ) => sources.Info.AppID;
@@ -89,7 +97,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded )
     {
         ArgumentException.ThrowIfNullOrEmpty(name);
-        if ( Source.HasListeners() is false ) { return null; }
+        if ( !Source.HasListeners() ) { return null; }
 
         Activity activity = Source.CreateActivity(name, kind, parentContext, tags, links, idFormat) ?? throw new InvalidOperationException($"{nameof(Source)}.{nameof(Source.CreateActivity)}");
         activity.ActivityTraceFlags = traceFlags;
@@ -99,6 +107,9 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
         activity.SetStatus(ActivityStatusCode.Ok);
         return activity.Start();
     }
+
+
+    public virtual DeviceInformation? GetDeviceInformation() => null;
 
 
     public int CompareTo( object? other ) => other is null

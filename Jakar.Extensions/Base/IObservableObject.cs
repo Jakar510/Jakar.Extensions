@@ -35,13 +35,13 @@ public static class ObservableObjects
 
     public static PropertyChangedEventArgs GetPropertyChangedEventArgs( this string property )
     {
-        if ( PropertyChangedEventArgsCache.TryGetValue(property, out PropertyChangedEventArgs? args) is false ) { PropertyChangedEventArgsCache[property] = args = new PropertyChangedEventArgs(property); }
+        if ( !PropertyChangedEventArgsCache.TryGetValue(property, out PropertyChangedEventArgs? args) ) { PropertyChangedEventArgsCache[property] = args = new PropertyChangedEventArgs(property); }
 
         return args;
     }
     public static PropertyChangingEventArgs GetPropertyChangingEventArgs( this string property )
     {
-        if ( PropertyChangingEventArgsCache.TryGetValue(property, out PropertyChangingEventArgs? args) is false ) { PropertyChangingEventArgsCache[property] = args = new PropertyChangingEventArgs(property); }
+        if ( !PropertyChangingEventArgsCache.TryGetValue(property, out PropertyChangingEventArgs? args) ) { PropertyChangingEventArgsCache[property] = args = new PropertyChangingEventArgs(property); }
 
         return args;
     }

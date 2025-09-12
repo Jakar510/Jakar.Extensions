@@ -60,7 +60,7 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     }
     public bool TryCopyTo( scoped Span<TValue> destination, Index offset )
     {
-        if ( EnumeratorHelper.TryGetSlice( Values, offset, destination.Length, out ReadOnlySpan<TValue> slice ) is false ) { return false; }
+        if ( !EnumeratorHelper.TryGetSlice(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 
         slice.CopyTo( destination );
         return true;

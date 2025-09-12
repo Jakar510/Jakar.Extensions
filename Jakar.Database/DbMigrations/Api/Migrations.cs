@@ -245,7 +245,7 @@ public static partial class Migrations
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
     {
-        if ( propertyInfo.PropertyType.IsList( out Type? itemType ) is false ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>)); }
+        if ( !propertyInfo.PropertyType.IsList( out Type? itemType ) ) { throw new ExpectedValueTypeException( nameof(propertyInfo), propertyInfo.PropertyType, typeof(IList<>)); }
 
         return parent.GetMappingTableName( propertyInfo, itemType );
     }

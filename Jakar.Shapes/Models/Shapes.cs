@@ -129,7 +129,7 @@ public static class Shapes
     {
         foreach ( ref readonly TPoint point in others )
         {
-            if ( self.Contains(in point) is false ) { return false; }
+            if ( !self.Contains(in point) ) { return false; }
         }
 
         return true;
@@ -170,7 +170,7 @@ public static class Shapes
 
     public static bool IntersectsWith<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
-        where TOther : IRectangle<TOther> => ( self.Left >= other.Right || self.Right <= other.Left || self.Top >= other.Bottom || self.Bottom <= other.Top ) is false;
+        where TOther : IRectangle<TOther> => !( self.Left >= other.Right || self.Right <= other.Left || self.Top >= other.Bottom || self.Bottom <= other.Top );
 
 
     public static bool DoesLineIntersect<TRectangle, TPoint>( this TRectangle self, in TPoint source, in TPoint target )

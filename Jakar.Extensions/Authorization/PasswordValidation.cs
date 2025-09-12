@@ -30,10 +30,10 @@ public readonly ref struct PasswordValidator
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         ReadOnlySpan<char>  password      = span.Trim();
-        bool                lengthPassed  = password.Length                                                                           >= _requirements.minLength && password.Length < _requirements.minLength;
-        bool                mustBeTrimmed = _requirements.mustBeTrimmed is false    || password.Length                                == span.Length;
-        bool                lowerPassed   = _requirements.requireLowerCase is false || password.IndexOfAny( _requirements.lowerCase ) >= 0;
-        bool                upperPassed   = _requirements.requireUpperCase is false || password.IndexOfAny( _requirements.upperCase ) >= 0;
+        bool                lengthPassed  = password.Length                                                                   >= _requirements.minLength && password.Length < _requirements.minLength;
+        bool                mustBeTrimmed = !_requirements.mustBeTrimmed    || password.Length                                == span.Length;
+        bool                lowerPassed   = !_requirements.requireLowerCase || password.IndexOfAny( _requirements.lowerCase ) >= 0;
+        bool                upperPassed   = !_requirements.requireUpperCase || password.IndexOfAny( _requirements.upperCase ) >= 0;
         bool                specialPassed;
         bool                numericPassed;
         bool                blockedPassed;
@@ -61,13 +61,13 @@ public readonly ref struct PasswordValidator
         else { numericPassed = true; }
 
 
-        if ( _requirements.blockedPasswords.IsEmpty is false )
+        if ( !_requirements.blockedPasswords.IsEmpty )
         {
             blockedPassed = true;
 
             foreach ( ReadOnlySpan<char> blocked in _requirements.blockedPasswords )
             {
-                if ( password.Equals( blocked, StringComparison.OrdinalIgnoreCase ) is false ) { continue; }
+                if ( !password.Equals( blocked, StringComparison.OrdinalIgnoreCase ) ) { continue; }
 
                 blockedPassed = false;
                 break;
@@ -93,7 +93,7 @@ public readonly ref struct PasswordValidator
         public readonly bool UpperPassed   = upperPassed;
         public readonly bool BlockedPassed = blockedPassed;
         public static   bool operator true( Results  x ) => x.HasPassed;
-        public static   bool operator false( Results x ) => x.HasPassed is false;
+        public static   bool operator false( Results x ) => !x.HasPassed;
     }
 }
 

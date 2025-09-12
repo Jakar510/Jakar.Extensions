@@ -25,7 +25,7 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     bool ILine<ReadOnlyLine>.                             IsFinite => IsFinite;
     public bool                                           IsEmpty  => Start.IsEmpty || End.IsEmpty;
     public bool                                           IsNaN    => Start.IsNaN   || End.IsNaN;
-    public bool                                           IsValid  => IsNaN is false && Start != End;
+    public bool                                           IsValid  => !IsNaN && Start != End;
     public double                                         Length   => Start.DistanceTo(in End);
     public double                                         Slope    => ( End.Y - Start.Y ) / ( End.X - Start.X );
 

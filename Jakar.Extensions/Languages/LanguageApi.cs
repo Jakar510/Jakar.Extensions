@@ -22,7 +22,7 @@ public class LanguageApi : ObservableClass
         get => _currentCulture;
         set
         {
-            if ( SetProperty( ref _currentCulture, value ) is false ) { return; }
+            if ( !SetProperty( ref _currentCulture, value ) ) { return; }
 
             CultureInfo.CurrentCulture = value;
         }
@@ -32,7 +32,7 @@ public class LanguageApi : ObservableClass
         get => _currentUiCulture;
         set
         {
-            if ( SetProperty( ref _currentUiCulture, value ) is false ) { return; }
+            if ( !SetProperty( ref _currentUiCulture, value ) ) { return; }
 
             CultureInfo.CurrentUICulture = value;
         }
@@ -42,7 +42,7 @@ public class LanguageApi : ObservableClass
         get => _defaultThreadCurrentCulture;
         set
         {
-            if ( SetProperty( ref _defaultThreadCurrentCulture, value ) is false ) { return; }
+            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
 
             CultureInfo.DefaultThreadCurrentCulture = value;
         }
@@ -52,7 +52,7 @@ public class LanguageApi : ObservableClass
         get => _defaultThreadCurrentUiCulture;
         set
         {
-            if ( SetProperty( ref _defaultThreadCurrentUiCulture, value ) is false ) { return; }
+            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
 
             CultureInfo.DefaultThreadCurrentUICulture = value;
         }
@@ -62,7 +62,7 @@ public class LanguageApi : ObservableClass
         get => _languages;
         set
         {
-            if ( SetProperty( ref _languages, value ) is false ) { return; }
+            if ( !SetProperty( ref _languages, value ) ) { return; }
 
             if ( value.Contains( SelectedLanguage ) ) { return; }
 
@@ -74,7 +74,7 @@ public class LanguageApi : ObservableClass
         get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
         {
-            if ( SetProperty( ref _selectedLanguage, value ) is false ) { return; }
+            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
 
             _weakEventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
             CurrentUICulture = value;

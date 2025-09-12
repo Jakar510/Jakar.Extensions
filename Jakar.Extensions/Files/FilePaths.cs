@@ -74,7 +74,7 @@ public class FilePaths : BaseClass, IDisposable
 
     protected virtual void Dispose( bool disposing )
     {
-        if ( disposing is false ) { return; }
+        if ( !disposing ) { return; }
 
         Disposables.ClearAndDispose(ref _accountsFile);
         Disposables.ClearAndDispose(ref _appCacheZipFile);

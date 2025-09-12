@@ -45,9 +45,9 @@ public readonly struct Reading<TValue>( TValue value, DateTimeOffset timeStamp, 
     public override bool Equals( object?         other )                              => other is Reading<TValue> reading  && Equals(reading);
     public override int  GetHashCode()                                                => HashCode.Combine(TimeStamp, Tags, Value);
     public static   bool operator ==( Reading<TValue>  left, Reading<TValue>  right ) => left.Equals(right);
-    public static   bool operator !=( Reading<TValue>  left, Reading<TValue>  right ) => left.Equals(right) is false;
+    public static   bool operator !=( Reading<TValue>  left, Reading<TValue>  right ) => !left.Equals(right);
     public static   bool operator ==( Reading<TValue>? left, Reading<TValue>? right ) => Nullable.Equals(left, right);
-    public static   bool operator !=( Reading<TValue>? left, Reading<TValue>? right ) => Nullable.Equals(left, right) is false;
+    public static   bool operator !=( Reading<TValue>? left, Reading<TValue>? right ) => !Nullable.Equals(left, right);
     public static   bool operator >( Reading<TValue>   left, Reading<TValue>  right ) => left.CompareTo(right) > 0;
     public static   bool operator >=( Reading<TValue>  left, Reading<TValue>  right ) => left.CompareTo(right) >= 0;
     public static   bool operator <( Reading<TValue>   left, Reading<TValue>  right ) => left.CompareTo(right) < 0;

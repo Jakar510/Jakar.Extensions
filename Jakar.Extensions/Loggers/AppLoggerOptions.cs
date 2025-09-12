@@ -53,19 +53,18 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
             Directory.CreateDirectory(value);
         }
     }
-    public ConfigureLogger     ConfigureLogger { get; set; } = DefaultConfigureLogger;
-    public DeviceInfo          DeviceInfo      { get; set; } = new();
-    public ILogEventEnricher[] Enrichers       { get; set; } = [];
-    public ITextFormatter      Formatter       { get; set; } = new CompactJsonFormatter();
-    public FileLifecycleHooks? Hooks           { get; set; }
-    public ref readonly AppInfo Info
+    public DeviceInformation   DeviceInfo { get; set; } = new();
+    public ILogEventEnricher[] Enrichers  { get; set; } = [];
+    public ITextFormatter      Formatter  { get; set; } = new CompactJsonFormatter();
+    public FileLifecycleHooks? Hooks      { get; set; }
+    public ref readonly AppInformation Info
     {
         get
         {
             TelemetrySource? current = TelemetrySource.Current;
 
             return ref current is null
-                           ? ref AppInfo.Invalid
+                           ? ref AppInformation.Invalid
                            : ref current.Info;
         }
     }
@@ -115,7 +114,7 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     {
         LoggerConfiguration builder = new();
 
-        ConfigureLogger.Invoke(this, builder.MinimumLevel, builder.WriteTo, builder.AuditTo, builder.Enrich, builder.Filter, builder.Destructure, in source);
+        ConfigureLogger(builder, builder.MinimumLevel, builder.WriteTo, builder.AuditTo, builder.Enrich, builder.Filter, builder.Destructure, in source);
 
         AddNativeLogs?.Invoke(builder);
 
@@ -123,7 +122,7 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     }
 
 
-    public static void DefaultConfigureLogger( in AppLoggerOptions options, in LoggerMinimumLevelConfiguration minimumLevel, in LoggerSinkConfiguration sinkTo, in LoggerAuditSinkConfiguration auditTo, in LoggerEnrichmentConfiguration enrichment, in LoggerFilterConfiguration filter, in LoggerDestructuringConfiguration destructure, in TelemetrySource source )
+    public virtual void ConfigureLogger( in LoggerConfiguration configuration, in LoggerMinimumLevelConfiguration minimumLevel, in LoggerSinkConfiguration sinkTo, in LoggerAuditSinkConfiguration auditTo, in LoggerEnrichmentConfiguration enrichment, in LoggerFilterConfiguration filter, in LoggerDestructuringConfiguration destructure, in TelemetrySource source )
     {
         minimumLevel.Verbose();
         minimumLevel.Override(nameof(Microsoft), LogEventLevel.Warning);
@@ -134,13 +133,13 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
         destructure.ToMaximumCollectionCount(99999);
 
         enrichment.FromLogContext();
-        OpenTelemetryActivityEnricher.Create(in enrichment, in options, in source);
+        OpenTelemetryActivityEnricher.Create(enrichment, this, source);
 
         Debug(in sinkTo);
-        File(in sinkTo, in options);
+        File(in sinkTo);
     }
-    public static void Debug( in LoggerSinkConfiguration sinkTo )                              => sinkTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
-    public static void File( in  LoggerSinkConfiguration sinkTo, in AppLoggerOptions options ) => sinkTo.File(options.Formatter, options.Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: options.Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
+    public static void Debug( in LoggerSinkConfiguration sinkTo ) => sinkTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
+    public        void File( in  LoggerSinkConfiguration sinkTo ) => sinkTo.File(Formatter, Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
 }
 
 

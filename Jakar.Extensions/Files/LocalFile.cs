@@ -91,7 +91,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     protected static FileInfo FromUri( Uri uri )
     {
-        if ( uri.IsFile is false ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
 
         return new FileInfo( uri.AbsolutePath );
     }
@@ -462,7 +462,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
         MimeType type = mime ?? Mime;
 
-        if ( FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) is false ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
 
         string path = FullPath.Remove( 0, 1 );
         return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
@@ -479,7 +479,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
         MimeType type = mime ?? Mime;
 
-        if ( FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) is false ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
 
         return new Uri( baseUri, $"{prefix}{HttpUtility.UrlEncode( FullPath )}" );
     }
@@ -879,7 +879,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        while ( token.ShouldContinue() && stream.EndOfStream is false ) { yield return await stream.ReadLineAsync( token ) ?? string.Empty; }
+        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync( token ) ?? string.Empty; }
     }
 
 

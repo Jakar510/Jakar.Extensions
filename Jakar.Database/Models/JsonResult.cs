@@ -62,7 +62,7 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
 
     public static void Apply( ProblemDetails details, int? statusCode )
     {
-        if ( details.Status.HasValue is false )
+        if ( !details.Status.HasValue )
         {
             details.Status = statusCode ??
                              (details is HttpValidationProblemDetails

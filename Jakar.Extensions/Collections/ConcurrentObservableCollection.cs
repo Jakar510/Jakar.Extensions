@@ -676,7 +676,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        if ( locker.TryEnter() is false )
+        if ( !locker.TryEnter() )
         {
             using ( AcquireLock() ) { base.TrimExcess(); }
         }
@@ -686,7 +686,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        if ( locker.IsHeldByCurrentThread is false )
+        if ( !locker.IsHeldByCurrentThread )
         {
             using ( AcquireLock() ) { base.EnsureCapacity( capacity ); }
         }

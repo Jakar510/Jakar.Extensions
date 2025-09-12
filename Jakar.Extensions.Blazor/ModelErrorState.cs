@@ -42,7 +42,7 @@ public class ModelErrorState : ObservableClass, IModelErrorState
             if ( SetProperty( ref __errorText, value ) ) { OnPropertyChanged( nameof(HasError) ); }
         }
     }
-    public virtual bool HasError => string.IsNullOrEmpty( ErrorText ) is false || __state.ErrorCount > 0;
+    public virtual bool HasError => !string.IsNullOrEmpty( ErrorText ) || __state.ErrorCount > 0;
     public virtual ModelStateDictionary State
     {
         get => __state;

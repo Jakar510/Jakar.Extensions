@@ -221,7 +221,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     private void ValidateState()
     {
         ObjectDisposedException.ThrowIf( _disposed, this );
-        if ( _keyIsSet is false ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
+        if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
     }
 
 

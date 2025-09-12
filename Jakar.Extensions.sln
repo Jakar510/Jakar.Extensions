@@ -23,6 +23,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B8AA3696-1782-42CF-8B29-1A4AAE184F9A}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		Directory.Packages.props = Directory.Packages.props
 		images\icon.png = images\icon.png
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md

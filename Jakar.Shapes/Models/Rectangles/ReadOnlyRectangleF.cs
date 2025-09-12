@@ -26,7 +26,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     double IShapeSize.                                                Width    => Width;
     double IShapeSize.                                                Height   => Height;
     public bool                                                       IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                       IsValid  => IsNaN is false && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public bool                                                       IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
     public ReadOnlyPointF                                             Center   => new(Right / 2, Bottom / 2);
     public ReadOnlyPointF                                             Location => new(X, Y);
     public ReadOnlySizeF                                              Size     => new(Width, Height);

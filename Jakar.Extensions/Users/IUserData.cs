@@ -41,11 +41,11 @@ public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonMo
     {
         if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
+        if ( !department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
 
-        if ( department.IsNullOrWhiteSpace() is false && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() is false ) { return $"{department} at {company}"; }
+        if ( !department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && !company.IsNullOrWhiteSpace() ) { return $"{department} at {company}"; }
 
-        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() is false && company.IsNullOrWhiteSpace() is false ) { return $"{title} at {company}"; }
+        if ( department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && !company.IsNullOrWhiteSpace() ) { return $"{title} at {company}"; }
 
         return $"{department}, {title} at {company}";
     }
