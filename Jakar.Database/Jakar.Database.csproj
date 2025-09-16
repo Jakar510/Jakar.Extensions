@@ -102,6 +102,10 @@
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" />
 		<PackageReference Include="prometheus-net.SystemMetrics" />
 		<PackageReference Include="Otp.NET" />
+		<PackageReference Include="Seq.Api" />
+		<PackageReference Include="Seq.Apps" />
+		<PackageReference Include="Seq.Extensions.Logging" />
+		<PackageReference Include="Serilog.Sinks.Seq" />
 		<PackageReference Include="Sigil" />
 		<PackageReference Include="System.IO.Hashing" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.Memory" />

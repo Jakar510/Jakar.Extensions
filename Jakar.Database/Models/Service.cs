@@ -148,10 +148,10 @@ public static class HostedServiceExtensions
                     finally { await _service.StopAsync( CancellationToken.None ).ConfigureAwait( false ); }
                 }
                 catch ( TaskCanceledException ) { }
-                catch ( Exception e ) { Log.ServiceError( _logger, e, this, _service ); }
+                catch ( Exception e ) { DbLog.ServiceError( _logger, e, this, _service ); }
                 finally
                 {
-                    Log.ServiceStopped( _logger, this, _service, _token );
+                    DbLog.ServiceStopped( _logger, this, _service, _token );
                     IsAlive = false;
                     _source = null;
                 }

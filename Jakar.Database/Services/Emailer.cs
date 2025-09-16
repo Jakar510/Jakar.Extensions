@@ -80,7 +80,7 @@ public class Emailer
             MimeMessage message = await builder.Create();
             await SendAsync( message, token );
         }
-        catch ( Exception e ) { Log.Error( _logger, e, this ); }
+        catch ( Exception e ) { DbLog.Error( _logger, e, this ); }
     }
 
 

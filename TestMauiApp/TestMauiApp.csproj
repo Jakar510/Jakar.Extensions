@@ -126,8 +126,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Jakar.Extensions.Serilog\Jakar.Extensions.Serilog.csproj" />
-	  <ProjectReference Include="..\Jakar.Extensions\Jakar.Extensions.csproj" />
+	  <ProjectReference Include="..\Jakar.Extensions.Serilog\Jakar.Extensions.Serilog.csproj" /> 
 	</ItemGroup>
 
 	<ItemGroup>

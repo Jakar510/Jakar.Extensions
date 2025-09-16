@@ -4,28 +4,28 @@
     <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Cupertino" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Fluent" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Fluent.Filled" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Outlined" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Rounded" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Sharp" Version="4.0.0" />
-    <PackageVersion Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="4.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Cupertino" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Fluent" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Fluent.Filled" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Outlined" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Rounded" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.Material.Sharp" Version="5.0.0" />
+    <PackageVersion Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="5.0.0" />
     <PackageVersion Include="AiForms.Maui.SettingsView" Version="1.0.17" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
     <PackageVersion Include="BlazorComponentUtilities" Version="1.8.0" />
+    <PackageVersion Include="BlazorPro.BlazorSize" Version="9.0.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageVersion Include="Blazored.Modal" Version="7.3.1" />
     <PackageVersion Include="Blazored.SessionStorage" Version="2.4.0" />
     <PackageVersion Include="Blazored.TextEditor" Version="1.1.3" />
     <PackageVersion Include="Blazored.Toast" Version="4.2.1" />
     <PackageVersion Include="Blazored.Video" Version="1.0.1" />
-    <PackageVersion Include="BlazorPro.BlazorSize" Version="9.0.0" />
     <PackageVersion Include="Bogus" Version="35.6.3" />
     <PackageVersion Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageVersion Include="CommunityToolkit.Maui" Version="12.2.0" />
@@ -33,12 +33,9 @@
     <PackageVersion Include="CommunityToolkit.Maui.MediaElement" Version="6.1.2" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageVersion Include="CountryData.Bogus" Version="6.13.0" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Cropper.Blazor" Version="1.4.2" />
     <PackageVersion Include="Dapper" Version="2.1.66" />
     <PackageVersion Include="Dapper.Contrib" Version="2.0.78" />
-    <PackageVersion Include="dbup-postgresql" Version="6.0.3" />
-    <PackageVersion Include="dbup-sqlserver" Version="6.0.0" />
     <PackageVersion Include="FluentMigrator" Version="7.1.0" />
     <PackageVersion Include="FluentMigrator.Abstractions" Version="7.1.0" />
     <PackageVersion Include="FluentMigrator.Runner" Version="7.1.0" />
@@ -46,73 +43,73 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.3-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="9.16.1" />
+    <PackageVersion Include="Jakar.Extensions" Version="9.16.2" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
-    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.0" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
     <PackageVersion Include="JetBrains.DotMemoryUnit" Version="3.2.20220510" />
     <PackageVersion Include="MailKit" Version="4.13.0" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.90" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.110" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.9" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.8.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.8.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.8" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.4.1" />
-    <PackageVersion Include="Microsoft.Identity.Client" Version="4.74.1" />
-    <PackageVersion Include="Microsoft.Identity.Web" Version="3.13.0" />
-    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.13.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.13.1" />
-    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.13.1" />
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.90" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.90" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.90" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.9.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.4.2" />
+    <PackageVersion Include="Microsoft.Identity.Client" Version="4.77.0" />
+    <PackageVersion Include="Microsoft.Identity.Web" Version="3.14.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.110" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.110" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.110" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
     <PackageVersion Include="MimeKit" Version="4.9.0" />
-    <PackageVersion Include="MudBlazor" Version="8.11.0" />
+    <PackageVersion Include="MudBlazor" Version="8.12.0" />
     <PackageVersion Include="MudBlazor.Markdown" Version="8.11.0" />
     <PackageVersion Include="MudBlazor.ThemeManager" Version="3.0.0" />
+    <PackageVersion Include="NUnit" Version="4.4.0" />
+    <PackageVersion Include="NUnit.Analyzers" Version="4.10.0" />
+    <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
     <PackageVersion Include="NaughtyStrings.Bogus" Version="3.0.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageVersion Include="Nito.Collections.Deque" Version="1.2.1" />
     <PackageVersion Include="Npgsql" Version="9.0.3" />
     <PackageVersion Include="Npgsql.Json.NET" Version="9.0.3" />
     <PackageVersion Include="Npgsql.OpenTelemetry" Version="9.0.3" />
-    <PackageVersion Include="NUnit" Version="4.4.0" />
-    <PackageVersion Include="NUnit.Analyzers" Version="4.10.0" />
-    <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
     <PackageVersion Include="OneOf" Version="3.0.271" />
     <PackageVersion Include="OneOf.Extended" Version="3.0.271" />
     <PackageVersion Include="OneOf.SourceGenerator" Version="3.0.271" />
@@ -129,14 +126,15 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.249" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.261" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
-    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
-    <PackageVersion Include="prometheus-net.SystemMetrics" Version="3.1.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="7.2.0" />
+    <PackageVersion Include="Radzen.Blazor" Version="7.3.4" />
+    <PackageVersion Include="Seq.Api" Version="2025.2.2" />
+    <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
+    <PackageVersion Include="Seq.Extensions.Logging" Version="8.0.0" />
+    <PackageVersion Include="SSyncfusion.Maui.Toolkit" Version="1.0.6" />
     <PackageVersion Include="Serilog" Version="4.3.0" />
     <PackageVersion Include="Serilog.Enrichers.GlobalLogContext" Version="3.0.0" />
     <PackageVersion Include="Serilog.Enrichers.Memory" Version="1.0.4" />
@@ -154,97 +152,53 @@
     <PackageVersion Include="Serilog.Sinks.Seq" Version="9.0.0" />
     <PackageVersion Include="SerilogTracing" Version="2.3.1" />
     <PackageVersion Include="Sigil" Version="5.0.0" />
-    <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.3" />
-    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.3" />
-    <PackageVersion Include="Syncfusion.Blazor.BarcodeGenerator" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.BulletChart" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Buttons" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Calendars" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Cards" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Chart3D" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Charts" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.CircularGauge" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Data" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.DataForm" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.DataVizCommon" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Diagram" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.DropDowns" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.FileManager" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.FileManager.PhysicalFileProvider" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Gantt" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Grid" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.HeatMap" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.ImageEditor" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.InPlaceEditor" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Inputs" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Kanban" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Layouts" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.LinearGauge" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Lists" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Maps" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Navigations" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Notifications" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.PivotTable" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Popups" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.ProgressBar" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.QueryBuilder" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.RangeNavigator" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.RichTextEditor" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Schedule" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.SfPdfViewer" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.SmithChart" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Sparkline" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Spinner" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.SplitButtons" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.StockChart" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.Themes" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.TreeGrid" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.TreeMap" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Blazor.WordProcessor" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Barcode" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Buttons" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Cards" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Carousel" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Charts" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Chat" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.DataForm" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.DataGrid" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.DataGridExport" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Expander" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Inputs" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Kanban" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.ListView" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Maps" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.NavigationDrawer" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.PdfToImageConverter" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.PdfViewer" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Picker" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Popup" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.ProgressBar" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.PullToRefresh" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.RadialMenu" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Rotator" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.Scheduler" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.SunburstChart" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.TabView" Version="30.1.42" />
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.4" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.4" />
+    <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.4" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Cards" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Carousel" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Charts" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Chat" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.DataForm" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.DataGrid" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.DataGridExport" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Expander" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Inputs" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Kanban" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.ListView" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Maps" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.NavigationDrawer" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.PdfToImageConverter" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.PdfViewer" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Picker" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Popup" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.ProgressBar" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.PullToRefresh" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.RadialMenu" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Rotator" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.Scheduler" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.SunburstChart" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.TabView" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
-    <PackageVersion Include="Syncfusion.Maui.TreeMap" Version="30.1.42" />
-    <PackageVersion Include="Syncfusion.Maui.TreeView" Version="30.1.42" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.7" />
+    <PackageVersion Include="Syncfusion.Maui.TreeMap" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Maui.TreeView" Version="31.1.19" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.9" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.7" />
-    <PackageVersion Include="System.IO.Hashing" Version="9.0.7" />
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.9" />
+    <PackageVersion Include="System.IO.Hashing" Version="9.0.9" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.7" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.7" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.7" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.7" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.9" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.9" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.9" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.9" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="9.0.7" />
+    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="9.0.9" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
     <PackageVersion Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
     <PackageVersion Include="System.Threading.ThreadPool" Version="4.3.0" />
@@ -259,18 +213,24 @@
     <PackageVersion Include="UraniumUI.Validations.DataAnnotations" Version="2.12.1" />
     <PackageVersion Include="UraniumUI.WebComponents" Version="2.12.1" />
     <PackageVersion Include="ValueOf" Version="2.0.31" />
-    <PackageVersion Include="WifiManager.Maui" Version="9.0.2" />
+    <PackageVersion Include="WifiManager.Maui" Version="9.0.5" />
     <PackageVersion Include="Xam.Plugin.Media" Version="6.0.2" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="2.3.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.3.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.3.0" />
-    <PackageVersion Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="2.3.0" />
     <PackageVersion Include="ZLinq" Version="1.5.2" />
     <PackageVersion Include="ZLinq.DropInGenerator" Version="1.5.2" />
     <PackageVersion Include="ZLinq.FileSystem" Version="1.5.2" />
     <PackageVersion Include="ZXing.Net" Version="0.16.10" />
-    <PackageVersion Include="ZXing.Net.Maui" Version="0.4.0" />
-    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.4.0" />
+    <PackageVersion Include="ZXing.Net.Maui" Version="0.5.2" />
+    <PackageVersion Include="ZXing.Net.Maui.Controls" Version="0.5.2" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.Memory" Version="2.4.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.4.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.OpenTelemetry" Version="2.4.0" />
+    <PackageVersion Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" Version="2.4.0" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
+    <PackageVersion Include="dbup-postgresql" Version="6.0.3" />
+    <PackageVersion Include="dbup-sqlserver" Version="6.0.0" />
+    <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
+    <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
+    <PackageVersion Include="prometheus-net.SystemMetrics" Version="3.1.0" />
   </ItemGroup>
   <ItemGroup Condition="'$$(TargetFramework)'=='net6.0'">
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.10" />
