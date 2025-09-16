@@ -42,7 +42,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected internal SecuredString?    ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
     public             PasswordValidator PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.PasswordRequirements.GetValidator(); }
     public             IsolationLevel    TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion        Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.Version; }
+    public             AppVersion        Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.AppInformation.Version; }
 
 
     static Database()

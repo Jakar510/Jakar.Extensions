@@ -8,7 +8,7 @@ namespace Jakar.Database;
 public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "recovery_codes";
-    private static readonly PasswordHasher<RecoveryCodeRecord> _hasher    = new();
+    private static readonly PasswordHasher<RecoveryCodeRecord> __hasher    = new();
     public static           string                             TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
 
 
@@ -90,13 +90,13 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     [Pure]
     public static bool IsValid( string code, ref RecoveryCodeRecord record )
     {
-        switch ( _hasher.VerifyHashedPassword( record, record.Code, code ) )
+        switch ( __hasher.VerifyHashedPassword( record, record.Code, code ) )
         {
             case PasswordVerificationResult.Failed:  return false;
             case PasswordVerificationResult.Success: return true;
 
             case PasswordVerificationResult.SuccessRehashNeeded:
-                record = record with { Code = _hasher.HashPassword( record, code ) };
+                record = record with { Code = __hasher.HashPassword( record, code ) };
 
                 return true;
 
@@ -114,15 +114,15 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
     public sealed class Codes( int count ) : IReadOnlyDictionary<string, RecoveryCodeRecord>
     {
-        private readonly Dictionary<string, RecoveryCodeRecord> _codes = new(count, StringComparer.Ordinal);
-        public           int                                    Count => _codes.Count;
-        public RecoveryCodeRecord this[ string key ] { get => _codes[key]; internal set => _codes[key] = value; }
-        public IEnumerable<string>                                   Keys                                                                             => _codes.Keys;
-        public IEnumerable<RecoveryCodeRecord>                       Values                                                                           => _codes.Values;
-        public IEnumerator<KeyValuePair<string, RecoveryCodeRecord>> GetEnumerator()                                                                  => _codes.GetEnumerator();
-        IEnumerator IEnumerable.                                     GetEnumerator()                                                                  => ((IEnumerable)_codes).GetEnumerator();
-        public bool                                                  ContainsKey( string key )                                                        => _codes.ContainsKey( key );
-        public bool                                                  TryGetValue( string key, [MaybeNullWhen( false )] out RecoveryCodeRecord value ) => _codes.TryGetValue( key, out value );
+        private readonly Dictionary<string, RecoveryCodeRecord> __codes = new(count, StringComparer.Ordinal);
+        public           int                                    Count => __codes.Count;
+        public RecoveryCodeRecord this[ string key ] { get => __codes[key]; internal set => __codes[key] = value; }
+        public IEnumerable<string>                                   Keys                                                                             => __codes.Keys;
+        public IEnumerable<RecoveryCodeRecord>                       Values                                                                           => __codes.Values;
+        public IEnumerator<KeyValuePair<string, RecoveryCodeRecord>> GetEnumerator()                                                                  => __codes.GetEnumerator();
+        IEnumerator IEnumerable.                                     GetEnumerator()                                                                  => ((IEnumerable)__codes).GetEnumerator();
+        public bool                                                  ContainsKey( string key )                                                        => __codes.ContainsKey( key );
+        public bool                                                  TryGetValue( string key, [MaybeNullWhen( false )] out RecoveryCodeRecord value ) => __codes.TryGetValue( key, out value );
     }
 }
 

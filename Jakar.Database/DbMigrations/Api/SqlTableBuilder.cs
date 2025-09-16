@@ -212,13 +212,13 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
 public ref struct SqlTableBuilder<TClass>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private Buffer<ColumnMetaData> _columns = new();
+    private Buffer<ColumnMetaData> __columns = new();
 
     public SqlTableBuilder() { }
     public static SqlTableBuilder<TClass> Create() => new();
     public void Dispose()
     {
-        _columns.Dispose();
+        __columns.Dispose();
         this = default;
     }
 
@@ -235,7 +235,7 @@ public ref struct SqlTableBuilder<TClass>
     }
     public SqlTableBuilder<TClass> WithColumn( ColumnMetaData column )
     {
-        _columns.Add( column );
+        __columns.Add( column );
         return this;
     }
 
@@ -419,7 +419,7 @@ public ref struct SqlTableBuilder<TClass>
 
     private string BuildInternal()
     {
-        ReadOnlySpan<ColumnMetaData> columns = _columns.Values;
+        ReadOnlySpan<ColumnMetaData> columns = __columns.Values;
         StringBuilder                query   = new(10240);
 
         query.Append( "CREATE TABLE " );

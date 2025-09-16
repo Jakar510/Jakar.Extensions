@@ -58,11 +58,11 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     protected internal static readonly PropertyInfo[]   Properties    = typeof(TClass).GetProperties( BindingFlags.Instance | BindingFlags.Public );
     public static readonly             SqlCache<TClass> SQLCache      = new();
     protected                          DateTimeOffset?  _lastModified = LastModified;
-    private                            RecordID<TClass> _id           = ID;
+    private                            RecordID<TClass> __id           = ID;
 
 
     public static SqlCache<TClass> SQL          => SQLCache;
-    [Key] public  RecordID<TClass> ID           { get => _id;           init => _id = value; }
+    [Key] public  RecordID<TClass> ID           { get => __id;           init => __id = value; }
     public        DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
 
 
@@ -79,7 +79,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     }
     public TClass NewID( RecordID<TClass> id )
     {
-        _id = id;
+        __id = id;
         return (TClass)this;
     }
     [Pure] public RecordPair<TClass> ToPair() => new(ID, DateCreated);
@@ -106,7 +106,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     }
 
 
-    public static DynamicParameters GetDynamicParameters( TClass record ) => GetDynamicParameters( in record._id );
+    public static DynamicParameters GetDynamicParameters( TClass record ) => GetDynamicParameters( in record.__id );
     public static DynamicParameters GetDynamicParameters( ref readonly RecordID<TClass> id )
     {
         DynamicParameters parameters = new();
@@ -178,7 +178,7 @@ public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecor
 
     public override DynamicParameters ToDynamicParameters()
     {
-        var parameters = base.ToDynamicParameters();
+        DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add( nameof(CreatedBy), CreatedBy );
         return parameters;
     }

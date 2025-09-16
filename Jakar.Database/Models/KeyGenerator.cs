@@ -8,22 +8,22 @@ namespace Jakar.Database;
 public record struct KeyGenerator<TClass> : IEnumerator<RecordID<TClass>>, IEnumerable<RecordID<TClass>>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly ReadOnlyMemory<RecordPair<TClass>> _pairs;
-    private          int                                _index = -1;
+    private readonly ReadOnlyMemory<RecordPair<TClass>> __pairs;
+    private          int                                __index = -1;
 
 
-    public readonly RecordID<TClass>   Current => _pairs.Span[_index].ID;
+    public readonly RecordID<TClass>   Current => __pairs.Span[__index].ID;
     readonly        object IEnumerator.Current => Current;
-    public readonly bool               IsEmpty => _pairs.IsEmpty;
+    public readonly bool               IsEmpty => __pairs.IsEmpty;
 
 
-    public KeyGenerator( scoped in ReadOnlyMemory<RecordPair<TClass>>          pairs ) => _pairs = pairs;
+    public KeyGenerator( scoped in ReadOnlyMemory<RecordPair<TClass>>          pairs ) => __pairs = pairs;
     public static implicit operator KeyGenerator<TClass>( RecordPair<TClass>[] pairs ) => new(pairs);
 
 
     public   void                                                        Dispose()       => this = default;
-    public   void                                                        Reset()         => _index = -1;
-    public   bool                                                        MoveNext()      => !_pairs.IsEmpty && ++_index < _pairs.Length;
+    public   void                                                        Reset()         => __index = -1;
+    public   bool                                                        MoveNext()      => !__pairs.IsEmpty && ++__index < __pairs.Length;
     readonly IEnumerator<RecordID<TClass>> IEnumerable<RecordID<TClass>>.GetEnumerator() => this;
     readonly IEnumerator IEnumerable.                                    GetEnumerator() => this;
 

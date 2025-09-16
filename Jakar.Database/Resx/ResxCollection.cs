@@ -3,14 +3,14 @@
 
 public sealed class ResxCollection : IResxCollection
 {
-    private readonly ConcurrentBag<ResxRowRecord> _rows = [];
+    private readonly ConcurrentBag<ResxRowRecord> __rows = [];
 
 
-    public int Count { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _rows.Count; }
+    public int Count { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __rows.Count; }
 
 
     public ResxCollection() { }
-    public ResxCollection( IEnumerable<ResxRowRecord> collection ) => _rows.Add( collection );
+    public ResxCollection( IEnumerable<ResxRowRecord> collection ) => __rows.Add( collection );
 
 
     public ResxSet GetSet( in SupportedLanguage language )
@@ -23,7 +23,7 @@ public sealed class ResxCollection : IResxCollection
 
     public async ValueTask<ResxSet> GetSetAsync(  IResxProvider provider, SupportedLanguage language, CancellationToken token = default )
     {
-        if ( _rows.IsEmpty ) { await Init(  provider, token ); }
+        if ( __rows.IsEmpty ) { await Init(  provider, token ); }
 
         return GetSet( language );
     }
@@ -33,11 +33,11 @@ public sealed class ResxCollection : IResxCollection
     public ValueTask Init(  IConnectableDb db,       DbTable<ResxRowRecord> table, CancellationToken token = default ) => db.Call( Init,  table, token );
     public async ValueTask Init( DbConnection connection, DbTransaction? transaction,  DbTable<ResxRowRecord> table, CancellationToken token = default )
     {
-        _rows.Clear();
-        await foreach ( ResxRowRecord record in table.All( connection, transaction,  token ) ) { _rows.Add( record ); }
+        __rows.Clear();
+        await foreach ( ResxRowRecord record in table.All( connection, transaction,  token ) ) { __rows.Add( record ); }
     }
 
 
-    [MustDisposeResource] public IEnumerator<ResxRowRecord> GetEnumerator() => _rows.GetEnumerator();
+    [MustDisposeResource] public IEnumerator<ResxRowRecord> GetEnumerator() => __rows.GetEnumerator();
     [MustDisposeResource]        IEnumerator IEnumerable.   GetEnumerator() => GetEnumerator();
 }

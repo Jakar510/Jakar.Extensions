@@ -10,12 +10,12 @@ namespace Jakar.Database;
 
 public abstract partial class Database
 {
-    private static readonly SynchronizedValue<TimeSpan> _accessTokenExpirationTime  = new(TimeSpan.FromMinutes( 15 ));
-    private static readonly SynchronizedValue<TimeSpan> _refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
+    private static readonly SynchronizedValue<TimeSpan> __accessTokenExpirationTime  = new(TimeSpan.FromMinutes( 15 ));
+    private static readonly SynchronizedValue<TimeSpan> __refreshTokenExpirationTime = new(TimeSpan.FromDays( 90 ));
 
 
-    public static TimeSpan AccessTokenExpirationTime  { get => _accessTokenExpirationTime;  set => _accessTokenExpirationTime.Value = value; }
-    public static TimeSpan RefreshTokenExpirationTime { get => _refreshTokenExpirationTime; set => _refreshTokenExpirationTime.Value = value; }
+    public static TimeSpan AccessTokenExpirationTime  { get => __accessTokenExpirationTime;  set => __accessTokenExpirationTime.Value = value; }
+    public static TimeSpan RefreshTokenExpirationTime { get => __refreshTokenExpirationTime; set => __refreshTokenExpirationTime.Value = value; }
 
 
     public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials( Settings ));
@@ -35,7 +35,7 @@ public abstract partial class Database
     }
 
 
-    /// <summary> Only to be used for <see cref="ITokenService"/> </summary>
+    /// <summary> Only to be used for <see cref="IEmailTokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
     public ValueTask<ErrorOrResult<Tokens>> Authenticate( ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall( Authenticate, request, types, token );
     protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( DbConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )

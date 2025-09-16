@@ -123,20 +123,20 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     {
         DynamicParameters   parameters = new();
         ReadOnlySpan<Claim> span       = claims;
-        if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
+        if ( hasFlag( types, ClaimType.StreetAddressLine1 ) ) { parameters.Add( nameof(Line1), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.StreetAddressLine2 ) ) { parameters.Add( nameof(Line2), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes() ).Value ); }
+        if ( hasFlag( types, ClaimType.StreetAddressLine2 ) ) { parameters.Add( nameof(Line2), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.StateOrProvince ) ) { parameters.Add( nameof(StateOrProvince), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StateOrProvince.ToClaimTypes() ).Value ); }
+        if ( hasFlag( types, ClaimType.StateOrProvince ) ) { parameters.Add( nameof(StateOrProvince), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.StateOrProvince.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.Country ) ) { parameters.Add( nameof(Country), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.Country.ToClaimTypes() ).Value ); }
+        if ( hasFlag( types, ClaimType.Country ) ) { parameters.Add( nameof(Country), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.Country.ToClaimTypes() ).Value ); }
 
-        if ( HasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
+        if ( hasFlag( types, ClaimType.PostalCode ) ) { parameters.Add( nameof(PostalCode), span.Single( static ( ref readonly Claim x ) => x.Type == ClaimType.PostalCode.ToClaimTypes() ).Value ); }
 
         return await db.Addresses.Get( connection, transaction, true, parameters, token );
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        static bool HasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
+        static bool hasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
     }
     [Pure]
     public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
@@ -163,20 +163,20 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     [Pure]
     public IEnumerable<Claim> GetUserClaims( ClaimType types )
     {
-        if ( HasFlag( types, ClaimType.StreetAddressLine1 ) ) { yield return new Claim( ClaimType.StreetAddressLine1.ToClaimTypes(), Line1, ClaimValueTypes.String ); }
+        if ( hasFlag( types, ClaimType.StreetAddressLine1 ) ) { yield return new Claim( ClaimType.StreetAddressLine1.ToClaimTypes(), Line1, ClaimValueTypes.String ); }
 
-        if ( HasFlag( types, ClaimType.StreetAddressLine2 ) ) { yield return new Claim( ClaimType.StreetAddressLine2.ToClaimTypes(), Line2, ClaimValueTypes.String ); }
+        if ( hasFlag( types, ClaimType.StreetAddressLine2 ) ) { yield return new Claim( ClaimType.StreetAddressLine2.ToClaimTypes(), Line2, ClaimValueTypes.String ); }
 
-        if ( HasFlag( types, ClaimType.StateOrProvince ) ) { yield return new Claim( ClaimType.StateOrProvince.ToClaimTypes(), StateOrProvince, ClaimValueTypes.String ); }
+        if ( hasFlag( types, ClaimType.StateOrProvince ) ) { yield return new Claim( ClaimType.StateOrProvince.ToClaimTypes(), StateOrProvince, ClaimValueTypes.String ); }
 
-        if ( HasFlag( types, ClaimType.Country ) ) { yield return new Claim( ClaimType.Country.ToClaimTypes(), Country, ClaimValueTypes.String ); }
+        if ( hasFlag( types, ClaimType.Country ) ) { yield return new Claim( ClaimType.Country.ToClaimTypes(), Country, ClaimValueTypes.String ); }
 
-        if ( HasFlag( types, ClaimType.PostalCode ) ) { yield return new Claim( ClaimType.PostalCode.ToClaimTypes(), PostalCode, ClaimValueTypes.String ); }
+        if ( hasFlag( types, ClaimType.PostalCode ) ) { yield return new Claim( ClaimType.PostalCode.ToClaimTypes(), PostalCode, ClaimValueTypes.String ); }
 
         yield break;
 
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
-        static bool HasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
+        static bool hasFlag( ClaimType value, ClaimType flag ) => (value & flag) != 0;
     }
 
 

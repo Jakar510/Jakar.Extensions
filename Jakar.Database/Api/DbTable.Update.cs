@@ -32,7 +32,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TClass record, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Update(record);
+        SqlCommand sql = TClass.SQL.GetUpdate(record);
 
         try
         {

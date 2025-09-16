@@ -8,12 +8,12 @@ namespace Jakar.Extensions;
 [DefaultValue( nameof(Default) ), SuppressMessage( "ReSharper", "OutParameterValueIsAlwaysDiscarded.Global" )]
 public readonly ref struct PasswordValidator
 {
-    private readonly Requirements _requirements;
+    private readonly Requirements __requirements;
 
     public static PasswordRequirements Requirements { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => PasswordRequirements.Current; [MethodImpl( MethodImplOptions.AggressiveInlining )] set => PasswordRequirements.Current = value; }
     public static PasswordValidator    Default      => new(Requirements);
     public PasswordValidator() => throw new InvalidOperationException( "Use the constructor with Requirements" );
-    public PasswordValidator( scoped in Requirements requirements ) => _requirements = requirements;
+    public PasswordValidator( scoped in Requirements requirements ) => __requirements = requirements;
 
 
     public static bool Check( scoped in ReadOnlySpan<char> password ) => Check( in password, Requirements );
@@ -30,42 +30,42 @@ public readonly ref struct PasswordValidator
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         ReadOnlySpan<char>  password      = span.Trim();
-        bool                lengthPassed  = password.Length                                                                   >= _requirements.minLength && password.Length < _requirements.minLength;
-        bool                mustBeTrimmed = !_requirements.mustBeTrimmed    || password.Length                                == span.Length;
-        bool                lowerPassed   = !_requirements.requireLowerCase || password.IndexOfAny( _requirements.lowerCase ) >= 0;
-        bool                upperPassed   = !_requirements.requireUpperCase || password.IndexOfAny( _requirements.upperCase ) >= 0;
+        bool                lengthPassed  = password.Length                                                                   >= __requirements.minLength && password.Length < __requirements.minLength;
+        bool                mustBeTrimmed = !__requirements.mustBeTrimmed    || password.Length                                == span.Length;
+        bool                lowerPassed   = !__requirements.requireLowerCase || password.IndexOfAny( __requirements.lowerCase ) >= 0;
+        bool                upperPassed   = !__requirements.requireUpperCase || password.IndexOfAny( __requirements.upperCase ) >= 0;
         bool                specialPassed;
         bool                numericPassed;
         bool                blockedPassed;
 
 
-        if ( _requirements.requireSpecialChar )
+        if ( __requirements.requireSpecialChar )
         {
-            int index = password.IndexOfAny( _requirements.specialChars );
+            int index = password.IndexOfAny( __requirements.specialChars );
 
-            specialPassed = _requirements.cantStartWithSpecialChar
+            specialPassed = __requirements.cantStartWithSpecialChar
                                 ? index >= 1
                                 : index >= 0;
         }
         else { specialPassed = true; }
 
 
-        if ( _requirements.requireNumber )
+        if ( __requirements.requireNumber )
         {
-            int index = password.IndexOfAny( _requirements.numbers );
+            int index = password.IndexOfAny( __requirements.numbers );
 
-            numericPassed = _requirements.cantStartWithNumber
+            numericPassed = __requirements.cantStartWithNumber
                                 ? index >= 1
                                 : index >= 0;
         }
         else { numericPassed = true; }
 
 
-        if ( !_requirements.blockedPasswords.IsEmpty )
+        if ( !__requirements.blockedPasswords.IsEmpty )
         {
             blockedPassed = true;
 
-            foreach ( ReadOnlySpan<char> blocked in _requirements.blockedPasswords )
+            foreach ( ReadOnlySpan<char> blocked in __requirements.blockedPasswords )
             {
                 if ( !password.Equals( blocked, StringComparison.OrdinalIgnoreCase ) ) { continue; }
 
@@ -156,20 +156,20 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
 {
     public const   int                   MAX_LENGTH = 255;
     public const   int                   MIN_LENGTH = 10;
-    private static PasswordRequirements? _current;
-    private        int                   _maxLength = MAX_LENGTH;
-    private        int                   _minLength = MIN_LENGTH;
+    private static PasswordRequirements? __current;
+    private        int                   __maxLength = MAX_LENGTH;
+    private        int                   __minLength = MIN_LENGTH;
 
 
-    public static PasswordRequirements Current { get => _current ??= new PasswordRequirements(); set => _current = value; }
+    public static PasswordRequirements Current { get => __current ??= new PasswordRequirements(); set => __current = value; }
 
 
     public string[]                                     BlockedPasswords         { get;               set; } = [];
     public bool                                         CantStartWithNumber      { get;               set; } = true;
     public bool                                         CantStartWithSpecialChar { get;               set; } = true;
     public string                                       LowerCase                { get;               set; } = Randoms.LOWER_CASE;
-    public int                                          MaxLength                { get => _maxLength; set => _maxLength = Math.Clamp( value, _minLength, MAX_LENGTH ); }
-    public int                                          MinLength                { get => _minLength; set => _minLength = Math.Clamp( value, MIN_LENGTH, _maxLength ); }
+    public int                                          MaxLength                { get => __maxLength; set => __maxLength = Math.Clamp( value, __minLength, MAX_LENGTH ); }
+    public int                                          MinLength                { get => __minLength; set => __minLength = Math.Clamp( value, MIN_LENGTH, __maxLength ); }
     public bool                                         MustBeTrimmed            { get;               set; } = true;
     public string                                       Numbers                  { get;               set; } = Randoms.NUMERIC;
     public bool                                         RequireLowerCase         { get;               set; } = true;

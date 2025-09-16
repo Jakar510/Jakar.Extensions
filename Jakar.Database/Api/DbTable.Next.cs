@@ -15,7 +15,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<ErrorOrResult<TClass>> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Next( in pair );
+        SqlCommand sql = TClass.SQL.GetNext( in pair );
 
         try
         {
@@ -33,7 +33,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.SortedID();
+        SqlCommand sql = TClass.SQL.GetSortedID();
 
         try
         {
@@ -48,7 +48,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.NextID( in pair );
+        SqlCommand sql = TClass.SQL.GetNextID( in pair );
 
         try
         {

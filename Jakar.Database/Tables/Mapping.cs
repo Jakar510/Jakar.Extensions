@@ -18,15 +18,15 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
     where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
 {
-    private WeakReference<TKey>?   _owner;
-    private WeakReference<TValue>? _value;
+    private WeakReference<TKey>?   __owner;
+    private WeakReference<TValue>? __value;
 
 
     protected Mapping( RecordID<TKey> key, RecordID<TValue> value ) : this( key, value, RecordID<TSelf>.New(), DateTimeOffset.UtcNow ) { }
     protected Mapping( TKey key, TValue value ) : this( key.ID, value.ID )
     {
-        _owner = new WeakReference<TKey>( key );
-        _value = new WeakReference<TValue>( value );
+        __owner = new WeakReference<TKey>( key );
+        __value = new WeakReference<TValue>( value );
     }
 
 
@@ -65,19 +65,19 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public async ValueTask<TKey?> Get( DbConnection connection, DbTransaction transaction, DbTable<TKey> selfTable, CancellationToken token )
     {
-        if ( _owner is not null && _owner.TryGetTarget( out TKey? value ) ) { return value; }
+        if ( __owner is not null && __owner.TryGetTarget( out TKey? value ) ) { return value; }
 
         TKey? record = await selfTable.Get( connection, transaction, KeyID, token );
-        if ( record is not null ) { _owner = new WeakReference<TKey>( record ); }
+        if ( record is not null ) { __owner = new WeakReference<TKey>( record ); }
 
         return record;
     }
     public async ValueTask<TValue?> Get( DbConnection connection, DbTransaction transaction, DbTable<TValue> selfTable, CancellationToken token )
     {
-        if ( _value is not null && _value.TryGetTarget( out TValue? value ) ) { return value; }
+        if ( __value is not null && __value.TryGetTarget( out TValue? value ) ) { return value; }
 
         TValue? record = await selfTable.Get( connection, transaction, ValueID, token );
-        if ( record is not null ) { _value = new WeakReference<TValue>( record ); }
+        if ( record is not null ) { __value = new WeakReference<TValue>( record ); }
 
         return record;
     }

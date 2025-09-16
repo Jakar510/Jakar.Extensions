@@ -7,17 +7,17 @@ namespace Jakar.Database;
 [Serializable]
 public record struct CounterAsync : IAsyncEnumerator<long>
 {
-    private long? _current;
+    private long? __current;
 
 
-    public long Current { get => _current ?? throw new InvalidOperationException( nameof(_current) ); private set => _current = value; }
+    public long Current { get => __current ?? throw new InvalidOperationException( nameof(__current) ); private set => __current = value; }
 
 
     public CounterAsync() { }
-    public void Reset() => _current = null;
+    public void Reset() => __current = null;
     public ValueTask DisposeAsync()
     {
-        _current = null;
+        __current = null;
         return ValueTask.CompletedTask;
     }
 

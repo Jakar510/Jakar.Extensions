@@ -2,138 +2,127 @@
 // 1/10/2024  14:10
 
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
+using Serilog.Core;
 
 
 
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class DbServices
 {
-    public const string OTEL_EXPORTER_OTLP_ENDPOINT        = nameof(OTEL_EXPORTER_OTLP_ENDPOINT);
     public const string AUTHENTICATION_SCHEME              = JwtBearerDefaults.AuthenticationScheme;
     public const string AUTHENTICATION_SCHEME_DISPLAY_NAME = $"Jwt.{AUTHENTICATION_SCHEME}";
+    public const string OTEL_EXPORTER_OTLP_ENDPOINT        = nameof(OTEL_EXPORTER_OTLP_ENDPOINT);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsValid<TClass>( this TClass value )
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
-    {
-        return value.ID.IsValid();
-    }
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass> =>
+        value.ID.IsValid();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNotValid<TClass>( this TClass value )
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
-    {
-        return !value.IsValid();
-    }
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass> =>
+        !value.IsValid();
 
 
-    public static string GetFullName( this Type type ) { return type.AssemblyQualifiedName ?? type.FullName ?? type.Name; }
+    public static string GetFullName( this Type type ) => type.AssemblyQualifiedName ?? type.FullName ?? type.Name;
 
 
     public static IHostApplicationBuilder OpenTelemetry( this IHostApplicationBuilder builder )
     {
-        builder.Logging.AddOpenTelemetry( static x =>
-                                          {
-                                              x.IncludeScopes           = true;
-                                              x.IncludeFormattedMessage = true;
-                                          } );
+        builder.Logging.AddOpenTelemetry(static x =>
+                                         {
+                                             x.IncludeScopes           = true;
+                                             x.IncludeFormattedMessage = true;
+                                         });
 
         builder.Services.AddOpenTelemetry()
-               .WithMetrics( static x => { x.AddRuntimeInstrumentation().AddMeter( "Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http", "WeatherApp.Api" ); } )
-               .WithTracing( x =>
-                             {
-                                 if ( builder.Environment.IsDevelopment() ) { x.SetSampler<AlwaysOnSampler>(); }
+               .WithMetrics(static x => { x.AddRuntimeInstrumentation().AddMeter("Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http", "WeatherApp.Api"); })
+               .WithTracing(x =>
+                            {
+                                if ( builder.Environment.IsDevelopment() ) { x.SetSampler<AlwaysOnSampler>(); }
 
-                                 x.AddAspNetCoreInstrumentation().AddGrpcClientInstrumentation().AddHttpClientInstrumentation();
-                             } );
+                                x.AddAspNetCoreInstrumentation().AddGrpcClientInstrumentation().AddHttpClientInstrumentation();
+                            });
 
         return builder.AddOpenTelemetryExporters();
     }
     public static IHostApplicationBuilder AddOpenTelemetryExporters( this IHostApplicationBuilder builder )
     {
-        bool useOtlpExporter = !string.IsNullOrWhiteSpace( builder.Configuration[OTEL_EXPORTER_OTLP_ENDPOINT] );
+        bool useOtlpExporter = !string.IsNullOrWhiteSpace(builder.Configuration[OTEL_EXPORTER_OTLP_ENDPOINT]);
 
         if ( useOtlpExporter )
         {
-            builder.Services.Configure<OpenTelemetryLoggerOptions>( static logging => logging.AddOtlpExporter() );
-            builder.Services.ConfigureOpenTelemetryMeterProvider( static metrics => metrics.AddOtlpExporter() );
-            builder.Services.ConfigureOpenTelemetryTracerProvider( static tracing => tracing.AddOtlpExporter() );
+            builder.Services.Configure<OpenTelemetryLoggerOptions>(static logging => logging.AddOtlpExporter());
+            builder.Services.ConfigureOpenTelemetryMeterProvider(static metrics => metrics.AddOtlpExporter());
+            builder.Services.ConfigureOpenTelemetryTracerProvider(static tracing => tracing.AddOtlpExporter());
         }
 
-        builder.Services.AddOpenTelemetry().WithMetrics( static x => x.AddPrometheusExporter() );
+        builder.Services.AddOpenTelemetry().WithMetrics(static x => x.AddPrometheusExporter());
 
         return builder;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private static LogLevel GetLogLevel( this bool isDevEnvironment )
-    {
-        return isDevEnvironment
-                   ? LogLevel.Trace
-                   : LogLevel.Information;
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static LogLevel GetLogLevel( this bool isDevEnvironment ) =>
+        isDevEnvironment
+            ? LogLevel.Trace
+            : LogLevel.Information;
     public static ILoggingBuilder AddDefaultLogging<TApp>( this WebApplicationBuilder builder )
-        where TApp : IAppName
-    {
-        return AddDefaultLogging<TApp>( builder.Logging, builder.Environment.IsDevelopment() );
-    }
+        where TApp : IAppName =>
+        AddDefaultLogging<TApp>(builder.Logging, builder.Environment.IsDevelopment());
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, bool isDevEnvironment )
-        where TApp : IAppName
-    {
-        return AddDefaultLogging<TApp>( builder, isDevEnvironment.GetLogLevel() );
-    }
+        where TApp : IAppName =>
+        AddDefaultLogging<TApp>(builder, isDevEnvironment.GetLogLevel());
     public static ILoggingBuilder AddDefaultLogging<TApp>( this ILoggingBuilder builder, in LogLevel minimumLevel )
-        where TApp : IAppName
-    {
-        return AddDefaultLogging( builder, minimumLevel, TApp.AppName );
-    }
+        where TApp : IAppName =>
+        AddDefaultLogging(builder, minimumLevel, TApp.AppName);
     public static ILoggingBuilder AddDefaultLogging( this ILoggingBuilder builder, in LogLevel minimumLevel, in string name )
     {
         builder.ClearProviders();
-        builder.SetMinimumLevel( minimumLevel );
-        builder.AddProvider( new DebugLoggerProvider() );
+        builder.SetMinimumLevel(minimumLevel);
+        builder.AddProvider(new DebugLoggerProvider());
 
-        builder.AddSimpleConsole( static options =>
-                                  {
-                                      options.ColorBehavior = LoggerColorBehavior.Enabled;
-                                      options.SingleLine    = false;
-                                      options.IncludeScopes = true;
-                                  } );
+        builder.AddSimpleConsole(static options =>
+                                 {
+                                     options.ColorBehavior = LoggerColorBehavior.Enabled;
+                                     options.SingleLine    = false;
+                                     options.IncludeScopes = true;
+                                 });
 
 
-        if ( OperatingSystem.IsWindows() ) { builder.AddProvider( name.GetEventLogLoggerProvider() ); }
-        else if ( OperatingSystem.IsLinux() ) { builder.AddSystemdConsole( static options => options.UseUtcTimestamp = true ); }
+        if ( OperatingSystem.IsWindows() ) { builder.AddProvider(name.GetEventLogLoggerProvider()); }
+        else if ( OperatingSystem.IsLinux() ) { builder.AddSystemdConsole(static options => options.UseUtcTimestamp = true); }
 
         return builder.AddFluentMigratorLogger();
     }
 
 
-    [SupportedOSPlatform( "Windows" )]
+    [SupportedOSPlatform("Windows")]
     public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name )
     {
-        return GetEventLogLoggerProvider( name, Filter );
-        static bool Filter( string category, LogLevel level ) { return level > LogLevel.Information; }
+        return GetEventLogLoggerProvider(name, filter);
+        static bool filter( string category, LogLevel level ) => level > LogLevel.Information;
     }
-    [SupportedOSPlatform( "Windows" )]
-    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter )
-    {
-        return new EventLogLoggerProvider(new EventLogSettings
-                                          {
-                                              SourceName  = name,
-                                              LogName     = name,
-                                              MachineName = GetMachineName(),
-                                              Filter      = filter
-                                          });
-    }
+    [SupportedOSPlatform("Windows")]
+    public static EventLogLoggerProvider GetEventLogLoggerProvider( this string name, Func<string, LogLevel, bool> filter ) =>
+        new(new EventLogSettings
+            {
+                SourceName  = name,
+                LogName     = name,
+                MachineName = GetMachineName(),
+                Filter      = filter
+            });
     public static string GetMachineName()
     {
     #pragma warning disable RS1035
@@ -144,50 +133,49 @@ public static class DbServices
 
 
     public static IHealthChecksBuilder AddHealthCheck<TValue>( this IServiceCollection services )
-        where TValue : IHealthCheck
-    {
-        return services.AddHealthCheck( HealthChecks.Create<TValue>() );
-    }
-    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) { return services.AddHealthChecks().Add( registration ); }
+        where TValue : IHealthCheck => services.AddHealthCheck(HealthChecks.Create<TValue>());
+    public static IHealthChecksBuilder AddHealthCheck( this IServiceCollection services, HealthCheckRegistration registration ) => services.AddHealthChecks().Add(registration);
 
 
-    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       { return new FluentMigratorConsoleLoggerProvider(new OptionsWrapper<FluentMigratorLoggerOptions>( options )); }
-    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) { return services.AddProvider( options.GetFluentMigratorConsoleLoggerProvider() ); }
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true )
-    {
-        return services.AddFluentMigratorLogger( new FluentMigratorLoggerOptions
-                                                 {
-                                                     ShowElapsedTime = showElapsedTime,
-                                                     ShowSql         = showSql
-                                                 } );
-    }
+    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       => new(new OptionsWrapper<FluentMigratorLoggerOptions>(options));
+    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) => services.AddProvider(options.GetFluentMigratorConsoleLoggerProvider());
+    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true ) =>
+        services.AddFluentMigratorLogger(new FluentMigratorLoggerOptions
+                                         {
+                                             ShowElapsedTime = showElapsedTime,
+                                             ShowSql         = showSql
+                                         });
 
 
     public static void MigrationsMsSql( this IMigrationRunnerBuilder migration )
     {
         migration.AddSqlServer2016();
-        DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        DbOptions.GetConnectionString(migration);
+
+        migration.ScanIn(typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly()).For.All();
     }
-    public static void MigrationsMsSql<TValue>( this IMigrationRunnerBuilder migration )
-        where TValue : IAppName
+    public static void MigrationsMsSql<TApp>( this IMigrationRunnerBuilder migration )
+        where TApp : IAppName
     {
         migration.AddSqlServer2016();
-        DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(TValue).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        DbOptions.GetConnectionString(migration);
+
+        migration.ScanIn(typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly()).For.All();
     }
     public static void MigrationsPostgres( this IMigrationRunnerBuilder migration )
     {
         migration.AddPostgres();
-        DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        DbOptions.GetConnectionString(migration);
+
+        migration.ScanIn(typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly()).For.All();
     }
-    public static void MigrationsPostgres<TValue>( this IMigrationRunnerBuilder migration )
-        where TValue : IAppName
+    public static void MigrationsPostgres<TApp>( this IMigrationRunnerBuilder migration )
+        where TApp : IAppName
     {
         migration.AddPostgres();
-        DbOptions.GetConnectionString( migration );
-        migration.ScanIn( typeof(TValue).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly() ).For.All();
+        DbOptions.GetConnectionString(migration);
+
+        migration.ScanIn(typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly()).For.All();
     }
 
 
@@ -197,32 +185,56 @@ public static class DbServices
     ///         <see cref="AUTHENTICATION_SCHEME"/>
     ///     </para>
     /// </summary>
-    /// <returns> </returns>
-    public static IdentityBuilder AddIdentityServices( this IServiceCollection services, Action<IdentityOptions>? options = null )
+    public static IdentityBuilder AddIdentityServices<TDataProtectorTokenProvider, TEmailTokenProvider, TPhoneNumberTokenProvider, TAuthenticatorTokenProvider>( this IServiceCollection services, TelemetrySource source, Action<IdentityOptions> options )
+        where TDataProtectorTokenProvider : DataProtectorTokenProvider
+        where TEmailTokenProvider : EmailTokenProvider
+        where TPhoneNumberTokenProvider : PhoneNumberTokenProvider
+        where TAuthenticatorTokenProvider : OtpAuthenticatorTokenProvider
     {
-        services.AddOptions<IdentityOptions>().Configure( options ?? IdentityOptions );
+        services.AddOptions(options);
 
-        RoleStore.Register( services );
-        UserStore.Register( services );
+        RoleStore.Register(services);
+        UserStore.Register(services);
 
-        return services.AddIdentity<UserRecord, RoleRecord>().AddUserStore<UserStore>().AddUserManager<UserRecordManager>().AddRoleStore<RoleStore>().AddRoleManager<RoleManager>().AddSignInManager<SignInManager>().AddUserValidator<UserValidator>().AddRoleValidator<RoleValidator>().AddPasswordValidator<UserPasswordValidator>().AddDefaultTokenProviders().AddTokenProvider<TokenProvider>( nameof(TokenProvider) );
+        services.TryAddSingleton(source);
 
-        static void IdentityOptions( IdentityOptions _ ) { }
+        return services.AddIdentity<UserRecord, RoleRecord>()
+                       .AddUserStore<UserStore>()
+                       .AddUserManager<UserRecordManager>()
+                       .AddRoleStore<RoleStore>()
+                       .AddRoleManager<RoleManager>()
+                       .AddSignInManager<SignInManager>()
+                       .AddUserValidator<UserValidator>()
+                       .AddRoleValidator<RoleValidator>()
+                       .AddPasswordValidator<UserPasswordValidator>()
+                       .AddTokenProvider(TokenOptions.DefaultProvider,              typeof(TDataProtectorTokenProvider))
+                       .AddTokenProvider(TokenOptions.DefaultEmailProvider,         typeof(TEmailTokenProvider))
+                       .AddTokenProvider(TokenOptions.DefaultPhoneProvider,         typeof(TPhoneNumberTokenProvider))
+                       .AddTokenProvider(TokenOptions.DefaultAuthenticatorProvider, typeof(TAuthenticatorTokenProvider))
+                       .AddTokenProvider<TokenProvider>(nameof(TokenProvider));
     }
 
 
-    public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options )
-        where TValue : class, IOptions<TValue>
-    {
-        return services.AddOptions( options, Options.DefaultName );
-    }
-    public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options, string name )
-        where TValue : class, IOptions<TValue>
+    public static WebApplicationBuilder AddDatabase<TDatabase>( this WebApplicationBuilder builder, DbOptions options )
+        where TDatabase : Database => options.AddDatabase<TDatabase>(builder);
+    public static WebApplicationBuilder AddDatabase<TDatabase, TApp>( this WebApplicationBuilder builder, DbOptions options )
+        where TDatabase : Database
+        where TApp : IAppName => options.AddDatabase<TDatabase, TApp>(builder);
+
+
+    public static IServiceCollection AddOptions<TValue>( this IServiceCollection services, Action<TValue> options, string? name = null )
+        where TValue : class
     {
         services.AddSingleton<TValue>();
-        services.Configure( name, options );
-        services.AddTransient<IOptions<TValue>>( static provider => provider.GetRequiredService<TValue>() );
+        services.Configure(name ?? Options.DefaultName, options);
+        services.AddTransient(getValue);
         return services;
+
+        static IOptions<TValue> getValue( IServiceProvider provider )
+        {
+            TValue value = provider.GetRequiredService<TValue>();
+            return value as IOptions<TValue> ?? Options.Create(value);
+        }
     }
 
 
@@ -238,46 +250,39 @@ public static class DbServices
                                {
                                    Audience                  = options.TokenAudience,
                                    ClaimsIssuer              = options.TokenIssuer,
-                                   TokenValidationParameters = configuration.GetTokenValidationParameters( options )
+                                   TokenValidationParameters = configuration.GetTokenValidationParameters(options)
                                };
 
-        jwt.TokenHandlers.TryAdd( DbTokenHandler.Instance );
+        jwt.TokenHandlers.TryAdd(DbTokenHandler.Instance);
         return jwt;
     }
 
 
     public static IServiceCollection AddDataProtection( this IServiceCollection services )
     {
-        DataProtectionServiceCollectionExtensions.AddDataProtection( services );
-        ProtectedDataProvider.Register( services );
+        DataProtectionServiceCollectionExtensions.AddDataProtection(services);
+        ProtectedDataProvider.Register(services);
         return services;
     }
-    public static IServiceCollection AddEmailer( this IServiceCollection services ) { return services.AddEmailer( static options => { } ); }
+
+
+    public static IServiceCollection AddEmailer( this IServiceCollection services ) { return services.AddEmailer(static options => { }); }
     public static IServiceCollection AddEmailer( this IServiceCollection services, Action<Emailer.Options> options )
     {
-        services.AddOptions( options );
+        services.AddOptions(options);
         services.AddScoped<Emailer>();
         return services;
     }
 
 
-    public static IServiceCollection AddPasswordValidator( this IServiceCollection services ) { return services.AddPasswordValidator( static requirements => { } ); }
-    public static IServiceCollection AddPasswordValidator( this IServiceCollection services, Action<PasswordRequirements> options )
+    public static IServiceCollection AddPasswordValidator( this IServiceCollection services )
     {
-        services.AddOptions( options );
-        services.AddScoped<IPasswordValidator<UserRecord>, UserPasswordValidator>();
+        services.AddTransient<IOptions<PasswordRequirements>>(static provider => PasswordRequirements.Current);
+        services.AddScoped<UserPasswordValidator>();
+        services.AddTransient<IPasswordValidator<UserRecord>>(static provider => provider.GetRequiredService<UserPasswordValidator>());
         return services;
     }
 
 
-    public static IServiceCollection AddTokenizer( this IServiceCollection services ) { return services.AddTokenizer<Tokenizer>(); }
-    public static IServiceCollection AddTokenizer<TTokenizer>( this IServiceCollection services )
-        where TTokenizer : class, ITokenService
-    {
-        services.AddScoped<ITokenService, TTokenizer>();
-        return services;
-    }
-
-
-    public static AuthorizationBuilder RequireMultiFactorAuthentication( this AuthorizationBuilder builder ) { return builder.AddPolicy( nameof(RequireMfa), static policy => policy.Requirements.Add( RequireMfa.Instance ) ); }
+    public static AuthorizationBuilder RequireMultiFactorAuthentication( this AuthorizationBuilder builder ) { return builder.AddPolicy(nameof(RequireMfa), static policy => policy.Requirements.Add(RequireMfa.Instance)); }
 }

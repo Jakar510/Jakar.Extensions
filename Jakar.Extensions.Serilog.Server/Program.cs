@@ -30,8 +30,7 @@ builder.Services.AddOpenTelemetry().WithTracing( static x => x.AddHttpClientInst
 builder.Services.AddBlazorServices();
 
 builder.Services.AddDataProtection( static options => options.ApplicationDiscriminator = TelemetryServer.AppName );
-ConfigureApiDatabase.Setup( builder );
-
+ 
 
 await using WebApplication app = builder.Build();
 

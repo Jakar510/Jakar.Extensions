@@ -6,16 +6,14 @@ namespace Jakar.Database;
 
 public sealed class UserPasswordValidator( IOptions<PasswordRequirements> options ) : IPasswordValidator<UserRecord>
 {
-    private readonly PasswordRequirements _options = options.Value;
+    private readonly PasswordRequirements __options = options.Value;
 
 
-    public IdentityResult Validate( in ReadOnlySpan<char> password )
-    {
-        return PasswordValidator.Check( password, _options )
-                   ? IdentityResult.Success
-                   : IdentityResult.Failed();
-    }
+    public IdentityResult Validate( in ReadOnlySpan<char> password ) =>
+        PasswordValidator.Check(password, __options)
+            ? IdentityResult.Success
+            : IdentityResult.Failed();
 
 
-    public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user, string? password ) { return Task.FromResult( Validate( password ) ); }
+    public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user, string? password ) => Task.FromResult(Validate(password));
 }

@@ -11,7 +11,7 @@ namespace Jakar.Database;
 
 public readonly struct SqlKey( bool matchAll, ImmutableArray<string> parameters ) : IEquatable<DynamicParameters>, IEqualityOperators<SqlKey>, IComparisonOperators<SqlKey>, IValueEnumerable<FromImmutableArray<string>, string>
 {
-    private readonly int                    _hash      = HashCode.Combine( matchAll, parameters );
+    private readonly int                    __hash      = HashCode.Combine( matchAll, parameters );
     public readonly  bool                   matchAll   = matchAll;
     public readonly  ImmutableArray<string> parameters = parameters;
     public readonly  string                 key        = GetKey( matchAll, parameters.AsSpan()! );
@@ -32,11 +32,11 @@ public readonly struct SqlKey( bool matchAll, ImmutableArray<string> parameters 
         int keyComparison = string.Compare( key, other.key, StringComparison.Ordinal );
         if ( keyComparison != 0 ) { return keyComparison; }
 
-        return _hash.CompareTo( other._hash );
+        return __hash.CompareTo( other.__hash );
     }
     public bool Equals( SqlKey other )
     {
-        if ( _hash != other._hash ) { return false; }
+        if ( __hash != other.__hash ) { return false; }
 
         if ( matchAll != other.matchAll ) { return false; }
 
@@ -44,7 +44,7 @@ public readonly struct SqlKey( bool matchAll, ImmutableArray<string> parameters 
     }
     public override bool Equals( object?            other ) => other is SqlKey x && Equals( x );
     public          bool Equals( DynamicParameters? other ) => other is not null && AsValueEnumerable().SequenceEqual( other.ParameterNames, StringComparer.Ordinal );
-    public override int  GetHashCode()                      => _hash;
+    public override int  GetHashCode()                      => __hash;
     public int CompareTo( object? other ) =>
         other is SqlKey sqlKey
             ? CompareTo( sqlKey )

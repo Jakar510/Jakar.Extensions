@@ -30,7 +30,7 @@ public partial class DbTable<TClass>
     }
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TClass> id, CancellationToken token = default )
     {
-        SqlCommand        sql     = TClass.SQL.DeleteID( in id );
+        SqlCommand        sql     = TClass.SQL.GetDeleteID( in id );
         CommandDefinition command = _database.GetCommand( in sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }
@@ -39,7 +39,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Delete( ids );
+        SqlCommand sql = TClass.SQL.GetDelete( ids );
 
         try
         {
@@ -51,7 +51,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand        sql     = TClass.SQL.Delete( matchAll, parameters );
+        SqlCommand        sql     = TClass.SQL.GetDelete( matchAll, parameters );
         CommandDefinition command = _database.GetCommand( in sql, transaction, token );
         await connection.ExecuteScalarAsync( command );
     }

@@ -6,18 +6,18 @@ namespace Jakar.Database;
 
 public readonly struct OneTimePassword
 {
-    private readonly byte[] _key;
-    private readonly string _issuer;
-    private readonly string _secretKey;
+    private readonly byte[] __key;
+    private readonly string __issuer;
+    private readonly string __secretKey;
 
 
     private OneTimePassword( string secretKey, string issuer )
     {
-        if ( !string.IsNullOrWhiteSpace( secretKey ) ) { throw new InvalidOperationException( $"{nameof(secretKey)} is not set" ); }
+        if ( !string.IsNullOrWhiteSpace(secretKey) ) { throw new InvalidOperationException($"{nameof(secretKey)} is not set"); }
 
-        _secretKey = secretKey;
-        _issuer    = issuer;
-        _key       = Base32Encoding.ToBytes( _secretKey );
+        __secretKey = secretKey;
+        __issuer    = issuer;
+        __key       = Base32Encoding.ToBytes(__secretKey);
     }
 
 
@@ -29,22 +29,22 @@ public readonly struct OneTimePassword
     public static string GenerateSecret()
     {
         byte[] secretKey = new byte[20];
-        RandomNumberGenerator.Fill( secretKey );
-        return Base32Encoding.ToString( secretKey );
+        RandomNumberGenerator.Fill(secretKey);
+        return Base32Encoding.ToString(secretKey);
     }
 
 
     public bool ValidateToken( string token, VerificationWindow? window = null )
     {
-        Totp totp = new( _key );
-        return totp.VerifyTotp( token, out long _, window );
+        Totp totp = new(__key);
+        return totp.VerifyTotp(token, out long _, window);
     }
 
 
-    public string GetContent( IUserName record ) => $"otpauth://totp/{record.UserName}?secret={_secretKey}&issuer={_issuer}";
+    public string GetContent( IUserName record ) => $"otpauth://totp/{record.UserName}?secret={__secretKey}&issuer={__issuer}";
 
 
-    public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode( record, size, size, format );
+    public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode(record, size, size, format);
     public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
     {
         BarcodeWriterSvg writer = new()
@@ -61,7 +61,7 @@ public readonly struct OneTimePassword
                                                 }
                                   };
 
-        string? result = writer.Write( GetContent( record ) ).ToString();
-        return result ?? throw new NullReferenceException( nameof(result) );
+        string? result = writer.Write(GetContent(record)).ToString();
+        return result ?? throw new NullReferenceException(nameof(result));
     }
 }

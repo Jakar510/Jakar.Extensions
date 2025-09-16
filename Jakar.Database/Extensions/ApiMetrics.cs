@@ -6,25 +6,25 @@ namespace Jakar.Database;
 
 public sealed class ApiMetric
 {
-    private readonly Counter<long>     _counter;
-    private readonly Histogram<double> _histogram;
+    private readonly Counter<long>     __counter;
+    private readonly Histogram<double> __histogram;
 
 
     public ApiMetric( IMeterFactory meterFactory, string meterName )
     {
         Meter meter = meterFactory.Create( meterName );
-        _counter   = meter.CreateCounter<long>( $"{meterName}.Count" );
-        _histogram = meter.CreateHistogram<double>( $"{meterName}.Duration", "ms" );
+        __counter   = meter.CreateCounter<long>( $"{meterName}.Count" );
+        __histogram = meter.CreateHistogram<double>( $"{meterName}.Duration", "ms" );
     }
 
-    public void IncreaseRequestCount()                                                    { _counter.Add( 1 ); }
-    public void IncreaseRequestCount( Tag                      tag1 )                     { _counter.Add( 1, tag1 ); }
-    public void IncreaseRequestCount( Tag                      tag1, Tag tag2 )           { _counter.Add( 1, tag1, tag2 ); }
-    public void IncreaseRequestCount( Tag                      tag1, Tag tag2, Tag tag3 ) { _counter.Add( 1, tag1, tag2, tag3 ); }
-    public void IncreaseRequestCount( params ReadOnlySpan<Tag> tags ) { _counter.Add( 1, Tag.Convert( tags ) ); }
+    public void IncreaseRequestCount()                                                    { __counter.Add( 1 ); }
+    public void IncreaseRequestCount( Tag                      tag1 )                     { __counter.Add( 1, tag1 ); }
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2 )           { __counter.Add( 1, tag1, tag2 ); }
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2, Tag tag3 ) { __counter.Add( 1, tag1, tag2, tag3 ); }
+    public void IncreaseRequestCount( params ReadOnlySpan<Tag> tags ) { __counter.Add( 1, Tag.Convert( tags ) ); }
 
 
-    public Duration MeasureRequestDuration() { return new Duration(_histogram); }
+    public Duration MeasureRequestDuration() { return new Duration(__histogram); }
 
 
     public static ApiMetric Create<TApp>( IServiceProvider provider, string method )
@@ -42,13 +42,13 @@ public sealed class ApiMetric
 
     public sealed class Duration( Histogram<double> histogram ) : IDisposable
     {
-        private readonly Histogram<double> _histogram        = histogram;
-        private readonly long              _requestStartTime = TimeProvider.System.GetTimestamp();
+        private readonly Histogram<double> __histogram        = histogram;
+        private readonly long              __requestStartTime = TimeProvider.System.GetTimestamp();
 
         public void Dispose()
         {
-            TimeSpan elapsed = TimeProvider.System.GetElapsedTime( _requestStartTime );
-            _histogram.Record( elapsed.TotalMilliseconds );
+            TimeSpan elapsed = TimeProvider.System.GetElapsedTime( __requestStartTime );
+            __histogram.Record( elapsed.TotalMilliseconds );
         }
     }
 }

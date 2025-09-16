@@ -5,11 +5,11 @@
 public class RecordCollection<TClass>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TClass>
     where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly List<TClass> _records = new(capacity);
+    private readonly List<TClass> __records = new(capacity);
 
 
-    public int Count => _records.Count;
-    public TClass this[ int index ] => _records[index];
+    public int Count => __records.Count;
+    public TClass this[ int index ] => __records[index];
 
 
     public RecordCollection( params ReadOnlySpan<TClass> values ) : this() => Add( values );
@@ -32,17 +32,17 @@ public class RecordCollection<TClass>( int capacity = Buffers.DEFAULT_CAPACITY )
     {
         if ( value.IsValidID() )
         {
-            _records.Add( value );
+            __records.Add( value );
             return this;
         }
 
 
-        _records.Add( value.NewID( RecordID<TClass>.New() ) );
+        __records.Add( value.NewID( RecordID<TClass>.New() ) );
 
         return this;
     }
 
 
-    public IEnumerator<TClass> GetEnumerator() => _records.GetEnumerator();
+    public IEnumerator<TClass> GetEnumerator() => __records.GetEnumerator();
     IEnumerator IEnumerable.    GetEnumerator() => GetEnumerator();
 }

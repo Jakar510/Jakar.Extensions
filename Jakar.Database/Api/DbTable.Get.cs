@@ -20,7 +20,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Count();
+        SqlCommand sql = TClass.SQL.GetCount();
 
         try { return await connection.QueryFirstAsync<long>( sql.sql, sql.parameters, transaction ); }
         catch ( Exception e ) { throw new SqlException( sql, e ); }
@@ -30,7 +30,7 @@ public partial class DbTable<TClass>
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand sql = TClass.SQL.Exists( matchAll, parameters );
+        SqlCommand sql = TClass.SQL.GetExists( matchAll, parameters );
 
         try
         {
@@ -64,9 +64,9 @@ public partial class DbTable<TClass>
     {
         SqlCommand            command    = TClass.SQL.Get( in id );
         SqlCommand.Definition definition = _database.GetCommand( in command, connection, transaction, token );
-        return await _cache.GetOrCreateAsync( id.key, definition, Factory, Options, token );
+        return await _cache.GetOrCreateAsync( id.key, definition, factory, Options, token );
 
-        async ValueTask<ErrorOrResult<TClass>> Factory( SqlCommand.Definition sql, CancellationToken cancellationToken )
+        async ValueTask<ErrorOrResult<TClass>> factory( SqlCommand.Definition sql, CancellationToken cancellationToken )
         {
             try
             {

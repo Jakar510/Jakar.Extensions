@@ -21,13 +21,20 @@ namespace Jakar.Database;
 
 public static class Telemetry
 {
-    public const           string                                   METER_NAME     = "Jakar.Database";
-    public static readonly Version                                  DefaultVersion = new(1, 0, 0);
-    public static readonly KeyValuePair<string, object?>[]          Pairs          = [];
-    public static readonly Meter                                    DbMeter        = CreateMeter(METER_NAME);
-    public static readonly ActivitySource                           DbSource       = CreateSource(METER_NAME);
-    public static readonly ConcurrentDictionary<string, Instrument> Instruments    = [];
-    public static readonly ConcurrentDictionary<string, Meter>      Meters         = [];
+    public const           string                                   ATTRIBUTE_SERVICE_NAME           = "service.name";
+    public const           string                                   ATTRIBUTE_SERVICE_NAMESPACE      = "service.namespace";
+    public const           string                                   ATTRIBUTE_SERVICE_INSTANCE       = "service.instance.id";
+    public const           string                                   ATTRIBUTE_SERVICE_VERSION        = "service.version";
+    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_NAME     = "telemetry.sdk.name";
+    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_LANGUAGE = "telemetry.sdk.language";
+    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_VERSION  = "telemetry.sdk.version";
+    public const           string                                   METER_NAME                       = "Jakar.Database";
+    public static readonly Version                                  DefaultVersion                   = new(1, 0, 0);
+    public static readonly KeyValuePair<string, object?>[]          Pairs                            = [];
+    public static readonly Meter                                    DbMeter                          = CreateMeter(METER_NAME);
+    public static readonly ActivitySource                           DbSource                         = CreateSource(METER_NAME);
+    public static readonly ConcurrentDictionary<string, Instrument> Instruments                      = [];
+    public static readonly ConcurrentDictionary<string, Meter>      Meters                           = [];
 
 
     public static Meter          Meter  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = DbMeter;
@@ -80,30 +87,16 @@ public static class Telemetry
         return builder;
     }
 
-    public static WebApplicationBuilder AddOpenTelemetry<TApp>( this WebApplicationBuilder builder, Action<OtlpExporterOptions> tracerOtlpExporter, Action<OtlpExporterOptions> meterOtlpExporter )
-        where TApp : IAppName
+
+    public static WebApplicationBuilder AddOpenTelemetry<TApp>( this WebApplicationBuilder builder, Action<OtlpExporterOptions> tracerOtlpExporter, Action<OtlpExporterOptions> meterOtlpExporter, Action<LoggerProviderBuilder>? configureBuilder = null, Action<OpenTelemetryLoggerOptions>? configureOptions = null )
+        where TApp : IAppID
     {
-        bool            isDevelopment = builder.Environment.IsDevelopment();
-        ResourceBuilder resources     = ResourceBuilder.CreateDefault().AddService(TApp.AppName, null, TApp.AppVersion.ToString()).AddService(METER_NAME);
+        KeyValuePair<string, object>[] attributes = [new(ATTRIBUTE_SERVICE_NAME, TApp.AppName), new(ATTRIBUTE_SERVICE_VERSION, TApp.AppVersion.ToString()), new(ATTRIBUTE_SERVICE_INSTANCE, TApp.AppID.ToString()), new(ATTRIBUTE_SERVICE_NAMESPACE, typeof(TApp).Namespace ?? string.Empty)];
 
-        builder.Services.AddOpenTelemetry()
-               .WithTracing(tracerProviderBuilder =>
-                            {
-                                tracerProviderBuilder.AddAspNetCoreInstrumentation()
-                                                     .AddHttpClientInstrumentation()
-                                                     .AddNpgsql() // PostgreSQL tracing for Dapper
-                                                     .AddSource(METER_NAME)
-                                                     .SetResourceBuilder(resources)
-                                                     .AddOtlpExporter(tracerOtlpExporter);
+        ResourceBuilder resources = ResourceBuilder.CreateEmpty().AddAttributes(attributes).AddTelemetrySdk().AddEnvironmentVariableDetector().AddService(TApp.AppName, null, TApp.AppVersion.ToString()).AddService(METER_NAME);
 
-                                if ( isDevelopment ) { tracerProviderBuilder.AddConsoleExporter(); }
-                            })
-               .WithMetrics(meterProviderBuilder =>
-                            {
-                                meterProviderBuilder.AddAspNetCoreInstrumentation().AddRuntimeInstrumentation().AddHttpClientInstrumentation().AddMeter(METER_NAME).SetResourceBuilder(resources).AddOtlpExporter(meterOtlpExporter);
 
-                                if ( isDevelopment ) { meterProviderBuilder.AddConsoleExporter(); }
-                            });
+        builder.Services.AddOpenTelemetry().WithTracing(configureTracing).WithMetrics(configureMetrics).WithLogging(configureBuilder, configureOptions);
 
         builder.Services.AddSingleton(static x =>
                                       {
@@ -113,6 +106,31 @@ public static class Telemetry
                                       });
 
         return builder;
+
+        void configureMetrics( MeterProviderBuilder meterProviderBuilder )
+        {
+            meterProviderBuilder.AddAspNetCoreInstrumentation()
+                                .AddRuntimeInstrumentation()
+                                .AddHttpClientInstrumentation()
+                                .AddNpgsqlInstrumentation() // PostgreSQL metrics for Dapper
+                                .AddFusionCacheInstrumentation()
+                                .AddMeter(METER_NAME)
+                                .SetResourceBuilder(resources)
+                                .AddOtlpExporter(meterOtlpExporter)
+                                .AddConsoleExporter();
+        }
+
+        void configureTracing( TracerProviderBuilder tracerProviderBuilder )
+        {
+            tracerProviderBuilder.AddAspNetCoreInstrumentation()
+                                 .AddHttpClientInstrumentation()
+                                 .AddNpgsql() // PostgreSQL tracing for Dapper
+                                 .AddFusionCacheInstrumentation()
+                                 .AddSource(METER_NAME)
+                                 .SetResourceBuilder(resources)
+                                 .AddOtlpExporter(tracerOtlpExporter)
+                                 .AddConsoleExporter();
+        }
     }
 
 

@@ -10,22 +10,22 @@ namespace Jakar.Database;
 public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, CancellationToken token = default ) : IAsyncEnumerator<RecordID<TClass>>, IAsyncEnumerable<RecordID<TClass>>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly DbTable<TClass>      _table = table;
-    private          CancellationToken     _token = token;
-    private          KeyGenerator<TClass> _generator;
+    private readonly DbTable<TClass>      __table = table;
+    private          CancellationToken     __token = token;
+    private          KeyGenerator<TClass> __generator;
     public           RecordID<TClass>     Current { get; private set; }
 
 
     public ValueTask DisposeAsync()
     {
-        _generator.Dispose();
+        __generator.Dispose();
         Current   = default;
         return ValueTask.CompletedTask;
     }
-    public void Reset() => _generator = default;
+    public void Reset() => __generator = default;
 
 
-    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _token );
+    public ValueTask<bool> MoveNextAsync() => __table.Call( MoveNextAsync, __token );
     public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         if ( token.IsCancellationRequested )
@@ -34,17 +34,17 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
             return false;
         }
 
-        if ( _generator.IsEmpty )
+        if ( __generator.IsEmpty )
         {
-            IEnumerable<RecordPair<TClass>> pairs = await _table.SortedIDs( connection, transaction, token );
-            _generator = KeyGenerator<TClass>.Create( pairs );
+            IEnumerable<RecordPair<TClass>> pairs = await __table.SortedIDs( connection, transaction, token );
+            __generator = KeyGenerator<TClass>.Create( pairs );
         }
 
-        if ( _generator.MoveNext() ) { Current = _generator.Current; }
+        if ( __generator.MoveNext() ) { Current = __generator.Current; }
         else
         {
             Current    = default;
-            _generator = default;
+            __generator = default;
         }
 
         return Current.value != Guid.Empty;
@@ -54,7 +54,7 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
     IAsyncEnumerator<RecordID<TClass>> IAsyncEnumerable<RecordID<TClass>>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
     public AsyncKeyGenerator<TClass> WithCancellation( CancellationToken token )
     {
-        _token = token;
+        __token = token;
         return this;
     }
 }
