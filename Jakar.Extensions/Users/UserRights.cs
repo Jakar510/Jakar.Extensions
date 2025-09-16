@@ -148,7 +148,7 @@ public ref struct UserRights<TEnum>
     {
         foreach ( TEnum i in indexes )
         {
-            if ( Has( i ) is false ) { return false; }
+            if ( !Has( i ) ) { return false; }
         }
 
         return true;

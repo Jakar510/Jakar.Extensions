@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-	<PackageReference Include="Bogus" Version="35.6.3" />
-	<PackageReference Include="CountryData.Bogus" Version="6.13.0" />
-	<PackageReference Include="NaughtyStrings.Bogus" Version="3.0.0" />
-	<PackageReference Include="System.Text.Json" Version="9.0.7" />
+	<PackageReference Include="Bogus" />
+	<PackageReference Include="CountryData.Bogus" />
+	<PackageReference Include="NaughtyStrings.Bogus" />
+	<PackageReference Include="System.Text.Json" />
   </ItemGroup>
 
 </Project>

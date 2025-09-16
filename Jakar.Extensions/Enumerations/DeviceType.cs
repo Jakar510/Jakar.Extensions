@@ -5,7 +5,7 @@
 ///     <summary> Various types of devices. </summary>
 ///     <remarks/>
 /// </Docs>
-public enum DeviceType
+public enum DeviceTypes
 {
     /// <Docs>
     ///     <summary> An unknown device type. </summary>

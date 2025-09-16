@@ -24,10 +24,7 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public ref ReadOnlyPoint this[ int index ] => ref Points[index];
 
 
-    public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
-
-
-    public static       Sorter<Spline>              Sorter  => Sorter<Spline>.Default;
+    public static       EqualComparer<Spline>       Sorter  => EqualComparer<Spline>.Default;
     static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
     static ref readonly Spline IShape<Spline>.      One     => ref One;
     static ref readonly Spline IShape<Spline>.      Invalid => ref Invalid;
@@ -42,13 +39,10 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
             return span.Any(static ( ref readonly ReadOnlyPoint x ) => x.IsNaN);
         }
     }
-    public bool IsValid => IsEmpty is false && IsNaN is false;
+    public bool IsValid => !IsEmpty && !IsNaN;
 
 
-    public static implicit operator Spline( int    other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( long   other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( float  other ) => new(ReadOnlyPoint.Zero, other);
-    public static implicit operator Spline( double other ) => new(ReadOnlyPoint.Zero, other);
+    public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
 
 
     [Pure] public static Spline                                                   Create( params ReadOnlyPoint[]? points ) => new(points);
@@ -83,11 +77,11 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     }
     public bool Equals( Spline other )
     {
-        if ( Length.Equals(other.Length) is false ) { return false; }
+        if ( !Length.Equals(other.Length) ) { return false; }
 
         for ( int i = 0; i < Length; i++ )
         {
-            if ( Points[i].Equals(other.Points[i]) is false ) { return false; }
+            if ( !Points[i].Equals(other.Points[i]) ) { return false; }
         }
 
         return true;
@@ -146,28 +140,28 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public static bool operator >=( Spline  left, Spline                           right ) => Sorter.GreaterThanOrEqualTo(left, right);
     public static bool operator <( Spline   left, Spline                           right ) => Sorter.LessThan(left, right);
     public static bool operator <=( Spline  left, Spline                           right ) => Sorter.LessThanOrEqualTo(left, right);
-    public static Spline operator +( Spline self, int                              other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator +( Spline self, float                            other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator +( Spline self, double                           other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator -( Spline self, int                              other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator -( Spline self, float                            other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator -( Spline self, double                           other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator *( Spline self, int                              other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator *( Spline self, float                            other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator *( Spline self, double                           other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator /( Spline self, int                              other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
-    public static Spline operator /( Spline self, float                            other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
-    public static Spline operator /( Spline self, double                           other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
-    public static Spline operator +( Spline self, (int xOffset, int yOffset)       other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator +( Spline self, (float xOffset, float yOffset)   other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator +( Spline self, (double xOffset, double yOffset) other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x + other);
-    public static Spline operator -( Spline self, (int xOffset, int yOffset)       other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator -( Spline self, (float xOffset, float yOffset)   other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator -( Spline self, (double xOffset, double yOffset) other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x - other);
-    public static Spline operator *( Spline self, (int xOffset, int yOffset)       other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator *( Spline self, (float xOffset, float yOffset)   other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator *( Spline self, (double xOffset, double yOffset) other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x * other);
-    public static Spline operator /( Spline self, (int xOffset, int yOffset)       other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
-    public static Spline operator /( Spline self, (float xOffset, float yOffset)   other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
-    public static Spline operator /( Spline self, (double xOffset, double yOffset) other ) => Shapes.Create<ReadOnlyPoint>(in self.Points, ( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator +( Spline self, int                              other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator +( Spline self, float                            other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator +( Spline self, double                           other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator -( Spline self, int                              other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator -( Spline self, float                            other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator -( Spline self, double                           other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator *( Spline self, int                              other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator *( Spline self, float                            other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator *( Spline self, double                           other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator /( Spline self, int                              other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator /( Spline self, float                            other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator /( Spline self, double                           other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator +( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator +( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator +( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
+    public static Spline operator -( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator -( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator -( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x - other);
+    public static Spline operator *( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator *( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator *( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x * other);
+    public static Spline operator /( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator /( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static Spline operator /( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
 }

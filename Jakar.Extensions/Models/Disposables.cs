@@ -18,34 +18,35 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
     }
 
 
-    public void                     Add( IDisposable                      disposable )  => _disposables.Add( disposable );
-    public void                     Add( params ReadOnlySpan<IDisposable> disposables ) => _disposables.Add( disposables );
+    public void                     Add( IDisposable                      disposable )  => _disposables.Add(disposable);
+    public void                     Add( params ReadOnlySpan<IDisposable> disposables ) => _disposables.Add(disposables);
     public IEnumerator<IDisposable> GetEnumerator()                                     => _disposables.GetEnumerator();
     IEnumerator IEnumerable.        GetEnumerator()                                     => GetEnumerator();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static void CastAndDispose<TValue>( ref TValue? resource )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void ClearAndDispose<TValue>( ref TValue? resource )
         where TValue : IDisposable
     {
         resource?.Dispose();
         resource = default;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public static ValueTask CastAndDisposeAsync<TValue>( ref TValue? resource )
-        where TValue : class, IDisposable
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
+        where TValue : IDisposable
     {
-        ValueTask task = CastAndDisposeAsync( resource );
-        resource = null;
+        ValueTask task = CastAndDisposeAsync(resource);
+        resource = default;
         return task;
     }
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask CastAndDisposeAsync<TValue>( TValue? resource )
-        where TValue : class, IDisposable
+        where TValue : IDisposable
     {
         switch ( resource )
         {
-            case null: return;
+            case null:
+                return;
 
             case IAsyncDisposable resourceAsyncDisposable:
                 await resourceAsyncDisposable.DisposeAsync();
@@ -68,14 +69,14 @@ public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisp
     public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => _disposables = [..enumerable];
     public async ValueTask DisposeAsync()
     {
-        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync().ConfigureAwait( false ); }
+        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }
 
         _disposables.Clear();
     }
 
 
-    public void                          Add( IAsyncDisposable                      disposable )  => _disposables.Add( disposable );
-    public void                          Add( params ReadOnlySpan<IAsyncDisposable> disposables ) => _disposables.Add( disposables );
+    public void                          Add( IAsyncDisposable                      disposable )  => _disposables.Add(disposable);
+    public void                          Add( params ReadOnlySpan<IAsyncDisposable> disposables ) => _disposables.Add(disposables);
     public IEnumerator<IAsyncDisposable> GetEnumerator()                                          => _disposables.GetEnumerator();
     IEnumerator IEnumerable.             GetEnumerator()                                          => GetEnumerator();
 }

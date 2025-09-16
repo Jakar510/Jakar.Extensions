@@ -2,7 +2,7 @@
 
 
 [DefaultValue(nameof(Zero))]
-public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint> 
+public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>
 {
     public static readonly ReadOnlyPoint Invalid       = new(double.NaN, double.NaN);
     public static readonly ReadOnlyPoint Zero          = 0;
@@ -30,13 +30,13 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public readonly        double        Y             = y;
 
 
-    public static       Sorter<ReadOnlyPoint>               Sorter  => Sorter<ReadOnlyPoint>.Default;
+    public static       EqualComparer<ReadOnlyPoint>        Sorter  => EqualComparer<ReadOnlyPoint>.Default;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero    => ref Zero;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One     => ref One;
     public              bool                                IsEmpty => X == 0 && Y == 0;
     public              bool                                IsNaN   => double.IsNaN(X) || double.IsNaN(Y);
-    public              bool                                IsValid => IsNaN is false;
+    public              bool                                IsValid => !IsNaN;
     double IShapeLocation.                                  X       => X;
     double IShapeLocation.                                  Y       => Y;
 
@@ -62,7 +62,6 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     [Pure] public ReadOnlyPoint Floor()   => new(X.Floor(), Y.Floor());
 
 
-    [Pure]
     public double DistanceTo( in ReadOnlyPoint other )
     {
         double x      = X - other.X;
@@ -72,8 +71,8 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
         double result = Math.Sqrt(x2 + y2);
         return result;
     }
-    [Pure] public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
-    [Pure] public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
+    public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
+    public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
     public double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 )
     {
         ReadOnlyPoint v1 = this - p1;
@@ -91,6 +90,13 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     }
 
 
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
+
+    
     public int CompareTo( ReadOnlyPoint other )
     {
         int xOffsetComparison = X.CompareTo(other.X);

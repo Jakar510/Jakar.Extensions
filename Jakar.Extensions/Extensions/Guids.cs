@@ -15,28 +15,28 @@ public static class Guids
     private const char UNDERSCORE = '_';
 
 
-    public static bool TryAsGuid( this ref readonly Span<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( in this Span<char> value, [NotNullWhen(true)] out Guid? result )
     {
         ReadOnlySpan<char> span = value;
         result = span.AsGuid();
         return result.HasValue;
     }
-    public static bool TryAsGuid( this ref readonly ReadOnlySpan<char> value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( in this ReadOnlySpan<char> value, [NotNullWhen(true)] out Guid? result )
     {
         result = value.AsGuid();
         return result.HasValue;
     }
-    public static bool TryAsGuid( this string value, [NotNullWhen( true )] out Guid? result )
+    public static bool TryAsGuid( this string value, [NotNullWhen(true)] out Guid? result )
     {
         ReadOnlySpan<char> span = value;
-        return span.TryAsGuid( out result );
+        return span.TryAsGuid(out result);
     }
 
 
-    public static bool TryWriteBytes( this ref readonly Guid value, [MustDisposeResource] out Buffer<byte> result )
+    public static bool TryWriteBytes( in this Guid value, [MustDisposeResource] out Buffer<byte> result )
     {
-        result = new Buffer<byte>( 16 );
-        if ( value.TryWriteBytes( result.Span ) ) { return true; }
+        result = new Buffer<byte>(16);
+        if ( value.TryWriteBytes(result.Span) ) { return true; }
 
         result = default;
         return false;
@@ -51,7 +51,7 @@ public static class Guids
     public static Guid? AsGuid( this string value )
     {
         ReadOnlySpan<char> span = value;
-        return AsGuid( in span );
+        return AsGuid(in span);
     }
 
 
@@ -60,9 +60,9 @@ public static class Guids
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static Guid? AsGuid( this ref readonly ReadOnlySpan<char> value )
+    public static Guid? AsGuid( in this ReadOnlySpan<char> value )
     {
-        if ( Guid.TryParse( value, out Guid result ) ) { return result; }
+        if ( Guid.TryParse(value, out Guid result) ) { return result; }
 
         Span<char> base64Chars = stackalloc char[24];
 
@@ -81,35 +81,35 @@ public static class Guids
 
         Span<byte> idBytes = stackalloc byte[16];
 
-        return Convert.TryFromBase64Chars( base64Chars, idBytes, out int bytesWritten )
-                   ? new Guid( idBytes[..bytesWritten] )
+        return Convert.TryFromBase64Chars(base64Chars, idBytes, out int bytesWritten)
+                   ? new Guid(idBytes[..bytesWritten])
                    : Guid.Empty;
     }
 
 
     public static string NewBase64()
     {
-        var id = Guid.CreateVersion7( DateTimeOffset.UtcNow );
-        return NewBase64( in id );
+        var id = Guid.CreateVersion7(DateTimeOffset.UtcNow);
+        return NewBase64(in id);
     }
-    public static string NewBase64( this ref readonly DateTimeOffset timeStamp )
+    public static string NewBase64( in this DateTimeOffset timeStamp )
     {
-        var id = Guid.CreateVersion7( timeStamp );
-        return NewBase64( in id );
+        var id = Guid.CreateVersion7(timeStamp);
+        return NewBase64(in id);
     }
-    public static string NewBase64( this ref readonly DateTimeOffset? timeStamp )
+    public static string NewBase64( in this DateTimeOffset? timeStamp )
     {
         Guid id = timeStamp.HasValue
-                      ? Guid.CreateVersion7( timeStamp.Value )
+                      ? Guid.CreateVersion7(timeStamp.Value)
                       : Guid.NewGuid();
 
-        return NewBase64( in id );
+        return NewBase64(in id);
     }
-    public static string NewBase64( this ref readonly Guid id )
+    public static string NewBase64( in this Guid id )
     {
         Span<char> result = stackalloc char[22];
-        id.AsSpan( ref result );
-        return new string( result );
+        id.AsSpan(ref result);
+        return new string(result);
     }
 
 
@@ -118,11 +118,11 @@ public static class Guids
     /// </summary>
     /// <param name="value"> </param>
     /// <returns> </returns>
-    public static string ToBase64( this ref readonly Guid value )
+    public static string ToBase64( in this Guid value )
     {
         Span<char> result = stackalloc char[22];
-        value.AsSpan( ref result );
-        return new string( result );
+        value.AsSpan(ref result);
+        return new string(result);
     }
 
 
@@ -132,14 +132,14 @@ public static class Guids
     /// <param name="value"> </param>
     /// <param name="result"> </param>
     /// <returns> </returns>
-    public static bool AsSpan( this ref readonly Guid value, scoped ref Span<char> result )
+    public static bool AsSpan( in this Guid value, scoped ref Span<char> result )
     {
-        Guard.IsGreaterThanOrEqualTo( result.Length, 22 );
+        Guard.IsGreaterThanOrEqualTo(result.Length, 22);
         Span<byte> base64Bytes = stackalloc byte[24];
         Span<byte> idBytes     = stackalloc byte[16];
-        if ( value.TryWriteBytes( idBytes ) is false ) { throw new InvalidOperationException( "Guid.TryWriteBytes failed" ); }
+        if ( !value.TryWriteBytes(idBytes) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
 
-        System.Buffers.Text.Base64.EncodeToUtf8( idBytes, base64Bytes, out _, out int bytesWritten );
+        System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out int bytesWritten);
         result = result[..bytesWritten];
 
         for ( int i = 0; i < bytesWritten; i++ )
@@ -156,25 +156,25 @@ public static class Guids
     }
 
 
-    public static (long Lower, long Upper) AsLong( this ref readonly Guid value ) =>
-        value.AsLong( out long lower, out long upper )
-            ? (lower, upper)
-            : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
-    public static (ulong Lower, ulong Upper) AsULong( this ref readonly Guid value ) =>
-        value.AsLong( out ulong lower, out ulong upper )
-            ? (lower, upper)
-            : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
+    public static (long Lower, long Upper) AsLong( in this Guid value ) =>
+        value.AsLong(out long lower, out long upper)
+            ? ( lower, upper )
+            : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+    public static (ulong Lower, ulong Upper) AsULong( in this Guid value ) =>
+        value.AsLong(out ulong lower, out ulong upper)
+            ? ( lower, upper )
+            : throw new InvalidOperationException("Guid.TryWriteBytes failed");
 
 
-    public static bool AsLong( this ref readonly Guid value, out long lower, out long upper )
+    public static bool AsLong( in this Guid value, out long lower, out long upper )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
 
-        if ( value.TryWriteBytes( span ) )
+        if ( value.TryWriteBytes(span) )
         {
-            lower = BitConverter.ToInt64( span[..SIZE] );
-            upper = BitConverter.ToInt64( span[SIZE..] );
+            lower = BitConverter.ToInt64(span[..SIZE]);
+            upper = BitConverter.ToInt64(span[SIZE..]);
             return true;
         }
 
@@ -182,15 +182,15 @@ public static class Guids
         upper = 0;
         return false;
     }
-    public static bool AsLong( this ref readonly Guid value, out ulong lower, out ulong upper )
+    public static bool AsLong( in this Guid value, out ulong lower, out ulong upper )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
 
-        if ( value.TryWriteBytes( span ) )
+        if ( value.TryWriteBytes(span) )
         {
-            lower = BitConverter.ToUInt64( span[..SIZE] );
-            upper = BitConverter.ToUInt64( span[SIZE..] );
+            lower = BitConverter.ToUInt64(span[..SIZE]);
+            upper = BitConverter.ToUInt64(span[SIZE..]);
             return true;
         }
 
@@ -200,78 +200,78 @@ public static class Guids
     }
 
 
-    public static Guid AsGuid( this ref readonly (long Lower, long Upper) value )
+    public static Guid AsGuid( in this (long Lower, long Upper) value )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
 
-        if ( BitConverter.TryWriteBytes( span[..SIZE], value.Lower ) && BitConverter.TryWriteBytes( span[SIZE..], value.Upper ) ) { return new Guid( span ); }
+        if ( BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper) ) { return new Guid(span); }
 
-        throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" );
+        throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
     }
-    public static Guid AsGuid( this ref readonly (ulong Lower, ulong Upper) value )
+    public static Guid AsGuid( in this (ulong Lower, ulong Upper) value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
 
-        return BitConverter.TryWriteBytes( span[..SIZE], value.Lower ) && BitConverter.TryWriteBytes( span[SIZE..], value.Upper )
-                   ? new Guid( span )
-                   : throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" );
+        return BitConverter.TryWriteBytes(span[..SIZE], value.Lower) && BitConverter.TryWriteBytes(span[SIZE..], value.Upper)
+                   ? new Guid(span)
+                   : throw new InvalidOperationException("BitConverter.TryWriteBytes failed");
     }
-    public static Guid AsGuid( this ref readonly long value )
+    public static Guid AsGuid( in this long value )
     {
         const int  SIZE = sizeof(long);
         Span<byte> span = stackalloc byte[SIZE * 2];
         span.Clear();
 
-        if ( BitConverter.TryWriteBytes( span, value ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid( span );
+        return new Guid(span);
     }
-    public static Guid AsGuid( this ref readonly ulong value )
+    public static Guid AsGuid( in this ulong value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
         span.Clear();
 
-        if ( BitConverter.TryWriteBytes( span, value ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
+        if ( !BitConverter.TryWriteBytes(span, value) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid( span );
+        return new Guid(span);
     }
 
 
-    public static Guid AsGuid( this ref readonly Int128 value )
+    public static Guid AsGuid( in this Int128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( value.TryFormat( span, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid( span );
+        return new Guid(span);
     }
-    public static Guid AsGuid( this ref readonly UInt128 value )
+    public static Guid AsGuid( in this UInt128 value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
-        if ( value.TryFormat( span, out int bytesWritten ) is false ) { throw new InvalidOperationException( "BitConverter.TryWriteBytes failed" ); }
+        if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid( span );
+        return new Guid(span);
     }
-    public static Int128 AsInt128( this ref readonly Guid value )
-    {
-        const int  SIZE = sizeof(ulong);
-        Span<byte> span = stackalloc byte[SIZE * 2];
-
-        return value.TryWriteBytes( span )
-                   ? new Int128( BitConverter.ToUInt64( span[..SIZE] ), BitConverter.ToUInt64( span[SIZE..] ) )
-                   : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
-    }
-    public static UInt128 AsUInt128( this ref readonly Guid value )
+    public static Int128 AsInt128( in this Guid value )
     {
         const int  SIZE = sizeof(ulong);
         Span<byte> span = stackalloc byte[SIZE * 2];
 
-        return value.TryWriteBytes( span )
-                   ? new UInt128( BitConverter.ToUInt64( span[..SIZE] ), BitConverter.ToUInt64( span[SIZE..] ) )
-                   : throw new InvalidOperationException( "Guid.TryWriteBytes failed" );
+        return value.TryWriteBytes(span)
+                   ? new Int128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
+                   : throw new InvalidOperationException("Guid.TryWriteBytes failed");
+    }
+    public static UInt128 AsUInt128( in this Guid value )
+    {
+        const int  SIZE = sizeof(ulong);
+        Span<byte> span = stackalloc byte[SIZE * 2];
+
+        return value.TryWriteBytes(span)
+                   ? new UInt128(BitConverter.ToUInt64(span[..SIZE]), BitConverter.ToUInt64(span[SIZE..]))
+                   : throw new InvalidOperationException("Guid.TryWriteBytes failed");
     }
 }

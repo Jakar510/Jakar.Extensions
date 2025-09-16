@@ -50,57 +50,57 @@ public sealed record UserRecord( string                        UserName,
                                  DateTimeOffset                DateCreated,
                                  DateTimeOffset?               LastModified = null ) : OwnedTableRecord<UserRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
 {
-    public const                                                                                       int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
-    public const                                                                                       int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
-    public const                                                                                       int                           MAX_PASSWORD_SIZE                   = 250;
-    public const                                                                                       string                        TABLE_NAME                          = "users";
-    public static readonly                                                                             TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
-    private                                                                                            IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
-    public static                                                                                      string                        TableName              { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData         { get => _additionalData; set => _additionalData = value; }
-    [StringLength(                        Constants.ANSI_CAPACITY )]                            public string                        AuthenticatorKey       { get;                    set; } = AuthenticatorKey;
-    public                                                                                             int?                          BadLogins              { get;                    set; } = BadLogins;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public                         string                        Company                { get;                    set; } = Company;
-    [StringLength(                        Constants.ANSI_CAPACITY )]    public                         string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                                      CreatedBy              => CreatedBy?.value;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Department             { get; set; } = Department;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Description            { get; set; } = Description;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Email                  { get; set; } = Email;
-    public                                                                     RecordID<UserRecord>?                                 EscalateTo             { get; set; } = EscalateTo;
-    Guid? IEscalateToUser<Guid>.                                                                                                     EscalateTo             => EscalateTo?.value;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Ext                    { get; set; } = Ext;
-    [ProtectedPersonalData, StringLength( 2000 )]                       public string                                                FirstName              { get; set; } = FirstName;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                FullName               { get; set; } = FullName;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Gender                 { get; set; } = Gender;
-    Guid? IImageID<Guid>.                                                                                                            ImageID                => ImageID?.value;
-    public   RecordID<FileRecord>?                                                                                                   ImageID                { get; set; } = ImageID;
-    public   bool                                                                                                                    IsActive               { get; set; } = IsActive;
-    public   bool                                                                                                                    IsDisabled             { get; set; } = IsDisabled;
-    public   bool                                                                                                                    IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
-    public   bool                                                                                                                    IsLocked               { get; set; } = IsLocked;
-    public   bool                                                                                                                    IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
-    public   bool                                                                                                                    IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
-    internal bool                                                                                                                    IsValid                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false && ID.IsValid(); }
-    bool IValidator.                                                                                                                 IsValid                => IsValid;
-    public                                                                      DateTimeOffset?                                      LastBadAttempt         { get; set; } = LastBadAttempt;
-    public                                                                      DateTimeOffset?                                      LastLogin              { get; set; } = LastLogin;
-    [ProtectedPersonalData, StringLength( 2000 )] public                        string                                               LastName               { get; set; } = LastName;
-    public                                                                      DateTimeOffset?                                      LockDate               { get; set; } = LockDate;
-    public                                                                      DateTimeOffset?                                      LockoutEnd             { get; set; } = LockoutEnd;
-    [StringLength(                        ENCRYPTED_MAX_PASSWORD_SIZE )] public string                                               PasswordHash           { get; set; } = PasswordHash;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )]  public string                                               PhoneNumber            { get; set; } = PhoneNumber;
-    [StringLength(                        512 )]                         public SupportedLanguage                                    PreferredLanguage      { get; set; } = PreferredLanguage;
-    [StringLength(                        Constants.ANSI_CAPACITY )]     public string                                               RefreshToken           { get; set; } = RefreshToken;
-    public                                                                      DateTimeOffset?                                      RefreshTokenExpiryTime { get; set; } = RefreshTokenExpiryTime;
-    [StringLength( IUserRights.MAX_SIZE )]    public                            string                                               Rights                 { get; set; } = Rights;
-    [StringLength( Constants.ANSI_CAPACITY )] public                            string                                               SecurityStamp          { get; set; } = SecurityStamp;
-    public                                                                      Guid?                                                SessionID              { get; set; } = SessionID;
-    public                                                                      DateTimeOffset?                                      SubscriptionExpires    { get; set; } = SubscriptionExpires;
-    public                                                                      Guid?                                                SubscriptionID         { get; set; } = SubscriptionID;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public  string                                               Title                  { get; set; } = Title;
-    Guid IUserID<Guid>.                                                                                                              UserID                 => ID.value;
-    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                                Website                { get;                  set; } = Website;
-    DateTimeOffset? IUserRecord<Guid>.                                                                                               LastModified           { get => _lastModified; set => _lastModified = value; }
+    public const                                                                                      int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
+    public const                                                                                      int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
+    public const                                                                                      int                           MAX_PASSWORD_SIZE                   = 250;
+    public const                                                                                      string                        TABLE_NAME                          = "users";
+    public static readonly                                                                            TimeSpan                      DefaultLockoutTime                  = TimeSpan.FromHours( 6 );
+    private                                                                                           IDictionary<string, JToken?>? _additionalData                     = AdditionalData;
+    public static                                                                                     string                        TableName              { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_TEXT_CAPACITY ), JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData         { get => _additionalData; set => _additionalData = value; }
+    [StringLength(                       Constants.ANSI_CAPACITY )]                            public string                        AuthenticatorKey       { get;                    set; } = AuthenticatorKey;
+    public                                                                                            int?                          BadLogins              { get;                    set; } = BadLogins;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public                         string                        Company                { get;                    set; } = Company;
+    [StringLength(                       Constants.ANSI_CAPACITY )]    public                         string                        ConcurrencyStamp       { get;                    set; } = ConcurrencyStamp;
+    Guid? ICreatedByUser<Guid>.                                                                                                     CreatedBy              => CreatedBy?.value;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                Department             { get; set; } = Department;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                Description            { get; set; } = Description;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                Email                  { get; set; } = Email;
+    public                                                                    RecordID<UserRecord>?                                 EscalateTo             { get; set; } = EscalateTo;
+    Guid? IEscalateToUser<Guid>.                                                                                                    EscalateTo             => EscalateTo?.value;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                Ext                    { get; set; } = Ext;
+    [ProtectedPersonalData, StringLength(2000 )]                       public string                                                FirstName              { get; set; } = FirstName;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                FullName               { get; set; } = FullName;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )] public string                                                Gender                 { get; set; } = Gender;
+    Guid? IImageID<Guid>.                                                                                                           ImageID                => ImageID?.value;
+    public   RecordID<FileRecord>?                                                                                                  ImageID                { get; set; } = ImageID;
+    public   bool                                                                                                                   IsActive               { get; set; } = IsActive;
+    public   bool                                                                                                                   IsDisabled             { get; set; } = IsDisabled;
+    public   bool                                                                                                                   IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
+    public   bool                                                                                                                   IsLocked               { get; set; } = IsLocked;
+    public   bool                                                                                                                   IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
+    public   bool                                                                                                                   IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
+    internal bool                                                                                                                   IsValid                { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( UserName ) && ID.IsValid(); }
+    bool IValidator.                                                                                                                IsValid                => IsValid;
+    public                                                                     DateTimeOffset?                                      LastBadAttempt         { get; set; } = LastBadAttempt;
+    public                                                                     DateTimeOffset?                                      LastLogin              { get; set; } = LastLogin;
+    [ProtectedPersonalData, StringLength( 2000 )] public                       string                                               LastName               { get; set; } = LastName;
+    public                                                                     DateTimeOffset?                                      LockDate               { get; set; } = LockDate;
+    public                                                                     DateTimeOffset?                                      LockoutEnd             { get; set; } = LockoutEnd;
+    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE )] public string                                               PasswordHash           { get; set; } = PasswordHash;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY )]  public string                                               PhoneNumber            { get; set; } = PhoneNumber;
+    [StringLength(                       512 )]                         public SupportedLanguage                                    PreferredLanguage      { get; set; } = PreferredLanguage;
+    [StringLength(                       Constants.ANSI_CAPACITY )]     public string                                               RefreshToken           { get; set; } = RefreshToken;
+    public                                                                     DateTimeOffset?                                      RefreshTokenExpiryTime { get; set; } = RefreshTokenExpiryTime;
+    [StringLength(IUserRights.MAX_SIZE )]    public                            string                                               Rights                 { get; set; } = Rights;
+    [StringLength(Constants.ANSI_CAPACITY )] public                            string                                               SecurityStamp          { get; set; } = SecurityStamp;
+    public                                                                     Guid?                                                SessionID              { get; set; } = SessionID;
+    public                                                                     DateTimeOffset?                                      SubscriptionExpires    { get; set; } = SubscriptionExpires;
+    public                                                                     Guid?                                                SubscriptionID         { get; set; } = SubscriptionID;
+    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                               Title                  { get; set; } = Title;
+    Guid IUserID<Guid>.                                                                                                             UserID                 => ID.value;
+    [ProtectedPersonalData, StringLength( Constants.UNICODE_CAPACITY )] public string                                               Website                { get;                  set; } = Website;
+    DateTimeOffset? IUserRecord<Guid>.                                                                                              LastModified           { get => _lastModified; set => _lastModified = value; }
 
 
     public override DynamicParameters ToDynamicParameters()
@@ -569,7 +569,7 @@ public sealed record UserRecord( string                        UserName,
 
     #region Passwords
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool HasPassword() => string.IsNullOrWhiteSpace( PasswordHash ) is false;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool HasPassword() => !string.IsNullOrWhiteSpace( PasswordHash );
 
 
     public UserRecord WithPassword( string password )
@@ -585,7 +585,7 @@ public sealed record UserRecord( string                        UserName,
         if ( requirements.maxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException( $"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password) ); }
 
         PasswordValidator validator = new(requirements);
-        if ( validator.Validate( password, out results ) is false ) { return this; }
+        if ( !validator.Validate( password, out results ) ) { return this; }
 
         return WithPassword( password );
     }
@@ -635,7 +635,7 @@ public sealed record UserRecord( string                        UserName,
         int badLogins = BadLogins ?? 0;
         badLogins++;
         bool           isDisabled = badLogins > badLoginDisableThreshold;
-        bool           isLocked   = isDisabled || IsActive is false;
+        bool           isLocked   = isDisabled || !IsActive;
         DateTimeOffset now        = DateTimeOffset.UtcNow;
 
         BadLogins      = badLogins;
@@ -716,7 +716,7 @@ public sealed record UserRecord( string                        UserName,
     {
         if ( record.LockoutEnd.HasValue && DateTimeOffset.UtcNow <= record.LockoutEnd.Value ) { record = record.Enable(); }
 
-        return record.IsDisabled is false && record.IsActive;
+        return !record.IsDisabled && record.IsActive;
     }
 
     #endregion

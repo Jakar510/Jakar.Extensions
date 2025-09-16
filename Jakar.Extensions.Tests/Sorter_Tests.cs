@@ -8,7 +8,7 @@ using System.Collections.Generic;
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture, TestOf( typeof(Sorter<>) )]
+[TestFixture, TestOf( typeof(EqualComparer<>) )]
 public class Sorter_Tests : Assert
 {
     [Test, TestCase( "false", "false" ), TestCase( "true", "true" ), TestCase( 0, 0 ), TestCase( double.Pi, double.Pi ), TestCase( 5UL, 5UL )]
@@ -18,9 +18,9 @@ public class Sorter_Tests : Assert
         using ( EnterMultipleScope() )
         {
             this.AreEqual( expected,                                      actual );
-            this.AreEqual( expected.CompareTo( actual ),                  Sorter<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( expected.CompareTo( actual ),                  EqualComparer<T>.Default.Compare( expected, actual ) );
             this.AreEqual( expected.CompareTo( actual ),                  Comparer<T>.Default.Compare( expected, actual ) );
-            this.AreEqual( Sorter<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( EqualComparer<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
         }
     }
 
@@ -32,9 +32,9 @@ public class Sorter_Tests : Assert
         using ( EnterMultipleScope() )
         {
             this.GreaterThan( expected, actual );
-            this.AreEqual( expected.CompareTo( actual ),                  Sorter<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( expected.CompareTo( actual ),                  EqualComparer<T>.Default.Compare( expected, actual ) );
             this.AreEqual( expected.CompareTo( actual ),                  Comparer<T>.Default.Compare( expected, actual ) );
-            this.AreEqual( Sorter<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( EqualComparer<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
         }
     }
 
@@ -46,9 +46,9 @@ public class Sorter_Tests : Assert
         using ( EnterMultipleScope() )
         {
             this.LessThan( expected, actual );
-            this.AreEqual( expected.CompareTo( actual ),                  Sorter<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( expected.CompareTo( actual ),                  EqualComparer<T>.Default.Compare( expected, actual ) );
             this.AreEqual( expected.CompareTo( actual ),                  Comparer<T>.Default.Compare( expected, actual ) );
-            this.AreEqual( Sorter<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
+            this.AreEqual( EqualComparer<T>.Default.Compare( expected, actual ), Comparer<T>.Default.Compare( expected, actual ) );
         }
     }
 
@@ -61,9 +61,9 @@ public class Sorter_Tests : Assert
         {
             this.AreEqual( expected,                                     actual );
             this.AreEqual( expected.GetHashCode(),                       actual.GetHashCode() );
-            this.AreEqual( expected.Equals( actual ),                    Sorter<T>.Default.Equals( expected, actual ) );
+            this.AreEqual( expected.Equals( actual ),                    EqualComparer<T>.Default.Equals( expected, actual ) );
             this.AreEqual( expected.Equals( actual ),                    EqualityComparer<T>.Default.Equals( expected, actual ) );
-            this.AreEqual( Sorter<T>.Default.Equals( expected, actual ), EqualityComparer<T>.Default.Equals( expected, actual ) );
+            this.AreEqual( EqualComparer<T>.Default.Equals( expected, actual ), EqualityComparer<T>.Default.Equals( expected, actual ) );
         }
     }
 }

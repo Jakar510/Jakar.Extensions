@@ -252,7 +252,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
-            if ( InternalRemove( in value ) is false ) { continue; }
+            if ( !InternalRemove( in value ) ) { continue; }
 
             results++;
         }
@@ -267,7 +267,7 @@ public class ObservableCollection<TValue>( IComparer<TValue> comparer, int capac
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( TValue value in values )
         {
-            if ( InternalRemove( in value ) is false ) { continue; }
+            if ( !InternalRemove( in value ) ) { continue; }
 
             results++;
         }

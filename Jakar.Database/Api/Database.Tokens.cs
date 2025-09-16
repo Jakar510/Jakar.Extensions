@@ -173,11 +173,11 @@ public abstract partial class Database
     public virtual async ValueTask<ErrorOrResult<Tokens>> Refresh( DbConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin( connection, transaction, refreshToken, types, token );
-        if ( result.TryGetValue( out UserRecord? record, out Errors? error ) is false ) { return error; }
+        if ( !result.TryGetValue( out UserRecord? record, out Errors? error ) ) { return error; }
 
         DateTimeOffset? expires = await GetSubscriptionExpiration( connection, transaction, record, token );
 
-        if ( UserRecord.CheckRefreshToken( ref record, refreshToken ) is false )
+        if ( !UserRecord.CheckRefreshToken( ref record, refreshToken ) )
         {
             record = record.MarkBadLogin();
             await Users.Update( connection, transaction, record, token );
@@ -229,7 +229,7 @@ public abstract partial class Database
 
         Claim[]                   claims = validationResult.ClaimsIdentity.Claims.ToArray();
         ErrorOrResult<UserRecord> result = await UserRecord.TryFromClaims( connection, transaction, this, claims, types | DEFAULT_CLAIM_TYPES, token );
-        if ( result.TryGetValue( out UserRecord? record, out Errors? errors ) is false ) { return errors; }
+        if ( !result.TryGetValue( out UserRecord? record, out Errors? errors ) ) { return errors; }
 
         record.LastLogin = DateTimeOffset.UtcNow;
         await Users.Update( connection, transaction, record, token );
@@ -258,7 +258,7 @@ public abstract partial class Database
         // return await provider.ValidateAsync( purpose, token, manager, user );
         string? key = await manager.GetAuthenticatorKeyAsync( user );
 
-        if ( string.IsNullOrWhiteSpace( key ) is false )
+        if ( !string.IsNullOrWhiteSpace( key ) )
         {
             if ( long.TryParse( token, out _ ) ) { return OneTimePassword.Create( key, Settings.TokenIssuer ).ValidateToken( token ); }
 
@@ -278,7 +278,7 @@ public abstract partial class Database
     public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) => CanGenerateTwoFactorTokenAsync( manager, user, CancellationToken.None );
     public virtual async Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user, CancellationToken token )
     {
-        if ( user.IsValidID() is false || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
+        if ( !user.IsValidID() || string.IsNullOrWhiteSpace( user.UserName ) ) { return false; }
 
         return await UserLogins.Where( true, UserLoginProviderRecord.GetDynamicParameters( user ), token ).Any( token );
     }

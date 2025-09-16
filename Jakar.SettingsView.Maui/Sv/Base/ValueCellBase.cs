@@ -21,13 +21,13 @@ public abstract class ValueCellBase<TValue> : DescriptionCellBase, ISvCellValue<
 
     public static  IEqualityComparer<TValue> Equalizer { get;                                        set; } = EqualityComparer<TValue>.Default;
     public static  IComparer<TValue>         Sorter    { get;                                        set; } = Comparer<TValue>.Default;
-    public virtual string?              Format    { get => (string?)GetValue( FormatProperty ); set => SetValue( FormatProperty, value ); }
-    public virtual string?              Hint      { get => (string?)GetValue( HintProperty );   set => SetValue( HintProperty,   value ); }
-    public virtual bool                 IsValid   => Value is not null && Equalizer.Equals( Value, default ) is false;
-    public virtual TValue?                   Max       { get => (TValue?)GetValue( MaxProperty );              set => SetValue( MaxProperty,         value ); }
-    public virtual TValue?                   Min       { get => (TValue?)GetValue( MinProperty );              set => SetValue( MinProperty,         value ); }
-    public virtual TValue?                   Value     { get => (TValue?)GetValue( ValueProperty );            set => SetValue( ValueProperty,       value ); }
-    public virtual string?              ValueText { get => (string?)GetValue( DescriptionProperty ); set => SetValue( DescriptionProperty, value ); }
+    public virtual string?                   Format    { get => (string?)GetValue( FormatProperty ); set => SetValue( FormatProperty, value ); }
+    public virtual string?                   Hint      { get => (string?)GetValue( HintProperty );   set => SetValue( HintProperty,   value ); }
+    public virtual bool                      IsValid   => Value is not null && !Equalizer.Equals( Value, default );
+    public virtual TValue?                   Max       { get => (TValue?)GetValue( MaxProperty );         set => SetValue( MaxProperty,         value ); }
+    public virtual TValue?                   Min       { get => (TValue?)GetValue( MinProperty );         set => SetValue( MinProperty,         value ); }
+    public virtual TValue?                   Value     { get => (TValue?)GetValue( ValueProperty );       set => SetValue( ValueProperty,       value ); }
+    public virtual string?                   ValueText { get => (string?)GetValue( DescriptionProperty ); set => SetValue( DescriptionProperty, value ); }
 
 
     public event EventHandler<ChangedEventArgs<TValue>>? TextChanged;

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0</TargetFramework>
@@ -19,8 +19,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="9.13.1" />
-		<PackageReference Include="Sigil" Version="5.0.0" />
+		<PackageReference Include="Jakar.Extensions" />
+		<PackageReference Include="Sigil" />
 	</ItemGroup>
 
 </Project>

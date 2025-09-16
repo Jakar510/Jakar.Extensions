@@ -26,7 +26,7 @@ public static class MigrationExtensions
     {
         if ( app.Environment.IsProduction() ) { return; }
 
-        if ( app.Configuration.GetValue( key, true ) is false ) { return; }
+        if ( !app.Configuration.GetValue( key, true ) ) { return; }
 
         using IServiceScope scope  = app.Services.CreateScope();
         IMigrationRunner                 runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
@@ -36,7 +36,7 @@ public static class MigrationExtensions
     {
         if ( app.Environment.IsProduction() ) { return; }
 
-        if ( app.Configuration.GetValue( key, true ) is false ) { return; }
+        if ( !app.Configuration.GetValue( key, true ) ) { return; }
 
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
         IMigrationRunner                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();

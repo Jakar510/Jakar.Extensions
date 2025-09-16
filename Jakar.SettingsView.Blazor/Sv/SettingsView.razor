@@ -18,7 +18,7 @@
                 <ol class="@SV_ROOT_LIST" >
                     @foreach ( SvSection section in Sections )
                     {
-                        @if ( section.IsVisible is false ) { continue; }
+                        @if ( !section.IsVisible ) { continue; }
 
                         <li class="@SV_SECTION"
                             @key="@section.ID" >

@@ -88,7 +88,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     [Pure]
     protected internal TClass Validate()
     {
-        if ( Debugger.IsAttached is false ) { return (TClass)this; }
+        if ( !Debugger.IsAttached ) { return (TClass)this; }
 
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();

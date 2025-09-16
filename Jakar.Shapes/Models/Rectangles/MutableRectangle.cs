@@ -9,7 +9,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static readonly MutableRectangle One     = 1;
 
 
-    public static                Sorter<MutableRectangle>                  Sorter  => Sorter<MutableRectangle>.Default;
+    public static                EqualComparer<MutableRectangle>           Sorter  => EqualComparer<MutableRectangle>.Default;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Zero    => ref Zero;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Invalid => ref Invalid;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.One     => ref One;
@@ -18,7 +18,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public                       double                                    Width   { get; set; } = width;
     public                       double                                    Height  { get; set; } = height;
     public readonly              bool                                      IsNaN   => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public readonly              bool                                      IsValid => IsNaN is false && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public readonly              bool                                      IsValid => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
     [JsonIgnore] public readonly double                                    Bottom  => Y + Height;
     [JsonIgnore] public readonly ReadOnlyPoint                             Center  => new(( X + Width ) / 2, ( Y + Height ) / 2);
     [JsonIgnore] public readonly bool                                      IsEmpty => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || Width <= 0 || double.IsNaN(Height) || Height <= 0;
@@ -114,6 +114,12 @@ public struct MutableRectangle( double x, double y, double width, double height 
     [Pure] public static MutableRectangle Create( in MutableRectangle rectangle, in ReadOnlyThickness padding )     => rectangle + padding;
 
 
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
+
     public readonly int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -143,7 +149,7 @@ public struct MutableRectangle( double x, double y, double width, double height 
 
 
     [Pure] public readonly bool Contains( in       MutableRectangle other ) => Left <= other.Left && Right >= other.Right && Top <= other.Top && Bottom >= other.Bottom;
-    [Pure] public readonly bool IntersectsWith( in MutableRectangle other ) => ( Left >= other.Right || Right <= other.Left || Top >= other.Bottom || Bottom <= other.Top ) is false;
+    [Pure] public readonly bool IntersectsWith( in MutableRectangle other ) => !( Left >= other.Right || Right <= other.Left || Top >= other.Bottom || Bottom <= other.Top );
 
 
     public MutableRectangle Round()

@@ -62,7 +62,7 @@ public interface IFileData<TClass, TID, TFileMetaData> : IFileData<TID, TFileMet
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : class, IFileData<TClass, TID, TFileMetaData>
 {
-    public abstract static Sorter<TClass> Sorter { get; }
+    public abstract static EqualComparer<TClass> Sorter { get; }
 
 
     public abstract static TClass  Create( IFileData<TID, TFileMetaData>                                        data );
@@ -89,7 +89,7 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TClass : FileData<TClass, TID, TFileMetaData>, IFileData<TClass, TID, TFileMetaData>
 {
-    public static                                      Sorter<TClass> Sorter   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TClass>.Default; }
+    public static                                      EqualComparer<TClass> Sorter   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<TClass>.Default; }
     public required                                    long           FileSize { get; init; } = fileSize;
     [StringLength( UNICODE_CAPACITY )] public required string         Hash     { get; init; } = hash;
     public required                                    TID            ID       { get; init; } = id;
@@ -113,9 +113,9 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     }
     public async Task WriteToAsync( Stream stream, CancellationToken token )
     {
-        if ( stream.CanWrite is false ) { throw new ArgumentException( "Stream is not writable" ); }
+        if ( !stream.CanWrite ) { throw new ArgumentException( "Stream is not writable" ); }
 
-        if ( stream.CanSeek is false ) { throw new ArgumentException( "Stream is not seekable" ); }
+        if ( !stream.CanSeek ) { throw new ArgumentException( "Stream is not seekable" ); }
 
         stream.Seek( 0, SeekOrigin.Begin );
         OneOf<byte[], string> data = GetData();
@@ -132,9 +132,9 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
     }
     public void WriteTo( Stream stream )
     {
-        if ( stream.CanWrite is false ) { throw new ArgumentException( "Stream is not writable" ); }
+        if ( !stream.CanWrite ) { throw new ArgumentException( "Stream is not writable" ); }
 
-        if ( stream.CanSeek is false ) { throw new ArgumentException( "Stream is not seekable" ); }
+        if ( !stream.CanSeek ) { throw new ArgumentException( "Stream is not seekable" ); }
 
         stream.Seek( 0, SeekOrigin.Begin );
         OneOf<byte[], string> data = GetData();
@@ -229,7 +229,7 @@ public abstract class FileData<TClass, TID, TFileMetaData>( long fileSize, strin
 [Serializable, SuppressMessage( "ReSharper", "RedundantExplicitPositionalPropertyDeclaration" )]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
 {
-    public static                             Sorter<FileMetaData>          Sorter          => Sorter<FileMetaData>.Default;
+    public static                             EqualComparer<FileMetaData>          Sorter          => EqualComparer<FileMetaData>.Default;
     [JsonExtensionData]                public IDictionary<string, JToken?>? AdditionalData  { get; set; }
     [StringLength( UNICODE_CAPACITY )] public string?                       FileDescription { get; set; }  = fileDescription;
     [StringLength( UNICODE_CAPACITY )] public string?                       FileName        { get; init; } = fileName;

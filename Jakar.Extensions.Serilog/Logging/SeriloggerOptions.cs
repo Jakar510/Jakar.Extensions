@@ -40,7 +40,7 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     public          Func<EventDetails, EventDetails>                         UpdateEventDetails { get; set; } = UpdateEventDetailsNoOpp;
     SeriloggerOptions IOptions<SeriloggerOptions>.                           Value              => this;
     public ReadOnlyMemory<byte>                                              ScreenShotData     { get; internal set; }
-    public bool                                                              IsValid            => AppID.IsValidID() && IsValidDeviceID && string.IsNullOrWhiteSpace( AppName ) is false && AppVersion.IsValid;
+    public bool                                                              IsValid            => AppID.IsValidID() && IsValidDeviceID && !string.IsNullOrWhiteSpace( AppName ) && AppVersion.IsValid;
     public bool                                                              IsValidDeviceID    => DeviceID.IsValidID() || DeviceIDLong != 0;
 
 
@@ -62,7 +62,7 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     public async ValueTask<bool> BufferScreenShot( CancellationToken token = default )
     {
         ReadOnlyMemory<byte> data = ScreenShotData = await TakeScreenShot( token );
-        return data.IsEmpty is false;
+        return !data.IsEmpty;
     }
     public async ValueTask<LocalFile?> GetScreenShot( CancellationToken token = default )
     {

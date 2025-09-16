@@ -16,7 +16,7 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public readonly        bool          IsFinite = isFinite;
 
 
-    public static       Sorter<ReadOnlyLine>              Sorter   => Sorter<ReadOnlyLine>.Default;
+    public static       EqualComparer<ReadOnlyLine>       Sorter   => EqualComparer<ReadOnlyLine>.Default;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Zero     => ref Zero;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.One      => ref One;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Invalid  => ref Invalid;
@@ -25,8 +25,9 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     bool ILine<ReadOnlyLine>.                             IsFinite => IsFinite;
     public bool                                           IsEmpty  => Start.IsEmpty || End.IsEmpty;
     public bool                                           IsNaN    => Start.IsNaN   || End.IsNaN;
-    public bool                                           IsValid  => IsNaN is false && Start != End;
+    public bool                                           IsValid  => !IsNaN && Start != End;
     public double                                         Length   => Start.DistanceTo(in End);
+    public double                                         Slope    => ( End.Y - Start.Y ) / ( End.X - Start.X );
 
 
     public static implicit operator ReadOnlyLine( int    other ) => new(ReadOnlyPoint.Zero, other);
@@ -39,6 +40,12 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     [Pure] public        ReadOnlyLine Round() => new(Start.Round(), End.Round(), IsFinite);
     [Pure] public        ReadOnlyLine Floor() => new(Start.Floor(), End.Floor(), IsFinite);
 
+    public void Deconstruct( out ReadOnlyPoint start, out ReadOnlyPoint end, out bool isFinite )
+    {
+        start    = Start;
+        end      = End;
+        isFinite = IsFinite;
+    }
 
     public int CompareTo( ReadOnlyLine other )
     {

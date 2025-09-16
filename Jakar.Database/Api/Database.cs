@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 using IsolationLevel = System.Data.IsolationLevel;
 using Status = Jakar.Extensions.Status;
@@ -10,7 +11,7 @@ using Status = Jakar.Extensions.Status;
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "SuggestBaseTypeForParameter" ), SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage("ReSharper", "SuggestBaseTypeForParameter"), SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
     public const       ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
@@ -34,14 +35,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected          string?                          _className;
 
 
-    public static      Database?         Current                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public static      DataProtector     DataProtector             { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             string            ClassName                 { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _className ??= GetType().GetFullName(); }
-    public             int?              CommandTimeout            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.CommandTimeout; }
-    protected internal SecuredString?    ConnectionString          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; }
-    public             PasswordValidator PasswordValidator         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.PasswordRequirements.GetValidator(); }
-    public             IsolationLevel    TransactionIsolationLevel { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion        Version                   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Settings.Version; }
+    public static      Database?         Current                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    public static      DataProtector     DataProtector             { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public             string            ClassName                 { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType().GetFullName(); }
+    public             int?              CommandTimeout            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.CommandTimeout; }
+    protected internal SecuredString?    ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    public             PasswordValidator PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.PasswordRequirements.GetValidator(); }
+    public             IsolationLevel    TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion        Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.Version; }
 
 
     static Database()
@@ -83,7 +84,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         UserAddresses     = Create<UserAddressRecord>();
         Files             = Create<FileRecord>();
         Current           = this;
-        Task.Run( InitDataProtector );
+        Task.Run(InitDataProtector);
     }
     public virtual async ValueTask DisposeAsync()
     {
@@ -92,7 +93,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         _tables.Clear();
         ConnectionString?.Dispose();
         ConnectionString = null;
-        GC.SuppressFinalize( this );
+        NpgsqlConnection.ClearAllPools();
+        GC.SuppressFinalize(this);
     }
 
 
@@ -104,59 +106,59 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         if ( Settings.DataProtectorKey.HasValue )
         {
-            (LocalFile pem, SecuredStringResolverOptions password) = Settings.DataProtectorKey.Value;
-            await InitDataProtector( pem, password );
+            ( LocalFile pem, SecuredStringResolverOptions password ) = Settings.DataProtectorKey.Value;
+            await InitDataProtector(pem, password);
         }
     }
-    protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync( pem, await password.GetSecuredStringAsync( Configuration, token ), token );
+    protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync(pem, await password.GetSecuredStringAsync(Configuration, token), token);
 
 
     protected abstract DbConnection CreateConnection( in SecuredString secure );
     public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
     {
-        ConnectionString ??= await Settings.GetConnectionStringAsync( Configuration, token );
-        DbConnection connection = CreateConnection( ConnectionString );
-        await connection.OpenAsync( token );
+        ConnectionString ??= await Settings.GetConnectionStringAsync(Configuration, token);
+        DbConnection connection = CreateConnection(ConnectionString);
+        await connection.OpenAsync(token);
         return connection;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual DbTable<TClass> Create<TClass>()
         where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
     {
         DbTable<TClass> table = new(this, _cache);
-        return AddDisposable( table );
+        return AddDisposable(table);
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
     {
-        _tables.Add( value );
+        _tables.Add(value);
         return value;
     }
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
         where TValue : class, IDapperSqlCommand
     {
-        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
-        return new CommandDefinition( command.Sql, ParametersDictionary.LoadFrom( command ), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token );
+        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
+        return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token);
     }
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
-        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
-        return sql.ToCommandDefinition( transaction, token, CommandTimeout );
+        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
+        return sql.ToCommandDefinition(transaction, token, CommandTimeout);
     }
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, DbConnection connection, DbTransaction? transaction, CancellationToken token )
     {
-        Activity.Current?.AddEvent( new ActivityEvent( nameof(GetCommand) ) );
-        return sql.ToCommandDefinition( connection, transaction, token, CommandTimeout );
+        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
+        return sql.ToCommandDefinition(connection, transaction, token, CommandTimeout);
     }
 
 
@@ -165,24 +167,24 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         try
         {
-            CommandDefinition definition = GetCommand( command, transaction, token );
-            return await connection.ExecuteReaderAsync( definition );
+            CommandDefinition definition = GetCommand(command, transaction, token);
+            return await connection.ExecuteReaderAsync(definition);
         }
-        catch ( Exception e ) { throw new SqlException( command.Sql, e ); }
+        catch ( Exception e ) { throw new SqlException(command.Sql, e); }
     }
     public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
     {
         try
         {
-            CommandDefinition command = GetCommand( in sql, transaction, token );
-            return await connection.ExecuteReaderAsync( command );
+            CommandDefinition command = GetCommand(in sql, transaction, token);
+            return await connection.ExecuteReaderAsync(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql.sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql.sql, e); }
     }
     public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition )
     {
-        try { return await definition.connection.ExecuteReaderAsync( definition ); }
-        catch ( Exception e ) { throw new SqlException( definition.command.CommandText, definition.command.Parameters as DynamicParameters, e ); }
+        try { return await definition.connection.ExecuteReaderAsync(definition); }
+        catch ( Exception e ) { throw new SqlException(definition.command.CommandText, definition.command.Parameters as DynamicParameters, e); }
     }
 
 
@@ -190,7 +192,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         try
         {
-            await using DbConnection connection = await ConnectAsync( token );
+            await using DbConnection connection = await ConnectAsync(token);
 
             return connection.State switch
                    {
@@ -200,32 +202,32 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
                        ConnectionState.Connecting => HealthCheckResult.Healthy(),
                        ConnectionState.Executing  => HealthCheckResult.Healthy(),
                        ConnectionState.Fetching   => HealthCheckResult.Healthy(),
-                       _                          => throw new OutOfRangeException( connection.State )
+                       _                          => throw new OutOfRangeException(connection.State)
                    };
         }
-        catch ( Exception e ) { return HealthCheckResult.Unhealthy( e.Message, e ); }
+        catch ( Exception e ) { return HealthCheckResult.Unhealthy(e.Message, e); }
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall( Register, request, rights, types, token );
+    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall(Register, request, rights, types, token);
     public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
-        UserRecord? record = await Users.Get( connection, transaction, true, UserRecord.GetDynamicParameters( request ), token );
-        if ( record is not null ) { return Error.NotFound( request.UserName ); }
+        UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
+        if ( record is not null ) { return Error.NotFound(request.UserName); }
 
-        if ( PasswordValidator.Validate( request.Password, out PasswordValidator.Results results ) is false ) { return Error.Unauthorized( in results ); }
+        if ( !PasswordValidator.Validate(request.Password, out PasswordValidator.Results results) ) { return Error.Unauthorized(in results); }
 
-        record = UserRecord.Create( request, rights );
-        record = await Users.Insert( connection, transaction, record, token );
-        return await GetToken( connection, transaction, record, types, token );
+        record = UserRecord.Create(request, rights);
+        record = await Users.Insert(connection, transaction, record, token);
+        return await GetToken(connection, transaction, record, types, token);
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression( nameof(value) )] string? variableName = null )
+    public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
     {
-        ArgumentNullException.ThrowIfNull( variableName );
-        var parameters = new DynamicParameters( template );
-        parameters.Add( variableName, value );
+        ArgumentNullException.ThrowIfNull(variableName);
+        var parameters = new DynamicParameters(template);
+        parameters.Add(variableName, value);
         return parameters;
     }
 
@@ -237,13 +239,13 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            SqlCommand        sqlCommand = new SqlCommand( sql, parameters );
-            CommandDefinition command    = GetCommand( in sqlCommand, transaction, token );
-            reader = await connection.ExecuteReaderAsync( command );
+            SqlCommand        sqlCommand = new SqlCommand(sql, parameters);
+            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
+            reader = await connection.ExecuteReaderAsync(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
 
-        await foreach ( TValue record in TValue.CreateAsync( reader, token ) ) { yield return record; }
+        await foreach ( TValue record in TValue.CreateAsync(reader, token) ) { yield return record; }
     }
     public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
@@ -252,14 +254,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            SqlCommand        sqlCommand = new SqlCommand( sql, parameters );
-            CommandDefinition command    = GetCommand( in sqlCommand, transaction, token );
-            await connection.QueryAsync<TValue>( command );
+            SqlCommand        sqlCommand = new SqlCommand(sql, parameters);
+            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
+            await connection.QueryAsync<TValue>(command);
 
-            reader = await connection.ExecuteReaderAsync( command );
+            reader = await connection.ExecuteReaderAsync(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, parameters, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
 
-        while ( await reader.ReadAsync( token ) ) { yield return reader.GetFieldValue<TValue>( 0 ); }
+        while ( await reader.ReadAsync(token) ) { yield return reader.GetFieldValue<TValue>(0); }
     }
 }

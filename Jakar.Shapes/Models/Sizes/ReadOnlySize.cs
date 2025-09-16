@@ -6,16 +6,16 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
 {
     public static readonly ReadOnlySize Invalid = new(double.NaN, double.NaN);
     public static readonly ReadOnlySize Zero    = 0;
-    public static readonly ReadOnlySize One     = 1; 
+    public static readonly ReadOnlySize One     = 1;
     public readonly        double       Height  = height;
     public readonly        double       Width   = width;
 
 
-    public static       Sorter<ReadOnlySize>              Sorter      => Sorter<ReadOnlySize>.Default;
+    public static       EqualComparer<ReadOnlySize>       Sorter      => EqualComparer<ReadOnlySize>.Default;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Zero        => ref Zero;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid     => ref Invalid;
-    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One         => ref One; 
-    public              bool                              IsValid     => IsNaN is false && IsEmpty is false;
+    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One         => ref One;
+    public              bool                              IsValid     => !IsNaN && !IsEmpty;
     [JsonIgnore] public bool                              IsEmpty     => IsNaN || Width < 0 || Height < 0;
     public              bool                              IsLandscape => Width < Height;
     public              bool                              IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
@@ -29,6 +29,13 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     [Pure] public        ReadOnlySize Reverse() => new(Height, Width);
     [Pure] public        ReadOnlySize Round()   => new(Width.Round(), Height.Round());
     [Pure] public        ReadOnlySize Floor()   => new(Width.Floor(), Height.Floor());
+
+
+    public void Deconstruct( out double width, out double height )
+    {
+        width  = Width;
+        height = Height;
+    }
 
 
     public int CompareTo( ReadOnlySize other )

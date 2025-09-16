@@ -67,7 +67,7 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
         get => _data;
         set
         {
-            if ( SetProperty( ref _data, value ) is false ) { return; }
+            if ( !SetProperty( ref _data, value ) ) { return; }
 
             OnPropertyChanged( nameof(Title) );
             OnPropertyChanged( nameof(TitleAttributes) );
@@ -87,7 +87,7 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
     public bool IsCollapsable { get => _isCollapsable; set => SetProperty( ref _isCollapsable, value ); }
     public bool IsExpanded
     {
-        get => _isExpanded || _isCollapsable is false;
+        get => _isExpanded || !_isCollapsable;
         set
         {
             if ( SetProperty( ref _isExpanded, value ) ) { Icon = GetIcon( value ); }
@@ -114,7 +114,7 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
 
     protected void ExpandCollapse()
     {
-        if ( _isCollapsable is false ) { return; }
+        if ( !_isCollapsable ) { return; }
 
         IsExpanded = !_isExpanded;
     }

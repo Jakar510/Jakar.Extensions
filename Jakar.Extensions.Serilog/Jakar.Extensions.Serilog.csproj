@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -45,24 +45,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="Jakar.Extensions" Version="9.13.1" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.7" />
-	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
-	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
-	<PackageReference Include="Serilog.Enrichers.Span" Version="3.1.0" />
-	<PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
-	<PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
-	<PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
-	<PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
-	<PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
-	<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-	<PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
-	<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-	<PackageReference Include="Serilog.Sinks.Http" Version="9.1.1" />
-	<PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
-	<PackageReference Include="Serilog.Sinks.Seq" Version="9.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Jakar.Extensions" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+	<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+	<PackageReference Include="Serilog.Enrichers.Span" />
+	<PackageReference Include="Serilog.Enrichers.Process" />
+	<PackageReference Include="Serilog.Enrichers.Thread" />
+	<PackageReference Include="Serilog.Extensions.Logging" />
+	<PackageReference Include="Serilog.Formatting.Compact" />
+	<PackageReference Include="Serilog.Sinks.Async" />
+	<PackageReference Include="Serilog.Sinks.Console" />
+	<PackageReference Include="Serilog.Sinks.Debug" />
+	<PackageReference Include="Serilog.Sinks.File" />
+	<PackageReference Include="Serilog.Sinks.Http" />
+	<PackageReference Include="Serilog.Sinks.OpenTelemetry" />
+	<PackageReference Include="Serilog.Sinks.Seq" />
   </ItemGroup>
 
   <ItemGroup>

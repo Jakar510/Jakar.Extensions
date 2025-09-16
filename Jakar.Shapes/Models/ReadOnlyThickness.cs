@@ -22,13 +22,13 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public readonly        double            VerticalThickness   = top  + bottom;
 
 
-    public static       Sorter<ReadOnlyThickness>                   Sorter              => Sorter<ReadOnlyThickness>.Default;
+    public static       EqualComparer<ReadOnlyThickness>            Sorter              => EqualComparer<ReadOnlyThickness>.Default;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Zero                => ref Zero;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Invalid             => ref Invalid;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.One                 => ref One;
     public              bool                                        IsEmpty             => Left == 0 && Top == 0 && Right == 0 && Bottom == 0;
     public              bool                                        IsNaN               => double.IsNaN(Left) || double.IsNaN(Top) || double.IsNaN(Right) || double.IsNaN(Bottom);
-    public              bool                                        IsValid             => IsNaN is false;
+    public              bool                                        IsValid             => !IsNaN;
     double IThickness<ReadOnlyThickness>.                           Bottom              => Bottom;
     double IThickness<ReadOnlyThickness>.                           Left                => Left;
     double IThickness<ReadOnlyThickness>.                           Right               => Right;

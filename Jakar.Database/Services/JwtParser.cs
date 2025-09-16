@@ -32,11 +32,11 @@ public static class JwtParser
     }
     private static void ExtractRolesFromJwt( List<Claim> claims, Dictionary<string, object> keyValuePairs )
     {
-        if ( keyValuePairs.TryGetValue( ClaimTypes.Role, out object? roles ) is false ) { return; }
+        if ( !keyValuePairs.TryGetValue( ClaimTypes.Role, out object? roles ) ) { return; }
 
         ReadOnlySpan<string> parsedRoles = roles.ToString()?.Trim().TrimStart( '[' ).TrimEnd( ']' ).Split( ',' );
 
-        if ( parsedRoles.IsEmpty is false )
+        if ( !parsedRoles.IsEmpty )
         {
             if ( parsedRoles.Length > 1 )
             {

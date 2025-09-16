@@ -60,7 +60,7 @@ public sealed record FileRecord( string?              FileName,
             string hash    = Hashes.GetHash( content );
             if ( FileSize != content.Length ) { return Error.Conflict( $"{nameof(FileSize)} mismatch. Got {content.Length} but expected {FileSize}" ); }
 
-            if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
+            if ( !string.Equals( Hash, hash, StringComparison.Ordinal ) ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
 
             return new FileData( FileSize, Hash, Convert.ToBase64String( content ), FileMetaData.Create( this ) );
         }
@@ -70,7 +70,7 @@ public sealed record FileRecord( string?              FileName,
             string hash    = Hashes.GetHash( content );
             if ( FileSize != content.Length ) { return Error.Conflict( $"{nameof(FileSize)} mismatch. Got {content.Length} but expected {FileSize}" ); }
 
-            if ( string.Equals( Hash, hash, StringComparison.Ordinal ) is false ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
+            if ( !string.Equals( Hash, hash, StringComparison.Ordinal ) ) { return Error.Conflict( $"{nameof(Hash)} mismatch: {Hash} != {hash}" ); }
 
             return new FileData( FileSize, Hash, content, FileMetaData.Create( this ) );
         }

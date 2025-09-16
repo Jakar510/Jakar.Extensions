@@ -112,7 +112,7 @@ public class SpansBenchmarks
         Span<char> span = stackalloc char[Value.Length];
         Value.CopyTo( span );
 
-        Span<char> result = span.RemoveAll( ['1', '3', 'F', 'A'] );
+        Span<char> result = span.RemoveAll('1', '3', 'F', 'A');
         return result.ToArray();
     }
 

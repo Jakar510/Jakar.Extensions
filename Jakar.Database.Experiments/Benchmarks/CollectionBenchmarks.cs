@@ -65,23 +65,23 @@ public class CollectionBenchmarks
     static CollectionBenchmarks()
     {
         Dictionary<int, List<double>> list = new(3);
-        list.Add( [GetList( 10 ), GetList( 1000 ), GetList( 10_000 )] );
+        list.Add(GetList( 10 ), GetList( 1000 ), GetList( 10_000 ));
         _list = list.ToFrozenDictionary();
 
         Dictionary<int, double[]> array = new(3);
-        array.Add( [GetArray( 10 ), GetArray( 1000 ), GetArray( 10_000 )] );
+        array.Add(GetArray( 10 ), GetArray( 1000 ), GetArray( 10_000 ));
         _array = array.ToFrozenDictionary();
 
         Dictionary<int, ImmutableArray<double>> immutableArray = new(3);
-        immutableArray.Add( [GetImmutableArray( 10 ), GetImmutableArray( 1000 ), GetImmutableArray( 10_000 )] );
+        immutableArray.Add(GetImmutableArray( 10 ), GetImmutableArray( 1000 ), GetImmutableArray( 10_000 ));
         _immutableArray = immutableArray.ToFrozenDictionary();
 
         Dictionary<int, ImmutableList<double>> immutableList = new(3);
-        immutableList.Add( [GetImmutableList( 10 ), GetImmutableList( 1000 ), GetImmutableList( 10_000 )] );
+        immutableList.Add(GetImmutableList( 10 ), GetImmutableList( 1000 ), GetImmutableList( 10_000 ));
         _immutableList = immutableList.ToFrozenDictionary();
 
         Dictionary<int, FrozenSet<double>> set = new(3);
-        set.Add( [GetFrozenSet( 10 ), GetFrozenSet( 1000 ), GetFrozenSet( 10_000 )] );
+        set.Add(GetFrozenSet( 10 ), GetFrozenSet( 1000 ), GetFrozenSet( 10_000 ));
         _set = set.ToFrozenDictionary();
     }
 

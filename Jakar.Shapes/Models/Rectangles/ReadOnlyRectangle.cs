@@ -16,7 +16,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public readonly        double            Height  = height;
 
 
-    public static       Sorter<ReadOnlyRectangle>                   Sorter   => Sorter<ReadOnlyRectangle>.Default;
+    public static       EqualComparer<ReadOnlyRectangle>            Sorter   => EqualComparer<ReadOnlyRectangle>.Default;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;
@@ -26,7 +26,7 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     double IShapeSize.                                              Width    => Width;
     double IShapeSize.                                              Height   => Height;
     public bool                                                     IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                     IsValid  => IsNaN is false && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public bool                                                     IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
     public ReadOnlyPoint                                            Center   => new(Right / 2, Bottom / 2);
     public ReadOnlyPoint                                            Location => new(X, Y);
     public ReadOnlySize                                             Size     => new(Width, Height);
@@ -64,7 +64,14 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     [Pure] public static ReadOnlyRectangle Create( float                              x,         float                y, float           width, float  height ) => new(x, y, width, height);
     [Pure] public static ReadOnlyRectangle Create( double                             x,         double               y, double          width, double height ) => new(x, y, width, height);
 
-
+    
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
+    
+    
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }

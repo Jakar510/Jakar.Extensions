@@ -20,7 +20,7 @@ public ref struct SpanFilter<TValue>( scoped in ReadOnlySpan<TValue> span, Func<
     public bool MoveNext()
     {
         int index = _index + 1;
-        while ( index < _span.Length && _func( _span[index] ) is false ) { index++; }
+        while ( index < _span.Length && !_func( _span[index] ) ) { index++; }
 
         Current = _span[index];
         _index  = index;

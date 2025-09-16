@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Shapes
 // 07/14/2025  10:08
 
-using System.Diagnostics.CodeAnalysis;
-
-
-
 namespace Jakar.Shapes;
 
 
@@ -20,7 +16,7 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public readonly        ReadOnlyPoint C       = c;
 
 
-    public static       Sorter<Triangle>          Sorter   => Sorter<Triangle>.Default;
+    public static       EqualComparer<Triangle>   Sorter   => EqualComparer<Triangle>.Default;
     static ref readonly Triangle IShape<Triangle>.Zero     => ref Zero;
     static ref readonly Triangle IShape<Triangle>.One      => ref One;
     static ref readonly Triangle IShape<Triangle>.Invalid  => ref Invalid;
@@ -40,6 +36,9 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public Degrees                                Cab      => new(C.AngleBetween(in A, in B));
     double IShapeLocation.                        X        => Centroid.X;
     double IShapeLocation.                        Y        => Centroid.Y;
+
+
+    public void Deconstruct( out double x, out double y ) => Centroid.Deconstruct(out x, out y);
 
 
     public int CompareTo( Triangle other )

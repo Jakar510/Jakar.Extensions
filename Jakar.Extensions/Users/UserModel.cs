@@ -83,16 +83,16 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         }
     }
 
-    [StringLength( UNICODE_CAPACITY )] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
-    [StringLength( UNICODE_CAPACITY )] public string                            Gender             { get => _gender;                     set => SetProperty( ref _gender,   value ); }
-    public                                    ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
-    public                                    TID?                              ImageID            { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
-    [JsonIgnore] public virtual               bool                              IsValid            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsValidEmail                                && IsValidName && IsValidUserName; }
-    [JsonIgnore] public virtual               bool                              IsValidEmail       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Email ) is false && Email.IsEmailAddress(); }
-    [JsonIgnore] public virtual               bool                              IsValidName        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( FullName ) is false; }
-    [JsonIgnore] public virtual               bool                              IsValidPhoneNumber { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( PhoneNumber ) is false; }
-    [JsonIgnore] public virtual               bool                              IsValidUserName    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( UserName ) is false; }
-    [JsonIgnore] public virtual               bool                              IsValidWebsite     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
+    [StringLength(UNICODE_CAPACITY )] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty( ref _fullName, value ); }
+    [StringLength(UNICODE_CAPACITY )] public string                            Gender             { get => _gender;                     set => SetProperty( ref _gender,   value ); }
+    public                                   ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
+    public                                   TID?                              ImageID            { get => _imageID;                    set => SetProperty( ref _imageID, value ); }
+    [JsonIgnore] public virtual              bool                              IsValid            { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => IsValidEmail                        && IsValidName && IsValidUserName; }
+    [JsonIgnore] public virtual              bool                              IsValidEmail       { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( Email ) && Email.IsEmailAddress(); }
+    [JsonIgnore] public virtual              bool                              IsValidName        { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( FullName ); }
+    [JsonIgnore] public virtual              bool                              IsValidPhoneNumber { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( PhoneNumber ); }
+    [JsonIgnore] public virtual              bool                              IsValidUserName    { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( UserName ); }
+    [JsonIgnore] public virtual              bool                              IsValidWebsite     { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Uri.TryCreate( Website, UriKind.RelativeOrAbsolute, out _ ); }
 
     [Required, StringLength( 2000 )]
     public string LastName

@@ -82,7 +82,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.Span )
             {
-                if ( string.Equals( parameter, otherParameter, StringComparison.Ordinal ) is false ) { return false; }
+                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
             }
         }
 
@@ -96,7 +96,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.Span )
             {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
             }
         }
 
@@ -110,7 +110,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.AsSpan() )
             {
-                if ( string.Equals( parameter, otherParameter, StringComparison.Ordinal ) is false ) { return false; }
+                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
             }
         }
 
@@ -124,7 +124,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.AsSpan() )
             {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
             }
         }
 
@@ -138,7 +138,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( string otherParameter in right.AsSpan() )
             {
-                if ( string.Equals( parameter, otherParameter, StringComparison.Ordinal ) is false ) { return false; }
+                if ( !string.Equals( parameter, otherParameter, StringComparison.Ordinal ) ) { return false; }
             }
         }
 
@@ -152,7 +152,7 @@ public class StringCollectionBenchmarks
         {
             foreach ( ReadOnlySpan<char> otherParameter in right.AsSpan() )
             {
-                if ( parameter.SequenceEqual( otherParameter ) is false ) { return false; }
+                if ( !parameter.SequenceEqual( otherParameter ) ) { return false; }
             }
         }
 

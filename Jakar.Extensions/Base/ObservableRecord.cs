@@ -37,7 +37,7 @@ public record ObservableRecord : BaseRecord, IObservableObject
         return true;
     }
     protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
     protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
         OnPropertyChanging(propertyName);
@@ -47,7 +47,7 @@ public record ObservableRecord : BaseRecord, IObservableObject
         return true;
     }
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue> => comparer.Equals(backingStore, value) is false && SetProperty(ref backingStore, value, propertyName);
+        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
         where TComparer : IEqualityComparer<TValue>
@@ -69,7 +69,7 @@ public record ObservableRecord : BaseRecord, IObservableObject
 public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static Sorter<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Sorter<TClass>.Default; }
+    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
 
 
     public TClass? FromJson( [NotNullIfNotNull(nameof(json))] string? json ) => json?.FromJson<TClass>();

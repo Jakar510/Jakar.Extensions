@@ -101,7 +101,7 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     internal readonly      StringValues errors;
 
 
-    public static                  Sorter<Error> Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<Error>.Default; }
+    public static                  EqualComparer<Error> Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<Error>.Default; }
     public static                  IErrorTitles  Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
     [JsonRequired] public required string?       Detail     { get;                                                      init; }
     [JsonRequired] public required StringValues  Errors     { get => errors;                                            init => errors = value; }

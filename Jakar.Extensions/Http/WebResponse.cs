@@ -123,7 +123,7 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
+            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
             TValue result = await func( response, token );
             return new WebResponse<TValue>( response, result );
@@ -140,7 +140,7 @@ public sealed class WebResponse<TValue>
 
         try
         {
-            if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
+            if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
             TValue result = await func( response, arg, token );
             return new WebResponse<TValue>( response, result );
@@ -163,7 +163,7 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
                 TValue result = await func( response, token );
                 return new WebResponse<TValue>( response, result );
@@ -190,7 +190,7 @@ public sealed class WebResponse<TValue>
         {
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await Create( response, token ); }
 
                 TValue result = await func( response, arg, token );
                 return new WebResponse<TValue>( response, result );

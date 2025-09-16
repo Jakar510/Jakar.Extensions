@@ -90,7 +90,7 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     }
 
 
-    public          bool   IsValid()                                                                                                                      => Guid.Empty.Equals( value ) is false;
+    public          bool   IsValid()                                                                                                                      => !Guid.Empty.Equals( value );
     public          bool   IsNotValid()                                                                                                                   => Guid.Empty.Equals( value );
     public override string ToString()                                                                                                                     => value.ToString();
     public          string ToString( string?           format,      IFormatProvider? formatProvider )                                                     => value.ToString( format, formatProvider );
@@ -104,7 +104,7 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     public static bool operator true( RecordID<TClass>  recordID )              => recordID.IsValid();
     public static bool operator false( RecordID<TClass> recordID )              => recordID.IsNotValid();
     public static bool operator ==( RecordID<TClass>    a, RecordID<TClass> b ) => a.Equals( b );
-    public static bool operator !=( RecordID<TClass>    a, RecordID<TClass> b ) => a.Equals( b ) is false;
+    public static bool operator !=( RecordID<TClass>    a, RecordID<TClass> b ) => !a.Equals( b );
 
 
     public static void RegisterDapperTypeHandlers()

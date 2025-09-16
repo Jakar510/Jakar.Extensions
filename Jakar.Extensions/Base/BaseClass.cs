@@ -13,15 +13,7 @@ public class BaseClass
     public static readonly DateTimeOffset SQLMinDate       = new(1753, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
     public static readonly DateOnly       SQLMinDateOnly   = new(1753, 1, 1);
 
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static void ClearAndDispose<TValue>( ref TValue? field )
-        where TValue : IDisposable => Disposables.CastAndDispose(ref field);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
-        where TValue : class, IDisposable => Disposables.CastAndDisposeAsync(ref resource);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected static ValueTask CastAndDispose( IDisposable? resource ) => Disposables.CastAndDisposeAsync(resource);
+     
 }
 
 
@@ -30,7 +22,7 @@ public class BaseClass
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseClass<TClass>, IEqualComparable<TClass>
 {
-    public static Sorter<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Sorter<TClass>.Default; }
+    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
 
 
     public string ToJson()       => this.ToJson(Formatting.None);

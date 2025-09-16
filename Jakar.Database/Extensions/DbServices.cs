@@ -31,7 +31,7 @@ public static class DbServices
     public static bool IsNotValid<TClass>( this TClass value )
         where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
     {
-        return value.IsValid() is false;
+        return !value.IsValid();
     }
 
 
@@ -59,7 +59,7 @@ public static class DbServices
     }
     public static IHostApplicationBuilder AddOpenTelemetryExporters( this IHostApplicationBuilder builder )
     {
-        bool useOtlpExporter = string.IsNullOrWhiteSpace( builder.Configuration[OTEL_EXPORTER_OTLP_ENDPOINT] ) is false;
+        bool useOtlpExporter = !string.IsNullOrWhiteSpace( builder.Configuration[OTEL_EXPORTER_OTLP_ENDPOINT] );
 
         if ( useOtlpExporter )
         {

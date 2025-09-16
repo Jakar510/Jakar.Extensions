@@ -68,7 +68,7 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
     protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync( _file );
     protected virtual void WatcherOnChanged( object sender, FileSystemEventArgs e )
     {
-        if ( string.Equals( e.Name, _file.Name, StringComparison.Ordinal ) is false ) { return; }
+        if ( !string.Equals( e.Name, _file.Name, StringComparison.Ordinal ) ) { return; }
 
         _ = LoadAsync();
     }

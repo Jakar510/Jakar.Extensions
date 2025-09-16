@@ -73,7 +73,7 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public virtual void Add( KeyValuePair<TKey, TValue> item ) => Add( item.Key, item.Value );
     public virtual void Add( TKey key, TValue value )
     {
-        if ( buffer.TryAdd( key, value ) is false ) { return; }
+        if ( !buffer.TryAdd( key, value ) ) { return; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Added( in pair, -1 );
@@ -83,9 +83,9 @@ public class ObservableDictionary<TKey, TValue> : CollectionAlerts<KeyValuePair<
     public bool Remove( KeyValuePair<TKey, TValue> item ) => Remove( item.Key );
     public bool Remove( TKey key )
     {
-        if ( buffer.ContainsKey( key ) is false ) { return false; }
+        if ( !buffer.ContainsKey( key ) ) { return false; }
 
-        if ( buffer.Remove( key, out TValue? value ) is false ) { return false; }
+        if ( !buffer.Remove( key, out TValue? value ) ) { return false; }
 
         KeyValuePair<TKey, TValue> pair = new(key, value);
         Removed( in pair, -1 );

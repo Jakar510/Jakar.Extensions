@@ -16,7 +16,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public readonly        float              Height  = height;
 
 
-    public static       Sorter<ReadOnlyRectangleF>                    Sorter   => Sorter<ReadOnlyRectangleF>.Default;
+    public static       EqualComparer<ReadOnlyRectangleF>             Sorter   => EqualComparer<ReadOnlyRectangleF>.Default;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.One      => ref One;
@@ -26,7 +26,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     double IShapeSize.                                                Width    => Width;
     double IShapeSize.                                                Height   => Height;
     public bool                                                       IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                       IsValid  => IsNaN is false && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public bool                                                       IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
     public ReadOnlyPointF                                             Center   => new(Right / 2, Bottom / 2);
     public ReadOnlyPointF                                             Location => new(X, Y);
     public ReadOnlySizeF                                              Size     => new(Width, Height);
@@ -51,6 +51,13 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public static implicit operator ReadOnlyRectangleF( long       value ) => new(value, value, value, value);
     public static implicit operator ReadOnlyRectangleF( float      value ) => new(value, value, value, value);
     public static implicit operator ReadOnlyRectangleF( double     value ) => value.AsFloat();
+
+
+    public void Deconstruct( out double x, out double y )
+    {
+        x = X;
+        y = Y;
+    }
 
 
     [Pure]

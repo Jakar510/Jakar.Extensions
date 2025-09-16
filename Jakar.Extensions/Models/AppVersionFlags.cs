@@ -17,10 +17,10 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     public readonly        uint            Iteration      = iteration;
 
 
-    public static ValueSorter<AppVersionFlags> Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ValueSorter<AppVersionFlags>.Default; }
-    public        bool                         IsEmpty    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
-    public        bool                         IsNotEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => IsEmpty is false; }
-    public        int                          Length     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
+    public static ValueSorter<AppVersionFlags> Sorter     { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => ValueSorter<AppVersionFlags>.Default; }
+    public        bool                         IsEmpty    { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Flag ); }
+    public        bool                         IsNotEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !IsEmpty; }
+    public        int                          Length     { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => Flag.Length + 15; }
 
 
     public override string ToString()                                                  => AsSpan().ToString();
@@ -126,7 +126,7 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
             return Alpha();
         }
 
-        if ( value.Contains( FLAG_SEPARATOR ) is false ) { return Stable; }
+        if ( !value.Contains( FLAG_SEPARATOR ) ) { return Stable; }
 
         int                index = value.IndexOf( FLAG_SEPARATOR );
         ReadOnlySpan<char> flag  = value[(index - 1)..];

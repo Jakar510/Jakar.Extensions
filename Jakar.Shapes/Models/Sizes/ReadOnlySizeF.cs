@@ -14,11 +14,11 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public readonly        float         Width   = width;
 
 
-    public static       Sorter<ReadOnlySizeF>               Sorter      => Sorter<ReadOnlySizeF>.Default;
+    public static       EqualComparer<ReadOnlySizeF>        Sorter      => EqualComparer<ReadOnlySizeF>.Default;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
-    public              bool                                IsValid     => IsNaN is false && IsEmpty is false;
+    public              bool                                IsValid     => !IsNaN && !IsEmpty;
     [JsonIgnore] public bool                                IsEmpty     => IsNaN || Width < 0 || Height < 0;
     public              bool                                IsLandscape => Width < Height;
     public              bool                                IsNaN       => float.IsNaN(Width) || float.IsNaN(Height);
@@ -44,6 +44,13 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     [Pure] public        ReadOnlySizeF Reverse() => new(Height, Width);
     [Pure] public        ReadOnlySizeF Round()   => new(Width.Round(), Height.Round());
     [Pure] public        ReadOnlySizeF Floor()   => new(Width.Floor(), Height.Floor());
+
+
+    public void Deconstruct( out double width, out double height )
+    {
+        width  = Width;
+        height = Height;
+    }
 
 
     public int CompareTo( ReadOnlySizeF other )

@@ -17,7 +17,7 @@ public interface IComparisonOperators<TValue> : IComparisonOperators<TValue, TVa
 public interface IEqualComparable<TValue> : IEqualityOperators<TValue>, IComparisonOperators<TValue>
     where TValue : IEqualComparable<TValue>
 {
-    public abstract static Sorter<TValue> Sorter { get; }
+    public abstract static EqualComparer<TValue> Sorter { get; }
 
 
     public bool Equals( object? other );

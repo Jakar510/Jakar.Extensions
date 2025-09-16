@@ -636,7 +636,7 @@ public static class Hashes
     {
         using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent( UNICODE_CAPACITY );
         Span<byte>               span   = buffer.Memory.Span;
-        if ( hasher.TryComputeHash( data, span, out int bytesWritten ) is false ) { throw new InvalidOperationException( nameof(span) ); }
+        if ( !hasher.TryComputeHash( data, span, out int bytesWritten ) ) { throw new InvalidOperationException( nameof(span) ); }
 
         span = span[..bytesWritten];
         Span<char>   hexChars     = stackalloc char[span.Length * 2];

@@ -28,8 +28,8 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [JsonIgnore]                                                                       public override bool IsValid         { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => base.IsValid                                   && IsValidPassword; }
-    [JsonIgnore, MemberNotNullWhen( true, nameof(Password), nameof(ConfirmPassword) )] public virtual  bool IsValidPassword { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => string.IsNullOrWhiteSpace( Password ) is false && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password ); }
+    [JsonIgnore]                                                                       public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => base.IsValid                           && IsValidPassword; }
+    [JsonIgnore, MemberNotNullWhen( true, nameof(Password), nameof(ConfirmPassword) )] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( Password ) && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password ); }
 
 
     [Required, StringLength( UNICODE_CAPACITY )]

@@ -13,7 +13,7 @@
                     @_headerContent(_headerTitle)
                 </div>
 
-                @if ( string.IsNullOrEmpty(_icon) is false )
+                @if ( !string.IsNullOrEmpty(_icon) )
                 {
                     <div class="@SV_SECTION_HEADER_ICON"
                          @onclick="ToggleExpanded" >
@@ -29,7 +29,7 @@
                 {
                     @foreach ( CellBase cell in Cells )
                     {
-                        @if ( cell.IsVisible is false ) { continue; }
+                        @if ( !cell.IsVisible ) { continue; }
 
                         <li class="@SV_CELL"
                             @key="cell.ID" >

@@ -1,28 +1,83 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  15:58
 
+using Jakar.Shapes.Interfaces;
+
+
+
 namespace Jakar.Shapes;
 
 
-public delegate TOutput RefSelect<TInput, out TOutput>( in TInput value );
+public delegate TValue RefSelect<TValue>( ref readonly TValue value );
+
+
+
+public delegate TOutput RefSelect<TInput, out TOutput>( ref readonly TInput value );
 
 
 
 public static class Shapes
 {
-    public static TInput[]? Create<TInput>( this ref readonly TInput[]? self, RefSelect<TInput, TInput> func )
+    public static ReadOnlyLine RadiusLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle> => new(self.Center, new ReadOnlyPoint(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value)));
+    public static CalculatedLine RadiusCalculatedLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
     {
-        ReadOnlySpan<TInput> span = self;
+        ref readonly ReadOnlyPoint start = ref self.Center;
+        ReadOnlyPoint              end   = new(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value));
+
+        double dx = end.X - start.X;
+        double dy = end.Y - start.Y;
+
+        if ( Math.Abs(dx) < double.Epsilon ) { return CalculatedLine.Create(x => self.Center.X); }
+
+        double m = dy / dx;
+        double b = start.Y - m * start.X;
+
+        return CalculatedLine.Create(x => m * x + b);
+    }
+
+
+    public static ReadOnlyLine DiameterLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
+    {
+        ref readonly ReadOnlyPoint center = ref self.Center;
+        ReadOnlyPoint              start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint              end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
+        return new ReadOnlyLine(start, end);
+    }
+    public static CalculatedLine DiameterCalculatedLine<TCircle>( this TCircle self, in Radians radians )
+        where TCircle : struct, ICircle<TCircle>
+    {
+        ReadOnlyPoint center = self.Center;
+        ReadOnlyPoint start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
+
+        double dx = end.X - start.X;
+        double dy = end.Y - start.Y;
+
+        if ( Math.Abs(dx) < double.Epsilon ) { return CalculatedLine.Create(x => start.X); }
+
+        double m = dy / dx;
+        double b = start.Y - m * start.X;
+
+        return CalculatedLine.Create(x => m * x + b);
+    }
+
+
+    public static TValue[]? Create<TValue>( this TValue[]? self, RefSelect<TValue> func )
+    {
+        ReadOnlySpan<TValue> span = self;
         if ( span.IsEmpty ) { return null; }
 
-        TInput[] buffer = GC.AllocateUninitializedArray<TInput>(span.Length);
+        TValue[] buffer = GC.AllocateUninitializedArray<TValue>(span.Length);
         int      index  = 0;
 
-        foreach ( ref readonly TInput value in span ) { buffer[index++] = func(in value); }
+        foreach ( ref readonly TValue value in span ) { buffer[index++] = func(in value); }
 
         return buffer;
     }
-    public static TOutput[]? Create<TInput, TOutput>( this ref readonly TInput[]? self, RefSelect<TInput, TOutput> func )
+    public static TOutput[]? Create<TInput, TOutput>( this TInput[]? self, RefSelect<TInput, TOutput> func )
     {
         ReadOnlySpan<TInput> span = self;
         if ( span.IsEmpty ) { return null; }
@@ -74,7 +129,7 @@ public static class Shapes
     {
         foreach ( ref readonly TPoint point in others )
         {
-            if ( self.Contains(in point) is false ) { return false; }
+            if ( !self.Contains(in point) ) { return false; }
         }
 
         return true;
@@ -115,7 +170,7 @@ public static class Shapes
 
     public static bool IntersectsWith<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
-        where TOther : IRectangle<TOther> => ( self.Left >= other.Right || self.Right <= other.Left || self.Top >= other.Bottom || self.Bottom <= other.Top ) is false;
+        where TOther : IRectangle<TOther> => !( self.Left >= other.Right || self.Right <= other.Left || self.Top >= other.Bottom || self.Bottom <= other.Top );
 
 
     public static bool DoesLineIntersect<TRectangle, TPoint>( this TRectangle self, in TPoint source, in TPoint target )

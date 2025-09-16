@@ -71,7 +71,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create( response, token ); }
 
                 TValue result = await func( response, arg, token );
                 return new WebResponse<TValue>( response, result );
@@ -93,7 +93,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
             try
             {
-                if ( response.IsSuccessStatusCode is false ) { return await WebResponse<TValue>.Create( response, token ); }
+                if ( !response.IsSuccessStatusCode ) { return await WebResponse<TValue>.Create( response, token ); }
 
                 TValue result = await func( response, arg1, arg2, token );
                 return new WebResponse<TValue>( response, result );
@@ -203,7 +203,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         await using Stream     stream = await AsStream( response, token );
         await using FileStream fs     = LocalFile.CreateTempFileAndOpen( out LocalFile file );
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( fs, token ); }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync( fs, token ); }
 
         return file;
     }
@@ -217,7 +217,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     {
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using MemoryStream stream        = await AsStream( response, token );
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( stream, token ); }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync( stream, token ); }
 
         return file;
     }
@@ -235,7 +235,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync( token );
         MemoryStream       buffer  = new((int)stream.Length);
-        using ( telemetrySpan.WriteToFile() ) { await stream.CopyToAsync( buffer, token ); }
+        using ( telemetrySpan.SubSpan("WriteToFile") ) { await stream.CopyToAsync( buffer, token ); }
 
         buffer.Seek( 0, SeekOrigin.Begin );
         return buffer;

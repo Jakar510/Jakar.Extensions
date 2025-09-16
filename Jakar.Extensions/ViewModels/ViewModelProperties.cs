@@ -43,10 +43,10 @@ public static class Properties
         where TCommand : class, ICommand => new(EqualityComparer<TValue?>.Default, onSelected, value);
 
 
-    public static TValue NoCoerceValue<TValue>( TValue                   value ) => value;
-    public static bool   HasValue( [NotNullWhen(         true )] string? value ) => string.IsNullOrWhiteSpace( value ) is false;
-    public static bool   HasValue<TValue>( [NotNullWhen( true )] TValue? value ) => value is not null;
-    public static bool   CheckIsEmail( [NotNullWhen(     true )] string? value ) => HasValue( value ) && value.IsEmailAddress();
+    public static TValue NoCoerceValue<TValue>( TValue                  value ) => value;
+    public static bool   HasValue( [NotNullWhen(        true )] string? value ) => !string.IsNullOrWhiteSpace( value );
+    public static bool   HasValue<TValue>( [NotNullWhen(true )] TValue? value ) => value is not null;
+    public static bool   CheckIsEmail( [NotNullWhen(    true )] string? value ) => HasValue( value ) && value.IsEmailAddress();
 }
 
 

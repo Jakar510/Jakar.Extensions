@@ -37,7 +37,7 @@ public sealed class HeaderData( string? title, TextFontAttributes titleAttribute
 {
     public static HeaderData         Empty           => new(null, TextFontAttributes.None, null);
     public        HeaderDataCell[]?  Cells           { get; init; } = cells;
-    public        bool               IsEmpty         => IsNotEmpty is false;
+    public        bool               IsEmpty         => !IsNotEmpty;
     public        bool               IsNotEmpty      => Cells?.Length is > 0 || !string.IsNullOrEmpty( Title );
     public        string?            Title           { get; init; } = title;
     public        TextFontAttributes TitleAttributes { get; init; } = titleAttributes;

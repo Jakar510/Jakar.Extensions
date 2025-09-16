@@ -27,7 +27,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
                 tasks.Add( Handle( disposables, _logger.Settings.Paths.Screenshot ) );
 
                 ReadOnlyMemory<byte> data = _logger.ScreenShotData;
-                if ( data.IsEmpty is false ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
+                if ( !data.IsEmpty ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
             if ( _logger.Settings.IncludeAppStateOnError )
@@ -44,7 +44,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();
         }
-        catch ( Exception e ) { SelfLog.WriteLine( "{Exception}", e ); }
+        catch ( Exception e ) { global::Serilog.Debugging.SelfLog.WriteLine( "{Exception}", e ); }
     }
     private static async Task Handle( Disposables disposables, LocalFile? file, CancellationToken token = default )
     {
