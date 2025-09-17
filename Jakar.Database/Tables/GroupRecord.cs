@@ -71,6 +71,8 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
         parameters.Add(nameof(Rights),      Rights);
         return parameters;
     }
+
+
     [Pure]
     public static GroupRecord Create( DbDataReader reader )
     {
@@ -84,14 +86,10 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
         GroupRecord           record       = new(customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
     }
-    [Pure]
-    public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where(connection, transaction, db.Users, this, token);
+
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where(connection, transaction, db.Users, this, token);
 
 
     public static bool operator >( GroupRecord  left, GroupRecord right ) => left.CompareTo(right) > 0;

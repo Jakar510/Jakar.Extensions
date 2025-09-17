@@ -13,9 +13,9 @@ public partial class DbTable<TClass>
     public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( string           sql, DynamicParameters? parameters, CancellationToken token = default ) => this.Call(SingleOrDefault, sql, parameters, token);
 
 
-    public ValueTask<ErrorOrResult<TClass>> Single( DbConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => Single(connection, transaction, TClass.SQL.Get(in id),           token);
-    public ValueTask<ErrorOrResult<TClass>> Single( DbConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => Single(connection, transaction, new SqlCommand(sql, parameters), token);
-    public virtual async ValueTask<ErrorOrResult<TClass>> Single( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => Single(connection, transaction, SQLCache.Get(in id),           token);
+    public ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => Single(connection, transaction, new SqlCommand(sql, parameters), token);
+    public virtual async ValueTask<ErrorOrResult<TClass>> Single( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
     {
         try
         {
@@ -26,9 +26,9 @@ public partial class DbTable<TClass>
     }
 
 
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( DbConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => SingleOrDefault(connection, transaction, TClass.SQL.Get(in id),           token);
-    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( DbConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => SingleOrDefault(connection, transaction, new SqlCommand(sql, parameters), token);
-    public virtual async ValueTask<ErrorOrResult<TClass>> SingleOrDefault( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass> id,  CancellationToken  token                               = default ) => SingleOrDefault(connection, transaction, SQLCache.Get(in id),           token);
+    public ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, string           sql, DynamicParameters? parameters, CancellationToken token = default ) => SingleOrDefault(connection, transaction, new SqlCommand(sql, parameters), token);
+    public virtual async ValueTask<ErrorOrResult<TClass>> SingleOrDefault( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token = default )
     {
         try
         {

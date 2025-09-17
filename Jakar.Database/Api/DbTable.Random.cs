@@ -13,9 +13,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Random( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Random( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetRandom();
+        SqlCommand sql = SQLCache.GetRandom();
 
         try
         {
@@ -27,17 +27,17 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TClass> Random( DbConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Random( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetRandom(user, count);
+        SqlCommand sql = SQLCache.GetRandom(user, count);
         return Where(connection, transaction, sql, token);
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TClass> Random( DbConnection connection, DbTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Random( NpgsqlConnection connection, DbTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetRandom(count);
+        SqlCommand sql = SQLCache.GetRandom(count);
         return Where(connection, transaction, sql, token);
     }
 }

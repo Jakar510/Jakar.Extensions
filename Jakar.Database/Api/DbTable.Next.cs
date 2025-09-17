@@ -13,9 +13,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Next( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetNext(in pair);
+        SqlCommand sql = SQLCache.GetNext(in pair);
 
         try
         {
@@ -31,9 +31,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetSortedID();
+        SqlCommand sql = SQLCache.GetSortedID();
 
         try
         {
@@ -46,9 +46,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetNextID(in pair);
+        SqlCommand sql = SQLCache.GetNextID(in pair);
 
         try
         {

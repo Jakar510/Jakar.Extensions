@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using Npgsql;
 using ZiggyCreatures.Caching.Fusion;
 using IsolationLevel = System.Data.IsolationLevel;
 using Status = Jakar.Extensions.Status;
@@ -113,11 +112,11 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected async ValueTask InitDataProtector( LocalFile pem, SecuredStringResolverOptions password, CancellationToken token = default ) => DataProtector = await DataProtector.WithKeyAsync(pem, await password.GetSecuredStringAsync(Configuration, token), token);
 
 
-    protected abstract DbConnection CreateConnection( in SecuredString secure );
-    public async ValueTask<DbConnection> ConnectAsync( CancellationToken token )
+    protected virtual NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure.ToString());
+    public async ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token )
     {
         ConnectionString ??= await Settings.GetConnectionStringAsync(Configuration, token);
-        DbConnection connection = CreateConnection(ConnectionString);
+        NpgsqlConnection connection = CreateConnection(ConnectionString);
         await connection.OpenAsync(token);
         return connection;
     }
@@ -155,14 +154,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         return sql.ToCommandDefinition(transaction, token, CommandTimeout);
     }
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, DbConnection connection, DbTransaction? transaction, CancellationToken token )
+    public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return sql.ToCommandDefinition(connection, transaction, token, CommandTimeout);
     }
 
 
-    public async ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( DbConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
+    public async ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( NpgsqlConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
         where TValue : class, IDapperSqlCommand
     {
         try
@@ -172,7 +171,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         }
         catch ( Exception e ) { throw new SqlException(command.Sql, e); }
     }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( DbConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
+    public async ValueTask<DbDataReader> ExecuteReaderAsync( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
     {
         try
         {
@@ -192,7 +191,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         try
         {
-            await using DbConnection connection = await ConnectAsync(token);
+            await using NpgsqlConnection connection = await ConnectAsync(token);
 
             return connection.State switch
                    {
@@ -210,7 +209,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall(Register, request, rights, types, token);
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( DbConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( NpgsqlConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
         if ( record is not null ) { return Error.NotFound(request.UserName); }
@@ -232,8 +231,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public virtual async IAsyncEnumerable<TValue> Where<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TValue : class, IDbReaderMapping<TValue>, IRecordPair
+    public virtual async IAsyncEnumerable<TClass> Where<TClass>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TClass : class, IDbReaderMapping<TClass>, IRecordPair
     {
         DbDataReader reader;
 
@@ -245,9 +244,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         }
         catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
 
-        await foreach ( TValue record in TValue.CreateAsync(reader, token) ) { yield return record; }
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( DbConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
     {
         DbDataReader reader;

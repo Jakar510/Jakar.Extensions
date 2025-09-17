@@ -16,30 +16,30 @@ public partial class DbTable<TClass>
     public ValueTask Delete( bool                               matchAll, DynamicParameters parameters, CancellationToken token = default ) => this.TryCall(Delete, matchAll, parameters, token);
 
 
-    public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, TClass              record,  CancellationToken token = default ) => Delete(connection, transaction, record.ID,                        token);
-    public virtual ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<TClass> records, CancellationToken token = default ) => Delete(connection, transaction, records.Select(static x => x.ID), token);
-    public async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
+    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, TClass              record,  CancellationToken token = default ) => Delete(connection, transaction, record.ID,                        token);
+    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<TClass> records, CancellationToken token = default ) => Delete(connection, transaction, records.Select(static x => x.ID), token);
+    public async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
     {
         HashSet<TClass> ids = await records.ToHashSet(token);
         await Delete(connection, transaction, ids, token);
     }
-    public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
     {
         HashSet<RecordID<TClass>> records = await ids.ToHashSet(token);
         await Delete(connection, transaction, records, token);
     }
-    public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, RecordID<TClass> id, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, RecordID<TClass> id, CancellationToken token = default )
     {
-        SqlCommand        sql     = TClass.SQL.GetDeleteID(in id);
+        SqlCommand        sql     = SQLCache.GetDeleteID(in id);
         CommandDefinition command = _database.GetCommand(in sql, transaction, token);
         await connection.ExecuteScalarAsync(command);
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask Delete( DbConnection connection, DbTransaction transaction, IEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetDelete(ids);
+        SqlCommand sql = SQLCache.GetDelete(ids);
 
         try
         {
@@ -49,9 +49,9 @@ public partial class DbTable<TClass>
         catch ( Exception e ) { throw new SqlException(sql, e); }
     }
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public async ValueTask Delete( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
+    public async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand        sql     = TClass.SQL.GetDelete(matchAll, parameters);
+        SqlCommand        sql     = SQLCache.GetDelete(matchAll, parameters);
         CommandDefinition command = _database.GetCommand(in sql, transaction, token);
         await connection.ExecuteScalarAsync(command);
     }

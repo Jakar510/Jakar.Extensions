@@ -148,13 +148,6 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public static async IAsyncEnumerable<FileRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
-
-
     public override int CompareTo( FileRecord? other )
     {
         if ( ReferenceEquals(this, other) ) { return 0; }

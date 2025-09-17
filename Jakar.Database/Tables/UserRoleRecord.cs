@@ -29,11 +29,8 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
         UserRoleRecord           record       = new(key, value, id, dateCreated, lastModified);
         return record.Validate();
     }
-    [Pure]
-    public static async IAsyncEnumerable<UserRoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
+
+
     public static bool operator >( UserRoleRecord  left, UserRoleRecord right ) => left.CompareTo(right) > 0;
     public static bool operator >=( UserRoleRecord left, UserRoleRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( UserRoleRecord  left, UserRoleRecord right ) => left.CompareTo(right) < 0;

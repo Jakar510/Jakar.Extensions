@@ -46,11 +46,6 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         return record.Validate();
     }
 
-    [Pure]
-    public static async IAsyncEnumerable<UserLoginProviderRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
 
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {

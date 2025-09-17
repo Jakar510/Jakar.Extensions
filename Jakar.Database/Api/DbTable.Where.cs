@@ -14,28 +14,28 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async IAsyncEnumerable<TClass> Where( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand               command = TClass.SQL.Get(matchAll, parameters);
+        SqlCommand               command = SQLCache.Get(matchAll, parameters);
         await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
-        await foreach ( TClass record in TClass.CreateAsync(reader, token) ) { yield return record; }
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
     }
 
 
-    public virtual async IAsyncEnumerable<TClass> Where( DbConnection connection, DbTransaction? transaction, SqlCommand sql, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbDataReader reader = await _database.ExecuteReaderAsync(connection, transaction, sql, token);
-        await foreach ( TClass record in TClass.CreateAsync(reader, token) ) { yield return record; }
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
     }
     public virtual async IAsyncEnumerable<TClass> Where( SqlCommand.Definition definition, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbDataReader reader = await _database.ExecuteReaderAsync(definition);
-        await foreach ( TClass record in TClass.CreateAsync(reader, token) ) { yield return record; }
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TClass> Where<TValue>( DbConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Where<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
         DynamicParameters parameters = new();
         parameters.Add(nameof(value), value);

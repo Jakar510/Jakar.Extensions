@@ -28,9 +28,8 @@ public interface IOwnedTableRecord : ITableRecord
 public interface ITableRecord<TClass> : ITableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    public abstract static SqlCache<TClass> SQL { get; }
-    Guid IUniqueID<Guid>.                   ID  => ID.value;
-    public new RecordID<TClass>             ID  { get; }
+    Guid IUniqueID<Guid>.       ID => ID.value;
+    public new RecordID<TClass> ID { get; }
 
 
     [Pure] public RecordPair<TClass> ToPair();
@@ -43,10 +42,11 @@ public interface ITableRecord<TClass> : ITableRecord, IEquatable<TClass>, ICompa
 public interface IDbReaderMapping<TClass> : ITableRecord<TClass>, IEqualComparable<TClass>
     where TClass : class, IDbReaderMapping<TClass>, IRecordPair
 {
-    public abstract static        string                   TableName { [Pure] get; }
-    [Pure] public abstract static TClass                   Create( DbDataReader      reader );
-    [Pure] public abstract static IAsyncEnumerable<TClass> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
-    [Pure] public                 DynamicParameters        ToDynamicParameters();
+    public abstract static        string            TableName { [Pure] get; }
+    [Pure] public abstract static TClass            Create( DbDataReader reader );
+    [Pure] public                 DynamicParameters ToDynamicParameters();
+
+    // [Pure] public abstract static IAsyncEnumerable<TClass> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
 }
 
 
@@ -56,14 +56,12 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
 {
     protected internal static readonly PropertyInfo[]   Properties    = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-    public static readonly             SqlCache<TClass> SQLCache      = new();
     protected                          DateTimeOffset?  _lastModified = LastModified;
     private                            RecordID<TClass> __id          = ID;
 
 
-    public static SqlCache<TClass> SQL          => SQLCache;
-    [Key] public  RecordID<TClass> ID           { get => __id;          init => __id = value; }
-    public        DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
+    [Key] public RecordID<TClass> ID           { get => __id;          init => __id = value; }
+    public       DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
 
 
     [Pure]
@@ -171,8 +169,8 @@ public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecor
     }
 
 
-    public async ValueTask<UserRecord?> GetUser( DbConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, true,      GetDynamicParameters(this), token);
-    public async ValueTask<UserRecord?> GetUserWhoCreated( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
+    public async ValueTask<UserRecord?> GetUser( NpgsqlConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, true,      GetDynamicParameters(this), token);
+    public async ValueTask<UserRecord?> GetUserWhoCreated( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public TClass WithOwner( UserRecord  user )   => (TClass)( this with { CreatedBy = user.ID } );

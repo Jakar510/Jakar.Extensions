@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:26 PM
 
-using Jakar.Database.Resx;
-
-
-
 namespace Jakar.Database;
 
 
@@ -36,12 +32,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID(reader);
         RecoveryCodeRecord           record       = new(code, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
-    }
-    [Pure]
-    public static async IAsyncEnumerable<RecoveryCodeRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
+    } 
 
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());

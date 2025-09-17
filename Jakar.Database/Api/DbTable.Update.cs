@@ -13,26 +13,26 @@ public partial class DbTable<TClass>
     public ValueTask Update( IAsyncEnumerable<TClass> records, CancellationToken token = default ) => this.TryCall(Update, records, token);
 
 
-    public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, ImmutableArray<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, ImmutableArray<TClass> records, CancellationToken token = default )
     {
         foreach ( TClass record in records ) { await Update(connection, transaction, record, token); }
     }
-    public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, IEnumerable<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IEnumerable<TClass> records, CancellationToken token = default )
     {
         foreach ( TClass record in records ) { await Update(connection, transaction, record, token); }
     }
 
 
-    public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
     {
         await foreach ( TClass record in records.WithCancellation(token) ) { await Update(connection, transaction, record, token); }
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask Update( DbConnection connection, DbTransaction? transaction, TClass record, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, TClass record, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetUpdate(record);
+        SqlCommand sql = SQLCache.GetUpdate(record);
 
         try
         {

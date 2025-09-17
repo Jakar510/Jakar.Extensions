@@ -58,13 +58,8 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
         RoleRecord            record           = new(name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
     }
-    [Pure]
-    public static async IAsyncEnumerable<RoleRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
 
-    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
 
 
     [Pure]

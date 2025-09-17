@@ -19,5 +19,5 @@ public class UserRecordManager( Database                                    data
 
 
     public override async Task<IList<Claim>>      GetClaimsAsync( UserRecord   user )                                                                            => await __database.TryCall(GetClaimsAsync, user, CancellationToken.None);
-    public async          ValueTask<IList<Claim>> GetClaimsAsync( DbConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) => await user.GetUserClaims(connection, transaction, __database, Claims.DEFAULTS, token);
+    public async          ValueTask<IList<Claim>> GetClaimsAsync( NpgsqlConnection connection, DbTransaction transaction, UserRecord user, CancellationToken token ) => await user.GetUserClaims(connection, transaction, __database, Claims.DEFAULTS, token);
 }

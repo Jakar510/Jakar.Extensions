@@ -11,9 +11,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Last( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetLast();
+        SqlCommand sql = SQLCache.GetLast();
 
         try
         {
@@ -28,9 +28,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> LastOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetLast();
+        SqlCommand sql = SQLCache.GetLast();
 
         try
         {

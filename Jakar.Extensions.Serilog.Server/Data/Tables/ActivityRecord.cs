@@ -23,10 +23,6 @@ public record ActivityRecord( string ApplicationName, RecordID<ApplicationRecord
         ActivityRecord              record          = new(applicationName, applicationID, ownerUserID, id, dateCreated, lastModified);
         return record.Validate();
     }
-    public static async IAsyncEnumerable<ActivityRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
 
 
     public static bool operator >( ActivityRecord  left, ActivityRecord right ) => Comparer<ActivityRecord>.Default.Compare(left, right) > 0;

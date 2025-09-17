@@ -13,8 +13,9 @@ namespace Jakar.Database;
 public partial class DbTable<TClass> : IConnectableDb
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    protected readonly FusionCache        _cache;
-    protected readonly IConnectableDbRoot _database;
+    protected readonly     FusionCache        _cache;
+    protected readonly     IConnectableDbRoot _database;
+    public static readonly SqlCache<TClass>   SQLCache = new();
 
 
     public static TClass[]                 Empty                     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
@@ -39,20 +40,20 @@ public partial class DbTable<TClass> : IConnectableDb
     }
 
 
-    public ValueTask<DbConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync(token);
+    public ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync(token);
 
 
     public IAsyncEnumerable<TClass> All( CancellationToken token = default ) => this.Call(All, token);
-    public virtual async IAsyncEnumerable<TClass> All( DbConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> All( NpgsqlConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand               command = TClass.SQL.GetAll();
+        SqlCommand               command = SQLCache.GetAll();
         await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
-        await foreach ( TClass record in TClass.CreateAsync(reader, token) ) { yield return record; }
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
     }
 
 
     public ValueTask<TResult> Call<TResult>( string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall(Call, sql, parameters, func, token);
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, DbTransaction transaction, string sql, DynamicParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
@@ -64,7 +65,7 @@ public partial class DbTable<TClass> : IConnectableDb
 
 
     public ValueTask<TResult> Call<TResult>( SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall(Call, sql, func, token);
-    public virtual async ValueTask<TResult> Call<TResult>( DbConnection connection, DbTransaction transaction, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, DbTransaction transaction, SqlCommand sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
@@ -77,52 +78,52 @@ public partial class DbTable<TClass> : IConnectableDb
 
     public async ValueTask Schema( Func<DataTable, CancellationToken, ValueTask> func, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, token);
         await func(schema, token);
     }
     public async ValueTask Schema( Func<DataTable, CancellationToken, ValueTask> func, string collectionName, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, collectionName, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, collectionName, token);
         await func(schema, token);
     }
     public async ValueTask Schema( Func<DataTable, CancellationToken, ValueTask> func, string collectionName, string?[] restrictionValues, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, collectionName, restrictionValues, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, collectionName, restrictionValues, token);
         await func(schema, token);
     }
 
 
-    public async ValueTask<DataTable> Schema( DbConnection connection, CancellationToken token                                                                        = default ) => await connection.GetSchemaAsync(token);
-    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, CancellationToken token                                      = default ) => await connection.GetSchemaAsync(collectionName, token);
-    public async ValueTask<DataTable> Schema( DbConnection connection, string            collectionName, string?[]         restrictionValues, CancellationToken token = default ) => await connection.GetSchemaAsync(collectionName, restrictionValues, token);
+    public async ValueTask<DataTable> Schema( NpgsqlConnection connection, CancellationToken token                                                                        = default ) => await connection.GetSchemaAsync(token);
+    public async ValueTask<DataTable> Schema( NpgsqlConnection connection, string            collectionName, CancellationToken token                                      = default ) => await connection.GetSchemaAsync(collectionName, token);
+    public async ValueTask<DataTable> Schema( NpgsqlConnection connection, string            collectionName, string?[]         restrictionValues, CancellationToken token = default ) => await connection.GetSchemaAsync(collectionName, restrictionValues, token);
 
 
     public async ValueTask<TResult> Schema<TResult>( Func<DataTable, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, token);
         return await func(schema, token);
     }
     public async ValueTask<TResult> Schema<TResult>( Func<DataTable, CancellationToken, ValueTask<TResult>> func, string collectionName, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, collectionName, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, collectionName, token);
         return await func(schema, token);
     }
     public async ValueTask<TResult> Schema<TResult>( Func<DataTable, CancellationToken, ValueTask<TResult>> func, string collectionName, string?[] restrictionValues, CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
-        using DataTable          schema     = await Schema(connection, collectionName, restrictionValues, token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
+        using DataTable              schema     = await Schema(connection, collectionName, restrictionValues, token);
         return await func(schema, token);
     }
 
 
     public virtual async ValueTask<string> ServerVersion( CancellationToken token = default )
     {
-        await using DbConnection connection = await ConnectAsync(token);
+        await using NpgsqlConnection connection = await ConnectAsync(token);
         return connection.ServerVersion;
     }
 }

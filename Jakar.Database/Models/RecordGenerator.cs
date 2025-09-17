@@ -28,7 +28,7 @@ public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnu
 
 
     public ValueTask<bool> MoveNextAsync() => __table.Call(MoveNextAsync, __token);
-    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested )
         {

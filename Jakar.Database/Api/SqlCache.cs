@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/01/2025  16:01
 
+using FluentMigrator.Runner.Generators.Base;
+
+
+
 namespace Jakar.Database;
 
 
@@ -20,50 +24,50 @@ public sealed class SqlCache<TClass>
     public readonly string All       = $"SELECT * FROM {TClass.TableName};";
     public readonly string Count     = $"SELECT COUNT(*) FROM {TClass.TableName};";
     public readonly string DeleteAll = $"DELETE FROM {TClass.TableName};";
-    public readonly string DeleteID = $$"""
-                                        DELETE FROM {{TClass.TableName}}
-                                        WHERE {{ID}} = '{0}';
-                                        """;
-    public readonly string DeleteIDs = $$"""
-                                         DELETE FROM {{TClass.TableName}} 
-                                         WHERE {{ID}} in ({0});
+    private readonly string __deleteID = $$"""
+                                           DELETE FROM {{TClass.TableName}}
+                                           WHERE {{ID}} = '{0}';
+                                           """;
+    private readonly string __deleteIDs = $$"""
+                                            DELETE FROM {{TClass.TableName}} 
+                                            WHERE {{ID}} in ({0});
+                                            """;
+    private readonly string __exists = $$"""
+                                         EXISTS( 
+                                         SELECT * FROM {{TClass.TableName}} 
+                                         WHERE {0} 
+                                         );
                                          """;
-    public readonly string Exists = $$"""
-                                      EXISTS( 
-                                      SELECT * FROM {{TClass.TableName}} 
-                                      WHERE {0} 
-                                      );
-                                      """;
     public readonly string First = $"""
                                     SELECT * FROM {TClass.TableName} 
                                     ORDER BY {DateCreated} ASC 
                                     LIMIT 1;
                                     """;
-    public readonly string GetPaged = $$"""
-                                        SELECT * FROM {{TClass.TableName}} 
-                                        OFFSET {0}
-                                        LIMIT {1};
-                                        """;
-    public readonly string GetPagedWhere = $$"""
-                                             SELECT * FROM {{TClass.TableName}} 
-                                             {0} 
-                                             OFFSET {1}
-                                             LIMIT {2};
-                                             """;
+    private readonly string __getPaged = $$"""
+                                           SELECT * FROM {{TClass.TableName}} 
+                                           OFFSET {0}
+                                           LIMIT {1};
+                                           """;
+    private readonly string __getPagedWhere = $$"""
+                                                SELECT * FROM {{TClass.TableName}} 
+                                                {0} 
+                                                OFFSET {1}
+                                                LIMIT {2};
+                                                """;
     public readonly string GetPagedWhereCreatedBy = $$"""
                                                       SELECT * FROM {{TClass.TableName}} 
                                                       WHERE {{CreatedBy}} = '{0}'
                                                       OFFSET {1}
                                                       LIMIT {2};
                                                       """;
-    public readonly string GetWhereID = $$"""
-                                          SELECT * FROM {{TClass.TableName}} 
-                                          WHERE {{ID}} = '{0}';
-                                          """;
-    public readonly string GetWhereIDs = $$"""
-                                           SELECT * FROM {{TClass.TableName}} 
-                                           WHERE {{ID}} in ({0});
-                                           """;
+    private readonly string __getWhereID = $$"""
+                                             SELECT * FROM {{TClass.TableName}} 
+                                             WHERE {{ID}} = '{0}';
+                                             """;
+    private readonly string __getWhereIDs = $$"""
+                                              SELECT * FROM {{TClass.TableName}} 
+                                              WHERE {{ID}} in ({0});
+                                              """;
     public readonly string Insert = $"""
                                          INSERT INTO {TClass.TableName} 
                                          (
@@ -80,30 +84,30 @@ public sealed class SqlCache<TClass>
                                    ORDER BY {DateCreated} DESC 
                                    LIMIT 1
                                    """;
-    public readonly string NextID_whereDateCreated = $$"""
-                                                       SELECT {{ID}} FROM {{TClass.TableName}}
-                                                       WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {{DateCreated}} > '{0}'), 0) );
+    private readonly string __nextID_WhereDateCreated = $$"""
+                                                          SELECT {{ID}} FROM {{TClass.TableName}}
+                                                          WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {{DateCreated}} > '{0}'), 0) );
+                                                          """;
+    private readonly string __nextWhereDateCreated = $$"""
+                                                       SELECT * FROM {{TClass.TableName}}
+                                                       WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {DateCreated} > '{0}', 0) );
                                                        """;
-    public readonly string NextWhereDateCreated = $$"""
-                                                    SELECT * FROM {{TClass.TableName}}
-                                                    WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {DateCreated} > '{0}', 0) );
-                                                    """;
     public readonly string Random = $"""
                                      SELECT * FROM {TClass.TableName} 
                                      ORDER BY RANDOM()
                                      LIMIT 1;
                                      """;
-    public readonly string RandomCount = $$"""
-                                           SELECT * FROM {{TClass.TableName}} 
-                                           ORDER BY RANDOM() 
-                                           LIMIT {0};
-                                           """;
-    public readonly string RandomCountWhereCreatedBy = $$"""
-                                                         SELECT * FROM {{TClass.TableName}} 
-                                                         WHERE {{CreatedBy}} = '{0}'
-                                                         ORDER BY RANDOM() 
-                                                         LIMIT {1};
-                                                         """;
+    private readonly string __randomCount = $$"""
+                                              SELECT * FROM {{TClass.TableName}} 
+                                              ORDER BY RANDOM() 
+                                              LIMIT {0};
+                                              """;
+    private readonly string __randomCountWhereCreatedBy = $$"""
+                                                            SELECT * FROM {{TClass.TableName}} 
+                                                            WHERE {{CreatedBy}} = '{0}'
+                                                            ORDER BY RANDOM() 
+                                                            LIMIT {1};
+                                                            """;
     public readonly string SortedIDs = $"""
                                         SELECT {ID}, {DateCreated} FROM {TClass.TableName} 
                                         ORDER BY {DateCreated} DESC;
@@ -152,29 +156,45 @@ public sealed class SqlCache<TClass>
                                                   SELECT @{{ID}};
                                               END
                                               """;
-    public readonly string Where = $$"""
-                                     SELECT * FROM {{TClass.TableName}} 
-                                     WHERE {0};
-                                     """;
+    private readonly string __where = $$"""
+                                        SELECT * FROM {{TClass.TableName}} 
+                                        WHERE {0};
+                                        """;
+    private string? __whereColumnValue;
 
 
     public static IEnumerable<string> KeyValuePairs => SqlProperties.Values.Select(Descriptor.GetKeyValuePair);
 
 
     public SqlCommand GetRandom()                                       => Random;
-    public SqlCommand GetRandom( int                  count )           => new(string.Format(RandomCount, count.ToString()));
+    public SqlCommand GetRandom( int                  count )           => new(string.Format(__randomCount, count.ToString()));
     public SqlCommand GetRandom( UserRecord           user, int count ) => GetRandom(user.ID, count);
-    public SqlCommand GetRandom( RecordID<UserRecord> id,   int count ) => new(string.Format(RandomCountWhereCreatedBy, id.Value.ToString(), count.ToString()));
+    public SqlCommand GetRandom( RecordID<UserRecord> id,   int count ) => new(string.Format(__randomCountWhereCreatedBy, id.Value.ToString(), count.ToString()));
 
 
-    public SqlCommand WherePaged( bool                              matchAll, DynamicParameters parameters, int start, int count ) => new(string.Format(GetPagedWhere, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters)), start.ToString(), count.ToString()));
+    public SqlCommand WherePaged( bool                              matchAll, DynamicParameters parameters, int start, int count ) => new(string.Format(__getPagedWhere, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters)), start.ToString(), count.ToString()));
     public SqlCommand WherePaged( ref readonly RecordID<UserRecord> id,       int               start,      int count ) => new(string.Format(GetPagedWhereCreatedBy, id.Value.ToString(), start.ToString(), count.ToString()));
-    public SqlCommand WherePaged( int                               start,    int               count ) => new(string.Format(GetPaged, start.ToString(), count.ToString()));
+    public SqlCommand WherePaged( int                               start,    int               count ) => new(string.Format(__getPaged, start.ToString(), count.ToString()));
+    public SqlCommand Where<TValue>( string columnName, TValue? value )
+    {
+        __whereColumnValue ??= $"SELECT * FROM {TClass.TableName} WHERE {columnName} = @{nameof(value)};";
+        
+        DynamicParameters parameters = new();
+        parameters.Add(nameof(value), value);
+
+        return new SqlCommand(__whereColumnValue, parameters);
+    }
 
 
-    public SqlCommand Get( ref readonly RecordID<TClass> id )                                     => new(string.Format(GetWhereID, id.value.ToString()));
-    public string     Get( IEnumerable<RecordID<TClass>> ids )                                    => string.Format(GetWhereIDs, string.Join(',', ids.Select(GetValue)));
-    public SqlCommand Get( bool                          matchAll, DynamicParameters parameters ) => new(string.Format(Where, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
+    public SqlCommand Get( ref readonly RecordID<TClass> id )  => new(string.Format(__getWhereID, id.value.ToString()));
+    public SqlCommand Get( IEnumerable<RecordID<TClass>> ids ) => string.Format(__getWhereIDs, string.Join(',', ids.Select(GetValue)));
+    public SqlCommand Get( bool matchAll, DynamicParameters parameters )
+    {
+        using ValueStringBuilder sb = new(__where);
+        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(parameters));
+
+        return new SqlCommand(sb.ToString(), parameters);
+    }
     public SqlCommand GetAll()   => All;
     public SqlCommand GetFirst() => First;
     public SqlCommand GetLast()  => Last;
@@ -182,17 +202,17 @@ public sealed class SqlCache<TClass>
 
     public SqlCommand GetCount()                                               => Count;
     public SqlCommand GetSortedID()                                            => SortedIDs;
-    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters ) => new(string.Format(Exists, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
+    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters ) => new(string.Format(__exists, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
 
 
-    public SqlCommand GetDelete( bool                            matchAll, DynamicParameters parameters ) => new(string.Format(DeleteIDs, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
-    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )  => new(string.Format(DeleteID, id.value.ToString()));
-    public string     GetDelete( IEnumerable<RecordID<TClass>>   ids ) => string.Format(DeleteIDs, string.Join(',', ids.Select(GetValue)));
+    public SqlCommand GetDelete( bool                            matchAll, DynamicParameters parameters ) => new(string.Format(__deleteIDs, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
+    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )  => new(string.Format(__deleteID, id.value.ToString()));
+    public SqlCommand GetDelete( IEnumerable<RecordID<TClass>>   ids ) => string.Format(__deleteIDs, string.Join(',', ids.Select(GetValue)));
     public SqlCommand GetDeleteAll()                                   => DeleteAll;
 
 
-    public SqlCommand GetNext( ref readonly   RecordPair<TClass> pair ) => new(string.Format(NextWhereDateCreated,    pair.DateCreated.ToString()));
-    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair ) => new(string.Format(NextID_whereDateCreated, pair.DateCreated.ToString()));
+    public SqlCommand GetNext( ref readonly   RecordPair<TClass> pair ) => new(string.Format(__nextWhereDateCreated,    pair.DateCreated.ToString()));
+    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair ) => new(string.Format(__nextID_WhereDateCreated, pair.DateCreated.ToString()));
 
 
     public SqlCommand GetInsert( TClass record ) => new(Insert, record.ToDynamicParameters());

@@ -11,9 +11,9 @@ public partial class DbTable<TClass>
     public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call(FirstOrDefault, token);
 
 
-    public virtual async ValueTask<ErrorOrResult<TClass>> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> First( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetFirst();
+        SqlCommand sql = SQLCache.GetFirst();
 
         try
         {
@@ -22,9 +22,9 @@ public partial class DbTable<TClass>
         }
         catch ( Exception e ) { throw new SqlException(sql, e); }
     }
-    public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetFirst();
+        SqlCommand sql = SQLCache.GetFirst();
 
         try
         {

@@ -18,9 +18,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<long> Count( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<long> Count( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetCount();
+        SqlCommand sql = SQLCache.GetCount();
 
         try { return await connection.QueryFirstAsync<long>(sql.sql, sql.parameters, transaction); }
         catch ( Exception e ) { throw new SqlException(sql, e); }
@@ -28,9 +28,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<bool> Exists( DbConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
+    public virtual async ValueTask<bool> Exists( NpgsqlConnection connection, DbTransaction transaction, bool matchAll, DynamicParameters parameters, CancellationToken token )
     {
-        SqlCommand sql = TClass.SQL.GetExists(matchAll, parameters);
+        SqlCommand sql = SQLCache.GetExists(matchAll, parameters);
 
         try
         {
@@ -42,7 +42,7 @@ public partial class DbTable<TClass>
     }
 
 
-    public virtual async IAsyncEnumerable<TClass> Get( DbConnection connection, DbTransaction? transaction, IAsyncEnumerable<RecordID<TClass>> ids, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Get( NpgsqlConnection connection, DbTransaction? transaction, IAsyncEnumerable<RecordID<TClass>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
         HashSet<RecordID<TClass>> set = await ids.ToHashSet(token);
         await foreach ( TClass record in Get(connection, transaction, set, token) ) { yield return record; }
@@ -50,19 +50,19 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TClass> Get( DbConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TClass>> ids, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TClass> Get( NpgsqlConnection connection, DbTransaction? transaction, IEnumerable<RecordID<TClass>> ids, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Get(ids);
+        SqlCommand sql = SQLCache.Get(ids);
         return Where(connection, transaction, sql, token);
     }
 
 
-    public async ValueTask<ErrorOrResult<TClass>> Get( DbConnection connection, DbTransaction? transaction, RecordID<TClass>? id, CancellationToken token = default ) => id.HasValue
+    public async ValueTask<ErrorOrResult<TClass>> Get( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass>? id, CancellationToken token = default ) => id.HasValue
                                                                                                                                                                              ? await Get(connection, transaction, id.Value, token)
                                                                                                                                                                              : Error.NotFound();
-    public async ValueTask<ErrorOrResult<TClass>> Get( DbConnection connection, DbTransaction? transaction, RecordID<TClass> id, CancellationToken token = default )
+    public async ValueTask<ErrorOrResult<TClass>> Get( NpgsqlConnection connection, DbTransaction? transaction, RecordID<TClass> id, CancellationToken token = default )
     {
-        SqlCommand            command    = TClass.SQL.Get(in id);
+        SqlCommand            command    = SQLCache.Get(in id);
         SqlCommand.Definition definition = _database.GetCommand(in command, connection, transaction, token);
         return await _cache.GetOrCreateAsync(id.key, definition, factory, Options, token);
 
@@ -88,13 +88,13 @@ public partial class DbTable<TClass>
     }
 
 
-    public virtual async ValueTask<ErrorOrResult<TClass>> Get( DbConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) => await Get(connection, transaction, true, Database.GetParameters(value, null, columnName), token);
+    public virtual async ValueTask<ErrorOrResult<TClass>> Get( NpgsqlConnection connection, DbTransaction? transaction, string columnName, object? value, CancellationToken token = default ) => await Get(connection, transaction, true, Database.GetParameters(value, null, columnName), token);
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Get( DbConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> Get( NpgsqlConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.Get(matchAll, parameters);
+        SqlCommand sql = SQLCache.Get(matchAll, parameters);
 
         try
         {

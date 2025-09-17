@@ -2,7 +2,6 @@
 // 12/02/2023  12:12 PM
 
 using System.Security.Cryptography.X509Certificates;
-using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;

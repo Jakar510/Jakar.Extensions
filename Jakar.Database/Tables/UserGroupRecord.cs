@@ -28,12 +28,7 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
         RecordID<UserGroupRecord> id           = new(reader.GetFieldValue<Guid>(nameof(ID)));
         UserGroupRecord           record       = new(key, value, id, dateCreated, lastModified);
         return record.Validate();
-    }
-    [Pure]
-    public static async IAsyncEnumerable<UserGroupRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
+    } 
 
     
     public static bool operator >( UserGroupRecord  left, UserGroupRecord right ) => left.CompareTo(right) > 0;

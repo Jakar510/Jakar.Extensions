@@ -4,4 +4,4 @@
 namespace Jakar.Database;
 
 
-public readonly record struct DbConnContext( DbConnection Connection, DbTransaction? Transaction, Activity? Activity );
+public readonly record struct DbConnContext( NpgsqlConnection Connection, DbTransaction? Transaction, Activity? Activity );

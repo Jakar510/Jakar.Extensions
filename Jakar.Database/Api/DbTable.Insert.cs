@@ -13,28 +13,28 @@ public partial class DbTable<TClass>
     public ValueTask<TClass>        Insert( TClass                   record,  CancellationToken token = default ) => this.TryCall(Insert, record,  token);
 
 
-    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TClass record in records ) { yield return await Insert(connection, transaction, record, token); }
     }
-    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ReadOnlyMemory<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( NpgsqlConnection connection, DbTransaction transaction, ReadOnlyMemory<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         for ( int i = 0; i < records.Length; i++ ) { yield return await Insert(connection, transaction, records.Span[i], token); }
     }
-    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( NpgsqlConnection connection, DbTransaction transaction, ImmutableArray<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         foreach ( TClass record in records ) { yield return await Insert(connection, transaction, record, token); }
     }
-    public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TClass> Insert( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
         await foreach ( TClass record in records.WithCancellation(token) ) { yield return await Insert(connection, transaction, record, token); }
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<TClass> Insert( DbConnection connection, DbTransaction transaction, TClass record, CancellationToken token = default )
+    public virtual async ValueTask<TClass> Insert( NpgsqlConnection connection, DbTransaction transaction, TClass record, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetInsert(record);
+        SqlCommand sql = SQLCache.GetInsert(record);
 
         try
         {
@@ -46,9 +46,9 @@ public partial class DbTable<TClass>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> TryInsert( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> TryInsert( NpgsqlConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetTryInsert(record, matchAll, parameters);
+        SqlCommand sql = SQLCache.GetTryInsert(record, matchAll, parameters);
 
         try
         {
@@ -63,9 +63,9 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> InsertOrUpdate( NpgsqlConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.InsertOrUpdate(record, matchAll, parameters);
+        SqlCommand sql = SQLCache.InsertOrUpdate(record, matchAll, parameters);
 
         try
         {

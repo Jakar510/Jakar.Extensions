@@ -12,8 +12,8 @@ public class SerilogDb : Database.Database
 {
     public DbTable<ApplicationRecord> Applications { get; }
 
-    public SerilogDb( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base( configuration, options, cache ) { Applications = Create<ApplicationRecord>(); }
+    public SerilogDb( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base(configuration, options, cache) { Applications = Create<ApplicationRecord>(); }
 
 
-    protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection( secure.ToString() );
+    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure.ToString());
 }

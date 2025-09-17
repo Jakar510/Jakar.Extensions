@@ -111,15 +111,10 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         return record.Validate();
     }
-    [Pure]
-    public static async IAsyncEnumerable<AddressRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
-    }
 
 
     [Pure]
-    public static async ValueTask<AddressRecord?> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
+    public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         DynamicParameters   parameters = new();
         ReadOnlySpan<Claim> span       = claims;
@@ -139,7 +134,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
     [Pure]
-    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( DbConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
+    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         DynamicParameters parameters = new();
 
