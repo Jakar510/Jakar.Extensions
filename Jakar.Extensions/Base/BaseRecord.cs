@@ -17,8 +17,8 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseRecord<TClass>, IEqualityOperators<TClass>, IComparisonOperators<TClass>
 {
-    public string ToJson()       => this.ToJson(Formatting.None);
-    public string ToPrettyJson() => this.ToJson(Formatting.Indented);
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToJson()       => this.ToJson(Formatting.None);
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
 
     public abstract bool Equals( TClass?    other );
@@ -35,11 +35,13 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
     }
 
 
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(json);
         return json.FromJson<TClass>();
     }
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

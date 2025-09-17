@@ -105,7 +105,7 @@
     <PackageVersion Include="NUnit.Analyzers" Version="4.10.0" />
     <PackageVersion Include="NUnit3TestAdapter" Version="5.1.0" />
     <PackageVersion Include="NaughtyStrings.Bogus" Version="3.0.0" />
-    <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageVersion Include="Nito.Collections.Deque" Version="1.2.1" />
     <PackageVersion Include="Npgsql" Version="9.0.3" />
     <PackageVersion Include="Npgsql.Json.NET" Version="9.0.3" />
@@ -130,7 +130,7 @@
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="7.3.4" />
+    <PackageVersion Include="Radzen.Blazor" Version="7.3.5" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="8.0.0" />
@@ -155,7 +155,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.4" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.19" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.20" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
@@ -183,7 +183,7 @@
     <PackageVersion Include="Syncfusion.Maui.Scheduler" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.SunburstChart" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.TabView" Version="31.1.19" />
-    <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.6" />
+    <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.7" />
     <PackageVersion Include="Syncfusion.Maui.TreeMap" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.TreeView" Version="31.1.19" />
     <PackageVersion Include="System.Collections.Immutable" Version="9.0.9" />

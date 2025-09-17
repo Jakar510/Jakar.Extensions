@@ -476,9 +476,9 @@ public sealed record UserRecord( string                        UserName,
     public async ValueTask<UserModel> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
     {
         UserModel model = new(this);
-        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { await model.Groups.AddAsync(record.ToGroupModel(), token); }
+        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { model.Groups.Add(record.ToGroupModel()); }
 
-        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { await model.Roles.AddAsync(record.ToRoleModel(), token); }
+        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { model.Roles.Add(record.ToRoleModel()); }
 
         return model;
     }

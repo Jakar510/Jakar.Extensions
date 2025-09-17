@@ -112,7 +112,18 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
         }
     }
 
-    
+
+    public override bool Equals( RecoveryCodeRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return base.Equals(other) && string.Equals(Code, other.Code, StringComparison.InvariantCultureIgnoreCase);
+    }
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), Code);
+
+
     public static bool operator >( RecoveryCodeRecord  left, RecoveryCodeRecord right ) => left.CompareTo(right) > 0;
     public static bool operator >=( RecoveryCodeRecord left, RecoveryCodeRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( RecoveryCodeRecord  left, RecoveryCodeRecord right ) => left.CompareTo(right) < 0;
@@ -163,9 +174,9 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
         while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
     }
 
-     
-    public static bool operator >( UserRecoveryCodeRecord   left, UserRecoveryCodeRecord  right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) > 0;
-    public static bool operator >=( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord  right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) >= 0;
-    public static bool operator <( UserRecoveryCodeRecord   left, UserRecoveryCodeRecord  right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) < 0;
-    public static bool operator <=( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord  right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) <= 0;
+
+    public static bool operator >( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) > 0;
+    public static bool operator >=( UserRecoveryCodeRecord left, UserRecoveryCodeRecord right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) >= 0;
+    public static bool operator <( UserRecoveryCodeRecord  left, UserRecoveryCodeRecord right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) < 0;
+    public static bool operator <=( UserRecoveryCodeRecord left, UserRecoveryCodeRecord right ) => Comparer<UserRecoveryCodeRecord>.Default.Compare(left, right) <= 0;
 }

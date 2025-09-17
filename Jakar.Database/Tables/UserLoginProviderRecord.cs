@@ -71,7 +71,29 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
     [Pure] public UserLoginInfo ToUserLoginInfo() => new(LoginProvider, ProviderKey, ProviderDisplayName);
 
-    
+
+    public override bool Equals( UserLoginProviderRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return base.Equals(other)                                                                                         &&
+               string.Equals(LoginProvider,       other.LoginProvider,       StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(ProviderDisplayName, other.ProviderDisplayName, StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(ProviderKey,         other.ProviderKey,         StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(Value,               other.Value,               StringComparison.InvariantCultureIgnoreCase);
+    }
+    public override int GetHashCode()
+    {
+        HashCode hashCode = new HashCode();
+        hashCode.Add(base.GetHashCode());
+        hashCode.Add(LoginProvider,       StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(ProviderDisplayName, StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(ProviderKey,         StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(Value,               StringComparer.InvariantCultureIgnoreCase);
+        return hashCode.ToHashCode();
+    }
     public static bool operator >( UserLoginProviderRecord  left, UserLoginProviderRecord right ) => left.CompareTo(right) > 0;
     public static bool operator >=( UserLoginProviderRecord left, UserLoginProviderRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( UserLoginProviderRecord  left, UserLoginProviderRecord right ) => left.CompareTo(right) < 0;

@@ -836,7 +836,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using StreamReader     stream        = new(file, FileEncoding);
         return await stream.ReadToEndAsync(token);
     }
-
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] 
     async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -882,7 +882,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? string.Empty; }
     }
 
-
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     TValue IReadHandler.AsJson<TValue>( in TelemetrySpan parent = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -982,7 +982,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class Collection : ObservableCollection<LocalFile>
     {
         public Collection() : base() { }
-        public Collection( params ReadOnlySpan<LocalFile> values ) : base( values) { }
+        public Collection( params ReadOnlySpan<LocalFile> values ) : base(values) { }
     }
 
 
@@ -991,7 +991,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
         public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base( values) { }
+        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base(values) { }
     }
 
 
@@ -1118,6 +1118,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
+        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
         TValue AsJson<TValue>( in TelemetrySpan parent = default );
     }
 

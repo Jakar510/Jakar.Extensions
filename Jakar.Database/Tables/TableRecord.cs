@@ -40,7 +40,7 @@ public interface ITableRecord<TClass> : ITableRecord, IEquatable<TClass>, ICompa
 
 
 
-public interface IDbReaderMapping<TClass> : ITableRecord<TClass>, IEqualityOperators<TClass>, IComparisonOperators<TClass>
+public interface IDbReaderMapping<TClass> : ITableRecord<TClass>, IEqualComparable<TClass>
     where TClass : class, IDbReaderMapping<TClass>, IRecordPair
 {
     public abstract static        string                   TableName { [Pure] get; }

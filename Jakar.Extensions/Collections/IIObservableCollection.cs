@@ -6,13 +6,13 @@ namespace Jakar.Extensions;
 
 public interface IBuffer<TValue> : ICollection<TValue>, IDisposable
 {
-    int  Capacity   { [Pure, MethodImpl(                              MethodImplOptions.AggressiveInlining )] get; }
-    bool IsEmpty    { [Pure, MethodImpl(                              MethodImplOptions.AggressiveInlining )] get; }
-    bool IsNotEmpty { [Pure, MethodImpl(                              MethodImplOptions.AggressiveInlining )] get; }
-    ref TValue this[ int     index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get; }
-    ref TValue this[ Index   index ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get; }
-    Span<TValue> this[ Range range ] { [Pure, MethodImpl(             MethodImplOptions.AggressiveInlining )] get; }
-    Span<TValue> this[ int   start, int length ] { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get; }
+    int  Capacity   { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
+    bool IsEmpty    { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
+    bool IsNotEmpty { [Pure, MethodImpl(                             MethodImplOptions.AggressiveInlining)] get; }
+    ref TValue this[ int     index ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
+    ref TValue this[ Index   index ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
+    Span<TValue> this[ Range range ] { [Pure, MethodImpl(            MethodImplOptions.AggressiveInlining)] get; }
+    Span<TValue> this[ int   start, int length ] { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
     Span<TValue> Next { [Pure] get; }
     Span<TValue> Span { [Pure] get; }
 
@@ -48,7 +48,7 @@ public interface ICollectionRemove<TValue>
     int  Remove( params       ReadOnlySpan<TValue>   values );
     int  Remove( ref readonly ReadOnlyMemory<TValue> values );
     int  Remove( ref readonly ImmutableArray<TValue> values );
-    bool RemoveAt( int                               index, [NotNullWhen( true )] out TValue? value );
+    bool RemoveAt( int                               index, [NotNullWhen(true)] out TValue? value );
 }
 
 
@@ -79,13 +79,13 @@ public interface ICollectionAdd<TValue>
 
 
 
-public interface ICollectionSort<out TValue>
+public interface ICollectionSort<TValue>
 {
     void Sort();
-    void Sort( IComparer<TValue>  comparer );
+    void Sort( Comparer<TValue>   comparer );
     void Sort( Comparison<TValue> comparer );
     void Sort( int                start, int count );
-    void Sort( int                start, int length, IComparer<TValue> comparer );
+    void Sort( int                start, int length, Comparer<TValue> comparer );
 }
 
 

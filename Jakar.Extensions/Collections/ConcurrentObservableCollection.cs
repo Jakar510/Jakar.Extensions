@@ -507,7 +507,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { InternalSort(comparer); }
     }
-    public override void Sort( IComparer<TValue> compare )
+    public override void Sort( Comparer<TValue> compare )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { InternalSort(compare); }
@@ -517,13 +517,13 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { InternalSort(compare); }
     }
-    public override void Sort( int start, int count, IComparer<TValue> compare )
+    public override void Sort( int start, int count, Comparer<TValue> compare )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { InternalSort(start, count, compare); }
     }
     public ValueTask SortAsync( CancellationToken token = default ) => SortAsync(comparer, token);
-    public async ValueTask SortAsync( IComparer<TValue> compare, CancellationToken token = default )
+    public async ValueTask SortAsync( Comparer<TValue> compare, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(compare); }
@@ -533,8 +533,8 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(compare); }
     }
-    public ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
-    public override async ValueTask SortAsync( int start, int count, IComparer<TValue> compare, CancellationToken token = default )
+    public override ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
+    public override async ValueTask SortAsync( int start, int count, Comparer<TValue> compare, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(start, count, compare); }

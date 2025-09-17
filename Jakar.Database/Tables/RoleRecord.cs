@@ -76,6 +76,15 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                             };
 
 
+    public override bool Equals( RoleRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return base.Equals(other) && string.Equals(NameOfRole, other.NameOfRole, StringComparison.InvariantCultureIgnoreCase) && string.Equals(NormalizedName, other.NormalizedName, StringComparison.InvariantCultureIgnoreCase);
+    }
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), NameOfRole, NormalizedName, Rights);
     public override int CompareTo( RoleRecord? other )
     {
         if ( other is null ) { return 1; }

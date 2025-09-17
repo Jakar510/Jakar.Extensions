@@ -1,10 +1,6 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
-using System.Text.RegularExpressions;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -229,7 +225,7 @@ public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capaci
     }
 
 
-    protected internal virtual void InternalSort( IComparer<TValue> compare )
+    protected internal virtual void InternalSort( Comparer<TValue> compare )
     {
         ThrowIfReadOnly();
         CollectionsMarshal.AsSpan(buffer).Sort(compare);
@@ -241,7 +237,7 @@ public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capaci
         CollectionsMarshal.AsSpan(buffer).Sort(compare);
         Reset();
     }
-    protected internal virtual void InternalSort( int start, int length, IComparer<TValue> compare )
+    protected internal virtual void InternalSort( int start, int length, Comparer<TValue> compare )
     {
         ThrowIfReadOnly();
         CollectionsMarshal.AsSpan(buffer).Slice(start, length).Sort(compare);
@@ -564,18 +560,18 @@ public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capaci
     public virtual void Reverse( int start, int count ) => InternalReverse(start, count);
 
 
-    public virtual void Sort()                                                                 => InternalSort(comparer);
-    public virtual void Sort( IComparer<TValue>  compare )                                     => InternalSort(compare);
-    public virtual void Sort( Comparison<TValue> compare )                                     => InternalSort(compare);
-    public virtual void Sort( int                start, int count )                            => InternalSort(start, count, comparer);
-    public virtual void Sort( int                start, int count, IComparer<TValue> compare ) => InternalSort(start, count, compare);
+    public virtual void Sort()                                                                => InternalSort(comparer);
+    public virtual void Sort( Comparer<TValue>   compare )                                    => InternalSort(compare);
+    public virtual void Sort( Comparison<TValue> compare )                                    => InternalSort(compare);
+    public virtual void Sort( int                start, int count )                           => InternalSort(start, count, comparer);
+    public virtual void Sort( int                start, int count, Comparer<TValue> compare ) => InternalSort(start, count, compare);
     public virtual ValueTask SortAsync( Comparison<TValue> compare, CancellationToken token = default )
     {
         InternalSort(compare);
         return ValueTask.CompletedTask;
     }
-    public ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
-    public virtual ValueTask SortAsync( int start, int count, IComparer<TValue> compare, CancellationToken token = default )
+    public virtual ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
+    public virtual ValueTask SortAsync( int start, int count, Comparer<TValue> compare, CancellationToken token = default )
     {
         InternalSort(start, count, compare);
         return ValueTask.CompletedTask;

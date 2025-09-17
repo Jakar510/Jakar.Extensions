@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public static partial class Spans
 {
     [Pure]
-    public static TValue Max<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value, TValue start )
+    public static TValue Max<TValue>( this scoped in ReadOnlySpan<TValue> value, TValue start )
         where TValue : INumber<TValue>
     {
         TValue result = start;
@@ -18,7 +18,7 @@ public static partial class Spans
 
 
     [Pure]
-    public static TNumber Max<TValue, TNumber>( this scoped ref readonly ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector, TNumber start )
+    public static TNumber Max<TValue, TNumber>( this scoped in ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector, TNumber start )
         where TNumber : INumber<TNumber>
     {
         TNumber result = start;

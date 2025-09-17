@@ -20,9 +20,9 @@ public static class ErrorOrResults
     public static UnprocessableEntity    UnprocessableEntity { get; } = TypedResults.UnprocessableEntity();
 
 
-    public static JsonResult<TValue> ToJsonResult<TValue>( this ref readonly TValue value, Status status = Status.Ok ) => new(value, status.AsInt());
-    public static JsonResult<Errors> ToJsonResult( this ref readonly         Error  value ) => new(Errors.Create([value]), value.GetStatus());
-    public static JsonResult<Errors> ToJsonResult( this ref readonly         Errors value ) => new(value, value.GetStatus());
+    public static JsonResult<TValue> ToJsonResult<TValue>( this TValue value, Status status = Status.Ok ) => new(value, status.AsInt());
+    public static JsonResult<Errors> ToJsonResult( this         Error  value ) => new(Errors.Create([value]), value.GetStatus());
+    public static JsonResult<Errors> ToJsonResult( this         Errors value ) => new(value, value.GetStatus());
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool IsAuthorized( this ClaimsPrincipal principal, RecordID<UserRecord> id ) => principal.IsAuthorized(id.value);
@@ -32,16 +32,16 @@ public static class ErrorOrResults
     public static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
 
 
-    public static SerializableError? ToSerializableError<TValue>( this ref readonly ErrorOrResult<TValue> result ) =>
+    public static SerializableError? ToSerializableError<TValue>( this ErrorOrResult<TValue> result ) =>
         result.TryGetValue(out Errors? errors)
             ? new SerializableError(errors.ToModelStateDictionary())
             : null;
-    public static ModelStateDictionary? ToModelStateDictionary<TValue>( this ref readonly ErrorOrResult<TValue> result ) =>
+    public static ModelStateDictionary? ToModelStateDictionary<TValue>( this ErrorOrResult<TValue> result ) =>
         result.TryGetValue(out Errors? errors)
             ? errors.ToModelStateDictionary()
             : null;
-    public static SerializableError ToSerializableError( this ref readonly Errors errors ) => new(errors.ToModelStateDictionary());
-    public static ModelStateDictionary ToModelStateDictionary( this ref readonly Errors errors )
+    public static SerializableError ToSerializableError( this Errors errors ) => new(errors.ToModelStateDictionary());
+    public static ModelStateDictionary ToModelStateDictionary( this Errors errors )
     {
         ModelStateDictionary state = new();
         foreach ( Error error in errors.Details.AsSpan() ) { error.ToModelStateDictionary(state); }
@@ -50,13 +50,13 @@ public static class ErrorOrResults
     }
 
 
-    public static ModelStateDictionary ToModelStateDictionary( this ref readonly Error error )
+    public static ModelStateDictionary ToModelStateDictionary( this Error error )
     {
         ModelStateDictionary state = new();
         error.ToModelStateDictionary(state);
         return state;
     }
-    public static void ToModelStateDictionary( this ref readonly Error error, in ModelStateDictionary state )
+    public static void ToModelStateDictionary( this Error error, in ModelStateDictionary state )
     {
         foreach ( string? e in error.Errors ) { state.TryAddModelError(nameof(Error.Errors), e ?? NULL); }
 
@@ -78,19 +78,19 @@ public static class ErrorOrResults
         ErrorOrResult<TValue> errorOrResult = await result.ConfigureAwait(false);
         return errorOrResult.ToResult();
     }
-    public static JsonResult<Error>  ToResult( this ref readonly Error  error ) => new(error, (int)( error.StatusCode ?? Status.Ok ));
-    public static JsonResult<Errors> ToResult( this ref readonly Errors error ) => new(error, (int)error.GetStatus());
-    public static Results<JsonResult<TValue>, JsonResult<Errors>> ToResult<TValue>( this ref readonly ErrorOrResult<TValue> result ) =>
+    public static JsonResult<Error>  ToResult( this Error  error ) => new(error, (int)( error.StatusCode ?? Status.Ok ));
+    public static JsonResult<Errors> ToResult( this Errors error ) => new(error, (int)error.GetStatus());
+    public static Results<JsonResult<TValue>, JsonResult<Errors>> ToResult<TValue>( this ErrorOrResult<TValue> result ) =>
         result.TryGetValue(out TValue? value, out Errors? errors)
             ? new JsonResult<TValue>(value, Errors.GetStatus(errors))
             : errors.ToResult();
 
 
-    public static ActionResult<TValue> ToActionResult<TValue>( this ref readonly ErrorOrResult<TValue> result ) => result.TryGetValue(out TValue? value, out Errors? errors)
+    public static ActionResult<TValue> ToActionResult<TValue>( this ErrorOrResult<TValue> result ) => result.TryGetValue(out TValue? value, out Errors? errors)
                                                                                                                        ? new ObjectResult(value) { StatusCode  = (int)Errors.GetStatus(errors) }
                                                                                                                        : new ObjectResult(errors) { StatusCode = (int)errors.GetStatus() };
-    public static ObjectResult ToActionResult( this ref readonly Error  error ) => new(error) { StatusCode = (int)( error.StatusCode ?? Status.Ok ) };
-    public static ObjectResult ToActionResult( this ref readonly Errors error ) => new(error) { StatusCode = (int)error.GetStatus() };
+    public static ObjectResult ToActionResult( this Error  error ) => new(error) { StatusCode = (int)( error.StatusCode ?? Status.Ok ) };
+    public static ObjectResult ToActionResult( this Errors error ) => new(error) { StatusCode = (int)error.GetStatus() };
     public static async Task<ActionResult<TValue>> ToActionResult<TValue>( this Task<ErrorOrResult<TValue>> result )
     {
         ErrorOrResult<TValue> errorOrResult = await result.ConfigureAwait(false);
