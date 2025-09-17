@@ -24,11 +24,11 @@ public sealed class ResxString( string neutral,
 
 
 #pragma warning disable RS1035
-    protected override string GetText( IFormatProvider? formatProvider ) => GetText( formatProvider as CultureInfo ?? CultureInfo.CurrentUICulture );
+    protected override string GetText( IFormatProvider? formatProvider ) => GetText(formatProvider as CultureInfo ?? CultureInfo.CurrentUICulture);
 #pragma warning restore RS1035
 
 
-    public string GetText( CultureInfo info ) => GetText( info.GetSupportedLanguage() ?? SupportedLanguage.Unspecified );
+    public string GetText( CultureInfo info ) => GetText(info.GetSupportedLanguage() ?? SupportedLanguage.Unspecified);
     public string GetText( SupportedLanguage language ) =>
         language switch
         {
@@ -50,14 +50,14 @@ public sealed class ResxString( string neutral,
             _                             => __neutral
         };
     protected override int  GetHash()                 => __neutral.GetHashCode();
-    protected override bool AreEqual( object? other ) => other is ResxString resx && Equals( resx );
+    protected override bool AreEqual( object? other ) => other is ResxString resx && Equals(resx);
     public bool Equals( ResxString? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
-        return string.Equals( __neutral, other.__neutral, StringComparison.Ordinal );
+        return string.Equals(__neutral, other.__neutral, StringComparison.Ordinal);
     }
-    public int CompareTo( ResxString? other ) => string.Compare( __neutral, other?.__neutral, StringComparison.Ordinal );
+    public int CompareTo( ResxString? other ) => string.Compare(__neutral, other?.__neutral, StringComparison.Ordinal);
 }

@@ -93,7 +93,7 @@ global using Microsoft.IdentityModel.JsonWebTokens;
 global using Microsoft.IdentityModel.Tokens;
 global using MimeKit;
 global using Newtonsoft.Json.Serialization;
-global using OneOf; 
+global using OneOf;
 global using OtpNet;
 global using Prometheus;
 global using ZXing;

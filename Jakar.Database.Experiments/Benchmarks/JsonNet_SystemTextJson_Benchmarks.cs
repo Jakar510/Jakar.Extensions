@@ -176,7 +176,7 @@ public class JsonNet_SystemTextJson_Benchmarks
 public sealed class NodeFaker : Faker<Node>
 {
     public static readonly NodeFaker Instance = new();
-    private                uint      _depth   = (uint)Random.Shared.Next( 5, 10 );
+    private                uint      __depth   = (uint)Random.Shared.Next( 5, 10 );
 
 
     public NodeFaker()
@@ -189,10 +189,10 @@ public sealed class NodeFaker : Faker<Node>
     }
     private Node[] GetChildren( Faker f )
     {
-        if ( _depth > 0 )
+        if ( __depth > 0 )
         {
-            uint depth = _depth;
-            _depth = depth / 2;
+            uint depth = __depth;
+            __depth = depth / 2;
             return Generate( (int)depth ).ToArray();
         }
 

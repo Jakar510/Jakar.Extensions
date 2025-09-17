@@ -54,24 +54,24 @@ public static class Properties
 public class ViewModelProperty<TCommand>() : ObservableClass()
     where TCommand : class, ICommand
 {
-    private bool      _isEnabled = true;
-    private bool      _isVisible = true;
-    private object?   _commandParameter;
-    private string?   _description;
-    private string?   _hint;
-    private string?   _placeholder;
-    private string?   _title;
-    private TCommand? _command;
+    private bool      __isEnabled = true;
+    private bool      __isVisible = true;
+    private object?   __commandParameter;
+    private string?   __description;
+    private string?   __hint;
+    private string?   __placeholder;
+    private string?   __title;
+    private TCommand? __command;
 
 
-    public TCommand? Command          { get => _command;          set => SetProperty( ref _command,          value ); }
-    public object?   CommandParameter { get => _commandParameter; set => SetProperty( ref _commandParameter, value ); }
-    public string?   Description      { get => _description;      set => SetProperty( ref _description,      value ); }
-    public string?   Hint             { get => _hint;             set => SetProperty( ref _hint,             value ); }
-    public bool      IsEnabled        { get => _isEnabled;        set => SetProperty( ref _isEnabled,        value ); }
-    public bool      IsVisible        { get => _isVisible;        set => SetProperty( ref _isVisible,        value ); }
-    public string?   Placeholder      { get => _placeholder;      set => SetProperty( ref _placeholder,      value ); }
-    public string?   Title            { get => _title;            set => SetProperty( ref _title,            value ); }
+    public TCommand? Command          { get => __command;          set => SetProperty( ref __command,          value ); }
+    public object?   CommandParameter { get => __commandParameter; set => SetProperty( ref __commandParameter, value ); }
+    public string?   Description      { get => __description;      set => SetProperty( ref __description,      value ); }
+    public string?   Hint             { get => __hint;             set => SetProperty( ref __hint,             value ); }
+    public bool      IsEnabled        { get => __isEnabled;        set => SetProperty( ref __isEnabled,        value ); }
+    public bool      IsVisible        { get => __isVisible;        set => SetProperty( ref __isVisible,        value ); }
+    public string?   Placeholder      { get => __placeholder;      set => SetProperty( ref __placeholder,      value ); }
+    public string?   Title            { get => __title;            set => SetProperty( ref __title,            value ); }
 }
 
 
@@ -80,21 +80,21 @@ public class ViewModelProperty<TCommand, TValue> : ViewModelProperty<TCommand>, 
     where TValue : IEquatable<TValue>
     where TCommand : class, ICommand
 {
-    private readonly IEqualityComparer<TValue?> _equalityComparer;
-    private          TValue?                    _value;
+    private readonly IEqualityComparer<TValue?> __equalityComparer;
+    private          TValue?                    __value;
 
 
     public static Func<Handler<TValue>, TCommand?>      ActionToCommand { get; set; } = static x => null;
     public static Func<HandlerAsync<TValue>, TCommand?> FuncToCommand   { get; set; } = static x => null;
-    public        bool                                  IsValid         => HasValue( _value );
-    public        TValue?                               Value           { get => _value; set => SetValue( value ); }
+    public        bool                                  IsValid         => HasValue( __value );
+    public        TValue?                               Value           { get => __value; set => SetValue( value ); }
 
 
     public ViewModelProperty( IEqualityComparer<TValue?> equalityComparer, TValue value ) : this( equalityComparer, Properties.EmptyCommand, value ) { }
     public ViewModelProperty( IEqualityComparer<TValue?> equalityComparer, OneOf<Handler<TValue>, HandlerAsync<TValue>, None> onSelected, TValue value ) : base()
     {
-        _equalityComparer = equalityComparer;
-        _value            = value;
+        __equalityComparer = equalityComparer;
+        __value            = value;
         Command           = onSelected.Match( ActionToCommand, FuncToCommand, none => null );
     }
     public static implicit operator TValue?( ViewModelProperty<TCommand, TValue> property ) => property.Value;
@@ -108,7 +108,7 @@ public class ViewModelProperty<TCommand, TValue> : ViewModelProperty<TCommand>, 
         {
             value = CoerceValue( value );
 
-            return SetProperty( ref _value, value, _equalityComparer, propertyName )
+            return SetProperty( ref __value, value, __equalityComparer, propertyName )
                        ? IsValid
                        : null;
         }

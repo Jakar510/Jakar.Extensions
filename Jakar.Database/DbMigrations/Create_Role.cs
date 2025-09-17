@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_ROLES )]
+[Migration(CREATE_ROLES)]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_Role : Migrate_Roles

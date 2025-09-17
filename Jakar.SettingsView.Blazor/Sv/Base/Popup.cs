@@ -11,7 +11,7 @@ namespace Jakar.SettingsView.Blazor.Sv;
 
 public class Popup<TValue> : RadzenComponent
 {
-    private   bool                       _open;
+    private   bool                       __open;
     protected ElementReference           _target;
     protected TValue?                    _value;
     protected IList<TValue>?             _values;
@@ -37,7 +37,7 @@ public class Popup<TValue> : RadzenComponent
         builder.AddAttribute( 4, "id",    GetId() );
         builder.AddElementReferenceCapture( 5, value => Element = value );
         builder.AddMarkupContent( 6, "\r\n" );
-        if ( _open || !Lazy ) { builder.AddContent( 7, ChildContent ); }
+        if ( __open || !Lazy ) { builder.AddContent( 7, ChildContent ); }
 
         builder.CloseElement();
     }
@@ -45,7 +45,7 @@ public class Popup<TValue> : RadzenComponent
 
     public async Task ToggleAsync( ElementReference target )
     {
-        if ( _open ) { await CloseAsync( target ); }
+        if ( __open ) { await CloseAsync( target ); }
         else { await OpenAsync( target ); }
     }
     public async Task OpenAsync( ElementReference target, IList<TValue> values, EventCallback<TValue?> changed, Expression<Func<TValue?>>? expression )
@@ -64,7 +64,7 @@ public class Popup<TValue> : RadzenComponent
     }
     public async Task OpenAsync()
     {
-        _open = true;
+        __open = true;
         await Open.InvokeAsync( _value );
 
         await JSRuntime.InvokeVoidAsync( "Radzen.openPopup",
@@ -86,7 +86,7 @@ public class Popup<TValue> : RadzenComponent
     }
     public async Task CloseAsync()
     {
-        _open = false;
+        __open = false;
         await Close.InvokeAsync( _value );
         await JSRuntime.InvokeVoidAsync( "Radzen.closePopup", GetId(), Reference, nameof(OnClose) );
     }
@@ -101,7 +101,7 @@ public class Popup<TValue> : RadzenComponent
     [JSInvokable]
     public async Task OnClose()
     {
-        _open = false;
+        __open = false;
         await Close.InvokeAsync( default );
     }
 }

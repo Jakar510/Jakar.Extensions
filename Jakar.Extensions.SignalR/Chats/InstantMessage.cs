@@ -6,10 +6,10 @@ namespace Jakar.Extensions.SignalR.Chats;
 
 public interface IInstantMessage
 {
-    [StringLength( UNICODE_CAPACITY )] public string         GroupName   { get; }
-    public                                    bool           HasBeenRead { get; }
-    [StringLength( UNICODE_CAPACITY )] public string         Message     { get; }
-    public                                    DateTimeOffset TimeStamp   { get; }
+    [StringLength(UNICODE_CAPACITY)] public string         GroupName   { get; }
+    public                                  bool           HasBeenRead { get; }
+    [StringLength(UNICODE_CAPACITY)] public string         Message     { get; }
+    public                                  DateTimeOffset TimeStamp   { get; }
 }
 
 
@@ -17,17 +17,17 @@ public interface IInstantMessage
 [Serializable]
 public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage, IEqualComparable<InstantMessage>
 {
-    private bool        _hasBeenRead;
-    private FileData[]? _data;
-    private string      _groupName = string.Empty;
-    private string      _message   = string.Empty;
+    private bool        __hasBeenRead;
+    private FileData[]? __data;
+    private string      __groupName = string.Empty;
+    private string      __message   = string.Empty;
 
 
-    public                                             FileData[]?    Data        { get => _data;        set => SetProperty( ref _data,        value ); }
-    [StringLength( UNICODE_CAPACITY )] public required string         GroupName   { get => _groupName;   set => SetProperty( ref _groupName,   value ); }
-    public                                             bool           HasBeenRead { get => _hasBeenRead; set => SetProperty( ref _hasBeenRead, value ); }
-    [StringLength( UNICODE_CAPACITY )] public required string         Message     { get => _message;     set => SetProperty( ref _message,     value ); }
-    public                                             DateTimeOffset TimeStamp   { get;                 init; }
+    public                                           FileData[]?    Data        { get => __data;        set => SetProperty(ref __data,        value); }
+    [StringLength(UNICODE_CAPACITY)] public required string         GroupName   { get => __groupName;   set => SetProperty(ref __groupName,   value); }
+    public                                           bool           HasBeenRead { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
+    [StringLength(UNICODE_CAPACITY)] public required string         Message     { get => __message;     set => SetProperty(ref __message,     value); }
+    public                                           DateTimeOffset TimeStamp   { get;                  init; }
 
 
     public InstantMessage() { }
@@ -54,46 +54,46 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        int groupComparison = string.Compare( GroupName, other.GroupName, StringComparison.OrdinalIgnoreCase );
+        int groupComparison = string.Compare(GroupName, other.GroupName, StringComparison.OrdinalIgnoreCase);
         if ( groupComparison != 0 ) { return groupComparison; }
 
-        return TimeStamp.CompareTo( other.TimeStamp );
+        return TimeStamp.CompareTo(other.TimeStamp);
     }
     public override bool Equals( InstantMessage? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
-        return _hasBeenRead == other._hasBeenRead && _groupName == other._groupName && _message == other._message && Equals( _data, other._data ) && TimeStamp.Equals( other.TimeStamp );
+        return __hasBeenRead == other.__hasBeenRead && __groupName == other.__groupName && __message == other.__message && Equals(__data, other.__data) && TimeStamp.Equals(other.TimeStamp);
     }
-    public override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is InstantMessage message && Equals( message );
+    public override bool Equals( object? other ) => ReferenceEquals(this, other) || ( other is InstantMessage message && Equals(message) );
     public override int GetHashCode()
     {
         HashCode hashCode = new();
-        hashCode.Add( base.GetHashCode() );
-        hashCode.Add( _hasBeenRead );
-        hashCode.Add( _groupName );
-        hashCode.Add( _message );
-        hashCode.Add( _data );
-        hashCode.Add( TimeStamp );
+        hashCode.Add(base.GetHashCode());
+        hashCode.Add(__hasBeenRead);
+        hashCode.Add(__groupName);
+        hashCode.Add(__message);
+        hashCode.Add(__data);
+        hashCode.Add(TimeStamp);
         return hashCode.ToHashCode();
     }
 
 
-    public static bool operator >( InstantMessage   left, InstantMessage  right ) => Sorter.GreaterThan( left, right );
-    public static bool operator >=( InstantMessage  left, InstantMessage  right ) => Sorter.GreaterThanOrEqualTo( left, right );
-    public static bool operator <( InstantMessage   left, InstantMessage  right ) => Sorter.LessThan( left, right );
-    public static bool operator <=( InstantMessage  left, InstantMessage  right ) => Sorter.LessThanOrEqualTo( left, right );
-    public static bool operator ==( InstantMessage? left, InstantMessage? right ) =>  Sorter.Equals( left, right );
-    public static bool operator !=( InstantMessage? left, InstantMessage? right ) =>  Sorter.DoesNotEqual( left, right );
+    public static bool operator ==( InstantMessage? left, InstantMessage? right ) => EqualityComparer<InstantMessage>.Default.Equals(left, right);
+    public static bool operator !=( InstantMessage? left, InstantMessage? right ) => !EqualityComparer<InstantMessage>.Default.Equals(left, right);
+    public static bool operator >( InstantMessage   left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) > 0;
+    public static bool operator >=( InstantMessage  left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) >= 0;
+    public static bool operator <( InstantMessage   left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) < 0;
+    public static bool operator <=( InstantMessage  left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) <= 0;
 
 
 
-    public sealed class Collection() : ConcurrentObservableCollection<InstantMessage>( DEFAULT_CAPACITY )
+    public sealed class Collection() : ConcurrentObservableCollection<InstantMessage>(DEFAULT_CAPACITY)
     {
-        public Collection( params ReadOnlySpan<InstantMessage> enumerable ) : this() => Add( enumerable );
+        public Collection( params ReadOnlySpan<InstantMessage> enumerable ) : this() => Add(enumerable);
     }
 }

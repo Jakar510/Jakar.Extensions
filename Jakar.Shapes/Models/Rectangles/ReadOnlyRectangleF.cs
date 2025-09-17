@@ -16,7 +16,6 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public readonly        float              Height  = height;
 
 
-    public static       EqualComparer<ReadOnlyRectangleF>             Sorter   => EqualComparer<ReadOnlyRectangleF>.Default;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.One      => ref One;
@@ -163,12 +162,14 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     }
 
 
-    public static bool operator ==( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.Equals(left, right);
-    public static bool operator !=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( ReadOnlyRectangleF?             left, ReadOnlyRectangleF?              right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyRectangleF?             left, ReadOnlyRectangleF?              right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => EqualityComparer<ReadOnlyRectangleF>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => !EqualityComparer<ReadOnlyRectangleF>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Comparer<ReadOnlyRectangleF>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Comparer<ReadOnlyRectangleF>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyRectangleF               left, ReadOnlyRectangleF               right ) => Comparer<ReadOnlyRectangleF>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyRectangleF              left, ReadOnlyRectangleF               right ) => Comparer<ReadOnlyRectangleF>.Default.Compare(left, right) <= 0;
     public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, int                              value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
     public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, float                            value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
     public static ReadOnlyRectangleF operator +( ReadOnlyRectangleF self, double                           value ) => new(self.X, self.Y, (float)( self.Width + value ), (float)( self.Height + value ));

@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_RECOVERY_CODE )]
+[Migration(CREATE_RECOVERY_CODE)]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_RecoveryCode : Migrate_RecoveryCodes

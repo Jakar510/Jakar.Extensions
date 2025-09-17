@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+/*
 public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqualityComparer<TValue>, IEqualityComparer
     where TValue : IComparable<TValue>, IEquatable<TValue>
 {
@@ -71,3 +72,4 @@ public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqual
         return GetHashCode( value );
     }
 }
+*/

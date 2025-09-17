@@ -39,10 +39,6 @@ public sealed class SqlCache<TClass>
                                     ORDER BY {DateCreated} ASC 
                                     LIMIT 1;
                                     """;
-    public readonly string GetWhereIDs = $$"""
-                                           SELECT * FROM {{TClass.TableName}} 
-                                           WHERE {{ID}} in ({0});
-                                           """;
     public readonly string GetPaged = $$"""
                                         SELECT * FROM {{TClass.TableName}} 
                                         OFFSET {0}
@@ -64,6 +60,10 @@ public sealed class SqlCache<TClass>
                                           SELECT * FROM {{TClass.TableName}} 
                                           WHERE {{ID}} = '{0}';
                                           """;
+    public readonly string GetWhereIDs = $$"""
+                                           SELECT * FROM {{TClass.TableName}} 
+                                           WHERE {{ID}} in ({0});
+                                           """;
     public readonly string Insert = $"""
                                          INSERT INTO {TClass.TableName} 
                                          (
@@ -80,14 +80,14 @@ public sealed class SqlCache<TClass>
                                    ORDER BY {DateCreated} DESC 
                                    LIMIT 1
                                    """;
-    public readonly string NextWhereDateCreated = $$"""
-                                                    SELECT * FROM {{TClass.TableName}}
-                                                    WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {DateCreated} > '{0}', 0) );
-                                                    """;
     public readonly string NextID_whereDateCreated = $$"""
                                                        SELECT {{ID}} FROM {{TClass.TableName}}
                                                        WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {{DateCreated}} > '{0}'), 0) );
                                                        """;
+    public readonly string NextWhereDateCreated = $$"""
+                                                    SELECT * FROM {{TClass.TableName}}
+                                                    WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {DateCreated} > '{0}', 0) );
+                                                    """;
     public readonly string Random = $"""
                                      SELECT * FROM {TClass.TableName} 
                                      ORDER BY RANDOM()
@@ -199,14 +199,14 @@ public sealed class SqlCache<TClass>
     public SqlCommand GetUpdate( TClass record ) => new(UpdateID, record.ToDynamicParameters());
     public SqlCommand GetTryInsert( TClass record, bool matchAll, DynamicParameters parameters )
     {
-        var param = record.ToDynamicParameters();
+        DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams(parameters);
 
         return new SqlCommand(string.Format(TryInsert, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), param);
     }
     public SqlCommand InsertOrUpdate( TClass record, bool matchAll, DynamicParameters parameters )
     {
-        var param = record.ToDynamicParameters();
+        DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams(parameters);
 
         return new SqlCommand(string.Format(UpdateOrInsert, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters)), param));

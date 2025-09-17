@@ -3,13 +3,13 @@
 
 public static class Strings
 {
-    public static readonly ImmutableDictionary<char, char> _bracketPairs = new Dictionary<char, char>
+    public static readonly ImmutableDictionary<char, char> BracketPairs = new Dictionary<char, char>
                                                                            {
                                                                                { '(', ')' },
                                                                                { '{', '}' },
                                                                                { '[', ']' }
                                                                            }.ToImmutableDictionary();
-    private static readonly char[] _ends = ['\n', '\r'];
+    private static readonly char[] __ends = ['\n', '\r'];
 
     public static bool ContainsAbout( this string source, string search ) => source.Contains( search, StringComparison.OrdinalIgnoreCase );
     public static bool ContainsExact( this string source, string search ) => source.Contains( search, StringComparison.Ordinal );
@@ -58,7 +58,7 @@ public static class Strings
     /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
     public static bool IsBalanced( this ReadOnlySpan<char> input, IReadOnlyDictionary<char, char>? bracketPairs = null ) // TODO: ReadOnlySpan<char>
     {
-        bracketPairs ??= _bracketPairs;
+        bracketPairs ??= BracketPairs;
         using IMemoryOwner<char> buffer = MemoryPool<char>.Shared.Rent( bracketPairs.Count );
         foreach ( (int i, char item) in bracketPairs.Values.Enumerate( 0 ) ) { buffer.Memory.Span[i] = item; }
 
@@ -170,7 +170,7 @@ public static class Strings
     ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
     /// <param name="span"> </param>
-    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, _ends);
+    public static SpanSplitEnumerator<char> SplitOn( this ReadOnlySpan<char> span ) => new(span, __ends);
 
 
     public static SpanSplitEnumerator<TValue> SplitOn<TValue>( this Span<TValue> span, TValue separator )
@@ -257,7 +257,7 @@ public static class Strings
             {
                 case UnicodeCategory.UppercaseLetter:
                 case UnicodeCategory.TitlecaseLetter:
-                    if ( IsSpaceOrLower( previousCategory ) || IsNextLower( previousCategory, currentIndex, in span ) ) { builder.Append( '_' ); }
+                    if ( isSpaceOrLower( previousCategory ) || isNextLower( previousCategory, currentIndex, in span ) ) { builder.Append( '_' ); }
 
                     currentChar = char.ToLower( currentChar, cultureInfo );
                     break;
@@ -284,9 +284,9 @@ public static class Strings
 
         return builder.ToString();
 
-        static bool IsSpaceOrLower( in UnicodeCategory? category ) => category is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter;
+        static bool isSpaceOrLower( in UnicodeCategory? category ) => category is UnicodeCategory.SpaceSeparator or UnicodeCategory.LowercaseLetter;
 
-        static bool IsNextLower( in UnicodeCategory? category, in int index, scoped ref readonly ReadOnlySpan<char> span ) => category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower( span[index + 1] );
+        static bool isNextLower( in UnicodeCategory? category, in int index, scoped ref readonly ReadOnlySpan<char> span ) => category.HasValue && category is not UnicodeCategory.DecimalDigitNumber && index > 0 && index + 1 < span.Length && char.IsLower( span[index + 1] );
     }
 
 

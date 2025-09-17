@@ -4,7 +4,7 @@
 /// <summary> Validator Extensions </summary>
 public static partial class Validate
 {
-    private static volatile string _demo = "DEMO";
+    private static volatile string __demo = "DEMO";
 
 
     public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
@@ -29,7 +29,7 @@ public static partial class Validate
     {
         if ( value.IsEmpty ) { return false; }
 
-        if ( value.Contains( _demo, StringComparison.OrdinalIgnoreCase ) ) { return true; }
+        if ( value.Contains( __demo, StringComparison.OrdinalIgnoreCase ) ) { return true; }
 
         foreach ( string option in options )
         {
@@ -97,7 +97,7 @@ public static partial class Validate
     {
         if ( value is null ) { throw new ArgumentNullException( nameof(value) ); }
 
-        return Interlocked.Exchange( ref _demo, value );
+        return Interlocked.Exchange( ref __demo, value );
     }
 
 

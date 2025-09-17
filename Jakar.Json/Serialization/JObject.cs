@@ -12,24 +12,24 @@ public ref struct JObject
 {
     public const char    START = '{';
     public const char    END   = '}';
-    private      JWriter _writer;
+    private      JWriter __writer;
 
 
     public JObject( JWriter writer )
     {
-        _writer = writer;
+        __writer = writer;
         Begin();
     }
-    public readonly void Empty() => _writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
+    public readonly void Empty() => __writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
     public JObject Begin()
     {
-        _writer.StartBlock( START );
+        __writer.StartBlock( START );
         return this;
     }
-    public void Complete() => _writer.FinishBlock( END );
+    public void Complete() => __writer.FinishBlock( END );
 
 
-    private readonly JWriter Start( ReadOnlySpan<char> key ) => _writer.Indent().Append( JWriter.QUOTE ).Append( key ).Append( JWriter.QUOTE ).Append( JWriter.COLON ).Append( JWriter.SPACE );
+    private readonly JWriter Start( ReadOnlySpan<char> key ) => __writer.Indent().Append( JWriter.QUOTE ).Append( key ).Append( JWriter.QUOTE ).Append( JWriter.COLON ).Append( JWriter.SPACE );
     public readonly JObject Null( ReadOnlySpan<char> key )
     {
         Start( key ).Null().Next();
@@ -164,7 +164,7 @@ public ref struct JObject
         foreach ( DictionaryEntry pair in value )
         {
             node.Add( pair );
-            node._writer.Next();
+            node.__writer.Next();
         }
 
         node.Complete();
@@ -188,9 +188,9 @@ public ref struct JObject
             (string? k, IJsonizer? jsonizer) = pair;
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
-            item._writer.Next();
+            item.__writer.Next();
 
-            if ( index < value.Count ) { node._writer.Next(); }
+            if ( index < value.Count ) { node.__writer.Next(); }
         }
 
         node.Complete();
@@ -213,9 +213,9 @@ public ref struct JObject
         {
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
-            item._writer.Next();
+            item.__writer.Next();
 
-            if ( index < value.Count ) { node._writer.Next(); }
+            if ( index < value.Count ) { node.__writer.Next(); }
         }
 
         node.Complete();

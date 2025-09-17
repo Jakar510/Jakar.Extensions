@@ -4,9 +4,9 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_FILES )]
+[Migration(CREATE_FILES)]
 public sealed class Create_Files : Migrate_Files
 {
     public override void Up()   => CreateTable();
-    public override void Down() => Delete.Table( FileRecord.TableName );
+    public override void Down() => Delete.Table(FileRecord.TableName);
 }

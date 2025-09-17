@@ -28,7 +28,7 @@
 @code
 {
     // ReSharper disable once CSharpWarnings::CS8618 
-    private OptionsPopup<string> _selector;
+    private OptionsPopup<string> __selector;
 
     public override                             WidgetType            Type          => WidgetType.TextPicker;
     [Parameter]                 public          IList<string>         Values        { get; set; } = new ObservableCollection<string>();
@@ -38,7 +38,7 @@
 
     protected override void OnParametersSet()
     {
-        _selector = new OptionsPopup<string>
+        __selector = new OptionsPopup<string>
                     {
                         ID        = ID,
                         Close     = OnCPopupClose,
@@ -47,5 +47,5 @@
                     };
     }
 
-    private async Task OnClickHandler() => await _selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
+    private async Task OnClickHandler() => await __selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
 }

@@ -46,32 +46,32 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 [SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
 public class StringCollectionBenchmarks
 {
-    private ImmutableArray<string> _array;
-    private int                    _count;
-    private ReadOnlyMemory<string> _memory;
-    private string[]               _values = GetArray( 10 );
+    private ImmutableArray<string> __array;
+    private int                    __count;
+    private ReadOnlyMemory<string> __memory;
+    private string[]               __values = GetArray( 10 );
 
 
     [Params( 10, 1000, 10_000, 100_000 )]
     public int Count
     {
-        get => _count;
+        get => __count;
         set
         {
-            _count  = value;
-            _values = GetArray( 10000 );
-            _array  = [.._values];
-            _memory = _values;
+            __count  = value;
+            __values = GetArray( 10000 );
+            __array  = [..__values];
+            __memory = __values;
         }
     }
 
 
-    [Benchmark] public bool CheckArraySpan()            => AreSpanEqual( _values, _values );
-    [Benchmark] public bool CheckArrayString()          => AreStringEqual( _values, _values );
-    [Benchmark] public bool CheckImmutableArraySpan()   => AreSpanEqual( _array, _array );
-    [Benchmark] public bool CheckImmutableArrayString() => AreStringEqual( _array, _array );
-    [Benchmark] public bool CheckMemorySpan()           => AreSpanEqual( _memory, _memory );
-    [Benchmark] public bool CheckMemoryString()         => AreStringEqual( _memory, _memory );
+    [Benchmark] public bool CheckArraySpan()            => AreSpanEqual( __values, __values );
+    [Benchmark] public bool CheckArrayString()          => AreStringEqual( __values, __values );
+    [Benchmark] public bool CheckImmutableArraySpan()   => AreSpanEqual( __array, __array );
+    [Benchmark] public bool CheckImmutableArrayString() => AreStringEqual( __array, __array );
+    [Benchmark] public bool CheckMemorySpan()           => AreSpanEqual( __memory, __memory );
+    [Benchmark] public bool CheckMemoryString()         => AreStringEqual( __memory, __memory );
 
 
     private static bool AreStringEqual( in ReadOnlyMemory<string> left, in ReadOnlyMemory<string> right )

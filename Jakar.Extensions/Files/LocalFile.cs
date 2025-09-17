@@ -16,47 +16,47 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     public readonly              string   FullPath     = info.FullName;
-    private                      bool     _isTemporary;
+    private                      bool     __isTemporary;
     [JsonIgnore] public readonly FileInfo Info = info;
 
 
-    public string           ContentType     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Mime.ToContentType(); }
-    public DateTimeOffset   CreationTimeUtc { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.CreationTimeUtc; }
-    public string?          DirectoryName   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.DirectoryName; }
-    public bool             DoesNotExist    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => !Exists; }
-    public bool             Exists          { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Exists; }
-    public string           Extension       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Extension; }
-    bool TempFile.ITempFile.IsTemporary     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isTemporary; set => _isTemporary = value; }
-    public DateTimeOffset   LastAccess      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.LastAccessTime; }
-    public MimeType         Mime            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Extension.FromExtension(); }
-    public string           Name            { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Info.Name; }
+    public string           ContentType     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Mime.ToContentType(); }
+    public DateTimeOffset   CreationTimeUtc { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.CreationTimeUtc; }
+    public string?          DirectoryName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.DirectoryName; }
+    public bool             DoesNotExist    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !Exists; }
+    public bool             Exists          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Exists; }
+    public string           Extension       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Extension; }
+    bool TempFile.ITempFile.IsTemporary     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset   LastAccess      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.LastAccessTime; }
+    public MimeType         Mime            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Extension.FromExtension(); }
+    public string           Name            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Name; }
 
     [JsonIgnore]
     public LocalDirectory? Parent
     {
         get
         {
-            DirectoryInfo? parent = Directory.GetParent( FullPath );
+            DirectoryInfo? parent = Directory.GetParent(FullPath);
 
             return parent is null
                        ? null
-                       : new LocalDirectory( parent );
+                       : new LocalDirectory(parent);
         }
     }
-    public string Root { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Directory.GetDirectoryRoot( FullPath ); }
+    public string Root { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Directory.GetDirectoryRoot(FullPath); }
 
 
-    public LocalFile( Uri            path, Encoding?                   encoding = null ) : this( FromUri( path ), encoding ) { }
-    public LocalFile( FileSystemInfo path, Encoding?                   encoding = null ) : this( path.FullName, encoding ) { }
-    public LocalFile( string         path, params ReadOnlySpan<string> subFolders ) : this( path, Encoding.Default, subFolders ) { }
-    public LocalFile( string         path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this( path.Combine( subFolders ), encoding ) { }
-    public LocalFile( DirectoryInfo  path, string                      fileName, Encoding?                   encoding = null ) : this( path.Combine( fileName ), encoding ) { }
-    public LocalFile( string         path, string                      fileName, Encoding?                   encoding = null ) : this( new DirectoryInfo( path ), fileName, encoding ) { }
-    public LocalFile( string         path, Encoding?                   encoding = null ) : this( new FileInfo( path ), encoding ) { }
+    public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
+    public LocalFile( FileSystemInfo path, Encoding?                   encoding = null ) : this(path.FullName, encoding) { }
+    public LocalFile( string         path, params ReadOnlySpan<string> subFolders ) : this(path, Encoding.Default, subFolders) { }
+    public LocalFile( string         path, Encoding?                   encoding, params ReadOnlySpan<string> subFolders ) : this(path.Combine(subFolders), encoding) { }
+    public LocalFile( DirectoryInfo  path, string                      fileName, Encoding?                   encoding = null ) : this(path.Combine(fileName), encoding) { }
+    public LocalFile( string         path, string                      fileName, Encoding?                   encoding = null ) : this(new DirectoryInfo(path), fileName, encoding) { }
+    public LocalFile( string         path, Encoding?                   encoding = null ) : this(new FileInfo(path), encoding) { }
     public void Dispose()
     {
-        Dispose( this.IsTempFile() );
-        GC.SuppressFinalize( this );
+        Dispose(this.IsTempFile());
+        GC.SuppressFinalize(this);
     }
     protected virtual void Dispose( bool remove )
     {
@@ -91,9 +91,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     protected static FileInfo FromUri( Uri uri )
     {
-        if ( !uri.IsFile ) { throw new ArgumentException( "Uri is not a file Uri.", nameof(uri) ); }
+        if ( !uri.IsFile ) { throw new ArgumentException("Uri is not a file Uri.", nameof(uri)); }
 
-        return new FileInfo( uri.AbsolutePath );
+        return new FileInfo(uri.AbsolutePath);
     }
 
     /// <summary> </summary>
@@ -110,8 +110,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     public static FileStream CreateAndOpen( string path, out LocalFile file )
     {
-        file = new LocalFile( path );
-        return File.Create( path );
+        file = new LocalFile(path);
+        return File.Create(path);
     }
 
     /// <summary> </summary>
@@ -126,7 +126,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     public static FileStream CreateTempFileAndOpen( out LocalFile file )
     {
-        FileStream stream = CreateAndOpen( Path.GetTempFileName(), out file );
+        FileStream stream = CreateAndOpen(Path.GetTempFileName(), out file);
         file.SetTemporary();
         return stream;
     }
@@ -145,13 +145,13 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     {
         ReadOnlySpan<char> ext  = type.ToExtensionWithPeriod();
         ReadOnlySpan<char> name = Path.GetRandomFileName();
-        name = name[..name.IndexOf( '.' )];
+        name = name[..name.IndexOf('.')];
         Span<char> span = stackalloc char[name.Length + ext.Length];
-        name.CopyTo( span );
-        ext.CopyTo( span[name.Length..] );
+        name.CopyTo(span);
+        ext.CopyTo(span[name.Length..]);
 
-        string     path   = Path.Combine( Path.GetTempPath(), span.ToString() );
-        FileStream stream = CreateAndOpen( path, out file );
+        string     path   = Path.Combine(Path.GetTempPath(), span.ToString());
+        FileStream stream = CreateAndOpen(path, out file);
         file.SetTemporary();
         return stream;
     }
@@ -169,7 +169,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        await file.WriteAsync( payload, token );
+        await file.WriteAsync(payload, token);
         return file;
     }
 
@@ -188,7 +188,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         LocalFile           file          = new(path);
-        await file.WriteAsync( payload, token );
+        await file.WriteAsync(payload, token);
         return file;
     }
 
@@ -224,9 +224,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public FileStream Open( FileMode mode, FileAccess access, FileShare share, int bufferSize = 4096, bool useAsync = true )
     {
-        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
 
-        return new FileStream( FullPath, mode, access, share, bufferSize, useAsync );
+        return new FileStream(FullPath, mode, access, share, bufferSize, useAsync);
     }
 
 
@@ -247,7 +247,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="FileStream"/>
     /// </returns>
-    public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open( FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync );
+    public FileStream OpenRead( int bufferSize = 4096, bool useAsync = true ) => Open(FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, useAsync);
     /// <summary> Opens file for write only actions. If it doesn't exist, file will be created. </summary>
     /// <param name="mode"> </param>
     /// <param name="bufferSize"> </param>
@@ -266,7 +266,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="FileStream"/>
     /// </returns>
-    public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open( mode, FileAccess.Write, FileShare.None, bufferSize, useAsync );
+    public FileStream OpenWrite( FileMode mode, int bufferSize = 4096, bool useAsync = true ) => Open(mode, FileAccess.Write, FileShare.None, bufferSize, useAsync);
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -419,12 +419,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <summary> Changes the extension of the file. </summary>
     /// <param name="ext"> </param>
     /// <returns> The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. </returns>
-    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension( ext.ToExtension() );
+    public LocalFile ChangeExtension( MimeType ext ) => ChangeExtension(ext.ToExtension());
 
     /// <summary> Changes the extension of the file. </summary>
     /// <param name="ext"> </param>
     /// <returns> The modified path information. On Windows, if ext is null or empty, the path information is unchanged. If the extension is null, the returned path is with the extension removed. If the path has no extension, and the extension is not null, the returned string contains the extension appended to the end of the path. </returns>
-    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension( FullPath, ext );
+    public LocalFile ChangeExtension( string? ext ) => Path.ChangeExtension(FullPath, ext);
 
 
     protected string Hash( HashAlgorithm hasher )
@@ -432,22 +432,22 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using ( hasher )
         {
             using FileStream stream = OpenRead();
-            byte[]           hash   = hasher.ComputeHash( stream );
-            return BitConverter.ToString( hash );
+            byte[]           hash   = hasher.ComputeHash(stream);
+            return BitConverter.ToString(hash);
         }
     }
 
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public string Hash_MD5() => Hash( MD5.Create() );
+    public string Hash_MD5() => Hash(MD5.Create());
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public string Hash_SHA1() => Hash( SHA1.Create() );
+    public string Hash_SHA1() => Hash(SHA1.Create());
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
-    public string Hash_SHA256() => Hash( SHA256.Create() );
+    public string Hash_SHA256() => Hash(SHA256.Create());
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
-    public string Hash_SHA384() => Hash( SHA384.Create() );
+    public string Hash_SHA384() => Hash(SHA384.Create());
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
-    public string Hash_SHA512() => Hash( SHA512.Create() );
+    public string Hash_SHA512() => Hash(SHA512.Create());
 
 
     public sealed override string ToString() => FullPath;
@@ -458,14 +458,14 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     public Uri ToUri( MimeType? mime = null )
     {
-        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
 
         MimeType type = mime ?? Mime;
 
-        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith("/", StringComparison.InvariantCultureIgnoreCase) ) { return new Uri($"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute); }
 
-        string path = FullPath.Remove( 0, 1 );
-        return new Uri( $"{type.ToUriScheme()}://{path}", UriKind.Absolute );
+        string path = FullPath.Remove(0, 1);
+        return new Uri($"{type.ToUriScheme()}://{path}", UriKind.Absolute);
     }
 
     /// <summary> Creates a <see cref="Uri"/> using provided prefix, and <see cref="HttpUtility.UrlEncode(string)"/> to encode the <see cref="FullPath"/> . </summary>
@@ -475,13 +475,13 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns> </returns>
     public Uri ToUri( Uri baseUri, string prefix = "?path=", MimeType? mime = null )
     {
-        if ( string.IsNullOrWhiteSpace( FullPath ) ) { throw new NullReferenceException( nameof(FullPath) ); }
+        if ( string.IsNullOrWhiteSpace(FullPath) ) { throw new NullReferenceException(nameof(FullPath)); }
 
         MimeType type = mime ?? Mime;
 
-        if ( !FullPath.StartsWith( "/", StringComparison.InvariantCultureIgnoreCase ) ) { return new Uri( $"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute ); }
+        if ( !FullPath.StartsWith("/", StringComparison.InvariantCultureIgnoreCase) ) { return new Uri($"{type.ToUriScheme()}://{FullPath}", UriKind.Absolute); }
 
-        return new Uri( baseUri, $"{prefix}{HttpUtility.UrlEncode( FullPath )}" );
+        return new Uri(baseUri, $"{prefix}{HttpUtility.UrlEncode(FullPath)}");
     }
 
 
@@ -493,42 +493,42 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         FileStream          stream        = OpenRead();
-        await newFile.WriteAsync( stream, token );
+        await newFile.WriteAsync(stream, token);
     }
 
 
     public async ValueTask<LocalFile> ZipAsync( CancellationToken token = default, params LocalFile[] files )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( FullPath );
+        await using FileStream zipToOpen     = File.Create(FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         for ( int i = 0; i < files.Length; i++ )
         {
             LocalFile            file   = files[i];
-            ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
 
-            await stream.WriteAsync( data, token );
+            await stream.WriteAsync(data, token);
         }
 
         return this;
     }
-    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token = default ) => ZipAsync( files.Select( static x => new LocalFile( x ) ), token );
+    public ValueTask<LocalFile> ZipAsync( IEnumerable<string> files, CancellationToken token = default ) => ZipAsync(files.Select(static x => new LocalFile(x)), token);
     public async ValueTask<LocalFile> ZipAsync( IEnumerable<LocalFile> files, CancellationToken token = default )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( FullPath );
+        await using FileStream zipToOpen     = File.Create(FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in files )
         {
-            ZipArchiveEntry      entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
             await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
 
-            await stream.WriteAsync( data, token );
+            await stream.WriteAsync(data, token);
         }
 
         return this;
@@ -538,17 +538,17 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <summary> Decrypts a file that was encrypted by the current account using the <see cref="File.Encrypt(string)"/> method. </summary>
     public void Decrypt()
     {
-        if ( OperatingSystem.IsWindows() ) { File.Decrypt( FullPath ); }
+        if ( OperatingSystem.IsWindows() ) { File.Decrypt(FullPath); }
 
-        throw new InvalidOperationException( "Windows Only" );
+        throw new InvalidOperationException("Windows Only");
     }
 
     /// <summary> Encrypts the file so that only the account used to encrypt the file can decrypt it. </summary>
     public void Encrypt()
     {
-        if ( OperatingSystem.IsWindows() ) { File.Encrypt( FullPath ); }
+        if ( OperatingSystem.IsWindows() ) { File.Encrypt(FullPath); }
 
-        throw new InvalidOperationException( "Windows Only" );
+        throw new InvalidOperationException("Windows Only");
     }
 
 
@@ -558,11 +558,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
 
     /// <summary> Moves this file to the new <paramref name="path"/> </summary>
     /// <param name="path"> </param>
-    public void Move( string path ) => Info.MoveTo( path );
+    public void Move( string path ) => Info.MoveTo(path);
 
     /// <summary> Moves this file to the new <paramref name="file"/> location </summary>
     /// <param name="file"> </param>
-    public void Move( LocalFile file ) => Info.MoveTo( file.FullPath );
+    public void Move( LocalFile file ) => Info.MoveTo(file.FullPath);
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -577,7 +577,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( StringBuilder payload ) => Write( payload.ToString() );
+    public void Write( StringBuilder payload ) => Write(payload.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -588,7 +588,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( ValueStringBuilder payload ) => Write( payload.ToString() );
+    public void Write( ValueStringBuilder payload ) => Write(payload.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -601,12 +601,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( string payload )
     {
-        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
         using StreamWriter  writer        = new(stream, FileEncoding);
-        writer.Write( payload );
+        writer.Write(payload);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -619,11 +619,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( byte[] payload )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
-        stream.Write( payload, 0, payload.Length );
+        stream.Write(payload, 0, payload.Length);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -637,10 +637,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( scoped in Span<byte> payload )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using FileStream stream = Create();
-        stream.Write( payload );
+        stream.Write(payload);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -654,11 +654,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( scoped in ReadOnlySpan<byte> payload )
     {
-        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.IsEmpty ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
-        stream.Write( payload );
+        stream.Write(payload);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -670,7 +670,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public void Write( scoped in ReadOnlyMemory<byte> payload ) => Write( payload.Span );
+    public void Write( scoped in ReadOnlyMemory<byte> payload ) => Write(payload.Span);
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -683,12 +683,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( scoped in ReadOnlyMemory<char> payload )
     {
-        if ( payload.IsEmpty ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.IsEmpty ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    stream        = Create();
         using StreamWriter  writer        = new(stream, FileEncoding);
-        writer.Write( payload );
+        writer.Write(payload);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -702,12 +702,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public void Write( Stream payload )
     {
-        ArgumentNullException.ThrowIfNull( payload );
+        ArgumentNullException.ThrowIfNull(payload);
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using MemoryStream  memory        = new((int)payload.Length);
-        payload.CopyTo( memory );
+        payload.CopyTo(memory);
         ReadOnlySpan<byte> data = memory.GetBuffer();
-        Write( data );
+        Write(data);
     }
 
 
@@ -720,7 +720,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( StringBuilder payload ) => WriteAsync(payload.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -731,7 +731,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// <returns>
     ///     <see cref="ValueTask"/>
     /// </returns>
-    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync( payload.ToString() );
+    public ValueTask WriteAsync( ValueStringBuilder payload ) => WriteAsync(payload.ToString());
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
     /// <param name="payload"> the data being written to the file </param>
@@ -745,15 +745,15 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public async ValueTask WriteAsync( string payload, CancellationToken token = default )
     {
-        if ( string.IsNullOrWhiteSpace( payload ) ) { throw new ArgumentNullException( nameof(payload) ); }
+        if ( string.IsNullOrWhiteSpace(payload) ) { throw new ArgumentNullException(nameof(payload)); }
 
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
 
-        using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent( payload.Length );
-        payload.AsSpan().CopyTo( owner.Memory.Span );
-        await writer.WriteAsync( owner.Memory, token );
+        using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(payload.Length);
+        payload.AsSpan().CopyTo(owner.Memory.Span);
+        await writer.WriteAsync(owner.Memory, token);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -767,11 +767,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public async ValueTask WriteAsync( byte[] payload, CancellationToken token = default )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await stream.WriteAsync( payload, token );
+        await stream.WriteAsync(payload, token);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -785,11 +785,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public async ValueTask WriteAsync( ReadOnlyMemory<byte> payload, CancellationToken token = default )
     {
-        if ( payload.Length == 0 ) { throw new ArgumentException( @"payload.IsEmpty", nameof(payload) ); }
+        if ( payload.Length == 0 ) { throw new ArgumentException(@"payload.IsEmpty", nameof(payload)); }
 
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await stream.WriteAsync( payload, token );
+        await stream.WriteAsync(payload, token);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -807,7 +807,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         await using FileStream   stream        = Create();
         await using StreamWriter writer        = new(stream, FileEncoding);
 
-        await writer.WriteAsync( payload, token );
+        await writer.WriteAsync(payload, token);
     }
 
     /// <summary> Write the <paramref name="payload"/> to the file. </summary>
@@ -822,10 +822,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     /// </returns>
     public async ValueTask WriteAsync( Stream payload, CancellationToken token = default )
     {
-        ArgumentNullException.ThrowIfNull( payload );
+        ArgumentNullException.ThrowIfNull(payload);
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream stream        = Create();
-        await payload.CopyToAsync( stream, token );
+        await payload.CopyToAsync(stream, token);
     }
 
 
@@ -834,14 +834,14 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
-        return await stream.ReadToEndAsync( token );
+        return await stream.ReadToEndAsync(token);
     }
 
     async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using StreamReader  stream        = new(OpenRead(), FileEncoding);
-        string              content       = await stream.ReadToEndAsync( token );
+        string              content       = await stream.ReadToEndAsync(token);
         return content.FromJson<TValue>();
     }
 
@@ -850,7 +850,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new();
-        await file.CopyToAsync( stream, token );
+        await file.CopyToAsync(stream, token);
         return stream.GetBuffer();
     }
 
@@ -859,7 +859,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
         await using FileStream   file          = OpenRead();
         await using MemoryStream stream        = new((int)file.Length);
-        await file.CopyToAsync( stream, token );
+        await file.CopyToAsync(stream, token);
         ReadOnlyMemory<byte> results = stream.GetBuffer();
         return results;
     }
@@ -869,7 +869,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using TelemetrySpan    span   = TelemetrySpan.Create();
         await using FileStream file   = OpenRead();
         MemoryStream           stream = new((int)file.Length);
-        await file.CopyToAsync( stream, token );
+        await file.CopyToAsync(stream, token);
         return stream;
     }
 
@@ -879,7 +879,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync( token ) ?? string.Empty; }
+        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? string.Empty; }
     }
 
 
@@ -903,7 +903,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    file          = OpenRead();
         using MemoryStream  stream        = new();
-        file.CopyTo( stream );
+        file.CopyTo(stream);
         return stream.GetBuffer();
     }
 
@@ -920,7 +920,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using FileStream    file          = OpenRead();
         int                 length        = (int)file.Length;
         Buffer<byte>        buffer        = new(length);
-        file.ReadExactly( buffer.Span );
+        file.ReadExactly(buffer.Span);
         return buffer;
     }
 
@@ -929,40 +929,40 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
+        return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
     public override bool Equals( LocalFile? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-    public override bool Equals( object? other ) => ReferenceEquals( this, other ) || other is LocalFile x && Equals( x );
-    public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
+    public override bool Equals( object? other ) => ReferenceEquals(this, other) || ( other is LocalFile x && Equals(x) );
+    public override int  GetHashCode()           => HashCode.Combine(FullPath, this.IsTempFile());
 
 
-    public static bool operator ==( LocalFile? left, LocalFile? right ) => Sorter.Equals( left, right );
-    public static bool operator !=( LocalFile? left, LocalFile? right ) => Sorter.DoesNotEqual( left, right );
-    public static bool operator >( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator >=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator <( LocalFile?  left, LocalFile? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator <=( LocalFile? left, LocalFile? right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator ==( LocalFile? left, LocalFile? right ) => EqualityComparer<LocalFile>.Default.Equals(left, right);
+    public static bool operator !=( LocalFile? left, LocalFile? right ) => !EqualityComparer<LocalFile>.Default.Equals(left, right);
+    public static bool operator >( LocalFile   left, LocalFile  right ) => Comparer<LocalFile>.Default.Compare(left, right) > 0;
+    public static bool operator >=( LocalFile  left, LocalFile  right ) => Comparer<LocalFile>.Default.Compare(left, right) >= 0;
+    public static bool operator <( LocalFile   left, LocalFile  right ) => Comparer<LocalFile>.Default.Compare(left, right) < 0;
+    public static bool operator <=( LocalFile  left, LocalFile  right ) => Comparer<LocalFile>.Default.Compare(left, right) <= 0;
 
 
     /// <summary> Calculates a file hash using <see cref="MD5"/> </summary>
-    public ValueTask<string> HashAsync_MD5() => HashAsync( MD5.Create() );
+    public ValueTask<string> HashAsync_MD5() => HashAsync(MD5.Create());
     /// <summary> Calculates a file hash using <see cref="SHA1"/> </summary>
-    public ValueTask<string> HashAsync_SHA1() => HashAsync( SHA1.Create() );
+    public ValueTask<string> HashAsync_SHA1() => HashAsync(SHA1.Create());
     /// <summary> Calculates a file hash using <see cref="SHA256"/> </summary>
-    public ValueTask<string> HashAsync_SHA256() => HashAsync( SHA256.Create() );
+    public ValueTask<string> HashAsync_SHA256() => HashAsync(SHA256.Create());
     /// <summary> Calculates a file hash using <see cref="SHA384"/> </summary>
-    public ValueTask<string> HashAsync_SHA384() => HashAsync( SHA384.Create() );
+    public ValueTask<string> HashAsync_SHA384() => HashAsync(SHA384.Create());
     /// <summary> Calculates a file hash using <see cref="SHA512"/> </summary>
-    public ValueTask<string> HashAsync_SHA512() => HashAsync( SHA512.Create() );
+    public ValueTask<string> HashAsync_SHA512() => HashAsync(SHA512.Create());
 
 
     public async ValueTask<string> HashAsync( HashAlgorithm hasher )
@@ -970,9 +970,9 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         using ( hasher )
         {
             await using FileStream stream = OpenRead();
-            byte[]                 hash   = await hasher.ComputeHashAsync( stream );
+            byte[]                 hash   = await hasher.ComputeHashAsync(stream);
 
-            return BitConverter.ToString( hash );
+            return BitConverter.ToString(hash);
         }
     }
 
@@ -981,8 +981,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     [Serializable]
     public class Collection : ObservableCollection<LocalFile>
     {
-        public Collection() : base( Sorter ) { }
-        public Collection( params ReadOnlySpan<LocalFile> values ) : base( Sorter, values ) { }
+        public Collection() : base() { }
+        public Collection( params ReadOnlySpan<LocalFile> values ) : base( values) { }
     }
 
 
@@ -990,8 +990,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalFile>
     {
-        public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base( Sorter, values ) { }
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( params ReadOnlySpan<LocalFile> values ) : base( values) { }
     }
 
 
@@ -1002,7 +1002,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         public ConcurrentQueue() : base() { }
         public ConcurrentQueue( params ReadOnlySpan<LocalFile> values ) : base()
         {
-            foreach ( LocalFile value in values ) { Enqueue( value ); }
+            foreach ( LocalFile value in values ) { Enqueue(value); }
         }
     }
 
@@ -1016,18 +1016,18 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     public class Deque : ConcurrentDeque<LocalFile>
     {
         public Deque() : base() { }
-        public Deque( params ReadOnlySpan<LocalFile> values ) : base( values ) { }
+        public Deque( params ReadOnlySpan<LocalFile> values ) : base(values) { }
     }
 
 
 
     [Serializable]
-    public class Files( int capacity ) : List<LocalFile>( capacity )
+    public class Files( int capacity ) : List<LocalFile>(capacity)
     {
-        public Files() : this( DEFAULT_CAPACITY ) { }
-        public Files( params ReadOnlySpan<LocalFile> values ) : this( values.Length )
+        public Files() : this(DEFAULT_CAPACITY) { }
+        public Files( params ReadOnlySpan<LocalFile> values ) : this(values.Length)
         {
-            foreach ( LocalFile value in values ) { Add( value ); }
+            foreach ( LocalFile value in values ) { Add(value); }
         }
     }
 
@@ -1129,19 +1129,19 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         public Queue() : base() { }
         public Queue( params ReadOnlySpan<LocalFile> values ) : base()
         {
-            foreach ( LocalFile value in values ) { Enqueue( value ); }
+            foreach ( LocalFile value in values ) { Enqueue(value); }
         }
     }
 
 
 
     [Serializable]
-    public class Set( int capacity ) : HashSet<LocalFile>( capacity )
+    public class Set( int capacity ) : HashSet<LocalFile>(capacity)
     {
-        public Set() : this( DEFAULT_CAPACITY ) { }
-        public Set( params ReadOnlySpan<LocalFile> values ) : this( values.Length )
+        public Set() : this(DEFAULT_CAPACITY) { }
+        public Set( params ReadOnlySpan<LocalFile> values ) : this(values.Length)
         {
-            foreach ( LocalFile value in values ) { Add( value ); }
+            foreach ( LocalFile value in values ) { Add(value); }
         }
     }
 
@@ -1151,53 +1151,53 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     [Serializable]
     public class Watcher : ConcurrentObservableCollection<LocalFile>
     {
-        private readonly LocalDirectory.Watcher           _watcher;
-        private readonly WeakEventManager<ErrorEventArgs> _errorEventManager = new();
+        private readonly LocalDirectory.Watcher           __watcher;
+        private readonly WeakEventManager<ErrorEventArgs> __errorEventManager = new();
 
 
-        public event ErrorEventHandler? Error { add => _errorEventManager.AddEventHandler( x => value?.Invoke( this, x ) ); remove => _errorEventManager.RemoveEventHandler( x => value?.Invoke( this, x ) ); }
+        public event ErrorEventHandler? Error { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this, x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this, x)); }
 
 
-        public Watcher( LocalDirectory.Watcher watcher ) : base( watcher.Directory.GetFiles(), Sorter )
+        public Watcher( LocalDirectory.Watcher watcher ) : base(watcher.Directory.GetFiles())
         {
-            _watcher                     =  watcher;
-            _watcher.Created             += OnCreated;
-            _watcher.Changed             += OnChanged;
-            _watcher.Deleted             += OnDeleted;
-            _watcher.Renamed             += OnRenamed;
-            _watcher.Error               += OnError;
-            _watcher.EnableRaisingEvents =  true;
+            __watcher                     =  watcher;
+            __watcher.Created             += OnCreated;
+            __watcher.Changed             += OnChanged;
+            __watcher.Deleted             += OnDeleted;
+            __watcher.Renamed             += OnRenamed;
+            __watcher.Error               += OnError;
+            __watcher.EnableRaisingEvents =  true;
         }
         private void OnChanged( object sender, FileSystemEventArgs e )
         {
             LocalFile file = new(e.FullPath);
-            AddOrUpdate( file );
+            AddOrUpdate(file);
         }
-        private void OnCreated( object sender, FileSystemEventArgs e ) => Add( e.FullPath );
-        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove( e.FullPath );
-        private void OnError( object   sender, ErrorEventArgs      e ) => _errorEventManager.RaiseEvent( e, nameof(Error) );
+        private void OnCreated( object sender, FileSystemEventArgs e ) => Add(e.FullPath);
+        private void OnDeleted( object sender, FileSystemEventArgs e ) => Remove(e.FullPath);
+        private void OnError( object   sender, ErrorEventArgs      e ) => __errorEventManager.RaiseEvent(e, nameof(Error));
         private void OnRenamed( object sender, RenamedEventArgs e )
         {
-            LocalFile? file = Values.FirstOrDefault( x => x.FullPath == e.OldFullPath );
-            if ( file is not null ) { Remove( file ); }
+            LocalFile? file = Values.FirstOrDefault(x => x.FullPath == e.OldFullPath);
+            if ( file is not null ) { Remove(file); }
 
-            Add( e.FullPath );
+            Add(e.FullPath);
         }
 
 
         public override void Dispose()
         {
             base.Dispose();
-            _watcher.EnableRaisingEvents = false;
+            __watcher.EnableRaisingEvents = false;
 
-            _watcher.Created -= OnCreated;
-            _watcher.Changed -= OnChanged;
-            _watcher.Deleted -= OnDeleted;
-            _watcher.Renamed -= OnRenamed;
-            _watcher.Error   -= OnError;
+            __watcher.Created -= OnCreated;
+            __watcher.Changed -= OnChanged;
+            __watcher.Deleted -= OnDeleted;
+            __watcher.Renamed -= OnRenamed;
+            __watcher.Error   -= OnError;
 
-            _watcher.Dispose();
-            GC.SuppressFinalize( this );
+            __watcher.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

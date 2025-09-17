@@ -23,7 +23,7 @@ public class JsonizerGenerator : ISourceGenerator
 {
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
-    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
+    private static readonly string __attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
@@ -78,7 +78,7 @@ public class JsonizerGenerator : ISourceGenerator
     private static void Execute( in GeneratorExecutionContext context, in SyntaxReceiver receiver, in CancellationToken token )
     {
         // get the added attribute, and INotifyPropertyChanged
-        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName( _attribute ) ?? throw new InvalidOperationException();
+        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName( __attribute ) ?? throw new InvalidOperationException();
 
 
         // group the fields by class, and generate the source

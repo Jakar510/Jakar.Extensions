@@ -10,19 +10,19 @@ namespace Jakar.Extensions.Telemetry;
 
 public sealed class AggregateLogger( ReadOnlyMemory<ILogger> loggers ) : ILogger
 {
-    private readonly ReadOnlyMemory<ILogger> _loggers = loggers;
+    private readonly ReadOnlyMemory<ILogger> __loggers = loggers;
 
 
     public void Log<TState>( LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter )
     {
-        foreach ( ILogger logger in _loggers.Span )
+        foreach ( ILogger logger in __loggers.Span )
         {
             if ( logger.IsEnabled(logLevel) ) { logger.Log(logLevel, eventId, state, exception, formatter); }
         }
     }
     public bool IsEnabled( LogLevel logLevel )
     {
-        foreach ( ILogger logger in _loggers.Span )
+        foreach ( ILogger logger in __loggers.Span )
         {
             if ( logger.IsEnabled(logLevel) ) { return true; }
         }
@@ -36,7 +36,7 @@ public sealed class AggregateLogger( ReadOnlyMemory<ILogger> loggers ) : ILogger
     {
         Disposables states = new();
 
-        foreach ( ILogger logger in _loggers.Span )
+        foreach ( ILogger logger in __loggers.Span )
         {
             IDisposable? disposable = logger.BeginScope(state);
             if ( disposable is not null ) { states.Add(disposable); }
@@ -51,8 +51,8 @@ public sealed class AggregateLogger( ReadOnlyMemory<ILogger> loggers ) : ILogger
     [method: MustDisposeResource]
     public sealed class Scope( Disposables states ) : IDisposable
     {
-        private readonly Disposables _states = states;
+        private readonly Disposables __states = states;
 
-        public void Dispose() => _states.Dispose();
+        public void Dispose() => __states.Dispose();
     }
 }

@@ -18,7 +18,7 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
         {
             __isAlive.Value = value;
             OnPropertyChanged();
-            OnPropertyChanged( nameof(IsValid) );
+            OnPropertyChanged(nameof(IsValid));
         }
     }
     public virtual bool IsValid => IsAlive;
@@ -35,25 +35,25 @@ public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
     public virtual ValueTask DisposeAsync() => default;
 
 
-    public static Task Delay( in double   days,    in CancellationToken token ) => Delay( TimeSpan.FromDays( days ),       token );
-    public static Task Delay( in float    minutes, in CancellationToken token ) => Delay( TimeSpan.FromMinutes( minutes ), token );
-    public static Task Delay( in long     seconds, in CancellationToken token ) => Delay( TimeSpan.FromSeconds( seconds ), token );
-    public static Task Delay( in int      ms,      in CancellationToken token ) => Delay( TimeSpan.FromMilliseconds( ms ), token );
-    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => delay.Delay( token );
+    public static Task Delay( in double   days,    in CancellationToken token ) => Delay(TimeSpan.FromDays(days),       token);
+    public static Task Delay( in float    minutes, in CancellationToken token ) => Delay(TimeSpan.FromMinutes(minutes), token);
+    public static Task Delay( in long     seconds, in CancellationToken token ) => Delay(TimeSpan.FromSeconds(seconds), token);
+    public static Task Delay( in int      ms,      in CancellationToken token ) => Delay(TimeSpan.FromMilliseconds(ms), token);
+    public static Task Delay( in TimeSpan delay,   in CancellationToken token ) => delay.Delay(token);
 
 
 #if NET6_0_OR_GREATER
     [StackTraceHidden, DoesNotReturn]
 #endif
 
-    protected virtual void ThrowDisabled( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ApiDisabledException( $"{ClassName}.{caller}", inner );
+    protected virtual void ThrowDisabled( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ApiDisabledException($"{ClassName}.{caller}", inner);
 
 
 #if NET6_0_OR_GREATER
     [StackTraceHidden, DoesNotReturn]
 #endif
 
-    protected void ThrowDisposed( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ObjectDisposedException( $"{ClassName}.{caller}", inner );
+    protected void ThrowDisposed( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ObjectDisposedException($"{ClassName}.{caller}", inner);
 }
 
 
@@ -70,7 +70,7 @@ public static class HostedServiceExtensions
 {
     public static ServiceThread StartInThread( this IHostedService service, ILogger<ServiceThread> logger, CancellationToken token )
     {
-        ServiceThread thread = new( service, logger, token );
+        ServiceThread thread = new(service, logger, token);
         thread.Start();
         return thread;
     }
@@ -86,24 +86,24 @@ public static class HostedServiceExtensions
         private          CancellationTokenSource? __source;
 
 
-        public ServiceThread( IHostedService service, ILoggerFactory factory, CancellationToken token = default ) : this( service, factory.CreateLogger<ServiceThread>(), token ) { }
+        public ServiceThread( IHostedService service, ILoggerFactory factory, CancellationToken token = default ) : this(service, factory.CreateLogger<ServiceThread>(), token) { }
         public ServiceThread( IHostedService service, ILogger logger, CancellationToken token = default )
         {
             __service = service;
             __logger  = logger;
             __token   = token;
 
-            __thread = new Thread( ThreadStart )
-                      {
-                          Name         = $"{nameof(ServiceThread)}.{service.GetType().Name}",
-                          IsBackground = true
-                      };
+            __thread = new Thread(ThreadStart)
+                       {
+                           Name         = $"{nameof(ServiceThread)}.{service.GetType().Name}",
+                           IsBackground = true
+                       };
         }
         public bool Stop( in TimeSpan timeout )
         {
             __source?.Cancel();
             __source?.Dispose();
-            return __thread.Join( timeout );
+            return __thread.Join(timeout);
         }
         public override ValueTask DisposeAsync()
         {
@@ -132,27 +132,27 @@ public static class HostedServiceExtensions
 
             if ( __source is not null )
             {
-                await __source.CancelAsync().ConfigureAwait( false );
+                await __source.CancelAsync().ConfigureAwait(false);
                 __source.Dispose();
             }
 
             __source = new CancellationTokenSource();
 
-            await using ( __token.Register( __source.Cancel ) )
+            await using ( __token.Register(__source.Cancel) )
             {
                 try
                 {
                     IsAlive = true;
 
-                    try { await __service.StartAsync( __source.Token ).ConfigureAwait( false ); }
-                    finally { await __service.StopAsync( CancellationToken.None ).ConfigureAwait( false ); }
+                    try { await __service.StartAsync(__source.Token).ConfigureAwait(false); }
+                    finally { await __service.StopAsync(CancellationToken.None).ConfigureAwait(false); }
                 }
                 catch ( TaskCanceledException ) { }
-                catch ( Exception e ) { DbLog.ServiceError( __logger, e, this, __service ); }
+                catch ( Exception e ) { DbLog.ServiceError(__logger, e, this, __service); }
                 finally
                 {
-                    DbLog.ServiceStopped( __logger, this, __service, __token );
-                    IsAlive = false;
+                    DbLog.ServiceStopped(__logger, this, __service, __token);
+                    IsAlive  = false;
                     __source = null;
                 }
             }

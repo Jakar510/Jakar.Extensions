@@ -3,30 +3,30 @@
 
 public struct GroupByClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
-    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Add( GROUP, BY, string.Join( separator, columnNames ) );
+    public EasySqlBuilder By( string separator, params string[] columnNames ) => __builder.Add( GROUP, BY, string.Join( separator, columnNames ) );
 
     public GroupByChainBuilder Chain()
     {
-        _builder.Add( GROUP, BY );
-        return new GroupByChainBuilder( this, ref _builder );
+        __builder.Add( GROUP, BY );
+        return new GroupByChainBuilder( this, ref __builder );
     }
 
     public GroupByChainBuilder Chain( string columnName )
     {
-        _builder.Add( GROUP, BY, columnName );
-        return new GroupByChainBuilder( this, ref _builder );
+        __builder.Add( GROUP, BY, columnName );
+        return new GroupByChainBuilder( this, ref __builder );
     }
 
 
-    public EasySqlBuilder Done() => _builder.VerifyParentheses().NewLine();
+    public EasySqlBuilder Done() => __builder.VerifyParentheses().NewLine();
 
 
     public GroupByClauseBuilder Next()
     {
-        _builder.VerifyParentheses().NewLine();
+        __builder.VerifyParentheses().NewLine();
 
         return this;
     }
@@ -34,7 +34,7 @@ public struct GroupByClauseBuilder( ref EasySqlBuilder builder )
 
     public GroupByClauseBuilder And( string columnName )
     {
-        _builder.Add( columnName + ',' );
+        __builder.Add( columnName + ',' );
         return this;
     }
 }

@@ -6,21 +6,21 @@ namespace Jakar.Extensions;
 
 public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
 {
-    private readonly ConcurrentBag<IDisposable> _disposables = [];
+    private readonly ConcurrentBag<IDisposable> __disposables = [];
     public Disposables() : base() { }
-    public Disposables( IEnumerable<IDisposable>         enumerable ) => _disposables = [..enumerable];
-    public Disposables( params ReadOnlySpan<IDisposable> enumerable ) => _disposables = [..enumerable];
+    public Disposables( IEnumerable<IDisposable>         enumerable ) => __disposables = [..enumerable];
+    public Disposables( params ReadOnlySpan<IDisposable> enumerable ) => __disposables = [..enumerable];
     public void Dispose()
     {
-        foreach ( IDisposable disposable in _disposables ) { disposable.Dispose(); }
+        foreach ( IDisposable disposable in __disposables ) { disposable.Dispose(); }
 
-        _disposables.Clear();
+        __disposables.Clear();
     }
 
 
-    public void                     Add( IDisposable                      disposable )  => _disposables.Add(disposable);
-    public void                     Add( params ReadOnlySpan<IDisposable> disposables ) => _disposables.Add(disposables);
-    public IEnumerator<IDisposable> GetEnumerator()                                     => _disposables.GetEnumerator();
+    public void                     Add( IDisposable                      disposable )  => __disposables.Add(disposable);
+    public void                     Add( params ReadOnlySpan<IDisposable> disposables ) => __disposables.Add(disposables);
+    public IEnumerator<IDisposable> GetEnumerator()                                     => __disposables.GetEnumerator();
     IEnumerator IEnumerable.        GetEnumerator()                                     => GetEnumerator();
 
 
@@ -63,20 +63,20 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
 
 public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisposable
 {
-    private readonly ConcurrentBag<IAsyncDisposable> _disposables = [];
+    private readonly ConcurrentBag<IAsyncDisposable> __disposables = [];
     public AsyncDisposables() : base() { }
-    public AsyncDisposables( IEnumerable<IAsyncDisposable>         enumerable ) => _disposables = [..enumerable];
-    public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => _disposables = [..enumerable];
+    public AsyncDisposables( IEnumerable<IAsyncDisposable>         enumerable ) => __disposables = [..enumerable];
+    public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => __disposables = [..enumerable];
     public async ValueTask DisposeAsync()
     {
-        foreach ( IAsyncDisposable disposable in _disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }
+        foreach ( IAsyncDisposable disposable in __disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }
 
-        _disposables.Clear();
+        __disposables.Clear();
     }
 
 
-    public void                          Add( IAsyncDisposable                      disposable )  => _disposables.Add(disposable);
-    public void                          Add( params ReadOnlySpan<IAsyncDisposable> disposables ) => _disposables.Add(disposables);
-    public IEnumerator<IAsyncDisposable> GetEnumerator()                                          => _disposables.GetEnumerator();
+    public void                          Add( IAsyncDisposable                      disposable )  => __disposables.Add(disposable);
+    public void                          Add( params ReadOnlySpan<IAsyncDisposable> disposables ) => __disposables.Add(disposables);
+    public IEnumerator<IAsyncDisposable> GetEnumerator()                                          => __disposables.GetEnumerator();
     IEnumerator IEnumerable.             GetEnumerator()                                          => GetEnumerator();
 }

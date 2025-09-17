@@ -19,7 +19,7 @@
     </div>
     <RadzenSwitch class="@SV_CELL_BODY_VALUE_ENTRY"
                   id="@ID-value"
-                  @ref="_switch"
+                  @ref="__switch"
                   Value="@Value"
                   ValueChanged="@ValueChanged"
                   ValueExpression="@ValueExpression" />
@@ -28,14 +28,14 @@
 
 @code
 {
-    private            RadzenSwitch?       _switch;
+    private            RadzenSwitch?       __switch;
     public override    WidgetType          Type    => WidgetType.Switch;
     [Parameter] public EventCallback<bool> OnClick { get; set; }
 
 
     private async Task OnClickHandler()
     {
-        if ( _switch is not null ) { await _switch.Toggle(); }
+        if ( __switch is not null ) { await __switch.Toggle(); }
 
         await OnClick.InvokeAsync(Value);
     }

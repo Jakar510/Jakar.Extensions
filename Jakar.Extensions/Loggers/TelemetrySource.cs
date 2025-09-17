@@ -44,8 +44,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public readonly        AppInformation                  Info;
     public readonly        Meter                           Meter;
     public static          TelemetrySource?                Current        { get; set; }
-    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<TelemetrySource>.Default; }
-    public static          EqualComparer<TelemetrySource>  Sorter         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TelemetrySource>.Default; }
+    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<TelemetrySource>.Default; } 
 
 
     ref readonly AppInformation ITelemetrySource.Info   => ref Info;
@@ -131,11 +130,11 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public          bool Equals( AppVersion?          other ) => Info.Version.Equals(other);
     public          bool FuzzyEquals( AppVersion      other ) => Info.Version.FuzzyEquals(other);
 
-
-    public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => Sorter.Equals(left, right);
-    public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( TelemetrySource   left, TelemetrySource  right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( TelemetrySource  left, TelemetrySource  right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( TelemetrySource   left, TelemetrySource  right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( TelemetrySource  left, TelemetrySource  right ) => Sorter.LessThanOrEqualTo(left, right);
+    
+    public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => EqualityComparer<TelemetrySource>.Default.Equals(left, right);
+    public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => !EqualityComparer<TelemetrySource>.Default.Equals(left, right);
+    public static bool operator >( TelemetrySource   left, TelemetrySource  right ) => Comparer<TelemetrySource>.Default.Compare(left, right) > 0;
+    public static bool operator >=( TelemetrySource  left, TelemetrySource  right ) => Comparer<TelemetrySource>.Default.Compare(left, right) >= 0;
+    public static bool operator <( TelemetrySource   left, TelemetrySource  right ) => Comparer<TelemetrySource>.Default.Compare(left, right) < 0;
+    public static bool operator <=( TelemetrySource  left, TelemetrySource  right ) => Comparer<TelemetrySource>.Default.Compare(left, right) <= 0;
 }

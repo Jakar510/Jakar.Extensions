@@ -12,24 +12,24 @@ namespace Jakar.Extensions.Telemetry.Meters;
 public sealed class TelemetryCounter<TValue> : TelemetryMeter<TValue>.MeterInstrument
     where TValue : struct, INumber<TValue>
 {
-    private readonly OneOf<Func<Reading<TValue>[]>, Func<Reading<TValue>>, None> _func;
+    private readonly OneOf<Func<Reading<TValue>[]>, Func<Reading<TValue>>, None> __func;
 
 
     public TelemetryCounter() { }
     [SetsRequiredMembers] public TelemetryCounter( TelemetryMeter<TValue> meter, ref readonly MeterInstrumentInfo info ) : this( meter, in info, new None() ) { }
-    [SetsRequiredMembers] public TelemetryCounter( TelemetryMeter<TValue> meter, ref readonly MeterInstrumentInfo info, OneOf<Func<Reading<TValue>[]>, Func<Reading<TValue>>, None> func ) : base( meter, in info ) => _func = func;
+    [SetsRequiredMembers] public TelemetryCounter( TelemetryMeter<TValue> meter, ref readonly MeterInstrumentInfo info, OneOf<Func<Reading<TValue>[]>, Func<Reading<TValue>>, None> func ) : base( meter, in info ) => __func = func;
 
 
     public TelemetryCounter<TValue> TryMeasurements()
     {
-        if ( _func.IsT0 )
+        if ( __func.IsT0 )
         {
-            Reading<TValue>[] readings = _func.AsT0();
+            Reading<TValue>[] readings = __func.AsT0();
             RecordMeasurement( readings );
         }
-        else if ( _func.IsT1 )
+        else if ( __func.IsT1 )
         {
-            Reading<TValue> reading = _func.AsT1();
+            Reading<TValue> reading = __func.AsT1();
             RecordMeasurement( in reading );
         }
 

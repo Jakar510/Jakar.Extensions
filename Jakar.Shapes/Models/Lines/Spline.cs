@@ -17,14 +17,13 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public static readonly  Spline          Invalid = new(null);
     public static readonly  Spline          Zero    = new(ReadOnlyPoint.Zero);
     public static readonly  Spline          One     = new(ReadOnlyPoint.One);
-    private static readonly ReadOnlyPoint[] _empty  = [];
-    public readonly         ReadOnlyPoint[] Points  = points ?? _empty;
+    private static readonly ReadOnlyPoint[] __empty = [];
+    public readonly         ReadOnlyPoint[] Points  = points ?? __empty;
 
 
     public ref ReadOnlyPoint this[ int index ] => ref Points[index];
 
 
-    public static       EqualComparer<Spline>       Sorter  => EqualComparer<Spline>.Default;
     static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
     static ref readonly Spline IShape<Spline>.      One     => ref One;
     static ref readonly Spline IShape<Spline>.      Invalid => ref Invalid;
@@ -134,12 +133,14 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     }
 
 
-    public static bool operator ==( Spline  left, Spline                           right ) => Sorter.Equals(left, right);
-    public static bool operator !=( Spline  left, Spline                           right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( Spline   left, Spline                           right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( Spline  left, Spline                           right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( Spline   left, Spline                           right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( Spline  left, Spline                           right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( Spline? left, Spline?                          right ) => Nullable.Equals(left, right);
+    public static bool operator !=( Spline? left, Spline?                          right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( Spline  left, Spline                           right ) => EqualityComparer<Spline>.Default.Equals(left, right);
+    public static bool operator !=( Spline  left, Spline                           right ) => !EqualityComparer<Spline>.Default.Equals(left, right);
+    public static bool operator >( Spline   left, Spline                           right ) => Comparer<Spline>.Default.Compare(left, right) > 0;
+    public static bool operator >=( Spline  left, Spline                           right ) => Comparer<Spline>.Default.Compare(left, right) >= 0;
+    public static bool operator <( Spline   left, Spline                           right ) => Comparer<Spline>.Default.Compare(left, right) < 0;
+    public static bool operator <=( Spline  left, Spline                           right ) => Comparer<Spline>.Default.Compare(left, right) <= 0;
     public static Spline operator +( Spline self, int                              other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
     public static Spline operator +( Spline self, float                            other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);
     public static Spline operator +( Spline self, double                           other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x + other);

@@ -4,14 +4,14 @@
 public sealed class ResxSet : ConcurrentDictionary<long, string>
 {
     public ResxSet() { }
-    public ResxSet( IEnumerable<KeyValuePair<long, string>> collection ) : this( collection, ValueSorter<long>.Default ) { }
-    public ResxSet( IEnumerable<KeyValuePair<long, string>> collection, IEqualityComparer<long> comparer ) : base( collection, comparer ) { }
-    public ResxSet( IEqualityComparer<long>                 comparer ) : base( comparer ) { }
-    public ResxSet( int                                     concurrencyLevel, IEnumerable<KeyValuePair<long, string>> collection, IEqualityComparer<long> comparer ) : base( concurrencyLevel, collection, comparer ) { }
-    public ResxSet( int                                     concurrencyLevel, int                                     capacity ) : base( concurrencyLevel, capacity ) { }
-    public ResxSet( int                                     concurrencyLevel, int                                     capacity, IEqualityComparer<long> comparer ) : base( concurrencyLevel, capacity, comparer ) { }
+    public ResxSet( IEnumerable<KeyValuePair<long, string>> collection ) : this(collection, ValueSorter<long>.Default) { }
+    public ResxSet( IEnumerable<KeyValuePair<long, string>> collection, IEqualityComparer<long> comparer ) : base(collection, comparer) { }
+    public ResxSet( IEqualityComparer<long>                 comparer ) : base(comparer) { }
+    public ResxSet( int                                     concurrencyLevel, IEnumerable<KeyValuePair<long, string>> collection, IEqualityComparer<long> comparer ) : base(concurrencyLevel, collection, comparer) { }
+    public ResxSet( int                                     concurrencyLevel, int                                     capacity ) : base(concurrencyLevel, capacity) { }
+    public ResxSet( int                                     concurrencyLevel, int                                     capacity, IEqualityComparer<long> comparer ) : base(concurrencyLevel, capacity, comparer) { }
 
 #pragma warning disable RS1035
-    public ResxSet( int capacity ) : base( Environment.ProcessorCount, capacity, ValueSorter<long>.Default ) { }
+    public ResxSet( int capacity ) : base(Environment.ProcessorCount, capacity, ValueSorter<long>.Default) { }
 #pragma warning restore RS1035
 }

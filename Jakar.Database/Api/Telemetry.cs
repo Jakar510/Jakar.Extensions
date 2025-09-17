@@ -2,7 +2,6 @@
 // 12/02/2023  12:12 PM
 
 using System.Security.Cryptography.X509Certificates;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 using OpenTelemetry;
 using OpenTelemetry.Exporter;
@@ -21,20 +20,21 @@ namespace Jakar.Database;
 
 public static class Telemetry
 {
-    public const           string                                   ATTRIBUTE_SERVICE_NAME           = "service.name";
-    public const           string                                   ATTRIBUTE_SERVICE_NAMESPACE      = "service.namespace";
-    public const           string                                   ATTRIBUTE_SERVICE_INSTANCE       = "service.instance.id";
-    public const           string                                   ATTRIBUTE_SERVICE_VERSION        = "service.version";
-    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_NAME     = "telemetry.sdk.name";
-    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_LANGUAGE = "telemetry.sdk.language";
-    public const           string                                   ATTRIBUTE_TELEMETRY_SDK_VERSION  = "telemetry.sdk.version";
-    public const           string                                   METER_NAME                       = "Jakar.Database";
-    public static readonly Version                                  DefaultVersion                   = new(1, 0, 0);
-    public static readonly KeyValuePair<string, object?>[]          Pairs                            = [];
-    public static readonly Meter                                    DbMeter                          = CreateMeter(METER_NAME);
-    public static readonly ActivitySource                           DbSource                         = CreateSource(METER_NAME);
-    public static readonly ConcurrentDictionary<string, Instrument> Instruments                      = [];
-    public static readonly ConcurrentDictionary<string, Meter>      Meters                           = [];
+    public const           string                          ATTRIBUTE_SERVICE_INSTANCE       = "service.instance.id";
+    public const           string                          ATTRIBUTE_SERVICE_NAME           = "service.name";
+    public const           string                          ATTRIBUTE_SERVICE_NAMESPACE      = "service.namespace";
+    public const           string                          ATTRIBUTE_SERVICE_VERSION        = "service.version";
+    public const           string                          ATTRIBUTE_TELEMETRY_SDK_LANGUAGE = "telemetry.sdk.language";
+    public const           string                          ATTRIBUTE_TELEMETRY_SDK_NAME     = "telemetry.sdk.name";
+    public const           string                          ATTRIBUTE_TELEMETRY_SDK_VERSION  = "telemetry.sdk.version";
+    public const           string                          METER_NAME                       = "Jakar.Database";
+    public static readonly Version                         DefaultVersion                   = new(1, 0, 0);
+    public static readonly KeyValuePair<string, object?>[] Pairs                            = [];
+    public static readonly Meter                           DbMeter                          = CreateMeter(METER_NAME);
+    public static readonly ActivitySource                  DbSource                         = CreateSource(METER_NAME);
+
+    public static readonly ConcurrentDictionary<string, Instrument> Instruments = [];
+    public static readonly ConcurrentDictionary<string, Meter>      Meters      = [];
 
 
     public static Meter          Meter  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = DbMeter;

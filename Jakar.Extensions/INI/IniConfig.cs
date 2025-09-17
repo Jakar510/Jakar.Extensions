@@ -3,28 +3,28 @@
 
 public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Section>, ISpanParsable<IniConfig>, ISpanFormattable
 {
-    private readonly ConcurrentDictionary<string, Section> _dictionary;
+    private readonly ConcurrentDictionary<string, Section> __dictionary;
 
 
-    public int  Count      => _dictionary.Count;
-    public bool IsReadOnly => ( (ICollection<KeyValuePair<string, Section>>)_dictionary ).IsReadOnly;
-    public Section this[ string sectionName ] { get => GetOrAdd(sectionName); set => _dictionary[sectionName] = value; }
-    public IEnumerable<string> Keys => _dictionary.Keys;
+    public int  Count      => __dictionary.Count;
+    public bool IsReadOnly => ( (ICollection<KeyValuePair<string, Section>>)__dictionary ).IsReadOnly;
+    public Section this[ string sectionName ] { get => GetOrAdd(sectionName); set => __dictionary[sectionName] = value; }
+    public IEnumerable<string> Keys => __dictionary.Keys;
     public int Length
     {
         get
         {
-            int values = _dictionary.Values.Sum(static x => x.Length + 1);
-            int result = values + _dictionary.Keys.Sum(static x => x.Length + 3);
+            int values = __dictionary.Values.Sum(static x => x.Length + 1);
+            int result = values + __dictionary.Keys.Sum(static x => x.Length + 3);
             return result;
         }
     }
-    public ConcurrentDictionary<string, Section>.AlternateLookup<ReadOnlySpan<char>> Lookup => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
-    public IEnumerable<Section>                                                      Values => _dictionary.Values;
+    public ConcurrentDictionary<string, Section>.AlternateLookup<ReadOnlySpan<char>> Lookup => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+    public IEnumerable<Section>                                                      Values => __dictionary.Values;
 
 
     public IniConfig() : this(DEFAULT_CAPACITY) { }
-    public IniConfig( int                                                capacity ) { _dictionary = new ConcurrentDictionary<string, Section>(Environment.ProcessorCount, capacity, StringComparer.OrdinalIgnoreCase); }
+    public IniConfig( int                                                capacity ) { __dictionary = new ConcurrentDictionary<string, Section>(Environment.ProcessorCount, capacity, StringComparer.OrdinalIgnoreCase); }
     public IniConfig( IDictionary<string, Section>                       sections ) : this(sections.Count) { Add(sections); }
     public IniConfig( IEnumerable<Section>                               sections ) : this(DEFAULT_CAPACITY) { Add(sections); }
     public IniConfig( IEnumerable<KeyValuePair<string, Section>>         sections ) : this(DEFAULT_CAPACITY) { Add(sections); }
@@ -138,13 +138,13 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     public Section GetOrAdd( string sectionName )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sectionName);
-        return _dictionary.GetOrAdd(sectionName, Section.Create);
+        return __dictionary.GetOrAdd(sectionName, Section.Create);
     }
 
 
     public IniConfig Add( string key, Section value )
     {
-        _dictionary[key] = value;
+        __dictionary[key] = value;
         return this;
     }
     public IniConfig Add( IEnumerable<KeyValuePair<string, Section>> values )
@@ -161,7 +161,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     }
     public IniConfig Add( KeyValuePair<string, Section> pair )
     {
-        _dictionary.Add(pair);
+        __dictionary.Add(pair);
         return this;
     }
     public IniConfig Add( IEnumerable<Section> values )
@@ -181,19 +181,19 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         this[value.Name] = value;
         return this;
     }
-    public bool Contains( KeyValuePair<string, Section> pair )                  => _dictionary.Contains(pair);
-    public void CopyTo( KeyValuePair<string, Section>[] array, int arrayIndex ) => ( (ICollection<KeyValuePair<string, Section>>)_dictionary ).CopyTo(array, arrayIndex);
-    public bool Remove( KeyValuePair<string, Section>   pair )                    => _dictionary.TryRemove(pair);
+    public bool Contains( KeyValuePair<string, Section> pair )                  => __dictionary.Contains(pair);
+    public void CopyTo( KeyValuePair<string, Section>[] array, int arrayIndex ) => ( (ICollection<KeyValuePair<string, Section>>)__dictionary ).CopyTo(array, arrayIndex);
+    public bool Remove( KeyValuePair<string, Section>   pair )                    => __dictionary.TryRemove(pair);
     public bool ContainsKey( Section                    pair )                    => ContainsKey(pair.Name);
     public bool Remove( Section                         pair )                    => Remove(pair.Name);
-    public bool Remove( string                          key )                     => _dictionary.TryRemove(key, out _);
-    public bool ContainsKey( string                     key )                     => _dictionary.ContainsKey(key);
-    public void Clear()                                                           => _dictionary.Clear();
-    public bool TryGetValue( string key, [NotNullWhen(true)] out Section? value ) => _dictionary.TryGetValue(key, out value);
+    public bool Remove( string                          key )                     => __dictionary.TryRemove(key, out _);
+    public bool ContainsKey( string                     key )                     => __dictionary.ContainsKey(key);
+    public void Clear()                                                           => __dictionary.Clear();
+    public bool TryGetValue( string key, [NotNullWhen(true)] out Section? value ) => __dictionary.TryGetValue(key, out value);
 
 
     IEnumerator IEnumerable.                                   GetEnumerator() => GetEnumerator();
-    public          IEnumerator<KeyValuePair<string, Section>> GetEnumerator() => _dictionary.GetEnumerator();
+    public          IEnumerator<KeyValuePair<string, Section>> GetEnumerator() => __dictionary.GetEnumerator();
     public override string                                     ToString()      => ToString(null, CultureInfo.InvariantCulture);
     public string ToString( string? format, IFormatProvider? formatProvider )
     {
@@ -211,7 +211,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         Debug.Assert(destination.Length >= Length);
         charsWritten = 0;
 
-        foreach ( ( string key, Section section ) in _dictionary )
+        foreach ( ( string key, Section section ) in __dictionary )
         {
             Span<char> span = destination[charsWritten..];
 

@@ -21,7 +21,6 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public readonly        double        Radius    = radius;
 
 
-    public static       EqualComparer<Circle> Sorter  => EqualComparer<Circle>.Default;
     static ref readonly Circle IShape<Circle>.Zero    => ref Zero;
     static ref readonly Circle IShape<Circle>.One     => ref One;
     static ref readonly Circle IShape<Circle>.Invalid => ref Invalid;
@@ -136,12 +135,12 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
         double                      step          = ( xMax - xMin ) / samples;
 
         double prevX = xMin;
-        double prevD = Helper(prevX, in curve, in Center, in r2);
+        double prevD = helper(prevX, in curve, in Center, in r2);
 
         for ( int i = 1; i <= samples; i++ )
         {
             double currX = xMin + i * step;
-            double currD = Helper(currX, in curve, in Center, in r2);
+            double currD = helper(currX, in curve, in Center, in r2);
 
             if ( double.IsNaN(prevD) || double.IsNaN(currD) )
             {
@@ -158,7 +157,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
             }
             else if ( prevD * currD < 0 ) // sign change → root in between
             {
-                double        root  = Bisection(prevX, currX, in tolerance, 50, in curve, in Center, in r2);
+                double        root  = bisection(prevX, currX, in tolerance, 50, in curve, in Center, in r2);
                 ReadOnlyPoint point = new(root, curve[root]);
                 intersections.Add(in point);
             }
@@ -169,7 +168,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
 
         return intersections;
 
-        static double Helper( double x, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
+        static double helper( double x, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
         {
             double y = curve[x];
             if ( double.IsNaN(y) || double.IsInfinity(y) ) { return double.NaN; }
@@ -179,15 +178,15 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
             return dx * dx + dy * dy - r2;
         }
 
-        static double Bisection( double a, double b, in double tolerance, int maxIter, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
+        static double bisection( double a, double b, in double tolerance, int maxIter, ref readonly CalculatedLine curve, ref readonly ReadOnlyPoint center, in double r2 )
         {
-            double fa  = Helper(a, in curve, in center, in r2);
-            double fb  = Helper(b, in curve, in center, in r2);
+            double fa  = helper(a, in curve, in center, in r2);
+            double fb  = helper(b, in curve, in center, in r2);
             double mid = 0.5 * ( a + b );
 
             for ( int i = 0; i < maxIter; i++ )
             {
-                double fm = Helper(mid, in curve, in center, in r2);
+                double fm = helper(mid, in curve, in center, in r2);
 
                 if ( Math.Abs(fm) < tolerance ) { return mid; }
 
@@ -248,12 +247,14 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ICircle<Circle>.ToString(in this, format);
 
 
-    public static bool operator ==( Circle  left, Circle                           right ) => Sorter.Equals(left, right);
-    public static bool operator !=( Circle  left, Circle                           right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( Circle   left, Circle                           right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( Circle  left, Circle                           right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( Circle   left, Circle                           right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( Circle  left, Circle                           right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( Circle? left, Circle?                          right ) => Nullable.Equals(left, right);
+    public static bool operator !=( Circle? left, Circle?                          right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( Circle  left, Circle                           right ) => EqualityComparer<Circle>.Default.Equals(left, right);
+    public static bool operator !=( Circle  left, Circle                           right ) => !EqualityComparer<Circle>.Default.Equals(left, right);
+    public static bool operator >( Circle   left, Circle                           right ) => Comparer<Circle>.Default.Compare(left, right) > 0;
+    public static bool operator >=( Circle  left, Circle                           right ) => Comparer<Circle>.Default.Compare(left, right) >= 0;
+    public static bool operator <( Circle   left, Circle                           right ) => Comparer<Circle>.Default.Compare(left, right) < 0;
+    public static bool operator <=( Circle  left, Circle                           right ) => Comparer<Circle>.Default.Compare(left, right) <= 0;
     public static Circle operator *( Circle self, Circle                           other ) => new(self.Center * other.Center, self.Radius * other.Radius);
     public static Circle operator +( Circle self, Circle                           other ) => new(self.Center + other.Center, self.Radius + other.Radius);
     public static Circle operator -( Circle self, Circle                           other ) => new(self.Center - other.Center, self.Radius - other.Radius);

@@ -69,7 +69,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
 {
     public readonly   Encoding   Encoding = encoding ?? Encoding.Default;
     internal readonly HttpClient Client   = client;
-    private readonly  IHostInfo  _host    = host;
+    private readonly  IHostInfo  __host    = host;
     internal readonly ILogger?   Logger   = logger;
 
 
@@ -91,7 +91,7 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     private static IHttpClientFactory GetHttpClientFactory( IServiceProvider provider ) => provider.GetRequiredService<IHttpClientFactory>();
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                              => new(_host.HostInfo, relativePath);
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private Uri        CreateUrl( string  relativePath )                              => new(__host.HostInfo, relativePath);
     [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method )                    => new(this, new HttpRequestMessage( method, url ));
     [MethodImpl( MethodImplOptions.AggressiveInlining )] private WebHandler CreateHandler( Uri url, HttpMethod method, HttpContent value ) => new(this, new HttpRequestMessage( method, url ) { Content = value });
 

@@ -17,5 +17,5 @@ public abstract record JsonModelRecord<TClass, TID> : ObservableRecord<TClass, T
     [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
     protected JsonModelRecord() : base() { }
     protected JsonModelRecord( TID   ID ) : base( ID ) { }
-    public void Deconstruct( out TID ID ) => ID = this.ID;
+    public void Deconstruct( out TID id ) => id = this.ID;
 }

@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-[Serializable, DefaultValue( nameof(Empty) )]
+[Serializable, DefaultValue(nameof(Empty))]
 public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 {
     public const           string       ACCEPTED_TYPE                        = "Server.Accepted";
@@ -101,14 +101,13 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     internal readonly      StringValues errors;
 
 
-    public static                  EqualComparer<Error> Sorter     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => EqualComparer<Error>.Default; }
-    public static                  IErrorTitles  Titles     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = IErrorTitles.Defaults.Instance;
-    [JsonRequired] public required string?       Detail     { get;                                                      init; }
-    [JsonRequired] public required StringValues  Errors     { get => errors;                                            init => errors = value; }
-    [JsonRequired] public required string?       Instance   { get;                                                      init; }
-    [JsonRequired] public required Status?       StatusCode { get => statusCode;                                        init => statusCode = value; }
-    [JsonRequired] public required string?       Title      { get;                                                      init; }
-    [JsonRequired] public required string?       Type       { get;                                                      init; }
+    public static                  IErrorTitles Titles     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IErrorTitles.Defaults.Instance;
+    [JsonRequired] public required string?      Detail     { get;                                                    init; }
+    [JsonRequired] public required StringValues Errors     { get => errors;                                          init => errors = value; }
+    [JsonRequired] public required string?      Instance   { get;                                                    init; }
+    [JsonRequired] public required Status?      StatusCode { get => statusCode;                                      init => statusCode = value; }
+    [JsonRequired] public required string?      Title      { get;                                                    init; }
+    [JsonRequired] public required string?      Type       { get;                                                    init; }
 
 
     public Error() : base() { }
@@ -124,10 +123,10 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     }
 
 
-    public static implicit operator Error( Status          result ) => Create( result,            StringValues.Empty );
-    public static implicit operator Error( string          error )  => Create( Status.BadRequest, error );
-    public static implicit operator Error( string[]        error )  => Create( Status.BadRequest, error );
-    public static implicit operator Error( in StringValues error )  => Create( Status.BadRequest, error );
+    public static implicit operator Error( Status          result ) => Create(result,            StringValues.Empty);
+    public static implicit operator Error( string          error )  => Create(Status.BadRequest, error);
+    public static implicit operator Error( string[]        error )  => Create(Status.BadRequest, error);
+    public static implicit operator Error( in StringValues error )  => Create(Status.BadRequest, error);
 
 
     public Status GetStatus() => StatusCode ?? Status.Ok;
@@ -137,34 +136,34 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
         where TValue : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
     public static Error Create( Status     status, in StringValues errors, [CallerMemberName] string type = EMPTY )                                                                   => new(status, type, null, null, null, in errors);
     public static Error Create( Status     status, string          type,   StringValues              errors )                                                                         => new(status, type, null, null, null, in errors);
-    public static Error Create( Status     status, string          type,   params string[]           errors )                                                                         => Create( status, type, null, null, null, new StringValues( errors ) );
+    public static Error Create( Status     status, string          type,   params string[]           errors )                                                                         => Create(status, type, null, null, null, new StringValues(errors));
     public static Error Create( Status     status, string          type,   string?                   title,    in     StringValues errors )                                           => new(status, type, title, null, null, in errors);
-    public static Error Create( Status     status, string          type,   string?                   title,    params string[]     errors )                                           => Create( status, type, title, null, null, new StringValues( errors ) );
+    public static Error Create( Status     status, string          type,   string?                   title,    params string[]     errors )                                           => Create(status, type, title, null, null, new StringValues(errors));
     public static Error Create( Status     status, string          type,   string?                   title,    string?             detail, string? instance, StringValues    errors ) => new(status, type, title, detail, instance, in errors);
-    public static Error Create( Status     status, string          type,   string?                   title,    string?             detail, string? instance, params string[] errors ) => Create( status, type, title, detail, instance, new StringValues( errors ) );
-    public static Error Create( Exception? e,      string?         detail, in StringValues           errors,   Status              status = Status.InternalServerError )                          => Create( e, detail, e?.Source, in errors, status );
+    public static Error Create( Status     status, string          type,   string?                   title,    string?             detail, string? instance, params string[] errors ) => Create(status, type, title, detail, instance, new StringValues(errors));
+    public static Error Create( Exception? e,      string?         detail, in StringValues           errors,   Status              status = Status.InternalServerError )                          => Create(e, detail, e?.Source, in errors, status);
     public static Error Create( Exception? e,      string?         detail, string?                   instance, in StringValues     errors = default, Status status = Status.InternalServerError ) => new(status, e?.GetType().Name, e?.Message, detail, instance, in errors);
 
 
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static Error Create( Exception e, in StringValues errors = default, Status status = Status.InternalServerError ) => Create( e, e.MethodSignature(), e.Source, in errors, status );
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static Error Create( Exception e, in StringValues errors = default, Status status = Status.InternalServerError ) => Create(e, e.MethodSignature(), e.Source, in errors, status);
 
 
-    public static Error Unauthorized( ref readonly PasswordValidator.Results results,  string?      instance                 = null, string? detail = null, string type = PASSWORD_VALIDATION_TYPE ) => Unauthorized( results.ToValues(), instance, detail, Titles.PasswordValidation, type );
-    public static Error Unauthorized( string?                                instance, StringValues errors                   = default )                                                     => Unauthorized( errors, instance, title: Titles.InvalidCredentials );
+    public static Error Unauthorized( ref readonly PasswordValidator.Results results,  string?      instance                 = null, string? detail = null, string type = PASSWORD_VALIDATION_TYPE ) => Unauthorized(results.ToValues(), instance, detail, Titles.PasswordValidation, type);
+    public static Error Unauthorized( string?                                instance, StringValues errors                   = default )                                                     => Unauthorized(errors, instance, title: Titles.InvalidCredentials);
     public static Error Unauthorized( in                  StringValues       errors,   string?      instance, string? detail = null, string? title = null, string type = UNAUTHORIZED_TYPE ) => new(Status.Unauthorized, type, title ?? Titles.Unauthorized, detail, instance, in errors);
-    public static Error NoInternet( in                    StringValues       errors = default )                                                                                                                => Disabled( errors, title: Titles.NoInternet,     type: NO_INTERNET_TYPE );
-    public static Error WiFiDisabled( in                  StringValues       errors = default )                                                                                                                => Disabled( errors, title: Titles.WiFiIsDisabled, type: NO_INTERNET_WIFI_TYPE );
+    public static Error NoInternet( in                    StringValues       errors = default )                                                                                                                => Disabled(errors, title: Titles.NoInternet,     type: NO_INTERNET_TYPE);
+    public static Error WiFiDisabled( in                  StringValues       errors = default )                                                                                                                => Disabled(errors, title: Titles.WiFiIsDisabled, type: NO_INTERNET_WIFI_TYPE);
     public static Error ExpiredSubscription( in           StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = EXPIRED_SUBSCRIPTION_TYPE ) => new(Status.PaymentRequired, type, title     ?? Titles.ExpiredSubscription, detail, instance, in errors);
     public static Error Subscription( in                  StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = INVALID_SUBSCRIPTION_TYPE ) => new(Status.PaymentRequired, type, title     ?? Titles.InvalidSubscription, detail, instance, in errors);
     public static Error NoSubscription( in                StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = NO_SUBSCRIPTION_TYPE )      => new(Status.PaymentRequired, type, title     ?? Titles.NoSubscription, detail, instance, in errors);
     public static Error Failure( in                       StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = GENERAL_FAILURE_TYPE )      => new(Status.PreconditionFailed, type, title  ?? Titles.General, detail, instance, in errors);
     public static Error Unexpected( in                    StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = UNEXPECTED_TYPE )           => new(Status.UnprocessableEntity, type, title ?? Titles.Unexpected, detail, instance, in errors);
     public static Error Validation( in                    StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = VALIDATION_TYPE )           => new(Status.BadRequest, type, title          ?? Titles.Validation, detail, instance, in errors);
-    public static Error DeviceName( in                    StringValues       errors = default )                                                                                                                           => Validation( errors, title: Titles.MustHaveValidDeviceName );
-    public static Error Host( in                          StringValues       errors = default )                                                                                                                           => Validation( errors, title: Titles.MustHaveValidIPHostName );
-    public static Error Password( in                      StringValues       errors = default )                                                                                                                           => Validation( errors, title: Titles.PasswordCannotBeEmpty );
-    public static Error Port( in                          StringValues       errors = default )                                                                                                                           => Validation( errors, title: Titles.GivenPortIsNotAValidPortNumberInRangeOf1To65535 );
-    public static Error UserName( in                      StringValues       errors = default )                                                                                                                           => Validation( errors, title: Titles.UserNameCannotBeEmpty );
+    public static Error DeviceName( in                    StringValues       errors = default )                                                                                                                           => Validation(errors, title: Titles.MustHaveValidDeviceName);
+    public static Error Host( in                          StringValues       errors = default )                                                                                                                           => Validation(errors, title: Titles.MustHaveValidIPHostName);
+    public static Error Password( in                      StringValues       errors = default )                                                                                                                           => Validation(errors, title: Titles.PasswordCannotBeEmpty);
+    public static Error Port( in                          StringValues       errors = default )                                                                                                                           => Validation(errors, title: Titles.GivenPortIsNotAValidPortNumberInRangeOf1To65535);
+    public static Error UserName( in                      StringValues       errors = default )                                                                                                                           => Validation(errors, title: Titles.UserNameCannotBeEmpty);
     public static Error ServerIsUnavailable( in           StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = SERVER_IS_UNAVAILABLE_TYPE )           => new(Status.PreconditionFailed, type, title            ?? Titles.ServerIsUnavailable, detail, instance, in errors);
     public static Error ServerIsOutdated( in              StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = SERVER_IS_OUTDATED_TYPE )              => new(Status.PreconditionFailed, type, title            ?? Titles.ServerIsOutdated, detail, instance, in errors);
     public static Error ClientIsOutdated( in              StringValues       errors = default, string? instance = null, string? detail = null, string? title = null, string type = CLIENT_IS_OUTDATED_TYPE )              => new(Status.PreconditionFailed, type, title            ?? Titles.ClientIsOutdated, detail, instance, in errors);
@@ -244,47 +243,47 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        int statusCodeComparison = Nullable.Compare( statusCode, other.statusCode );
+        int statusCodeComparison = Nullable.Compare(statusCode, other.statusCode);
         if ( statusCodeComparison != 0 ) { return statusCodeComparison; }
 
-        int typeComparison = string.Compare( Type, other.Type, StringComparison.Ordinal );
+        int typeComparison = string.Compare(Type, other.Type, StringComparison.Ordinal);
         if ( typeComparison != 0 ) { return typeComparison; }
 
-        int titleComparison = string.Compare( Title, other.Title, StringComparison.Ordinal );
+        int titleComparison = string.Compare(Title, other.Title, StringComparison.Ordinal);
         if ( titleComparison != 0 ) { return titleComparison; }
 
-        int detailComparison = string.Compare( Detail, other.Detail, StringComparison.Ordinal );
+        int detailComparison = string.Compare(Detail, other.Detail, StringComparison.Ordinal);
         if ( detailComparison != 0 ) { return detailComparison; }
 
-        return string.Compare( Instance, other.Instance, StringComparison.Ordinal );
+        return string.Compare(Instance, other.Instance, StringComparison.Ordinal);
     }
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
         return other is Error error
-                   ? CompareTo( error )
-                   : throw new ArgumentException( $"Object must be of type {nameof(Error)}" );
+                   ? CompareTo(error)
+                   : throw new ArgumentException($"Object must be of type {nameof(Error)}");
     }
-    public static bool Equals( ReadOnlySpan<Error> left, ReadOnlySpan<Error> right ) => left.SequenceEqual( right );
+    public static bool Equals( ReadOnlySpan<Error> left, ReadOnlySpan<Error> right ) => left.SequenceEqual(right);
     public bool Equals( Error? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
-        return Nullable.Equals( statusCode, other.statusCode ) && string.Equals( Type, other.Type, StringComparison.Ordinal ) && string.Equals( Title, other.Title, StringComparison.Ordinal ) && string.Equals( Detail, other.Detail, StringComparison.Ordinal ) && string.Equals( Instance, other.Instance, StringComparison.Ordinal );
+        return Nullable.Equals(statusCode, other.statusCode) && string.Equals(Type, other.Type, StringComparison.Ordinal) && string.Equals(Title, other.Title, StringComparison.Ordinal) && string.Equals(Detail, other.Detail, StringComparison.Ordinal) && string.Equals(Instance, other.Instance, StringComparison.Ordinal);
     }
-    public override bool Equals( object? other )                  => ReferenceEquals( this, other ) || other is Error error && Equals( error );
-    public override int  GetHashCode()                            => HashCode.Combine( statusCode, Type, Title, Detail, Instance, errors );
-    public static   bool operator <( Error?  left, Error? right ) => Sorter.Compare( left, right ) < 0;
-    public static   bool operator >( Error?  left, Error? right ) => Sorter.Compare( left, right ) > 0;
-    public static   bool operator <=( Error? left, Error? right ) => Sorter.Compare( left, right ) <= 0;
-    public static   bool operator >=( Error? left, Error? right ) => Sorter.Compare( left, right ) >= 0;
-    public static   bool operator ==( Error? left, Error? right ) => Sorter.Equals( left, right );
-    public static   bool operator !=( Error? left, Error? right ) => Sorter.DoesNotEqual( left, right );
+    public override bool Equals( object? other )                  => ReferenceEquals(this, other) || ( other is Error error && Equals(error) );
+    public override int  GetHashCode()                            => HashCode.Combine(statusCode, Type, Title, Detail, Instance, errors);
+    public static   bool operator ==( Error? left, Error? right ) => EqualityComparer<Error>.Default.Equals(left, right);
+    public static   bool operator !=( Error? left, Error? right ) => !EqualityComparer<Error>.Default.Equals(left, right);
+    public static   bool operator >( Error   left, Error  right ) => Comparer<Error>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( Error  left, Error  right ) => Comparer<Error>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( Error   left, Error  right ) => Comparer<Error>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( Error  left, Error  right ) => Comparer<Error>.Default.Compare(left, right) <= 0;
 }

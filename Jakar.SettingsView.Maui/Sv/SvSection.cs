@@ -103,7 +103,7 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
 
         public sealed class Default : FooterBase
         {
-            private readonly Label _label = new()
+            private readonly Label __label = new()
                                             {
                                                 Padding                 = new Thickness( 10, 0, 0, 0 ),
                                                 VerticalTextAlignment   = TextAlignment.Center,
@@ -125,13 +125,13 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
                               HasShadow    = false,
                               Padding      = new Thickness( 0 ),
                               Margin       = new Thickness( 0 ),
-                              Content      = _label
+                              Content      = __label
                           };
 
                 SetDynamicResource( BackgroundColorProperty, FOOTER_BACKGROUND_COLOR );
-                _label.SetDynamicResource( Label.FontSizeProperty,  FOOTER_FONT_SIZE );
-                _label.SetDynamicResource( Label.TextColorProperty, FOOTER_TEXT_COLOR );
-                _label.SetDynamicResource( BackgroundColorProperty, FOOTER_BACKGROUND_COLOR );
+                __label.SetDynamicResource( Label.FontSizeProperty,  FOOTER_FONT_SIZE );
+                __label.SetDynamicResource( Label.TextColorProperty, FOOTER_TEXT_COLOR );
+                __label.SetDynamicResource( BackgroundColorProperty, FOOTER_BACKGROUND_COLOR );
             }
 
 
@@ -139,15 +139,15 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
             public static Default Create()                   => new();
 
 
-            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => _label.CharacterSpacing = value;
-            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => _label.FontFamily = value;
-            public override void OnFontSizeChanged( double                       oldValue, double         value ) => _label.FontSize = value;
-            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => _label.FontAutoScalingEnabled = value;
-            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => _label.FontAttributes = value;
-            public override void OnTitleChanged( string                          oldValue, string         value ) => _label.Text = value;
-            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => _label.HorizontalTextAlignment = value;
-            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => _label.VerticalTextAlignment = value;
-            public override void OnTextColorChanged( Color?                      oldValue, Color?         value ) => _label.TextColor = value ?? Colors.Black;
+            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => __label.CharacterSpacing = value;
+            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => __label.FontFamily = value;
+            public override void OnFontSizeChanged( double                       oldValue, double         value ) => __label.FontSize = value;
+            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => __label.FontAutoScalingEnabled = value;
+            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => __label.FontAttributes = value;
+            public override void OnTitleChanged( string                          oldValue, string         value ) => __label.Text = value;
+            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => __label.HorizontalTextAlignment = value;
+            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => __label.VerticalTextAlignment = value;
+            public override void OnTextColorChanged( Color?                      oldValue, Color?         value ) => __label.TextColor = value ?? Colors.Black;
         }
     }
 
@@ -202,14 +202,14 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
 
         public sealed class Default : HeaderBase
         {
-            private readonly Grid _grid;
-            private readonly Image _icon = new()
+            private readonly Grid __grid;
+            private readonly Image __icon = new()
                                            {
                                                Aspect            = Aspect.AspectFit,
                                                HorizontalOptions = LayoutOptions.Fill,
                                                VerticalOptions   = LayoutOptions.Fill
                                            };
-            private readonly Label _label = new()
+            private readonly Label __label = new()
                                             {
                                                 Padding                 = new Thickness( 0 ),
                                                 VerticalTextAlignment   = TextAlignment.Center,
@@ -225,33 +225,33 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
                 HorizontalOptions    = LayoutOptions.Fill;
                 VerticalOptions      = LayoutOptions.Fill;
 
-                Grid.SetColumn( _label, 1 );
-                Grid.SetColumn( _icon,  2 );
+                Grid.SetColumn( __label, 1 );
+                Grid.SetColumn( __icon,  2 );
 
                 SetDynamicResource( BackgroundColorProperty, HEADER_BACKGROUND_COLOR );
-                _label.SetDynamicResource( Label.FontSizeProperty,  HEADER_FONT_SIZE );
-                _label.SetDynamicResource( Label.TextColorProperty, HEADER_TEXT_COLOR );
-                _label.SetDynamicResource( BackgroundColorProperty, HEADER_BACKGROUND_COLOR );
-                _icon.SetDynamicResource( BackgroundColorProperty, HEADER_BACKGROUND_COLOR );
+                __label.SetDynamicResource( Label.FontSizeProperty,  HEADER_FONT_SIZE );
+                __label.SetDynamicResource( Label.TextColorProperty, HEADER_TEXT_COLOR );
+                __label.SetDynamicResource( BackgroundColorProperty, HEADER_BACKGROUND_COLOR );
+                __icon.SetDynamicResource( BackgroundColorProperty, HEADER_BACKGROUND_COLOR );
 
-                Content = _grid = new Grid
+                Content = __grid = new Grid
                                   {
                                       HorizontalOptions = LayoutOptions.Fill,
                                       VerticalOptions   = LayoutOptions.Fill,
                                       ColumnDefinitions = [new ColumnDefinition { Width = new GridLength( 15, GridUnitType.Absolute ) }, new ColumnDefinition { Width = GridLength.Star }, new ColumnDefinition { Width = new GridLength( 0.1, GridUnitType.Star ) }],
                                       Children =
                                       {
-                                          _label,
-                                          _icon
+                                          __label,
+                                          __icon
                                       }
                                   };
             }
             public override void Dispose()
             {
                 base.Dispose();
-                ClearGesture( _grid );
-                ClearGesture( _label );
-                ClearGesture( _icon );
+                ClearGesture( __grid );
+                ClearGesture( __label );
+                ClearGesture( __icon );
             }
 
 
@@ -260,15 +260,15 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
 
 
             public override void OnTappedCommandChanged( ICommand?               value )                          => _gestureRecognizer.Command = value;
-            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => _label.CharacterSpacing = value;
-            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => _label.FontFamily = value;
-            public override void OnFontSizeChanged( double                       oldValue, double         value ) => _label.FontSize = value;
-            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => _label.FontAutoScalingEnabled = value;
-            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => _label.FontAttributes = value;
-            public override void OnTitleChanged( string                          old,      string         value ) => _label.Text = value;
-            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => _label.HorizontalTextAlignment = value;
-            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => _label.VerticalTextAlignment = value;
-            public override void OnTextColorChanged( Color?                      old,      Color?         value ) => _label.TextColor = value ?? Colors.Black;
+            public override void OnCharacterSpacingChanged( double               oldValue, double         value ) => __label.CharacterSpacing = value;
+            public override void OnFontFamilyChanged( string                     oldValue, string         value ) => __label.FontFamily = value;
+            public override void OnFontSizeChanged( double                       oldValue, double         value ) => __label.FontSize = value;
+            public override void OnFontAutoScalingEnabledChanged( bool           oldValue, bool           value ) => __label.FontAutoScalingEnabled = value;
+            public override void OnFontAttributesChanged( FontAttributes         oldValue, FontAttributes value ) => __label.FontAttributes = value;
+            public override void OnTitleChanged( string                          old,      string         value ) => __label.Text = value;
+            public override void OnHorizontalTextAlignmentChanged( TextAlignment oldValue, TextAlignment  value ) => __label.HorizontalTextAlignment = value;
+            public override void OnVerticalTextAlignmentChanged( TextAlignment   oldValue, TextAlignment  value ) => __label.VerticalTextAlignment = value;
+            public override void OnTextColorChanged( Color?                      old,      Color?         value ) => __label.TextColor = value ?? Colors.Black;
             public override void OnIsExpandedChanged( bool value ) => IconSource = value
                                                                                        ? Collapsed
                                                                                        : Expanded;
@@ -278,7 +278,7 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
             public override void OnExpandedChanged( ImageSource? value ) => OnIconSourceChanged( IsExpanded
                                                                                                      ? value
                                                                                                      : Collapsed );
-            public override void OnIconSourceChanged( ImageSource? value ) => _icon.Source = value;
+            public override void OnIconSourceChanged( ImageSource? value ) => __icon.Source = value;
         }
     }
 }

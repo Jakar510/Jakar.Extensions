@@ -8,12 +8,12 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
 {
     private static Func<object, object> GetTablePropertyValue( PropertyInfo property )
     {
-        ArgumentNullException.ThrowIfNull( property.GetMethod );
-        ArgumentNullException.ThrowIfNull( property.DeclaringType );
+        ArgumentNullException.ThrowIfNull(property.GetMethod);
+        ArgumentNullException.ThrowIfNull(property.DeclaringType);
 
-        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod( property.DeclaringType, nameof(GetTablePropertyValue) ).LoadArgument( 0 ).CastClass( property.DeclaringType ).Call( property.GetMethod );
+        Emit<Func<object, object>>? emit = Emit<Func<object, object>>.NewDynamicMethod(property.DeclaringType, nameof(GetTablePropertyValue)).LoadArgument(0).CastClass(property.DeclaringType).Call(property.GetMethod);
 
-        if ( property.PropertyType.IsValueType ) { emit = emit.Box( property.PropertyType ); }
+        if ( property.PropertyType.IsValueType ) { emit = emit.Box(property.PropertyType); }
 
         return emit.Return().CreateDelegate();
     }
@@ -23,21 +23,21 @@ public sealed record Descriptor( string Name, bool IsKey, string ColumnName, str
     public static FrozenDictionary<string, Descriptor> CreateMapping( Type type )
     {
         const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
-        PropertyInfo[]     properties = type.GetProperties( ATTRIBUTES ).Where( static x => !x.HasAttribute<DataBaseIgnoreAttribute>() ).ToArray();
+        PropertyInfo[]     properties = type.GetProperties(ATTRIBUTES).Where(static x => !x.HasAttribute<DataBaseIgnoreAttribute>()).ToArray();
 
-        Debug.Assert( properties.Length > 0 );
-        Debug.Assert( properties.Any( IsDbKey ) );
+        Debug.Assert(properties.Length > 0);
+        Debug.Assert(properties.Any(IsDbKey));
 
-        return properties.ToFrozenDictionary( static x => x.Name, Create ).ToFrozenDictionary( StringComparer.Ordinal );
+        return properties.ToFrozenDictionary(static x => x.Name, Create).ToFrozenDictionary(StringComparer.Ordinal);
     }
     public static FrozenDictionary<string, Descriptor> CreateMapping<TClass>()
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass> => CreateMapping( typeof(TClass) );
-    public static Descriptor Create( PropertyInfo property ) => Create( property, property.Name.ToSnakeCase() );
+        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass> => CreateMapping(typeof(TClass));
+    public static Descriptor Create( PropertyInfo property ) => Create(property, property.Name.ToSnakeCase());
     public static Descriptor Create( PropertyInfo property, in string name )
     {
-        if ( !string.Equals( name.ToSnakeCase(), name ) ) { throw new ArgumentException( $"The name '{name}' is not in snake case." ); }
+        if ( !string.Equals(name.ToSnakeCase(), name) ) { throw new ArgumentException($"The name '{name}' is not in snake case."); }
 
-        return new Descriptor( name, IsDbKey( property ), $" {name} ", $" @{name} ", $" {name} = @{name} ", GetTablePropertyValue( property ) );
+        return new Descriptor(name, IsDbKey(property), $" {name} ", $" @{name} ", $" {name} = @{name} ", GetTablePropertyValue(property));
     }
 
 

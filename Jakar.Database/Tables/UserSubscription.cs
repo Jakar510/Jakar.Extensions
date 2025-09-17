@@ -11,14 +11,14 @@ public interface IUserSubscription : IUniqueID<Guid>
 
 
 
-public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExpires, RecordID<TClass> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TClass>( in CreatedBy, in ID, in DateCreated, in LastModified ), IUserSubscription
+public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExpires, RecordID<TClass> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TClass>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
     where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass>
 {
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(SubscriptionExpires), SubscriptionExpires );
+        parameters.Add(nameof(SubscriptionExpires), SubscriptionExpires);
         return parameters;
     }
 }

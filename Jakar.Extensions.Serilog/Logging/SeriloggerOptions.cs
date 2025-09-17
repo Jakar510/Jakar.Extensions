@@ -16,10 +16,10 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<SeriloggerOptions>, IAppInfo, IDisposable
 {
-    private ActivitySource? _source;
+    private ActivitySource? __source;
 
 
-    public          ActivitySource                                           ActivitySource     { get => GetActivitySource(); set => _source = value; }
+    public          ActivitySource                                           ActivitySource     { get => GetActivitySource(); set => __source = value; }
     public          int?                                                     BuildNumber        => AppVersion.Build;
     public required Guid                                                     AppID              { get; set; }
     public required string                                                   AppName            { get; set; }
@@ -51,10 +51,10 @@ public sealed class SeriloggerOptions : SeriloggerConstants, IOptions<Serilogger
     {
         ScreenShotData = ReadOnlyMemory<byte>.Empty;
         Paths.Dispose();
-        _source?.Dispose();
-        _source = null;
+        __source?.Dispose();
+        __source = null;
     }
-    private       ActivitySource                  GetActivitySource()                              => _source ??= new ActivitySource( AppName, AppVersion.ToString() );
+    private       ActivitySource                  GetActivitySource()                              => __source ??= new ActivitySource( AppName, AppVersion.ToString() );
     public static EventDetails                    UpdateEventDetailsNoOpp( EventDetails  details ) => details;
     public static ValueTask<ReadOnlyMemory<byte>> TakeEmptyScreenShot( CancellationToken token )   => new(ReadOnlyMemory<byte>.Empty);
 

@@ -24,6 +24,6 @@ public sealed class ProtectedData( IDataProtector protector ) : IProtectedData
 {
     private readonly IDataProtector __protector = protector;
     public           IProtectedData CreateProtector( string purpose )       => this;
-    public           byte[]         Protect( byte[]         plaintext )     => __protector.Encrypt( plaintext );
-    public           byte[]         Unprotect( byte[]       protectedData ) => __protector.Decrypt( protectedData );
+    public           byte[]         Protect( byte[]         plaintext )     => __protector.Encrypt(plaintext);
+    public           byte[]         Unprotect( byte[]       protectedData ) => __protector.Decrypt(protectedData);
 }

@@ -7,17 +7,17 @@ namespace Jakar.Extensions;
 public static partial class Tasks
 {
     private const           string                                      EMPTY                      = BaseRecord.EMPTY;
-    private static readonly Action<ILogger, string, Exception?>         _logCallerCallback         = LoggerMessage.Define<string>( LogLevel.Error, new EventId( 0,         nameof(Log) ), "{Caller}", new LogDefineOptions { SkipEnabledCheck            = true } );
-    private static readonly Action<ILogger, string, string, Exception?> _logCallerVariableCallback = LoggerMessage.Define<string, string>( LogLevel.Error, new EventId( 0, nameof(Log) ), "{Caller}.{Variable}", new LogDefineOptions { SkipEnabledCheck = true } );
+    private static readonly Action<ILogger, string, Exception?>         __logCallerCallback         = LoggerMessage.Define<string>( LogLevel.Error, new EventId( 0,         nameof(Log) ), "{Caller}", new LogDefineOptions { SkipEnabledCheck            = true } );
+    private static readonly Action<ILogger, string, string, Exception?> __logCallerVariableCallback = LoggerMessage.Define<string, string>( LogLevel.Error, new EventId( 0, nameof(Log) ), "{Caller}.{Variable}", new LogDefineOptions { SkipEnabledCheck = true } );
 
 
     public static void Log( ILogger logger, Exception e, string caller )
     {
-        if ( logger.IsEnabled( LogLevel.Error ) ) { _logCallerCallback( logger, caller, e ); }
+        if ( logger.IsEnabled( LogLevel.Error ) ) { __logCallerCallback( logger, caller, e ); }
     }
     public static void Log( ILogger logger, Exception e, string caller, string variable )
     {
-        if ( logger.IsEnabled( LogLevel.Error ) ) { _logCallerVariableCallback( logger, caller, variable, e ); }
+        if ( logger.IsEnabled( LogLevel.Error ) ) { __logCallerVariableCallback( logger, caller, variable, e ); }
     }
 
 

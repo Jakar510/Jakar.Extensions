@@ -15,9 +15,9 @@ namespace Jakar.Extensions;
 public sealed class Synchronized<TValue>( TValue value )
     where TValue : class?
 {
-    private volatile TValue _value = value;
+    private volatile TValue __value = value;
 
-    public TValue Value { get => Interlocked.CompareExchange( ref _value!, null, null ); set => Interlocked.Exchange( ref _value, value ); }
+    public TValue Value { get => Interlocked.CompareExchange( ref __value!, null, null ); set => Interlocked.Exchange( ref __value, value ); }
 
 
     public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;
@@ -27,18 +27,18 @@ public sealed class Synchronized<TValue>( TValue value )
 
 public sealed class SynchronizedValue<TValue>( TValue value )
 {
-    private readonly Lock   _lock  = new();
-    private          TValue _value = value;
+    private readonly Lock   __lock  = new();
+    private          TValue __value = value;
 
     public TValue Value
     {
         get
         {
-            lock (_lock) { return _value; }
+            lock (__lock) { return __value; }
         }
         set
         {
-            lock (_lock) { _value = value; }
+            lock (__lock) { __value = value; }
         }
     }
 

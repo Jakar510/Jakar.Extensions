@@ -40,7 +40,7 @@ public abstract class CellBase : ComponentBase, ISvCellTitle, IDisposable // , I
 {
     protected bool?           _isDisabled;
     protected bool?           _isVisible;
-    private   FieldIdentifier _fieldIdentifier;
+    private   FieldIdentifier __fieldIdentifier;
 
 
     protected                                           ElementReference                     _control;
@@ -66,14 +66,14 @@ public abstract class CellBase : ComponentBase, ISvCellTitle, IDisposable // , I
     [Parameter]                                  public EventCallback<string?>               TitleChanged         { get; set; }
     [Parameter]                                  public Expression<Func<string?>>?           TitleExpression      { get; set; }
     [Parameter]                                  public Expression<Func<string>>?            For                  { get; set; }
-    protected internal                                  IEnumerable<string>                  ValidationMessages   => CascadedEditContext?.GetValidationMessages( _fieldIdentifier ) ?? [];
+    protected internal                                  IEnumerable<string>                  ValidationMessages   => CascadedEditContext?.GetValidationMessages( __fieldIdentifier ) ?? [];
 
 
     protected internal void SetElementReference( ElementReference reference ) => _control = reference;
     protected override async Task OnParametersSetAsync()
     {
         For              ??= () => ID;
-        _fieldIdentifier =   FieldIdentifier.Create( For );
+        __fieldIdentifier =   FieldIdentifier.Create( For );
 
         if ( CascadedEditContext is not null ) { CascadedEditContext.OnValidationStateChanged += HandleValidationStateChanged; }
 

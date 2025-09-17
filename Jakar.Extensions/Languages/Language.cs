@@ -9,22 +9,21 @@ namespace Jakar.Extensions;
 [Serializable, DebuggerDisplay(nameof(DisplayName))]
 public sealed class Language : BaseClass, IEqualComparable<Language>
 {
-    private readonly CultureInfo _culture;
+    private readonly CultureInfo __culture;
 
 
-    public static EqualComparer<Language>   Sorter           => EqualComparer<Language>.Default;
-    public        string             DisplayName      { get; init; }
-    public        string             EnglishName      { get; init; }
-    public        bool               IsNeutralCulture { get; init; }
-    public        string             Name             { get; init; }
-    public        string             ThreeLetterISO   { get; init; }
-    public        string             TwoLetterISO     { get; init; }
-    public        SupportedLanguage? Version          { get; init; }
+    public string             DisplayName      { get; init; }
+    public string             EnglishName      { get; init; }
+    public bool               IsNeutralCulture { get; init; }
+    public string             Name             { get; init; }
+    public string             ThreeLetterISO   { get; init; }
+    public string             TwoLetterISO     { get; init; }
+    public SupportedLanguage? Version          { get; init; }
 
 
     public Language( CultureInfo culture, SupportedLanguage? version = null )
     {
-        _culture         = culture;
+        __culture        = culture;
         Name             = culture.Name;
         EnglishName      = culture.EnglishName;
         TwoLetterISO     = culture.TwoLetterISOLanguageName;
@@ -38,10 +37,10 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
-    public static implicit operator CultureInfo( Language       value ) => value._culture;
+    public static implicit operator CultureInfo( Language       value ) => value.__culture;
 
 
-    public          CultureInfo GetCulture()                  => _culture;
+    public          CultureInfo GetCulture()                  => __culture;
     public override string      ToString()                    => DisplayName;
     private static  Language    Create( CultureInfo culture ) => new(culture);
 
@@ -74,12 +73,12 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
     public override int  GetHashCode()         => HashCode.Combine(DisplayName, Name, Version);
 
 
-    public static bool operator ==( Language? left, Language? right ) => Sorter.Equals(left, right);
-    public static bool operator !=( Language? left, Language? right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( Language?  left, Language? right ) => Sorter.Compare(left, right) > 0;
-    public static bool operator >=( Language? left, Language? right ) => Sorter.Compare(left, right) >= 0;
-    public static bool operator <( Language?  left, Language? right ) => Sorter.Compare(left, right) < 0;
-    public static bool operator <=( Language? left, Language? right ) => Sorter.Compare(left, right) <= 0;
+    public static bool operator ==( Language? left, Language? right ) => EqualityComparer<Language>.Default.Equals(left, right);
+    public static bool operator !=( Language? left, Language? right ) => !EqualityComparer<Language>.Default.Equals(left, right);
+    public static bool operator >( Language   left, Language  right ) => Comparer<Language>.Default.Compare(left, right) > 0;
+    public static bool operator >=( Language  left, Language  right ) => Comparer<Language>.Default.Compare(left, right) >= 0;
+    public static bool operator <( Language   left, Language  right ) => Comparer<Language>.Default.Compare(left, right) < 0;
+    public static bool operator <=( Language  left, Language  right ) => Comparer<Language>.Default.Compare(left, right) <= 0;
 
 
 
@@ -104,7 +103,7 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
     {
         public Items() : base(Buffers.DEFAULT_CAPACITY) { }
         public Items( int                   capacity ) : base(capacity) { }
-        public Items( IEnumerable<Language> items ) : base(items) => Sort(Sorter);
+        public Items( IEnumerable<Language> items ) : base(items) => Sort(Comparer<Language>.Default);
         public Items( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
                                                                                                                ? count
                                                                                                                : Buffers.DEFAULT_CAPACITY)

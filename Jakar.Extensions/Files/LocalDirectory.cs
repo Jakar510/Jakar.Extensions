@@ -12,25 +12,25 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
-    private            bool          _isTemporary;
+    private            bool          __isTemporary;
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);                set => Environment.CurrentDirectory = value.FullPath; }
-    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc( FullPath ); set => Directory.SetCreationTimeUtc( FullPath, value ); }
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);              set => Environment.CurrentDirectory = value.FullPath; }
+    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
     public              bool            DoesNotExist      => !Exists;
     public              bool            Exists            => Info.Exists;
     [JsonIgnore] public DirectoryInfo   Info              => _info;
-    bool TempFile.ITempFile.            IsTemporary       { get => _isTemporary;                               set => _isTemporary = value; }
-    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc( FullPath ); set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
-    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc( FullPath );  set => Directory.SetLastWriteTimeUtc( FullPath, value ); }
+    bool TempFile.ITempFile.            IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
     public              string          Name              => Info.Name;
     [JsonIgnore] public LocalDirectory? Parent            => GetParent();
-    public              string          Root              => Directory.GetDirectoryRoot( FullPath );
+    public              string          Root              => Directory.GetDirectoryRoot(FullPath);
 
 
-    public LocalDirectory( string path ) : this( Directory.CreateDirectory( path ) ) { }
-    public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this( new DirectoryInfo( path.Combine( subFolders ) ) ) { }
+    public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
+    public LocalDirectory( string path, params ReadOnlySpan<string> subFolders ) : this(new DirectoryInfo(path.Combine(subFolders))) { }
     public LocalDirectory( DirectoryInfo info )
     {
         info.Create();
@@ -41,13 +41,13 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
     public void Dispose()
     {
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
         DisposeAsync().CallSynchronously();
     }
 
     public virtual async ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
         if ( DoesNotExist || !this.IsTempFile() ) { return; }
 
         await DeleteAllRecursivelyAsync();
@@ -74,12 +74,12 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public static LocalDirectory Create( DirectoryInfo      file ) => file;
     public static LocalDirectory Create( string             file ) => file;
     public static LocalDirectory Create( ReadOnlySpan<char> file ) => file;
-    public static LocalDirectory? TryCreate( [NotNullIfNotNull( nameof(info) )] DirectoryInfo? info ) => info is not null
-                                                                                                             ? Create( info )
-                                                                                                             : null;
-    public static LocalDirectory? TryCreate( [NotNullIfNotNull( nameof(info) )] string? info ) => info is not null
-                                                                                                      ? Create( info )
-                                                                                                      : null;
+    public static LocalDirectory? TryCreate( [NotNullIfNotNull(nameof(info))] DirectoryInfo? info ) => info is not null
+                                                                                                           ? Create(info)
+                                                                                                           : null;
+    public static LocalDirectory? TryCreate( [NotNullIfNotNull(nameof(info))] string? info ) => info is not null
+                                                                                                    ? Create(info)
+                                                                                                    : null;
 
     public static LocalDirectory AppData( string subPath )
     {
@@ -89,13 +89,13 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
         else if ( OperatingSystem.IsMacOS() ) { subPath = $"~/Library/{subPath}"; }
 
-        else if ( OperatingSystem.IsLinux() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+        else if ( OperatingSystem.IsLinux() ) { subPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), subPath); }
 
-        else if ( OperatingSystem.IsAndroid() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+        else if ( OperatingSystem.IsAndroid() ) { subPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), subPath); }
 
-        else if ( OperatingSystem.IsIOS() ) { subPath = Path.Join( Environment.GetFolderPath( Environment.SpecialFolder.CommonApplicationData ), subPath ); }
+        else if ( OperatingSystem.IsIOS() ) { subPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), subPath); }
 
-        string path = Path.GetFullPath( subPath );
+        string path = Path.GetFullPath(subPath);
         return path;
     }
 
@@ -106,14 +106,14 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public static LocalDirectory Create( LocalDirectory path, params ReadOnlySpan<string> subFolders ) => Directory.CreateDirectory( path.Combine( subFolders ) );
+    public static LocalDirectory Create( LocalDirectory path, params ReadOnlySpan<string> subFolders ) => Directory.CreateDirectory(path.Combine(subFolders));
 
     /// <summary> Uses the <see cref="CurrentDirectory"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public static LocalDirectory Create( params ReadOnlySpan<string> subFolders ) => Create( CurrentDirectory, subFolders );
+    public static LocalDirectory Create( params ReadOnlySpan<string> subFolders ) => Create(CurrentDirectory, subFolders);
 
     /// <summary> Uses <see cref="Path.GetTempPath"/> and creates the tree structure based on <paramref name="subFolders"/> </summary>
     /// <param name="subFolders"> </param>
@@ -122,7 +122,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// </returns>
     public static LocalDirectory CreateTemp( params ReadOnlySpan<string> subFolders )
     {
-        LocalDirectory d = Create( Path.GetTempPath().Combine( subFolders ) );
+        LocalDirectory d = Create(Path.GetTempPath().Combine(subFolders));
 
         return d.SetTemporary();
     }
@@ -134,27 +134,27 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public LocalDirectory[] GetSubFolders()                                                              => Info.EnumerateDirectories().Select( Create ).ToArray().ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories( searchPattern ).Select( Create ).ToArray().ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories( searchPattern, searchOption ).Select( Create ).ToArray().ToArray();
-    public LocalDirectory[] GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories( searchPattern, enumerationOptions ).Select( Create ).ToArray();
+    public LocalDirectory[] GetSubFolders()                                                              => Info.EnumerateDirectories().Select(Create).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern )                                        => Info.EnumerateDirectories(searchPattern).Select(Create).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern, SearchOption       searchOption )       => Info.EnumerateDirectories(searchPattern, searchOption).Select(Create).ToArray().ToArray();
+    public LocalDirectory[] GetSubFolders( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateDirectories(searchPattern, enumerationOptions).Select(Create).ToArray();
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-    public LocalFile[] GetFiles()                                                              => Info.EnumerateFiles().Select( LocalFile.Create ).ToArray();
-    public LocalFile[] GetFiles( string searchPattern )                                        => Info.EnumerateFiles( searchPattern ).Select( LocalFile.Create ).ToArray();
-    public LocalFile[] GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles( searchPattern, searchOption ).Select( LocalFile.Create ).ToArray();
-    public LocalFile[] GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles( searchPattern, enumerationOptions ).Select( LocalFile.Create ).ToArray();
+    public LocalFile[] GetFiles()                                                              => Info.EnumerateFiles().Select(LocalFile.Create).ToArray();
+    public LocalFile[] GetFiles( string searchPattern )                                        => Info.EnumerateFiles(searchPattern).Select(LocalFile.Create).ToArray();
+    public LocalFile[] GetFiles( string searchPattern, SearchOption       searchOption )       => Info.EnumerateFiles(searchPattern, searchOption).Select(LocalFile.Create).ToArray();
+    public LocalFile[] GetFiles( string searchPattern, EnumerationOptions enumerationOptions ) => Info.EnumerateFiles(searchPattern, enumerationOptions).Select(LocalFile.Create).ToArray();
 
 
-    public ValueEnumerable<Select<Descendants<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>> Descendants() => Info.Descendants().Select( GetFileOrDirectory );
-    public ValueEnumerable<Select<Children<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>    Children()    => Info.Children().Select( GetFileOrDirectory );
-    public ValueEnumerable<Select<Ancestors<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>   Ancestors()   => Info.Ancestors().Select( GetFileOrDirectory );
+    public ValueEnumerable<Select<Descendants<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>> Descendants() => Info.Descendants().Select(GetFileOrDirectory);
+    public ValueEnumerable<Select<Children<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>    Children()    => Info.Children().Select(GetFileOrDirectory);
+    public ValueEnumerable<Select<Ancestors<FileSystemInfoTraverser, FileSystemInfo>, FileSystemInfo, OneOf<LocalFile, LocalDirectory>>, OneOf<LocalFile, LocalDirectory>>   Ancestors()   => Info.Ancestors().Select(GetFileOrDirectory);
     public static OneOf<LocalFile, LocalDirectory> GetFileOrDirectory( FileSystemInfo info ) => info is DirectoryInfo directory
-                                                                                                    ? Create( directory )
-                                                                                                    : LocalFile.Create( info );
+                                                                                                    ? Create(directory)
+                                                                                                    : LocalFile.Create(info);
 
 
     /// <summary> Gets the <see cref="LocalDirectory"/> object of the directory in this <see cref="LocalDirectory"/> </summary>
@@ -169,8 +169,8 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="LocalDirectory"/>
     /// </returns>
-    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory( Path.Combine( paths ) );
-    protected virtual LocalDirectory? GetParent() => TryCreate( Info.Parent );
+    public LocalDirectory CreateSubDirectory( params ReadOnlySpan<string> paths ) => Info.CreateSubdirectory(Path.Combine(paths));
+    protected virtual LocalDirectory? GetParent() => TryCreate(Info.Parent);
 
 
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
@@ -185,7 +185,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public LocalFile Join( string path ) => new(Info.Combine( path ));
+    public LocalFile Join( string path ) => new(Info.Combine(path));
 
 
     /// <summary> Gets the <see cref="LocalFile"/> object of the file in this <see cref="LocalDirectory"/> </summary>
@@ -201,7 +201,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="LocalFile"/>
     /// </returns>
-    public LocalFile Join( string path, Encoding encoding ) => new(Info.Combine( path ), encoding);
+    public LocalFile Join( string path, Encoding encoding ) => new(Info.Combine(path), encoding);
 
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
@@ -216,7 +216,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="string"/>
     /// </returns>
-    public string Combine( string subPaths ) => Info.Combine( subPaths );
+    public string Combine( string subPaths ) => Info.Combine(subPaths);
 
     /// <summary> Gets the path of the directory or file in this <see cref="LocalDirectory"/> </summary>
     /// <param name="subPaths"> </param>
@@ -230,7 +230,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <returns>
     ///     <see cref="string"/>
     /// </returns>
-    public string Combine( params ReadOnlySpan<string> subPaths ) => Info.Combine( subPaths );
+    public string Combine( params ReadOnlySpan<string> subPaths ) => Info.Combine(subPaths);
 
 
     public sealed override string ToString() => FullPath;
@@ -250,17 +250,17 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteAllRecursivelyAsync() );
+            tasks.Add(dir.DeleteAllRecursivelyAsync());
         }
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteAllRecursivelyAsync() );
+            tasks.Add(dir.DeleteAllRecursivelyAsync());
             dir.Delete();
         }
 
         Delete();
-        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
+        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
     }
 
     /// <summary> Asynchronously deletes files. </summary>
@@ -278,10 +278,10 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
         {
             foreach ( LocalFile file in dir.GetFiles() ) { file.Delete(); }
 
-            tasks.Add( dir.DeleteFilesAsync() );
+            tasks.Add(dir.DeleteFilesAsync());
         }
 
-        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
+        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
     }
 
     /// <summary> Asynchronously deletes subdirectories. </summary>
@@ -297,27 +297,27 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
         foreach ( LocalDirectory dir in GetSubFolders() )
         {
-            tasks.Add( dir.DeleteSubFoldersAsync() );
+            tasks.Add(dir.DeleteSubFoldersAsync());
             dir.Delete();
         }
 
-        return Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) );
+        return Task.WhenAll(CollectionsMarshal.AsSpan(tasks));
     }
 
 
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, CancellationToken token = default )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        await using FileStream zipToOpen     = File.Create(zipFilePath.FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
         foreach ( LocalFile file in GetFiles() )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
-            using MemoryStream data   = await file.ReadAsync().AsStream( token );
+            using MemoryStream data   = await file.ReadAsync().AsStream(token);
 
-            await data.CopyToAsync( stream, token );
+            await data.CopyToAsync(stream, token);
         }
 
         return zipFilePath;
@@ -325,17 +325,17 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, CancellationToken token = default )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        await using FileStream zipToOpen     = File.Create(zipFilePath.FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
-        foreach ( LocalFile file in GetFiles( searchPattern ) )
+        foreach ( LocalFile file in GetFiles(searchPattern) )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token);
 
-            await stream.WriteAsync( data, token );
+            await stream.WriteAsync(data, token);
         }
 
         return zipFilePath;
@@ -343,17 +343,17 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, SearchOption searchOption, CancellationToken token = default )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        await using FileStream zipToOpen     = File.Create(zipFilePath.FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
-        foreach ( LocalFile file in GetFiles( searchPattern, searchOption ) )
+        foreach ( LocalFile file in GetFiles(searchPattern, searchOption) )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token);
 
-            await stream.WriteAsync( data, token );
+            await stream.WriteAsync(data, token);
         }
 
         return zipFilePath;
@@ -361,17 +361,17 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public async Task<LocalFile> ZipAsync( LocalFile zipFilePath, string searchPattern, EnumerationOptions enumerationOptions, CancellationToken token = default )
     {
         using TelemetrySpan    telemetrySpan = TelemetrySpan.Create();
-        await using FileStream zipToOpen     = File.Create( zipFilePath.FullPath );
+        await using FileStream zipToOpen     = File.Create(zipFilePath.FullPath);
         using ZipArchive       archive       = new(zipToOpen, ZipArchiveMode.Update);
 
-        foreach ( LocalFile file in GetFiles( searchPattern, enumerationOptions ) )
+        foreach ( LocalFile file in GetFiles(searchPattern, enumerationOptions) )
         {
-            ZipArchiveEntry    entry  = archive.CreateEntry( file.FullPath );
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
             await using Stream stream = entry.Open();
 
-            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory( token );
+            ReadOnlyMemory<byte> data = await file.ReadAsync().AsMemory(token);
 
-            await stream.WriteAsync( data, token );
+            await stream.WriteAsync(data, token);
         }
 
         return zipFilePath;
@@ -395,7 +395,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <exception cref="DirectoryNotFoundException"> </exception>
     /// <exception cref="IOException"> </exception>
     /// <exception cref="SecurityException"> </exception>
-    public void Delete( bool recursive ) => Info.Delete( recursive );
+    public void Delete( bool recursive ) => Info.Delete(recursive);
 
 
     /// <summary> Deletes subdirectories and files. </summary>
@@ -461,7 +461,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     /// <summary> Uses the <see cref="Encoding.Default"/> encoding to used for the file names </summary>
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
-    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip( output, Encoding.Default, compression );
+    public void Zip( in LocalFile output, in CompressionLevel compression = CompressionLevel.Optimal ) => Zip(output, Encoding.Default, compression);
     /// <summary> </summary>
     /// <param name="output"> file path to write the zip to </param>
     /// <param name="compression"> Defaults to <see cref="CompressionLevel.Optimal"/> </param>
@@ -469,36 +469,36 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public void Zip( in LocalFile output, Encoding encoding, in CompressionLevel compression = CompressionLevel.Optimal )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        ZipFile.CreateFromDirectory( FullPath, output.FullPath, compression, true, encoding );
+        ZipFile.CreateFromDirectory(FullPath, output.FullPath, compression, true, encoding);
     }
 
 
     public override int CompareTo( LocalDirectory? other )
     {
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        if ( ReferenceEquals( null, other ) ) { return 1; }
+        if ( ReferenceEquals(null, other) ) { return 1; }
 
-        return string.Compare( FullPath, other.FullPath, StringComparison.Ordinal );
+        return string.Compare(FullPath, other.FullPath, StringComparison.Ordinal);
     }
     public override bool Equals( LocalDirectory? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
         return this.IsTempFile() == other.IsTempFile() && FullPath == other.FullPath;
     }
-    public override bool Equals( object? other ) => other is LocalDirectory x && Equals( x );
-    public override int  GetHashCode()           => HashCode.Combine( FullPath, this.IsTempFile() );
+    public override bool Equals( object? other ) => other is LocalDirectory x && Equals(x);
+    public override int  GetHashCode()           => HashCode.Combine(FullPath, this.IsTempFile());
 
 
-    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => Sorter.Equals( left, right );
-    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !Sorter.Equals( left, right );
-    public static bool operator >( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator >=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator <( LocalDirectory?  left, LocalDirectory? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator <=( LocalDirectory? left, LocalDirectory? right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator ==( LocalDirectory? left, LocalDirectory? right ) => EqualityComparer<LocalDirectory>.Default.Equals(left, right);
+    public static bool operator !=( LocalDirectory? left, LocalDirectory? right ) => !EqualityComparer<LocalDirectory>.Default.Equals(left, right);
+    public static bool operator >( LocalDirectory   left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) > 0;
+    public static bool operator >=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) >= 0;
+    public static bool operator <( LocalDirectory   left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) < 0;
+    public static bool operator <=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) <= 0;
 
 
     // ---------------------------------------------------------------------------------------------------------------------------------------------------
@@ -508,8 +508,8 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     [Serializable]
     public class Collection : ObservableCollection<LocalDirectory>
     {
-        public Collection() : base( Sorter ) { }
-        public Collection( params ReadOnlySpan<LocalDirectory> values ) : base( Sorter, values ) { }
+        public Collection() : base() { }
+        public Collection( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
     }
 
 
@@ -517,8 +517,8 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     [Serializable]
     public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
     {
-        public ConcurrentCollection() : base( Sorter ) { }
-        public ConcurrentCollection( params ReadOnlySpan<LocalDirectory> values ) : base( Sorter, values ) { }
+        public ConcurrentCollection() : base() { }
+        public ConcurrentCollection( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
     }
 
 
@@ -529,7 +529,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
         public ConcurrentQueue() : base() { }
         public ConcurrentQueue( params ReadOnlySpan<LocalDirectory> values ) : base()
         {
-            foreach ( LocalDirectory value in values ) { Enqueue( value ); }
+            foreach ( LocalDirectory value in values ) { Enqueue(value); }
         }
     }
 
@@ -539,18 +539,18 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class Deque : ConcurrentDeque<LocalDirectory>
     {
         public Deque() : base() { }
-        public Deque( params ReadOnlySpan<LocalDirectory> values ) : base( values ) { }
+        public Deque( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
     }
 
 
 
     [Serializable]
-    public class Directories( int capacity ) : List<LocalDirectory>( capacity )
+    public class Directories( int capacity ) : List<LocalDirectory>(capacity)
     {
-        public Directories() : this( DEFAULT_CAPACITY ) { }
-        public Directories( params ReadOnlySpan<LocalDirectory> values ) : this( values.Length )
+        public Directories() : this(DEFAULT_CAPACITY) { }
+        public Directories( params ReadOnlySpan<LocalDirectory> values ) : this(values.Length)
         {
-            foreach ( LocalDirectory value in values ) { Add( value ); }
+            foreach ( LocalDirectory value in values ) { Add(value); }
         }
     }
 
@@ -562,7 +562,7 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
         public Queue() : base() { }
         public Queue( params ReadOnlySpan<LocalDirectory> values ) : base()
         {
-            foreach ( LocalDirectory value in values ) { Enqueue( value ); }
+            foreach ( LocalDirectory value in values ) { Enqueue(value); }
         }
     }
 
@@ -572,26 +572,26 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public class Set : HashSet<LocalDirectory>
     {
         public Set() : base() { }
-        public Set( int capacity ) : base( capacity ) { }
+        public Set( int capacity ) : base(capacity) { }
         public Set( params ReadOnlySpan<LocalDirectory> values ) : base()
         {
-            foreach ( LocalDirectory value in values ) { Add( value ); }
+            foreach ( LocalDirectory value in values ) { Add(value); }
         }
     }
 
 
 
-    [SuppressMessage( "ReSharper", "IntroduceOptionalParameters.Global" )]
+    [SuppressMessage("ReSharper", "IntroduceOptionalParameters.Global")]
     public class Watcher : FileSystemWatcher
     {
         public readonly LocalDirectory Directory;
 
 
         /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>
-        public Watcher() : this( CurrentDirectory ) { }
-        public Watcher( LocalDirectory directory ) : this( directory, "*" ) { }
-        public Watcher( LocalDirectory directory, string searchFilter ) : this( directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite ) { }
-        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base( directory.FullPath, searchFilter )
+        public Watcher() : this(CurrentDirectory) { }
+        public Watcher( LocalDirectory directory ) : this(directory, "*") { }
+        public Watcher( LocalDirectory directory, string searchFilter ) : this(directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite) { }
+        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base(directory.FullPath, searchFilter)
         {
             Directory    = directory;
             NotifyFilter = filters;

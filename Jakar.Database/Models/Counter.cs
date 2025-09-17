@@ -15,6 +15,6 @@ public record struct Counter : IEnumerator<long>
     public void Dispose() => Current = 0;
 
 
-    public bool MoveNext() => (++Current).IsValidID();
+    public bool MoveNext() => ( ++Current ).IsValidID();
     public void Reset()    => Current = 0;
 }

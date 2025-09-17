@@ -13,7 +13,7 @@ public static class Sizes
     public const  int UNICODE_TEXT_CAPACITY = 1_073_741_823;
 
 
-    private static readonly ConcurrentDictionary<Type, int> _sizes = new(Environment.ProcessorCount, DEFAULT_CAPACITY, TypeEqualityComparer.Instance)
+    private static readonly ConcurrentDictionary<Type, int> __sizes = new(Environment.ProcessorCount, DEFAULT_CAPACITY, TypeEqualityComparer.Instance)
                                                                      {
                                                                          [typeof(byte)]            = 3,
                                                                          [typeof(byte?)]           = 3,
@@ -51,12 +51,12 @@ public static class Sizes
                                                                      };
 
 
-    public static bool Register( Type                type, int size ) => _sizes.TryAdd( type, size );
+    public static bool Register( Type                type, int size ) => __sizes.TryAdd( type, size );
     public static bool Register<TValue>( int         size )        => Register( typeof(TValue), size );
     public static bool Register<TValue>( this TValue _, int size ) => Register<TValue>( size );
 
 
-    public static int GetBufferSize<TValue>( int         defaultSize           = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(TValue), defaultSize );
-    public static int GetBufferSize<TValue>( this TValue _,    int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( typeof(TValue), defaultSize );
-    public static int GetBufferSize( this         Type   type, int defaultSize = DEFAULT_SIZE ) => _sizes.GetValueOrDefault( type,           defaultSize );
+    public static int GetBufferSize<TValue>( int         defaultSize           = DEFAULT_SIZE ) => __sizes.GetValueOrDefault( typeof(TValue), defaultSize );
+    public static int GetBufferSize<TValue>( this TValue _,    int defaultSize = DEFAULT_SIZE ) => __sizes.GetValueOrDefault( typeof(TValue), defaultSize );
+    public static int GetBufferSize( this         Type   type, int defaultSize = DEFAULT_SIZE ) => __sizes.GetValueOrDefault( type,           defaultSize );
 }

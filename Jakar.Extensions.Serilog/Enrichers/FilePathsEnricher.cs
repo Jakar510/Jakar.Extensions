@@ -12,7 +12,7 @@ namespace Jakar.Extensions.Serilog;
 
 public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnricher
 {
-    private readonly ISerilogger _logger = serilogger;
+    private readonly ISerilogger __logger = serilogger;
     void ILogEventEnricher.Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
     {
         try
@@ -22,24 +22,24 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
             using Disposables disposables = new();
             List<Task>        tasks       = new(20);
 
-            if ( _logger.Settings.IncludeAppStateOnError )
+            if ( __logger.Settings.IncludeAppStateOnError )
             {
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.Screenshot ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.Screenshot ) );
 
-                ReadOnlyMemory<byte> data = _logger.ScreenShotData;
+                ReadOnlyMemory<byte> data = __logger.ScreenShotData;
                 if ( !data.IsEmpty ) { disposables.Add( data.GetAttachment( FilePaths.SCREEN_SHOT_FILE, MimeTypeNames.Image.PNG ).AddFileToLogContext() ); }
             }
 
-            if ( _logger.Settings.IncludeAppStateOnError )
+            if ( __logger.Settings.IncludeAppStateOnError )
             {
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.FeedbackFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppStateFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.CrashFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.IncomingFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.OutgoingFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppDataZipFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.AppCacheZipFile ) );
-                tasks.Add( Handle( disposables, _logger.Settings.Paths.LogsZipFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.FeedbackFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.AppStateFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.CrashFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.IncomingFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.OutgoingFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.AppDataZipFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.AppCacheZipFile ) );
+                tasks.Add( Handle( disposables, __logger.Settings.Paths.LogsZipFile ) );
             }
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();

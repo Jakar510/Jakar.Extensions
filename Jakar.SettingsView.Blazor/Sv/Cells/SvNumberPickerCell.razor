@@ -28,7 +28,7 @@
 @code
 {
     // ReSharper disable once CSharpWarnings::CS8618
-    private OptionsPopup<double> _selector;
+    private OptionsPopup<double> __selector;
 
     public override                             WidgetType            Type       => WidgetType.NumberPicker;
     [Parameter]                 public          IList<double>         Values     { get; set; } = new ObservableCollection<double>();
@@ -40,7 +40,7 @@
     {
         Formatter ??= DefaultFormatter;
 
-        _selector = new OptionsPopup<double>
+        __selector = new OptionsPopup<double>
                     {
                         ID        = ID,
                         Close     = new EventCallback<double>(this, SetValue),
@@ -50,5 +50,5 @@
     }
 
     public        string DefaultFormatter( double x ) => x.ToString(CurrentCulture);
-    private async Task   OnClickHandler()             => await _selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
+    private async Task   OnClickHandler()             => await __selector.OpenAsync(_control, Values, ValueChanged, ValueExpression);
 }

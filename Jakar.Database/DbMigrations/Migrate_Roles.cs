@@ -13,11 +13,11 @@ public abstract class Migrate_Roles : OwnedMigration<RoleRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(RoleRecord.NameOfRole) ).AsString( 1024 ).NotNullable();
+        table.WithColumn(nameof(RoleRecord.NameOfRole)).AsString(1024).NotNullable();
 
-        table.WithColumn( nameof(RoleRecord.NormalizedName) ).AsString( 1024 ).NotNullable();
+        table.WithColumn(nameof(RoleRecord.NormalizedName)).AsString(1024).NotNullable();
 
-        table.WithColumn( nameof(RoleRecord.ConcurrencyStamp) ).AsString( 4096 ).NotNullable();
+        table.WithColumn(nameof(RoleRecord.ConcurrencyStamp)).AsString(4096).NotNullable();
 
         return table;
     }

@@ -2,10 +2,7 @@
 // 09/28/2023  10:02 AM
 
 using Npgsql;
-using OpenTelemetry.Exporter;
 using ZiggyCreatures.Caching.Fusion;
-using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
-using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
 
 
@@ -14,16 +11,15 @@ namespace Jakar.Database;
 
 internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : Database(configuration, options, cache), IAppID
 {
+    public static Guid       AppID      { get; } = Guid.NewGuid();
     public static string     AppName    => nameof(TestDatabase);
     public static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
-    public static Guid       AppID      { get; } = Guid.NewGuid();
 
 
     protected override DbConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection(secure);
 
 
-    [Experimental("SqlTableBuilder")]
-    [Conditional("DEBUG")]
+    [Experimental("SqlTableBuilder"), Conditional("DEBUG")]
     public static async void TestAsync()
     {
         try
@@ -63,7 +59,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
                                               ConnectionStringResolver = connectionString,
                                               CommandTimeout           = 30,
                                               TokenIssuer              = AppName,
-                                              TokenAudience            = AppName,
+                                              TokenAudience            = AppName
                                           });
 
 

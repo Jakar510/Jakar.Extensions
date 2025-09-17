@@ -21,12 +21,12 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
 {
     public const           string                                    PATH          = "/Chat/hub";
     public static readonly InstantMessage[]                          EmptyMessages = [];
-    private readonly       Disposables                               _disposables  = [];
+    private readonly       Disposables                               __disposables  = [];
     protected              ChatUser                                  _user         = ChatUser.Empty;
     protected              ConcurrentObservableCollection<IChatRoom> _rooms        = [];
     protected              HubConnection?                            _connection; // SignalR.Client
     protected              Tokens?                                   _tokens;
-    private                bool                                      _isDisposed;
+    private                bool                                      __isDisposed;
     public abstract        Uri                                       HostInfo { get; }
 
 
@@ -91,7 +91,7 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
     public override void Dispose()
     {
         base.Dispose();
-        _isDisposed = true;
+        __isDisposed = true;
         GC.SuppressFinalize( this );
     }
 
@@ -100,7 +100,7 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
     protected void OnPropertyChanged( [CallerMemberName] string? propertyName = null ) => PropertyChanged?.Invoke( this, new PropertyChangedEventArgs( propertyName ) );
     public HubEvent GetHubEvent( IChatRoom room, HubEventType type, InstantMessage? message = null )
     {
-        ObjectDisposedException.ThrowIf( _isDisposed, this );
+        ObjectDisposedException.ThrowIf( __isDisposed, this );
         string connectionID = _connection?.ConnectionId ?? throw new InvalidOperationException( $"{nameof(_connection)} is null. Make sure to call {nameof(StartAsync)} first." );
         return new HubEvent( connectionID, room.Group, type, Sender, message );
     }
@@ -114,20 +114,20 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
         await StopAsync( token );
         _connection = CreateConnection();
 
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Send),          SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.JoinRoom),      SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.LeaveRoom),     SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Disconnection), SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Reconnection),  SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Login),         SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Logout),        SendEvent ) );
-        _disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Typing),        SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Send),          SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.JoinRoom),      SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.LeaveRoom),     SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Disconnection), SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Reconnection),  SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Login),         SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Logout),        SendEvent ) );
+        __disposables.Add( _connection.On<HubEvent>( nameof(IChatHub.Typing),        SendEvent ) );
         await _connection.StartAsync( token );
     }
     public override async Task StopAsync( CancellationToken cancellationToken )
     {
         await base.StopAsync( cancellationToken );
-        _disposables.Dispose();
+        __disposables.Dispose();
         _connection = null;
     }
     protected virtual  void          ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;

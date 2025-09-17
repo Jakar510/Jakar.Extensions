@@ -6,6 +6,6 @@ namespace Jakar.SqlBuilder;
 
 public struct OrderByClauseChainBuilder( in OrderByClauseBuilder order, ref EasySqlBuilder builder )
 {
-    private readonly OrderByClauseBuilder _order   = order;
-    private          EasySqlBuilder       _builder = builder;
+    private readonly OrderByClauseBuilder __order   = order;
+    private          EasySqlBuilder       __builder = builder;
 }

@@ -12,7 +12,6 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static readonly MutableSize One     = 1;
 
 
-    public static                EqualComparer<MutableSize>      Sorter      => EqualComparer<MutableSize>.Default;
     static ref readonly          MutableSize IShape<MutableSize>.Zero        => ref Zero;
     static ref readonly          MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
     static ref readonly          MutableSize IShape<MutableSize>.One         => ref One;
@@ -164,12 +163,14 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     }
 
 
-    public static        bool operator ==( MutableSize       left, MutableSize                      right )  => Sorter.Equals(left, right);
-    public static        bool operator !=( MutableSize       left, MutableSize                      right )  => Sorter.DoesNotEqual(left, right);
-    public static        bool operator >( MutableSize        left, MutableSize                      right )  => Sorter.GreaterThan(left, right);
-    public static        bool operator >=( MutableSize       left, MutableSize                      right )  => Sorter.GreaterThanOrEqualTo(left, right);
-    public static        bool operator <( MutableSize        left, MutableSize                      right )  => Sorter.LessThan(left, right);
-    public static        bool operator <=( MutableSize       left, MutableSize                      right )  => Sorter.LessThanOrEqualTo(left, right);
+    public static        bool operator ==( MutableSize?      left, MutableSize?                     right )  => Nullable.Equals(left, right);
+    public static        bool operator !=( MutableSize?      left, MutableSize?                     right )  => !Nullable.Equals(left, right);
+    public static        bool operator ==( MutableSize       left, MutableSize                      right )  => EqualityComparer<MutableSize>.Default.Equals(left, right);
+    public static        bool operator !=( MutableSize       left, MutableSize                      right )  => !EqualityComparer<MutableSize>.Default.Equals(left, right);
+    public static        bool operator >( MutableSize        left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) > 0;
+    public static        bool operator >=( MutableSize       left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) >= 0;
+    public static        bool operator <( MutableSize        left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) < 0;
+    public static        bool operator <=( MutableSize       left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) <= 0;
     public static        MutableSize operator +( MutableSize self, MutableSize                      other )  => new(self.Width + other.Width, self.Height + other.Height);
     public static        MutableSize operator -( MutableSize self, MutableSize                      other )  => new(self.Width - other.Width, self.Height - other.Height);
     public static        MutableSize operator *( MutableSize self, MutableSize                      other )  => new(self.Width * other.Width, self.Height * other.Height);

@@ -8,23 +8,23 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
     where TCloser : IDisposable
 {
     private const    int                                START_INDEX = 0;
-    private readonly ILockedCollection<TValue, TCloser> _collection = collection;
-    private          bool                               _isDisposed;
-    private          FilterBuffer<TValue>?              _owner;
-    private          int                                _index = START_INDEX;
+    private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          bool                               __isDisposed;
+    private          FilterBuffer<TValue>?              __owner;
+    private          int                                __index = START_INDEX;
 
 
-    private             ReadOnlyMemory<TValue> _Memory => _owner?.Memory ?? ReadOnlyMemory<TValue>.Empty;
-    public ref readonly TValue                 Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _Memory.Span[_index]; }
+    private             ReadOnlyMemory<TValue> __Memory => __owner?.Memory ?? ReadOnlyMemory<TValue>.Empty;
+    public ref readonly TValue                 Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
     TValue IEnumerator<TValue>.                Current => Current;
     object? IEnumerator.                       Current => Current;
 
 
     public void Dispose()
     {
-        _isDisposed = true;
-        _owner?.Dispose();
-        _owner = null;
+        __isDisposed = true;
+        __owner?.Dispose();
+        __owner = null;
         GC.SuppressFinalize( this );
     }
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
@@ -34,18 +34,18 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
     public bool MoveNext()
     {
         ThrowIfDisposed();
-        if ( _Memory.IsEmpty ) { Reset(); }
+        if ( __Memory.IsEmpty ) { Reset(); }
 
-        return (uint)++_index < (uint)_Memory.Length;
+        return (uint)++__index < (uint)__Memory.Length;
     }
     public void Reset()
     {
         ThrowIfDisposed();
-        _owner?.Dispose();
-        _owner = _collection.Copy();
-        _index = START_INDEX;
+        __owner?.Dispose();
+        __owner = __collection.Copy();
+        __index = START_INDEX;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, this );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
 }

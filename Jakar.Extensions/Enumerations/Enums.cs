@@ -17,11 +17,11 @@ public static partial class Enums
         where TEnum : struct, Enum
     {
         IEnumerable<TValue> values = Enum.GetValues<TEnum>().Cast<TValue>();
-        return values.ToFrozenDictionary( KeySelector, ElementSelector );
+        return values.ToFrozenDictionary( keySelector, elementSelector );
 
-        static string KeySelector( TValue item ) => Enum.GetName( typeof(TEnum), item ?? throw new ArgumentNullException( nameof(item) ) ) ?? throw new NullReferenceException( nameof(item) );
+        static string keySelector( TValue item ) => Enum.GetName( typeof(TEnum), item ?? throw new ArgumentNullException( nameof(item) ) ) ?? throw new NullReferenceException( nameof(item) );
 
-        static TValue ElementSelector( TValue item ) => item;
+        static TValue elementSelector( TValue item ) => item;
     }
 
 

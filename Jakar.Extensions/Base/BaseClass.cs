@@ -12,8 +12,6 @@ public class BaseClass
     public const           int            UNICODE_CAPACITY = BaseRecord.UNICODE_CAPACITY;
     public static readonly DateTimeOffset SQLMinDate       = new(1753, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
     public static readonly DateOnly       SQLMinDateOnly   = new(1753, 1, 1);
-
-     
 }
 
 
@@ -22,9 +20,6 @@ public class BaseClass
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : BaseClass<TClass>, IEqualComparable<TClass>
 {
-    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
-
-
     public string ToJson()       => this.ToJson(Formatting.None);
     public string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
@@ -43,7 +38,7 @@ public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, ICompar
                    ? CompareTo(t)
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
-    public override bool Equals( object? other ) => ReferenceEquals(this, other) || other is TClass x && Equals(x);
+    public override bool Equals( object? other ) => ReferenceEquals(this, other) || ( other is TClass x && Equals(x) );
     public override int  GetHashCode()           => RuntimeHelpers.GetHashCode(this);
 
 

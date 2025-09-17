@@ -22,14 +22,14 @@ public class ResourceException<TValue>( string path ) : ResourceException( path,
 
 public class EmbeddedResources<TValue>
 {
-    private readonly Assembly _assembly = typeof(TValue).Assembly;
+    private readonly Assembly __assembly = typeof(TValue).Assembly;
     public static    string   Namespace { get; } = typeof(TValue).Namespace ?? throw new NullReferenceException( nameof(Type.Namespace) );
 
 
     public Stream GetResourceStream( string fileName )
     {
         string path = GetPath( fileName );
-        return _assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<TValue>( path );
+        return __assembly.GetManifestResourceStream( path ) ?? throw new ResourceException<TValue>( path );
     }
 
 

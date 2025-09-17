@@ -12,8 +12,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
 {
     public readonly  AsyncReader                Reader;
     public readonly  AsyncWriter                Writer;
-    private readonly ConcurrentQueue<TValue>    _values     = [];
-    private readonly TaskCompletionSource<bool> _completion = new();
+    private readonly ConcurrentQueue<TValue>    __values     = [];
+    private readonly TaskCompletionSource<bool> __completion = new();
 
 
     public int  Count   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Reader.Count; }
@@ -35,17 +35,17 @@ public sealed class AsyncChannel<TValue> : IDisposable
 
     public class AsyncReader( AsyncChannel<TValue> parent ) : ChannelReader<TValue?>
     {
-        private readonly AsyncChannel<TValue>       _parent = parent;
-        private          TaskCompletionSource<bool> _Completion => _parent._completion;
-        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
+        private readonly AsyncChannel<TValue>       __parent = parent;
+        private          TaskCompletionSource<bool> __Completion => __parent.__completion;
+        private          ConcurrentQueue<TValue>    __Values     => __parent.__values;
         public override  bool                       CanCount    => true;
         public override  bool                       CanPeek     => true;
-        public override  Task                       Completion  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Completion.Task; }
-        public override  int                        Count       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Values.Count; }
-        public           bool                       IsEmpty     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _Values.IsEmpty; }
+        public override  Task                       Completion  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __Completion.Task; }
+        public override  int                        Count       { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __Values.Count; }
+        public           bool                       IsEmpty     { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __Values.IsEmpty; }
 
 
-        public TValue? Read() => _Values.TryDequeue( out TValue? first )
+        public TValue? Read() => __Values.TryDequeue( out TValue? first )
                                      ? first
                                      : default;
         public override bool TryRead( [NotNullWhen( true )] out TValue? value )
@@ -53,7 +53,7 @@ public sealed class AsyncChannel<TValue> : IDisposable
             value = Read();
             return value is not null;
         }
-        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => _Values.TryPeek( out value ) && value is not null;
+        public override bool               TryPeek( [NotNullWhen( true )] out TValue? value )           => __Values.TryPeek( out value ) && value is not null;
         public override ValueTask<TValue?> ReadAsync( CancellationToken               token = default ) => new(Read());
         public override async IAsyncEnumerable<TValue> ReadAllAsync( [EnumeratorCancellation] CancellationToken token = default )
         {
@@ -69,32 +69,32 @@ public sealed class AsyncChannel<TValue> : IDisposable
                 await telemetrySpan.Delay( 5, token ).ConfigureAwait( false );
             }
         }
-        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(!_Values.IsEmpty);
+        public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(!__Values.IsEmpty);
     }
 
 
 
     public class AsyncWriter( AsyncChannel<TValue> parent ) : ChannelWriter<TValue>
     {
-        private readonly AsyncChannel<TValue>       _parent = parent;
-        private          TaskCompletionSource<bool> _Completion => _parent._completion;
-        private          ConcurrentQueue<TValue>    _Values     => _parent._values;
+        private readonly AsyncChannel<TValue>       __parent = parent;
+        private          TaskCompletionSource<bool> __Completion => __parent.__completion;
+        private          ConcurrentQueue<TValue>    __Values     => __parent.__values;
 
 
         public override bool TryComplete( Exception? error = null ) => error is not null
-                                                                           ? _Completion.TrySetException( error )
-                                                                           : _Completion.TrySetResult( true );
+                                                                           ? __Completion.TrySetException( error )
+                                                                           : __Completion.TrySetResult( true );
         public override ValueTask<bool> WaitToWriteAsync( CancellationToken token = default ) => token.IsCancellationRequested
                                                                                                      ? ValueTask.FromCanceled<bool>( token )
                                                                                                      : new ValueTask<bool>( true );
         public override bool TryWrite( TValue value )
         {
-            _Values.Enqueue( Validate.ThrowIfNull( value ) );
+            __Values.Enqueue( Validate.ThrowIfNull( value ) );
             return true;
         }
         public override ValueTask WriteAsync( TValue value, CancellationToken token = default )
         {
-            _Values.Enqueue( Validate.ThrowIfNull( value ) );
+            __Values.Enqueue( Validate.ThrowIfNull( value ) );
             return ValueTask.CompletedTask;
         }
     }

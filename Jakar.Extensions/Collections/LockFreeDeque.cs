@@ -7,10 +7,10 @@ namespace Jakar.Extensions;
 public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
     where TValue : class
 {
-    private int  _count;
-    private Node _head = Node.Empty;
-    private Node _tail = Node.Empty;
-    public  int  Count => Interlocked.CompareExchange( ref _count, 0, 0 );
+    private int  __count;
+    private Node __head = Node.Empty;
+    private Node __tail = Node.Empty;
+    public  int  Count => Interlocked.CompareExchange( ref __count, 0, 0 );
 
 
     public void Enqueue( TValue value )
@@ -19,19 +19,19 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
 
         while ( true )
         {
-            Node  tail = _tail;
+            Node  tail = __tail;
             Node? next = tail.next;
 
             if ( next is null )
             {
                 if ( Interlocked.CompareExchange( ref tail.next, newNode, null ) is null )
                 {
-                    Interlocked.CompareExchange( ref _tail, newNode, tail );
-                    Interlocked.Increment( ref _count );
+                    Interlocked.CompareExchange( ref __tail, newNode, tail );
+                    Interlocked.Increment( ref __count );
                     return;
                 }
             }
-            else { Interlocked.CompareExchange( ref _tail, next, tail ); }
+            else { Interlocked.CompareExchange( ref __tail, next, tail ); }
         }
     }
 
@@ -43,9 +43,9 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
     {
         while ( true )
         {
-            Interlocked.Decrement( ref _count );
-            Node  head = _head;
-            Node  tail = _tail;
+            Interlocked.Decrement( ref __count );
+            Node  head = __head;
+            Node  tail = __tail;
             Node? next = head.next;
 
             if ( head == tail )
@@ -56,13 +56,13 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
                     return false;
                 }
 
-                Interlocked.CompareExchange( ref _tail, next, tail );
+                Interlocked.CompareExchange( ref __tail, next, tail );
             }
             else
             {
                 Debug.Assert( next is not null, "next should not be null when head != tail" );
                 result = next.Value;
-                if ( Interlocked.CompareExchange( ref _head, next, head ) == head ) { return true; }
+                if ( Interlocked.CompareExchange( ref __head, next, head ) == head ) { return true; }
             }
         }
     }
@@ -70,7 +70,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
 
     public IEnumerator<TValue> GetEnumerator()
     {
-        Node? current = _head;
+        Node? current = __head;
 
         while ( current is not null )
         {

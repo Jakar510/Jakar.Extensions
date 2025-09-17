@@ -69,9 +69,6 @@ public record ObservableRecord : BaseRecord, IObservableObject
 public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
     where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
 {
-    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
-
-
     public TClass? FromJson( [NotNullIfNotNull(nameof(json))] string? json ) => json?.FromJson<TClass>();
     public string  ToJson()                                                  => this.ToJson(Formatting.None);
     public string  ToPrettyJson()                                            => this.ToJson(Formatting.Indented);
@@ -120,10 +117,10 @@ public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>,
     where TClass : ObservableRecord<TClass, TID>, IComparisonOperators<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    private TID _id;
+    private TID __id;
 
 
-    public virtual TID ID { get => _id; init => _id = value; }
+    public virtual TID ID { get => __id; init => __id = value; }
 
 
     protected ObservableRecord() : base() { }
@@ -131,5 +128,5 @@ public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>,
 
 
     protected bool SetID( TClass record ) => SetID(record.ID);
-    protected bool SetID( TID    id )     => SetProperty(ref _id, id, nameof(ID));
+    protected bool SetID( TID    id )     => SetProperty(ref __id, id, nameof(ID));
 }

@@ -47,7 +47,7 @@ public static class UriExtensions
         (string? key, object? value) = pair;
         string? s = value?.ToString();
 
-        if ( string.IsNullOrWhiteSpace( key ) || string.IsNullOrWhiteSpace( s ) || value is not null && value.GetType().Name == s ) { return; }
+        if ( string.IsNullOrWhiteSpace( key ) || string.IsNullOrWhiteSpace( s ) || ( value is not null && value.GetType().Name == s ) ) { return; }
 
         sb.Append( key );
         sb.Append( '=' );

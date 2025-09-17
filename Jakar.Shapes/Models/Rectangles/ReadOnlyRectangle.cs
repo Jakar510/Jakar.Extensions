@@ -16,7 +16,6 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public readonly        double            Height  = height;
 
 
-    public static       EqualComparer<ReadOnlyRectangle>            Sorter   => EqualComparer<ReadOnlyRectangle>.Default;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
     static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;
@@ -64,14 +63,14 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     [Pure] public static ReadOnlyRectangle Create( float                              x,         float                y, float           width, float  height ) => new(x, y, width, height);
     [Pure] public static ReadOnlyRectangle Create( double                             x,         double               y, double          width, double height ) => new(x, y, width, height);
 
-    
+
     public void Deconstruct( out double x, out double y )
     {
         x = X;
         y = Y;
     }
-    
-    
+
+
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -126,12 +125,14 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     }
 
 
-    public static bool operator ==( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Sorter.Equals(left, right);
-    public static bool operator !=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( ReadOnlyRectangle              left, ReadOnlyRectangle                right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( ReadOnlyRectangle              left, ReadOnlyRectangle                right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( ReadOnlyRectangle?            left, ReadOnlyRectangle?               right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyRectangle?            left, ReadOnlyRectangle?               right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => EqualityComparer<ReadOnlyRectangle>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => !EqualityComparer<ReadOnlyRectangle>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyRectangle              left, ReadOnlyRectangle                right ) => Comparer<ReadOnlyRectangle>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Comparer<ReadOnlyRectangle>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyRectangle              left, ReadOnlyRectangle                right ) => Comparer<ReadOnlyRectangle>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyRectangle             left, ReadOnlyRectangle                right ) => Comparer<ReadOnlyRectangle>.Default.Compare(left, right) <= 0;
     public static ReadOnlyRectangle operator +( ReadOnlyRectangle self, int                              value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
     public static ReadOnlyRectangle operator +( ReadOnlyRectangle self, float                            value ) => new(self.X, self.Y, self.Width + value, self.Height + value);
     public static ReadOnlyRectangle operator +( ReadOnlyRectangle self, double                           value ) => new(self.X, self.Y, self.Width + value, self.Height + value);

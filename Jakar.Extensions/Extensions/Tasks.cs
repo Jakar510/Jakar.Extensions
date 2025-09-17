@@ -105,10 +105,10 @@ public static partial class Tasks
                                       MaxDegreeOfParallelism = Environment.ProcessorCount
                                   };
 
-        await Parallel.ForEachAsync( funcs, options, ExecutorAsync );
+        await Parallel.ForEachAsync( funcs, options, executorAsync );
         return;
 
-        static ValueTask ExecutorAsync( Func<CancellationToken, ValueTask> task, CancellationToken token ) => task( token );
+        static ValueTask executorAsync( Func<CancellationToken, ValueTask> task, CancellationToken token ) => task( token );
     }
 
 
@@ -126,11 +126,11 @@ public static partial class Tasks
 
         ConcurrentBag<TResult>                        results = [];
         Func<CancellationToken, ValueTask<TResult>>[] tasks   = funcs.ToArray();
-        await Parallel.ForAsync( 0, tasks.Length, options, Executor );
+        await Parallel.ForAsync( 0, tasks.Length, options, executor );
 
         return results.ToArray();
 
-        async ValueTask Executor( int i, CancellationToken cancellationToken )
+        async ValueTask executor( int i, CancellationToken cancellationToken )
         {
             Func<CancellationToken, ValueTask<TResult>> task   = tasks[i];
             TResult                                     result = await task( cancellationToken );

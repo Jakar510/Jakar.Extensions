@@ -22,7 +22,6 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public readonly        double            VerticalThickness   = top  + bottom;
 
 
-    public static       EqualComparer<ReadOnlyThickness>            Sorter              => EqualComparer<ReadOnlyThickness>.Default;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Zero                => ref Zero;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.Invalid             => ref Invalid;
     static ref readonly ReadOnlyThickness IShape<ReadOnlyThickness>.One                 => ref One;
@@ -80,12 +79,14 @@ public readonly partial struct ReadOnlyThickness( double left, double top, doubl
     public          string ToString( string? format, IFormatProvider? formatProvider ) => IThickness<ReadOnlyThickness>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.Equals(self, value);
-    public static bool operator !=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.DoesNotEqual(self, value);
-    public static bool operator >( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.GreaterThan(self, value);
-    public static bool operator >=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.GreaterThanOrEqualTo(self, value);
-    public static bool operator <( ReadOnlyThickness              self, ReadOnlyThickness                value ) => Sorter.LessThan(self, value);
-    public static bool operator <=( ReadOnlyThickness             self, ReadOnlyThickness                value ) => Sorter.LessThanOrEqualTo(self, value);
+    public static bool operator ==( ReadOnlyThickness?            left, ReadOnlyThickness?               right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyThickness?            left, ReadOnlyThickness?               right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyThickness             left, ReadOnlyThickness                right ) => EqualityComparer<ReadOnlyThickness>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyThickness             left, ReadOnlyThickness                right ) => !EqualityComparer<ReadOnlyThickness>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyThickness              left, ReadOnlyThickness                right ) => Comparer<ReadOnlyThickness>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyThickness             left, ReadOnlyThickness                right ) => Comparer<ReadOnlyThickness>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyThickness              left, ReadOnlyThickness                right ) => Comparer<ReadOnlyThickness>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyThickness             left, ReadOnlyThickness                right ) => Comparer<ReadOnlyThickness>.Default.Compare(left, right) <= 0;
     public static ReadOnlyThickness operator +( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left + value.Left, self.Top + value.Top, self.Right + value.Right, self.Bottom + value.Bottom);
     public static ReadOnlyThickness operator -( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left - value.Left, self.Top - value.Top, self.Right - value.Right, self.Bottom - value.Bottom);
     public static ReadOnlyThickness operator *( ReadOnlyThickness self, ReadOnlyThickness                value ) => new(self.Left * value.Left, self.Top * value.Top, self.Right * -value.Right, self.Bottom * value.Bottom);

@@ -28,18 +28,18 @@ public static class ArrayExtensions
     /// </summary>
     internal static class ArrayAccessor<TElement>
     {
-        private static Func<Collection<TElement>, List<TElement>>? _collectionGetter;
-        private static Func<List<TElement>, TElement[]>?           _getter;
+        private static Func<Collection<TElement>, List<TElement>>? __collectionGetter;
+        private static Func<List<TElement>, TElement[]>?           __getter;
 
 
         internal static Func<Collection<TElement>, List<TElement>> CollectionGetter
         {
             [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
-            get => _collectionGetter ??= GetCollectionGetter();
+            get => __collectionGetter ??= GetCollectionGetter();
         }
 
 
-        internal static Func<List<TElement>, TElement[]> Getter { [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.CreateGetter()" )] get => _getter ??= CreateGetter(); }
+        internal static Func<List<TElement>, TElement[]> Getter { [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.CreateGetter()" )] get => __getter ??= CreateGetter(); }
 
 
         [RequiresDynamicCode( "System.Reflection.Emit.DynamicMethod.DynamicMethod(String, MethodAttributes, CallingConventions, Type, Type[], Type, Boolean)" )]

@@ -12,28 +12,28 @@ public ref struct JArray
 {
     public const char    START = '[';
     public const char    END   = ']';
-    private      JWriter _writer;
+    private      JWriter __writer;
 
 
     public JArray( JWriter writer )
     {
-        _writer = writer;
+        __writer = writer;
         Begin();
     }
     public readonly JArray Empty()
     {
-        _writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
+        __writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
 
         return this;
     }
     public JArray Begin()
     {
-        _writer.StartBlock( START );
+        __writer.StartBlock( START );
         return this;
     }
     public JArray Complete()
     {
-        _writer.FinishBlock( END );
+        __writer.FinishBlock( END );
         return this;
     }
 
@@ -156,7 +156,7 @@ public ref struct JArray
     public readonly JArray Add()               => Add( JWriter.NULL );
     public readonly JArray Add( ReadOnlySpan<char> value )
     {
-        _writer.Append( JWriter.QUOTE ).Append( value ).Append( JWriter.QUOTE ).Next();
+        __writer.Append( JWriter.QUOTE ).Append( value ).Append( JWriter.QUOTE ).Next();
 
         return this;
     }
@@ -169,13 +169,13 @@ public ref struct JArray
     public readonly JArray Add<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        _writer.Append( value, format, provider );
+        __writer.Append( value, format, provider );
         return this;
     }
     public readonly JArray Add<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
-        if ( value is not null ) { _writer.Append( value, format, bufferSize, provider ).Next(); }
+        if ( value is not null ) { __writer.Append( value, format, bufferSize, provider ).Next(); }
 
         return this;
     }
@@ -208,20 +208,20 @@ public ref struct JArray
     public readonly JArray AddNumber<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
-        _writer.Append( value, format, provider );
+        __writer.Append( value, format, provider );
         return this;
     }
     public readonly JArray AddNumber<TValue>( TValue value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider = null )
         where TValue : struct, INumber<TValue>, ISpanFormattable
     {
-        _writer.AppendValue( value, format, bufferSize, provider ).Next();
+        __writer.AppendValue( value, format, bufferSize, provider ).Next();
 
         return this;
     }
 
 
-    public JArray  AddArray()  => new(_writer);
-    public JObject AddObject() => new(_writer);
+    public JArray  AddArray()  => new(__writer);
+    public JObject AddObject() => new(__writer);
 
 
     public JArray AddObjects( IReadOnlyCollection<IJsonizer>? collection )
@@ -235,7 +235,7 @@ public ref struct JArray
             JObject node = AddObject();
             item.Serialize( ref node );
 
-            if ( index < collection.Count ) { _writer.Next(); }
+            if ( index < collection.Count ) { __writer.Next(); }
         }
 
         return Complete();

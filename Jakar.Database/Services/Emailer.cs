@@ -1,5 +1,4 @@
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.DependencyInjection;
 
 
 
@@ -33,12 +32,12 @@ public interface IEmailer : IEmailTokenService
 [SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor")]
 public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configuration, ILogger<Emailer> logger, Database dataBase, IOptions<Emailer.Options> options ) : IEmailer
 {
+    protected readonly Database                _dataBase      = dataBase;
     protected readonly EmailTokenProvider      _tokenProvider = tokenProvider;
     protected readonly IConfiguration          _configuration = configuration;
     protected readonly ILogger                 _logger        = logger;
-    protected readonly Database                _dataBase      = dataBase;
-    protected readonly Options                 _options       = options.Value;
     protected readonly JwtSecurityTokenHandler _handler       = new();
+    protected readonly Options                 _options       = options.Value;
     protected          EmailSettings?          _settings;
 
 

@@ -31,7 +31,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
 
 
 {
-    private bool _isDebuggable = true;
+    private bool __isDebuggable = true;
 
 
     public static OneOf<Func<ValueTask<bool>>, Func<bool>> CanDebug               { get; set; } = new Func<bool>( ISeriloggerSettings.GetDebuggerIsAttached );
@@ -47,10 +47,10 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
     bool ISeriloggerSettings.                              IncludeAppStateOnError => AppState.Value;
     public bool IsDebuggable
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _isDebuggable;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __isDebuggable;
         set
         {
-            _isDebuggable = value;
+            __isDebuggable = value;
 
             LoggingLevel.MinimumLevel = value
                                             ? LogEventLevel.Verbose
@@ -144,27 +144,27 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
 
     public sealed class Setting( bool value, Func<bool, string> hinter, Action<bool>? action = null ) : ObservableClass
     {
-        private readonly Action<bool>?      _action = action;
-        private readonly Func<bool, string> _hinter = hinter;
-        private          bool               _isTitleBold;
-        private          bool               _value       = value;
-        private          string             _description = string.Empty;
-        private          string             _title       = string.Empty;
+        private readonly Action<bool>?      __action = action;
+        private readonly Func<bool, string> __hinter = hinter;
+        private          bool               __isTitleBold;
+        private          bool               __value       = value;
+        private          string             __description = string.Empty;
+        private          string             __title       = string.Empty;
 
 
-        public string Description { get => _description; set => SetProperty( ref _description, value ); }
-        public string Hint        => _hinter( _value );
-        public bool   IsTitleBold { get => _isTitleBold; set => SetProperty( ref _isTitleBold, value ); }
-        public string Title       { get => _title;       set => SetProperty( ref _title,       value ); }
+        public string Description { get => __description; set => SetProperty( ref __description, value ); }
+        public string Hint        => __hinter( __value );
+        public bool   IsTitleBold { get => __isTitleBold; set => SetProperty( ref __isTitleBold, value ); }
+        public string Title       { get => __title;       set => SetProperty( ref __title,       value ); }
         public bool Value
         {
-            get => _value;
+            get => __value;
             set
             {
-                if ( !SetProperty( ref _value, value ) ) { return; }
+                if ( !SetProperty( ref __value, value ) ) { return; }
 
                 OnPropertyChanged( nameof(Hint) );
-                _action?.Invoke( value );
+                __action?.Invoke( value );
             }
         }
 

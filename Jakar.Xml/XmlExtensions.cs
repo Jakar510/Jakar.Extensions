@@ -58,8 +58,8 @@ public static class XmlExtensions
         attributes = null;
         if ( attributes is null ) { throw new NullReferenceException( nameof(attributes) ); }
 
-        Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
-        Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
+        Type keyType   = Xmlizer.NameToType[attributes[Constants.KEY]];
+        Type valueType = Xmlizer.NameToType[attributes[Constants.VALUE]];
 
         Type        target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
         IDictionary results = (IDictionary?)Activator.CreateInstance( target ) ?? throw new InvalidOperationException( $"Cannot Create instance of '{target.Name}'" );

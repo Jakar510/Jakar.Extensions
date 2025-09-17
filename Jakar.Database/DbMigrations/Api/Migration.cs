@@ -26,41 +26,41 @@ public abstract class Migration<TClass> : Migration
     // public override void GetDownExpressions( IMigrationContext context ) => base.GetDownExpressions( context ); // _dbContext = context.ServiceProvider.GetRequiredService<Database>();
 
 
-    protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table( TableName );
+    protected IAlterTableAddColumnOrAlterColumnOrSchemaOrDescriptionSyntax AlterTable() => Alter.Table(TableName);
 
 
     protected virtual ICreateTableWithColumnSyntax CreateTable()
     {
-        ICreateTableWithColumnSyntax? table = Create.Table( TableName );
+        ICreateTableWithColumnSyntax? table = Create.Table(TableName);
 
-        table.WithColumn( nameof(ITableRecord<TClass>.ID) ).AsGuid().PrimaryKey();
-        table.WithColumn( nameof(ITableRecord<TClass>.DateCreated) ).AsDateTimeOffset().NotNullable().WithDefaultValue( SystemMethods.CurrentUTCDateTime );
-        table.WithColumn( nameof(ITableRecord<TClass>.LastModified) ).AsDateTimeOffset().Nullable();
+        table.WithColumn(nameof(ITableRecord<TClass>.ID)).AsGuid().PrimaryKey();
+        table.WithColumn(nameof(ITableRecord<TClass>.DateCreated)).AsDateTimeOffset().NotNullable().WithDefaultValue(SystemMethods.CurrentUTCDateTime);
+        table.WithColumn(nameof(ITableRecord<TClass>.LastModified)).AsDateTimeOffset().Nullable();
 
         return table;
     }
 
 
-    protected IInsertDataSyntax StartInsert() => Insert.IntoTable( TableName ).WithIdentityInsert();
+    protected IInsertDataSyntax StartInsert() => Insert.IntoTable(TableName).WithIdentityInsert();
 
 
     /// <param name="dataAsAnonymousType"> The columns and values to be used set </param>
-    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table( TableName ).Set( dataAsAnonymousType );
+    protected IUpdateWhereSyntax UpdateTable( object dataAsAnonymousType ) => Update.Table(TableName).Set(dataAsAnonymousType);
 
 
-    protected void DeleteTable()              => Delete.Table( TableName );
-    protected void RenameTable( string name ) => Rename.Table( TableName ).To( name );
+    protected void DeleteTable()              => Delete.Table(TableName);
+    protected void RenameTable( string name ) => Rename.Table(TableName).To(name);
 
 
-    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          columnName )              => Create.UniqueConstraint().OnTable( TableName ).Column( columnName );
-    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, string columnName ) => Create.UniqueConstraint( name ).OnTable( TableName ).Column( columnName );
-    protected ICreateConstraintOptionsSyntax UniqueConstraint( params string[] columnNames )                       => Create.UniqueConstraint().OnTable( TableName ).Columns( columnNames );
-    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, params string[] columnNames ) => Create.UniqueConstraint( name ).OnTable( TableName ).Columns( columnNames );
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          columnName )              => Create.UniqueConstraint().OnTable(TableName).Column(columnName);
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, string columnName ) => Create.UniqueConstraint(name).OnTable(TableName).Column(columnName);
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( params string[] columnNames )                       => Create.UniqueConstraint().OnTable(TableName).Columns(columnNames);
+    protected ICreateConstraintOptionsSyntax UniqueConstraint( string          name, params string[] columnNames ) => Create.UniqueConstraint(name).OnTable(TableName).Columns(columnNames);
 }
 
 
 
-[SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
+[SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
     where TClass : Mapping<TClass, TKey, TValue>, ITableRecord<TClass>, IDbReaderMapping<TClass>, ICreateMapping<TClass, TKey, TValue>
     where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
@@ -75,8 +75,8 @@ public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(Mapping<TClass, TKey, TValue>.KeyID) ).AsGuid().ForeignKey( KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID) ).NotNullable();
-        table.WithColumn( nameof(Mapping<TClass, TKey, TValue>.ValueID) ).AsGuid().ForeignKey( ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID) ).NotNullable();
+        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.KeyID)).AsGuid().ForeignKey(KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID)).NotNullable();
+        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.ValueID)).AsGuid().ForeignKey(ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID)).NotNullable();
 
         return table;
     }
@@ -90,7 +90,7 @@ public abstract class OwnedMigration<TClass> : Migration<TClass>
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
-        table.WithColumn( nameof(IOwnedTableRecord.CreatedBy) ).AsGuid().Nullable().ForeignKey( $"{nameof(UserRecord.CreatedBy)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID) );
+        table.WithColumn(nameof(IOwnedTableRecord.CreatedBy)).AsGuid().Nullable().ForeignKey($"{nameof(UserRecord.CreatedBy)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID));
         return table;
     }
 }

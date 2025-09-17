@@ -62,8 +62,8 @@ public class EmailTokenProvider : EmailTokenProvider<UserRecord>
 
 public class OtpAuthenticatorTokenProvider : AuthenticatorTokenProvider<UserRecord>
 {
-    public readonly string          SecretKey;
     public readonly OneTimePassword OTP;
+    public readonly string          SecretKey;
 
 
     public OtpAuthenticatorTokenProvider( TelemetrySource source )

@@ -11,9 +11,9 @@
 public ref struct SpanSplitEnumerator<TValue>
     where TValue : unmanaged, IEquatable<TValue>
 {
-    private readonly ReadOnlySpan<TValue> _separators;
-    private readonly ReadOnlySpan<TValue> _originalString;
-    private          ReadOnlySpan<TValue> _span;
+    private readonly ReadOnlySpan<TValue> __separators;
+    private readonly ReadOnlySpan<TValue> __originalString;
+    private          ReadOnlySpan<TValue> __span;
 
 
     public LineSplitEntry<TValue> Current { get; private set; }
@@ -23,22 +23,22 @@ public ref struct SpanSplitEnumerator<TValue>
     {
         if ( separators.Length == 0 ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
-        _originalString = span;
-        _span           = span;
-        _separators     = separators;
+        __originalString = span;
+        __span           = span;
+        __separators     = separators;
         Current         = default;
     }
 
 
-    public readonly override string                      ToString()      => $"{nameof(LineSplitEntry<TValue>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
+    public readonly override string                      ToString()      => $"{nameof(LineSplitEntry<TValue>)}({nameof(Current)}: '{Current.ToString()}', {nameof(__originalString)}: '{__originalString.ToString()}')";
     public readonly          SpanSplitEnumerator<TValue> GetEnumerator() => this;
-    public                   void                        Reset()         => _span = _originalString;
+    public                   void                        Reset()         => __span = __originalString;
 
 
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
     public bool MoveNext()
     {
-        ReadOnlySpan<TValue> span = _span;
+        ReadOnlySpan<TValue> span = __span;
 
         if ( span.IsEmpty )
         {
@@ -48,19 +48,19 @@ public ref struct SpanSplitEnumerator<TValue>
 
 
         int start;
-        int index = start = span.IndexOfAny( _separators );
+        int index = start = span.IndexOfAny( __separators );
 
         if ( index < 0 ) // The string doesn't contain the separators
         {
-            _span   = default; // The remaining string is an empty string
+            __span   = default; // The remaining string is an empty string
             Current = new LineSplitEntry<TValue>( span, default );
             return true;
         }
 
-        while ( index < span.Length - 1 && _separators.Contains( span[index + 1] ) ) { index++; }
+        while ( index < span.Length - 1 && __separators.Contains( span[index + 1] ) ) { index++; }
 
         Current = new LineSplitEntry<TValue>( span[..start], span.Slice( start, Math.Max( index - start, 1 ) ) );
-        _span   = span[(index + 1)..];
+        __span   = span[(index + 1)..];
         return true;
     }
 }

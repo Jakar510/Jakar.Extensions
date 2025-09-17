@@ -21,7 +21,7 @@ public static class Enricher
     /// </summary>
     /// <param name="activity">The activity.</param>
     /// <returns>The span unique identifier.</returns>
-    public static string GetSpanId( this Activity activity )
+    public static string GetSpanID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
 
@@ -41,7 +41,7 @@ public static class Enricher
     /// </summary>
     /// <param name="activity">The activity.</param>
     /// <returns>The span trace unique identifier.</returns>
-    public static string GetTraceId( this Activity activity )
+    public static string GetTraceID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
 
@@ -61,7 +61,7 @@ public static class Enricher
     /// </summary>
     /// <param name="activity">The activity.</param>
     /// <returns>The span parent unique identifier.</returns>
-    public static string GetParentId( this Activity activity )
+    public static string GetParentID( this Activity activity )
     {
         ArgumentNullException.ThrowIfNull(activity);
 

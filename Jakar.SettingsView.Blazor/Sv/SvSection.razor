@@ -4,28 +4,28 @@
 <CascadingValue IsFixed="true"
                 TValue="SvSection"
                 Value="@( this )" >
-    @if ( _isVisible )
+    @if ( __isVisible )
     {
         <div class="@SV_SECTION @Class"
              for="@ID" >
             <div class="@SV_SECTION_HEADER" >
                 <div class="@HeaderClass" >
-                    @_headerContent(_headerTitle)
+                    @__headerContent(__headerTitle)
                 </div>
 
-                @if ( !string.IsNullOrEmpty(_icon) )
+                @if ( !string.IsNullOrEmpty(__icon) )
                 {
                     <div class="@SV_SECTION_HEADER_ICON"
                          @onclick="ToggleExpanded" >
                         <img alt=""
                              class="@Html.ASPECT_FIT @Html.IMAGE"
-                             src="@_icon" />
+                             src="@__icon" />
                     </div>
                 }
             </div>
 
             <oi class="@SV_SECTION_BODY" >
-                @if ( _isExpanded )
+                @if ( __isExpanded )
                 {
                     @foreach ( CellBase cell in Cells )
                     {
@@ -40,7 +40,7 @@
             </oi>
 
             <div class="@SV_SECTION_FOOTER @FooterClass" >
-                @_footerContent(_footerTitle)
+                @__footerContent(__footerTitle)
             </div>
         </div>
     }
@@ -49,14 +49,14 @@
 
 @code
 {
-    private bool                   _isExpanded;
-    private bool                   _isExpandable;
-    private bool                   _isVisible;
-    private RenderFragment<string> _footerContent = GetContent;
-    private RenderFragment<string> _headerContent = GetContent;
-    private string                 _footerTitle   = string.Empty;
-    private string                 _headerTitle   = string.Empty;
-    private string?                _icon;
+    private bool                   __isExpanded;
+    private bool                   __isExpandable;
+    private bool                   __isVisible;
+    private RenderFragment<string> __footerContent = GetContent;
+    private RenderFragment<string> __headerContent = GetContent;
+    private string                 __footerTitle   = string.Empty;
+    private string                 __headerTitle   = string.Empty;
+    private string?                __icon;
 
 
     [Parameter]                                                   public          string                               ID                      { get; init; } = GetID();
@@ -100,9 +100,9 @@
     }
     internal static RenderFragment GetContent( string title )
     {
-        return AddContent;
+        return addContent;
 
-        void AddContent( RenderTreeBuilder builder ) => builder.AddContent(0, title);
+        void addContent( RenderTreeBuilder builder ) => builder.AddContent(0, title);
     }
 
 
@@ -122,55 +122,55 @@
 
     public async Task SetIsVisible( bool value )
     {
-        if ( _isVisible == value ) { return; }
+        if ( __isVisible == value ) { return; }
 
         if ( value ) { OnAppearing(); }
         else { OnDisappearing(); }
 
-        _isVisible = value;
+        __isVisible = value;
         await IsVisibleChanged.InvokeAsync(value);
     }
     public async Task SetHeader( string title )
     {
-        _headerTitle = title;
+        __headerTitle = title;
 
         if ( HeaderContent is not null )
         {
-            _headerContent = HeaderContent;
-            await HeaderContentChanged.InvokeAsync(_headerTitle);
+            __headerContent = HeaderContent;
+            await HeaderContentChanged.InvokeAsync(__headerTitle);
         }
     }
     public async Task SetFooter( string title )
     {
-        _footerTitle = title;
+        __footerTitle = title;
 
         if ( FooterContent is not null )
         {
-            _footerContent = FooterContent;
-            await FooterContentChanged.InvokeAsync(_footerTitle);
+            __footerContent = FooterContent;
+            await FooterContentChanged.InvokeAsync(__footerTitle);
         }
     }
     public async Task SetIsExpandable( bool isExpandable )
     {
-        if ( _isExpandable == isExpandable ) { return; }
+        if ( __isExpandable == isExpandable ) { return; }
 
-        _isExpandable = isExpandable;
+        __isExpandable = isExpandable;
         await IsExpandableChanged.InvokeAsync(isExpandable);
     }
     public async Task SetIsExpanded( bool isExpanded )
     {
-        if ( _isExpanded == isExpanded ) { return; }
+        if ( __isExpanded == isExpanded ) { return; }
 
-        _isExpanded = isExpanded;
+        __isExpanded = isExpanded;
 
-        _icon = isExpanded
+        __icon = isExpanded
                     ? ExpandedIcon
                     : CollapsedIcon;
 
         await ExpandedChanged.InvokeAsync(isExpanded);
     }
-    public Task ToggleExpandable() => SetIsExpandable(!_isExpandable);
-    public Task ToggleExpanded()   => SetIsExpanded(!_isExpanded);
+    public Task ToggleExpandable() => SetIsExpandable(!__isExpandable);
+    public Task ToggleExpanded()   => SetIsExpanded(!__isExpanded);
 
 
     public void OnAppearing()

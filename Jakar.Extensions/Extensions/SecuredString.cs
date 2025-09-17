@@ -26,22 +26,22 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
 
     public readonly struct ResolverOptions
     {
-        private readonly Func<CancellationToken, Task<SecuredString>>?                      _value0 = null;
-        private readonly Func<CancellationToken, ValueTask<SecuredString>>?                 _value1 = null;
-        private readonly Func<IConfiguration, CancellationToken, Task<SecuredString>>?      _value2 = null;
-        private readonly Func<IConfiguration, CancellationToken, ValueTask<SecuredString>>? _value3 = null;
-        private readonly Func<IConfiguration, SecuredString>?                               _value4 = null;
-        private readonly Func<SecuredString>?                                               _value5 = null;
-        private readonly SecuredString?                                                     _value6 = null;
+        private readonly Func<CancellationToken, Task<SecuredString>>?                      __value0 = null;
+        private readonly Func<CancellationToken, ValueTask<SecuredString>>?                 __value1 = null;
+        private readonly Func<IConfiguration, CancellationToken, Task<SecuredString>>?      __value2 = null;
+        private readonly Func<IConfiguration, CancellationToken, ValueTask<SecuredString>>? __value3 = null;
+        private readonly Func<IConfiguration, SecuredString>?                               __value4 = null;
+        private readonly Func<SecuredString>?                                               __value5 = null;
+        private readonly SecuredString?                                                     __value6 = null;
 
 
-        public ResolverOptions( SecuredString                                                     value ) => _value6 = value;
-        public ResolverOptions( Func<SecuredString>                                               value ) => _value5 = value;
-        public ResolverOptions( Func<CancellationToken, Task<SecuredString>>                      value ) => _value0 = value;
-        public ResolverOptions( Func<CancellationToken, ValueTask<SecuredString>>                 value ) => _value1 = value;
-        public ResolverOptions( Func<IConfiguration, SecuredString>                               value ) => _value4 = value;
-        public ResolverOptions( Func<IConfiguration, CancellationToken, Task<SecuredString>>      value ) => _value2 = value;
-        public ResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => _value3 = value;
+        public ResolverOptions( SecuredString                                                     value ) => __value6 = value;
+        public ResolverOptions( Func<SecuredString>                                               value ) => __value5 = value;
+        public ResolverOptions( Func<CancellationToken, Task<SecuredString>>                      value ) => __value0 = value;
+        public ResolverOptions( Func<CancellationToken, ValueTask<SecuredString>>                 value ) => __value1 = value;
+        public ResolverOptions( Func<IConfiguration, SecuredString>                               value ) => __value4 = value;
+        public ResolverOptions( Func<IConfiguration, CancellationToken, Task<SecuredString>>      value ) => __value2 = value;
+        public ResolverOptions( Func<IConfiguration, CancellationToken, ValueTask<SecuredString>> value ) => __value3 = value;
 
 
         public static implicit operator ResolverOptions( string                                                            value ) => new(value);
@@ -58,19 +58,19 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
         public async ValueTask<SecuredString> GetSecuredStringAsync( IConfiguration configuration, CancellationToken token = default, string key = "Default", string section = "ConnectionStrings" )
         {
             using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-            if ( _value0 is not null ) { return await _value0( token ); }
+            if ( __value0 is not null ) { return await __value0( token ); }
 
-            if ( _value1 is not null ) { return await _value1( token ); }
+            if ( __value1 is not null ) { return await __value1( token ); }
 
-            if ( _value2 is not null ) { return await _value2( configuration, token ); }
+            if ( __value2 is not null ) { return await __value2( configuration, token ); }
 
-            if ( _value3 is not null ) { return await _value3( configuration, token ); }
+            if ( __value3 is not null ) { return await __value3( configuration, token ); }
 
-            if ( _value4 is not null ) { return _value4( configuration ); }
+            if ( __value4 is not null ) { return __value4( configuration ); }
 
-            if ( _value5 is not null ) { return _value5(); }
+            if ( __value5 is not null ) { return __value5(); }
 
-            if ( _value6 is not null ) { return _value6; }
+            if ( __value6 is not null ) { return __value6; }
 
             return configuration.GetSection( section ).GetValue<string?>( key ) ?? throw new KeyNotFoundException( key );
         }

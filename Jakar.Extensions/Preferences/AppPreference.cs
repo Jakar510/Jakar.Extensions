@@ -6,19 +6,19 @@ public static class AppPreference
 {
     public const            string           FALSE = "false";
     public const            string           TRUE  = "true";
-    private static readonly Lock             _lock = new();
-    private static          IAppPreferences? _source;
+    private static readonly Lock             __lock = new();
+    private static          IAppPreferences? __source;
 
 
     public static IAppPreferences Source
     {
         get
         {
-            lock ( _lock ) { return _source ??= File.Create(); }
+            lock ( __lock ) { return __source ??= File.Create(); }
         }
         set
         {
-            lock ( _lock ) { _source = value; }
+            lock ( __lock ) { __source = value; }
         }
     }
 
@@ -103,40 +103,40 @@ public static class AppPreference
     public sealed class File( LocalFile file ) : IAppPreferences // TODO: Add watcher to update if file changes
     {
         public const     string    DEFAULT_FILE_NAME = "Settings.ini";
-        private readonly IniConfig _config           = IniConfig.ReadFromFile(file);
-        private readonly LocalFile _file             = file;
+        private readonly IniConfig __config           = IniConfig.ReadFromFile(file);
+        private readonly LocalFile __file             = file;
 
 
         public static File      Create()                           => Create(LocalDirectory.CurrentDirectory);
         public static File      Create( LocalDirectory directory ) => Create(directory.Join(DEFAULT_FILE_NAME));
         public static File      Create( LocalFile      file )      => new(file);
         public async  ValueTask DisposeAsync()                     => await SaveAsync();
-        private async Task      SaveAsync()                        => await _config.WriteToFile(_file);
+        private async Task      SaveAsync()                        => await __config.WriteToFile(__file);
 
 
-        public bool ContainsKey( string key, string sharedName ) => _config[sharedName].ContainsKey(key);
+        public bool ContainsKey( string key, string sharedName ) => __config[sharedName].ContainsKey(key);
         public void Remove( string key, string sharedName, string? alternateKey = null )
         {
-            _config[sharedName].TryRemove(key, out _);
-            if ( alternateKey is not null ) { _config[sharedName].TryRemove(alternateKey, out _); }
+            __config[sharedName].TryRemove(key, out _);
+            if ( alternateKey is not null ) { __config[sharedName].TryRemove(alternateKey, out _); }
 
             _ = SaveAsync();
         }
         public void Clear()
         {
-            _config.Clear();
+            __config.Clear();
             _ = SaveAsync();
         }
         public void Clear( string sharedName )
         {
-            _config[sharedName].Clear();
+            __config[sharedName].Clear();
             _ = SaveAsync();
         }
 
 
         public void Set( string key, string value, string sharedName )
         {
-            _config[sharedName][key] = value;
+            __config[sharedName][key] = value;
             _                        = SaveAsync();
         }
         public void Set( string key, Uri   value, string sharedName ) => Set(key, value.ToString(),  sharedName);
@@ -145,7 +145,7 @@ public static class AppPreference
         public void Set<TValue>( string key, TValue value, string sharedName )
             where TValue : IParsable<TValue>, IFormattable
         {
-            _config[sharedName][key] = value.ToString(null, CultureInfo.CurrentCulture);
+            __config[sharedName][key] = value.ToString(null, CultureInfo.CurrentCulture);
             _                        = SaveAsync();
         }
 
@@ -166,7 +166,7 @@ public static class AppPreference
         public bool? Get( string key, bool? defaultValue, string sharedName, string? alternateKey = null ) => Get(key, sharedName, alternateKey).GetBool();
         public string Get( string key, string sharedName, string? alternateKey = null, string defaultValue = EMPTY )
         {
-            IniConfig.Section section = _config[sharedName];
+            IniConfig.Section section = __config[sharedName];
 
             string? result = alternateKey is not null && section.TryGetValue(alternateKey, out string? value)
                                  ? value

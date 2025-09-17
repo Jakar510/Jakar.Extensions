@@ -3,25 +3,25 @@
 
 public struct JoinChainBuilderRight( in JoinClauseBuilder join, ref EasySqlBuilder builder )
 {
-    private readonly JoinClauseBuilder _join    = join;
-    private          EasySqlBuilder    _builder = builder;
+    private readonly JoinClauseBuilder __join    = join;
+    private          EasySqlBuilder    __builder = builder;
 
     public JoinClauseBuilder Right<TValue>( string columnName )
     {
-        _builder.Add( columnName.GetName<TValue>() );
-        _builder.VerifyParentheses();
-        return _join;
+        __builder.Add( columnName.GetName<TValue>() );
+        __builder.VerifyParentheses();
+        return __join;
     }
     public JoinClauseBuilder Right<TValue>( TValue _, string columnName )
     {
-        _builder.Add( columnName.GetName<TValue>() );
-        _builder.VerifyParentheses();
-        return _join;
+        __builder.Add( columnName.GetName<TValue>() );
+        __builder.VerifyParentheses();
+        return __join;
     }
     public JoinClauseBuilder Right( string columnName )
     {
-        _builder.Add( columnName );
-        _builder.VerifyParentheses();
-        return _join;
+        __builder.Add( columnName );
+        __builder.VerifyParentheses();
+        return __join;
     }
 }

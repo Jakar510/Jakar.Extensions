@@ -20,11 +20,11 @@ public static class Telemetry
     public static readonly TelemetryTags                            Tags           = new();
 
 
-    private static readonly Action<ILogger, string, Exception?> _logEventCallback = LoggerMessage.Define<string>( LogLevel.Trace, new EventId( -1329573148, nameof(LogEvent) ), "{EventName}", new LogDefineOptions { SkipEnabledCheck = true } );
+    private static readonly Action<ILogger, string, Exception?> __logEventCallback = LoggerMessage.Define<string>( LogLevel.Trace, new EventId( -1329573148, nameof(LogEvent) ), "{EventName}", new LogDefineOptions { SkipEnabledCheck = true } );
 
     public static void LogEvent( this ILogger logger, [CallerMemberName] string eventName = BaseRecord.EMPTY )
     {
-        if ( logger.IsEnabled( LogLevel.Trace ) ) { _logEventCallback( logger, eventName, null ); }
+        if ( logger.IsEnabled( LogLevel.Trace ) ) { __logEventCallback( logger, eventName, null ); }
     }
 
 

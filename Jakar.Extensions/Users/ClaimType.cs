@@ -44,7 +44,7 @@ public static class Claims
 
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID )
     {
-        Claim? claim = principal.Claims.FirstOrDefault( CheckUserID );
+        Claim? claim = principal.Claims.FirstOrDefault( checkUserID );
 
         if ( Guid.TryParse( claim?.Value, out Guid id ) )
         {
@@ -54,11 +54,11 @@ public static class Claims
 
         userID = Guid.Empty;
         return false;
-        static bool CheckUserID( Claim claim ) => claim.IsUserID();
+        static bool checkUserID( Claim claim ) => claim.IsUserID();
     }
     public static bool TryParse( this ClaimsPrincipal principal, [NotNullWhen( true )] out Guid? userID )
     {
-        Claim? claim = principal.Claims.FirstOrDefault( CheckUserID );
+        Claim? claim = principal.Claims.FirstOrDefault( checkUserID );
 
         if ( Guid.TryParse( claim?.Value, out Guid id ) )
         {
@@ -68,7 +68,7 @@ public static class Claims
 
         userID = null;
         return false;
-        static bool CheckUserID( Claim claim ) => claim.IsUserID();
+        static bool checkUserID( Claim claim ) => claim.IsUserID();
     }
     public static bool TryParse( this ClaimsPrincipal principal, out Guid userID, out string userName ) => TryParse( principal.Claims.ToArray(), out userID, out userName );
     public static bool TryParse( this ReadOnlySpan<Claim> claims, out Guid userID, out string userName )

@@ -6,35 +6,35 @@ namespace Jakar.SqlBuilder;
 
 public struct WhereInChainBuilder<TNext>
 {
-    private readonly WhereClauseBuilder<TNext> _next;
-    private          EasySqlBuilder            _builder;
-    private readonly List<string>              _cache = [];
+    private readonly WhereClauseBuilder<TNext> __next;
+    private          EasySqlBuilder            __builder;
+    private readonly List<string>              __cache = [];
 
 
     public WhereInChainBuilder( in WhereClauseBuilder<TNext> next, ref EasySqlBuilder builder )
     {
-        _next    = next;
-        _builder = builder.Begin();
+        __next    = next;
+        __builder = builder.Begin();
     }
 
 
     public WhereClauseBuilder<TNext> Next()
     {
-        _builder.AddRange( ',', _cache );
-        _builder.VerifyParentheses().NewLine();
+        __builder.AddRange( ',', __cache );
+        __builder.VerifyParentheses().NewLine();
 
-        return _next;
+        return __next;
     }
 
     public WhereInChainBuilder<TNext> With( string? value )
     {
-        _cache.Add( $"'{value ?? NULL}'" );
+        __cache.Add( $"'{value ?? NULL}'" );
         return this;
     }
     public WhereInChainBuilder<TNext> With<TValue>( TValue value )
         where TValue : struct
     {
-        _cache.Add( value.ToString() ?? "''" );
+        __cache.Add( value.ToString() ?? "''" );
         return this;
     }
 

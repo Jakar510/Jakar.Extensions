@@ -128,10 +128,10 @@ public abstract class ObservableClass<TClass, TID> : ObservableClass<TClass>, IU
     where TClass : ObservableClass<TClass, TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    private TID _id;
+    private TID __id;
 
 
-    public virtual TID ID { get => _id; init => _id = value; }
+    public virtual TID ID { get => __id; init => __id = value; }
 
 
     protected ObservableClass() : base() { }
@@ -139,5 +139,5 @@ public abstract class ObservableClass<TClass, TID> : ObservableClass<TClass>, IU
 
 
     protected bool SetID( TClass record ) => SetID(record.ID);
-    protected bool SetID( TID    id )     => SetProperty(ref _id, id, nameof(ID));
+    protected bool SetID( TID    id )     => SetProperty(ref __id, id, nameof(ID));
 }

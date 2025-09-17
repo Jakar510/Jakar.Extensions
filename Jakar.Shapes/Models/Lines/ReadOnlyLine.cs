@@ -16,7 +16,6 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public readonly        bool          IsFinite = isFinite;
 
 
-    public static       EqualComparer<ReadOnlyLine>       Sorter   => EqualComparer<ReadOnlyLine>.Default;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Zero     => ref Zero;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.One      => ref One;
     static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Invalid  => ref Invalid;
@@ -70,12 +69,14 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ILine<ReadOnlyLine>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlyLine        left, ReadOnlyLine                     right ) => Sorter.Equals(left, right);
-    public static bool operator !=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( ReadOnlyLine         left, ReadOnlyLine                     right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( ReadOnlyLine         left, ReadOnlyLine                     right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( ReadOnlyLine?       left, ReadOnlyLine?                    right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyLine?       left, ReadOnlyLine?                    right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyLine        left, ReadOnlyLine                     right ) => EqualityComparer<ReadOnlyLine>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyLine        left, ReadOnlyLine                     right ) => !EqualityComparer<ReadOnlyLine>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyLine         left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyLine         left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) <= 0;
     public static ReadOnlyLine operator *( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start * other.Start, self.End * other.End);
     public static ReadOnlyLine operator +( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start + other.Start, self.End + other.End);
     public static ReadOnlyLine operator -( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start - other.Start, self.End - other.End);

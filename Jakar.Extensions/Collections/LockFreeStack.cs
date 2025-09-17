@@ -6,20 +6,20 @@ namespace Jakar.Extensions;
 
 public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 {
-    private Node? _head;
-    private int   _count;
+    private Node? __head;
+    private int   __count;
 
-    public int Count => Interlocked.CompareExchange( ref _count, 0, 0 );
+    public int Count => Interlocked.CompareExchange( ref __count, 0, 0 );
 
 
     public void Push( TValue value )
     {
         Node node = new(value);
 
-        do { node.next = _head; }
-        while ( Interlocked.CompareExchange( ref _head, node, node.next ) != node.next );
+        do { node.next = __head; }
+        while ( Interlocked.CompareExchange( ref __head, node, node.next ) != node.next );
 
-        Interlocked.Increment( ref _count );
+        Interlocked.Increment( ref __count );
     }
     public TValue? TryPop() => TryPop( out TValue? result )
                                    ? result
@@ -30,15 +30,15 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 
         do
         {
-            oldHead = _head;
+            oldHead = __head;
             if ( oldHead is not null ) { continue; }
 
             result = default;
             return false;
         }
-        while ( Interlocked.CompareExchange( ref _head, oldHead.next, oldHead ) != oldHead );
+        while ( Interlocked.CompareExchange( ref __head, oldHead.next, oldHead ) != oldHead );
 
-        Interlocked.Decrement( ref _count );
+        Interlocked.Decrement( ref __count );
         result = oldHead.Value;
         return true;
     }
@@ -62,7 +62,7 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
 
     public IEnumerator<TValue> GetEnumerator()
     {
-        Node? current = _head;
+        Node? current = __head;
 
         while ( current is not null )
         {

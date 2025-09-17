@@ -9,31 +9,31 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 {
     public const           string             NO_RESPONSE = "NO RESPONSE";
     public static readonly EventId            EventId     = new(69420, nameof(SendAsync));
-    private readonly       HttpRequestMessage _request    = request;
-    private readonly       WebRequester       _requester  = requester;
+    private readonly       HttpRequestMessage __request    = request;
+    private readonly       WebRequester       __requester  = requester;
 
 
-    internal HttpClient          Client         => _requester.Client;
-    public   HttpContentHeaders? ContentHeaders => _request.Content?.Headers;
-    internal Encoding            Encoding       => _requester.Encoding;
-    public   HttpRequestHeaders  Headers        => _request.Headers;
-    internal ILogger?            Logger         => _requester.Logger;
-    public   string              Method         => _request.Method.Method;
-    public   HttpRequestOptions  Options        => _request.Options;
-    public   Uri                 RequestUri     => _request.RequestUri ?? throw new NullReferenceException( nameof(_request.RequestUri) );
-    internal RetryPolicy?        RetryPolicy    => _requester.Retries;
-    public   AppVersion          Version        { get => _request.Version;       set => _request.Version = value.ToVersion(); }
-    public   HttpVersionPolicy   VersionPolicy  { get => _request.VersionPolicy; set => _request.VersionPolicy = value; }
+    internal HttpClient          Client         => __requester.Client;
+    public   HttpContentHeaders? ContentHeaders => __request.Content?.Headers;
+    internal Encoding            Encoding       => __requester.Encoding;
+    public   HttpRequestHeaders  Headers        => __request.Headers;
+    internal ILogger?            Logger         => __requester.Logger;
+    public   string              Method         => __request.Method.Method;
+    public   HttpRequestOptions  Options        => __request.Options;
+    public   Uri                 RequestUri     => __request.RequestUri ?? throw new NullReferenceException( nameof(__request.RequestUri) );
+    internal RetryPolicy?        RetryPolicy    => __requester.Retries;
+    public   AppVersion          Version        { get => __request.Version;       set => __request.Version = value.ToVersion(); }
+    public   HttpVersionPolicy   VersionPolicy  { get => __request.VersionPolicy; set => __request.VersionPolicy = value; }
 
 
-    public void Dispose() => _request.Dispose();
+    public void Dispose() => __request.Dispose();
 
 
     public async ValueTask<HttpResponseMessage> SendAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        HttpResponseMessage response      = await Client.SendAsync( _request, token );
-        Logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, _request.RequestUri?.OriginalString );
+        HttpResponseMessage response      = await Client.SendAsync( __request, token );
+        Logger?.LogDebug( EventId, "Response StatusCode: {StatusCode} for {Uri}", response.StatusCode, __request.RequestUri?.OriginalString );
         return response;
     }
 

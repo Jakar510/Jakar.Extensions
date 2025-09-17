@@ -176,7 +176,7 @@ public class JsonNet_SystemTextJson_Benchmarks
 public sealed class NodeFaker : Faker<Node>
 {
     public static readonly NodeFaker Instance = new();
-    private                uint      _depth   = (uint)Random.Shared.Next( 5, 10 );
+    private                uint      __depth   = (uint)Random.Shared.Next( 5, 10 );
 
 
     public NodeFaker()
@@ -189,10 +189,10 @@ public sealed class NodeFaker : Faker<Node>
     }
     private Node[] GetChildren( Faker f )
     {
-        if ( _depth > 0 )
+        if ( __depth > 0 )
         {
-            uint depth = _depth;
-            _depth = depth / 2;
+            uint depth = __depth;
+            __depth = depth / 2;
             return Generate( (int)depth ).ToArray();
         }
 
@@ -204,8 +204,8 @@ public sealed class NodeFaker : Faker<Node>
 
 public sealed record Node
 {
-    private static readonly Node[]         _empty = [];
-    public                  Node[]         Children    { get; init; } = _empty;
+    private static readonly Node[]         __empty = [];
+    public                  Node[]         Children    { get; init; } = __empty;
     public                  DateTimeOffset Date        { get; init; }
     public                  string         Description { get; init; } = string.Empty;
     public                  string         Name        { get; init; } = string.Empty;
@@ -223,7 +223,7 @@ public sealed record Node
         Description = value;
         Price       = price;
         Date        = date;
-        Children    = children ?? _empty;
+        Children    = children ?? __empty;
     }
 }
 

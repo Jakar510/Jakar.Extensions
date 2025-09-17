@@ -30,13 +30,13 @@ public abstract class Widget : ComponentBase, IWidget
 
 public class BlazorSetting<T>( T value ) : ObservableClass
 {
-    private T _value = value;
+    private T __value = value;
     public T Value
     {
-        get => _value;
+        get => __value;
         set
         {
-            SetProperty(ref _value, value);
+            SetProperty(ref __value, value);
             _ = ValueChanged.InvokeAsync(value);
         }
     }

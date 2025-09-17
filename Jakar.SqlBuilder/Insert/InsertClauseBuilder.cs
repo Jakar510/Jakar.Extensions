@@ -3,22 +3,22 @@
 
 public struct InsertClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
     public EasySqlBuilder Into<TValue>( string tableName, TValue value )
     {
-        _builder.Add( INSERT, INTO, tableName.GetName( value ) );
+        __builder.Add( INSERT, INTO, tableName.GetName( value ) );
         return SetValues( value );
     }
     public EasySqlBuilder Into<TValue>( TValue value )
     {
-        _builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
         return SetValues( value );
     }
     public EasySqlBuilder Into<TValue>( IEnumerable<TValue> values )
     {
-        _builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
         return SetValues( values );
     }
     private EasySqlBuilder SetValues<TValue>( TValue value )
@@ -32,29 +32,29 @@ public struct InsertClauseBuilder( ref EasySqlBuilder builder )
             cache[info.Name] = x;
         }
 
-        _builder.Begin().AddRange( ',', cache.Keys ).End();
+        __builder.Begin().AddRange( ',', cache.Keys ).End();
 
-        _builder.Add( VALUES );
-        _builder.Begin().AddRange( ',', cache.Values ).End();
+        __builder.Add( VALUES );
+        __builder.Begin().AddRange( ',', cache.Values ).End();
 
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
 
 
-    public DataInsertBuilder In() => new(this, ref _builder);
+    public DataInsertBuilder In() => new(this, ref __builder);
     public DataInsertBuilder In( string tableName )
     {
-        _builder.Add( INSERT, INTO, tableName );
+        __builder.Add( INSERT, INTO, tableName );
         return In();
     }
     public DataInsertBuilder In<TValue>()
     {
-        _builder.Add( INSERT, INTO, typeof(TValue).GetName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
     public DataInsertBuilder In<TValue>( TValue _ )
     {
-        _builder.Add( INSERT, INTO, typeof(TValue).GetName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
 }

@@ -6,29 +6,29 @@ namespace Jakar.Extensions;
 
 public sealed class ScopeProvider : IExternalScopeProvider
 {
-    private static readonly Lazy<ScopeProvider> _service      = new(static () => new ScopeProvider());
-    private readonly        AsyncLocal<Scope?>  _currentScope = new();
+    private static readonly Lazy<ScopeProvider> __service      = new(static () => new ScopeProvider());
+    private readonly        AsyncLocal<Scope?>  __currentScope = new();
 
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
-        Report( _currentScope.Value );
+        report( __currentScope.Value );
         return;
 
-        void Report( Scope? current )
+        void report( Scope? current )
         {
             if ( current is null ) { return; }
 
-            Report( current.parent );
+            report( current.parent );
             callback( current.state, state );
         }
     }
 
     public IDisposable Push( object? state )
     {
-        Scope? parent   = _currentScope.Value;
+        Scope? parent   = __currentScope.Value;
         Scope  newScope = new(this, state, parent);
-        _currentScope.Value = newScope;
+        __currentScope.Value = newScope;
 
         return newScope;
     }
@@ -39,16 +39,16 @@ public sealed class ScopeProvider : IExternalScopeProvider
     {
         public readonly  object?       state     = state;
         public readonly  Scope?        parent    = parent;
-        private readonly ScopeProvider _provider = provider;
-        private          bool          _isDisposed;
+        private readonly ScopeProvider __provider = provider;
+        private          bool          __isDisposed;
 
         public override string? ToString() => state?.ToString();
         public void Dispose()
         {
-            if ( _isDisposed ) { return; }
+            if ( __isDisposed ) { return; }
 
-            _provider._currentScope.Value = parent;
-            _isDisposed                   = true;
+            __provider.__currentScope.Value = parent;
+            __isDisposed                   = true;
         }
     }
 }
@@ -57,20 +57,20 @@ public sealed class ScopeProvider : IExternalScopeProvider
 
 public sealed class ScopeProvider<TValue> : IExternalScopeProvider
 {
-    private static readonly Lazy<ScopeProvider<TValue>> _service      = new(static () => new ScopeProvider<TValue>());
-    private readonly        AsyncLocal<Scope?>          _currentScope = new();
+    private static readonly Lazy<ScopeProvider<TValue>> __service      = new(static () => new ScopeProvider<TValue>());
+    private readonly        AsyncLocal<Scope?>          __currentScope = new();
 
 
     public void ForEachScope<TState>( Action<object?, TState> callback, TState state )
     {
-        Report( _currentScope.Value );
+        report( __currentScope.Value );
         return;
 
-        void Report( Scope? current )
+        void report( Scope? current )
         {
             if ( current is null ) { return; }
 
-            Report( current.parent );
+            report( current.parent );
             callback( current.state, state );
         }
     }
@@ -78,9 +78,9 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
     IDisposable IExternalScopeProvider.Push( object? state ) => Push( (TValue?)state );
     public IDisposable Push( TValue? state )
     {
-        Scope? parent   = _currentScope.Value;
+        Scope? parent   = __currentScope.Value;
         Scope  newScope = new(this, state, parent);
-        _currentScope.Value = newScope;
+        __currentScope.Value = newScope;
 
         return newScope;
     }
@@ -89,19 +89,19 @@ public sealed class ScopeProvider<TValue> : IExternalScopeProvider
 
     private sealed class Scope( ScopeProvider<TValue> provider, TValue? state, Scope? parent ) : IDisposable
     {
-        private readonly ScopeProvider<TValue> _provider = provider;
+        private readonly ScopeProvider<TValue> __provider = provider;
         public readonly  Scope?                parent    = parent;
         public readonly  TValue?               state     = state;
-        private          bool                  _isDisposed;
+        private          bool                  __isDisposed;
 
 
         public override string? ToString() => state?.ToString();
         public void Dispose()
         {
-            if ( _isDisposed ) { return; }
+            if ( __isDisposed ) { return; }
 
-            _provider._currentScope.Value = parent;
-            _isDisposed                   = true;
+            __provider.__currentScope.Value = parent;
+            __isDisposed                   = true;
         }
     }
 }

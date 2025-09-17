@@ -9,10 +9,10 @@ public static class MimeTypes
     public static readonly FrozenDictionary<MimeType, string> ContentNames          = All.ToFrozenDictionary( SelectSelf,   ToContentType );
     public static readonly FrozenDictionary<MimeType, string> Extensions            = All.ToFrozenDictionary( SelectSelf,   ToExtension );
     public static readonly FrozenDictionary<MimeType, string> ExtensionsWithPeriods = All.ToFrozenDictionary( SelectSelf,   static x => $".{x.ToExtension()}" );
-    private static         int?                               _maxLength;
+    private static         int?                               __maxLength;
 
 
-    public static int MaxLength => _maxLength ??= Names.Values.Max( static x => x.Length );
+    public static int MaxLength => __maxLength ??= Names.Values.Max( static x => x.Length );
 
     private static TValue SelectSelf<TValue>( TValue v ) => v;
 

@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_USER_GROUP )]
+[Migration(CREATE_USER_GROUP)]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_UserGroup : Migrate_UserGroups

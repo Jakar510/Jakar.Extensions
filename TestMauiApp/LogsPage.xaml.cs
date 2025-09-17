@@ -8,7 +8,7 @@ namespace TestMauiApp;
 
 public sealed partial class LogsPage : ContentPage
 {
-    private readonly Logger                         _logger;
+    private readonly Logger                         __logger;
     public           ObservableCollection<FileLogs> Files          { get; } = new(64);
     public           AsyncRelayCommand              RefreshCommand { get; }
 
@@ -18,7 +18,7 @@ public sealed partial class LogsPage : ContentPage
         InitializeComponent();
         BindingContext = this;
         RefreshCommand = new AsyncRelayCommand( RefreshAsync );
-        _logger        = App.Logger.CreateLogger<LogsPage>();
+        __logger        = App.Logger.CreateLogger<LogsPage>();
     }
     protected override void OnAppearing()    => RefreshCommand.Execute( null );
     protected override void OnDisappearing() => Files.Clear();
@@ -40,7 +40,7 @@ public sealed partial class LogsPage : ContentPage
 
 public sealed class FileLogs( string fileName, string[] lines ) : ObservableCollection<string>( lines ), IEquatable<FileLogs>
 {
-    private static readonly char[] _separator = ['\n', '\r'];
+    private static readonly char[] __separator = ['\n', '\r'];
     public                  string Name { get; } = fileName;
 
 
@@ -48,7 +48,7 @@ public sealed class FileLogs( string fileName, string[] lines ) : ObservableColl
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         string              content       = await file.ReadAsync().AsString( token );
-        return new FileLogs( file.Name, content.Split( _separator, StringSplitOptions.RemoveEmptyEntries ) );
+        return new FileLogs( file.Name, content.Split( __separator, StringSplitOptions.RemoveEmptyEntries ) );
     }
 
 
@@ -60,6 +60,6 @@ public sealed class FileLogs( string fileName, string[] lines ) : ObservableColl
 
         return string.Equals( Name, other.Name, StringComparison.Ordinal );
     }
-    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || obj is FileLogs other && Equals( other );
+    public override bool Equals( object? obj ) => ReferenceEquals( this, obj ) || ( obj is FileLogs other && Equals( other ) );
     public override int  GetHashCode()         => Name.GetHashCode();
 }

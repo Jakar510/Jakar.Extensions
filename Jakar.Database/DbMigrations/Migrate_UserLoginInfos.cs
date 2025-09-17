@@ -13,13 +13,13 @@ public abstract class Migrate_UserLoginInfos : OwnedMigration<UserLoginProviderR
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(UserLoginProviderRecord.LoginProvider) ).AsString( int.MaxValue ).NotNullable();
+        table.WithColumn(nameof(UserLoginProviderRecord.LoginProvider)).AsString(int.MaxValue).NotNullable();
 
-        table.WithColumn( nameof(UserLoginProviderRecord.ProviderKey) ).AsString( int.MaxValue ).NotNullable();
+        table.WithColumn(nameof(UserLoginProviderRecord.ProviderKey)).AsString(int.MaxValue).NotNullable();
 
-        table.WithColumn( nameof(UserLoginProviderRecord.ProviderDisplayName) ).AsString( int.MaxValue ).Nullable();
+        table.WithColumn(nameof(UserLoginProviderRecord.ProviderDisplayName)).AsString(int.MaxValue).Nullable();
 
-        table.WithColumn( nameof(UserLoginProviderRecord.Value) ).AsString( int.MaxValue ).Nullable();
+        table.WithColumn(nameof(UserLoginProviderRecord.Value)).AsString(int.MaxValue).Nullable();
 
         return table;
     }

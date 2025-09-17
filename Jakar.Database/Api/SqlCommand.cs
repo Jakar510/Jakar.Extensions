@@ -15,8 +15,8 @@ public readonly struct SqlCommand( string sql, DynamicParameters? parameters = n
     public static implicit operator SqlCommand( string sql ) => new(sql);
 
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, CancellationToken token,       int?              timeout             = null ) => new(sql, parameters, transaction, timeout, commandType, flags, token);
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public Definition        ToCommandDefinition( DbConnection   connection,  DbTransaction?    transaction, CancellationToken token, int? timeout = null ) => new(connection, ToCommandDefinition( transaction, token, timeout ));
+    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public CommandDefinition ToCommandDefinition( DbTransaction? transaction, CancellationToken token,       int?              timeout             = null ) => new(sql, parameters, transaction, timeout, commandType, flags, token);
+    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public Definition        ToCommandDefinition( DbConnection   connection,  DbTransaction?    transaction, CancellationToken token, int? timeout = null ) => new(connection, ToCommandDefinition(transaction, token, timeout));
 
 
 

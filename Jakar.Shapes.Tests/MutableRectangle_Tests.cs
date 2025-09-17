@@ -7,9 +7,9 @@ namespace Jakar.Shapes.Tests;
 [TestFixture, TestOf(typeof(MutableRectangle))]
 public sealed class MutableRectangle_Tests : Assert
 {
-    private static readonly ReadOnlyPoint    _five     = 5;
-    private static readonly MutableRectangle _fiveRect = 5;
-    private static readonly ReadOnlyPoint    _two      = 2;
+    private static readonly ReadOnlyPoint    __five     = 5;
+    private static readonly MutableRectangle __fiveRect = 5;
+    private static readonly ReadOnlyPoint    __two      = 2;
 
     [Test]
     public void Create_ShouldBeSizedToMaxDimensionsOfPoints()
@@ -241,7 +241,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Multiplication_With_ReadOnlyPointF_AdjustsPositionOnly()
     {
-        MutableRectangle result = _five;
+        MutableRectangle result = __five;
         result *= ReadOnlyPointF.One * 2;
         this.AreEqual(10, result.X);
         this.AreEqual(10, result.Y);
@@ -295,8 +295,8 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Addition_With_ReadOnlyPoint()
     {
-        MutableRectangle result = _five;
-        result += ReadOnlyRectangle.Create(in _two, in ReadOnlySize.One);
+        MutableRectangle result = __five;
+        result += ReadOnlyRectangle.Create(in __two, in ReadOnlySize.One);
         this.AreEqual(7, result.X);
         this.AreEqual(7, result.Y);
         this.AreEqual(6, result.Width);
@@ -305,8 +305,8 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Subtraction_With_ReadOnlyPoint()
     {
-        MutableRectangle result = _five;
-        result -= ReadOnlyRectangle.Create(in _two, in ReadOnlySize.One);
+        MutableRectangle result = __five;
+        result -= ReadOnlyRectangle.Create(in __two, in ReadOnlySize.One);
         this.AreEqual(3, result.X);
         this.AreEqual(3, result.Y);
         this.AreEqual(4, result.Width);
@@ -315,8 +315,8 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Division_With_ReadOnlyPoint()
     {
-        MutableRectangle result = _five;
-        result /= ReadOnlyRectangle.Create(in _two, in ReadOnlySize.One);
+        MutableRectangle result = __five;
+        result /= ReadOnlyRectangle.Create(in __two, in ReadOnlySize.One);
         this.AreEqual(2.5, result.X);
         this.AreEqual(2.5, result.Y);
         this.AreEqual(5,   result.Width);
@@ -325,8 +325,8 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Multiplication_With_ReadOnlyPoint()
     {
-        MutableRectangle result = _five;
-        result *= ReadOnlyRectangle.Create(in _two, in ReadOnlySize.One);
+        MutableRectangle result = __five;
+        result *= ReadOnlyRectangle.Create(in __two, in ReadOnlySize.One);
         this.AreEqual(10, result.X);
         this.AreEqual(10, result.Y);
         this.AreEqual(5,  result.Width);
@@ -378,7 +378,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_ReadOnlyPoint_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & _two;
+        MutableRectangle result = __fiveRect & __two;
         this.AreEqual(2, result.X);
         this.AreEqual(2, result.Y);
         this.AreEqual(5, result.Width);
@@ -387,7 +387,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_ReadOnlyPointF_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & ReadOnlyPointF.One * 2;
+        MutableRectangle result = __fiveRect & ( ReadOnlyPointF.One * 2 );
         this.AreEqual(2, result.X);
         this.AreEqual(2, result.Y);
         this.AreEqual(5, result.Width);
@@ -396,7 +396,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_Point_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & new Point(2, 2);
+        MutableRectangle result = __fiveRect & new Point(2, 2);
         this.AreEqual(2, result.X);
         this.AreEqual(2, result.Y);
         this.AreEqual(5, result.Width);
@@ -405,7 +405,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_PointF_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & new PointF(2, 2);
+        MutableRectangle result = __fiveRect & new PointF(2, 2);
         this.AreEqual(2, result.X);
         this.AreEqual(2, result.Y);
         this.AreEqual(5, result.Width);
@@ -416,7 +416,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_ReadOnlySize_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & _two;
+        MutableRectangle result = __fiveRect & __two;
         this.AreEqual(2, result.X);
         this.AreEqual(2, result.Y);
         this.AreEqual(5, result.Width);
@@ -425,7 +425,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_ReadOnlySizeF_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & ReadOnlySizeF.One * 2;
+        MutableRectangle result = __fiveRect & ( ReadOnlySizeF.One * 2 );
         this.AreEqual(5, result.X);
         this.AreEqual(5, result.Y);
         this.AreEqual(2, result.Width);
@@ -434,7 +434,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_Size_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & new Size(2, 2);
+        MutableRectangle result = __fiveRect & new Size(2, 2);
         this.AreEqual(5, result.X);
         this.AreEqual(5, result.Y);
         this.AreEqual(2, result.Width);
@@ -443,7 +443,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Ampersand_Replacement_SizeF_WorkAsExpected()
     {
-        MutableRectangle result = _fiveRect & new SizeF(2, 2);
+        MutableRectangle result = __fiveRect & new SizeF(2, 2);
         this.AreEqual(5, result.X);
         this.AreEqual(5, result.Y);
         this.AreEqual(2, result.Width);
@@ -454,7 +454,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Addition_With_ReadOnlyThickness_ScalesPositionOnly()
     {
-        MutableRectangle result = _fiveRect + ReadOnlyThickness.One * 2;
+        MutableRectangle result = __fiveRect + ReadOnlyThickness.One * 2;
         this.AreEqual(3, result.X);
         this.AreEqual(3, result.Y);
         this.AreEqual(7, result.Width);
@@ -463,7 +463,7 @@ public sealed class MutableRectangle_Tests : Assert
     [Test]
     public void Subtraction_With_ReadOnlyThickness_ScalesPositionOnly()
     {
-        MutableRectangle result = _fiveRect - ReadOnlyThickness.One * 2;
+        MutableRectangle result = __fiveRect - ReadOnlyThickness.One * 2;
         this.AreEqual(7, result.X);
         this.AreEqual(7, result.Y);
         this.AreEqual(3, result.Width);

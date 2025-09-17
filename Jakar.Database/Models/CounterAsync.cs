@@ -10,7 +10,7 @@ public record struct CounterAsync : IAsyncEnumerator<long>
     private long? __current;
 
 
-    public long Current { get => __current ?? throw new InvalidOperationException( nameof(__current) ); private set => __current = value; }
+    public long Current { get => __current ?? throw new InvalidOperationException(nameof(__current)); private set => __current = value; }
 
 
     public CounterAsync() { }
@@ -22,5 +22,5 @@ public record struct CounterAsync : IAsyncEnumerator<long>
     }
 
 
-    public ValueTask<bool> MoveNextAsync() => new((++Current).IsValidID());
+    public ValueTask<bool> MoveNextAsync() => new(( ++Current ).IsValidID());
 }

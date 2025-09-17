@@ -21,7 +21,7 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
     public const     string                         TRACE_ID      = "TraceId";
     private readonly LogEventProperty               __appInfo     = Enricher.GetProperty(in source.Info);
     private readonly IOpenTelemetryActivityEnricher __options     = options;
-    private readonly TelemetrySource                _source       = source;
+    private readonly TelemetrySource                __source       = source;
 
 
     public static void Create( LoggerEnrichmentConfiguration enrichment, AppLoggerOptions options, TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));
@@ -66,7 +66,7 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
     protected virtual void TryAddDeviceInformation( ref readonly LogEvent log )
     {
-        DeviceInformation? device = _source.GetDeviceInformation();
+        DeviceInformation? device = __source.GetDeviceInformation();
         if ( device is not null ) { log.AddOrUpdateProperty(device.ToProperty()); }
     }
 
@@ -77,7 +77,7 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
         if ( property is not LogEventProperty logProperty )
         {
-            logProperty = Enricher.GetProperty(activity.GetTraceId(), SPAN_ID);
+            logProperty = Enricher.GetProperty(activity.GetTraceID(), SPAN_ID);
             activity.SetCustomProperty(SPAN_ID_KEY, logProperty);
         }
 
@@ -89,7 +89,7 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
         if ( property is not LogEventProperty logProperty )
         {
-            logProperty = Enricher.GetProperty(activity.GetTraceId(), PARENT_ID);
+            logProperty = Enricher.GetProperty(activity.GetTraceID(), PARENT_ID);
             activity.SetCustomProperty(TRACE_ID_KEY, logProperty);
         }
 
@@ -101,7 +101,7 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
         if ( property is not LogEventProperty logProperty )
         {
-            logProperty = Enricher.GetProperty(activity.GetParentId(), PARENT_ID);
+            logProperty = Enricher.GetProperty(activity.GetParentID(), PARENT_ID);
             activity.SetCustomProperty(PARENT_ID_KEY, logProperty);
         }
 

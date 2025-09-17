@@ -15,11 +15,8 @@ public record BaseRecord
 
 
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : BaseRecord<TClass>, IEqualComparable<TClass>
+    where TClass : BaseRecord<TClass>, IEqualityOperators<TClass>, IComparisonOperators<TClass>
 {
-    public static EqualComparer<TClass> Sorter { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => EqualComparer<TClass>.Default; }
-
-
     public string ToJson()       => this.ToJson(Formatting.None);
     public string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
@@ -67,10 +64,10 @@ public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<T
     where TClass : BaseRecord<TClass, TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    private TID _id;
+    private TID __id;
 
 
-    public virtual TID ID { get => _id; init => _id = value; }
+    public virtual TID ID { get => __id; init => __id = value; }
 
 
     protected BaseRecord() : base() { }
@@ -80,7 +77,7 @@ public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<T
     protected bool SetID( TClass record ) => SetID(record.ID);
     protected bool SetID( TID id )
     {
-        _id = id;
+        __id = id;
         return true;
     }
 }

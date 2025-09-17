@@ -13,24 +13,24 @@ namespace Jakar.Extensions;
 public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, IValueEnumerable<FilterBuffer<TValue>, TValue>
 {
     public static readonly FilterBuffer<TValue> Empty = new(0);
-    private readonly IMemoryOwner<TValue>? _owner = capacity > 0
+    private readonly IMemoryOwner<TValue>? __owner = capacity > 0
                                                         ? MemoryPool<TValue>.Shared.Rent( capacity )
                                                         : null;
     public readonly int Capacity = capacity;
     internal        int length   = 0;
-    private         int _index   = 0;
+    private         int __index   = 0;
 
 
     public readonly int                    Length => length;
-    public readonly ReadOnlyMemory<TValue> Memory => _owner?.Memory[..length] ?? Memory<TValue>.Empty;
+    public readonly ReadOnlyMemory<TValue> Memory => __owner?.Memory[..length] ?? Memory<TValue>.Empty;
     public readonly ReadOnlySpan<TValue>   Values => Memory.Span;
 
 
     public FilterBuffer() : this( 0 ) { }
-    public readonly void Dispose() => _owner?.Dispose();
+    public readonly void Dispose() => __owner?.Dispose();
     public void Add( ref readonly TValue value )
     {
-        if ( _owner is not null ) { _owner.Memory.Span[length++] = value; }
+        if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
 
         if ( length > Capacity ) { throw new InvalidOperationException( "Cannot add more items than the capacity of the buffer." ); }
     }
@@ -39,9 +39,9 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     [Pure] public ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
     public bool TryGetNext( out TValue current )
     {
-        if ( _index < length )
+        if ( __index < length )
         {
-            current = Values[_index++];
+            current = Values[__index++];
             return true;
         }
 

@@ -2,12 +2,10 @@
 // 1/10/2024  14:10
 
 
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using Serilog.Core;
 
 
 

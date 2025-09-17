@@ -13,20 +13,20 @@ public abstract class Migrate_Files : Migration<FileRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(FileRecord.FileName) ).AsString( UNICODE_CAPACITY ).NotNullable();
+        table.WithColumn(nameof(FileRecord.FileName)).AsString(UNICODE_CAPACITY).NotNullable();
 
-        table.WithColumn( nameof(FileRecord.FileDescription) ).AsString( UNICODE_CAPACITY ).NotNullable();
+        table.WithColumn(nameof(FileRecord.FileDescription)).AsString(UNICODE_CAPACITY).NotNullable();
 
-        table.WithColumn( nameof(FileRecord.FileType) ).AsString( UNICODE_CAPACITY ).NotNullable();
+        table.WithColumn(nameof(FileRecord.FileType)).AsString(UNICODE_CAPACITY).NotNullable();
 
-        table.WithColumn( nameof(FileRecord.FileSize) ).AsInt64().NotNullable();
+        table.WithColumn(nameof(FileRecord.FileSize)).AsInt64().NotNullable();
 
-        table.WithColumn( nameof(FileRecord.Hash) ).AsString( UNICODE_CAPACITY ).NotNullable();
+        table.WithColumn(nameof(FileRecord.Hash)).AsString(UNICODE_CAPACITY).NotNullable();
 
         ReadOnlySpan<string> mimeTypeNames = MimeTypes.Names.Values.AsSpan();
-        table.WithColumn( nameof(FileRecord.MimeType) ).AsString( mimeTypeNames.Max( static x => x.Length, 0 ) ).NotNullable();
+        table.WithColumn(nameof(FileRecord.MimeType)).AsString(mimeTypeNames.Max(static x => x.Length, 0)).NotNullable();
 
-        table.WithColumn( nameof(FileRecord.Payload) ).AsString( BINARY_CAPACITY ).NotNullable();
+        table.WithColumn(nameof(FileRecord.Payload)).AsString(BINARY_CAPACITY).NotNullable();
 
         return table;
     }

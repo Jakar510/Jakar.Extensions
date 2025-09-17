@@ -13,51 +13,51 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
 {
-    private string _confirmPassword = string.Empty;
-    private string _userPassword    = string.Empty;
+    private string __confirmPassword = string.Empty;
+    private string __userPassword    = string.Empty;
 
 
-    [Required, StringLength( UNICODE_CAPACITY )]
+    [Required, StringLength(UNICODE_CAPACITY)]
     public virtual string ConfirmPassword
     {
-        get => _confirmPassword;
+        get => __confirmPassword;
         set
         {
-            if ( SetProperty( ref _confirmPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
+            if ( SetProperty(ref __confirmPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
         }
     }
 
 
-    [JsonIgnore]                                                                       public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => base.IsValid                           && IsValidPassword; }
-    [JsonIgnore, MemberNotNullWhen( true, nameof(Password), nameof(ConfirmPassword) )] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining )] get => !string.IsNullOrWhiteSpace( Password ) && string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) && PasswordValidator.Check( Password ); }
+    [JsonIgnore]                                                                     public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.IsValid                         && IsValidPassword; }
+    [JsonIgnore, MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
 
 
-    [Required, StringLength( UNICODE_CAPACITY )]
+    [Required, StringLength(UNICODE_CAPACITY)]
     public virtual string Password
     {
-        get => _userPassword;
+        get => __userPassword;
         set
         {
-            if ( SetProperty( ref _userPassword, value ) ) { OnPropertyChanged( nameof(IsValid) ); }
+            if ( SetProperty(ref __userPassword, value) ) { OnPropertyChanged(nameof(IsValid)); }
         }
     }
 
 
-    [Required, StringLength( UNICODE_CAPACITY )]
+    [Required, StringLength(UNICODE_CAPACITY)]
     public override string UserName
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => base.UserName;
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.UserName;
         set
         {
             base.UserName = value;
-            OnPropertyChanged( nameof(IsValid) );
+            OnPropertyChanged(nameof(IsValid));
         }
     }
 
 
     protected CreateUserModel() : base() { }
-    protected CreateUserModel( IUserData<TID> value ) : base( value ) { }
-    protected CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
+    protected CreateUserModel( IUserData<TID> value ) : base(value) { }
+    protected CreateUserModel( string         firstName, string lastName ) : base(firstName, lastName) { }
 
 
     public static TClass Register( string email, string password )
@@ -70,7 +70,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
                           Email           = email
                       };
 
-        Debug.Assert( user.IsValid );
+        Debug.Assert(user.IsValid);
         return user;
     }
     public static TClass Register( string userName, string password, string email )
@@ -83,7 +83,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
                           Email           = email
                       };
 
-        Debug.Assert( user.IsValid );
+        Debug.Assert(user.IsValid);
         return user;
     }
 
@@ -94,60 +94,16 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 
     public virtual bool Validate( ICollection<string> errors )
     {
-        if ( string.IsNullOrWhiteSpace( UserName ) || !UserName.IsEmailAddress() ) { errors.Add( "Must provide a valid email address" ); }
+        if ( string.IsNullOrWhiteSpace(UserName) || !UserName.IsEmailAddress() ) { errors.Add("Must provide a valid email address"); }
 
-        if ( string.IsNullOrWhiteSpace( Password ) || string.IsNullOrWhiteSpace( ConfirmPassword ) ) { errors.Add( "Password must not be empty" ); }
+        if ( string.IsNullOrWhiteSpace(Password) || string.IsNullOrWhiteSpace(ConfirmPassword) ) { errors.Add("Password must not be empty"); }
 
-        if ( !string.Equals( Password, ConfirmPassword, StringComparison.Ordinal ) ) { errors.Add( "Passwords be equal" ); }
+        if ( !string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) ) { errors.Add("Passwords be equal"); }
 
-        if ( !IsValidEmail ) { errors.Add( "Invalid Email" ); }
+        if ( !IsValidEmail ) { errors.Add("Invalid Email"); }
 
         return errors.Count == 0;
     }
 }
 
-
-
-[Serializable]
-public abstract class CreateUserModel<TClass, TID> : CreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : CreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID>, ICreateUserModel<TClass, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<TClass>, new()
-{
-    protected CreateUserModel() : base() { }
-    protected CreateUserModel( IUserData<TID> value ) : base( value ) { }
-    protected CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
-}
-
-
-
-[Serializable]
-public sealed class CreateUserModel<TID> : CreateUserModel<CreateUserModel<TID>, TID>, ICreateUserModel<CreateUserModel<TID>, TID, UserAddress<TID>, GroupModel<TID>, RoleModel<TID>>, IEqualComparable<CreateUserModel<TID>>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public CreateUserModel() : base() { }
-    public CreateUserModel( IUserData<TID> value ) : base( value ) { }
-    public CreateUserModel( string         firstName, string lastName ) : base( firstName, lastName ) { }
-
-
-    public static CreateUserModel<TID> Create( IUserData<TID> model )                                                                                                                                                   => new(model);
-    public static CreateUserModel<TID> Create( IUserData<TID> model, IEnumerable<UserAddress<TID>>            addresses, IEnumerable<GroupModel<TID>>            groups, IEnumerable<RoleModel<TID>>            roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
-    public static CreateUserModel<TID> Create( IUserData<TID> model, scoped in ReadOnlySpan<UserAddress<TID>> addresses, scoped in ReadOnlySpan<GroupModel<TID>> groups, scoped in ReadOnlySpan<RoleModel<TID>> roles ) => Create( model ).With( addresses ).With( groups ).With( roles );
-    public static async ValueTask<CreateUserModel<TID>> CreateAsync( IUserData<TID> model, IAsyncEnumerable<UserAddress<TID>> addresses, IAsyncEnumerable<GroupModel<TID>> groups, IAsyncEnumerable<RoleModel<TID>> roles, CancellationToken token = default )
-    {
-        CreateUserModel<TID> user = Create( model );
-        await user.Addresses.Add( addresses, token );
-        await user.Groups.Add( groups, token );
-        await user.Roles.Add( roles, token );
-        return user;
-    }
-
-
-    public override bool Equals( object? other )                                                => other is CreateUserModel<TID> x && Equals( x );
-    public override int  GetHashCode()                                                          => base.GetHashCode();
-    public static   bool operator ==( CreateUserModel<TID>? left, CreateUserModel<TID>? right ) =>  Sorter.Equals( left, right );
-    public static   bool operator !=( CreateUserModel<TID>? left, CreateUserModel<TID>? right ) =>  Sorter.DoesNotEqual( left, right );
-    public static   bool operator >( CreateUserModel<TID>   left, CreateUserModel<TID>  right ) => Sorter.GreaterThan( left, right );
-    public static   bool operator >=( CreateUserModel<TID>  left, CreateUserModel<TID>  right ) => Sorter.GreaterThanOrEqualTo( left, right );
-    public static   bool operator <( CreateUserModel<TID>   left, CreateUserModel<TID>  right ) => Sorter.LessThan( left, right );
-    public static   bool operator <=( CreateUserModel<TID>  left, CreateUserModel<TID>  right ) => Sorter.LessThanOrEqualTo( left, right );
-}
+ 

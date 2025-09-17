@@ -49,54 +49,54 @@ public interface IHeaderContext<TImageSource> : IHeaderContext
 
 public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImageSource>
 {
-    private bool               _isCollapsable;
-    private bool               _isExpanded;
-    private bool               _isVisible;
-    private TextFontAttributes _titleAttributes = TextFontAttributes.Bold;
-    private HeaderData?        _data;
-    private TImageSource?      _collapseIcon;
-    private TImageSource?      _expandIcon;
-    private TImageSource?      _icon;
-    private string?            _title;
-    private bool               _isTitleBold;
+    private bool               __isCollapsable;
+    private bool               __isExpanded;
+    private bool               __isVisible;
+    private TextFontAttributes __titleAttributes = TextFontAttributes.Bold;
+    private HeaderData?        __data;
+    private TImageSource?      __collapseIcon;
+    private TImageSource?      __expandIcon;
+    private TImageSource?      __icon;
+    private string?            __title;
+    private bool               __isTitleBold;
 
 
-    public TImageSource? CollapseIcon { get => _collapseIcon; set => SetProperty( ref _collapseIcon, value ); }
+    public TImageSource? CollapseIcon { get => __collapseIcon; set => SetProperty( ref __collapseIcon, value ); }
     public HeaderData? Data
     {
-        get => _data;
+        get => __data;
         set
         {
-            if ( !SetProperty( ref _data, value ) ) { return; }
+            if ( !SetProperty( ref __data, value ) ) { return; }
 
             OnPropertyChanged( nameof(Title) );
             OnPropertyChanged( nameof(TitleAttributes) );
         }
     }
     public ICommand      ExpandCollapseCommand { get; }
-    public TImageSource? ExpandIcon            { get => _expandIcon; set => SetProperty( ref _expandIcon, value ); }
+    public TImageSource? ExpandIcon            { get => __expandIcon; set => SetProperty( ref __expandIcon, value ); }
     public TImageSource? Icon
     {
-        get => _icon ??= GetIcon( _isExpanded );
+        get => __icon ??= GetIcon( __isExpanded );
         set
         {
-            if ( SetProperty( ref _icon, value ) ) { OnPropertyChanged( nameof(IconIsVisible) ); }
+            if ( SetProperty( ref __icon, value ) ) { OnPropertyChanged( nameof(IconIsVisible) ); }
         }
     }
-    public bool IconIsVisible => _icon is not null;
-    public bool IsCollapsable { get => _isCollapsable; set => SetProperty( ref _isCollapsable, value ); }
+    public bool IconIsVisible => __icon is not null;
+    public bool IsCollapsable { get => __isCollapsable; set => SetProperty( ref __isCollapsable, value ); }
     public bool IsExpanded
     {
-        get => _isExpanded || !_isCollapsable;
+        get => __isExpanded || !__isCollapsable;
         set
         {
-            if ( SetProperty( ref _isExpanded, value ) ) { Icon = GetIcon( value ); }
+            if ( SetProperty( ref __isExpanded, value ) ) { Icon = GetIcon( value ); }
         }
     }
-    public bool               IsVisible       { get => _isVisible;                                       set => SetProperty( ref _isVisible,       value ); }
-    public bool               IsTitleBold     { get => _isTitleBold;                                     set => SetProperty( ref _isTitleBold,     value ); }
-    public string             Title           { get => _data?.Title           ?? _title ?? string.Empty; set => SetProperty( ref _title,           value ); }
-    public TextFontAttributes TitleAttributes { get => _data?.TitleAttributes ?? _titleAttributes;       set => SetProperty( ref _titleAttributes, value ); }
+    public bool               IsVisible       { get => __isVisible;                                       set => SetProperty( ref __isVisible,       value ); }
+    public bool               IsTitleBold     { get => __isTitleBold;                                     set => SetProperty( ref __isTitleBold,     value ); }
+    public string             Title           { get => __data?.Title           ?? __title ?? string.Empty; set => SetProperty( ref __title,           value ); }
+    public TextFontAttributes TitleAttributes { get => __data?.TitleAttributes ?? __titleAttributes;       set => SetProperty( ref __titleAttributes, value ); }
 
 
     public HeaderContext()
@@ -114,11 +114,11 @@ public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImag
 
     protected void ExpandCollapse()
     {
-        if ( !_isCollapsable ) { return; }
+        if ( !__isCollapsable ) { return; }
 
-        IsExpanded = !_isExpanded;
+        IsExpanded = !__isExpanded;
     }
     protected TImageSource? GetIcon( bool isExpanded ) => isExpanded
-                                                              ? _expandIcon
-                                                              : _collapseIcon;
+                                                              ? __expandIcon
+                                                              : __collapseIcon;
 }

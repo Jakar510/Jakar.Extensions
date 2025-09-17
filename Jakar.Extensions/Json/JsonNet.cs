@@ -3,19 +3,19 @@
 
 public static class JsonNet
 {
-    private static readonly JsonConverter[]         _converters = [];
-    private static          JsonSerializer?         _serializer;
-    private static          JsonSerializerSettings? _settings;
+    private static readonly JsonConverter[]         __converters = [];
+    private static          JsonSerializer?         __serializer;
+    private static          JsonSerializerSettings? __settings;
 
 
     public static JsonLoadSettings LoadSettings { get;                                                      set; } = new();
-    public static JsonSerializer   Serializer   { get => _serializer ??= JsonSerializer.Create( Settings ); set => _serializer = value; }
+    public static JsonSerializer   Serializer   { get => __serializer ??= JsonSerializer.Create( Settings ); set => __serializer = value; }
     public static JsonSerializerSettings Settings
     {
-        get => _settings ??= new JsonSerializerSettings();
+        get => __settings ??= new JsonSerializerSettings();
         set
         {
-            _settings  = value;
+            __settings  = value;
             Serializer = JsonSerializer.Create( value );
         }
     }
@@ -30,9 +30,9 @@ public static class JsonNet
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static JToken FromJson( this object             value, JsonSerializer serializer ) => Validate.ThrowIfNull( JToken.FromObject( value, serializer ) );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, _converters );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value )                                                                       => ToJson( value, Formatting.None, __converters );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, params JsonConverter[] converters )                                    => ToJson( value, Formatting.None, converters );
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      _converters );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting )                                    => ToJson( value, formatting,      __converters );
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static string ToJson( this JToken value, Formatting             formatting, params JsonConverter[] converters ) => value.ToString( formatting, converters );
 
 
@@ -126,8 +126,8 @@ public static class JsonNet
     public sealed class JsonArrayPool<T>() : IArrayPool<T>
     {
         public static readonly JsonArrayPool<T> Shared = new();
-        private readonly       ArrayPool<T>     _inner = Validate.ThrowIfNull( ArrayPool<T>.Shared );
-        public                 T[]              Rent( int    minimumLength ) => _inner.Rent( minimumLength );
-        public                 void             Return( T[]? array )         => _inner.Return( Validate.ThrowIfNull( array ) );
+        private readonly       ArrayPool<T>     __inner = Validate.ThrowIfNull( ArrayPool<T>.Shared );
+        public                 T[]              Rent( int    minimumLength ) => __inner.Rent( minimumLength );
+        public                 void             Return( T[]? array )         => __inner.Return( Validate.ThrowIfNull( array ) );
     }
 }

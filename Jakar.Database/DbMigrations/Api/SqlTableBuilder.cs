@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.SqlBuilder
 // 3/1/2024  23:20
 
-using Jakar.Extensions;
-
 namespace Jakar.Database.DbMigrations;
 
 
@@ -54,8 +52,7 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-[Experimental( "SqlTableBuilder" )]
-[Flags]
+[Experimental("SqlTableBuilder"), Flags]
 public enum ColumnOptions
 {
     AlwaysIdentity  = 1 << 0,
@@ -67,11 +64,11 @@ public enum ColumnOptions
 
 
 
-[Experimental( "SqlTableBuilder" )] public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
+[Experimental("SqlTableBuilder")] public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
 
 
 
-[Experimental( "SqlTableBuilder" )]
+[Experimental("SqlTableBuilder")]
 public readonly record struct ColumnCheckMetaData( bool And, params string[] Checks )
 {
     public static implicit operator ColumnCheckMetaData( string   check )  => new(true, check);
@@ -80,7 +77,7 @@ public readonly record struct ColumnCheckMetaData( bool And, params string[] Che
 
 
 
-[Experimental( "SqlTableBuilder" )]
+[Experimental("SqlTableBuilder")]
 public readonly record struct ColumnMetaData( string Name, DbType DbType, bool IsNullable, OneOf<uint, ColumnPrecisionMetaData> Length = default, ColumnCheckMetaData? Check = null, ColumnOptions Options = 0 )
 {
     // public bool    IsForeignKey { get; init; }
@@ -94,28 +91,28 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
     public static ColumnMetaData Indexed( string     name, string indexName ) => new(name, DbType.Int64, false) { IndexColumnName = indexName };
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > Constants.DECIMAL_MAX_PRECISION, Scope: > Constants.DECIMAL_MAX_SCALE } };
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > Constants.DECIMAL_MAX_PRECISION, Scope: > Constants.DECIMAL_MAX_SCALE } };
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool IsValidLength() =>
         Length.IsT0 &&
         Length.AsT0 switch
         {
-            0                                                                                    => false,
+            0                                                                                          => false,
             > Constants.ANSI_CAPACITY when DbType is DbType.AnsiString or DbType.AnsiStringFixedLength => false,
             > Constants.UNICODE_CAPACITY when DbType is DbType.String or DbType.StringFixedLength      => false,
-            _                                                                                    => true
+            _                                                                                          => true
         };
 
 
-    [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public string GetDataTypeSqlServer() =>
         DbType switch
         {
-            DbType.String or DbType.StringFixedLength when Length is { IsT0        : true, AsT0: > Constants.UNICODE_CAPACITY } => throw new OutOfRangeException( Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}" ),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when Length is { IsT0: true, AsT0: > Constants.ANSI_CAPACITY }    => throw new OutOfRangeException( Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()                                    => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
+            DbType.String or DbType.StringFixedLength when Length is { IsT0        : true, AsT0: > Constants.UNICODE_CAPACITY } => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when Length is { IsT0: true, AsT0: > Constants.ANSI_CAPACITY }    => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
+            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()                                    => throw new OutOfRangeException(Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}"),
             _ => DbType switch
                  {
                      DbType.Binary => Length.IsT0
@@ -152,18 +149,18 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
                      DbType.Currency                    => "MONEY",
                      DbType.Object                      => "JSON",
                      DbType.Xml                         => "XML",
-                     _                                  => throw new OutOfRangeException( DbType )
+                     _                                  => throw new OutOfRangeException(DbType)
                  }
         };
 
 
-    [SuppressMessage( "ReSharper", "StringLiteralTypo" )]
+    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public string GetDataTypePostgresSql() =>
         DbType switch
         {
-            DbType.String or DbType.StringFixedLength when !IsValidLength()                  => throw new OutOfRangeException( Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}" ),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when !IsValidLength()          => throw new OutOfRangeException( Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}" ),
-            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision() => throw new OutOfRangeException( Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}" ),
+            DbType.String or DbType.StringFixedLength when !IsValidLength()                  => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
+            DbType.AnsiString or DbType.AnsiStringFixedLength when !IsValidLength()          => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
+            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision() => throw new OutOfRangeException(Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}"),
 
             _ => DbType switch
                  {
@@ -201,14 +198,14 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
                      DbType.Currency                    => "money",
                      DbType.Object                      => "json",
                      DbType.Xml                         => "xml",
-                     _                                  => throw new OutOfRangeException( DbType )
+                     _                                  => throw new OutOfRangeException(DbType)
                  }
         };
 }
 
 
 
-[Experimental( "SqlTableBuilder" )]
+[Experimental("SqlTableBuilder")]
 public ref struct SqlTableBuilder<TClass>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
@@ -223,39 +220,39 @@ public ref struct SqlTableBuilder<TClass>
     }
 
 
-    public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn( ColumnMetaData.Indexed( columnName, indexColumnName ) );
+    public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public SqlTableBuilder<TClass> WithColumn<TValue>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
     {
-        DbType         dbType = GetDataType<TValue>( out bool isNullable, ref length );
+        DbType         dbType = GetDataType<TValue>(out bool isNullable, ref length);
         ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);
-        return WithColumn( column );
+        return WithColumn(column);
     }
     public SqlTableBuilder<TClass> WithColumn( ColumnMetaData column )
     {
-        __columns.Add( column );
+        __columns.Add(column);
         return this;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private static DbType GetDataType<TValue>( out bool isNullable, ref OneOf<uint, ColumnPrecisionMetaData> length )
     {
         isNullable = typeof(TValue).IsNullableType() || typeof(TValue).IsBuiltInNullableType();
 
         if ( typeof(TValue) == typeof(byte[]) ) { return DbType.Binary; }
 
-        if ( typeof(JToken).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
+        if ( typeof(JToken).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
+        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom( typeof(TValue) ) ) { return DbType.Object; }
+        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
         if ( typeof(TValue).IsEnum )
         {
-            length = Spans.Max<string, uint>( Enum.GetNames( typeof(TValue) ), static x => (uint)x.Length, 0 );
+            length = Spans.Max<string, uint>(Enum.GetNames(typeof(TValue)), static x => (uint)x.Length, 0);
             return DbType.StringFixedLength;
         }
 
@@ -413,7 +410,7 @@ public ref struct SqlTableBuilder<TClass>
             return DbType.DateTimeOffset;
         }
 
-        throw new ArgumentException( $"Unsupported typeof(TValue): {typeof(TValue).Name}" );
+        throw new ArgumentException($"Unsupported typeof(TValue): {typeof(TValue).Name}");
     }
 
 
@@ -422,56 +419,56 @@ public ref struct SqlTableBuilder<TClass>
         ReadOnlySpan<ColumnMetaData> columns = __columns.Values;
         StringBuilder                query   = new(10240);
 
-        query.Append( "CREATE TABLE " );
-        query.Append( TClass.TableName );
-        query.Append( " (" );
+        query.Append("CREATE TABLE ");
+        query.Append(TClass.TableName);
+        query.Append(" (");
 
         foreach ( ColumnMetaData column in columns )
         {
-            if ( column.Options.HasFlag( ColumnOptions.Indexed ) )
+            if ( column.Options.HasFlag(ColumnOptions.Indexed) )
             {
-                query.Append( column.IndexColumnName ?? $"{column.Name}_index" );
-                query.Append( " ON " );
-                query.Append( TClass.TableName );
-                query.Append( " (" );
-                query.Append( column.Name );
-                query.Append( ");" );
+                query.Append(column.IndexColumnName ?? $"{column.Name}_index");
+                query.Append(" ON ");
+                query.Append(TClass.TableName);
+                query.Append(" (");
+                query.Append(column.Name);
+                query.Append(");");
                 continue;
             }
 
             string dataType = column.GetDataTypePostgresSql();
 
-            query.Append( query[^1] == '('
-                              ? "\n    "
-                              : ",\n    " );
+            query.Append(query[^1] == '('
+                             ? "\n    "
+                             : ",\n    ");
 
-            query.Append( column.Name );
-            query.Append( ' ' );
-            query.Append( dataType );
+            query.Append(column.Name);
+            query.Append(' ');
+            query.Append(dataType);
 
             if ( column.Check.HasValue )
             {
-                query.Append( " CHECK ( " );
+                query.Append(" CHECK ( ");
 
-                query.AppendJoin( column.Check.Value.And
-                                      ? Constants.AND
-                                      : Constants.OR,
-                                  column.Check.Value.Checks );
+                query.AppendJoin(column.Check.Value.And
+                                     ? Constants.AND
+                                     : Constants.OR,
+                                 column.Check.Value.Checks);
 
-                query.Append( " )" );
+                query.Append(" )");
             }
 
-            if ( HasFlag( column.Options, ColumnOptions.Unique ) ) { query.Append( " UNIQUE" ); }
+            if ( HasFlag(column.Options, ColumnOptions.Unique) ) { query.Append(" UNIQUE"); }
 
-            query.Append( column.IsNullable
-                              ? " NULL"
-                              : " NOT NULL" );
+            query.Append(column.IsNullable
+                             ? " NULL"
+                             : " NOT NULL");
 
-            if ( HasFlag( column.Options, ColumnOptions.AlwaysIdentity ) ) { query.Append( " GENERATED ALWAYS AS IDENTITY" ); }
+            if ( HasFlag(column.Options, ColumnOptions.AlwaysIdentity) ) { query.Append(" GENERATED ALWAYS AS IDENTITY"); }
 
-            else if ( HasFlag( column.Options, ColumnOptions.DefaultIdentity ) ) { query.Append( " GENERATED BY DEFAULT AS IDENTITY" ); }
+            else if ( HasFlag(column.Options, ColumnOptions.DefaultIdentity) ) { query.Append(" GENERATED BY DEFAULT AS IDENTITY"); }
 
-            if ( HasFlag( column.Options, ColumnOptions.PrimaryKey ) ) { query.Append( " PRIMARY KEY" ); }
+            if ( HasFlag(column.Options, ColumnOptions.PrimaryKey) ) { query.Append(" PRIMARY KEY"); }
         }
 
         // return query.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' ).Append( "\n );" ).ToString();
@@ -479,7 +476,7 @@ public ref struct SqlTableBuilder<TClass>
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool HasFlag( ColumnOptions options, ColumnOptions flag ) => (options & flag) != 0;
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool HasFlag( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
 
 
     public string Build()

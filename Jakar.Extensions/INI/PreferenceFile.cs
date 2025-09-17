@@ -5,13 +5,13 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
     where TClass : PreferenceFile<TClass>, IEqualComparable<TClass>, new()
 {
 #if NET9_0_OR_GREATER
-    private readonly Lock _lock = new();
+    private readonly Lock __lock = new();
 #else
     private readonly object _lock = new();
 #endif
     protected        DateTime                _lastWriteTimeUtc;
     protected        IniConfig?              _config;
-    private readonly LocalFile               _file = $"{typeof(TClass).Name}.ini";
+    private readonly LocalFile               __file = $"{typeof(TClass).Name}.ini";
     protected        LocalDirectory.Watcher? _watcher;
 
 
@@ -19,35 +19,35 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
     {
         get
         {
-            lock (_lock)
+            lock (__lock)
             {
                 if ( _config is not null && LastWriteTimeUtc > _lastWriteTimeUtc ) { return _config; }
 
-                _config           = IniConfig.ReadFromFile( _file );
+                _config           = IniConfig.ReadFromFile( __file );
                 _lastWriteTimeUtc = LastWriteTimeUtc;
                 return _config;
             }
         }
         protected set
         {
-            lock (_lock) { SetProperty( ref _config, value ); }
+            lock (__lock) { SetProperty( ref _config, value ); }
         }
     }
     public LocalFile File
     {
-        get => _file;
+        get => __file;
         init
         {
-            _file = value;
-            if ( string.IsNullOrWhiteSpace( _file.DirectoryName ) ) { return; }
+            __file = value;
+            if ( string.IsNullOrWhiteSpace( __file.DirectoryName ) ) { return; }
 
-            _watcher         =  new LocalDirectory.Watcher( _file.DirectoryName );
+            _watcher         =  new LocalDirectory.Watcher( __file.DirectoryName );
             _watcher.Changed += WatcherOnChanged;
         }
     }
 
 
-    protected internal DateTime LastWriteTimeUtc => _file.Info.LastWriteTimeUtc;
+    protected internal DateTime LastWriteTimeUtc => __file.Info.LastWriteTimeUtc;
 
     protected PreferenceFile() { }
     public virtual async ValueTask DisposeAsync()
@@ -64,11 +64,11 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
     }
 
 
-    public virtual async    Task SaveAsync() => await Config.WriteToFile( _file );
-    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync( _file );
+    public virtual async    Task SaveAsync() => await Config.WriteToFile( __file );
+    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync( __file );
     protected virtual void WatcherOnChanged( object sender, FileSystemEventArgs e )
     {
-        if ( !string.Equals( e.Name, _file.Name, StringComparison.Ordinal ) ) { return; }
+        if ( !string.Equals( e.Name, __file.Name, StringComparison.Ordinal ) ) { return; }
 
         _ = LoadAsync();
     }

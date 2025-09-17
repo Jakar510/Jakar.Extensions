@@ -5,7 +5,7 @@ namespace Jakar.Shapes.Tests;
 
 
 [TestFixture, TestOf( typeof(ReadOnlySizeF) )]
-public sealed class ReadOnlySizeFF_Tests : Assert
+public sealed class ReadOnlySizeFf_Tests : Assert
 {
     [Test]
     public void Zero_ShouldBeEmptyAndValid()

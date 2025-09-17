@@ -9,14 +9,14 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public const           char                               COLON          = ':';
     public const           char                               SPACE          = ' ';
     public static readonly ConcurrentDictionary<Type, string> DefaultFormats = new();
-    private readonly       ValueStringBuilder                 _sb            = new(capacity);
-    private                int                                _indentLevel   = 0;
+    private readonly       ValueStringBuilder                 __sb            = new(capacity);
+    private                int                                __indentLevel   = 0;
     public                 bool                               ShouldIndent { get; } = formatting is Formatting.Indented;
 
 
     public JWriter() : this( 10_000, Formatting.Indented ) { }
-    public readonly          void   Dispose()  => _sb.Dispose();
-    public readonly override string ToString() => _sb.ToString();
+    public readonly          void   Dispose()  => __sb.Dispose();
+    public readonly override string ToString() => __sb.ToString();
 
 
     [Pure] public readonly JArray  AddArray()  => new(this);
@@ -29,8 +29,8 @@ public ref struct JWriter( int capacity, Formatting formatting )
 
         if ( !ShouldIndent ) { return this; }
 
-        _sb.Append( '\n' );
-        _indentLevel += 1;
+        __sb.Append( '\n' );
+        __indentLevel += 1;
         return this;
     }
 
@@ -38,7 +38,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public JWriter FinishBlock( char end ) => FinishBlock().NewLine().Indent().Append( end );
     public JWriter FinishBlock()
     {
-        if ( ShouldIndent ) { _indentLevel -= 1; }
+        if ( ShouldIndent ) { __indentLevel -= 1; }
 
         return this;
     }
@@ -46,10 +46,10 @@ public ref struct JWriter( int capacity, Formatting formatting )
 
     public readonly JWriter Indent()
     {
-        if ( _indentLevel < 0 ) { throw new InvalidOperationException( $"{nameof(_indentLevel)} is negative" ); }
+        if ( __indentLevel < 0 ) { throw new InvalidOperationException( $"{nameof(__indentLevel)} is negative" ); }
 
-        if ( ShouldIndent ) { _sb.Append( ' ', _indentLevel * 4 ); }
-        else { _sb.Append( ' ' ); }
+        if ( ShouldIndent ) { __sb.Append( ' ', __indentLevel * 4 ); }
+        else { __sb.Append( ' ' ); }
 
         return this;
     }
@@ -57,30 +57,30 @@ public ref struct JWriter( int capacity, Formatting formatting )
 
     public readonly JWriter NewLine()
     {
-        if ( ShouldIndent ) { _sb.Append( '\n' ); }
+        if ( ShouldIndent ) { __sb.Append( '\n' ); }
 
         return this;
     }
     public readonly JWriter Next()
     {
-        _sb.Append( ',' );
+        __sb.Append( ',' );
         return NewLine();
     }
     public readonly JWriter Null()
     {
-        _sb.Append( NULL );
+        __sb.Append( NULL );
         return this;
     }
 
 
     public readonly JWriter Append( ReadOnlySpan<char> value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public readonly JWriter Append( char value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
 
@@ -94,7 +94,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
     {
         if ( value is null ) { return Null(); }
 
-        _sb.AppendSpanFormattable( value, format, provider );
+        __sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
     public readonly JWriter Append<TValue>( TValue? value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = null )
@@ -102,8 +102,8 @@ public ref struct JWriter( int capacity, Formatting formatting )
     {
         if ( value is null ) { return Null(); }
 
-        _sb.EnsureCapacity( bufferSize );
-        _sb.AppendSpanFormattable( value, format, provider );
+        __sb.EnsureCapacity( bufferSize );
+        __sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
 
@@ -131,14 +131,14 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public readonly JWriter AppendValue<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider )
         where TValue : struct, ISpanFormattable
     {
-        _sb.AppendSpanFormattable( value, format, provider );
+        __sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
     public readonly JWriter AppendValue<TValue>( TValue value, ReadOnlySpan<char> format, int bufferSize, IFormatProvider? provider = null )
         where TValue : struct, ISpanFormattable
     {
-        _sb.EnsureCapacity( bufferSize );
-        _sb.AppendSpanFormattable( value, format, provider );
+        __sb.EnsureCapacity( bufferSize );
+        __sb.AppendSpanFormattable( value, format, provider );
         return this;
     }
 

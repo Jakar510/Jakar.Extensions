@@ -14,7 +14,7 @@ namespace Jakar.Xml.Serialization;
 public ref struct XWriter( bool shouldIndent )
 {
     public const      string        NULL         = "null";
-    private readonly  StringBuilder _sb          = new(); // TODO: System.Text.ValueStringBuilder
+    private readonly  StringBuilder __sb          = new(); // TODO: System.Text.ValueStringBuilder
     internal readonly bool          shouldIndent = shouldIndent;
     internal          int           indentLevel  = 0;
 
@@ -66,31 +66,31 @@ public ref struct XWriter( bool shouldIndent )
 
     public void StartBlock( ReadOnlySpan<char> name )
     {
-        _sb.Append( '<' ).Append( name ).Append( '>' );
+        __sb.Append( '<' ).Append( name ).Append( '>' );
 
         if ( shouldIndent )
         {
-            _sb.Append( '\n' );
+            __sb.Append( '\n' );
             indentLevel += 1;
         }
     }
     public void StartBlock( ReadOnlySpan<char> name, XAttributeBuilder builder )
     {
-        _sb.Append( '<' ).Append( name ).Append( ' ' ).Append( builder.sb ).Append( '>' );
+        __sb.Append( '<' ).Append( name ).Append( ' ' ).Append( builder.sb ).Append( '>' );
 
         if ( shouldIndent )
         {
-            _sb.Append( '\n' );
+            __sb.Append( '\n' );
             indentLevel += 1;
         }
     }
     public void FinishBlock( ReadOnlySpan<char> name )
     {
-        _sb.Append( "</" ).Append( name ).Append( '>' );
+        __sb.Append( "</" ).Append( name ).Append( '>' );
 
         if ( shouldIndent )
         {
-            _sb.Append( '\n' );
+            __sb.Append( '\n' );
             indentLevel -= 1;
         }
     }
@@ -101,18 +101,18 @@ public ref struct XWriter( bool shouldIndent )
         if ( shouldIndent )
         {
             // throw new InvalidOperationException($"{nameof(Indent)} should not be used  this context"); 
-            _sb.Append( '\t', indentLevel );
+            __sb.Append( '\t', indentLevel );
         }
 
-        _sb.Append( '<' ).Append( key ).Append( '>' );
+        __sb.Append( '<' ).Append( key ).Append( '>' );
 
         return this;
     }
     public XWriter Next( ReadOnlySpan<char> key )
     {
-        _sb.Append( "</" ).Append( key ).Append( '>' );
+        __sb.Append( "</" ).Append( key ).Append( '>' );
 
-        if ( shouldIndent ) { _sb.Append( '\n' ); }
+        if ( shouldIndent ) { __sb.Append( '\n' ); }
 
         return this;
     }
@@ -120,65 +120,65 @@ public ref struct XWriter( bool shouldIndent )
 
     public XWriter Null()
     {
-        _sb.Append( NULL );
+        __sb.Append( NULL );
         return this;
     }
     public XWriter Append( string value ) => Append( value.AsSpan() );
     public XWriter Append( ReadOnlySpan<char> value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( char value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
 
 
     public XWriter Append( short value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( ushort value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( int value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( uint value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( long value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( ulong value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( float value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( double value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     public XWriter Append( decimal value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
 
@@ -189,7 +189,7 @@ public ref struct XWriter( bool shouldIndent )
 
         if ( !value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
 
-        _sb.Append( buffer[..charsWritten] );
+        __sb.Append( buffer[..charsWritten] );
         return this;
     }
     public XWriter Append<TValue>( TValue? value, ReadOnlySpan<char> format, CultureInfo culture, int bufferSize )
@@ -201,14 +201,14 @@ public ref struct XWriter( bool shouldIndent )
 
             if ( !value.Value.TryFormat( buffer, out int charsWritten, format, culture ) ) { throw new InvalidOperationException( $"Can't format value: '{value}'" ); }
 
-            _sb.Append( buffer[..charsWritten] );
+            __sb.Append( buffer[..charsWritten] );
         }
-        else { _sb.Append( NULL ); }
+        else { __sb.Append( NULL ); }
 
         return this;
     }
 
 
-    public override string ToString() => _sb.ToString();
-    public          void   Dispose()  => _sb.Clear();
+    public override string ToString() => __sb.ToString();
+    public          void   Dispose()  => __sb.Clear();
 }

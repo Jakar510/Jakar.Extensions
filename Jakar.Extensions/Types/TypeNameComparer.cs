@@ -3,7 +3,7 @@
 
 public sealed class TypeNameComparer : IComparer<Type>
 {
-    public static readonly TypeNameComparer instance = new();
+    public static readonly TypeNameComparer Instance = new();
 
     /// <summary>
     ///     <para>

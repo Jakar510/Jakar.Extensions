@@ -22,7 +22,7 @@
          type="datetime-local"
          UniqueID="@ID-value" >
         <RadzenDatePicker PopupRenderMode="PopupRenderMode.OnDemand"
-                          @ref="_picker"
+                          @ref="__picker"
                           TValue="DateTime"
                           Value="@Value"
                           ValueChanged="@ValueChanged"
@@ -38,7 +38,7 @@
     public const       string                       DATE_FORMAT      = "yyyy-MM-dd";
     public const       string                       TIME_FORMAT      = "HH:mm:ss.fffffffzzz";
     public const       string                       DATE_TIME_FORMAT = "yyyy-MM-ddTHH:mm:ss.fffffffzzz";
-    private            RadzenDatePicker<DateTime>?  _picker;
+    private            RadzenDatePicker<DateTime>?  __picker;
     public override    WidgetType                   Type             => WidgetType.Date;
     [Parameter] public bool                         AllowClear       { get; set; }
     [Parameter] public int                          TabIndex         { get; set; }
@@ -64,32 +64,32 @@
 
     protected override Task OnParametersSetAsync()
     {
-        Debug.Assert(_picker is not null, nameof(_picker));
+        Debug.Assert(__picker is not null, nameof(__picker));
 
-        _picker.Change             = new EventCallback<DateTime?>(this, SetValue);
-        _picker.CurrentDateChanged = new EventCallback<DateTime>(this, SetValue);
-        _picker.InitialViewDate    = Value;
-        _picker.Min                = Min;
-        _picker.Max                = Max;
-        _picker.TabIndex           = TabIndex;
-        _picker.DateRender         = DateRender;
-        _picker.Culture            = Culture;
-        _picker.DefaultCulture     = DefaultCulture;
-        _picker.TimeOnly           = TimeOnly;
-        _picker.ReadOnly           = ReadOnly;
-        _picker.AllowInput         = AllowInput;
-        _picker.ShowButton         = ShowButton;
-        _picker.Disabled           = IsDisabled;
-        _picker.ShowDays           = ShowDays;
-        _picker.ShowTime           = ShowTime;
-        _picker.ShowSeconds        = ShowSeconds;
-        _picker.PadHours           = PadHours;
-        _picker.PadMinutes         = PadMinutes;
-        _picker.PadSeconds         = PadSeconds;
-        _picker.ShowTimeOkButton   = ShowTimeOkButton;
-        _picker.DateFormat         = DateFormat;
-        _picker.HourFormat         = HourFormat;
-        _picker.Placeholder        = Placeholder;
+        __picker.Change             = new EventCallback<DateTime?>(this, SetValue);
+        __picker.CurrentDateChanged = new EventCallback<DateTime>(this, SetValue);
+        __picker.InitialViewDate    = Value;
+        __picker.Min                = Min;
+        __picker.Max                = Max;
+        __picker.TabIndex           = TabIndex;
+        __picker.DateRender         = DateRender;
+        __picker.Culture            = Culture;
+        __picker.DefaultCulture     = DefaultCulture;
+        __picker.TimeOnly           = TimeOnly;
+        __picker.ReadOnly           = ReadOnly;
+        __picker.AllowInput         = AllowInput;
+        __picker.ShowButton         = ShowButton;
+        __picker.Disabled           = IsDisabled;
+        __picker.ShowDays           = ShowDays;
+        __picker.ShowTime           = ShowTime;
+        __picker.ShowSeconds        = ShowSeconds;
+        __picker.PadHours           = PadHours;
+        __picker.PadMinutes         = PadMinutes;
+        __picker.PadSeconds         = PadSeconds;
+        __picker.ShowTimeOkButton   = ShowTimeOkButton;
+        __picker.DateFormat         = DateFormat;
+        __picker.HourFormat         = HourFormat;
+        __picker.Placeholder        = Placeholder;
 
         return base.OnParametersSetAsync();
     }

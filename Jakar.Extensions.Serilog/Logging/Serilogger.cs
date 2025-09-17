@@ -18,8 +18,8 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     public readonly        MessageEvent.Collection           Messages   = [];
     public readonly        Logger                            Logger;
     public readonly        SeriloggerOptions                 Options;
-    private readonly       Synchronized<ISeriloggerSettings> _settings;
-    private                LocalFile?                        _screenShotAddress;
+    private readonly       Synchronized<ISeriloggerSettings> __settings;
+    private                LocalFile?                        __screenShotAddress;
 
 
     public Activity                      Activity    { get; protected set; }
@@ -34,15 +34,15 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     public SerilogLoggerProvider         Provider    { [Pure, MustDisposeResource] get => new(this, true); }
     public LocalFile? ScreenShotAddress
     {
-        get => _screenShotAddress ??= Paths.Cache.Join( FilePaths.SCREEN_SHOT_FILE );
+        get => __screenShotAddress ??= Paths.Cache.Join( FilePaths.SCREEN_SHOT_FILE );
         set
         {
-            _screenShotAddress?.Dispose();
-            _screenShotAddress = value?.SetTemporary();
+            __screenShotAddress?.Dispose();
+            __screenShotAddress = value?.SetTemporary();
         }
     }
     public ReadOnlyMemory<byte>     ScreenShotData { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Options.ScreenShotData; }
-    public ISeriloggerSettings      Settings       { get => _settings.Value; set => _settings.Value = value; }
+    public ISeriloggerSettings      Settings       { get => __settings.Value; set => __settings.Value = value; }
     ISeriloggerSettings ISerilogger.Settings       => Settings;
 
 
@@ -58,7 +58,7 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
         ActivitySource.AddActivityListener( GetActivityListener() );
         Activity             = GetActivity( Options.AppName );
         Log.Logger           = Logger = CreateLogger( in Options );
-        _settings            = new Synchronized<ISeriloggerSettings>( Options.FromPreferences<SeriloggerSettings>() );
+        __settings            = new Synchronized<ISeriloggerSettings>( Options.FromPreferences<SeriloggerSettings>() );
         ISerilogger.Instance = this;
         ClearCache();
     }
@@ -105,8 +105,8 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     }
     public virtual void Dispose()
     {
-        _screenShotAddress?.Dispose();
-        _screenShotAddress = null;
+        __screenShotAddress?.Dispose();
+        __screenShotAddress = null;
         Events.Dispose();
         Options.Dispose();
         Settings.Dispose();
@@ -117,8 +117,8 @@ public partial class Serilogger : SeriloggerConstants, ISerilogger, IAsyncDispos
     }
     public virtual async ValueTask DisposeAsync()
     {
-        _screenShotAddress?.Dispose();
-        _screenShotAddress = null;
+        __screenShotAddress?.Dispose();
+        __screenShotAddress = null;
         Events.Dispose();
         Options.Dispose();
         Settings.Dispose();

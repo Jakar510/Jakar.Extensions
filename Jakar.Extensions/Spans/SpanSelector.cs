@@ -7,9 +7,9 @@ namespace Jakar.Extensions;
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
 public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<TValue, TNext> func )
 {
-    private readonly ReadOnlySpan<TValue> _span  = span;
-    private readonly Func<TValue, TNext>  _func  = func;
-    private volatile int                  _index = -1;
+    private readonly ReadOnlySpan<TValue> __span  = span;
+    private readonly Func<TValue, TNext>  __func  = func;
+    private volatile int                  __index = -1;
 
     public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
@@ -19,16 +19,16 @@ public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<T
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext()
     {
-        int index = _index + 1;
-        if ( index >= _span.Length ) { return false; }
+        int index = __index + 1;
+        if ( index >= __span.Length ) { return false; }
 
-        Current = _func( _span[index] );
-        _index  = index;
+        Current = __func( __span[index] );
+        __index  = index;
         return true;
     }
     public void Reset()
     {
-        Interlocked.Exchange( ref _index, -1 );
+        Interlocked.Exchange( ref __index, -1 );
         Current = default!;
     }
 }

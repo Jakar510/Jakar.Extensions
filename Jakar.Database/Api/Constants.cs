@@ -21,7 +21,7 @@ public static class Constants // TODO: move to Jakar.Extensions.Sizes
     public const int    UNICODE_TEXT_CAPACITY = 1_073_741_823;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string GetAndOr( this bool matchAll ) => matchAll
                                                                ? AND
                                                                : OR;
@@ -30,18 +30,18 @@ public static class Constants // TODO: move to Jakar.Extensions.Sizes
     public static int GetHash32( this DynamicParameters parameters )
     {
         HashCode code = new();
-        foreach ( string parameterName in parameters.ParameterNames ) { code.Add( parameterName ); }
+        foreach ( string parameterName in parameters.ParameterNames ) { code.Add(parameterName); }
 
         return code.ToHashCode();
     }
     public static ulong GetHash64( this DynamicParameters parameters )
     {
         ReadOnlySpan<string> values = new(parameters.ParameterNames.ToArray());
-        return Hashes.Hash( in values );
+        return Hashes.Hash(in values);
     }
     public static UInt128 GetHash128( this DynamicParameters parameters )
     {
         ReadOnlySpan<string> values = new(parameters.ParameterNames.ToArray());
-        return Hashes.Hash128( in values );
+        return Hashes.Hash128(in values);
     }
 }

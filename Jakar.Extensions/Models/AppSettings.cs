@@ -30,22 +30,22 @@ public interface IAppSettings<TViewPage> : IAppSettings, IScreenshot
 [Serializable]
 public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel( hostInfo, defaultHostInfo ), IAppSettings, IScreenshot
 {
-    private Guid       _deviceID;
-    private LocalFile? _screenshot;
+    private Guid       __deviceID;
+    private LocalFile? __screenshot;
 
 
     public string     AppName    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = appName;
     public AppVersion AppVersion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = version;
     public Guid DeviceID
     {
-        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _deviceID;
+        [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __deviceID;
         set
         {
-            if ( SetProperty( ref _deviceID, value ) ) { OnSetDeviceID( value ); }
+            if ( SetProperty( ref __deviceID, value ) ) { OnSetDeviceID( value ); }
         }
     }
     public         string     DeviceVersion { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = deviceVersion;
-    public virtual LocalFile? Screenshot    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _screenshot; set => SetProperty( ref _screenshot, value ); }
+    public virtual LocalFile? Screenshot    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __screenshot; set => SetProperty( ref __screenshot, value ); }
 
 
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
@@ -60,9 +60,9 @@ public class AppSettings( string appName, AppVersion version, string deviceVersi
 [Serializable]
 public class AppSettings<TViewPage>( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : AppSettings( appName, version, deviceVersion, hostInfo, defaultHostInfo ), IAppSettings<TViewPage>
 {
-    private TViewPage? _currentViewPage;
+    private TViewPage? __currentViewPage;
 
-    public virtual TViewPage? CurrentViewPage { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _currentViewPage; set => SetProperty( ref _currentViewPage, value ); }
+    public virtual TViewPage? CurrentViewPage { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __currentViewPage; set => SetProperty( ref __currentViewPage, value ); }
 
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this( appName, version, deviceVersion, hostInfo, hostInfo ) { }
 }

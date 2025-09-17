@@ -24,9 +24,9 @@ public record ApplicationRecord( string ApplicationName, RecordID<UserRecord>? C
         while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
     }
 
-
-    public static bool operator >( ApplicationRecord  left, ApplicationRecord right ) => Sorter.GreaterThan( left, right );
-    public static bool operator >=( ApplicationRecord left, ApplicationRecord right ) => Sorter.GreaterThanOrEqualTo( left, right );
-    public static bool operator <( ApplicationRecord  left, ApplicationRecord right ) => Sorter.LessThan( left, right );
-    public static bool operator <=( ApplicationRecord left, ApplicationRecord right ) => Sorter.LessThanOrEqualTo( left, right );
+    
+    public static bool operator >( ApplicationRecord  left, ApplicationRecord right ) => Comparer<ApplicationRecord>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ApplicationRecord left, ApplicationRecord right ) => Comparer<ApplicationRecord>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ApplicationRecord  left, ApplicationRecord right ) => Comparer<ApplicationRecord>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ApplicationRecord left, ApplicationRecord right ) => Comparer<ApplicationRecord>.Default.Compare(left, right) <= 0;
 }

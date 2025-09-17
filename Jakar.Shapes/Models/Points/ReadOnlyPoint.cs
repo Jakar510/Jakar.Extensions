@@ -30,7 +30,6 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public readonly        double        Y             = y;
 
 
-    public static       EqualComparer<ReadOnlyPoint>        Sorter  => EqualComparer<ReadOnlyPoint>.Default;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero    => ref Zero;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One     => ref One;
@@ -96,7 +95,7 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
         y = Y;
     }
 
-    
+
     public int CompareTo( ReadOnlyPoint other )
     {
         int xOffsetComparison = X.CompareTo(other.X);
@@ -120,12 +119,14 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPoint>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlyPoint         left, ReadOnlyPoint                    value ) => Sorter.Equals(left, value);
-    public static bool operator !=( ReadOnlyPoint         left, ReadOnlyPoint                    value ) => Sorter.DoesNotEqual(left, value);
-    public static bool operator >( ReadOnlyPoint          left, ReadOnlyPoint                    value ) => Sorter.GreaterThan(left, value);
-    public static bool operator >=( ReadOnlyPoint         left, ReadOnlyPoint                    value ) => Sorter.GreaterThanOrEqualTo(left, value);
-    public static bool operator <( ReadOnlyPoint          left, ReadOnlyPoint                    value ) => Sorter.LessThan(left, value);
-    public static bool operator <=( ReadOnlyPoint         left, ReadOnlyPoint                    value ) => Sorter.LessThanOrEqualTo(left, value);
+    public static bool operator ==( ReadOnlyPoint?        left, ReadOnlyPoint?                   right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyPoint?        left, ReadOnlyPoint?                   right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => EqualityComparer<ReadOnlyPoint>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => !EqualityComparer<ReadOnlyPoint>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyPoint          left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyPoint          left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) <= 0;
     public static ReadOnlyPoint operator +( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X + value.X, size.Y + value.Y);
     public static ReadOnlyPoint operator -( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X - value.X, size.Y - value.Y);
     public static ReadOnlyPoint operator *( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X * value.X, size.Y * value.Y);

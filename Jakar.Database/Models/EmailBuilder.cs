@@ -22,34 +22,34 @@ public sealed class EmailBuilder
 
     public EmailBuilder To( MailboxAddress recipient )
     {
-        __recipients.Add( recipient );
+        __recipients.Add(recipient);
         return this;
     }
     public EmailBuilder To( IEnumerable<MailboxAddress> recipients )
     {
-        __recipients.AddRange( recipients );
+        __recipients.AddRange(recipients);
         return this;
     }
     public EmailBuilder To( params ReadOnlySpan<MailboxAddress> recipients )
     {
-        __recipients.AddRange( recipients );
+        __recipients.AddRange(recipients);
         return this;
     }
 
 
     public EmailBuilder WithAttachment( Attachment attachment )
     {
-        __attachments.Add( attachment );
+        __attachments.Add(attachment);
         return this;
     }
     public EmailBuilder WithAttachment( IEnumerable<Attachment> attachments )
     {
-        __attachments.AddRange( attachments );
+        __attachments.AddRange(attachments);
         return this;
     }
     public EmailBuilder WithAttachment( params ReadOnlySpan<Attachment> attachments )
     {
-        __attachments.AddRange( attachments );
+        __attachments.AddRange(attachments);
         return this;
     }
 
@@ -81,8 +81,8 @@ public sealed class EmailBuilder
                                   HtmlBody = __html
                               };
 
-        foreach ( Attachment element in __attachments ) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
+        foreach ( Attachment element in __attachments ) { await builder.Attachments.AddAsync(element.Name, element.ContentStream); }
 
-        return new MimeMessage( __senders, __recipients, __subject, builder.ToMessageBody() );
+        return new MimeMessage(__senders, __recipients, __subject, builder.ToMessageBody());
     }
 }

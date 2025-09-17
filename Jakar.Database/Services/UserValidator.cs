@@ -13,8 +13,8 @@ public class UserValidator : IUserValidator<UserRecord>
 
     protected IdentityError[] Check( UserRecord user )
     {
-        List<IdentityError> errors = new( 5 );
-        Check( errors, user );
+        List<IdentityError> errors = new(5);
+        Check(errors, user);
         return [.. errors];
     }
     protected virtual void Check<TValue>( in TValue errors, UserRecord user )
@@ -30,16 +30,16 @@ public class UserValidator : IUserValidator<UserRecord>
         }
         */
 
-        if ( !string.IsNullOrWhiteSpace( user.UserName ) ) { errors.Add( new IdentityError { Description = $"{nameof(UserRecord.UserName)} is invalid" } ); }
+        if ( !string.IsNullOrWhiteSpace(user.UserName) ) { errors.Add(new IdentityError { Description = $"{nameof(UserRecord.UserName)} is invalid" }); }
     }
 
 
     public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user )
     {
-        IdentityError[] errors = Check( user );
+        IdentityError[] errors = Check(user);
 
-        return Task.FromResult( errors.Length > 0
-                                    ? IdentityResult.Failed( errors )
-                                    : IdentityResult.Success );
+        return Task.FromResult(errors.Length > 0
+                                   ? IdentityResult.Failed(errors)
+                                   : IdentityResult.Success);
     }
 }

@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_USER_LOGIN_INFO )]
+[Migration(CREATE_USER_LOGIN_INFO)]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_UserLoginInfo : Migrate_UserLoginInfos

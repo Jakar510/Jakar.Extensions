@@ -14,7 +14,6 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public readonly        float         Width   = width;
 
 
-    public static       EqualComparer<ReadOnlySizeF>        Sorter      => EqualComparer<ReadOnlySizeF>.Default;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
@@ -75,12 +74,14 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.Equals(left, value);
-    public static bool operator !=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.DoesNotEqual(left, value);
-    public static bool operator >( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.GreaterThan(left, value);
-    public static bool operator >=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.GreaterThanOrEqualTo(left, value);
-    public static bool operator <( ReadOnlySizeF          left, ReadOnlySizeF                    value ) => Sorter.LessThan(left, value);
-    public static bool operator <=( ReadOnlySizeF         left, ReadOnlySizeF                    value ) => Sorter.LessThanOrEqualTo(left, value);
+    public static bool operator ==( ReadOnlySizeF?        left, ReadOnlySizeF?                   right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlySizeF?        left, ReadOnlySizeF?                   right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => EqualityComparer<ReadOnlySizeF>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => !EqualityComparer<ReadOnlySizeF>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlySizeF          left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlySizeF          left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) <= 0;
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, Size                             value ) => new(size.Width + value.Width, size.Height             + value.Height);
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, SizeF                            value ) => new(size.Width + value.Width, size.Height             + value.Height);
     public static ReadOnlySizeF operator +( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width + value.Width, size.Height             + value.Height);

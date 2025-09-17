@@ -3,32 +3,32 @@
 
 public struct UpdateClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
     public UpdateChainBuilder To( string tableName )
     {
-        _builder.Add( UPDATE, tableName, SET );
-        return new UpdateChainBuilder( this, ref _builder );
+        __builder.Add( UPDATE, tableName, SET );
+        return new UpdateChainBuilder( this, ref __builder );
     }
     public UpdateChainBuilder To<TValue>( TValue _ )
     {
-        _builder.Add( UPDATE, typeof(TValue).GetName(), SET );
-        return new UpdateChainBuilder( this, ref _builder );
+        __builder.Add( UPDATE, typeof(TValue).GetName(), SET );
+        return new UpdateChainBuilder( this, ref __builder );
     }
     public UpdateChainBuilder To<TValue>()
     {
-        _builder.Add( UPDATE, typeof(TValue).GetName(), SET );
-        return new UpdateChainBuilder( this, ref _builder );
+        __builder.Add( UPDATE, typeof(TValue).GetName(), SET );
+        return new UpdateChainBuilder( this, ref __builder );
     }
 
 
-    public EasySqlBuilder Done() => _builder.NewLine();
+    public EasySqlBuilder Done() => __builder.NewLine();
 
 
     public WhereClauseBuilder<EasySqlBuilder> Where()
     {
         Done();
-        return _builder.Where();
+        return __builder.Where();
     }
 }

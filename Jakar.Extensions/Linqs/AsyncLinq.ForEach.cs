@@ -35,7 +35,7 @@ public static partial class AsyncLinq
 
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, Task> body, int? maxDegreeOfParallelism = null )
     {
-        async Task AwaitPartition( IEnumerator<TElement> partition )
+        async Task awaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
@@ -44,11 +44,11 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, ValueTask> body, int? maxDegreeOfParallelism = null )
     {
-        async Task AwaitPartition( IEnumerator<TElement> partition )
+        async Task awaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
@@ -57,11 +57,11 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, Task> body, CancellationToken token, int? maxDegreeOfParallelism = null )
     {
-        async Task AwaitPartition( IEnumerator<TElement> partition )
+        async Task awaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
@@ -70,11 +70,11 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
     }
     public static async Task ForEachParallelAsync<TElement>( this IEnumerable<TElement> source, Func<TElement, CancellationToken, ValueTask> body, CancellationToken token, int? maxDegreeOfParallelism = null )
     {
-        async Task AwaitPartition( IEnumerator<TElement> partition )
+        async Task awaitPartition( IEnumerator<TElement> partition )
         {
             using ( partition )
             {
@@ -83,7 +83,7 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
     }
 
 
@@ -106,9 +106,9 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( TElement item ) => await action( item, token );
+        async Task awaitItem( TElement item ) => await action( item, token );
 
-        ActionBlock<TElement> block = new(AwaitItem, options);
+        ActionBlock<TElement> block = new(awaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -121,9 +121,9 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( TElement item ) => await action( item, token );
+        async Task awaitItem( TElement item ) => await action( item, token );
 
-        ActionBlock<TElement> block = new(AwaitItem, options);
+        ActionBlock<TElement> block = new(awaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -134,7 +134,7 @@ public static partial class AsyncLinq
 
     public static async Task ForEachParallelAsync( this IEnumerable<Task> source, int? maxDegreeOfParallelism = null )
     {
-        static async Task AwaitPartition( IEnumerator<Task> partition )
+        static async Task awaitPartition( IEnumerator<Task> partition )
         {
             using ( partition )
             {
@@ -143,7 +143,7 @@ public static partial class AsyncLinq
         }
 
 
-        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        await Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
     }
     public static async Task ForEachParallelAsync( this IAsyncEnumerable<Task> source, int? maxDegreeOfParallelism = null, TaskScheduler? scheduler = null )
     {
@@ -164,7 +164,7 @@ public static partial class AsyncLinq
     {
         ConcurrentBag<TElement>? results = new();
 
-        async Task AwaitPartition( IEnumerator<Task<TElement>> partition )
+        async Task awaitPartition( IEnumerator<Task<TElement>> partition )
         {
             using ( partition )
             {
@@ -177,7 +177,7 @@ public static partial class AsyncLinq
         }
 
 
-        Task tasks = Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( AwaitPartition ) );
+        Task tasks = Task.WhenAll( Partitioner.Create( source ).GetPartitions( maxDegreeOfParallelism ?? Environment.ProcessorCount ).AsParallel().Select( awaitPartition ) );
 
         await tasks;
         return results;
@@ -186,7 +186,7 @@ public static partial class AsyncLinq
     {
         ConcurrentBag<TElement>? results = new();
 
-        async Task AwaitTask( Task<TElement> task )
+        async Task awaitTask( Task<TElement> task )
         {
             Debug.Assert( results != null, nameof(results) + " != null" );
             results.Add( await task );
@@ -196,7 +196,7 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        ActionBlock<Task<TElement>> block = new(AwaitTask, options);
+        ActionBlock<Task<TElement>> block = new(awaitTask, options);
         await foreach ( Task<TElement> item in source ) { block.Post( item ); }
 
         block.Complete();
@@ -213,13 +213,13 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        async Task AwaitItem( TElement item )
+        async Task awaitItem( TElement item )
         {
             TElement result = await action( item, token );
             results.Add( result );
         }
 
-        ActionBlock<TElement> block = new(AwaitItem, options);
+        ActionBlock<TElement> block = new(awaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -234,7 +234,7 @@ public static partial class AsyncLinq
 
         if ( scheduler is not null ) { options.TaskScheduler = scheduler; }
 
-        ActionBlock<TElement> block = new(AwaitItem, options);
+        ActionBlock<TElement> block = new(awaitItem, options);
 
         await foreach ( TElement item in source.WithCancellation( token ) ) { block.Post( item ); }
 
@@ -242,7 +242,7 @@ public static partial class AsyncLinq
         await block.Completion;
         return results;
 
-        async Task AwaitItem( TElement item )
+        async Task awaitItem( TElement item )
         {
             TElement result = await action( item, token );
             results.Add( result );

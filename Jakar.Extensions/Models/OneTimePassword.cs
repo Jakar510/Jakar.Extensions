@@ -16,7 +16,7 @@ public class OneTimePassword( string key, string issuer ) : Randoms
     // ReSharper disable once StaticMemberInGenericType
     protected readonly string _issuer     = issuer;
     protected readonly byte[] _keyBytes   = Base32Encoding.ToBytes(key);
-    protected readonly string _secret_Key = key;
+    protected readonly string _secret_key = key;
 
 
     public static OneTimePassword Create( string            key, string issuer ) => new(key, issuer);
@@ -35,7 +35,7 @@ public class OneTimePassword( string key, string issuer ) : Randoms
     }
 
 
-    public virtual string GetContent( string userName ) => $"otpauth://totp/{userName}?secret={_secret_Key}&issuer={_issuer}";
+    public virtual string GetContent( string userName ) => $"otpauth://totp/{userName}?secret={_secret_key}&issuer={_issuer}";
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

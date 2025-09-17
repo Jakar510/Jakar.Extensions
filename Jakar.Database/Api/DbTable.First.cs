@@ -4,11 +4,11 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TClass>
 {
-    public ValueTask<ErrorOrResult<TClass>> First( CancellationToken          token = default ) => this.Call( First,          token );
-    public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
+    public ValueTask<ErrorOrResult<TClass>> First( CancellationToken          token = default ) => this.Call(First,          token);
+    public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call(FirstOrDefault, token);
 
 
     public virtual async ValueTask<ErrorOrResult<TClass>> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
@@ -17,10 +17,10 @@ public partial class DbTable<TClass>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            return await connection.QueryFirstAsync<TClass>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            return await connection.QueryFirstAsync<TClass>(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
     public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
@@ -28,13 +28,13 @@ public partial class DbTable<TClass>
 
         try
         {
-            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            TClass?          record  = await connection.QueryFirstOrDefaultAsync<TClass>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            TClass?           record  = await connection.QueryFirstOrDefaultAsync<TClass>(command);
 
             return record is null
                        ? Error.NotFound()
                        : record;
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 }

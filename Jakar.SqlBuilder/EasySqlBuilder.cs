@@ -12,8 +12,8 @@ namespace Jakar.SqlBuilder;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public record struct EasySqlBuilder()
 {
-    private readonly StringBuilder _sb          = new(10240);
-    private          long          _needToClose = 0;
+    private readonly StringBuilder __sb          = new(10240);
+    private          long          __needToClose = 0;
 
     public string Result => ToString();
 
@@ -27,13 +27,13 @@ public record struct EasySqlBuilder()
     }
     internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
     {
-        _sb.AppendJoin( separator, names );
+        __sb.AppendJoin( separator, names );
 
         return Space();
     }
     internal EasySqlBuilder AddRange( char separator, params ReadOnlySpan<string?> names )
     {
-        _sb.AppendJoin( separator, names );
+        __sb.AppendJoin( separator, names );
 
         return Space();
     }
@@ -46,19 +46,19 @@ public record struct EasySqlBuilder()
     }
     internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )
     {
-        _sb.AppendJoin( separator, names );
+        __sb.AppendJoin( separator, names );
         return Space();
     }
 
 
     internal EasySqlBuilder Append( string value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     internal EasySqlBuilder Add( char c )
     {
-        _sb.Append( c );
+        __sb.Append( c );
         return this;
     }
     internal EasySqlBuilder Add( string                       value ) => Space().Append( value ).Space();
@@ -67,23 +67,23 @@ public record struct EasySqlBuilder()
 
     internal EasySqlBuilder NewLine()
     {
-        _sb.AppendLine();
+        __sb.AppendLine();
         return this;
     }
 
 
     internal EasySqlBuilder AggregateFunction( char func = '*' )
     {
-        _sb.Append( func );
+        __sb.Append( func );
         return Space();
     }
     internal EasySqlBuilder AggregateFunction( string func, string? columnName = null )
     {
-        _sb.Append( func );
+        __sb.Append( func );
         Begin();
 
-        if ( columnName is null ) { _sb.Append( '*' ); }
-        else { _sb.Append( columnName ); }
+        if ( columnName is null ) { __sb.Append( '*' ); }
+        else { __sb.Append( columnName ); }
 
         return End().Space();
     }
@@ -96,17 +96,17 @@ public record struct EasySqlBuilder()
 
     internal EasySqlBuilder Begin( char start = '(' )
     {
-        Interlocked.Increment( ref _needToClose );
+        Interlocked.Increment( ref __needToClose );
         return Add( start );
     }
     internal EasySqlBuilder End( char end = ')' )
     {
-        Interlocked.Decrement( ref _needToClose );
+        Interlocked.Decrement( ref __needToClose );
         return Add( end );
     }
     internal EasySqlBuilder VerifyParentheses()
     {
-        if ( Interlocked.Read( ref _needToClose ) != 0 ) { throw new InvalidOperationException( "Invalid SQL" ); }
+        if ( Interlocked.Read( ref __needToClose ) != 0 ) { throw new InvalidOperationException( "Invalid SQL" ); }
 
         return this;
     }
@@ -115,7 +115,7 @@ public record struct EasySqlBuilder()
     public override string ToString()
     {
         VerifyParentheses();
-        string result = _sb.Append( ';' ).ToString();
+        string result = __sb.Append( ';' ).ToString();
 
 
         // int start = result.LastIndexOf('(');

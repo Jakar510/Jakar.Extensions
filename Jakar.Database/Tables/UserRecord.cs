@@ -7,6 +7,7 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public sealed record UserRecord( string                        UserName,
                                  string                        FirstName,
                                  string                        LastName,
@@ -50,6 +51,7 @@ public sealed record UserRecord( string                        UserName,
                                  DateTimeOffset                DateCreated,
                                  DateTimeOffset?               LastModified = null ) : OwnedTableRecord<UserRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<UserRecord>, IRefreshToken, IUserDataRecord
 {
+    public override                                                                                  int                           GetHashCode() => HashCode.Combine(base.GetHashCode(), UserName, FullName, FirstName, LastName);
     public const                                                                                     int                           DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const                                                                                     int                           ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
     public const                                                                                     int                           MAX_PASSWORD_SIZE                   = 250;
@@ -82,25 +84,25 @@ public sealed record UserRecord( string                        UserName,
     public   bool                                                                                                                  IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
     internal bool                                                                                                                  IsValid                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
     bool IValidator.                                                                                                               IsValid                => IsValid;
-    public                                                                    DateTimeOffset?                                      LastBadAttempt         { get; set; } = LastBadAttempt;
-    public                                                                    DateTimeOffset?                                      LastLogin              { get; set; } = LastLogin;
-    [ProtectedPersonalData, StringLength(2000)] public                        string                                               LastName               { get; set; } = LastName;
-    public                                                                    DateTimeOffset?                                      LockDate               { get; set; } = LockDate;
-    public                                                                    DateTimeOffset?                                      LockoutEnd             { get; set; } = LockoutEnd;
-    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE)] public string                                               PasswordHash           { get; set; } = PasswordHash;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)]  public string                                               PhoneNumber            { get; set; } = PhoneNumber;
-    [StringLength(                       512)]                         public SupportedLanguage                                    PreferredLanguage      { get; set; } = PreferredLanguage;
-    [StringLength(                       Constants.ANSI_CAPACITY)]     public string                                               RefreshToken           { get; set; } = RefreshToken;
-    public                                                                    DateTimeOffset?                                      RefreshTokenExpiryTime { get; set; } = RefreshTokenExpiryTime;
-    [StringLength(IUserRights.MAX_SIZE)]    public                            string                                               Rights                 { get; set; } = Rights;
-    [StringLength(Constants.ANSI_CAPACITY)] public                            string                                               SecurityStamp          { get; set; } = SecurityStamp;
-    public                                                                    Guid?                                                SessionID              { get; set; } = SessionID;
-    public                                                                    DateTimeOffset?                                      SubscriptionExpires    { get; set; } = SubscriptionExpires;
-    public                                                                    Guid?                                                SubscriptionID         { get; set; } = SubscriptionID;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public  string                                               Title                  { get; set; } = Title;
-    Guid IUserID<Guid>.                                                                                                            UserID                 => ID.value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Website                { get;                  set; } = Website;
+    public DateTimeOffset?                                                                                                         LastBadAttempt         { get;                  set; } = LastBadAttempt;
+    public DateTimeOffset?                                                                                                         LastLogin              { get;                  set; } = LastLogin;
     DateTimeOffset? IUserRecord<Guid>.                                                                                             LastModified           { get => _lastModified; set => _lastModified = value; }
+    [ProtectedPersonalData, StringLength(2000)] public                        string                                               LastName               { get;                  set; } = LastName;
+    public                                                                    DateTimeOffset?                                      LockDate               { get;                  set; } = LockDate;
+    public                                                                    DateTimeOffset?                                      LockoutEnd             { get;                  set; } = LockoutEnd;
+    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE)] public string                                               PasswordHash           { get;                  set; } = PasswordHash;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)]  public string                                               PhoneNumber            { get;                  set; } = PhoneNumber;
+    [StringLength(                       512)]                         public SupportedLanguage                                    PreferredLanguage      { get;                  set; } = PreferredLanguage;
+    [StringLength(                       Constants.ANSI_CAPACITY)]     public string                                               RefreshToken           { get;                  set; } = RefreshToken;
+    public                                                                    DateTimeOffset?                                      RefreshTokenExpiryTime { get;                  set; } = RefreshTokenExpiryTime;
+    [StringLength(IUserRights.MAX_SIZE)]    public                            string                                               Rights                 { get;                  set; } = Rights;
+    [StringLength(Constants.ANSI_CAPACITY)] public                            string                                               SecurityStamp          { get;                  set; } = SecurityStamp;
+    public                                                                    Guid?                                                SessionID              { get;                  set; } = SessionID;
+    public                                                                    DateTimeOffset?                                      SubscriptionExpires    { get;                  set; } = SubscriptionExpires;
+    public                                                                    Guid?                                                SubscriptionID         { get;                  set; } = SubscriptionID;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public  string                                               Title                  { get;                  set; } = Title;
+    Guid IUserID<Guid>.                                                                                                            UserID                 => ID.value;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                Website                { get; set; } = Website;
 
 
     public override DynamicParameters ToDynamicParameters()
@@ -471,17 +473,25 @@ public sealed record UserRecord( string                        UserName,
         Rights = rights.ToString();
         return this;
     }
-    public async ValueTask<UserModel<Guid>> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async ValueTask<UserModel> GetRights( DbConnection connection, DbTransaction transaction, Database db, CancellationToken token )
     {
-        UserModel<Guid> model = new(this);
-        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { model.Groups.Add(record.ToGroupModel()); }
+        UserModel model = new(this);
+        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { await model.Groups.AddAsync(record.ToGroupModel(), token); }
 
-        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { model.Roles.Add(record.ToRoleModel()); }
+        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { await model.Roles.AddAsync(record.ToRoleModel(), token); }
 
         return model;
     }
 
 
+    public override bool Equals( UserRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return base.Equals(other) && string.Equals(UserName, other.UserName, StringComparison.InvariantCultureIgnoreCase) && string.Equals(FullName, other.FullName, StringComparison.InvariantCultureIgnoreCase) && string.Equals(FirstName, other.FirstName, StringComparison.InvariantCultureIgnoreCase) && string.Equals(LastName, other.LastName, StringComparison.InvariantCultureIgnoreCase);
+    }
     public override int CompareTo( UserRecord? other )
     {
         if ( other is null ) { return 1; }
@@ -529,10 +539,10 @@ public sealed record UserRecord( string                        UserName,
     }
 
 
-    public static bool operator >( UserRecord  left, UserRecord right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( UserRecord left, UserRecord right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( UserRecord  left, UserRecord right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( UserRecord left, UserRecord right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator >( UserRecord  left, UserRecord right ) => left.CompareTo(right) > 0;
+    public static bool operator >=( UserRecord left, UserRecord right ) => left.CompareTo(right) >= 0;
+    public static bool operator <( UserRecord  left, UserRecord right ) => left.CompareTo(right) < 0;
+    public static bool operator <=( UserRecord left, UserRecord right ) => left.CompareTo(right) <= 0;
 
 
     public UserModel ToUserModel() => ToUserModel<UserModel>();

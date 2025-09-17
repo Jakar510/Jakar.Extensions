@@ -13,9 +13,9 @@ public abstract class Migrate_Groups : OwnedMigration<GroupRecord>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn( nameof(GroupRecord.NameOfGroup) ).AsString( 1024 ).NotNullable();
+        table.WithColumn(nameof(GroupRecord.NameOfGroup)).AsString(1024).NotNullable();
 
-        table.WithColumn( nameof(GroupRecord.CustomerID) ).AsString( 256 ).Nullable();
+        table.WithColumn(nameof(GroupRecord.CustomerID)).AsString(256).Nullable();
 
         return table;
     }

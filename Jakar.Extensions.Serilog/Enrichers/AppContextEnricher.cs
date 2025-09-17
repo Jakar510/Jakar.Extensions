@@ -7,23 +7,23 @@ namespace Jakar.Extensions.Serilog;
 public sealed class AppContextEnricher( SeriloggerOptions options ) : ILogEventEnricher
 
 {
-    private readonly SeriloggerOptions _options = options;
-    private          LogEventProperty? _appName;
-    private          LogEventProperty? _appID;
-    private          LogEventProperty? _appVersion;
-    private          LogEventProperty? _timestamp;
-    private          LogEventProperty? _selectedLanguage;
+    private readonly SeriloggerOptions __options = options;
+    private          LogEventProperty? __appName;
+    private          LogEventProperty? __appID;
+    private          LogEventProperty? __appVersion;
+    private          LogEventProperty? __timestamp;
+    private          LogEventProperty? __selectedLanguage;
 
     public static AppContextEnricher Create( SeriloggerOptions options ) => new(options);
     public void Enrich( LogEvent log, ILogEventPropertyFactory factory )
     {
         if ( log.Level is LogEventLevel.Verbose ) { return; }
 
-        log.AddPropertyIfAbsent( _appName          ??= factory.CreateProperty( nameof(SeriloggerOptions.AppName),    _options.AppName ) );
-        log.AddPropertyIfAbsent( _appID            ??= factory.CreateProperty( nameof(SeriloggerOptions.AppID),      _options.AppID.ToString() ) );
-        log.AddPropertyIfAbsent( _appVersion       ??= factory.CreateProperty( nameof(SeriloggerOptions.AppVersion), _options.AppVersion.ToString() ) );
-        log.AddPropertyIfAbsent( _timestamp        ??= factory.CreateProperty( EventDetails.TIMESTAMP,               DateTimeOffset.UtcNow.ToString() ) );
-        log.AddPropertyIfAbsent( _selectedLanguage ??= factory.CreateProperty( nameof(LanguageApi.SelectedLanguage), CultureInfo.CurrentUICulture.DisplayName ) );
+        log.AddPropertyIfAbsent( __appName          ??= factory.CreateProperty( nameof(SeriloggerOptions.AppName),    __options.AppName ) );
+        log.AddPropertyIfAbsent( __appID            ??= factory.CreateProperty( nameof(SeriloggerOptions.AppID),      __options.AppID.ToString() ) );
+        log.AddPropertyIfAbsent( __appVersion       ??= factory.CreateProperty( nameof(SeriloggerOptions.AppVersion), __options.AppVersion.ToString() ) );
+        log.AddPropertyIfAbsent( __timestamp        ??= factory.CreateProperty( EventDetails.TIMESTAMP,               DateTimeOffset.UtcNow.ToString() ) );
+        log.AddPropertyIfAbsent( __selectedLanguage ??= factory.CreateProperty( nameof(LanguageApi.SelectedLanguage), CultureInfo.CurrentUICulture.DisplayName ) );
 
         log.TryEnrich( factory, Thread.CurrentThread );
     }

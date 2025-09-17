@@ -6,7 +6,7 @@ namespace Jakar.SqlBuilder;
 
 public struct SqlCloser( ref EasySqlBuilder builder, char start, char end ) : IDisposable
 {
-    private          EasySqlBuilder _builder = builder.Add( start );
-    private readonly char           _end     = end;
-    public           void           Dispose() => _builder.Add( _end );
+    private          EasySqlBuilder __builder = builder.Add( start );
+    private readonly char           __end     = end;
+    public           void           Dispose() => __builder.Add( __end );
 }

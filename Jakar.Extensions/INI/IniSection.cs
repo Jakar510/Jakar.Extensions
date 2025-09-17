@@ -13,15 +13,15 @@ public partial class IniConfig
 
     public sealed class Section( string sectionName ) : IReadOnlyDictionary<string, string?>
     {
-        private readonly ConcurrentDictionary<string, string?>                                     _dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, string?>                                     __dictionary = new(Environment.ProcessorCount, DEFAULT_CAPACITY, StringComparer.OrdinalIgnoreCase);
         public           int                                                                       Length  => GetLength(out _);
-        internal         int                                                                       Longest => _dictionary.Keys.Max(static item => item.Length);
-        public           ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+        internal         int                                                                       Longest => __dictionary.Keys.Max(static item => item.Length);
+        public           ConcurrentDictionary<string, string?>.AlternateLookup<ReadOnlySpan<char>> Lookup  => __dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
         public           string                                                                    Name    { get; } = sectionName;
-        public           int                                                                       Count   => _dictionary.Count;
-        public string? this[ string key ] { get => _dictionary[key]; set => _dictionary[key] = value; }
-        public IEnumerable<string>  Keys   => _dictionary.Keys;
-        public IEnumerable<string?> Values => _dictionary.Values;
+        public           int                                                                       Count   => __dictionary.Count;
+        public string? this[ string key ] { get => __dictionary[key]; set => __dictionary[key] = value; }
+        public IEnumerable<string>  Keys   => __dictionary.Keys;
+        public IEnumerable<string?> Values => __dictionary.Values;
 
 
         public static implicit operator Section( string sectionName ) => new(sectionName);
@@ -40,10 +40,10 @@ public partial class IniConfig
         }
         private int GetLength( out int longest )
         {
-            int count = _dictionary.Keys.Count;
+            int count = __dictionary.Keys.Count;
             longest = Longest;
             int keys   = ( longest + EQUALS.Length ) * count;
-            int values = _dictionary.Values.Sum(static x => x?.Length ?? 0);
+            int values = __dictionary.Values.Sum(static x => x?.Length ?? 0);
             int result = Padding + keys + values + count;
             return result;
         }
@@ -68,7 +68,7 @@ public partial class IniConfig
             destination[charsWritten++] = '\n';
 
 
-            foreach ( ( string sKey, string? sValue ) in _dictionary )
+            foreach ( ( string sKey, string? sValue ) in __dictionary )
             {
                 ReadOnlySpan<char> sectionValue = sValue;
 
@@ -85,13 +85,13 @@ public partial class IniConfig
         }
 
 
-        public bool ContainsKey( string key )                    => _dictionary.ContainsKey(key);
-        public bool TryGetValue( string key, out string? value ) => _dictionary.TryGetValue(key, out value);
-        public bool TryRemove( string   key, out string? value ) => _dictionary.TryRemove(key, out value);
-        public void Clear() => _dictionary.Clear();
+        public bool ContainsKey( string key )                    => __dictionary.ContainsKey(key);
+        public bool TryGetValue( string key, out string? value ) => __dictionary.TryGetValue(key, out value);
+        public bool TryRemove( string   key, out string? value ) => __dictionary.TryRemove(key, out value);
+        public void Clear() => __dictionary.Clear();
 
 
-        public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() => _dictionary.GetEnumerator();
+        public IEnumerator<KeyValuePair<string, string?>> GetEnumerator() => __dictionary.GetEnumerator();
         IEnumerator IEnumerable.                          GetEnumerator() => GetEnumerator();
 
 

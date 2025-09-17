@@ -28,8 +28,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly    DbTable<UserRecord>              Users;
     public readonly    DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
     public readonly    DbTable<UserRoleRecord>          UserRoles;
-    public readonly    IConfiguration                   Configuration;
     protected readonly FusionCache                      _cache;
+    public readonly    IConfiguration                   Configuration;
     protected          ActivitySource?                  _activitySource;
     protected          Meter?                           _meter;
     protected          string?                          _className;
@@ -226,7 +226,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
     {
         ArgumentNullException.ThrowIfNull(variableName);
-        var parameters = new DynamicParameters(template);
+        DynamicParameters parameters = new(template);
         parameters.Add(variableName, value);
         return parameters;
     }
@@ -239,7 +239,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            SqlCommand        sqlCommand = new SqlCommand(sql, parameters);
+            SqlCommand        sqlCommand = new(sql, parameters);
             CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
             reader = await connection.ExecuteReaderAsync(command);
         }
@@ -254,7 +254,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         try
         {
-            SqlCommand        sqlCommand = new SqlCommand(sql, parameters);
+            SqlCommand        sqlCommand = new(sql, parameters);
             CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
             await connection.QueryAsync<TValue>(command);
 

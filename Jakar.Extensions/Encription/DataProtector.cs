@@ -72,36 +72,36 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 {
     private const    int                  BLOCK    = 512;
     private const    int                  DATA     = 254;
-    private readonly RSA                  _rsa     = rsa;
-    private readonly RSAEncryptionPadding _padding = padding;
-    private          bool                 _disposed;
-    private          bool                 _keyIsSet;
+    private readonly RSA                  __rsa     = rsa;
+    private readonly RSAEncryptionPadding __padding = padding;
+    private          bool                 __disposed;
+    private          bool                 __keyIsSet;
 
 
     public DataProtector( RSAEncryptionPadding padding ) : this( RSA.Create(), padding ) { }
     public void Dispose()
     {
-        _rsa.Dispose();
-        _disposed = true;
+        __rsa.Dispose();
+        __disposed = true;
     }
 
 
     public DataProtector WithKey( scoped in ReadOnlySpan<char> pem )
     {
-        if ( _keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)} has already been called" ); }
+        if ( __keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)} has already been called" ); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        _rsa.ImportFromPem( pem );
-        _keyIsSet = true;
+        __rsa.ImportFromPem( pem );
+        __keyIsSet = true;
         return this;
     }
     public DataProtector WithKey( scoped in ReadOnlySpan<char> pem, scoped in ReadOnlySpan<char> password )
     {
-        if ( _keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)}  has already been called" ); }
+        if ( __keyIsSet ) { throw new WarningException( $"{nameof(WithKey)} or {nameof(WithKeyAsync)}  has already been called" ); }
 
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        _rsa.ImportFromEncryptedPem( pem, password );
-        _keyIsSet = true;
+        __rsa.ImportFromEncryptedPem( pem, password );
+        __keyIsSet = true;
         return this;
     }
 
@@ -220,8 +220,8 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     private void ValidateState()
     {
-        ObjectDisposedException.ThrowIf( _disposed, this );
-        if ( !_keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
+        ObjectDisposedException.ThrowIf( __disposed, this );
+        if ( !__keyIsSet ) { throw new InvalidOperationException( $"Must call {nameof(WithKey)} or {nameof(WithKeyAsync)}  first" ); }
     }
 
 
@@ -229,7 +229,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public bool TryDecrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
-        return _rsa.TryDecrypt( value, destination, _padding, out bytesWritten );
+        return __rsa.TryDecrypt( value, destination, __padding, out bytesWritten );
     }
 
 
@@ -239,7 +239,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         ValidateState();
         Debug.Assert( encrypted.Length % BLOCK == 0 );
-        if ( encrypted.Length <= BLOCK ) { return _rsa.Decrypt( encrypted, _padding ); }
+        if ( encrypted.Length <= BLOCK ) { return __rsa.Decrypt( encrypted, __padding ); }
 
 
         using MemoryStream stream    = new(encrypted.Length);
@@ -253,7 +253,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
 
             Debug.Assert( block.Length == BLOCK );
 
-            if ( _rsa.TryDecrypt( block, partition, _padding, out int bytesWritten ) )
+            if ( __rsa.TryDecrypt( block, partition, __padding, out int bytesWritten ) )
             {
                 stream.Write( partition[..bytesWritten] );
                 Debug.Assert( bytesWritten <= DATA );
@@ -329,7 +329,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     public bool TryEncrypt( scoped in ReadOnlySpan<byte> value, scoped ref Span<byte> destination, out int bytesWritten )
     {
         ValidateState();
-        return _rsa.TryEncrypt( value, destination, _padding, out bytesWritten );
+        return __rsa.TryEncrypt( value, destination, __padding, out bytesWritten );
     }
 
 
@@ -338,7 +338,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         ValidateState();
-        if ( value.Length <= DATA ) { return _rsa.Encrypt( value, _padding ); }
+        if ( value.Length <= DATA ) { return __rsa.Encrypt( value, __padding ); }
 
 
         using MemoryStream stream    = new(value.Length * 2);
@@ -353,7 +353,7 @@ public sealed class DataProtector( RSA rsa, RSAEncryptionPadding padding ) : IDa
             Debug.Assert( block.Length == size );
             Debug.Assert( block.Length <= DATA );
 
-            if ( _rsa.TryEncrypt( block, partition, _padding, out int bytesWritten ) )
+            if ( __rsa.TryEncrypt( block, partition, __padding, out int bytesWritten ) )
             {
                 stream.Write( partition[..bytesWritten] );
                 Debug.Assert( bytesWritten <= DATA );

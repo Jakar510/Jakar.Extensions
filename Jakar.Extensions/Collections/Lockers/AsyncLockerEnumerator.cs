@@ -8,25 +8,25 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     where TCloser : IDisposable
 {
     private const    int                                START_INDEX = 0;
-    private readonly ILockedCollection<TValue, TCloser> _collection = collection;
-    private          bool                               _isDisposed;
-    private          CancellationToken                  _token = token;
-    private          FilterBuffer<TValue>?              _buffer;
-    private          int                                _index = START_INDEX;
+    private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          bool                               __isDisposed;
+    private          CancellationToken                  __token = token;
+    private          FilterBuffer<TValue>?              __buffer;
+    private          int                                __index = START_INDEX;
 
 
-    private ReadOnlyMemory<TValue>  _Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
+    private ReadOnlyMemory<TValue>  __Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
     TValue IAsyncEnumerator<TValue>.Current        => Current;
-    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _Memory.Span[_index]; }
-    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && (uint)_index < (uint)_Memory.Length; }
+    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
+    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __token.ShouldContinue() && (uint)__index < (uint)__Memory.Length; }
 
 
     public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
-        _isDisposed = true;
-        _buffer?.Dispose();
-        _buffer = null;
+        __isDisposed = true;
+        __buffer?.Dispose();
+        __buffer = null;
         return ValueTask.CompletedTask;
     }
 
@@ -35,16 +35,16 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     {
         ThrowIfDisposed();
 
-        if ( _Memory.IsEmpty )
+        if ( __Memory.IsEmpty )
         {
-            _buffer?.Dispose();
-            _buffer = await _collection.CopyAsync( _token );
-            _index  = START_INDEX;
+            __buffer?.Dispose();
+            __buffer = await __collection.CopyAsync( __token );
+            __index  = START_INDEX;
         }
 
-        if ( _token.IsCancellationRequested || (uint)_index >= (uint)_Memory.Length ) { return false; }
+        if ( __token.IsCancellationRequested || (uint)__index >= (uint)__Memory.Length ) { return false; }
 
-        _index++;
+        __index++;
         return true;
     }
 
@@ -53,14 +53,14 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     public AsyncLockerEnumerator<TValue, TCloser> GetAsyncEnumerator( CancellationToken token = default )
     {
         ThrowIfDisposed();
-        _buffer?.Dispose();
-        _buffer = null;
-        _index  = START_INDEX;
-        _token  = token;
+        __buffer?.Dispose();
+        __buffer = null;
+        __index  = START_INDEX;
+        __token  = token;
         return this;
     }
-    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
+    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(__index)} : {__index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( _isDisposed, this );
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
 }

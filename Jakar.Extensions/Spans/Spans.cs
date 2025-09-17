@@ -202,13 +202,13 @@ public static partial class Spans
     {
         if ( left >= right ) { return; }
 
-        int pivotIndex = Partition( ref span, left, right, comparison );
+        int pivotIndex = partition( ref span, left, right, comparison );
         QuickSort( ref span, left, pivotIndex - 1, comparison );
         QuickSort( ref span, pivotIndex       + 1, right, comparison );
 
         return;
 
-        static int Partition( ref readonly Span<TValue> span, int left, int right, Comparison<TValue> comparison )
+        static int partition( ref readonly Span<TValue> span, int left, int right, Comparison<TValue> comparison )
         {
             TValue pivot = span[right];
             int    i     = left - 1;
@@ -218,13 +218,13 @@ public static partial class Spans
                 if ( comparison( span[j], pivot ) >= 0 ) { continue; }
 
                 i++;
-                Swap( ref span[i], ref span[j] );
+                swap( ref span[i], ref span[j] );
             }
 
-            Swap( ref span[i + 1], ref span[right] );
+            swap( ref span[i + 1], ref span[right] );
             return i + 1;
         }
 
-        static void Swap( ref TValue left, ref TValue right ) => (left, right) = (right, left);
+        static void swap( ref TValue left, ref TValue right ) => (left, right) = (right, left);
     }
 }

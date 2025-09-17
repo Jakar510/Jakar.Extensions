@@ -16,7 +16,7 @@ public class IniConfig_Tests : Assert
     private const           string    APP_NAME = "AppName";
     private const           string    PROJECT  = "Project";
     private const           string    SERVER   = "Server";
-    private static readonly IniConfig _ini     = GetConfig();
+    private static readonly IniConfig __ini     = GetConfig();
 
 
     private static IniConfig GetConfig()
@@ -46,13 +46,13 @@ public class IniConfig_Tests : Assert
     [Test]
     public void Test()
     {
-        string actual = _ini.ToString();
+        string actual = __ini.ToString();
         $"-- {nameof(actual)} --\n{actual}".WriteToConsole();
         IniConfig results = IniConfig.Parse( actual );
 
         $"-- {nameof(results)} --\n{results.ToString()}".WriteToConsole();
 
         this.NotNull( results );
-        this.AreEqual( results, _ini );
+        this.AreEqual( results, __ini );
     }
 }

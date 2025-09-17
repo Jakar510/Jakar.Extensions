@@ -10,17 +10,17 @@ public class DbTokenHandler : JsonWebTokenHandler
     public static    DbTokenHandler          Instance { get; set; } = new();
 
 
-    public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken ) => __handler.ValidateToken( jsonToken, parameters, out securityToken );
+    public virtual ClaimsPrincipal? ValidateToken( string jsonToken, TokenValidationParameters parameters, out SecurityToken? securityToken ) => __handler.ValidateToken(jsonToken, parameters, out securityToken);
 
 
     public override async Task<TokenValidationResult> ValidateTokenAsync( string token, TokenValidationParameters validationParameters )
     {
-        TokenValidationResult result = await base.ValidateTokenAsync( token, validationParameters );
+        TokenValidationResult result = await base.ValidateTokenAsync(token, validationParameters);
         return result;
     }
     public override async Task<TokenValidationResult> ValidateTokenAsync( SecurityToken token, TokenValidationParameters validationParameters )
     {
-        TokenValidationResult result = await base.ValidateTokenAsync( token, validationParameters );
+        TokenValidationResult result = await base.ValidateTokenAsync(token, validationParameters);
         return result;
     }
 }

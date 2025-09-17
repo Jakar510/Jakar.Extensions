@@ -4,77 +4,77 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TClass>
 {
-    public IAsyncEnumerable<TClass> Insert( ImmutableArray<TClass>   records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public IAsyncEnumerable<TClass> Insert( IEnumerable<TClass>      records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public IAsyncEnumerable<TClass> Insert( IAsyncEnumerable<TClass> records, CancellationToken token = default ) => this.TryCall( Insert, records, token );
-    public ValueTask<TClass>        Insert( TClass                   record,  CancellationToken token = default ) => this.TryCall( Insert, record,  token );
+    public IAsyncEnumerable<TClass> Insert( ImmutableArray<TClass>   records, CancellationToken token = default ) => this.TryCall(Insert, records, token);
+    public IAsyncEnumerable<TClass> Insert( IEnumerable<TClass>      records, CancellationToken token = default ) => this.TryCall(Insert, records, token);
+    public IAsyncEnumerable<TClass> Insert( IAsyncEnumerable<TClass> records, CancellationToken token = default ) => this.TryCall(Insert, records, token);
+    public ValueTask<TClass>        Insert( TClass                   record,  CancellationToken token = default ) => this.TryCall(Insert, record,  token);
 
 
     public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        foreach ( TClass record in records ) { yield return await Insert( connection, transaction, record, token ); }
+        foreach ( TClass record in records ) { yield return await Insert(connection, transaction, record, token); }
     }
     public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ReadOnlyMemory<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        for ( int i = 0; i < records.Length; i++ ) { yield return await Insert( connection, transaction, records.Span[i], token ); }
+        for ( int i = 0; i < records.Length; i++ ) { yield return await Insert(connection, transaction, records.Span[i], token); }
     }
     public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, ImmutableArray<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        foreach ( TClass record in records ) { yield return await Insert( connection, transaction, record, token ); }
+        foreach ( TClass record in records ) { yield return await Insert(connection, transaction, record, token); }
     }
     public virtual async IAsyncEnumerable<TClass> Insert( DbConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, [EnumeratorCancellation] CancellationToken token = default )
     {
-        await foreach ( TClass record in records.WithCancellation( token ) ) { yield return await Insert( connection, transaction, record, token ); }
+        await foreach ( TClass record in records.WithCancellation(token) ) { yield return await Insert(connection, transaction, record, token); }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<TClass> Insert( DbConnection connection, DbTransaction transaction, TClass record, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetInsert( record );
+        SqlCommand sql = TClass.SQL.GetInsert(record);
 
         try
         {
-            CommandDefinition command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TClass> id      = RecordID<TClass>.Create( await connection.ExecuteScalarAsync<Guid>( command ) );
-            return record.NewID( id );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            RecordID<TClass>  id      = RecordID<TClass>.Create(await connection.ExecuteScalarAsync<Guid>(command));
+            return record.NewID(id);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TClass>> TryInsert( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.GetTryInsert( record, matchAll, parameters );
+        SqlCommand sql = TClass.SQL.GetTryInsert(record, matchAll, parameters);
 
         try
         {
-            CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TClass>? id      = RecordID<TClass>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            RecordID<TClass>? id      = RecordID<TClass>.TryCreate(await connection.ExecuteScalarAsync<Guid?>(command));
             if ( id is null ) { return Error.NotFound(); }
 
-            return record.NewID( id.Value );
+            return record.NewID(id.Value);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TClass>> InsertOrUpdate( DbConnection connection, DbTransaction transaction, TClass record, bool matchAll, DynamicParameters parameters, CancellationToken token = default )
     {
-        SqlCommand sql = TClass.SQL.InsertOrUpdate( record, matchAll, parameters );
+        SqlCommand sql = TClass.SQL.InsertOrUpdate(record, matchAll, parameters);
 
         try
         {
-            CommandDefinition  command = _database.GetCommand( in sql, transaction, token );
-            RecordID<TClass>? id      = RecordID<TClass>.TryCreate( await connection.ExecuteScalarAsync<Guid?>( command ) );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            RecordID<TClass>? id      = RecordID<TClass>.TryCreate(await connection.ExecuteScalarAsync<Guid?>(command));
             if ( id is null ) { return Error.NotFound(); }
 
-            return record.NewID( id.Value );
+            return record.NewID(id.Value);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 }

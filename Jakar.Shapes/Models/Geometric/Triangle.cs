@@ -16,7 +16,6 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public readonly        ReadOnlyPoint C       = c;
 
 
-    public static       EqualComparer<Triangle>   Sorter   => EqualComparer<Triangle>.Default;
     static ref readonly Triangle IShape<Triangle>.Zero     => ref Zero;
     static ref readonly Triangle IShape<Triangle>.One      => ref One;
     static ref readonly Triangle IShape<Triangle>.Invalid  => ref Invalid;
@@ -66,12 +65,14 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public          string ToString( string? format, IFormatProvider? formatProvider ) => ITriangle<Triangle>.ToString(in this, format);
 
 
-    public static bool operator ==( Triangle    left, Triangle                         right ) => Sorter.Equals(left, right);
-    public static bool operator !=( Triangle    left, Triangle                         right ) => Sorter.DoesNotEqual(left, right);
-    public static bool operator >( Triangle     left, Triangle                         right ) => Sorter.GreaterThan(left, right);
-    public static bool operator >=( Triangle    left, Triangle                         right ) => Sorter.GreaterThanOrEqualTo(left, right);
-    public static bool operator <( Triangle     left, Triangle                         right ) => Sorter.LessThan(left, right);
-    public static bool operator <=( Triangle    left, Triangle                         right ) => Sorter.LessThanOrEqualTo(left, right);
+    public static bool operator ==( Triangle?   left, Triangle?                        right ) => Nullable.Equals(left, right);
+    public static bool operator !=( Triangle?   left, Triangle?                        right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( Triangle    left, Triangle                         right ) => EqualityComparer<Triangle>.Default.Equals(left, right);
+    public static bool operator !=( Triangle    left, Triangle                         right ) => !EqualityComparer<Triangle>.Default.Equals(left, right);
+    public static bool operator >( Triangle     left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) > 0;
+    public static bool operator >=( Triangle    left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) >= 0;
+    public static bool operator <( Triangle     left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) < 0;
+    public static bool operator <=( Triangle    left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) <= 0;
     public static Triangle operator *( Triangle self, Triangle                         other ) => new(self.A * other.A, self.B * other.B, self.C * other.B);
     public static Triangle operator +( Triangle self, Triangle                         other ) => new(self.A + other.A, self.B + other.B, self.C + other.B);
     public static Triangle operator -( Triangle self, Triangle                         other ) => new(self.A - other.A, self.B - other.B, self.C - other.B);

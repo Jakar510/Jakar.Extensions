@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_USER_RECOVERY_CODE )]
+[Migration(CREATE_USER_RECOVERY_CODE)]
 public sealed class Create_UserRecoveryCode : Migrate_UserRecoveryCodes
 {
     public Create_UserRecoveryCode() : base() { }

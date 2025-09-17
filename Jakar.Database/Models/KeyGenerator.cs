@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "MemberCanBePrivate.Local" )]
+[SuppressMessage("ReSharper", "MemberCanBePrivate.Local")]
 public record struct KeyGenerator<TClass> : IEnumerator<RecordID<TClass>>, IEnumerable<RecordID<TClass>>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
@@ -29,6 +29,6 @@ public record struct KeyGenerator<TClass> : IEnumerator<RecordID<TClass>>, IEnum
 
 
     public static KeyGenerator<TClass> Create( RecordPair<TClass>[]            records ) => new(records.Sorted());
-    public static KeyGenerator<TClass> Create( IEnumerable<RecordPair<TClass>> records ) => Create( records.ToArray() );
-    public static KeyGenerator<TClass> Create( IEnumerable<TClass>             records ) => Create( records.Select( static x => x.ToPair() ) );
+    public static KeyGenerator<TClass> Create( IEnumerable<RecordPair<TClass>> records ) => Create(records.ToArray());
+    public static KeyGenerator<TClass> Create( IEnumerable<TClass>             records ) => Create(records.Select(static x => x.ToPair()));
 }

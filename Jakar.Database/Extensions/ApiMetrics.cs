@@ -12,31 +12,27 @@ public sealed class ApiMetric
 
     public ApiMetric( IMeterFactory meterFactory, string meterName )
     {
-        Meter meter = meterFactory.Create( meterName );
-        __counter   = meter.CreateCounter<long>( $"{meterName}.Count" );
-        __histogram = meter.CreateHistogram<double>( $"{meterName}.Duration", "ms" );
+        Meter meter = meterFactory.Create(meterName);
+        __counter   = meter.CreateCounter<long>($"{meterName}.Count");
+        __histogram = meter.CreateHistogram<double>($"{meterName}.Duration", "ms");
     }
 
-    public void IncreaseRequestCount()                                                    { __counter.Add( 1 ); }
-    public void IncreaseRequestCount( Tag                      tag1 )                     { __counter.Add( 1, tag1 ); }
-    public void IncreaseRequestCount( Tag                      tag1, Tag tag2 )           { __counter.Add( 1, tag1, tag2 ); }
-    public void IncreaseRequestCount( Tag                      tag1, Tag tag2, Tag tag3 ) { __counter.Add( 1, tag1, tag2, tag3 ); }
-    public void IncreaseRequestCount( params ReadOnlySpan<Tag> tags ) { __counter.Add( 1, Tag.Convert( tags ) ); }
+    public void IncreaseRequestCount()                                                    { __counter.Add(1); }
+    public void IncreaseRequestCount( Tag                      tag1 )                     { __counter.Add(1, tag1); }
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2 )           { __counter.Add(1, tag1, tag2); }
+    public void IncreaseRequestCount( Tag                      tag1, Tag tag2, Tag tag3 ) { __counter.Add(1, tag1, tag2, tag3); }
+    public void IncreaseRequestCount( params ReadOnlySpan<Tag> tags ) { __counter.Add(1, Tag.Convert(tags)); }
 
 
-    public Duration MeasureRequestDuration() { return new Duration(__histogram); }
+    public Duration MeasureRequestDuration() => new(__histogram);
 
 
     public static ApiMetric Create<TApp>( IServiceProvider provider, string method )
-        where TApp : IAppName
-    {
-        return Create<TApp>( provider.GetRequiredService<IMeterFactory>(), method );
-    }
+        where TApp : IAppName =>
+        Create<TApp>(provider.GetRequiredService<IMeterFactory>(), method);
     public static ApiMetric Create<TApp>( IMeterFactory factory, string method )
-        where TApp : IAppName
-    {
-        return new ApiMetric(factory, $"{TApp.AppName}.{method}");
-    }
+        where TApp : IAppName =>
+        new(factory, $"{TApp.AppName}.{method}");
 
 
 
@@ -47,8 +43,8 @@ public sealed class ApiMetric
 
         public void Dispose()
         {
-            TimeSpan elapsed = TimeProvider.System.GetElapsedTime( __requestStartTime );
-            __histogram.Record( elapsed.TotalMilliseconds );
+            TimeSpan elapsed = TimeProvider.System.GetElapsedTime(__requestStartTime);
+            __histogram.Record(elapsed.TotalMilliseconds);
         }
     }
 }
@@ -70,12 +66,12 @@ public static class ApiMetrics
     public static IServiceCollection AddApiMetrics<TApp>( this IServiceCollection services, string method )
         where TApp : IAppName
     {
-        return services.AddSingleton( provider => ApiMetric.Create<TApp>( provider, method ) );
+        return services.AddSingleton(provider => ApiMetric.Create<TApp>(provider, method));
     }
     public static IServiceCollection AddApiMetrics<TApp>( this IServiceCollection services, scoped in ReadOnlySpan<string> methods )
         where TApp : IAppName
     {
-        foreach ( string method in methods ) { services.AddApiMetrics<TApp>( method ); }
+        foreach ( string method in methods ) { services.AddApiMetrics<TApp>(method); }
 
         return services;
     }

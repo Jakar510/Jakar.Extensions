@@ -7,12 +7,12 @@ namespace Jakar.Extensions;
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
 public ref struct EnumerateEnumerator<TValue>( ReadOnlySpan<TValue> span )
 {
-    private readonly ReadOnlySpan<TValue> _buffer = span;
-    private          int                  _index  = 0;
+    private readonly ReadOnlySpan<TValue> __buffer = span;
+    private          int                  __index  = 0;
 
     public (int Index, TValue Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
 
-    public EnumerateEnumerator( int startIndex, ReadOnlySpan<TValue> span ) : this( span ) => _index = startIndex;
+    public EnumerateEnumerator( int startIndex, ReadOnlySpan<TValue> span ) : this( span ) => __index = startIndex;
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly EnumerateEnumerator<TValue> GetEnumerator() => this;
 
@@ -20,16 +20,16 @@ public ref struct EnumerateEnumerator<TValue>( ReadOnlySpan<TValue> span )
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext()
     {
-        int index = int.CreateChecked( _index );
+        int index = int.CreateChecked( __index );
 
-        if ( index >= _buffer.Length )
+        if ( index >= __buffer.Length )
         {
-            _index = 0;
+            __index = 0;
             return false;
         }
 
-        Current = (_index, _buffer[index]);
-        _index++;
+        Current = (__index, __buffer[index]);
+        __index++;
         return true;
     }
 }

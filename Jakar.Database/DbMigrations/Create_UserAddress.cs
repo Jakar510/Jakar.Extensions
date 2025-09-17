@@ -4,7 +4,7 @@
 namespace Jakar.Database.DbMigrations;
 
 
-[Migration( CREATE_USER_ADDRESS )]
+[Migration(CREATE_USER_ADDRESS)]
 
 // ReSharper disable once InconsistentNaming
 public sealed class Create_UserAddress : Migrate_UserAddress

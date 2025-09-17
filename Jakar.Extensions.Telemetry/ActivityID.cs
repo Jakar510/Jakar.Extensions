@@ -5,9 +5,9 @@
 public readonly record struct ActivityID( in Guid ID ) : ISpanParsable<ActivityID>
 {
     public static readonly ActivityID Empty   = new(Guid.Empty);
-    private readonly       string     _string = ID.ToString();
+    private readonly       string     __string = ID.ToString();
     public readonly        Guid       ID      = ID;
-    public override        string     ToString() => _string;
+    public override        string     ToString() => __string;
 
 
     public static ActivityID Create()          => Create(Guid.CreateVersion7());
@@ -38,7 +38,7 @@ public readonly record struct ActivityID( in Guid ID ) : ISpanParsable<ActivityI
 
     public sealed class Converter : JsonConverter<ActivityID>
     {
-        public override void WriteJson( JsonWriter writer, ActivityID value, JsonSerializer serializer ) { writer.WriteValue(value._string); }
+        public override void WriteJson( JsonWriter writer, ActivityID value, JsonSerializer serializer ) { writer.WriteValue(value.__string); }
         public override ActivityID ReadJson( JsonReader reader, Type objectType, ActivityID existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value switch
                                                                                                                                                                  {
                                                                                                                                                                      Guid id  => Create(id),
@@ -51,7 +51,7 @@ public readonly record struct ActivityID( in Guid ID ) : ISpanParsable<ActivityI
 
     public sealed class NullableConverter : JsonConverter<ActivityID?>
     {
-        public override void WriteJson( JsonWriter writer, ActivityID? value, JsonSerializer serializer ) { writer.WriteValue(value?._string); }
+        public override void WriteJson( JsonWriter writer, ActivityID? value, JsonSerializer serializer ) { writer.WriteValue(value?.__string); }
         public override ActivityID? ReadJson( JsonReader reader, Type objectType, ActivityID? existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value switch
                                                                                                                                                                    {
                                                                                                                                                                        Guid id  => Create(id),

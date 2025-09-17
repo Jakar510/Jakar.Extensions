@@ -19,17 +19,17 @@ namespace Jakar.Database.Experiments.Benchmarks;
 public class GuidBenchmarks
 {
     private const           string GUID  = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
-    private static readonly Guid   _guid = Guid.Parse( GUID );
-    private static readonly string _b64  = _guid.ToBase64();
+    private static readonly Guid   __guid = Guid.Parse( GUID );
+    private static readonly string __b64  = __guid.ToBase64();
 
 
     [Benchmark]
-    public ReadOnlySpan<byte> TryWriteBytes() => _guid.TryWriteBytes( out Buffer<byte> memory )
+    public ReadOnlySpan<byte> TryWriteBytes() => __guid.TryWriteBytes( out Buffer<byte> memory )
                                                      ? memory.ToArray()
                                                      : ReadOnlySpan<byte>.Empty;
     [Benchmark] public     Guid    StringParse() => Guid.Parse( GUID );
-    [Benchmark] public     Guid?   SpanParse()   => _b64.AsGuid();
-    [Benchmark] public     string  AsBase64()    => _guid.ToBase64();
-    [Benchmark] public new string? ToString()    => _guid.ToString();
+    [Benchmark] public     Guid?   SpanParse()   => __b64.AsGuid();
+    [Benchmark] public     string  AsBase64()    => __guid.ToBase64();
+    [Benchmark] public new string? ToString()    => __guid.ToString();
 }
 #pragma warning restore CA1822

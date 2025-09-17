@@ -32,15 +32,15 @@ public static partial class Migrations
 {
     public static IServiceCollection AddFluentMigrator( this IServiceCollection collection, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
     {
-        Guard.HasSizeGreaterThan( assemblies, 0, nameof(assemblies) );
+        Guard.HasSizeGreaterThan(assemblies, 0, nameof(assemblies));
 
-        return collection.AddFluentMigratorCore().ConfigureRunner( configure => addDbType( configure ).WithGlobalConnectionString( connectionString ).ScanIn( assemblies ).For.All() ).AddLogging( builder => builder.AddFluentMigratorConsole() );
+        return collection.AddFluentMigratorCore().ConfigureRunner(configure => addDbType(configure).WithGlobalConnectionString(connectionString).ScanIn(assemblies).For.All()).AddLogging(builder => builder.AddFluentMigratorConsole());
     }
 
 
     public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
     {
-        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator( addDbType, connectionString, assemblies ).BuildServiceProvider( true );
+        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator(addDbType, connectionString, assemblies).BuildServiceProvider(true);
 
         serviceProvider.UpdateDatabase();
     }

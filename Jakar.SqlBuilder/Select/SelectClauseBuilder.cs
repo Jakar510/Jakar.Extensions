@@ -3,36 +3,36 @@
 
 public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next    = next;
-    private          EasySqlBuilder _builder = builder;
+    private readonly TNext          __next    = next;
+    private          EasySqlBuilder __builder = builder;
 
-    public readonly TNext Done() => _next;
+    public readonly TNext Done() => __next;
 
 
     public EasySqlBuilder From( string tableName, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM ); }
-        else { _builder.Add( FROM, tableName, AS, alias ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM ); }
+        else { __builder.Add( FROM, tableName, AS, alias ); }
 
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
     public EasySqlBuilder From<TValue>( TValue _, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(TValue).GetTableName() ); } // TODO: Bug...?
-        else { _builder.Add( FROM,                                      typeof(TValue).GetName(), AS, alias ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM, typeof(TValue).GetTableName() ); } // TODO: Bug...?
+        else { __builder.Add( FROM,                                      typeof(TValue).GetName(), AS, alias ); }
 
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
     public EasySqlBuilder From<TValue>( string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(TValue).GetTableName() ); }
-        else { _builder.Add( FROM,                                      typeof(TValue).GetName(), AS, alias ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM, typeof(TValue).GetTableName() ); }
+        else { __builder.Add( FROM,                                      typeof(TValue).GetName(), AS, alias ); }
 
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
 
 
-    public AggregateFunctionsBuilder<SelectClauseBuilder<TNext>> WithFunction() => new(this, ref _builder);
+    public AggregateFunctionsBuilder<SelectClauseBuilder<TNext>> WithFunction() => new(this, ref __builder);
 
 
     /// <summary> Adds
@@ -40,7 +40,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     ///     to SELECT set </summary>
     public SelectClauseBuilder<TNext> Next( string columnName )
     {
-        _builder.Add( columnName );
+        __builder.Add( columnName );
         return this;
     }
     /// <summary>
@@ -52,7 +52,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
     public SelectClauseBuilder<TNext> Next<TValue>( string columnName )
     {
-        _builder.Add( columnName.GetName<TValue>() );
+        __builder.Add( columnName.GetName<TValue>() );
         return this;
     }
     /// <summary>
@@ -64,7 +64,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     /// <example> SELECT Orders.OrderID, Customers.CustomerName, Orders.OrderDate </example>
     public SelectClauseBuilder<TNext> Next( params ReadOnlySpan<string?> columnNames )
     {
-        _builder.Begin().AddRange( ',', columnNames ).End();
+        __builder.Begin().AddRange( ',', columnNames ).End();
 
         return this;
     }
@@ -72,7 +72,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
 
     public SelectClauseBuilder<TNext> Next<TValue>( params ReadOnlySpan<string?> columnNames )
     {
-        _builder.Begin().AddRange<TValue>( ',', columnNames ).End();
+        __builder.Begin().AddRange<TValue>( ',', columnNames ).End();
 
         return this;
     }
@@ -85,7 +85,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     ///     variable </summary>
     public SelectClauseBuilder<TNext> NextAs( string alias, params ReadOnlySpan<string?> columnNames )
     {
-        _builder.Begin().AddRange( ',', columnNames ).End().Add( AS, alias );
+        __builder.Begin().AddRange( ',', columnNames ).End().Add( AS, alias );
 
         return this;
     }
@@ -98,7 +98,7 @@ public struct SelectClauseBuilder<TNext>( in TNext next, ref EasySqlBuilder buil
     /// </summary>
     public SelectClauseBuilder<TNext> NextAs<TValue>( string alias, params ReadOnlySpan<string?> columnNames )
     {
-        _builder.Begin().AddRange<TValue>( ',', columnNames ).End().Add( AS, alias );
+        __builder.Begin().AddRange<TValue>( ',', columnNames ).End().Add( AS, alias );
 
         return this;
     }

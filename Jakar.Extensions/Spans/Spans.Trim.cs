@@ -511,12 +511,12 @@ public static partial class Spans
     public static ReadOnlySpan<char> Trim( this scoped ref readonly ReadOnlySpan<char> span )
     {
         // Assume that in most cases input doesn't need trimming
-        if ( span.Length == 0 || !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) { return span; }
+        if ( span.Length == 0 || ( !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) ) { return span; }
 
-        return TrimFallback( in span );
+        return trimFallback( in span );
 
         [MethodImpl( MethodImplOptions.NoInlining )]
-        static ReadOnlySpan<char> TrimFallback( scoped ref readonly ReadOnlySpan<char> span )
+        static ReadOnlySpan<char> trimFallback( scoped ref readonly ReadOnlySpan<char> span )
         {
             int start = 0;
 
@@ -688,12 +688,12 @@ public static partial class Spans
     public static Span<char> Trim( this scoped ref readonly Span<char> span )
     {
         // Assume that in most cases input doesn't need trimming
-        if ( span.Length == 0 || !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) { return span; }
+        if ( span.Length == 0 || ( !char.IsWhiteSpace( span[0] ) && !char.IsWhiteSpace( span[^1] ) ) ) { return span; }
 
-        return TrimFallback( span );
+        return trimFallback( span );
 
         [MethodImpl( MethodImplOptions.NoInlining )]
-        static Span<char> TrimFallback( Span<char> span )
+        static Span<char> trimFallback( Span<char> span )
         {
             int start = 0;
 

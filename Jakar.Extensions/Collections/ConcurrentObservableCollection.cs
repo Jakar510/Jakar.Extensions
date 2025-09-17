@@ -17,31 +17,31 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     protected internal readonly Lock locker = new();
 
 
-    public AsyncLockerEnumerator<TValue, LockCloser> AsyncValues    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
-    bool ICollection.                                IsSynchronized { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => true; }
-    public Lock                                      Lock           { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; init => locker = value; }
+    public AsyncLockerEnumerator<TValue, LockCloser> AsyncValues    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
+    bool ICollection.                                IsSynchronized { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => true; }
+    public Lock                                      Lock           { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => locker; init => locker = value; }
 
 #pragma warning disable CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
-    object ICollection.SyncRoot { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => locker; }
+    object ICollection.SyncRoot { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => locker; }
 #pragma warning restore CS9216 // A value of type 'System.Threading.Lock' converted to a different type will use likely unintended monitor-based locking in 'lock' statement
-    public LockerEnumerator<TValue, LockCloser> Values { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(this); }
+    public LockerEnumerator<TValue, LockCloser> Values { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
 
 
     public ConcurrentObservableCollection() : base() { }
-    public ConcurrentObservableCollection( IComparer<TValue>                   comparer, int capacity = DEFAULT_CAPACITY ) : base( comparer, capacity ) { }
-    public ConcurrentObservableCollection( int                                 capacity ) : base( capacity ) { }
-    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values ) : base( in values ) { }
-    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values, IComparer<TValue> comparer ) : base( in values, comparer ) { }
-    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values ) : base( in values ) { }
-    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values, IComparer<TValue> comparer ) : base( in values, comparer ) { }
-    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : base( in values ) { }
-    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values, IComparer<TValue> comparer ) : base( in values, comparer ) { }
-    public ConcurrentObservableCollection( params       ReadOnlySpan<TValue>   values ) : base( values ) { }
-    public ConcurrentObservableCollection( IComparer<TValue>                   comparer, params ReadOnlySpan<TValue> values ) : base( comparer, values ) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue>                 values ) : base( values ) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue>                 values, IComparer<TValue> comparer ) : base( comparer ) { }
-    public ConcurrentObservableCollection( TValue[]                            values ) : base( values ) { }
-    public ConcurrentObservableCollection( TValue[]                            values, IComparer<TValue> comparer ) : base( values, comparer ) { }
+    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, int capacity = DEFAULT_CAPACITY ) : base(comparer, capacity) { }
+    public ConcurrentObservableCollection( int                                 capacity ) : base(capacity) { }
+    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( params       ReadOnlySpan<TValue>   values ) : base(values) { }
+    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : base(comparer, values) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue>                 values ) : base(values) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : base(comparer) { }
+    public ConcurrentObservableCollection( TValue[]                            values ) : base(values) { }
+    public ConcurrentObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : base(values, comparer) { }
 
 
     public static implicit operator ConcurrentObservableCollection<TValue>( Buffer<TValue>         values ) => new(in values);
@@ -58,193 +58,193 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public override void Set( int index, TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalSet( index, in value ); }
+        using ( AcquireLock() ) { InternalSet(index, in value); }
     }
     public override TValue Get( int index )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalGet( index ); }
+        using ( AcquireLock() ) { return InternalGet(index); }
     }
 
 
     public override bool Exists( RefCheck<TValue> match )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindIndex( match ) >= 0; }
+        using ( AcquireLock() ) { return base.FindIndex(match) >= 0; }
     }
     public async ValueTask<bool> ExistsAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindIndex( match ) >= 0; }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindIndex(match) >= 0; }
     }
 
 
     public override int FindIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindIndex( match, start, endInclusive ); }
+        using ( AcquireLock() ) { return base.FindIndex(match, start, endInclusive); }
     }
     public override int FindIndex( RefCheck<TValue> match, int start = 0 )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindIndex( match, start ); }
+        using ( AcquireLock() ) { return base.FindIndex(match, start); }
     }
     public async ValueTask<int> FindIndexAsync( int start, int count, RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindIndex( match, start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindIndex(match, start, count); }
     }
     public async ValueTask<int> FindIndexAsync( int start, RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindIndex( match, start ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindIndex(match, start); }
     }
     public async ValueTask<int> FindIndexAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindIndex( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindIndex(match); }
     }
 
 
     public override int FindLastIndex( RefCheck<TValue> match, int start, int count )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindLastIndex( match, start, count ); }
+        using ( AcquireLock() ) { return base.FindLastIndex(match, start, count); }
     }
     public override int FindLastIndex( RefCheck<TValue> match, int start = 0 )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindLastIndex( match, start ); }
+        using ( AcquireLock() ) { return base.FindLastIndex(match, start); }
     }
     public async ValueTask<int> FindLastIndexAsync( RefCheck<TValue> match, int start, int count, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindLastIndex( match, start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindLastIndex(match, start, count); }
     }
     public async ValueTask<int> FindLastIndexAsync( RefCheck<TValue> match, int start, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindLastIndex( match, start ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindLastIndex(match, start); }
     }
     public async ValueTask<int> FindLastIndexAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindLastIndex( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindLastIndex(match); }
     }
 
 
     public override int IndexOf( TValue value, int start )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.IndexOf( value, start ); }
+        using ( AcquireLock() ) { return base.IndexOf(value, start); }
     }
     public override int IndexOf( TValue value, int start, int count )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.IndexOf( value, start, count ); }
+        using ( AcquireLock() ) { return base.IndexOf(value, start, count); }
     }
     public async ValueTask<int> IndexOfAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.IndexOf( value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.IndexOf(value); }
     }
     public async ValueTask<int> IndexOfAsync( TValue value, int start, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.IndexOf( value, start ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.IndexOf(value, start); }
     }
     public async ValueTask<int> IndexOfAsync( TValue value, int start, int count, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.IndexOf( value, start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.IndexOf(value, start, count); }
     }
 
 
     public override int LastIndexOf( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.LastIndexOf( value ); }
+        using ( AcquireLock() ) { return base.LastIndexOf(value); }
     }
     public override int LastIndexOf( TValue value, int start )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.LastIndexOf( value, start ); }
+        using ( AcquireLock() ) { return base.LastIndexOf(value, start); }
     }
     public override int LastIndexOf( TValue value, int start, int count )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.LastIndexOf( value, start, count ); }
+        using ( AcquireLock() ) { return base.LastIndexOf(value, start, count); }
     }
     public async ValueTask<int> LastIndexOfAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.LastIndexOf( value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.LastIndexOf(value); }
     }
     public async ValueTask<int> LastIndexOfAsync( TValue value, int start, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.LastIndexOf( value, start ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.LastIndexOf(value, start); }
     }
     public async ValueTask<int> LastIndexOfAsync( TValue value, int start, int count, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.LastIndexOf( value, start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.LastIndexOf(value, start, count); }
     }
 
 
     public override TValue[] FindAll( RefCheck<TValue> match )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindAll( match ); }
+        using ( AcquireLock() ) { return base.FindAll(match); }
     }
     public async ValueTask<TValue[]> FindAllAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindAll( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindAll(match); }
     }
     public override TValue? Find( RefCheck<TValue> match )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.Find( match ); }
+        using ( AcquireLock() ) { return base.Find(match); }
     }
     public async ValueTask<TValue?> FindAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.Find( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.Find(match); }
     }
     public override TValue? FindLast( RefCheck<TValue> match )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.FindLast( match ); }
+        using ( AcquireLock() ) { return base.FindLast(match); }
     }
     public async ValueTask<TValue?> FindLastAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.FindLast( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return base.FindLast(match); }
     }
 
 
     public override bool TryAdd( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalTryAdd( in value ); }
+        using ( AcquireLock() ) { return InternalTryAdd(in value); }
     }
     public override void Add( params ReadOnlySpan<TValue> values )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalAdd( values ); }
+        using ( AcquireLock() ) { InternalAdd(values); }
     }
     public override void Add( IEnumerable<TValue> values )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalAdd( values ); }
+        using ( AcquireLock() ) { InternalAdd(values); }
     }
 
 
     public override void AddOrUpdate( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalAddOrUpdate( in value ); }
+        using ( AcquireLock() ) { InternalAddOrUpdate(in value); }
     }
     public override void AddOrUpdate( IEnumerable<TValue> values )
     {
@@ -252,7 +252,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         using ( AcquireLock() )
         {
-            foreach ( TValue value in values ) { InternalAddOrUpdate( in value ); }
+            foreach ( TValue value in values ) { InternalAddOrUpdate(in value); }
         }
     }
     public override void AddOrUpdate( params ReadOnlySpan<TValue> values )
@@ -261,65 +261,65 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         using ( AcquireLock() )
         {
-            foreach ( TValue value in values ) { InternalAddOrUpdate( in value ); }
+            foreach ( TValue value in values ) { InternalAddOrUpdate(in value); }
         }
     }
-    public virtual async ValueTask AddOrUpdate( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask AddOrUpdate( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            await foreach ( TValue value in values.WithCancellation( token ) ) { InternalAddOrUpdate( in value ); }
+            await foreach ( TValue value in values.WithCancellation(token) ) { InternalAddOrUpdate(in value); }
         }
     }
 
 
-    public virtual async ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default )
+    public override async ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalTryAdd( in value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalTryAdd(in value); }
     }
-    public virtual async ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            foreach ( TValue value in values ) { InternalTryAdd( in value ); }
+            foreach ( TValue value in values ) { InternalTryAdd(in value); }
         }
     }
-    public virtual async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            await foreach ( TValue value in values.WithCancellation( token ) ) { InternalTryAdd( in value ); }
+            await foreach ( TValue value in values.WithCancellation(token) ) { InternalTryAdd(in value); }
         }
     }
-    public virtual async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
+    public override async ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values.Span ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalAdd(values.Span); }
     }
-    public virtual async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
+    public override async ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values.AsSpan() ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalAdd(values.AsSpan()); }
     }
-    public virtual async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( values ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalAdd(values); }
     }
-    public virtual async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            await foreach ( TValue value in values.WithCancellation( token ) ) { InternalAdd( in value ); }
+            await foreach ( TValue value in values.WithCancellation(token) ) { InternalAdd(in value); }
         }
     }
 
@@ -327,153 +327,153 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public override void CopyTo( TValue[] array )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { base.CopyTo( array ); }
+        using ( AcquireLock() ) { base.CopyTo(array); }
     }
     public override void CopyTo( TValue[] array, int destinationStartIndex )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { base.CopyTo( array, destinationStartIndex ); }
+        using ( AcquireLock() ) { base.CopyTo(array, destinationStartIndex); }
     }
     public override void CopyTo( TValue[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { base.CopyTo( array, sourceStartIndex, length, destinationStartIndex ); }
+        using ( AcquireLock() ) { base.CopyTo(array, sourceStartIndex, length, destinationStartIndex); }
     }
     public async ValueTask CopyToAsync( TValue[] array, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { base.CopyTo( array ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { base.CopyTo(array); }
     }
     public async ValueTask CopyToAsync( TValue[] array, int destinationStartIndex, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { base.CopyTo( array, destinationStartIndex ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { base.CopyTo(array, destinationStartIndex); }
     }
     public async ValueTask CopyToAsync( TValue[] array, int destinationStartIndex, int length, int sourceStartIndex = 0, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { base.CopyTo( array, sourceStartIndex, length, destinationStartIndex ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { base.CopyTo(array, sourceStartIndex, length, destinationStartIndex); }
     }
 
 
     public override void Insert( int index, IEnumerable<TValue> collection )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalInsert( index, collection ); }
+        using ( AcquireLock() ) { InternalInsert(index, collection); }
     }
     public override void Insert( int index, params ReadOnlySpan<TValue> collection )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalInsert( index, collection ); }
+        using ( AcquireLock() ) { InternalInsert(index, collection); }
     }
     public async ValueTask InsertRangeAsync( int index, IEnumerable<TValue> collection, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalInsert(index, collection); }
     }
     public async ValueTask InsertRangeAsync( int index, IAsyncEnumerable<TValue> collection, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            await foreach ( (int i, TValue value) in collection.Enumerate( index ).WithCancellation( token ) ) { InternalInsert( i, in value ); }
+            await foreach ( ( int i, TValue value ) in collection.Enumerate(index).WithCancellation(token) ) { InternalInsert(i, in value); }
         }
     }
     public async ValueTask InsertRangeAsync( int index, ImmutableArray<TValue> collection, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection.AsSpan() ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalInsert(index, collection.AsSpan()); }
     }
     public async ValueTask InsertRangeAsync( int index, ReadOnlyMemory<TValue> collection, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, collection.Span ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalInsert(index, collection.Span); }
     }
 
 
     public override void RemoveRange( int start, int count )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalRemove( start, count ); }
+        using ( AcquireLock() ) { InternalRemove(start, count); }
     }
     public async ValueTask RemoveRangeAsync( int start, int count, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalRemove( start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalRemove(start, count); }
     }
 
 
     public override int Remove( RefCheck<TValue> match )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalRemove( match ); }
+        using ( AcquireLock() ) { return InternalRemove(match); }
     }
     public override int Remove( IEnumerable<TValue> values )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalRemove( values ); }
+        using ( AcquireLock() ) { return InternalRemove(values); }
     }
     public override bool Remove( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalRemove( in value ); }
+        using ( AcquireLock() ) { return InternalRemove(in value); }
     }
 
 
-    public virtual async ValueTask<bool> RemoveAsync( TValue value, CancellationToken token = default )
+    public override async ValueTask<bool> RemoveAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( in value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalRemove(in value); }
     }
-    public virtual async ValueTask<int> RemoveAsync( RefCheck<TValue> match, CancellationToken token = default )
+    public override async ValueTask<int> RemoveAsync( RefCheck<TValue> match, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( match ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalRemove(match); }
     }
-    public virtual async ValueTask<int> RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask<int> RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalRemove(values); }
     }
-    public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    public override async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            await foreach ( TValue value in values.WithCancellation( token ) ) { InternalRemove( in value ); }
+            await foreach ( TValue value in values.WithCancellation(token) ) { InternalRemove(in value); }
         }
     }
-    public virtual async ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
+    public override async ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values.Span ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalRemove(values.Span); }
     }
-    public virtual async ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default )
+    public override async ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return InternalRemove( values.AsSpan() ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalRemove(values.AsSpan()); }
     }
 
 
     public override bool RemoveAt( int index )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalRemoveAt( index, out _ ); }
+        using ( AcquireLock() ) { return InternalRemoveAt(index, out _); }
     }
-    public override bool RemoveAt( int index, [NotNullWhen( true )] out TValue? value )
+    public override bool RemoveAt( int index, [NotNullWhen(true)] out TValue? value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return InternalRemoveAt( index, out value ); }
+        using ( AcquireLock() ) { return InternalRemoveAt(index, out value); }
     }
     public async ValueTask<TValue?> RemoveAtAsync( int index, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) )
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) )
         {
-            return InternalRemoveAt( index, out TValue? value )
+            return InternalRemoveAt(index, out TValue? value)
                        ? value
                        : default;
         }
@@ -488,56 +488,56 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public override void Reverse( int start, int count )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalReverse( start, count ); }
+        using ( AcquireLock() ) { InternalReverse(start, count); }
     }
     public async ValueTask ReverseAsync( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalReverse(); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalReverse(); }
     }
     public async ValueTask ReverseAsync( int start, int count, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalReverse( start, count ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalReverse(start, count); }
     }
 
 
     public override void Sort()
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalSort( comparer ); }
+        using ( AcquireLock() ) { InternalSort(comparer); }
     }
     public override void Sort( IComparer<TValue> compare )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalSort( compare ); }
+        using ( AcquireLock() ) { InternalSort(compare); }
     }
     public override void Sort( Comparison<TValue> compare )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalSort( compare ); }
+        using ( AcquireLock() ) { InternalSort(compare); }
     }
     public override void Sort( int start, int count, IComparer<TValue> compare )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalSort( start, count, compare ); }
+        using ( AcquireLock() ) { InternalSort(start, count, compare); }
     }
-    public ValueTask SortAsync( CancellationToken token = default ) => SortAsync( comparer, token );
+    public ValueTask SortAsync( CancellationToken token = default ) => SortAsync(comparer, token);
     public async ValueTask SortAsync( IComparer<TValue> compare, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( compare ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(compare); }
     }
-    public virtual async ValueTask SortAsync( Comparison<TValue> compare, CancellationToken token = default )
+    public override async ValueTask SortAsync( Comparison<TValue> compare, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( compare ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(compare); }
     }
-    public ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync( start, count, comparer, token );
-    public virtual async ValueTask SortAsync( int start, int count, IComparer<TValue> compare, CancellationToken token = default )
+    public ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
+    public override async ValueTask SortAsync( int start, int count, IComparer<TValue> compare, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalSort( start, count, compare ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalSort(start, count, compare); }
     }
 
 
@@ -547,7 +547,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         using ( AcquireLock() )
         {
-            if ( array is TValue[] x ) { base.CopyTo( x, start ); }
+            if ( array is TValue[] x ) { base.CopyTo(x, start); }
         }
     }
     void IList.Remove( object? value )
@@ -556,7 +556,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         using ( AcquireLock() )
         {
-            if ( value is TValue x ) { InternalRemove( in x ); }
+            if ( value is TValue x ) { InternalRemove(in x); }
         }
     }
     int IList.Add( object? value )
@@ -567,14 +567,14 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         {
             if ( value is not TValue x ) { return NOT_FOUND; }
 
-            InternalAdd( in x );
+            InternalAdd(in x);
             return Count;
         }
     }
     bool IList.Contains( object? value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return value is TValue x && base.Contains( x ); }
+        using ( AcquireLock() ) { return value is TValue x && base.Contains(x); }
     }
     int IList.IndexOf( object? value )
     {
@@ -583,7 +583,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using ( AcquireLock() )
         {
             return value is TValue x
-                       ? base.IndexOf( x )
+                       ? base.IndexOf(x)
                        : NOT_FOUND;
         }
     }
@@ -593,7 +593,7 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         using ( AcquireLock() )
         {
-            if ( value is TValue x ) { InternalInsert( index, in x ); }
+            if ( value is TValue x ) { InternalInsert(index, in x); }
         }
     }
 
@@ -601,24 +601,24 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public override bool Contains( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { return base.Contains( value ); }
+        using ( AcquireLock() ) { return base.Contains(value); }
     }
-    public virtual async ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
+    public override async ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return base.Contains( value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return InternalContains(in value); }
     }
 
 
     public override void Add( TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalAdd( in value ); }
+        using ( AcquireLock() ) { InternalAdd(in value); }
     }
-    public virtual async ValueTask AddAsync( TValue value, CancellationToken token = default )
+    public override async ValueTask AddAsync( TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalAdd( in value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalAdd(in value); }
     }
 
 
@@ -627,27 +627,27 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using ( AcquireLock() ) { base.Clear(); }
     }
-    public virtual async ValueTask ClearAsync( CancellationToken token = default )
+    public override async ValueTask ClearAsync( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { base.Clear(); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalClear(); }
     }
 
 
     public override void Insert( int index, TValue value )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( AcquireLock() ) { InternalInsert( index, in value ); }
+        using ( AcquireLock() ) { InternalInsert(index, in value); }
     }
-    public async ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
+    public override async ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { InternalInsert( index, in value ); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { InternalInsert(index, in value); }
     }
 
 
-    public AsyncLockerEnumerator<TValue, LockCloser>     GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator( token );
-    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.   GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+    public AsyncLockerEnumerator<TValue, LockCloser>     GetAsyncEnumerator( CancellationToken token ) => AsyncValues.GetAsyncEnumerator(token);
+    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.   GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator(token);
     public override LockerEnumerator<TValue, LockCloser> GetEnumerator()                               => Values;
     IEnumerator IEnumerable.                             GetEnumerator()                               => GetEnumerator();
 
@@ -662,13 +662,13 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public LockCloser AcquireLock( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return LockCloser.Enter( locker, token );
+        return LockCloser.Enter(locker, token);
     }
     [MustDisposeResource]
     public async ValueTask<LockCloser> AcquireLockAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        return await LockCloser.EnterAsync( locker, token );
+        return await LockCloser.EnterAsync(locker, token);
     }
 
 
@@ -688,9 +688,9 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
 
         if ( !locker.IsHeldByCurrentThread )
         {
-            using ( AcquireLock() ) { base.EnsureCapacity( capacity ); }
+            using ( AcquireLock() ) { base.EnsureCapacity(capacity); }
         }
-        else { base.EnsureCapacity( capacity ); }
+        else { base.EnsureCapacity(capacity); }
     }
 
 
@@ -701,11 +701,11 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
         using ( AcquireLock() ) { return FilteredValues(); }
     }
     [Pure, MustDisposeResource] FilterBuffer<TValue> ILockedCollection<TValue, LockCloser>.                              Copy()                               => Copy();
-    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync( token ).ConfigureAwait( false );
+    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> ILockedCollection<TValue, LockCloser>.CopyAsync( CancellationToken token ) => CopyAsync(token).ConfigureAwait(false);
     [Pure, MustDisposeResource]
     protected async ValueTask<FilterBuffer<TValue>> CopyAsync( CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        using ( await AcquireLockAsync( token ).ConfigureAwait( false ) ) { return FilteredValues(); }
+        using ( await AcquireLockAsync(token).ConfigureAwait(false) ) { return FilteredValues(); }
     }
 }

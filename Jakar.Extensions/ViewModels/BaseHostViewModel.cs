@@ -18,34 +18,34 @@ public interface IHostViewModel : IHostInfo
 public abstract class BaseHostViewModel : BaseViewModel, IHostViewModel
 {
     protected readonly Uri     _defaultHostInfo;
-    private            string? _host;
-    private            Uri?    _hostInfo;
+    private            string? __host;
+    private            Uri?    __hostInfo;
 
 
     public virtual string? Host
     {
-        get => _host ?? HostInfo?.OriginalString;
+        get => __host ?? HostInfo?.OriginalString;
         set
         {
-            if ( !SetProperty( ref _host, value ) ) { return; }
+            if ( !SetProperty( ref __host, value ) ) { return; }
 
-            Uri.TryCreate( value, UriKind.Absolute, out _hostInfo );
+            Uri.TryCreate( value, UriKind.Absolute, out __hostInfo );
             OnPropertyChanged( nameof(IsValidHost) );
             OnPropertyChanged( nameof(HostInfo) );
         }
     }
     public virtual Uri? HostInfo
     {
-        get => _hostInfo ?? _defaultHostInfo;
+        get => __hostInfo ?? _defaultHostInfo;
         set
         {
-            if ( !SetProperty( ref _hostInfo, value ) ) { return; }
+            if ( !SetProperty( ref __hostInfo, value ) ) { return; }
 
-            SetProperty( ref _host, value?.OriginalString, StringComparer.OrdinalIgnoreCase, nameof(Host) );
+            SetProperty( ref __host, value?.OriginalString, StringComparer.OrdinalIgnoreCase, nameof(Host) );
             OnPropertyChanged( nameof(IsValidHost) );
         }
     }
-    Uri IHostInfo.      HostInfo    => _hostInfo ?? _defaultHostInfo;
+    Uri IHostInfo.      HostInfo    => __hostInfo ?? _defaultHostInfo;
     public virtual bool IsValidHost { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => HostInfo?.IsAbsoluteUri is true && HostInfo.Scheme.StartsWith( "http", StringComparison.OrdinalIgnoreCase ); }
 
 

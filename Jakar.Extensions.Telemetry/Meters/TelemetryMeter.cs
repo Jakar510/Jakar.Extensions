@@ -14,20 +14,20 @@ namespace Jakar.Extensions.Telemetry.Meters;
 
 public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDisposable
 {
-    private readonly TelemetrySource                                  _source      = source;
-    private readonly Dictionary<Type, Dictionary<string, Instrument>> _instruments = new(Buffers.DEFAULT_CAPACITY);
+    private readonly TelemetrySource                                  __source      = source;
+    private readonly Dictionary<Type, Dictionary<string, Instrument>> __instruments = new(Buffers.DEFAULT_CAPACITY);
 
 
     public void Dispose()
     {
-        foreach ( Dictionary<string, Instrument> instruments in _instruments.Values )
+        foreach ( Dictionary<string, Instrument> instruments in __instruments.Values )
         {
             foreach ( Instrument instrument in instruments.Values ) { instrument.Dispose(); }
 
             instruments.Clear();
         }
 
-        _instruments.Clear();
+        __instruments.Clear();
     }
 
     public void Enrich( LogEvent logEvent, ILogEventPropertyFactory propertyFactory )
@@ -39,7 +39,7 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
     public Instrument<TValue> CreateMeter<TValue>( Type type, string name )
         where TValue : IEquatable<TValue>
     {
-        ref Dictionary<string, Instrument>? instruments = ref CollectionsMarshal.GetValueRefOrAddDefault(_instruments, type, out bool _);
+        ref Dictionary<string, Instrument>? instruments = ref CollectionsMarshal.GetValueRefOrAddDefault(__instruments, type, out bool _);
         instruments ??= new Dictionary<string, Instrument>();
 
         if ( instruments.TryGetValue(name, out Instrument? instrument) ) { return (Instrument<TValue>)instrument; }
@@ -48,7 +48,7 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
         instruments[name] = instrument;
         return (Instrument<TValue>)instrument;
     }
-    public IEnumerable<LogEventProperty> Save() => _instruments.Values.SelectMany(static x => x.Values).Select(static x => x.Save());
+    public IEnumerable<LogEventProperty> Save() => __instruments.Values.SelectMany(static x => x.Values).Select(static x => x.Save());
 
 
 
@@ -66,7 +66,7 @@ public sealed class Meters( TelemetrySource source ) : ILogEventEnricher, IDispo
     public abstract class Instrument( Meters meters, string name ) : IDisposable
     {
         protected readonly Lock                          _lock = new();
-        protected readonly string                        _name = $"{meters._source.Info.AppName}.{nameof(Meters)}.{name}";
+        protected readonly string                        _name = $"{meters.__source.Info.AppName}.{nameof(Meters)}.{name}";
         public             LogEventProperty              Save() => new(_name, new StructureValue(GetValues()));
         protected abstract IEnumerable<LogEventProperty> GetValues();
         public virtual     void                          Dispose() => GC.SuppressFinalize(this);
@@ -249,15 +249,15 @@ public class TelemetryMeter<TValue> : IDisposable
     {
         protected bool                    _isDisposed;
         protected TelemetryMeter<TValue>? _meter;
-        private   TValue?                 _current;
-        private   TValue?                 _precision;
+        private   TValue?                 __current;
+        private   TValue?                 __precision;
 
 
-        public             TValue                 CurrentValue { get => _current ??= _meter?.DefaultCurrentValue ?? TValue.Zero; [MemberNotNull(nameof(_current))] protected internal set => _current = value; }
+        public             TValue                 CurrentValue { get => __current ??= _meter?.DefaultCurrentValue ?? TValue.Zero; [MemberNotNull(nameof(__current))] protected internal set => __current = value; }
         public required    MeterInstrumentInfo    Info         { get;                                                            init; }
         public             Reading<TValue>?       LastValue    => Reading<TValue>.TryGetLastValue(CollectionsMarshal.AsSpan(Readings));
         protected internal TelemetryMeter<TValue> Meter        { get => GetMeter();                                            init => _meter = value; }
-        public             TValue                 Precision    { get => _precision ??= _meter?.DefaultPrecision ?? TValue.One; set => _precision = value; }
+        public             TValue                 Precision    { get => __precision ??= _meter?.DefaultPrecision ?? TValue.One; set => __precision = value; }
         public             List<Reading<TValue>>  Readings     { get;                                                          init; } = [];
         public             string                 Type         => GetType().Name;
 
@@ -289,7 +289,7 @@ public class TelemetryMeter<TValue> : IDisposable
         internal void ReportMeasurement( ref readonly Reading<TValue> reading )
         {
             ObjectDisposedException.ThrowIf(_isDisposed, this);
-            _current = reading.Value;
+            __current = reading.Value;
             OnMeasurement?.Invoke(in reading);
         }
         public void RecordMeasurement( TValue value ) => RecordMeasurement(value, null);

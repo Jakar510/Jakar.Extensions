@@ -15,85 +15,85 @@ namespace Jakar.Xml.Serialization;
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
 public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
 {
-    private readonly ReadOnlySpan<char> _name   = name;
-    private          XWriter            _writer = context;
+    private readonly ReadOnlySpan<char> __name   = name;
+    private          XWriter            __writer = context;
 
 
     public XArray Init()
     {
-        _writer.StartBlock( _name );
+        __writer.StartBlock( __name );
         return this;
     }
     public XArray Init( XAttributeBuilder builder )
     {
-        _writer.StartBlock( _name, builder );
+        __writer.StartBlock( __name, builder );
         return this;
     }
 
 
     public XArray Null( ReadOnlySpan<char> key )
     {
-        _writer.Indent( key ).Append( XWriter.NULL ).Next( key );
+        __writer.Indent( key ).Append( XWriter.NULL ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, char value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, short value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, ushort value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, int value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, uint value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, long value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, ulong value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, float value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, double value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XArray Add( ReadOnlySpan<char> key, decimal value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
@@ -134,7 +134,7 @@ public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
     public XArray Add( ReadOnlySpan<char> key, string value ) => Add( key, value.AsSpan() );
     public XArray Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
@@ -144,7 +144,7 @@ public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
     public XArray Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, CultureInfo culture ) => Add( key, value, bufferSize, default, culture );
     public XArray Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
     {
-        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
+        __writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
@@ -157,7 +157,7 @@ public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
     public XArray Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
         where TValue : struct, ISpanFormattable
     {
-        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
+        __writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
@@ -213,9 +213,9 @@ public ref struct XArray( ReadOnlySpan<char> name, XWriter context )
     }
 
 
-    public XArray  AddArray( ReadOnlySpan<char>  name ) => new(name, _writer);
-    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, _writer);
+    public XArray  AddArray( ReadOnlySpan<char>  name ) => new(name, __writer);
+    public XObject AddObject( ReadOnlySpan<char> name ) => new(name, __writer);
 
 
-    public void Dispose() => _writer.FinishBlock( _name );
+    public void Dispose() => __writer.FinishBlock( __name );
 }

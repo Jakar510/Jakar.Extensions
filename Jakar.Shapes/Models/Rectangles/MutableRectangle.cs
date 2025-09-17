@@ -9,7 +9,6 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static readonly MutableRectangle One     = 1;
 
 
-    public static                EqualComparer<MutableRectangle>           Sorter  => EqualComparer<MutableRectangle>.Default;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Zero    => ref Zero;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.Invalid => ref Invalid;
     static ref readonly          MutableRectangle IShape<MutableRectangle>.One     => ref One;
@@ -218,12 +217,14 @@ public struct MutableRectangle( double x, double y, double width, double height 
     }
 
 
-    public static        bool operator ==( MutableRectangle            left, MutableRectangle                 right )  => Sorter.Equals(left, right);
-    public static        bool operator !=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.DoesNotEqual(left, right);
-    public static        bool operator >( MutableRectangle             left, MutableRectangle                 right )  => Sorter.GreaterThan(left, right);
-    public static        bool operator >=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.GreaterThanOrEqualTo(left, right);
-    public static        bool operator <( MutableRectangle             left, MutableRectangle                 right )  => Sorter.LessThan(left, right);
-    public static        bool operator <=( MutableRectangle            left, MutableRectangle                 right )  => Sorter.LessThanOrEqualTo(left, right);
+    public static        bool operator ==( MutableRectangle?           left, MutableRectangle?                right )  => Nullable.Equals(left, right);
+    public static        bool operator !=( MutableRectangle?           left, MutableRectangle?                right )  => !Nullable.Equals(left, right);
+    public static        bool operator ==( MutableRectangle            left, MutableRectangle                 right )  => EqualityComparer<MutableRectangle>.Default.Equals(left, right);
+    public static        bool operator !=( MutableRectangle            left, MutableRectangle                 right )  => !EqualityComparer<MutableRectangle>.Default.Equals(left, right);
+    public static        bool operator >( MutableRectangle             left, MutableRectangle                 right )  => Comparer<MutableRectangle>.Default.Compare(left, right) > 0;
+    public static        bool operator >=( MutableRectangle            left, MutableRectangle                 right )  => Comparer<MutableRectangle>.Default.Compare(left, right) >= 0;
+    public static        bool operator <( MutableRectangle             left, MutableRectangle                 right )  => Comparer<MutableRectangle>.Default.Compare(left, right) < 0;
+    public static        bool operator <=( MutableRectangle            left, MutableRectangle                 right )  => Comparer<MutableRectangle>.Default.Compare(left, right) <= 0;
     public static        MutableRectangle operator +( MutableRectangle self, MutableRectangle                 other )  => new(self.X + other.X, self.Y + other.Y, self.Width + other.Width, self.Height + other.Height);
     public static        MutableRectangle operator -( MutableRectangle self, MutableRectangle                 other )  => new(self.X - other.X, self.Y - other.Y, self.Width - other.Width, self.Height - other.Height);
     public static        MutableRectangle operator *( MutableRectangle self, MutableRectangle                 other )  => new(self.X * other.X, self.Y * other.Y, self.Width * other.Width, self.Height * other.Height);
