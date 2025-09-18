@@ -11,12 +11,12 @@ using ZXing.QrCode.Internal;
 namespace Jakar.Extensions;
 
 
-public class OneTimePassword( string key, string issuer ) : Randoms
+public sealed class OneTimePassword( string key, string issuer ) : Randoms
 {
     // ReSharper disable once StaticMemberInGenericType
-    protected readonly string _issuer     = issuer;
-    protected readonly byte[] _keyBytes   = Base32Encoding.ToBytes(key);
-    protected readonly string _secret_key = key;
+    private readonly string __issuer     = issuer;
+    private readonly byte[] __keyBytes   = Base32Encoding.ToBytes(key);
+    private readonly string __secret_Key = key;
 
 
     public static OneTimePassword Create( string            key, string issuer ) => new(key, issuer);
@@ -30,24 +30,36 @@ public class OneTimePassword( string key, string issuer ) : Randoms
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool ValidateToken( string token, VerificationWindow? window = null ) => ValidateToken(token, out long _, window);
     public bool ValidateToken( string token, out long timeStepMatched, VerificationWindow? window = null )
     {
-        Totp totp = new(_keyBytes);
+        Totp totp = new(__keyBytes);
         return totp.VerifyTotp(token, out timeStepMatched, window);
     }
 
 
-    public virtual string GetContent( string userName ) => $"otpauth://totp/{userName}?secret={_secret_key}&issuer={_issuer}";
+    public string GetContent( IUserName record )   => GetContent(record.UserName);
+    public string GetContent( string    userName ) => $"otpauth://totp/{userName}?secret={__secret_Key}&issuer={__issuer}";
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected virtual QrCodeEncodingOptions GetOptions( int width, int height ) => new()
-                                                                                   {
-                                                                                       DisableECI      = true,
-                                                                                       PureBarcode     = true,
-                                                                                       ErrorCorrection = ErrorCorrectionLevel.H,
-                                                                                       CharacterSet    = "UTF-8",
-                                                                                       Width           = width,
-                                                                                       Height          = height
-                                                                                   };
+    public string GetQrCode( IUserName record, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode(record, size, size, format);
+    public string GetQrCode( IUserName record, int width, int height, BarcodeFormat format = BarcodeFormat.QR_CODE )
+    {
+        BarcodeWriterSvg writer = new()
+                                  {
+                                      Format  = format,
+                                      Options = GetOptions(width, height)
+                                  };
+
+        string? result = writer.Write(GetContent(record)).ToString();
+        return result ?? throw new NullReferenceException(nameof(result));
+    }
+    public static QrCodeEncodingOptions GetOptions( int width, int height ) => new()
+                                                                               {
+                                                                                   DisableECI      = true,
+                                                                                   PureBarcode     = true,
+                                                                                   ErrorCorrection = ErrorCorrectionLevel.H,
+                                                                                   CharacterSet    = "UTF-8",
+                                                                                   Width           = width,
+                                                                                   Height          = height
+                                                                               };
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public string GetQrCode( string userName, int size, BarcodeFormat format = BarcodeFormat.QR_CODE ) => GetQrCode(userName, size, size, format);

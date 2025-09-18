@@ -14,14 +14,14 @@ public interface IFileMetaData : JsonModels.IJsonModel
 
 
 
-public interface IFileMetaData<FileMetaData> : IFileMetaData, IEqualComparable<FileMetaData>
-    where FileMetaData : class, IFileMetaData<FileMetaData>
+public interface IFileMetaData<TFileMetaData> : IFileMetaData, IEqualComparable<TFileMetaData>
+    where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
-    public abstract static FileMetaData  Create( IFileMetaData                                      data );
-    public abstract static FileMetaData? TryCreate( [NotNullIfNotNull(nameof(data))] IFileMetaData? data );
-    public abstract static FileMetaData  Create( LocalFile                                          file );
-    public abstract static FileMetaData  Create( string?                                            fileName, MimeType mimeType, string?   fileDescription                   = null );
-    public abstract static FileMetaData  Create( string?                                            fileName, string?  fileType, MimeType? mimeType, string? fileDescription = null );
+    public abstract static TFileMetaData  Create( IFileMetaData                                      data );
+    public abstract static TFileMetaData? TryCreate( [NotNullIfNotNull(nameof(data))] IFileMetaData? data );
+    public abstract static TFileMetaData  Create( LocalFile                                          file );
+    public abstract static TFileMetaData  Create( string?                                            fileName, MimeType mimeType, string?   fileDescription                   = null );
+    public abstract static TFileMetaData  Create( string?                                            fileName, string?  fileType, MimeType? mimeType, string? fileDescription = null );
 }
 
 
@@ -57,34 +57,34 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 
 
 [SuppressMessage("ReSharper", "TypeParameterCanBeVariant")]
-public interface IFileData<FileMetaData, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<FileMetaData>, IEquatable<FileMetaData>
+public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
-    where FileMetaData : class, IFileData<FileMetaData, TID, TFileMetaData>
+    where TSelf : class, IFileData<TSelf, TID, TFileMetaData>
 {
-    public abstract static FileMetaData  Create( IFileData<TID, TFileMetaData>                                      data );
-    public abstract static FileMetaData  Create( IFileData<TID>                                                     data, TFileMetaData metaData );
-    public abstract static FileMetaData? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID, TFileMetaData>? data );
-    public abstract static FileMetaData? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID>?                data, TFileMetaData metaData );
+    public abstract static TSelf         Create( IFileData<TID, TFileMetaData>                                      data );
+    public abstract static TSelf  Create( IFileData<TID>                                                     data, TFileMetaData metaData );
+    public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID, TFileMetaData>? data );
+    public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID>?                data, TFileMetaData metaData );
 
 
-    public abstract static ValueTask<FileMetaData> Create( LocalFile     file,     CancellationToken                 token                            = default );
-    public abstract static ValueTask<FileMetaData> Create( TFileMetaData metaData, Stream                            content, CancellationToken token = default );
-    public abstract static FileMetaData            Create( TFileMetaData metaData, MemoryStream                      content );
-    public abstract static FileMetaData            Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content );
-    public abstract static FileMetaData            Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content );
-    public abstract static FileMetaData            Create( TFileMetaData metaData, string                            content, Encoding? encoding = null );
-    public abstract static FileMetaData            Create( long          fileSize, string                            hash,    string    payload, TID id, TFileMetaData metaData );
+    public abstract static ValueTask<TSelf> Create( LocalFile     file,     CancellationToken                 token                            = default );
+    public abstract static ValueTask<TSelf> Create( TFileMetaData metaData, Stream                            content, CancellationToken token = default );
+    public abstract static TSelf            Create( TFileMetaData metaData, MemoryStream                      content );
+    public abstract static TSelf            Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content );
+    public abstract static TSelf            Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content );
+    public abstract static TSelf            Create( TFileMetaData metaData, string                            content, Encoding? encoding = null );
+    public abstract static TSelf            Create( long          fileSize, string                            hash,    string    payload, TID id, TFileMetaData metaData );
 }
 
 
 
 [Serializable, SuppressMessage("ReSharper", "InconsistentNaming"), SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: SetsRequiredMembers]
-public abstract class FileData<FileMetaData, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass, IFileData<TID, TFileMetaData>, IComparable<FileMetaData>, IEquatable<FileMetaData>
+public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass, IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
-    where FileMetaData : FileData<FileMetaData, TID, TFileMetaData>, IFileData<FileMetaData, TID, TFileMetaData>
+    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>
 {
     public required                                  long          FileSize { get; init; } = fileSize;
     [StringLength(UNICODE_CAPACITY)] public required string        Hash     { get; init; } = hash;
@@ -155,27 +155,27 @@ public abstract class FileData<FileMetaData, TID, TFileMetaData>( long fileSize,
                                                   : Payload.TryGetData();
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( IFileData<TID, TFileMetaData> data )                                                                           => Create(data, data.MetaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => FileMetaData.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create(metaData, stream.AsReadOnlyMemory().Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => FileMetaData.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static FileMetaData Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => FileMetaData.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID, TFileMetaData> data )                                                                           => Create(data, data.MetaData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create(metaData, stream.AsReadOnlyMemory().Span);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
 
 
-    public static FileMetaData? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
+    public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
                                                                                                                                ? Create(content)
                                                                                                                                : null;
-    public static FileMetaData? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID>? content, TFileMetaData metaData ) => content is not null
+    public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID>? content, TFileMetaData metaData ) => content is not null
                                                                                                                                         ? Create(content, metaData)
                                                                                                                                         : null;
-    public static async ValueTask<FileMetaData> Create( LocalFile file, CancellationToken token = default )
+    public static async ValueTask<TSelf> Create( LocalFile file, CancellationToken token = default )
     {
         using TelemetrySpan  telemetrySpan = TelemetrySpan.Create();
         ReadOnlyMemory<byte> content       = await file.ReadAsync().AsMemory(token);
         return Create(TFileMetaData.Create(file), content.Span);
     }
-    public static async ValueTask<FileMetaData> Create( TFileMetaData metaData, Stream stream, CancellationToken token = default )
+    public static async ValueTask<TSelf> Create( TFileMetaData metaData, Stream stream, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek(0, SeekOrigin.Begin);
@@ -184,7 +184,7 @@ public abstract class FileData<FileMetaData, TID, TFileMetaData>( long fileSize,
     }
 
 
-    public virtual int CompareTo( FileMetaData? other )
+    public virtual int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -201,7 +201,7 @@ public abstract class FileData<FileMetaData, TID, TFileMetaData>( long fileSize,
 
         return Comparer<TFileMetaData>.Default.Compare(MetaData, other.MetaData);
     }
-    public virtual bool Equals( FileMetaData? other )
+    public virtual bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 

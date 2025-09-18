@@ -17,7 +17,7 @@
     <PackageVersion Include="AathifMahir.Maui.MauiIcons.SegoeFluent" Version="5.0.0" />
     <PackageVersion Include="AiForms.Maui.SettingsView" Version="1.0.17" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
-    <PackageVersion Include="BenchmarkDotNet" Version="0.15.2" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.15.3" />
     <PackageVersion Include="BlazorComponentUtilities" Version="1.8.0" />
     <PackageVersion Include="BlazorPro.BlazorSize" Version="9.0.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -43,7 +43,7 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.3-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="9.17.1" />
+    <PackageVersion Include="Jakar.Extensions" Version="9.17.2" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />

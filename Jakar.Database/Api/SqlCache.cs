@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/01/2025  16:01
 
-using FluentMigrator.Runner.Generators.Base;
-
-
-
 namespace Jakar.Database;
 
 
@@ -12,134 +8,33 @@ namespace Jakar.Database;
 public sealed class SqlCache<TClass>
     where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    public const           string                               SPACER        = ",      \n";
-    public static readonly string                               CreatedBy     = nameof(IOwnedTableRecord.CreatedBy).ToSnakeCase();
-    public static readonly string                               DateCreated   = nameof(IRecordPair.DateCreated).ToSnakeCase();
-    public static readonly string                               ID            = nameof(IRecordPair.ID).ToSnakeCase();
-    public static readonly string                               Ids           = "ids";
-    public static readonly string                               LastModified  = nameof(ITableRecord.LastModified).ToSnakeCase();
-    public static readonly FrozenDictionary<string, Descriptor> SqlProperties = Descriptor.CreateMapping<TClass>();
+    private const           string                               SPACER          = ",      \n";
+    private static readonly string                               __createdBy     = nameof(IOwnedTableRecord.CreatedBy).ToSnakeCase();
+    private static readonly string                               __dateCreated   = nameof(IRecordPair.DateCreated).ToSnakeCase();
+    private static readonly string                               __id            = nameof(IRecordPair.ID).ToSnakeCase();
+    private static readonly FrozenDictionary<string, Descriptor> __sqlProperties = Descriptor.CreateMapping<TClass>();
 
 
-    public readonly string All       = $"SELECT * FROM {TClass.TableName};";
-    public readonly string Count     = $"SELECT COUNT(*) FROM {TClass.TableName};";
-    public readonly string DeleteAll = $"DELETE FROM {TClass.TableName};";
-    private readonly string __deleteID = $$"""
-                                           DELETE FROM {{TClass.TableName}}
-                                           WHERE {{ID}} = '{0}';
-                                           """;
-    private readonly string __deleteIDs = $$"""
-                                            DELETE FROM {{TClass.TableName}} 
-                                            WHERE {{ID}} in ({0});
-                                            """;
-    private readonly string __exists = $$"""
-                                         EXISTS( 
-                                         SELECT * FROM {{TClass.TableName}} 
-                                         WHERE {0} 
-                                         );
-                                         """;
-    public readonly string First = $"""
-                                    SELECT * FROM {TClass.TableName} 
-                                    ORDER BY {DateCreated} ASC 
-                                    LIMIT 1;
-                                    """;
-    private readonly string __getPaged = $$"""
-                                           SELECT * FROM {{TClass.TableName}} 
-                                           OFFSET {0}
-                                           LIMIT {1};
-                                           """; 
-    private readonly string __getWhereIDs = $$"""
-                                              SELECT * FROM {{TClass.TableName}} 
-                                              WHERE {{ID}} in ({0});
-                                              """;
-    public readonly string Insert = $"""
-                                         INSERT INTO {TClass.TableName} 
-                                         (
-                                         {string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetColumnName))}
-                                         ) 
-                                         values 
-                                         (
-                                            {string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetVariableName))}
-                                         ) 
-                                         RETURNING {ID};
-                                     """;
-    public readonly string Last = $"""
-                                   SELECT * FROM {TClass.TableName} 
-                                   ORDER BY {DateCreated} DESC 
-                                   LIMIT 1
-                                   """;
-    private readonly string __nextID_WhereDateCreated = $$"""
-                                                          SELECT {{ID}} FROM {{TClass.TableName}}
-                                                          WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {{DateCreated}} > '{0}'), 0) );
-                                                          """;
-    private readonly string __nextWhereDateCreated = $$"""
-                                                       SELECT * FROM {{TClass.TableName}}
-                                                       WHERE ( id = IFNULL((SELECT MIN({{ID}}) FROM {{TClass.TableName}} WHERE {DateCreated} > '{0}', 0) );
-                                                       """;
-    public readonly string Random = $"""
-                                     SELECT * FROM {TClass.TableName} 
-                                     ORDER BY RANDOM()
-                                     LIMIT 1;
-                                     """;
-    public readonly string SortedIDs = $"""
-                                        SELECT {ID}, {DateCreated} FROM {TClass.TableName} 
-                                        ORDER BY {DateCreated} DESC;
-                                        """;
-    public readonly string TryInsert = $$"""
-                                         IF NOT EXISTS(SELECT * FROM {TClass.TableName} WHERE {0})
-                                         BEGIN
-                                             INSERT INTO {{TClass.TableName}}
-                                             (
-                                             {{string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetColumnName))}}
-                                             ) 
-                                             values 
-                                             (
-                                                {{string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetVariableName))}}
-                                             ) 
-                                             RETURNING {{ID}};
-                                         END
-
-                                         ELSE
-                                         BEGIN
-                                             SELECT {{ID}} = NULL;
-                                         END
-                                         """;
-    public readonly string UpdateID = $"""
-                                       UPDATE {TClass.TableName} 
-                                       SET {string.Join(',', KeyValuePairs)} 
-                                       WHERE {ID} = @{ID};
-                                       """;
-    public readonly string UpdateOrInsert = $$"""
-                                              IF NOT EXISTS(SELECT * FROM {TClass.TableName} WHERE {0})
-                                              BEGIN
-                                                  INSERT INTO {{TClass.TableName}}
-                                                  (
-                                                    {{string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetColumnName))}}
-                                                  ) 
-                                                  values 
-                                                  (
-                                                    {{string.Join(SPACER, SqlProperties.Values.Select(Descriptor.GetVariableName))}}
-                                                  ) 
-                                                  RETURNING {{ID}};
-                                              END
-
-                                              ELSE
-                                              BEGIN
-                                                  UPDATE {{TClass.TableName}} SET {{KeyValuePairs}} WHERE {{ID}} = @{{ID}};
-                                                  SELECT @{{ID}};
-                                              END
-                                              """;
-    private readonly string __where = $$"""
-                                        SELECT * FROM {{TClass.TableName}} 
-                                        WHERE {0};
-                                        """;
+    private string? __all;
+    private string? __count;
+    private string? __deleteAll;
+    private string? __first;
+    private string? __insert;
+    private string? __last;
+    private string? __random;
+    private string? __sortedIDs;
+    private string? __updateID;
     private string? __whereColumnValue;
 
 
-    public static IEnumerable<string> KeyValuePairs => SqlProperties.Values.Select(Descriptor.GetKeyValuePair);
+    public static IEnumerable<string> KeyValuePairs => __sqlProperties.Values.Select(Descriptor.GetKeyValuePair);
 
 
-    public SqlCommand GetRandom() => Random;
+    public SqlCommand GetRandom() => __random ??= $"""
+                                                   SELECT * FROM {TClass.TableName} 
+                                                   ORDER BY RANDOM()
+                                                   LIMIT 1;
+                                                   """;
     public SqlCommand GetRandom( int count )
     {
         string sql = $"""
@@ -155,7 +50,7 @@ public sealed class SqlCache<TClass>
     {
         string sql = $"""
                       SELECT * FROM {TClass.TableName} 
-                      WHERE {CreatedBy} = '{id.Value}'
+                      WHERE {__createdBy} = '{id.Value}'
                       ORDER BY RANDOM() 
                       LIMIT {count};
                       """;
@@ -179,14 +74,23 @@ public sealed class SqlCache<TClass>
     {
         string sql = $"""
                       SELECT * FROM {TClass.TableName} 
-                      WHERE {CreatedBy} = '{id.Value}'
+                      WHERE {__createdBy} = '{id.Value}'
                       OFFSET {start}
                       LIMIT {count};
                       """;
 
         return new SqlCommand(sql);
     }
-    public SqlCommand WherePaged( int start, int count ) { return new SqlCommand(string.Format(__getPaged, start.ToString(), count.ToString())); }
+    public SqlCommand WherePaged( int start, int count )
+    {
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName} 
+                      OFFSET {start}
+                      LIMIT {count};
+                      """;
+
+        return new SqlCommand(sql);
+    }
     public SqlCommand Where<TValue>( string columnName, TValue? value )
     {
         __whereColumnValue ??= $"SELECT * FROM {TClass.TableName} WHERE {columnName} = @{nameof(value)};";
@@ -200,68 +104,189 @@ public sealed class SqlCache<TClass>
 
     public SqlCommand Get( ref readonly RecordID<TClass> id )
     {
-        string __getWhereID = $$"""
-                                SELECT * FROM {{TClass.TableName}} 
-                                WHERE {{ID}} = '{0}';
-                                """;
-        return new SqlCommand(string.Format(__getWhereID, id.value.ToString()));
+        string sql = $$"""
+                       SELECT * FROM {{TClass.TableName}} 
+                       WHERE {{__id}} = '{0}';
+                       """;
+
+        return new SqlCommand(string.Format(sql, id.value.ToString()));
     }
-    public SqlCommand Get( IEnumerable<RecordID<TClass>> ids ) { return string.Format(__getWhereIDs, string.Join(',', ids.Select(GetValue))); }
+    public SqlCommand Get( IEnumerable<RecordID<TClass>> ids )
+    {
+        string sql = """
+                     SELECT * FROM {TClass.TableName} 
+                     WHERE {ID} in ({string.Join(',', ids.Select(GetValue))});
+                     """;
+
+        return new SqlCommand(sql);
+    }
     public SqlCommand Get( bool matchAll, DynamicParameters parameters )
     {
-        using ValueStringBuilder sb = new(__where);
-        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(parameters));
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName}
+                      WHERE {string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))};
+                      """;
 
-        return new SqlCommand(sb.ToString(), parameters);
+        return new SqlCommand(sql, parameters);
     }
-    public SqlCommand GetAll()   { return All; }
-    public SqlCommand GetFirst() { return First; }
-    public SqlCommand GetLast()  { return Last; }
+    public SqlCommand GetAll() => __all ??= $"SELECT * FROM {TClass.TableName};";
+    public SqlCommand GetFirst() => __first ??= $"""
+                                                 SELECT * FROM {TClass.TableName} 
+                                                 ORDER BY {__dateCreated} ASC 
+                                                 LIMIT 1;
+                                                 """;
+    public SqlCommand GetLast() => __last ??= $"""
+                                               SELECT * FROM {TClass.TableName} 
+                                               ORDER BY {__dateCreated} DESC 
+                                               LIMIT 1
+                                               """;
 
 
-    public SqlCommand GetCount()                                               { return Count; }
-    public SqlCommand GetSortedID()                                            { return SortedIDs; }
-    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters ) { return new SqlCommand(string.Format(__exists, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters); }
+    public SqlCommand GetCount() => __count ??= $"SELECT COUNT(*) FROM {TClass.TableName};";
+    public SqlCommand GetSortedID() => __sortedIDs ??= $"""
+                                                        SELECT {__id}, {__dateCreated} FROM {TClass.TableName} 
+                                                        ORDER BY {__dateCreated} DESC;
+                                                        """;
+    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters )
+    {
+        string sql = $"""
+                      EXISTS( 
+                      SELECT * FROM {TClass.TableName}
+                      WHERE {string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))};
+                      """;
+
+        return new SqlCommand(sql, parameters);
+    }
 
 
     public SqlCommand GetDelete( bool matchAll, DynamicParameters parameters )
     {
-        using ValueStringBuilder sb = new(__deleteIDs);
-        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(parameters));
+        string sql = $"""
+                      DELETE FROM {TClass.TableName} 
+                      WHERE {__id} in ({string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))});
+                      """;
 
-        return new SqlCommand(sb.ToString(), parameters);
+        return new SqlCommand(sql, parameters);
     }
-    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )  { return new SqlCommand(string.Format(__deleteID, id.value.ToString())); }
-    public SqlCommand GetDelete( IEnumerable<RecordID<TClass>>   ids ) { return string.Format(__deleteIDs, string.Join(',', ids.Select(GetValue))); }
-    public SqlCommand GetDeleteAll()                                   { return DeleteAll; }
+    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )
+    {
+        string sql = $"""
+                      DELETE FROM {TClass.TableName}
+                      WHERE {__id} = '{id.value}';
+                      """;
+
+        return new SqlCommand(sql);
+    }
+    public SqlCommand GetDelete( IEnumerable<RecordID<TClass>> ids )
+    {
+        string sql = $"""
+                      DELETE FROM {TClass.TableName} 
+                      WHERE {__id} in ({string.Join(',', ids.Select(GetValue))});
+                      """;
+
+        return new SqlCommand(sql);
+    }
+    public SqlCommand GetDeleteAll() => __deleteAll ??= $"DELETE FROM {TClass.TableName};";
 
 
-    public SqlCommand GetNext( ref readonly   RecordPair<TClass> pair ) { return new SqlCommand(string.Format(__nextWhereDateCreated,    pair.DateCreated.ToString())); }
-    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair ) { return new SqlCommand(string.Format(__nextID_WhereDateCreated, pair.DateCreated.ToString())); }
+    public SqlCommand GetNext( ref readonly RecordPair<TClass> pair )
+    {
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName}
+                      WHERE ( id = IFNULL((SELECT MIN({__dateCreated}) FROM {TClass.TableName} WHERE {__dateCreated} > '{pair.DateCreated}' LIMIT 2, 0) );
+                      """;
 
+        return new SqlCommand(string.Format(sql));
+    }
+    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair )
+    {
+        string sql = $"""
+                      SELECT {__id} FROM {TClass.TableName}
+                      WHERE ( id = IFNULL((SELECT MIN({__dateCreated}) FROM {TClass.TableName} WHERE {__dateCreated} > '{pair.DateCreated}' LIMIT 2), 0) );
+                      """;
 
-    public SqlCommand GetInsert( TClass record ) { return new SqlCommand(Insert,   record.ToDynamicParameters()); }
-    public SqlCommand GetUpdate( TClass record ) { return new SqlCommand(UpdateID, record.ToDynamicParameters()); }
+        return new SqlCommand(sql);
+    }
+    public SqlCommand GetInsert( TClass record )
+    {
+        __insert ??= $"""
+                          INSERT INTO {TClass.TableName} 
+                          (
+                          {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetColumnName))}
+                          ) 
+                          values 
+                          (
+                             {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetVariableName))}
+                          ) 
+                          RETURNING {__id};
+                      """;
+
+        return new SqlCommand(__insert, record.ToDynamicParameters());
+    }
+    public SqlCommand GetUpdate( TClass record ) => new(__updateID ??= $"""
+                                                                        UPDATE {TClass.TableName} 
+                                                                        SET {string.Join(',', KeyValuePairs)} 
+                                                                        WHERE {__id} = @{__id};
+                                                                        """,
+                                                        record.ToDynamicParameters());
     public SqlCommand GetTryInsert( TClass record, bool matchAll, DynamicParameters parameters )
     {
         DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams(parameters);
 
-        return new SqlCommand(string.Format(TryInsert, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), param);
+        string sql = $"""
+                      IF NOT EXISTS(SELECT * FROM {TClass.TableName} WHERE {string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))})
+                      BEGIN
+                      INSERT INTO {TClass.TableName}
+                      (
+                      {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetColumnName))}
+                      ) 
+                      values 
+                      (
+                      {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetVariableName))}
+                      ) 
+                      RETURNING {__id};
+                      END
+
+                      ELSE
+                      BEGIN
+                      SELECT {__id} = '{Guid.Empty}';
+                      END
+                      """;
+
+        return new SqlCommand(sql, param);
     }
     public SqlCommand InsertOrUpdate( TClass record, bool matchAll, DynamicParameters parameters )
     {
         DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams(parameters);
 
-        using ValueStringBuilder sb = new(UpdateOrInsert);
-        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(param));
+        string sql = $"""
+                      IF NOT EXISTS(SELECT * FROM {TClass.TableName} WHERE {string.Join(matchAll.GetAndOr(), GetKeyValuePairs(param))})
+                      BEGIN
+                      INSERT INTO {TClass.TableName}
+                      (
+                      {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetColumnName))}
+                      ) 
+                      values 
+                      (
+                      {string.Join(SPACER, __sqlProperties.Values.Select(Descriptor.GetVariableName))}
+                      ) 
+                      RETURNING {__id};
+                      END
 
-        return new SqlCommand(sb.ToString(), parameters);
+                      ELSE
+                      BEGIN
+                      UPDATE {TClass.TableName} SET {KeyValuePairs} WHERE {__id} = @{__id};
+                      SELECT @{__id};
+                      END
+                      """;
+
+        return new SqlCommand(sql, parameters);
     }
 
 
-    public static IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) { return parameters.ParameterNames.Select(GetKeyValuePair); }
-    public static string              GetKeyValuePair( string             columnName ) { return SqlProperties[columnName].KeyValuePair; }
-    public static Guid                GetValue( RecordID<TClass>          id )         { return id.value; }
+    public static IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select(GetKeyValuePair);
+    public static string              GetKeyValuePair( string             columnName ) => __sqlProperties[columnName].KeyValuePair;
+    public static Guid                GetValue( RecordID<TClass>          id )         => id.value;
 }
