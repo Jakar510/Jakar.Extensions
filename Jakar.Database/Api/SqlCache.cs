@@ -47,23 +47,7 @@ public sealed class SqlCache<TClass>
                                            SELECT * FROM {{TClass.TableName}} 
                                            OFFSET {0}
                                            LIMIT {1};
-                                           """;
-    private readonly string __getPagedWhere = $$"""
-                                                SELECT * FROM {{TClass.TableName}} 
-                                                {0} 
-                                                OFFSET {1}
-                                                LIMIT {2};
-                                                """;
-    public readonly string GetPagedWhereCreatedBy = $$"""
-                                                      SELECT * FROM {{TClass.TableName}} 
-                                                      WHERE {{CreatedBy}} = '{0}'
-                                                      OFFSET {1}
-                                                      LIMIT {2};
-                                                      """;
-    private readonly string __getWhereID = $$"""
-                                             SELECT * FROM {{TClass.TableName}} 
-                                             WHERE {{ID}} = '{0}';
-                                             """;
+                                           """; 
     private readonly string __getWhereIDs = $$"""
                                               SELECT * FROM {{TClass.TableName}} 
                                               WHERE {{ID}} in ({0});
@@ -97,17 +81,6 @@ public sealed class SqlCache<TClass>
                                      ORDER BY RANDOM()
                                      LIMIT 1;
                                      """;
-    private readonly string __randomCount = $$"""
-                                              SELECT * FROM {{TClass.TableName}} 
-                                              ORDER BY RANDOM() 
-                                              LIMIT {0};
-                                              """;
-    private readonly string __randomCountWhereCreatedBy = $$"""
-                                                            SELECT * FROM {{TClass.TableName}} 
-                                                            WHERE {{CreatedBy}} = '{0}'
-                                                            ORDER BY RANDOM() 
-                                                            LIMIT {1};
-                                                            """;
     public readonly string SortedIDs = $"""
                                         SELECT {ID}, {DateCreated} FROM {TClass.TableName} 
                                         ORDER BY {DateCreated} DESC;
@@ -166,19 +139,58 @@ public sealed class SqlCache<TClass>
     public static IEnumerable<string> KeyValuePairs => SqlProperties.Values.Select(Descriptor.GetKeyValuePair);
 
 
-    public SqlCommand GetRandom()                                       => Random;
-    public SqlCommand GetRandom( int                  count )           => new(string.Format(__randomCount, count.ToString()));
-    public SqlCommand GetRandom( UserRecord           user, int count ) => GetRandom(user.ID, count);
-    public SqlCommand GetRandom( RecordID<UserRecord> id,   int count ) => new(string.Format(__randomCountWhereCreatedBy, id.Value.ToString(), count.ToString()));
+    public SqlCommand GetRandom() => Random;
+    public SqlCommand GetRandom( int count )
+    {
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName} 
+                      ORDER BY RANDOM() 
+                      LIMIT {count};
+                      """;
+
+        return new SqlCommand(sql);
+    }
+    public SqlCommand GetRandom( UserRecord user, int count ) => GetRandom(user.ID, count);
+    public SqlCommand GetRandom( RecordID<UserRecord> id, int count )
+    {
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName} 
+                      WHERE {CreatedBy} = '{id.Value}'
+                      ORDER BY RANDOM() 
+                      LIMIT {count};
+                      """;
+
+        return new SqlCommand(sql);
+    }
 
 
-    public SqlCommand WherePaged( bool                              matchAll, DynamicParameters parameters, int start, int count ) => new(string.Format(__getPagedWhere, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters)), start.ToString(), count.ToString()));
-    public SqlCommand WherePaged( ref readonly RecordID<UserRecord> id,       int               start,      int count ) => new(string.Format(GetPagedWhereCreatedBy, id.Value.ToString(), start.ToString(), count.ToString()));
-    public SqlCommand WherePaged( int                               start,    int               count ) => new(string.Format(__getPaged, start.ToString(), count.ToString()));
+    public SqlCommand WherePaged( bool matchAll, DynamicParameters parameters, int start, int count )
+    {
+        string sql = $"""
+                        SELECT * FROM {TClass.TableName}
+                        {string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))}
+                        OFFSET {start}
+                        LIMIT {count}
+                      """;
+
+        return new SqlCommand(sql, parameters);
+    }
+    public SqlCommand WherePaged( ref readonly RecordID<UserRecord> id, int start, int count )
+    {
+        string sql = $"""
+                      SELECT * FROM {TClass.TableName} 
+                      WHERE {CreatedBy} = '{id.Value}'
+                      OFFSET {start}
+                      LIMIT {count};
+                      """;
+
+        return new SqlCommand(sql);
+    }
+    public SqlCommand WherePaged( int start, int count ) { return new SqlCommand(string.Format(__getPaged, start.ToString(), count.ToString())); }
     public SqlCommand Where<TValue>( string columnName, TValue? value )
     {
         __whereColumnValue ??= $"SELECT * FROM {TClass.TableName} WHERE {columnName} = @{nameof(value)};";
-        
+
         DynamicParameters parameters = new();
         parameters.Add(nameof(value), value);
 
@@ -186,8 +198,15 @@ public sealed class SqlCache<TClass>
     }
 
 
-    public SqlCommand Get( ref readonly RecordID<TClass> id )  => new(string.Format(__getWhereID, id.value.ToString()));
-    public SqlCommand Get( IEnumerable<RecordID<TClass>> ids ) => string.Format(__getWhereIDs, string.Join(',', ids.Select(GetValue)));
+    public SqlCommand Get( ref readonly RecordID<TClass> id )
+    {
+        string __getWhereID = $$"""
+                                SELECT * FROM {{TClass.TableName}} 
+                                WHERE {{ID}} = '{0}';
+                                """;
+        return new SqlCommand(string.Format(__getWhereID, id.value.ToString()));
+    }
+    public SqlCommand Get( IEnumerable<RecordID<TClass>> ids ) { return string.Format(__getWhereIDs, string.Join(',', ids.Select(GetValue))); }
     public SqlCommand Get( bool matchAll, DynamicParameters parameters )
     {
         using ValueStringBuilder sb = new(__where);
@@ -195,28 +214,34 @@ public sealed class SqlCache<TClass>
 
         return new SqlCommand(sb.ToString(), parameters);
     }
-    public SqlCommand GetAll()   => All;
-    public SqlCommand GetFirst() => First;
-    public SqlCommand GetLast()  => Last;
+    public SqlCommand GetAll()   { return All; }
+    public SqlCommand GetFirst() { return First; }
+    public SqlCommand GetLast()  { return Last; }
 
 
-    public SqlCommand GetCount()                                               => Count;
-    public SqlCommand GetSortedID()                                            => SortedIDs;
-    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters ) => new(string.Format(__exists, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
+    public SqlCommand GetCount()                                               { return Count; }
+    public SqlCommand GetSortedID()                                            { return SortedIDs; }
+    public SqlCommand GetExists( bool matchAll, DynamicParameters parameters ) { return new SqlCommand(string.Format(__exists, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters); }
 
 
-    public SqlCommand GetDelete( bool                            matchAll, DynamicParameters parameters ) => new(string.Format(__deleteIDs, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters))), parameters);
-    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )  => new(string.Format(__deleteID, id.value.ToString()));
-    public SqlCommand GetDelete( IEnumerable<RecordID<TClass>>   ids ) => string.Format(__deleteIDs, string.Join(',', ids.Select(GetValue)));
-    public SqlCommand GetDeleteAll()                                   => DeleteAll;
+    public SqlCommand GetDelete( bool matchAll, DynamicParameters parameters )
+    {
+        using ValueStringBuilder sb = new(__deleteIDs);
+        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(parameters));
+
+        return new SqlCommand(sb.ToString(), parameters);
+    }
+    public SqlCommand GetDeleteID( ref readonly RecordID<TClass> id )  { return new SqlCommand(string.Format(__deleteID, id.value.ToString())); }
+    public SqlCommand GetDelete( IEnumerable<RecordID<TClass>>   ids ) { return string.Format(__deleteIDs, string.Join(',', ids.Select(GetValue))); }
+    public SqlCommand GetDeleteAll()                                   { return DeleteAll; }
 
 
-    public SqlCommand GetNext( ref readonly   RecordPair<TClass> pair ) => new(string.Format(__nextWhereDateCreated,    pair.DateCreated.ToString()));
-    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair ) => new(string.Format(__nextID_WhereDateCreated, pair.DateCreated.ToString()));
+    public SqlCommand GetNext( ref readonly   RecordPair<TClass> pair ) { return new SqlCommand(string.Format(__nextWhereDateCreated,    pair.DateCreated.ToString())); }
+    public SqlCommand GetNextID( ref readonly RecordPair<TClass> pair ) { return new SqlCommand(string.Format(__nextID_WhereDateCreated, pair.DateCreated.ToString())); }
 
 
-    public SqlCommand GetInsert( TClass record ) => new(Insert, record.ToDynamicParameters());
-    public SqlCommand GetUpdate( TClass record ) => new(UpdateID, record.ToDynamicParameters());
+    public SqlCommand GetInsert( TClass record ) { return new SqlCommand(Insert,   record.ToDynamicParameters()); }
+    public SqlCommand GetUpdate( TClass record ) { return new SqlCommand(UpdateID, record.ToDynamicParameters()); }
     public SqlCommand GetTryInsert( TClass record, bool matchAll, DynamicParameters parameters )
     {
         DynamicParameters param = record.ToDynamicParameters();
@@ -229,11 +254,14 @@ public sealed class SqlCache<TClass>
         DynamicParameters param = record.ToDynamicParameters();
         param.AddDynamicParams(parameters);
 
-        return new SqlCommand(string.Format(UpdateOrInsert, string.Join(matchAll.GetAndOr(), GetKeyValuePairs(parameters)), param));
+        using ValueStringBuilder sb = new(UpdateOrInsert);
+        sb.AppendJoin(matchAll.GetAndOr(), GetKeyValuePairs(param));
+
+        return new SqlCommand(sb.ToString(), parameters);
     }
 
 
-    public static IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select(GetKeyValuePair);
-    public static string              GetKeyValuePair( string             columnName ) => SqlProperties[columnName].KeyValuePair;
-    public static Guid                GetValue( RecordID<TClass>          id )         => id.value;
+    public static IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) { return parameters.ParameterNames.Select(GetKeyValuePair); }
+    public static string              GetKeyValuePair( string             columnName ) { return SqlProperties[columnName].KeyValuePair; }
+    public static Guid                GetValue( RecordID<TClass>          id )         { return id.value; }
 }
