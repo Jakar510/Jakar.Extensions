@@ -3,23 +3,23 @@
 
 public sealed class ExceptionDetails
 {
-    public Dictionary<string, JToken?>? Data            { get; init; }
-    public string?                      HelpLink        { get; init; }
-    public int                          HResult         { get; init; }
-    public ExceptionDetails?            Inner           { get; init; }
-    public string                       Message         { get; init; } = string.Empty;
-    public string?                      MethodSignature { get; init; }
-    public string?                      Source          { get; init; }
-    public string[]                     StackTrace      { get; init; } = [];
-    public string                       Str             { get; init; } = string.Empty;
-    public MethodDetails?               TargetSite      { get; init; }
-    public string?                      Type            { get; init; }
+    public JsonNode?         Data            { get; init; }
+    public string?           HelpLink        { get; init; }
+    public int               HResult         { get; init; }
+    public ExceptionDetails? Inner           { get; init; }
+    public string            Message         { get; init; } = string.Empty;
+    public string?           MethodSignature { get; init; }
+    public string?           Source          { get; init; }
+    public string[]          StackTrace      { get; init; } = [];
+    public string            Str             { get; init; } = string.Empty;
+    public MethodDetails?    TargetSite      { get; init; }
+    public string?           Type            { get; init; }
 
 
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
         Message = e.Message;
@@ -33,7 +33,7 @@ public sealed class ExceptionDetails
         StackTrace = e.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
 
         MethodSignature = $"{e.MethodClass()}::{e.MethodSignature()}";
-        Data            = e.GetData();
+        Data            = e.GetData()?.ToJsonNode();
         Str             = e.ToString();
 
 
@@ -42,6 +42,6 @@ public sealed class ExceptionDetails
 
         Inner = e.InnerException is null
                     ? null
-                    : new ExceptionDetails( e.InnerException );
+                    : new ExceptionDetails(e.InnerException);
     }
 }

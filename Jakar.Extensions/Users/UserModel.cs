@@ -10,10 +10,10 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
+    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
 {
     public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
-    private      IDictionary<string, JToken?>? __additionalData;
+    private      JsonObject? __additionalData;
     private      string                        __company     = string.Empty;
     private      string                        __department  = string.Empty;
     private      string                        __email       = string.Empty;
@@ -34,7 +34,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     private      TID?                          __imageID;
 
 
-    [JsonExtensionData] public IDictionary<string, JToken?>?  AdditionalData { get => __additionalData; set => SetProperty(ref __additionalData, value); }
+    [JsonExtensionData] public JsonObject?  AdditionalData { get => __additionalData; set => SetProperty(ref __additionalData, value); }
     public                     ObservableCollection<TAddress> Addresses      { get;                     init; } = [];
 
     [StringLength(UNICODE_CAPACITY)]
@@ -214,12 +214,12 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Rights            = value.Rights;
         return With(value.AdditionalData);
     }
-    public TClass With( IDictionary<string, JToken?>? data )
+    public TClass With( JsonObject? data )
     {
         if ( data?.Count is null or 0 ) { return (TClass)this; }
 
-        IDictionary<string, JToken?> dict = AdditionalData ??= new Dictionary<string, JToken?>();
-        foreach ( ( string key, JToken? jToken ) in data ) { dict[key] = jToken; }
+        JsonObject dict = AdditionalData ??= new JsonObject();
+        foreach ( ( string key, JsonNode? jToken ) in data ) { dict[key] = jToken; }
 
         return (TClass)this;
     }

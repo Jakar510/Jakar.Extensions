@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights, JsonModels.IJsonModel
+public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights, Json.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     [StringLength(UNICODE_CAPACITY)] string NameOfGroup { get; }
@@ -26,7 +26,7 @@ public interface IGroupModel<TClass, TID> : IGroupModel<TID>, IEqualComparable<T
 [method: JsonConstructor]
 public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : ObservableClass<TClass, TID>(id), IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : GroupModel<TClass, TID>, IGroupModel<TClass, TID>, IEqualComparable<TClass>
+    where TClass : GroupModel<TClass, TID>, IGroupModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
 
 {
     private string __nameOfGroup = nameOfGroup;
@@ -35,11 +35,11 @@ public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? cre
     private TID?   __ownerID     = ownerID;
 
 
-    [JsonExtensionData] public                  IDictionary<string, JToken?>? AdditionalData { get;                 set; }
-    public                                      TID?                          CreatedBy      { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
-    [StringLength(UNICODE_CAPACITY)] public     string                        NameOfGroup    { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
-    public                                      TID?                          OwnerID        { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string                        Rights         { get => __permissions; set => SetProperty(ref __permissions, value); }
+    [JsonExtensionData] public                  JsonObject? AdditionalData { get;                  set; }
+    public                                      TID?                            CreatedBy      { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
+    [StringLength(UNICODE_CAPACITY)] public     string                          NameOfGroup    { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
+    public                                      TID?                            OwnerID        { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
+    [StringLength(IUserRights.MAX_SIZE)] public string                          Rights         { get => __permissions; set => SetProperty(ref __permissions, value); }
 
 
     public GroupModel( IGroupModel<TID> model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }
@@ -64,25 +64,4 @@ public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? cre
 
         return string.Equals(NameOfGroup, other.NameOfGroup, StringComparison.Ordinal) && ID.Equals(other.ID);
     }
-}
-
-
-
-[Serializable]
-[method: JsonConstructor]
-public class GroupModel<TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : GroupModel<GroupModel<TID>, TID>(nameOfGroup, ownerID, createdBy, id, rights), IGroupModel<GroupModel<TID>, TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public GroupModel( IGroupModel<TID>                    model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }
-    public static GroupModel<TID> Create( IGroupModel<TID> model ) => new(model);
-
-
-    public override bool Equals( object? other )                                      => other is GroupModel<TID> x && Equals(x);
-    public override int  GetHashCode()                                                => HashCode.Combine(NameOfGroup, ID, Rights);
-    public static   bool operator ==( GroupModel<TID>? left, GroupModel<TID>? right ) => EqualityComparer<GroupModel<TID>>.Default.Equals(left, right);
-    public static   bool operator !=( GroupModel<TID>? left, GroupModel<TID>? right ) => !EqualityComparer<GroupModel<TID>>.Default.Equals(left, right);
-    public static   bool operator >( GroupModel<TID>   left, GroupModel<TID>  right ) => Comparer<GroupModel<TID>>.Default.Compare(left, right) > 0;
-    public static   bool operator >=( GroupModel<TID>  left, GroupModel<TID>  right ) => Comparer<GroupModel<TID>>.Default.Compare(left, right) >= 0;
-    public static   bool operator <( GroupModel<TID>   left, GroupModel<TID>  right ) => Comparer<GroupModel<TID>>.Default.Compare(left, right) < 0;
-    public static   bool operator <=( GroupModel<TID>  left, GroupModel<TID>  right ) => Comparer<GroupModel<TID>>.Default.Compare(left, right) <= 0;
 }

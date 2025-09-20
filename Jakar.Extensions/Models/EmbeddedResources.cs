@@ -84,8 +84,8 @@ public class EmbeddedResources<TValue>
     }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public async ValueTask<T> GetResourceJsonAsync<T>( string fileName ) => await GetResourceJsonAsync<T>(fileName, Encoding.Default);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName ) => await GetResourceJsonAsync<T>(fileName, Encoding.Default);
+    
     public async ValueTask<T> GetResourceJsonAsync<T>( string fileName, Encoding encoding )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

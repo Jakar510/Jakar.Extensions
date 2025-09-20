@@ -5,7 +5,7 @@
 namespace Jakar.Extensions;
 
 
-public sealed class MethodDetails
+public sealed class MethodDetails : IJsonModel<MethodDetails>
 {
     public MethodAttributes   Attributes          { get; init; }
     public string?            DeclaringType       { get; init; }
@@ -45,13 +45,38 @@ public sealed class MethodDetails
         IsAssembly          = method.IsAssembly;
         IsFamilyAndAssembly = method.IsFamilyAndAssembly;
         IsFamilyOrAssembly  = method.IsFamilyOrAssembly;
-        Parameters          = ParameterDetails.Create( method );
+        Parameters          = ParameterDetails.Create(method);
     }
 
 
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static MethodDetails? TryCreate( MethodBase? method ) => method is not null
-                                                                        ? new MethodDetails( method )
+                                                                        ? new MethodDetails(method)
                                                                         : null;
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static MethodDetails? TryCreate( Exception e ) => TryCreate( e.TargetSite );
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static MethodDetails? TryCreate( Exception e ) => TryCreate(e.TargetSite);
+
+
+    public static JsonTypeInfo<MethodDetails> JsonTypeInfo => JakarExtensionsContext.Default.MethodDetails;
+    public static JsonSerializerContext       JsonContext  => JakarExtensionsContext.Default;
+    public        JsonNode                    ToJsonNode() => Validate.ThrowIfNull(JsonSerializer.SerializeToNode(this, JsonTypeInfo));
+    public        string                      ToJson()     => Validate.ThrowIfNull(JsonSerializer.Serialize(this, JsonTypeInfo));
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out MethodDetails? result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = null;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
+    }
+    public static MethodDetails FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

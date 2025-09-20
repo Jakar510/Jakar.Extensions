@@ -37,7 +37,7 @@ public record ObservableRecord : BaseRecord, IObservableObject
         return true;
     }
     protected virtual bool SetPropertyWithoutNotify<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer )
-        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
+        where TComparer : EqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value);
     protected virtual bool SetProperty<TValue>( ref TValue backingStore, TValue value, [CallerMemberName] string propertyName = EMPTY )
     {
         OnPropertyChanging(propertyName);
@@ -47,10 +47,10 @@ public record ObservableRecord : BaseRecord, IObservableObject
         return true;
     }
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
-        where TComparer : IEqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
+        where TComparer : EqualityComparer<TValue> => !comparer.Equals(backingStore, value) && SetProperty(ref backingStore, value, propertyName);
     protected virtual bool SetProperty<TValue, TComparer>( ref TValue backingStore, TValue value, in TValue minValue, TComparer comparer, [CallerMemberName] string propertyName = EMPTY )
         where TValue : IComparisonOperators<TValue, TValue, bool>
-        where TComparer : IEqualityComparer<TValue>
+        where TComparer : EqualityComparer<TValue>
     {
         value = value < minValue
                     ? minValue
@@ -66,14 +66,9 @@ public record ObservableRecord : BaseRecord, IObservableObject
 
 
 
-public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : ObservableRecord<TClass>, IComparisonOperators<TClass>
+public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : ObservableRecord<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public         TClass? FromJson( [NotNullIfNotNull(nameof(json))] string? json ) => json?.FromJson<TClass>();
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string  ToJson()                                                  => this.ToJson(Formatting.None);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string  ToPrettyJson()                                            => this.ToJson(Formatting.Indented);
-
-
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
@@ -87,36 +82,32 @@ public abstract record ObservableRecord<TClass> : ObservableRecord, IEquatable<T
     public abstract int  CompareTo( TClass? other );
     public abstract bool Equals( TClass?    other );
 
-
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
+    
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(json);
-        return json.FromJson<TClass>();
-    }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
         try
         {
-            result = json?.FromJson<TClass>();
-            return result is not null;
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = null;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
         }
-        catch ( Exception e )
-        {
-            telemetrySpan.AddException(e);
-            result = null;
-            return false;
-        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
     }
+    public static TClass FromJson( string json ) => json.FromJson<TClass>();
 }
 
 
 
 public abstract record ObservableRecord<TClass, TID> : ObservableRecord<TClass>, IUniqueID<TID>
-    where TClass : ObservableRecord<TClass, TID>, IComparisonOperators<TClass>
+    where TClass : ObservableRecord<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID __id;

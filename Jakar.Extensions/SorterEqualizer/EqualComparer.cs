@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 /*
-public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqualityComparer<TValue>, IEqualityComparer
+public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, EqualityComparer<TValue>, EqualityComparer
     where TValue : IComparable<TValue>, IEquatable<TValue>
 {
     public static readonly EqualComparer<TValue> Default = new();
@@ -56,7 +56,7 @@ public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqual
     public bool Equals( ReadOnlySpan<TValue> left, ReadOnlySpan<TValue> right ) => left.SequenceEqual( right );
 
 
-    bool IEqualityComparer.Equals( object? x, object? y )
+    bool EqualityComparer.Equals( object? x, object? y )
     {
         if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
 
@@ -65,7 +65,7 @@ public sealed class EqualComparer<TValue> : IComparer<TValue>, IComparer, IEqual
         return Equals( left, right );
     }
 
-    int IEqualityComparer.GetHashCode( object obj )
+    int EqualityComparer.GetHashCode( object obj )
     {
         if ( obj is not TValue value ) { throw new ExpectedValueTypeException( nameof(obj), obj, typeof(TValue) ); }
 

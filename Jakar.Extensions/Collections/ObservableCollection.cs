@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 3/25/2024  15:41
 
+using Jakar.Extensions.UserGuid;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -14,8 +18,48 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TValue>, IIObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
+{
+    private static JsonSerializerContext?                      __jsonContext;
+    private static JsonTypeInfo<ObservableCollection<TValue>>? __jsonTypeInfo;
+    public static  JsonSerializerContext                       JsonContext  { get => Validate.ThrowIfNull(__jsonContext);  set => __jsonContext = value; }
+    public static  JsonTypeInfo<ObservableCollection<TValue>>  JsonTypeInfo { get => Validate.ThrowIfNull(__jsonTypeInfo); set => __jsonTypeInfo = value; }
+
+
+    public ObservableCollection() : this(Comparer<TValue>.Default) { }
+    public ObservableCollection( int                                 capacity ) : this(Comparer<TValue>.Default, capacity) { }
+    public ObservableCollection( ref readonly Buffer<TValue>         values ) : this(values.Length) => InternalAdd(values.Values);
+    public ObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Values);
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this(values.Length) => InternalAdd(values.AsSpan());
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.AsSpan());
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this(values.Length) => InternalAdd(values.Span);
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Span);
+    public ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this(values.Length) => InternalAdd(values);
+    public ObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : this(comparer, values.Length) => InternalAdd(values);
+    public ObservableCollection( TValue[]                            values ) : this(values.Length) => InternalAdd();
+    public ObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : this(comparer, new ReadOnlySpan<TValue>(values)) { }
+    public ObservableCollection( IEnumerable<TValue>                 values ) : this(values, Comparer<TValue>.Default) { }
+    public ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
+
+
+    public static implicit operator ObservableCollection<TValue>( List<TValue>                                                values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( HashSet<TValue>                                             values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( ConcurrentBag<TValue>                                       values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values )         => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values )         => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values )         => new(values);
+}
+
+
+
+[Serializable]
+public abstract class ObservableCollection<TClass, TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TClass, TValue>, IIObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+    where TValue : IEquatable<TValue>
+    where TClass : ObservableCollection<TClass, TValue>, ICollectionAlerts<TClass, TValue>
 {
     protected internal readonly Comparer<TValue> comparer = comparer;
     protected internal readonly List<TValue>     buffer   = new(capacity);
@@ -53,18 +97,6 @@ public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capaci
         buffer.Clear();
         GC.SuppressFinalize(this);
     }
-
-
-    public static implicit operator ObservableCollection<TValue>( Buffer<TValue>                                              values ) => new(values.Span);
-    public static implicit operator ObservableCollection<TValue>( List<TValue>                                                values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( HashSet<TValue>                                             values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( ConcurrentBag<TValue>                                       values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values ) => new(values);
-    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(in values);
-    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(in values);
-    public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
 
 
     public TValue[] ToArray() => buffer.ToArray();

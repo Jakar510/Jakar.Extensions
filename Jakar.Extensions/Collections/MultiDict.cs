@@ -7,10 +7,10 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
     #region ctor
 
     public MultiDict() : this( 0 ) { }
-    public MultiDict( IEqualityComparer<TKey>?                 comparer ) : base( 0, comparer ) { }
-    public MultiDict( int                                      capacity,   IEqualityComparer<TKey>? comparer = null ) : base( capacity, comparer ) { }
-    public MultiDict( IDictionary<TKey, object?>               dictionary, IEqualityComparer<TKey>? comparer = null ) : base( dictionary, comparer ) { }
-    public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, IEqualityComparer<TKey>? comparer = null ) : base( collection, comparer ) { }
+    public MultiDict( EqualityComparer<TKey>?                 comparer ) : base( 0, comparer ) { }
+    public MultiDict( int                                      capacity,   EqualityComparer<TKey>? comparer = null ) : base( capacity, comparer ) { }
+    public MultiDict( IDictionary<TKey, object?>               dictionary, EqualityComparer<TKey>? comparer = null ) : base( dictionary, comparer ) { }
+    public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, EqualityComparer<TKey>? comparer = null ) : base( collection, comparer ) { }
 
     #endregion
 
@@ -110,8 +110,8 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 public class MultiDict : MultiDict<string>
 {
     public MultiDict() : this( 0 ) { }
-    public MultiDict( IEqualityComparer<string>?                 comparer ) : base( 0, comparer ) { }
-    public MultiDict( int                                        capacity,   IEqualityComparer<string>? comparer = null ) : base( capacity, comparer ) { }
-    public MultiDict( IDictionary<string, object?>               dictionary, IEqualityComparer<string>? comparer = null ) : base( dictionary, comparer ) { }
-    public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, IEqualityComparer<string>? comparer = null ) : base( collection, comparer ) { }
+    public MultiDict( EqualityComparer<string>?                 comparer ) : base( 0, comparer ) { }
+    public MultiDict( int                                        capacity,   EqualityComparer<string>? comparer = null ) : base( capacity, comparer ) { }
+    public MultiDict( IDictionary<string, object?>               dictionary, EqualityComparer<string>? comparer = null ) : base( dictionary, comparer ) { }
+    public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, EqualityComparer<string>? comparer = null ) : base( collection, comparer ) { }
 }

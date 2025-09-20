@@ -106,12 +106,12 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Delete( string relativePath, Stream                      value )   => Delete(relativePath, new StreamContent(value));
     public WebHandler Delete( string relativePath, MultipartContent            content ) => Delete(relativePath, (HttpContent)content);
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete( string         relativePath, string                    value ) => Delete(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete( string         relativePath, BaseClass                 value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete( string         relativePath, BaseRecord                value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete( string         relativePath, IEnumerable<BaseRecord>   value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete( string         relativePath, IEnumerable<BaseClass>    value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Delete<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete( string         relativePath, string                    value ) => Delete(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete( string         relativePath, BaseClass                 value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete( string         relativePath, BaseRecord                value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete( string         relativePath, IEnumerable<BaseRecord>   value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete( string         relativePath, IEnumerable<BaseClass>    value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Delete<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Delete(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
 
 
     public WebHandler Get( Uri    url )          => CreateHandler(url, HttpMethod.Get);
@@ -126,12 +126,12 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Patch( string relativePath, Stream                      value )   => Patch(relativePath,            new StreamContent(value));
     public WebHandler Patch( string relativePath, MultipartContent            content ) => Patch(relativePath,            (HttpContent)content);
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch( string         relativePath, string                    value ) => Patch(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch( string         relativePath, BaseClass                 value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch( string         relativePath, BaseRecord                value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch( string         relativePath, IEnumerable<BaseRecord>   value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch( string         relativePath, IEnumerable<BaseClass>    value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Patch<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch( string         relativePath, string                    value ) => Patch(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch( string         relativePath, BaseClass                 value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch( string         relativePath, BaseRecord                value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch( string         relativePath, IEnumerable<BaseRecord>   value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch( string         relativePath, IEnumerable<BaseClass>    value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Patch<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Patch(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
 
 
     public WebHandler Post( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Post, value);
@@ -142,12 +142,12 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Post( string relativePath, Stream                      value )   => Post(relativePath,            new StreamContent(value));
     public WebHandler Post( string relativePath, MultipartContent            content ) => Post(relativePath,            (HttpContent)content);
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post( string         relativePath, string                    value ) => Post(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post( string         relativePath, BaseClass                 value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post( string         relativePath, BaseRecord                value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post( string         relativePath, IEnumerable<BaseClass>    value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post( string         relativePath, IEnumerable<BaseRecord>   value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Post<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post( string         relativePath, string                    value ) => Post(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post( string         relativePath, BaseClass                 value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post( string         relativePath, BaseRecord                value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post( string         relativePath, IEnumerable<BaseClass>    value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post( string         relativePath, IEnumerable<BaseRecord>   value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Post<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Post(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
 
 
     public WebHandler Put( Uri    url,          HttpContent                 value )   => CreateHandler(url, HttpMethod.Put, value);
@@ -158,10 +158,10 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public WebHandler Put( string relativePath, Stream                      value )   => Put(relativePath,            new StreamContent(value));
     public WebHandler Put( string relativePath, MultipartContent            content ) => Put(relativePath,            (HttpContent)content);
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put( string         relativePath, string                    value ) => Put(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put( string         relativePath, BaseClass                 value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put( string         relativePath, BaseRecord                value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put( string         relativePath, IEnumerable<BaseClass>    value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put( string         relativePath, IEnumerable<BaseRecord>   value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public WebHandler Put<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put( string         relativePath, string                    value ) => Put(relativePath, new StringContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put( string         relativePath, BaseClass                 value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put( string         relativePath, BaseRecord                value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put( string         relativePath, IEnumerable<BaseClass>    value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put( string         relativePath, IEnumerable<BaseRecord>   value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
+     public WebHandler Put<TValue>( string relativePath, in ImmutableArray<TValue> value ) => Put(relativePath, new JsonContent(value.ToPrettyJson(), Encoding));
 }

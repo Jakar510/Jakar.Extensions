@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, JsonModels.IJsonModel
+public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, Json.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     [StringLength(UNICODE_CAPACITY)] public string NameOfRole { get; }
@@ -25,15 +25,15 @@ public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IEqualComparable<TCl
 [method: JsonConstructor]
 public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) : ObservableClass<TClass, TID>(id), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IEqualComparable<TClass>
+    where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
     private string __name   = nameOfRole;
     private string __rights = rights;
 
 
-    [JsonExtensionData]                  public IDictionary<string, JToken?>? AdditionalData { get;            set; }
-    [StringLength(UNICODE_CAPACITY)]     public string                        NameOfRole     { get => __name;   set => SetProperty(ref __name,   value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string                        Rights         { get => __rights; set => SetProperty(ref __rights, value); }
+    [JsonExtensionData]                  public JsonObject? AdditionalData { get;             set; }
+    [StringLength(UNICODE_CAPACITY)]     public string                          NameOfRole     { get => __name;   set => SetProperty(ref __name,   value); }
+    [StringLength(IUserRights.MAX_SIZE)] public string                          Rights         { get => __rights; set => SetProperty(ref __rights, value); }
 
 
     public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }
@@ -58,25 +58,4 @@ public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) 
 
         return string.Equals(NameOfRole, other.NameOfRole) && ID.Equals(other.ID);
     }
-}
-
-
-
-[Serializable]
-[method: JsonConstructor]
-public sealed class RoleModel<TID>( string nameOfRole, string rights, TID id ) : RoleModel<RoleModel<TID>, TID>(nameOfRole, rights, id), IRoleModel<RoleModel<TID>, TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public RoleModel( IRoleModel<TID>                    model ) : this(model.NameOfRole, model.Rights, model.ID) { }
-    public static RoleModel<TID> Create( IRoleModel<TID> model ) => new(model);
-
-
-    public override bool Equals( object? other )                                    => other is RoleModel<TID> x && Equals(x);
-    public override int  GetHashCode()                                              => HashCode.Combine(NameOfRole, ID, Rights);
-    public static   bool operator ==( RoleModel<TID>? left, RoleModel<TID>? right ) => EqualityComparer<RoleModel<TID>>.Default.Equals(left, right);
-    public static   bool operator !=( RoleModel<TID>? left, RoleModel<TID>? right ) => !EqualityComparer<RoleModel<TID>>.Default.Equals(left, right);
-    public static   bool operator >( RoleModel<TID>   left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) > 0;
-    public static   bool operator >=( RoleModel<TID>  left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) >= 0;
-    public static   bool operator <( RoleModel<TID>   left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) < 0;
-    public static   bool operator <=( RoleModel<TID>  left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) <= 0;
 }

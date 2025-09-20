@@ -2,35 +2,31 @@
 
 
 public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDisposable
-    where TClass : PreferenceFile<TClass>, IEqualComparable<TClass>, new()
+    where TClass : PreferenceFile<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
 {
-#if NET9_0_OR_GREATER
-    private readonly Lock __lock = new();
-#else
-    private readonly object _lock = new();
-#endif
-    protected        DateTime                _lastWriteTimeUtc;
-    protected        IniConfig?              _config;
-    private readonly LocalFile               __file = $"{typeof(TClass).Name}.ini";
-    protected        LocalDirectory.Watcher? _watcher;
+    private readonly Lock              __lock = new();
+    protected        DateTime          _lastWriteTimeUtc;
+    protected        IniConfig?        _config;
+    private readonly LocalFile         __file = $"{typeof(TClass).Name}.ini";
+    protected        LocalFileWatcher? _watcher;
 
 
     public virtual IniConfig Config
     {
         get
         {
-            lock (__lock)
+            lock ( __lock )
             {
                 if ( _config is not null && LastWriteTimeUtc > _lastWriteTimeUtc ) { return _config; }
 
-                _config           = IniConfig.ReadFromFile( __file );
+                _config           = IniConfig.ReadFromFile(__file);
                 _lastWriteTimeUtc = LastWriteTimeUtc;
                 return _config;
             }
         }
         protected set
         {
-            lock (__lock) { SetProperty( ref _config, value ); }
+            lock ( __lock ) { SetProperty(ref _config, value); }
         }
     }
     public LocalFile File
@@ -39,9 +35,9 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
         init
         {
             __file = value;
-            if ( string.IsNullOrWhiteSpace( __file.DirectoryName ) ) { return; }
+            if ( string.IsNullOrWhiteSpace(__file.DirectoryName) ) { return; }
 
-            _watcher         =  new LocalDirectory.Watcher( __file.DirectoryName );
+            _watcher         =  new LocalFileWatcher(__file.Parent);
             _watcher.Changed += WatcherOnChanged;
         }
     }
@@ -60,15 +56,15 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
         }
 
         await SaveAsync();
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
     }
 
 
-    public virtual async    Task SaveAsync() => await Config.WriteToFile( __file );
-    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync( __file );
+    public virtual async    Task SaveAsync() => await Config.WriteToFile(__file);
+    protected virtual async Task LoadAsync() => Config = await IniConfig.ReadFromFileAsync(__file);
     protected virtual void WatcherOnChanged( object sender, FileSystemEventArgs e )
     {
-        if ( !string.Equals( e.Name, __file.Name, StringComparison.Ordinal ) ) { return; }
+        if ( !string.Equals(e.Name, __file.Name, StringComparison.Ordinal) ) { return; }
 
         _ = LoadAsync();
     }
@@ -85,7 +81,7 @@ public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDi
     public static TClass Create( LocalFile file ) => new() { File = file };
     public static async ValueTask<TClass> CreateAsync( LocalFile file )
     {
-        TClass result = Create( file );
+        TClass result = Create(file);
         await result.LoadAsync();
         return result;
     }

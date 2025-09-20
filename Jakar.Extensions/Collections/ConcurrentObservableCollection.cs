@@ -11,8 +11,49 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
+public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
+{
+    private static JsonSerializerContext?                                __jsonContext;
+    private static JsonTypeInfo<ConcurrentObservableCollection<TValue>>? __jsonTypeInfo;
+    public static  JsonSerializerContext                                 JsonContext  { get => Validate.ThrowIfNull(__jsonContext);  set => __jsonContext = value; }
+    public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>>  JsonTypeInfo { get => Validate.ThrowIfNull(__jsonTypeInfo); set => __jsonTypeInfo = value; }
+
+
+    public ConcurrentObservableCollection() : base() { }
+    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, int capacity = DEFAULT_CAPACITY ) : base(comparer, capacity) { }
+    public ConcurrentObservableCollection( int                                 capacity ) : base(capacity) { }
+    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : base(in values) { }
+    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    public ConcurrentObservableCollection( params       ReadOnlySpan<TValue>   values ) : base(values) { }
+    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : base(comparer, values) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue>                 values ) : base(values) { }
+    public ConcurrentObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : base(comparer) { }
+    public ConcurrentObservableCollection( TValue[]                            values ) : base(values) { }
+    public ConcurrentObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : base(values, comparer) { }
+
+
+    public static implicit operator ConcurrentObservableCollection<TValue>( Buffer<TValue>         values ) => new(in values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( List<TValue>           values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( HashSet<TValue>        values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ConcurrentBag<TValue>  values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( Collection<TValue>     values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( TValue[]               values ) => new(values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ImmutableArray<TValue> values ) => new(in values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlyMemory<TValue> values ) => new(in values);
+    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlySpan<TValue>   values ) => new(values);
+}
+
+
+
+[Serializable]
+public abstract class ConcurrentObservableCollection<TClass, TValue> : ObservableCollection<TClass, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
+    where TValue : IEquatable<TValue>
+    where TClass : ConcurrentObservableCollection<TClass, TValue>, ICollectionAlerts<TClass, TValue>
 {
     protected internal readonly Lock locker = new();
 
@@ -42,17 +83,6 @@ public class ConcurrentObservableCollection<TValue> : ObservableCollection<TValu
     public ConcurrentObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : base(comparer) { }
     public ConcurrentObservableCollection( TValue[]                            values ) : base(values) { }
     public ConcurrentObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : base(values, comparer) { }
-
-
-    public static implicit operator ConcurrentObservableCollection<TValue>( Buffer<TValue>         values ) => new(in values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( List<TValue>           values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( HashSet<TValue>        values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( ConcurrentBag<TValue>  values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( Collection<TValue>     values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( TValue[]               values ) => new(values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( ImmutableArray<TValue> values ) => new(in values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlyMemory<TValue> values ) => new(in values);
-    public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlySpan<TValue>   values ) => new(values);
 
 
     public override void Set( int index, TValue value )

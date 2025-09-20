@@ -21,7 +21,7 @@ public static partial class AsyncLinq
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static bool                         IsEmpty( this             ICollection                collection )                                => collection.Count == 0;
     public static                                                      ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default ) => source.ToHashSet( EqualityComparer<TElement>.Default, token );
-    public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer, CancellationToken token = default )
+    public static async ValueTask<HashSet<TElement>> ToHashSet<TElement>( this IAsyncEnumerable<TElement> source, EqualityComparer<TElement> comparer, CancellationToken token = default )
     {
         HashSet<TElement> list = new(comparer);
         await foreach ( TElement element in source.WithCancellation( token ) ) { list.Add( element ); }

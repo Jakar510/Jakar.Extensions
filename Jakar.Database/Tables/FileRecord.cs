@@ -187,7 +187,7 @@ public sealed record FileRecord( string?              FileName,
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(AdditionalData);
         hashCode.Add(FileName);

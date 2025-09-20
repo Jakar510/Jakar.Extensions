@@ -4,6 +4,7 @@
 namespace Jakar.Extensions;
 
 
+[method: JsonConstructor]
 public readonly record struct Email( string Value )
 {
     public static implicit operator string( Email email ) => email.Value;

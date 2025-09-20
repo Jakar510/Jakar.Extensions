@@ -33,7 +33,7 @@ public readonly record struct Alert()
     public static implicit operator Alert( string? value ) => new(value);
 
 
-    [Pure] public Error ToError() => new(null, null, Title, Message, null, StringValues.Empty);
+    [Pure] public Error ToError() => new(null, null, Title, Message, null, StringTags.Empty);
 }
 
 

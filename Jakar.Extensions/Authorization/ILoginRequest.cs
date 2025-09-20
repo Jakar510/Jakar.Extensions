@@ -11,7 +11,7 @@ public interface IUserName
 
 
 
-public interface ILoginRequest : IValidator, IUserName
+public interface ILoginRequest : IValidator, IUserName, ICredentials
 {
     public string Password { get; }
 }

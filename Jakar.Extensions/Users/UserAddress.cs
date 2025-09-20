@@ -31,24 +31,24 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqua
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, JsonModels.IJsonModel
+public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, Json.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>
+    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IJsonModel<TClass>
 {
-    private bool                          __isPrimary;
-    private IDictionary<string, JToken?>? __additionalData;
-    private string                        __city            = string.Empty;
-    private string                        __country         = string.Empty;
-    private string                        __line1           = string.Empty;
-    private string                        __line2           = string.Empty;
-    private string                        __postalCode      = string.Empty;
-    private string                        __stateOrProvince = string.Empty;
-    private string?                       __address;
-    private TID                           __id;
+    private bool                            __isPrimary;
+    private JsonObject? __additionalData;
+    private string                          __city            = string.Empty;
+    private string                          __country         = string.Empty;
+    private string                          __line1           = string.Empty;
+    private string                          __line2           = string.Empty;
+    private string                          __postalCode      = string.Empty;
+    private string                          __stateOrProvince = string.Empty;
+    private string?                         __address;
+    private TID                             __id;
 
 
-    [JsonExtensionData]              public IDictionary<string, JToken?>? AdditionalData { get => __additionalData;         set => SetProperty(ref __additionalData, value); }
-    [StringLength(UNICODE_CAPACITY)] public string?                       Address        { get => __address ??= ToString(); set => SetProperty(ref __address,        value); }
+    [JsonExtensionData]              public JsonObject? AdditionalData { get => __additionalData;         set => SetProperty(ref __additionalData, value); }
+    [StringLength(UNICODE_CAPACITY)] public string?                         Address        { get => __address ??= ToString(); set => SetProperty(ref __address,        value); }
 
 
     [StringLength(UNICODE_CAPACITY)]
@@ -204,54 +204,4 @@ public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddre
 
         return ReferenceEquals(this, other) || ( string.Equals(Line1, other.Line1, StringComparison.Ordinal) && string.Equals(Line2, other.Line2, StringComparison.Ordinal) && string.Equals(City, other.City, StringComparison.Ordinal) && string.Equals(PostalCode, other.PostalCode, StringComparison.Ordinal) && string.Equals(StateOrProvince, other.StateOrProvince, StringComparison.Ordinal) );
     }
-}
-
-
-
-[Serializable]
-public sealed class UserAddress<TID> : UserAddress<UserAddress<TID>, TID>, IAddress<UserAddress<TID>, TID>, IEqualComparable<UserAddress<TID>>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public UserAddress() { }
-    public UserAddress( Match                            match ) : base(match) { }
-    public UserAddress( IAddress<TID>                    address ) : base(address) { }
-    public UserAddress( string                           line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) : base(line1, line2, city, stateOrProvince, postalCode, country, id) { }
-    public static UserAddress<TID> Create( Match         match )                                                                                                         => new(match);
-    public static UserAddress<TID> Create( IAddress<TID> address )                                                                                                       => new(address);
-    public static UserAddress<TID> Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default ) => new(line1, line2, city, stateOrProvince, postalCode, country, id);
-    public new static UserAddress<TID> Parse( string value, IFormatProvider? provider )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        Match               match         = Validate.Re.Address.Match(value);
-        return new UserAddress<TID>(match);
-    }
-    public new static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress<TID>? result )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
-        try
-        {
-            result = !string.IsNullOrWhiteSpace(value)
-                         ? Parse(value, provider)
-                         : null;
-
-            return result is not null;
-        }
-        catch ( Exception e )
-        {
-            telemetrySpan.AddException(e);
-            result = null;
-            return false;
-        }
-    }
-
-
-    public override bool Equals( object? other )                            => other is UserAddress<TID> x && Equals(x);
-    public override int  GetHashCode()                                      => HashCode.Combine(Line1, Line2, City, PostalCode, Country, ID);
-    public static   bool operator ==( UserAddress<TID>? left, UserAddress<TID>? right ) => EqualityComparer<UserAddress<TID>>.Default.Equals(left, right);
-    public static   bool operator !=( UserAddress<TID>? left, UserAddress<TID>? right ) => !EqualityComparer<UserAddress<TID>>.Default.Equals(left, right);
-    public static   bool operator >( UserAddress<TID>   left, UserAddress<TID>  right ) => left.CompareTo(right) > 0;
-    public static   bool operator >=( UserAddress<TID>  left, UserAddress<TID>  right ) => left.CompareTo(right) >= 0;
-    public static   bool operator <( UserAddress<TID>   left, UserAddress<TID>  right ) => left.CompareTo(right) < 0;
-    public static   bool operator <=( UserAddress<TID>  left, UserAddress<TID>  right ) => left.CompareTo(right) <= 0;
 }

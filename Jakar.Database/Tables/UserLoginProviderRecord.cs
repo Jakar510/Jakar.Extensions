@@ -81,7 +81,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     }
     public override int GetHashCode()
     {
-        HashCode hashCode = new HashCode();
+        HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
         hashCode.Add(LoginProvider,       StringComparer.InvariantCultureIgnoreCase);
         hashCode.Add(ProviderDisplayName, StringComparer.InvariantCultureIgnoreCase);

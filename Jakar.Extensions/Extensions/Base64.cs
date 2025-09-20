@@ -13,8 +13,8 @@ public static class Base64
     }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public static string ToBase64( this object jsonSerializablePayload ) => jsonSerializablePayload.ToBase64(Encoding.Default);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+     public static string ToBase64( this object jsonSerializablePayload ) => jsonSerializablePayload.ToBase64(Encoding.Default);
+    
     public static string ToBase64( this object jsonSerializablePayload, Encoding encoding )
     {
         string temp = jsonSerializablePayload.ToJson();
@@ -47,8 +47,8 @@ public static class Base64
     public static string ToBase64( this ref readonly ReadOnlySpan<byte> payload ) => Convert.ToBase64String(payload);
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public static TResult JsonFromBase64String<TResult>( this string b64 ) => b64.JsonFromBase64String<TResult>(Encoding.Default);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+     public static TResult JsonFromBase64String<TResult>( this string b64 ) => b64.JsonFromBase64String<TResult>(Encoding.Default);
+    
     public static TResult JsonFromBase64String<TResult>( this string b64, Encoding encoding )
     {
         byte[] bytes = b64.FromBase64String();

@@ -64,7 +64,7 @@ public static partial class AsyncLinq
 
 
     public static IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source ) => source.Distinct( EqualityComparer<TElement>.Default );
-    public static async IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source, IEqualityComparer<TElement> comparer )
+    public static async IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source, EqualityComparer<TElement> comparer )
     {
         HashSet<TElement> set = await source.ToHashSet( comparer );
         foreach ( TElement element in set ) { yield return element; }
@@ -73,7 +73,7 @@ public static partial class AsyncLinq
         source.DistinctBy( keySelector, EqualityComparer<TKey>.Default );
     public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector ) =>
         source.DistinctBy( keySelector, EqualityComparer<TKey>.Default );
-    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, IEqualityComparer<TKey> comparer )
+    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, EqualityComparer<TKey> comparer )
     {
         HashSet<TKey> set = new(comparer);
 
@@ -82,7 +82,7 @@ public static partial class AsyncLinq
             if ( set.Add( keySelector( element ) ) ) { yield return element; }
         }
     }
-    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector, IEqualityComparer<TKey> comparer )
+    public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector, EqualityComparer<TKey> comparer )
     {
         HashSet<TKey> set = new(comparer);
 

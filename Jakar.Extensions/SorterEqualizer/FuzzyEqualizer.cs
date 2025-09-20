@@ -13,16 +13,16 @@ public interface IFuzzyEquals<TValue> : IEqualComparable<TValue>
 public sealed class FuzzyEqualizer<TValue> : IEqualityComparer<TValue>, IEqualityComparer
     where TValue : IFuzzyEquals<TValue>
 {
-    public static readonly  FuzzyEqualizer<TValue> Default    = new(); 
+    public static readonly FuzzyEqualizer<TValue> Default = new();
 
 
     bool IEqualityComparer.Equals( object? x, object? y )
     {
-        if ( x is not TValue left ) { throw new ExpectedValueTypeException( nameof(x), x, typeof(TValue) ); }
+        if ( x is not TValue left ) { throw new ExpectedValueTypeException(nameof(x), x, typeof(TValue)); }
 
-        if ( y is not TValue right ) { throw new ExpectedValueTypeException( nameof(y), y, typeof(TValue) ); }
+        if ( y is not TValue right ) { throw new ExpectedValueTypeException(nameof(y), y, typeof(TValue)); }
 
-        return left.Equals( right );
+        return left.Equals(right);
     }
 
     int IEqualityComparer.GetHashCode( object obj ) => obj.GetHashCode();
@@ -30,15 +30,13 @@ public sealed class FuzzyEqualizer<TValue> : IEqualityComparer<TValue>, IEqualit
 
     public bool Equals( TValue? left, TValue? right )
     {
-        if (  typeof(TValue).IsByRef && ReferenceEquals( left, right ) ) { return true; }
+        if ( typeof(TValue).IsByRef && ReferenceEquals(left, right) ) { return true; }
 
         if ( left is null && right is null ) { return true; }
 
         if ( left is null || right is null ) { return false; }
 
-        return left.FuzzyEquals( right );
+        return left.FuzzyEquals(right);
     }
-
-
     public int GetHashCode( TValue obj ) => obj.GetHashCode();
 }

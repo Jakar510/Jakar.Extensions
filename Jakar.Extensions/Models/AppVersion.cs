@@ -2,27 +2,30 @@
 
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
-[Serializable, JsonConverter(typeof(AppVersionJsonNetConverter)), JsonObject]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISpanParsable<AppVersion>, IComparisonOperators<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>
+[Serializable, JsonConverter(typeof(AppVersionJsonConverter))]
+public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>
 {
     private const          char                       SEPARATOR = '.';
-    public static readonly AppVersion                 Default   = new();
+    public static readonly AppVersion                 Default   = new(0);
     private                string?                    __string;
     public static          FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<AppVersion>.Default; }
-    public                 int?                       Build          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    int IReadOnlyCollection<int>.                     Count          => Scheme.AsInt();
-    public              AppVersionFlags               Flags          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              bool                          IsValid        => !ReferenceEquals(this, Default) && this != Default;
-    [JsonIgnore] public int                           Length         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Flags.Length + 65; }
-    public              int?                          Maintenance    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int                           Major          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          MajorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          Minor          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                          MinorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              Format                        Scheme         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public static          JsonSerializerContext      JsonContext    => JakarExtensionsContext.Default;
 
 
-    static AppVersion() => JsonNet.Serializer.Converters.Add(AppVersionJsonNetConverter.Instance);
+    public static JsonTypeInfo<AppVersion> JsonTypeInfo  => JakarExtensionsContext.Default.AppVersion;
+    public        int?                     Build         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    int IReadOnlyCollection<int>.          Count         => Scheme.AsInt();
+    public              AppVersionFlags    Flags         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              bool               IsValid       => !ReferenceEquals(this, Default) && this != Default;
+    [JsonIgnore] public int                Length        { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Flags.Length + 65; }
+    public              int?               Maintenance   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              int                Major         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              int?               MajorRevision { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              int?               Minor         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              int?               MinorRevision { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              Format             Scheme        { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+
+
     public AppVersion() : this(0, null, null, null, null, null, AppVersionFlags.Stable) { }
     public AppVersion( int major ) : this(major, null, null, null, null, null, AppVersionFlags.Stable) { }
     public AppVersion( int major, int  minor ) : this(major, minor, null, null, null, null, AppVersionFlags.Stable) { }
@@ -240,7 +243,9 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
 
 
     /// <summary>
-    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw <see cref="InvalidOperationException"/>
+    ///     If the <see cref="Scheme"/> is any of [ <see cref="Format.Singular"/> , <see cref="Format.DetailedRevisions"/> , <see cref="Format.Complete"/> ], will throw
+    ///     <see
+    ///         cref="InvalidOperationException"/>
     /// </summary>
     /// <returns> </returns>
     /// <exception cref="InvalidOperationException"> </exception>
@@ -403,6 +408,29 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
     public override int  GetHashCode()         => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags);
 
 
+    public string   ToJson()     => ToString();
+    public JsonNode ToJsonNode() => Validate.ThrowIfNull(Json.ToJsonNode(this));
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out AppVersion? result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = null;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
+    }
+    public static AppVersion FromJson( string json ) => json.FromJson<AppVersion>();
+
+
     // ---------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -427,31 +455,22 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, ISp
         /// <summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
         Complete = 6
     }
+}
 
 
 
-    public class AppVersionJsonNetConverter : JsonConverter<AppVersion>
+public class AppVersionJsonConverter : JsonConverter<AppVersion>
+{
+    public static readonly AppVersionJsonConverter Instance = new();
+
+
+    public override AppVersion? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
     {
-        public static   AppVersionJsonNetConverter Instance { get; } = new();
-        public override bool                       CanRead  => true;
-        public override bool                       CanWrite => true;
+        string? value = reader.GetString();
 
-
-        public override AppVersion? ReadJson( JsonReader reader, Type objectType, AppVersion? existingValue, bool hasExistingValue, JsonSerializer serializer ) => reader.Value is string version
-                                                                                                                                                                       ? Parse(version)
-                                                                                                                                                                       : existingValue;
-
-
-        public override void WriteJson( JsonWriter writer, AppVersion? value, JsonSerializer serializer )
-        {
-            if ( value is null )
-            {
-                writer.WriteNull();
-                return;
-            }
-
-            JToken token = value.ToString();
-            token.WriteTo(writer);
-        }
+        return AppVersion.TryParse(value, null, out AppVersion? result)
+                   ? result
+                   : null;
     }
+    public override void Write( Utf8JsonWriter writer, AppVersion value, JsonSerializerOptions options ) => writer.WriteStringValue(value.ToString());
 }

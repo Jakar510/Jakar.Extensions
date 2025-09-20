@@ -10,7 +10,7 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat(100);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed"), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
         where TValue : Exception
     {
@@ -30,7 +30,7 @@ public static class ConsoleExtensions
         return builder;
     }
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
         where TValue : notnull
     {

@@ -37,6 +37,9 @@
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
 		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
+		<EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+		<PublishTrimmed>true</PublishTrimmed>
+		<TrimMode>link</TrimMode>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -93,7 +96,6 @@
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
-		<PackageReference Include="Newtonsoft.Json" />
 		<PackageReference Include="Nito.Collections.Deque" />
  		<PackageReference Include="Otp.NET" />
 		<PackageReference Include="Portable.BouncyCastle" />
@@ -107,8 +109,10 @@
 		<PackageReference Include="System.ComponentModel.Annotations" />
 		<PackageReference Include="System.IO.Hashing" />
 		<PackageReference Include="System.Net.Http" />
+		<PackageReference Include="System.Net.Http.Json" />
 		<PackageReference Include="System.Text.Encoding.CodePages" />
 		<PackageReference Include="System.Text.Encodings.Web" />
+		<PackageReference Include="System.Text.Json" />
 		<PackageReference Include="System.Text.RegularExpressions" />
 		<PackageReference Include="System.Threading.Tasks" />
 		<PackageReference Include="System.Threading.Tasks.Dataflow" />

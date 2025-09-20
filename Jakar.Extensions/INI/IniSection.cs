@@ -98,7 +98,7 @@ public partial class IniConfig
 
         #region Gets
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+        
         public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
         {
             string? s = this[key];
@@ -109,7 +109,7 @@ public partial class IniConfig
 
             return value is not null;
         }
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+        
         public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue[]? value )
         {
             value = this[key]?.FromJson<TValue[]>();
@@ -122,7 +122,7 @@ public partial class IniConfig
             where TNumber : INumber<TNumber> => TNumber.TryParse(this[key], null, out value);
 
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+        
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
             value = this[key]?.FromJson<string[]>();
@@ -173,14 +173,14 @@ public partial class IniConfig
 
         #region Adds
 
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+        
         public void AddJson<TValue>( string key, TValue value )
             where TValue : class => this[key] = value.ToJson();
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
+         public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
-        [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
+         public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
+         public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
         public                                                                                                  void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
         public                                                                                                  void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
         public                                                                                                  void Add( string         key, TimeSpan            value ) => this[key] = value.ToString();

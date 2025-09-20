@@ -1,4 +1,5 @@
-﻿using ZLinq;
+﻿using System.Formats.Asn1;
+using ZLinq;
 using ZLinq.Linq;
 using ZLinq.Traversables;
 
@@ -8,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>
+public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;
@@ -16,17 +17,19 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
-    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory);              set => Environment.CurrentDirectory = value.FullPath; }
-    public              DateTime        CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public              bool            DoesNotExist      => !Exists;
-    public              bool            Exists            => Info.Exists;
-    [JsonIgnore] public DirectoryInfo   Info              => _info;
-    bool TempFile.ITempFile.            IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
-    public              DateTime        LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              DateTime        LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              string          Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory? Parent            => GetParent();
-    public              string          Root              => Directory.GetDirectoryRoot(FullPath);
+    public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
+    public static       JsonSerializerContext        JsonContext       => JakarExtensionsContext.Default;
+    public static       JsonTypeInfo<LocalDirectory> JsonTypeInfo      => JakarExtensionsContext.Default.LocalDirectory;
+    public              DateTime                     CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public              bool                         DoesNotExist      => !Exists;
+    public              bool                         Exists            => Info.Exists;
+    [JsonIgnore] public DirectoryInfo                Info              => _info;
+    bool TempFile.ITempFile.                         IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    public              DateTime                     LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              DateTime                     LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              string                       Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory?              Parent            => GetParent();
+    public              string                       Root              => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
@@ -54,21 +57,13 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public static implicit operator string( LocalDirectory                         directory ) => directory.FullPath;
-    public static implicit operator DirectoryInfo( LocalDirectory                  directory ) => directory.Info;
-    public static implicit operator ReadOnlySpan<char>( LocalDirectory             directory ) => directory.FullPath;
-    public static implicit operator LocalDirectory( DirectoryInfo                  info )      => new(info);
-    public static implicit operator LocalDirectory( ReadOnlySpan<char>             path )      => new(path.ToString());
-    public static implicit operator LocalDirectory( string                         path )      => new(path);
-    public static implicit operator Watcher( LocalDirectory                        directory ) => new(directory);
-    public static implicit operator Set( LocalDirectory                            directory ) => new(directory.GetSubFolders());
-    public static implicit operator Collection( LocalDirectory                     directory ) => new(directory.GetSubFolders());
-    public static implicit operator ConcurrentCollection( LocalDirectory           directory ) => new(directory.GetSubFolders());
-    public static implicit operator Directories( LocalDirectory                    directory ) => new(directory.GetSubFolders());
-    public static implicit operator LocalFile.Collection( LocalDirectory           directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Set( LocalDirectory                  directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.Files( LocalDirectory                directory ) => new(directory.GetFiles());
-    public static implicit operator LocalFile.ConcurrentCollection( LocalDirectory directory ) => new(directory.GetFiles());
+    public static implicit operator string( LocalDirectory                             directory ) => directory.FullPath;
+    public static implicit operator DirectoryInfo( LocalDirectory                      directory ) => directory.Info;
+    public static implicit operator ReadOnlySpan<char>( LocalDirectory                 directory ) => directory.FullPath;
+    public static implicit operator LocalDirectory( DirectoryInfo                      info )      => new(info);
+    public static implicit operator LocalDirectory( ReadOnlySpan<char>                 path )      => new(path.ToString());
+    public static implicit operator LocalDirectory( string                             path )      => new(path);
+    public static implicit operator LocalFileWatcher( LocalDirectory              directory ) => new(directory);
 
 
     public static LocalDirectory Create( DirectoryInfo      file ) => file;
@@ -499,102 +494,5 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public static bool operator >=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) >= 0;
     public static bool operator <( LocalDirectory   left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) < 0;
     public static bool operator <=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) <= 0;
-
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-    [Serializable]
-    public class Collection : ObservableCollection<LocalDirectory>
-    {
-        public Collection() : base() { }
-        public Collection( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentCollection : ConcurrentObservableCollection<LocalDirectory>
-    {
-        public ConcurrentCollection() : base() { }
-        public ConcurrentCollection( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class ConcurrentQueue : ConcurrentQueue<LocalDirectory>
-    {
-        public ConcurrentQueue() : base() { }
-        public ConcurrentQueue( params ReadOnlySpan<LocalDirectory> values ) : base()
-        {
-            foreach ( LocalDirectory value in values ) { Enqueue(value); }
-        }
-    }
-
-
-
-    [Serializable]
-    public class Deque : ConcurrentDeque<LocalDirectory>
-    {
-        public Deque() : base() { }
-        public Deque( params ReadOnlySpan<LocalDirectory> values ) : base(values) { }
-    }
-
-
-
-    [Serializable]
-    public class Directories( int capacity ) : List<LocalDirectory>(capacity)
-    {
-        public Directories() : this(DEFAULT_CAPACITY) { }
-        public Directories( params ReadOnlySpan<LocalDirectory> values ) : this(values.Length)
-        {
-            foreach ( LocalDirectory value in values ) { Add(value); }
-        }
-    }
-
-
-
-    [Serializable]
-    public class Queue : Queue<LocalDirectory>
-    {
-        public Queue() : base() { }
-        public Queue( params ReadOnlySpan<LocalDirectory> values ) : base()
-        {
-            foreach ( LocalDirectory value in values ) { Enqueue(value); }
-        }
-    }
-
-
-
-    [Serializable]
-    public class Set : HashSet<LocalDirectory>
-    {
-        public Set() : base() { }
-        public Set( int capacity ) : base(capacity) { }
-        public Set( params ReadOnlySpan<LocalDirectory> values ) : base()
-        {
-            foreach ( LocalDirectory value in values ) { Add(value); }
-        }
-    }
-
-
-
-    [SuppressMessage("ReSharper", "IntroduceOptionalParameters.Global")]
-    public class Watcher : FileSystemWatcher
-    {
-        public readonly LocalDirectory Directory;
-
-
-        /// <summary> Uses the <see cref="CurrentDirectory"/> </summary>
-        public Watcher() : this(CurrentDirectory) { }
-        public Watcher( LocalDirectory directory ) : this(directory, "*") { }
-        public Watcher( LocalDirectory directory, string searchFilter ) : this(directory, searchFilter, NotifyFilters.Size | NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.LastWrite) { }
-        public Watcher( LocalDirectory directory, string searchFilter, NotifyFilters filters ) : base(directory.FullPath, searchFilter)
-        {
-            Directory    = directory;
-            NotifyFilter = filters;
-        }
-    }
 }
+

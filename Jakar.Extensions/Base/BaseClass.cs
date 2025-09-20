@@ -17,13 +17,9 @@ public class BaseClass
 
 
 [Serializable]
-public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : BaseClass<TClass>, IEqualComparable<TClass>
+public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : BaseClass<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToJson()       => this.ToJson(Formatting.None);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToPrettyJson() => this.ToJson(Formatting.Indented);
-
-
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
 
@@ -38,31 +34,31 @@ public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, ICompar
                    ? CompareTo(t)
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
+
+
     public override bool Equals( object? other ) => ReferenceEquals(this, other) || ( other is TClass x && Equals(x) );
     public override int  GetHashCode()           => RuntimeHelpers.GetHashCode(this);
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
+    public virtual JsonNode ToJsonNode() => Validate.ThrowIfNull(JsonSerializer.SerializeToNode((TClass)this, TClass.JsonTypeInfo));
+    public virtual string   ToJson()     => Validate.ThrowIfNull(JsonSerializer.Serialize((TClass)this, TClass.JsonTypeInfo));
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(json);
-        return json.FromJson<TClass>();
-    }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
         try
         {
-            result = json?.FromJson<TClass>();
-            return result is not null;
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = null;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
         }
-        catch ( Exception e )
-        {
-            telemetrySpan.AddException(e);
-            result = null;
-            return false;
-        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
     }
+    public static TClass FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TClass.JsonTypeInfo));
 }

@@ -5,7 +5,7 @@
 		<name>Jakar.Extensions</name>
 	</assembly>
 	<members>
-		<member name="M:Jakar.Extensions.IObservableObject.SetProperty``1(``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.IObservableObject.SetProperty``1(``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary>
 				<para> Checks the values with <paramref name="equalityComparer" /> . </para>
 				Then calls <see cref="M:Jakar.Extensions.IObservableObject.OnPropertyChanging(System.String)" /> , sets the value, then calls
@@ -21,28 +21,28 @@
 			</returns>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{System.Threading.Tasks.Task},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{System.Threading.Tasks.Task},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.Func{System.Threading.Tasks.Task},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Func{``0,System.Threading.Tasks.Task},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member
-			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Windows.Input.ICommand,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+			name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Windows.Input.ICommand,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action,System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action,System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.IEqualityComparer{``0},System.Action,System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Collections.Generic.EqualityComparer{``0},System.Action,System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
-		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action{``0},System.Collections.Generic.IEqualityComparer{``0},System.String)">
+		<member name="M:Jakar.Extensions.ObservableObjects.SetProperty``1(Jakar.Extensions.IObservableObject,``0@,``0,System.Action{``0},System.Collections.Generic.EqualityComparer{``0},System.String)">
 			<summary> "onChanged" only called if the backingStore value has changed. </summary>
 		</member>
 		<member name="M:Jakar.Extensions.Buffer`1.Grow(System.UInt32)">

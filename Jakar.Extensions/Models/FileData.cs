@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IFileMetaData : JsonModels.IJsonModel
+public interface IFileMetaData : Json.IJsonModel
 {
     string?   FileDescription { get; }
     string?   FileName        { get; }
@@ -62,7 +62,7 @@ public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMeta
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TSelf : class, IFileData<TSelf, TID, TFileMetaData>
 {
-    public abstract static TSelf         Create( IFileData<TID, TFileMetaData>                                      data );
+    public abstract static TSelf  Create( IFileData<TID, TFileMetaData>                                      data );
     public abstract static TSelf  Create( IFileData<TID>                                                     data, TFileMetaData metaData );
     public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID, TFileMetaData>? data );
     public abstract static TSelf? TryCreate( [NotNullIfNotNull(nameof(data))] IFileData<TID>?                data, TFileMetaData metaData );
@@ -81,10 +81,10 @@ public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMeta
 
 [Serializable, SuppressMessage("ReSharper", "InconsistentNaming"), SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: SetsRequiredMembers]
-public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass, IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
+public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass<TSelf>, IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
-    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>
+    where TSelf : FileData<TSelf, TID, TFileMetaData>, IFileData<TSelf, TID, TFileMetaData>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     public required                                  long          FileSize { get; init; } = fileSize;
     [StringLength(UNICODE_CAPACITY)] public required string        Hash     { get; init; } = hash;
@@ -164,11 +164,11 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
-                                                                                                                               ? Create(content)
-                                                                                                                               : null;
+                                                                                                                        ? Create(content)
+                                                                                                                        : null;
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID>? content, TFileMetaData metaData ) => content is not null
-                                                                                                                                        ? Create(content, metaData)
-                                                                                                                                        : null;
+                                                                                                                                 ? Create(content, metaData)
+                                                                                                                                 : null;
     public static async ValueTask<TSelf> Create( LocalFile file, CancellationToken token = default )
     {
         using TelemetrySpan  telemetrySpan = TelemetrySpan.Create();
@@ -184,7 +184,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     }
 
 
-    public virtual int CompareTo( TSelf? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -201,7 +201,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
         return Comparer<TFileMetaData>.Default.Compare(MetaData, other.MetaData);
     }
-    public virtual bool Equals( TSelf? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 
@@ -223,18 +223,20 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 
 [Serializable, SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
-public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : IFileMetaData<FileMetaData>
+public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>, IJsonModel<FileMetaData>
 {
-    [JsonExtensionData]              public IDictionary<string, JToken?>? AdditionalData  { get; set; }
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileDescription { get; set; }  = fileDescription;
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileName        { get; init; } = fileName;
-    [StringLength(UNICODE_CAPACITY)] public string?                       FileType        { get; init; } = fileType;
-    [StringLength(UNICODE_CAPACITY)] public MimeType?                     MimeType        { get; init; } = mimeType;
+    public static                           JsonSerializerContext           JsonContext     => JakarExtensionsContext.Default;
+    public static                           JsonTypeInfo<FileMetaData>      JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
+    [JsonExtensionData]              public JsonObject? AdditionalData  { get; set; }
+    [StringLength(UNICODE_CAPACITY)] public string?                         FileDescription { get; set; }  = fileDescription;
+    [StringLength(UNICODE_CAPACITY)] public string?                         FileName        { get; init; } = fileName;
+    [StringLength(UNICODE_CAPACITY)] public string?                         FileType        { get; init; } = fileType;
+    [StringLength(UNICODE_CAPACITY)] public MimeType?                       MimeType        { get; init; } = mimeType;
 
 
     public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)
     {
-        if ( value.AdditionalData is not null ) { AdditionalData = new Dictionary<string, JToken?>(value.AdditionalData); }
+        if ( value.AdditionalData is not null ) { AdditionalData = new JsonObject(value.AdditionalData); }
     }
     public FileMetaData( LocalFile value ) : this(value.Name, value.ContentType, value.Mime) { }
 
@@ -257,7 +259,7 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
 
         return ReferenceEquals(this, other) || ( other is FileMetaData data && Equals(data) );
     }
-    public bool Equals( FileMetaData? other )
+    public override bool Equals( FileMetaData? other )
     {
         if ( other is null ) { return false; }
 
@@ -265,7 +267,7 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
 
         return FileName == other.FileName && FileType == other.FileType && FileDescription == other.FileDescription;
     }
-    public int CompareTo( FileMetaData? other )
+    public override int CompareTo( FileMetaData? other )
     {
         if ( other is null ) { return 1; }
 
@@ -278,14 +280,6 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
         if ( fileTypeComparison != 0 ) { return fileTypeComparison; }
 
         return string.Compare(FileDescription, other.FileDescription, StringComparison.Ordinal);
-    }
-    public int CompareTo( object? obj )
-    {
-        if ( obj is null ) { return 1; }
-
-        return obj is FileMetaData other
-                   ? CompareTo(other)
-                   : throw new ArgumentException($"Object must be of type {nameof(FileMetaData)}");
     }
     public override int GetHashCode() => HashCode.Combine(FileName, FileType, MimeType);
 

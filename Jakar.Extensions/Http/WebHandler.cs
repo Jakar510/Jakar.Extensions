@@ -107,12 +107,12 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<bool>>    AsBool( CancellationToken          token )                             => CreateResponse(AsBool,  token);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<byte[]>>  AsBytes( CancellationToken         token )                             => CreateResponse(AsBytes, token);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<JToken>>  AsJson( CancellationToken          token )                             => AsJson(JsonNet.LoadSettings, token);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<JToken>>  AsJson( JsonLoadSettings           settings, CancellationToken token ) => CreateResponse(AsJson, settings, Encoding, token);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<TResult>> AsJson<TResult>( CancellationToken token )                               => AsJson<TResult>(JsonNet.Serializer, token);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ValueTask<WebResponse<TResult>> AsJson<TResult>( JsonSerializer    serializer, CancellationToken token ) => CreateResponse(AsJson<TResult>, serializer, Encoding, token);
+    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken              token )                            => CreateResponse(AsBool,  token);
+    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken             token )                            => CreateResponse(AsBytes, token);
+    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken              token )                            => AsJson(Json.Options, token);
+    public ValueTask<WebResponse<JsonNode>> AsJson( JsonSerializerOptions          options, CancellationToken token ) => CreateResponse(AsJson, options, token);
+    public ValueTask<WebResponse<TResult>>  AsJson<TResult>( CancellationToken     token )                            => AsJson<TResult>(Json.Options, token);
+    public ValueTask<WebResponse<TResult>>  AsJson<TResult>( JsonSerializerOptions options, CancellationToken token ) => CreateResponse(AsJson<TResult>, options, token);
 
     public ValueTask<WebResponse<LocalFile>>            AsFile( CancellationToken   token )                                   => CreateResponse(AsFile, token);
     public ValueTask<WebResponse<LocalFile>>            AsFile( string              fileNameHeader, CancellationToken token ) => CreateResponse(AsFile, fileNameHeader, token);
@@ -135,24 +135,25 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
                        : Errors.Create(response.StatusCode.ToStatus());
         }
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static async ValueTask<JToken> AsJson( HttpResponseMessage response, JsonLoadSettings settings, Encoding encoding, CancellationToken token )
-    {
-        using TelemetrySpan      telemetrySpan = TelemetrySpan.Create();
-        await using MemoryStream stream        = await AsStream(response, token);
-        using StreamReader       sr            = new(stream, encoding);
-        await using JsonReader   reader        = new JsonTextReader(sr);
-        return await JToken.ReadFromAsync(reader, settings, token);
-    }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializer serializer, Encoding encoding, CancellationToken token )
+
+
+    public static async ValueTask<JsonNode> AsJson( HttpResponseMessage response, JsonSerializerOptions options, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync(token);
-        TResult            result  = stream.FromJson<TResult>(encoding);
-        return result;
+        JsonNode?          result  = await stream.FromJson(options, token);
+        return Validate.ThrowIfNull(result);
+    }
+    public static async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializerOptions options, CancellationToken token )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        response.EnsureSuccessStatusCode();
+        HttpContent        content = response.Content;
+        await using Stream stream  = await content.ReadAsStreamAsync(token);
+        TResult?           result  = await stream.FromJson<TResult>(options, token);
+        return Validate.ThrowIfNull(result);
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
     {

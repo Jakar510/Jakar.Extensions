@@ -7,8 +7,8 @@ public class FeedBackTrackerException : Exception
     public FeedBackTrackerException( string message ) : base(message) { }
     public FeedBackTrackerException( string message, Exception inner ) : base(message, inner) { }
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public FeedBackTrackerException( object dict ) : this(dict.ToPrettyJson()) { }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public FeedBackTrackerException( object dict, Exception inner ) : this(dict.ToPrettyJson(), inner) { }
+     public FeedBackTrackerException( object dict ) : this(dict.ToPrettyJson()) { }
+     public FeedBackTrackerException( object dict, Exception inner ) : this(dict.ToPrettyJson(), inner) { }
 
 
     protected void Update( object value )

@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using CommunityToolkit.Maui;
+using CommunityToolkit.Maui.Core;
+using Microsoft.Maui.Controls.Compatibility.Hosting;
 using Serilog;
 
 
@@ -9,7 +11,7 @@ namespace TestMauiApp;
 
 public static class MauiProgram
 {
-    [SuppressMessage( "ReSharper", "RedundantTypeArgumentsOfMethod" )]
+    [SuppressMessage("ReSharper", "RedundantTypeArgumentsOfMethod")]
     public static MauiApp CreateMauiApp()
     {
         MauiAppBuilder builder = MauiApp.CreateBuilder();
@@ -17,15 +19,18 @@ public static class MauiProgram
 
         builder.UseMauiApp<App>()
                .UseMauiCommunityToolkit()
-               .ConfigureFonts( static fonts =>
-                                {
-                                    fonts.AddFont( "OpenSans-Regular.ttf",  "OpenSansRegular" );
-                                    fonts.AddFont( "OpenSans-Semibold.ttf", "OpenSansSemibold" );
-                                } );
+               .UseMauiCommunityToolkitMediaElement()
+               .UseMauiCommunityToolkitCore()
+               .UseMauiCompatibility()
+               .ConfigureFonts(static fonts =>
+                               {
+                                   fonts.AddFont("OpenSans-Regular.ttf",  "OpenSansRegular");
+                                   fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                               });
 
         builder.Services.AddHttpClient();
 
-        builder.Logging.AddSerilog( App.Logger, true );
+        builder.Logging.AddSerilog(App.Logger, true);
         return builder.Build();
     }
 }

@@ -14,13 +14,9 @@ public record BaseRecord
 
 
 
-public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
-    where TClass : BaseRecord<TClass>, IEqualityOperators<TClass>, IComparisonOperators<TClass>
+public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
+    where TClass : BaseRecord<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToJson()       => this.ToJson(Formatting.None);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToPrettyJson() => this.ToJson(Formatting.Indented);
-
-
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
     public int CompareTo( object? other )
@@ -34,36 +30,34 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
 
-
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
+    
+    public virtual JsonNode ToJsonNode() => Validate.ThrowIfNull(JsonSerializer.SerializeToNode((TClass)this, TClass.JsonTypeInfo));
+    public virtual string   ToJson()     => Validate.ThrowIfNull(JsonSerializer.Serialize((TClass)this, TClass.JsonTypeInfo));
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(json);
-        return json.FromJson<TClass>();
-    }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
-    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
-    {
-        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-
         try
         {
-            result = json?.FromJson<TClass>();
-            return result is not null;
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = null;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
         }
-        catch ( Exception e )
-        {
-            telemetrySpan.AddException(e);
-            result = null;
-            return false;
-        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = null;
+        return false;
     }
+    public static TClass FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TClass.JsonTypeInfo));
 }
 
 
 
 public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<TID>
-    where TClass : BaseRecord<TClass, TID>, IEqualComparable<TClass>
+    where TClass : BaseRecord<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID __id;

@@ -12,17 +12,17 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
     public TKey?   Key      { get; private set; }
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( TKey      key,   object?                   value, params ReadOnlySpan<Type> expected ) : this(key, value?.GetType(), expected) { }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( TKey      key,   Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value,                                             in expected, key)) => Update(value,                   in expected, key);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( Exception inner, TKey                      key,   object?                   value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value?.GetType(), in expected, key), inner) => Update(value?.GetType(), in expected, key);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( Exception inner, TKey                      key,   Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value,            in expected, key), inner) => Update(value,            in expected, key);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( object?   value, params ReadOnlySpan<Type> expected ) : this(value?.GetType(), expected) => Update(value?.GetType(),                                         in expected);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( Type?     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value, in expected)) => Update(value,                                                in expected);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( Exception inner, object?                   value, params ReadOnlySpan<Type> expected ) : this(inner, value?.GetType(), expected) => Update(value?.GetType(), in expected);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public ExpectedValueTypeException( Exception inner, Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value, in expected), inner) => Update(value,        in expected);
+     public ExpectedValueTypeException( TKey      key,   object?                   value, params ReadOnlySpan<Type> expected ) : this(key, value?.GetType(), expected) { }
+     public ExpectedValueTypeException( TKey      key,   Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value,                                             in expected, key)) => Update(value,                   in expected, key);
+     public ExpectedValueTypeException( Exception inner, TKey                      key,   object?                   value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value?.GetType(), in expected, key), inner) => Update(value?.GetType(), in expected, key);
+     public ExpectedValueTypeException( Exception inner, TKey                      key,   Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value,            in expected, key), inner) => Update(value,            in expected, key);
+     public ExpectedValueTypeException( object?   value, params ReadOnlySpan<Type> expected ) : this(value?.GetType(), expected) => Update(value?.GetType(),                                         in expected);
+     public ExpectedValueTypeException( Type?     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value, in expected)) => Update(value,                                                in expected);
+     public ExpectedValueTypeException( Exception inner, object?                   value, params ReadOnlySpan<Type> expected ) : this(inner, value?.GetType(), expected) => Update(value?.GetType(), in expected);
+     public ExpectedValueTypeException( Exception inner, Type?                     value, params ReadOnlySpan<Type> expected ) : base(GetMessage(value, in expected), inner) => Update(value,        in expected);
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    
     protected static string GetMessage( Type? actual, scoped ref readonly ReadOnlySpan<Type> expected, TKey? key = default )
     {
         StringBuilder builder = new(1024);
@@ -37,11 +37,11 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
 
         return builder.ToString().Replace("\r\n", "\n");
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] protected static string    GetTypes( scoped ref readonly     ReadOnlySpan<Type> expected ) => GetTypeNames(in expected).ToPrettyJson();
+     protected static string    GetTypes( scoped ref readonly     ReadOnlySpan<Type> expected ) => GetTypeNames(in expected).ToPrettyJson();
     protected static                                                                                                  string?[] GetTypeNames( scoped ref readonly ReadOnlySpan<Type> expected ) => expected.AsValueEnumerable().Select(static item => item.FullName).ToArray();
 
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    
     public static TValue Verify<TValue>( object? item, TKey key )
     {
         if ( item is TValue value ) { return value; }
@@ -49,7 +49,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         throw new ExpectedValueTypeException<TKey>(key, item?.GetType(), typeof(TValue));
     }
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    
     public static TValue Verify<TValue>( object? item )
     {
         if ( item is TValue value ) { return value; }
@@ -57,7 +57,7 @@ public class ExpectedValueTypeException<TKey> : Exception // Jakar.Api.Exception
         throw new ExpectedValueTypeException<TKey>(item?.GetType(), typeof(TValue));
     }
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    
     protected void Update( Type? value, scoped ref readonly ReadOnlySpan<Type> expected, TKey? key = default )
     {
         Key      = key;

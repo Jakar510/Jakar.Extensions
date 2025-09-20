@@ -15,7 +15,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     public static AppVersion AppVersion { get; } = new(1, 0, 0, 1);
 
 
-    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new NpgsqlConnection(secure);
+    protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure);
 
 
     [Experimental("SqlTableBuilder"), Conditional("DEBUG")]

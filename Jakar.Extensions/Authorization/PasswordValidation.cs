@@ -2,6 +2,10 @@
 // 09/07/2022  3:56 PM
 
 
+using System.Formats.Asn1;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -190,7 +194,7 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         BlockedPasswords = new HashSet<string>(passwords).ToArray();
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public void SetBlockedPasswords( string content )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -198,7 +202,7 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
         try { SetBlockedPasswords(content.FromJson<string[]>()); }
         catch ( Exception ) { SetBlockedPasswords(content.SplitAndTrimLines()); }
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public async ValueTask SetBlockedPasswords( Uri uri, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -207,17 +211,18 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
         client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(MimeTypeNames.Text.PLAIN));
         await SetBlockedPasswords(client, uri, token);
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public async ValueTask SetBlockedPasswords( HttpClient client, Uri uri, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         string              content       = await client.GetStringAsync(uri, token);
         SetBlockedPasswords(content);
     }
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+
     public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         SetBlockedPasswords(await file.ReadAsync().AsString(token));
     }
 }
+

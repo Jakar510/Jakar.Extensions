@@ -44,7 +44,7 @@ public sealed class FilePathsEnricher( ISerilogger serilogger ) : ILogEventEnric
 
             Task.WhenAll( CollectionsMarshal.AsSpan( tasks ) ).CallSynchronously();
         }
-        catch ( Exception e ) { global::Serilog.Debugging.SelfLog.WriteLine( "{Exception}", e ); }
+        catch ( Exception e ) { SelfLog.WriteLine( "{Exception}", e ); }
     }
     private static async Task Handle( Disposables disposables, LocalFile? file, CancellationToken token = default )
     {

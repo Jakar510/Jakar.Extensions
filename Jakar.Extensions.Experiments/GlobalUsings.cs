@@ -17,6 +17,7 @@ global using BenchmarkDotNet.Engines;
 global using BenchmarkDotNet.Jobs;
 global using BenchmarkDotNet.Order;
 global using BenchmarkDotNet.Reports;
+global using BenchmarkDotNet.Running;
 global using Bogus;
 global using HashidsNet;
 global using Jakar.Extensions;

@@ -10,25 +10,29 @@ namespace Jakar.Extensions;
 
 public static class DictionaryExtensions
 {
-    public static void Add<TValue>( this TValue dictionary, string key, in StringValues value )
-        where TValue : IDictionary<string, StringValues>
+    /* TODO:
+    public static void Add<TValue>( this TValue dictionary, string key, in StringTags value )
+        where TValue : IDictionary<string, StringTags>
     {
-        if ( dictionary.TryGetValue( key, out StringValues values ) )
+        if ( dictionary.TryGetValue( key, out StringTags values ) )
         {
-            dictionary[key] = StringValues.Concat( values, value );
+            dictionary[key] = string.Concat( values, value );
             return;
         }
 
         dictionary.Add( key, value );
     }
+    */
+
+
     public static TValue GetOrAdd<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
         where TKey : notnull
     {
-        ref TValue? entry = ref CollectionsMarshal.GetValueRefOrAddDefault( dictionary, key, out bool exists );
+        ref TValue? entry = ref CollectionsMarshal.GetValueRefOrAddDefault(dictionary, key, out bool exists);
 
         if ( exists )
         {
-            Debug.Assert( entry is not null );
+            Debug.Assert(entry is not null);
             return entry;
         }
 
@@ -41,11 +45,11 @@ public static class DictionaryExtensions
         where TAlternateKey : notnull, allows ref struct
     {
         Dictionary<TKey, TValue>.AlternateLookup<TAlternateKey> lookup = dictionary.GetAlternateLookup<TAlternateKey>();
-        ref TValue?                                             entry  = ref CollectionsMarshal.GetValueRefOrAddDefault( lookup, key, out bool exists );
+        ref TValue?                                             entry  = ref CollectionsMarshal.GetValueRefOrAddDefault(lookup, key, out bool exists);
 
         if ( exists )
         {
-            Debug.Assert( entry is not null );
+            Debug.Assert(entry is not null);
             return entry;
         }
 
@@ -56,8 +60,8 @@ public static class DictionaryExtensions
     public static bool TryUpdate<TKey, TValue>( this Dictionary<TKey, TValue> dictionary, TKey key, TValue value )
         where TKey : notnull
     {
-        ref TValue entry = ref CollectionsMarshal.GetValueRefOrNullRef( dictionary, key );
-        if ( Unsafe.IsNullRef( ref entry ) ) { return false; }
+        ref TValue entry = ref CollectionsMarshal.GetValueRefOrNullRef(dictionary, key);
+        if ( Unsafe.IsNullRef(ref entry) ) { return false; }
 
         entry = value;
         return true;
@@ -68,8 +72,8 @@ public static class DictionaryExtensions
         where TAlternateKey : notnull, allows ref struct
     {
         Dictionary<TKey, TValue>.AlternateLookup<TAlternateKey> lookup = dictionary.GetAlternateLookup<TAlternateKey>();
-        ref TValue                                              entry  = ref CollectionsMarshal.GetValueRefOrNullRef( lookup, key );
-        if ( Unsafe.IsNullRef( ref entry ) ) { return false; }
+        ref TValue                                              entry  = ref CollectionsMarshal.GetValueRefOrNullRef(lookup, key);
+        if ( Unsafe.IsNullRef(ref entry) ) { return false; }
 
         entry = value;
         return true;

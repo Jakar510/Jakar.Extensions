@@ -17,7 +17,7 @@ public interface IUserID : IUserID<Guid>;
 
 
 
-public interface IUserData : IUserName, IUserID, IUserRights, IValidator, JsonModels.IJsonModel
+public interface IUserData : IUserName, IUserID, IUserRights, IValidator, Json.IJsonModel
 {
     public                string            Company             { get; set; }
     public                string            Department          { get; set; }
@@ -120,7 +120,7 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
     public TClass With( params ReadOnlySpan<TGroupModel> values );
     public TClass With( IEnumerable<TRoleModel>          values );
     public TClass With( params ReadOnlySpan<TRoleModel>  values );
-    public TClass With( IDictionary<string, JToken?>?    data );
+    public TClass With( JsonObject?    data );
     public TClass With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 

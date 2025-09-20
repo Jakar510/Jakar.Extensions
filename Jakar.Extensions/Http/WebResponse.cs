@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 08/15/2022  11:51 AM
 
-using Microsoft.Extensions.Primitives;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -61,7 +57,7 @@ public sealed class WebResponse<TValue>
 
     /// <summary> Gets the payload if available; otherwise throws. </summary>
     /// <exception cref="HttpRequestException"> </exception>
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    
     public TValue GetPayload()
     {
         EnsureSuccessStatusCode();
@@ -102,12 +98,12 @@ public sealed class WebResponse<TValue>
         errorMessage = Errors;
         return false;
     }
-    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString(Formatting.Indented)), GetError, static x => x);
-    private Errors GetError( string detail ) => Error.Create(Exception, ErrorMessage(), URL?.OriginalString, StringValues.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(Formatting.Indented), static x => x, static x => x.GetMessage());
+    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x);
+    private Errors GetError( string detail ) => Error.Create(Exception, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
+    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage());
 
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public override string ToString() => this.ToJson(Formatting.Indented);
-    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+     public override string ToString() => this.ToJson();
+    
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode ) { return; }

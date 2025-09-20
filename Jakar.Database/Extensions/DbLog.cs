@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public static class DbLog
+public static class DbLog // TODO: Jakar.Extensions.SelfLogger
 {
     private const           string                                                    EMPTY                    = "";
     private static readonly Action<ILogger, string, string, Exception?>               __errorCallback          = LoggerMessage.Define<string, string>(LogLevel.Error,    new EventId(1,                 nameof(Error)),    "{ClassName}.{Caller}", new LogDefineOptions { SkipEnabledCheck                                          = true });

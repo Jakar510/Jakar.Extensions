@@ -11,7 +11,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, new()
+    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
 {
     private string __confirmPassword = string.Empty;
     private string __userPassword    = string.Empty;
@@ -88,8 +88,9 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    public LoginRequest         GetLoginRequest()                       => new(UserName, Password);
-    public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value ) => new(UserName, Password, value);
+    public LoginRequest         GetLoginRequest()                                      => new(UserName, Password);
+    public LoginRequest<TValue> GetLoginRequest<TValue>( TValue value )                => new(UserName, Password, value);
+    public NetworkCredential    GetCredential( Uri              uri, string authType ) => new(UserName, Password, uri.ToString());
 
 
     public virtual bool Validate( ICollection<string> errors )
@@ -105,5 +106,3 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
         return errors.Count == 0;
     }
 }
-
- 

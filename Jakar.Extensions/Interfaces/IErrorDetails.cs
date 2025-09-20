@@ -14,7 +14,7 @@ public interface IErrorDetails
     string? Detail { get; }
 
 
-    StringValues Errors { get; }
+    StringTags Errors { get; }
 
     /// <summary> A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced. </summary>
     string? Instance { get; }

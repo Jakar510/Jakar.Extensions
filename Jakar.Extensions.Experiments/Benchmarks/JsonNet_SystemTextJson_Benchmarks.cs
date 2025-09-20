@@ -1,7 +1,11 @@
-﻿namespace Jakar.Extensions.Experiments.Benchmarks;
+﻿using Bogus.Bson;
+using Newtonsoft.Json;
 
 
-#pragma warning disable CA1822 // Mark members as static
+
+namespace Jakar.Extensions.Experiments.Benchmarks;
+
+
 /*
 
    BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
@@ -26,222 +30,323 @@
 
 
 
-[Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser, SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[Config(typeof(BenchmarkConfig)), GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory), SimpleJob(RuntimeMoniker.HostProcess), Orderer(SummaryOrderPolicy.FastestToSlowest), RankColumn, MemoryDiagnoser, SuppressMessage("ReSharper", "InconsistentNaming")]
 public class JsonNet_SystemTextJson_Benchmarks
 {
-    private const string JSON = """
-                                {
-                                  "AppName": "Gorgeous Plastic Shirt",
-                                  "Description": "Fantastic",
-                                  "Price": 23.474790677749812,
-                                  "Date": "2023-12-03T18:16:23.6915673+00:00",
-                                  "Children": [
-                                    {
-                                      "AppName": "Awesome Plastic Car",
-                                      "Description": "Small",
-                                      "Price": 30.657281164019174,
-                                      "Date": "2023-12-03T18:16:23.6929482+00:00",
-                                      "Children": [
-                                        {
-                                          "AppName": "Unbranded Concrete Pizza",
-                                          "Description": "Fantastic",
-                                          "Price": 94.07766085149403,
-                                          "Date": "2023-12-04T18:16:23.6929638+00:00",
-                                          "Children": [
-                                            {
-                                              "AppName": "Unbranded Granite Salad",
-                                              "Description": "Small",
-                                              "Price": 66.06374753622815,
-                                              "Date": "2023-12-05T18:16:23.6929664+00:00",
-                                              "Children": [
-                                                {
-                                                  "AppName": "Refined Frozen Pants",
-                                                  "Description": "Tasty",
-                                                  "Price": 8.501224852951566,
-                                                  "Date": "2023-11-24T18:16:23.6929686+00:00",
-                                                  "Children": []
-                                                }
-                                              ]
-                                            },
-                                            {
-                                              "AppName": "Small Metal Sausages",
-                                              "Description": "Generic",
-                                              "Price": 40.94389211369755,
-                                              "Date": "2023-12-08T18:16:23.6930666+00:00",
-                                              "Children": []
-                                            }
-                                          ]
-                                        },
-                                        {
-                                          "AppName": "Fantastic Granite Bike",
-                                          "Description": "Rustic",
-                                          "Price": 22.186910049957202,
-                                          "Date": "2023-12-03T18:16:23.6930708+00:00",
-                                          "Children": []
-                                        },
-                                        {
-                                          "AppName": "Fantastic Granite Bacon",
-                                          "Description": "Handcrafted",
-                                          "Price": 47.41072325681185,
-                                          "Date": "2023-12-06T18:16:23.693073+00:00",
-                                          "Children": []
-                                        },
-                                        {
-                                          "AppName": "Awesome Granite Car",
-                                          "Description": "Practical",
-                                          "Price": 53.86904665950482,
-                                          "Date": "2023-11-26T18:16:23.6930752+00:00",
-                                          "Children": []
-                                        }
-                                      ]
-                                    },
-                                    {
-                                      "AppName": "Generic Wooden Chips",
-                                      "Description": "Rustic",
-                                      "Price": 98.79916960229026,
-                                      "Date": "2023-11-29T18:16:23.6930775+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Intelligent Plastic Shirt",
-                                      "Description": "Unbranded",
-                                      "Price": 44.68665022123856,
-                                      "Date": "2023-11-23T18:16:23.6930796+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Gorgeous Fresh Pants",
-                                      "Description": "Incredible",
-                                      "Price": 30.797002792335935,
-                                      "Date": "2023-11-28T18:16:23.6930815+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Unbranded Steel Fish",
-                                      "Description": "Incredible",
-                                      "Price": 93.00952775914556,
-                                      "Date": "2023-12-06T18:16:23.6930836+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Gorgeous Concrete Pants",
-                                      "Description": "Refined",
-                                      "Price": 67.5470646020505,
-                                      "Date": "2023-12-06T18:16:23.6930857+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Gorgeous Plastic Pants",
-                                      "Description": "Generic",
-                                      "Price": 84.19487140880095,
-                                      "Date": "2023-11-30T18:16:23.6930876+00:00",
-                                      "Children": []
-                                    },
-                                    {
-                                      "AppName": "Generic Plastic Soap",
-                                      "Description": "Handmade",
-                                      "Price": 40.52820379402765,
-                                      "Date": "2023-12-04T18:16:23.6930897+00:00",
-                                      "Children": []
-                                    }
-                                  ]
-                                }
-                                """;
-    private static readonly Node _node = JSON.FromJson<Node>();
+    private const string NODE_JSON = """
+                                     {
+                                       "AppName": "Gorgeous Plastic Shirt",
+                                       "Description": "Fantastic",
+                                       "Price": 23.474790677749812,
+                                       "Date": "2023-12-03T18:16:23.6915673+00:00",
+                                       "Children": [
+                                         {
+                                           "AppName": "Awesome Plastic Car",
+                                           "Description": "Small",
+                                           "Price": 30.657281164019174,
+                                           "Date": "2023-12-03T18:16:23.6929482+00:00",
+                                           "Children": [
+                                             {
+                                               "AppName": "Unbranded Concrete Pizza",
+                                               "Description": "Fantastic",
+                                               "Price": 94.07766085149403,
+                                               "Date": "2023-12-04T18:16:23.6929638+00:00",
+                                               "Children": [
+                                                 {
+                                                   "AppName": "Unbranded Granite Salad",
+                                                   "Description": "Small",
+                                                   "Price": 66.06374753622815,
+                                                   "Date": "2023-12-05T18:16:23.6929664+00:00",
+                                                   "Children": [
+                                                     {
+                                                       "AppName": "Refined Frozen Pants",
+                                                       "Description": "Tasty",
+                                                       "Price": 8.501224852951566,
+                                                       "Date": "2023-11-24T18:16:23.6929686+00:00",
+                                                       "Children": []
+                                                     }
+                                                   ]
+                                                 },
+                                                 {
+                                                   "AppName": "Small Metal Sausages",
+                                                   "Description": "Generic",
+                                                   "Price": 40.94389211369755,
+                                                   "Date": "2023-12-08T18:16:23.6930666+00:00",
+                                                   "Children": []
+                                                 }
+                                               ]
+                                             },
+                                             {
+                                               "AppName": "Fantastic Granite Bike",
+                                               "Description": "Rustic",
+                                               "Price": 22.186910049957202,
+                                               "Date": "2023-12-03T18:16:23.6930708+00:00",
+                                               "Children": []
+                                             },
+                                             {
+                                               "AppName": "Fantastic Granite Bacon",
+                                               "Description": "Handcrafted",
+                                               "Price": 47.41072325681185,
+                                               "Date": "2023-12-06T18:16:23.693073+00:00",
+                                               "Children": []
+                                             },
+                                             {
+                                               "AppName": "Awesome Granite Car",
+                                               "Description": "Practical",
+                                               "Price": 53.86904665950482,
+                                               "Date": "2023-11-26T18:16:23.6930752+00:00",
+                                               "Children": []
+                                             }
+                                           ]
+                                         },
+                                         {
+                                           "AppName": "Generic Wooden Chips",
+                                           "Description": "Rustic",
+                                           "Price": 98.79916960229026,
+                                           "Date": "2023-11-29T18:16:23.6930775+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Intelligent Plastic Shirt",
+                                           "Description": "Unbranded",
+                                           "Price": 44.68665022123856,
+                                           "Date": "2023-11-23T18:16:23.6930796+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Gorgeous Fresh Pants",
+                                           "Description": "Incredible",
+                                           "Price": 30.797002792335935,
+                                           "Date": "2023-11-28T18:16:23.6930815+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Unbranded Steel Fish",
+                                           "Description": "Incredible",
+                                           "Price": 93.00952775914556,
+                                           "Date": "2023-12-06T18:16:23.6930836+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Gorgeous Concrete Pants",
+                                           "Description": "Refined",
+                                           "Price": 67.5470646020505,
+                                           "Date": "2023-12-06T18:16:23.6930857+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Gorgeous Plastic Pants",
+                                           "Description": "Generic",
+                                           "Price": 84.19487140880095,
+                                           "Date": "2023-11-30T18:16:23.6930876+00:00",
+                                           "Children": []
+                                         },
+                                         {
+                                           "AppName": "Generic Plastic Soap",
+                                           "Description": "Handmade",
+                                           "Price": 40.52820379402765,
+                                           "Date": "2023-12-04T18:16:23.6930897+00:00",
+                                           "Children": []
+                                         }
+                                       ]
+                                     }
+                                     """;
+
+    private const string TestJson_JSON = """
+                                         {
+                                             "Errors": {
+                                                 "Alert": null,
+                                                 "Details": [
+                                                     {
+                                                         "Detail": null,
+                                                         "Errors": [],
+                                                         "Instance": null,
+                                                         "StatusCode": 202,
+                                                         "Title": "Accepted",
+                                                         "Type": "Server.Accepted"
+                                                     },
+                                                     {
+                                                         "Detail": null,
+                                                         "Errors": [],
+                                                         "Instance": null,
+                                                         "StatusCode": 400,
+                                                         "Title": "BadRequest",
+                                                         "Type": "Client.BadRequest"
+                                                     }
+                                                 ]
+                                             },
+                                             "User": {
+                                                 "Addresses": [],
+                                                 "Company": "",
+                                                 "CreatedBy": null,
+                                                 "Department": "",
+                                                 "Description": "",
+                                                 "Email": "",
+                                                 "EscalateTo": null,
+                                                 "Ext": "",
+                                                 "FirstName": "",
+                                                 "FullName": "",
+                                                 "Gender": "",
+                                                 "Groups": [],
+                                                 "ImageID": null,
+                                                 "LastName": "",
+                                                 "PhoneNumber": "",
+                                                 "PreferredLanguage": 0,
+                                                 "Rights": "",
+                                                 "Roles": [],
+                                                 "SubscriptionExpires": null,
+                                                 "Title": "",
+                                                 "UserID": "00000000-0000-0000-0000-000000000000",
+                                                 "UserName": "",
+                                                 "Website": "",
+                                                 "ID": "00000000-0000-0000-0000-000000000000"
+                                             },
+                                             "Files": [
+                                                 {
+                                                     "FileSize": 0,
+                                                     "Hash": "Hash",
+                                                     "ID": "00000000-0000-0000-0000-000000000000",
+                                                     "MetaData": {
+                                                         "FileDescription": null,
+                                                         "FileName": "file.dat",
+                                                         "FileType": "application/octet-stream",
+                                                         "MimeType": 16
+                                                     },
+                                                     "Payload": "payload"
+                                                 }
+                                             ],
+                                             "CreateUser": {
+                                                 "ConfirmPassword": "",
+                                                 "Password": "",
+                                                 "UserName": "",
+                                                 "Addresses": [],
+                                                 "Company": "",
+                                                 "CreatedBy": null,
+                                                 "Department": "",
+                                                 "Description": "",
+                                                 "Email": "",
+                                                 "EscalateTo": null,
+                                                 "Ext": "",
+                                                 "FirstName": "",
+                                                 "FullName": "",
+                                                 "Gender": "",
+                                                 "Groups": [],
+                                                 "ImageID": null,
+                                                 "LastName": "",
+                                                 "PhoneNumber": "",
+                                                 "PreferredLanguage": 0,
+                                                 "Rights": "",
+                                                 "Roles": [],
+                                                 "SubscriptionExpires": null,
+                                                 "Title": "",
+                                                 "UserID": "00000000-0000-0000-0000-000000000000",
+                                                 "Website": "",
+                                                 "ID": "00000000-0000-0000-0000-000000000000"
+                                             },
+                                             "Location": {
+                                                 "Accuracy": null,
+                                                 "Altitude": null,
+                                                 "AltitudeReferenceSystem": 0,
+                                                 "Course": null,
+                                                 "ID": "00000000-0000-0000-0000-000000000000",
+                                                 "InstanceID": "00000000-0000-0000-0000-000000000000",
+                                                 "IsFromMockProvider": false,
+                                                 "Latitude": 0,
+                                                 "Longitude": 0,
+                                                 "Speed": null,
+                                                 "Timestamp": "0001-01-01T00:00:00+00:00",
+                                                 "VerticalAccuracy": null
+                                             },
+                                             "pair": {
+                                                 "Key": "date",
+                                                 "Value": "Friday, September 19, 2025"
+                                             },
+                                             "email": {
+                                                 "Value": "bite@me.com"
+                                             },
+                                             "mutableError": {
+                                                 "Detail": null,
+                                                 "Errors": [],
+                                                 "Instance": null,
+                                                 "StatusCode": 500,
+                                                 "Title": "InternalServerError",
+                                                 "Type": "Server.InternalServerError"
+                                             },
+                                             "readOnlyError": {
+                                                 "Detail": null,
+                                                 "Errors": [],
+                                                 "Instance": null,
+                                                 "StatusCode": 500,
+                                                 "Title": "InternalServerError",
+                                                 "Type": "Server.InternalServerError"
+                                             }
+                                         }
+                                         """;
 
 
-    [Benchmark, Category( "Serialize" )] public string? ToStringSerialize()             => _node.ToString();
-    [Benchmark, Category( "Serialize" )] public string? JsonNetSerialize()              => _node.ToJson();
-    [Benchmark, Category( "Serialize" )] public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
-    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
-    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
+    private static readonly Node     _node = NODE_JSON.FromJson<Node>(Node.JsonContext);
+    private static readonly TestJson _test = TestJson_JSON.FromJson<TestJson>(TestJson.JsonContext);
 
 
-    [Benchmark, Category( "Deserialize" )] public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
-    [Benchmark, Category( "Deserialize" )] public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
-    [Benchmark, Category( "Deserialize" )] public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
+    [Benchmark, Category("Serialize")]   public string? Node_ToString_Serialize()             => _node.ToString();
+    [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize()              => JsonConvert.SerializeObject(_node, Formatting.None);
+    [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_node, Formatting.Indented);
+    [Benchmark, Category("Serialize")]   public string  Node_SystemTextJson_Serialize()       => JsonSerializer.Serialize(_node, ExperimentContext.Default.Node);
+    [Benchmark, Category("Serialize")]   public string  Node_SystemTextJson_SerializePretty() => JsonSerializer.Serialize(_node, ExperimentContext.Pretty);
+    [Benchmark, Category("Deserialize")] public Node?   Node_Faker_Deserialize()              => Node.NodeFaker.Instance.Generate();
+    [Benchmark, Category("Deserialize")] public Node?   Node_JsonNet_Deserialize()            => JsonConvert.DeserializeObject<Node>(NODE_JSON);
+    [Benchmark, Category("Deserialize")] public Node?   Node_SystemTextJson_Deserialize()     => JsonSerializer.Deserialize(NODE_JSON, ExperimentContext.Default.Node);
 
 
+    [Benchmark, Category("Serialize")]   public string?   TestJson_ToString_Serialize()             => _test.ToString();
+    [Benchmark, Category("Serialize")]   public string    TestJson_JsonNet_Serialize()              => JsonConvert.SerializeObject(_test, Formatting.None);
+    [Benchmark, Category("Serialize")]   public string    TestJson_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_test, Formatting.Indented);
+    [Benchmark, Category("Serialize")]   public string    TestJson_SystemTextJson_Serialize()       => JsonSerializer.Serialize(_test, ExperimentContext.Default.Node);
+    [Benchmark, Category("Serialize")]   public string    TestJson_SystemTextJson_SerializePretty() => JsonSerializer.Serialize(_test, ExperimentContext.Pretty);
+    [Benchmark, Category("Deserialize")] public TestJson? TestJson_JsonNet_Deserialize()            => JsonConvert.DeserializeObject<TestJson>(NODE_JSON);
+    [Benchmark, Category("Deserialize")] public TestJson? TestJson_SystemTextJson_Deserialize()     => JsonSerializer.Deserialize(TestJson_JSON, ExperimentContext.Default.TestJson);
+
+
+    public static void Test()
+    {
+        JsonNet_SystemTextJson_Benchmarks benchmarks = new();
+
+        using ( StopWatch.Start(nameof(Node_ToString_Serialize)) ) { benchmarks.Node_ToString_Serialize(); }
+
+        using ( StopWatch.Start(nameof(Node_JsonNet_Deserialize)) ) { benchmarks.Node_JsonNet_Deserialize(); }
+
+        using ( StopWatch.Start(nameof(Node_JsonNet_Serialize_Pretty)) ) { benchmarks.Node_JsonNet_Serialize_Pretty(); }
+
+        using ( StopWatch.Start(nameof(Node_SystemTextJson_Serialize)) ) { benchmarks.Node_SystemTextJson_Serialize(); }
+
+        using ( StopWatch.Start(nameof(Node_SystemTextJson_SerializePretty)) ) { benchmarks.Node_SystemTextJson_SerializePretty(); }
+
+        using ( StopWatch.Start(nameof(Node_Faker_Deserialize)) ) { benchmarks.Node_Faker_Deserialize(); }
+
+        using ( StopWatch.Start(nameof(Node_JsonNet_Deserialize)) ) { benchmarks.Node_JsonNet_Deserialize(); }
+
+        using ( StopWatch.Start(nameof(Node_SystemTextJson_Deserialize)) ) { benchmarks.Node_SystemTextJson_Deserialize(); }
+
+
+        using ( StopWatch.Start(nameof(TestJson_ToString_Serialize)) ) { benchmarks.TestJson_ToString_Serialize(); }
+
+        using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize)) ) { benchmarks.TestJson_JsonNet_Serialize(); }
+
+        using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize_Pretty)) ) { benchmarks.TestJson_JsonNet_Serialize_Pretty(); }
+
+        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_Serialize)) ) { benchmarks.TestJson_SystemTextJson_Serialize(); }
+
+        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_SerializePretty)) ) { benchmarks.TestJson_SystemTextJson_SerializePretty(); }
+
+        using ( StopWatch.Start(nameof(TestJson_JsonNet_Deserialize)) ) { benchmarks.TestJson_JsonNet_Deserialize(); }
+
+        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_Deserialize)) ) { benchmarks.TestJson_SystemTextJson_Deserialize(); }
+    }
     public static async ValueTask SaveAsync()
     {
         using TelemetrySpan span = TelemetrySpan.Create();
         LocalFile           file = "test.json";
-        await file.WriteAsync( JSON );
-        Console.WriteLine( file.FullPath );
+        await file.WriteAsync(NODE_JSON);
+        Console.WriteLine(file.FullPath);
     }
 }
-
-
-
-public sealed class NodeFaker : Faker<Node>
-{
-    public static readonly NodeFaker Instance = new();
-    private                uint      __depth   = (uint)Random.Shared.Next( 5, 10 );
-
-
-    public NodeFaker()
-    {
-        RuleFor( static x => x.Name,        f => f.Commerce.ProductName() );
-        RuleFor( static x => x.Description, f => f.Commerce.ProductAdjective() );
-        RuleFor( static x => x.Price,       f => f.Random.Double( 1, 100 ) );
-        RuleFor( static x => x.Date,        f => DateTimeOffset.UtcNow - TimeSpan.FromDays( f.Random.Int( -10, 10 ) ) );
-        RuleFor( static x => x.Children,    GetChildren );
-    }
-    private Node[] GetChildren( Faker f )
-    {
-        if ( __depth > 0 )
-        {
-            uint depth = __depth;
-            __depth = depth / 2;
-            return Generate( (int)depth ).ToArray();
-        }
-
-        return [];
-    }
-}
-
-
-
-public sealed record Node
-{
-    private static readonly Node[]         __empty = [];
-    public                  Node[]         Children    { get; init; } = __empty;
-    public                  DateTimeOffset Date        { get; init; }
-    public                  string         Description { get; init; } = string.Empty;
-    public                  string         Name        { get; init; } = string.Empty;
-    public                  double         Price       { get; init; }
-
-    // [ JsonExtensionData ]                                public Dictionary<string, JToken>?      JsonExtensionData { get; set; }
-    // [ System.Text.Json.Serialization.JsonExtensionData ] public JsonObject? ExtensionData     { get; set; }
-
-
-    public Node() { }
-    public Node( string name, string value, double price, DateTimeOffset date ) : this( name, value, price, date, null ) { }
-    public Node( string name, string value, double price, DateTimeOffset date, params Node[]? children )
-    {
-        Name        = name;
-        Description = value;
-        Price       = price;
-        Date        = date;
-        Children    = children ?? __empty;
-    }
-}
-
-
-
-[JsonSerializable( typeof(Node) )]
-public partial class NodeContext : JsonSerializerContext
-{
-    public static JsonSerializerOptions Pretty => new()
-                                                  {
-                                                      WriteIndented               = true,
-                                                      AllowTrailingCommas         = true,
-                                                      PropertyNameCaseInsensitive = true,
-                                                      IncludeFields               = false,
-                                                      TypeInfoResolver            = Default
-                                                  };
-}
-
-
-
-#pragma warning restore CA1822 // Mark members as static
