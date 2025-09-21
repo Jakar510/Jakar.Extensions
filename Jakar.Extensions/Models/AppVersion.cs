@@ -3,7 +3,7 @@
 
 /// <summary> See <see cref="Format"/> for formatting details. </summary>
 [Serializable, JsonConverter(typeof(AppVersionJsonConverter))]
-public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>
+public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char                       SEPARATOR = '.';
     public static readonly AppVersion                 Default   = new(0);
@@ -119,7 +119,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     /// <param name="value"> </param>
     /// <param name="version"> </param>
     /// <returns> <see langword="true"/> Parse was successful. <br/> <see langword="false"/> otherwise. </returns>
-    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version ) => TryParse(value, CultureInfo.CurrentCulture, out version);
+    public static bool TryParse( ReadOnlySpan<char> value, [NotNullWhen(true)] out AppVersion? version ) => TryParse(value, CultureInfo.InvariantCulture, out version);
     public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, [NotNullWhen(true)] out AppVersion? version )
     {
         if ( !value.IsEmpty )
@@ -150,7 +150,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
 
 
     public static AppVersion Parse( string                    s, IFormatProvider? provider ) => Parse(s.AsSpan(), provider);
-    public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse(value,     CultureInfo.CurrentUICulture);
+    public static AppVersion Parse( scoped ReadOnlySpan<char> value )                            => Parse(value,     CultureInfo.InvariantCulture);
     public static AppVersion Parse( scoped ReadOnlySpan<char> value, IFormatProvider? provider ) => Parse(ref value, in value, provider);
     private static AppVersion Parse( scoped ref ReadOnlySpan<char> value, scoped in ReadOnlySpan<char> original, IFormatProvider? provider )
     {
@@ -459,18 +459,4 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
 
 
 
-public class AppVersionJsonConverter : JsonConverter<AppVersion>
-{
-    public static readonly AppVersionJsonConverter Instance = new();
-
-
-    public override AppVersion? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
-    {
-        string? value = reader.GetString();
-
-        return AppVersion.TryParse(value, null, out AppVersion? result)
-                   ? result
-                   : null;
-    }
-    public override void Write( Utf8JsonWriter writer, AppVersion value, JsonSerializerOptions options ) => writer.WriteStringValue(value.ToString());
-}
+public sealed class AppVersionJsonConverter : SerializeAsStringJsonConverter<AppVersionJsonConverter, AppVersion>;

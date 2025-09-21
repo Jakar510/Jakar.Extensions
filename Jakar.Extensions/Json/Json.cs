@@ -10,6 +10,7 @@ public static class Json
 
     private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos = new();
     public static ref       JsonDocumentOptions                      DocumentOptions => ref __documentOptions;
+    public static readonly  DefaultJsonTypeInfoResolver              DefaultJsonTypeInfoResolver = new();
 
 
     public static JsonSerializerOptions Options { get; set; } = new()
@@ -29,7 +30,7 @@ public static class Json
                                                                     ReadCommentHandling                  = JsonCommentHandling.Skip,
                                                                     UnknownTypeHandling                  = JsonUnknownTypeHandling.JsonNode,
                                                                     RespectRequiredConstructorParameters = true,
-                                                                    TypeInfoResolver                     = JsonTypeInfoResolver.Combine(new DefaultJsonTypeInfoResolver(), JakarExtensionsContext.Default, UserGuid.JakarModelsGuidContext.Default, UserLong.JakarModelsLongContext.Default),
+                                                                    TypeInfoResolver                     = JsonTypeInfoResolver.Combine(DefaultJsonTypeInfoResolver, JakarExtensionsContext.Default, UserGuid.JakarModelsGuidContext.Default, UserLong.JakarModelsLongContext.Default),
                                                                     Converters =
                                                                     {
                                                                         AppVersionJsonConverter.Instance,
@@ -316,12 +317,5 @@ public static class Json
     public interface IJsonStringModel
     {
         public string? AdditionalData { get; set; }
-    }
-
-
-
-    public readonly struct Indenter( JsonSerializerOptions options, bool isIndented ) : IDisposable
-    {
-        public void Dispose() => options.WriteIndented = isIndented;
     }
 }

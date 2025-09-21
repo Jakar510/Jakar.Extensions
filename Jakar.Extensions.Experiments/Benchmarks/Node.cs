@@ -2,19 +2,30 @@
 // 09/19/2025  17:14
 
 using System.Text.Json.Serialization.Metadata;
-using Jakar.Extensions.UserGuid;
 
 
 
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
+[JsonSourceGenerationOptions(MaxDepth = 128,
+                             IndentSize = 4,
+                             NewLine = "\n",
+                             IndentCharacter = ' ',
+                             WriteIndented = true,
+                             RespectNullableAnnotations = true,
+                             AllowTrailingCommas = true,
+                             AllowOutOfOrderMetadataProperties = true,
+                             IgnoreReadOnlyProperties = true,
+                             IncludeFields = true,
+                             IgnoreReadOnlyFields = false,
+                             PropertyNameCaseInsensitive = false,
+                             ReadCommentHandling = JsonCommentHandling.Skip,
+                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+                             RespectRequiredConstructorParameters = true)]
 [JsonSerializable(typeof(TestJson))]
 [JsonSerializable(typeof(Node))]
-public sealed partial class ExperimentContext : JsonSerializerContext
-{
-    public static JsonSerializerOptions Pretty => new(Default.Options) { WriteIndented = true };
-}
+public sealed partial class ExperimentContext : JsonSerializerContext;
 
 
 
@@ -40,6 +51,7 @@ public sealed record Node : BaseRecord<Node>, IEqualComparable<Node>, IJsonModel
         Date        = date;
         Children    = children ?? __empty;
     }
+
 
     public override bool Equals( Node?    other )             => ReferenceEquals(this, other) || string.Equals(Name, other?.Name, StringComparison.InvariantCultureIgnoreCase);
     public override int  CompareTo( Node? other )             => string.Compare(Name, other?.Name, StringComparison.InvariantCultureIgnoreCase);
@@ -86,12 +98,59 @@ public sealed class TestJson
     public Error readOnlyError = Error.InternalServerError();
     public Pair  pair          = new("date", DateTime.Now.ToLongDateString());
 
+    internal static readonly TestJson Debug = new()
+                                              {
+                                                  Nodes  = Node.NodeFaker.Instance.Generate(5).ToArray(),
+                                                  Errors = Errors.Create(Error.Accepted(), Error.BadRequest()),
+                                                  Files  = [new FileData(0, "Hash", "payload", new FileMetaData("file.dat", MimeTypeNames.Application.BINARY, MimeType.Binary))],
+                                                  Location = new CurrentLocation
+                                                             {
+                                                                 Altitude         = Random.Shared.NextDouble() * 20000,
+                                                                 Latitude         = Random.Shared.NextDouble() * 20000,
+                                                                 Longitude        = Random.Shared.NextDouble() * 20000,
+                                                                 Accuracy         = Random.Shared.NextDouble() * 100,
+                                                                 VerticalAccuracy = Random.Shared.NextDouble() * 100,
+                                                                 Speed            = Random.Shared.NextDouble() * 100,
+                                                                 Course           = Random.Shared.NextDouble() * 360,
+                                                                 InstanceID       = Guid.NewGuid(),
+                                                                 ID               = Guid.NewGuid(),
+                                                                 Timestamp        = DateTimeOffset.UtcNow,
+                                                             },
+                                                  CreateUser = new CreateUserModel
+                                                               {
+                                                                   ID        = Guid.NewGuid(),
+                                                                   UserID    = Guid.NewGuid(),
+                                                                   UserName  = "Jonny",
+                                                                   FirstName = "John",
+                                                                   LastName  = "Doe",
+                                                                   Email     = "john.doe@mail.com",
+                                                               },
+                                                  User = new UserModel
+                                                         {
+                                                             ID        = Guid.NewGuid(),
+                                                             UserID    = Guid.NewGuid(),
+                                                             UserName  = "Jonny",
+                                                             FirstName = "John",
+                                                             LastName  = "Doe",
+                                                             Email     = "john.doe@mail.com",
+                                                         }
+                                              };
 
     public static JsonSerializerContext          JsonContext  => ExperimentContext.Default;
     public static JsonTypeInfo<TestJson>         JsonTypeInfo => ExperimentContext.Default.TestJson;
+    public        Node[]                         Nodes        { get; set; } = [];
     public        CreateUserModel                CreateUser   { get; set; } = new();
-    public        Errors                         Errors       { get; set; } = Errors.Create(Error.Accepted(), Error.BadRequest());
-    public        ObservableCollection<FileData> Files        { get; set; } = [new FileData(0, "Hash", "payload", new FileMetaData("file.dat", MimeTypeNames.Application.BINARY, MimeType.Binary))];
+    public        Errors                         Errors       { get; set; } = Errors.Empty;
+    public        ObservableCollection<FileData> Files        { get; set; } = [];
     public        CurrentLocation                Location     { get; set; } = new();
     public        UserModel                      User         { get; set; } = new();
+
+
+    public static void Print()
+    {
+        string json = Debug.ToJson();
+        Console.WriteLine();
+        Console.WriteLine(json);
+        Console.WriteLine();
+    }
 }

@@ -343,6 +343,21 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, Use
 
 
 
+[JsonSourceGenerationOptions(MaxDepth = 128,
+                             IndentSize = 4,
+                             NewLine = "\n",
+                             IndentCharacter = ' ',
+                             WriteIndented = true,
+                             RespectNullableAnnotations = true,
+                             AllowTrailingCommas = true,
+                             AllowOutOfOrderMetadataProperties = true,
+                             IgnoreReadOnlyProperties = true,
+                             IncludeFields = true,
+                             IgnoreReadOnlyFields = false,
+                             PropertyNameCaseInsensitive = false,
+                             ReadCommentHandling = JsonCommentHandling.Skip,
+                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+                             RespectRequiredConstructorParameters = true)]
 [JsonSerializable(typeof(UserModel))]
 [JsonSerializable(typeof(CreateUserModel))]
 [JsonSerializable(typeof(FileData))]

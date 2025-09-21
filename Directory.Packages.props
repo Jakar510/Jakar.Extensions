@@ -18,6 +18,7 @@
     <PackageVersion Include="AiForms.Maui.SettingsView" Version="1.0.17" />
     <PackageVersion Include="AsyncAwaitBestPractices" Version="9.0.0" />
     <PackageVersion Include="BenchmarkDotNet" Version="0.15.3" />
+    <PackageVersion Include="BenchmarkDotNet.Exporters.Plotting" Version="0.15.3" />
     <PackageVersion Include="BlazorComponentUtilities" Version="1.8.0" />
     <PackageVersion Include="BlazorPro.BlazorSize" Version="9.0.0" />
     <PackageVersion Include="Blazored.LocalStorage" Version="4.5.0" />
@@ -39,7 +40,7 @@
     <PackageVersion Include="FluentMigrator" Version="7.1.0" />
     <PackageVersion Include="FluentMigrator.Abstractions" Version="7.1.0" />
     <PackageVersion Include="FluentMigrator.Runner" Version="7.1.0" />
-    <PackageVersion Include="Hardware.Info" Version="101.0.1.1" />
+    <PackageVersion Include="Hardware.Info" Version="101.1.0" />
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.3-beta" />
@@ -97,6 +98,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+    <PackageVersion Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" Version="18.0.36421.1" />
     <PackageVersion Include="MimeKit" Version="4.9.0" />
     <PackageVersion Include="MudBlazor" Version="8.12.0" />
     <PackageVersion Include="MudBlazor.Markdown" Version="8.11.0" />
@@ -126,7 +128,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.261" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.262" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />

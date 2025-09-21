@@ -4,6 +4,21 @@
 namespace Jakar.Extensions;
 
 
+[JsonSourceGenerationOptions(MaxDepth = 128,
+                             IndentSize = 4,
+                             NewLine = "\n",
+                             IndentCharacter = ' ',
+                             WriteIndented = true,
+                             RespectNullableAnnotations = true,
+                             AllowTrailingCommas = true,
+                             AllowOutOfOrderMetadataProperties = true,
+                             IgnoreReadOnlyProperties = true,
+                             IncludeFields = true,
+                             IgnoreReadOnlyFields = false,
+                             PropertyNameCaseInsensitive = false,
+                             ReadCommentHandling = JsonCommentHandling.Skip,
+                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+                             RespectRequiredConstructorParameters = true)]
 [JsonSerializable(typeof(AppVersion))]
 [JsonSerializable(typeof(MethodDetails))]
 [JsonSerializable(typeof(ExceptionDetails))]

@@ -21,4 +21,5 @@ global using BenchmarkDotNet.Running;
 global using Bogus;
 global using HashidsNet;
 global using Jakar.Extensions;
+global using Jakar.Extensions.UserGuid;
 global using JsonSerializer = System.Text.Json.JsonSerializer;
