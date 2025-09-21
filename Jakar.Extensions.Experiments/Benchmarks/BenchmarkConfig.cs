@@ -4,6 +4,7 @@
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
+[MarkdownExporterAttribute.GitHub]
 public class BenchmarkConfig : ManualConfig
 {
     // private readonly FileStream _stream = new("Benchmark.log", FileMode.Create, FileAccess.Write, FileShare.ReadWrite);

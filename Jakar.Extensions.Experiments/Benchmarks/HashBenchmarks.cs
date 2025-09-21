@@ -24,7 +24,14 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class HashBenchmarks
 {
     private const    string  HASH    = "xOEDj6A8g15z";

@@ -11,17 +11,17 @@ namespace Jakar.Extensions;
 
 [DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public readonly struct StringTags( Pair[]? tags, string[]? values ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>
+public readonly struct StringTags( Pair[] tags, string[] values ) : IValueEnumerable<FromArray<string>, string>, IValueEnumerable<FromArray<Pair>, Pair>, IEquatable<StringTags>
 {
-    public static readonly StringTags Empty  = new(null, null);
-    public readonly        Pair[]     Tags   = tags   ?? [];
-    public readonly        string[]   Values = values ?? [];
+    public static readonly StringTags Empty  = new([], []);
+    public readonly        Pair[]     Tags   = tags;
+    public readonly        string[]   Values = values;
 
 
-    public StringTags( Pair     pair ) : this([pair], null) { }
-    public StringTags( Pair[]   pairs ) : this(pairs, null) { }
-    public StringTags( string[] values ) : this(null, values) { }
-    public StringTags( string   value ) : this(null, [value]) { }
+    public StringTags( Pair     pair ) : this([pair], []) { }
+    public StringTags( Pair[]   pairs ) : this(pairs, []) { }
+    public StringTags( string[] values ) : this([], values) { }
+    public StringTags( string   value ) : this([], [value]) { }
 
 
     public static implicit operator StringTags( Pair     value )  => new([value]);

@@ -29,13 +29,7 @@ public static class Json
                                                                     ReadCommentHandling                  = JsonCommentHandling.Skip,
                                                                     UnknownTypeHandling                  = JsonUnknownTypeHandling.JsonNode,
                                                                     RespectRequiredConstructorParameters = true,
-                                                                    TypeInfoResolver                     = JakarExtensionsContext.Default,
-                                                                    TypeInfoResolverChain =
-                                                                    {
-                                                                        JakarExtensionsContext.Default,
-                                                                        UserGuid.JakarModelsGuidContext.Default,
-                                                                        UserLong.JakarModelsLongContext.Default,
-                                                                    },
+                                                                    TypeInfoResolver                     = JsonTypeInfoResolver.Combine(new DefaultJsonTypeInfoResolver(), JakarExtensionsContext.Default, UserGuid.JakarModelsGuidContext.Default, UserLong.JakarModelsLongContext.Default),
                                                                     Converters =
                                                                     {
                                                                         AppVersionJsonConverter.Instance,

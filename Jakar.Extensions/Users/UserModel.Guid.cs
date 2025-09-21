@@ -95,7 +95,7 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
 
 
 [Serializable]
-[method: SetsRequiredMembers]
+[method: SetsRequiredMembers, JsonConstructor]
 public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IJsonModel<FileData>, IEqualComparable<FileData>
 {
     public static JsonSerializerContext  JsonContext  => JakarModelsGuidContext.Default;

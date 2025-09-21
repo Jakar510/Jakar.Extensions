@@ -30,7 +30,11 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
     public IEnumerable<long> Ids

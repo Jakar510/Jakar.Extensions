@@ -43,7 +43,11 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class StringCollectionBenchmarks
 {
     private ImmutableArray<string> __array;

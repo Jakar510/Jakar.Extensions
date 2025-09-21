@@ -9,7 +9,8 @@ using Jakar.Extensions.UserGuid;
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
-[JsonSerializable(typeof(TestJson)), JsonSerializable(typeof(Node))]
+[JsonSerializable(typeof(TestJson))]
+[JsonSerializable(typeof(Node))]
 public sealed partial class ExperimentContext : JsonSerializerContext
 {
     public static JsonSerializerOptions Pretty => new(Default.Options) { WriteIndented = true };

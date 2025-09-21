@@ -223,15 +223,16 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 
 [Serializable, SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
+[method: JsonConstructor]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>, IJsonModel<FileMetaData>
 {
-    public static                           JsonSerializerContext           JsonContext     => JakarExtensionsContext.Default;
-    public static                           JsonTypeInfo<FileMetaData>      JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
-    [JsonExtensionData]              public JsonObject? AdditionalData  { get; set; }
-    [StringLength(UNICODE_CAPACITY)] public string?                         FileDescription { get; set; }  = fileDescription;
-    [StringLength(UNICODE_CAPACITY)] public string?                         FileName        { get; init; } = fileName;
-    [StringLength(UNICODE_CAPACITY)] public string?                         FileType        { get; init; } = fileType;
-    [StringLength(UNICODE_CAPACITY)] public MimeType?                       MimeType        { get; init; } = mimeType;
+    public static                           JsonSerializerContext      JsonContext     => JakarExtensionsContext.Default;
+    public static                           JsonTypeInfo<FileMetaData> JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
+    [JsonExtensionData]              public JsonObject?                AdditionalData  { get; set; }
+    [StringLength(UNICODE_CAPACITY)] public string?                    FileDescription { get; set; }  = fileDescription;
+    [StringLength(UNICODE_CAPACITY)] public string?                    FileName        { get; init; } = fileName;
+    [StringLength(UNICODE_CAPACITY)] public string?                    FileType        { get; init; } = fileType;
+    [StringLength(UNICODE_CAPACITY)] public MimeType?                  MimeType        { get; init; } = mimeType;
 
 
     public FileMetaData( IFileMetaData value ) : this(value.FileName, value.FileType, value.MimeType, value.FileDescription)

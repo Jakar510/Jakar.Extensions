@@ -68,7 +68,11 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[JsonExporterAttribute.Full]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class SpansBenchmarks
 {
     private const string ALPHABET        = Randoms.ALPHANUMERIC;
@@ -122,7 +126,8 @@ public class SpansBenchmarks
 
     [Benchmark] public ReadOnlySpan<char> Join() => Spans.Join<char>( Value, NEW_VALUE );
 
-    [Benchmark, MustDisposeResource]
+    [Benchmark]
+    [MustDisposeResource]
     public Buffer<char> RemoveAll_Params()
     {
         Span<char> span = stackalloc char[Value.Length];

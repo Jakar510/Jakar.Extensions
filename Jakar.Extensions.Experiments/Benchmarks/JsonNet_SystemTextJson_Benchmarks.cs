@@ -8,29 +8,44 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 /*
 
-   BenchmarkDotNet v0.13.10, Windows 11 (10.0.22621.2715/22H2/2022Update/SunValley2)
-   AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
-   .NET SDK 8.0.100
-   [Host]     : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
-   DefaultJob : .NET 8.0.0 (8.0.23.53103), X64 RyuJIT AVX2
+BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.6584/24H2/2024Update/HudsonValley)
+AMD Ryzen 9 3900X 3.80GHz, 1 CPU, 24 logical and 12 physical cores
+.NET SDK 9.0.305
+ [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3 [AttachedDebugger]
+ DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
 
 
-   | Method                        | Mean        | Error     | StdDev    | Rank | Gen0   | Gen1   | Allocated |
-   |------------------------------ |------------:|----------:|----------:|-----:|-------:|-------:|----------:|
-   | ToStringSerialize             |    620.8 ns |  11.89 ns |  16.67 ns |    1 | 0.1640 |      - |    1376 B |
-   | FakerDeserialize              |    901.8 ns |   3.68 ns |   3.07 ns |    2 | 0.0820 |      - |     690 B |
-   | SystemTextJsonSerialize       |  5,760.6 ns |  44.45 ns |  41.58 ns |    3 | 0.5417 |      - |    4536 B |
-   | SystemTextJsonSerializePretty |  7,538.7 ns | 121.15 ns | 113.33 ns |    4 | 0.8545 | 0.0153 |    7190 B |
-   | JsonNetSerialize              | 14,199.0 ns | 179.53 ns | 159.15 ns |    5 | 2.0447 | 0.0610 |   17144 B |
-   | JsonNetSerializePretty        | 17,021.6 ns | 268.17 ns | 250.84 ns |    6 | 2.3499 | 0.0305 |   19760 B |
-   | SystemTextJsonDeserialize     | 18,266.2 ns |  94.49 ns |  88.38 ns |    7 | 1.0376 |      - |    8696 B |
-   | JsonNetDeserialize            | 24,603.9 ns |  83.56 ns |  74.07 ns |    8 | 1.1597 |      - |    9776 B |
+| Method                                  | Mean          | Error       | StdDev        | Rank | Gen0   | Gen1   | Allocated |
+|---------------------------------------- |--------------:|------------:|--------------:|-----:|-------:|-------:|----------:|
+| TestJson_ToString_Serialize             |      7.772 ns |   0.1547 ns |     0.2117 ns |    1 |      - |      - |         - |
+| Node_ToString_Serialize                 |    660.156 ns |   9.1724 ns |     8.1311 ns |    2 | 0.1631 |      - |    1368 B |
+| Node_Faker                  |  1,064.754 ns |  21.0140 ns |    22.4847 ns |    3 | 0.0820 |      - |     690 B |
+| Node_JsonNet_Serialize                  |  1,201.324 ns |  18.9912 ns |    17.7643 ns |    4 | 0.2766 | 0.0010 |    2320 B |
+| Node_JsonNet_Serialize_Pretty           |  1,314.537 ns |  26.2381 ns |    64.8540 ns |    5 | 0.3014 |      - |    2528 B |
+| TestJson_SystemTextJson_Serialize       |  5,141.210 ns |  66.6114 ns |    62.3083 ns |    6 | 0.5035 |      - |    4216 B |
+| Node_SystemTextJson_Serialize           |  6,284.724 ns |  90.7470 ns |    84.8848 ns |    7 | 0.4654 |      - |    3912 B |
+| TestJson_SystemTextJson_SerializePretty |  8,319.549 ns | 163.8312 ns |   240.1416 ns |    8 | 0.7324 |      - |    6301 B |
+| Node_SystemTextJson_SerializePretty     |  8,843.487 ns | 100.1265 ns |    88.7596 ns |    9 | 0.7935 | 0.0153 |    6658 B |
+| TestJson_JsonNet_Serialize              | 17,611.836 ns | 350.1496 ns |   327.5301 ns |   10 | 2.0142 | 0.0610 |   16848 B |
+| Node_SystemTextJson         | 19,370.384 ns | 385.1058 ns |   472.9445 ns |   11 | 0.9155 |      - |    7704 B |
+| TestJson_JsonNet_Serialize_Pretty       | 20,704.243 ns | 408.3273 ns |   401.0320 ns |   12 | 2.2583 | 0.0610 |   19112 B |
+| TestJson_JsonNet            | 21,344.637 ns | 393.7377 ns |   368.3025 ns |   12 | 1.8921 | 0.0610 |   15872 B |
+| TestJson_SystemTextJson     | 27,037.069 ns | 513.6680 ns |   649.6256 ns |   13 | 2.1057 | 0.0610 |   17688 B |
+| Node_JsonNet                | 27,937.809 ns | 553.1903 ns | 1,325.4088 ns |   13 | 1.2207 |      - |   10416 B |
 
  */
 
 
 
-[Config(typeof(BenchmarkConfig)), GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory), SimpleJob(RuntimeMoniker.HostProcess), Orderer(SummaryOrderPolicy.FastestToSlowest), RankColumn, MemoryDiagnoser, SuppressMessage("ReSharper", "InconsistentNaming")]
+[JsonExporterAttribute.Full]
+[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 public class JsonNet_SystemTextJson_Benchmarks
 {
     private const string NODE_JSON = """
@@ -154,67 +169,6 @@ public class JsonNet_SystemTextJson_Benchmarks
 
     private const string TestJson_JSON = """
                                          {
-                                             "Errors": {
-                                                 "Alert": null,
-                                                 "Details": [
-                                                     {
-                                                         "Detail": null,
-                                                         "Errors": [],
-                                                         "Instance": null,
-                                                         "StatusCode": 202,
-                                                         "Title": "Accepted",
-                                                         "Type": "Server.Accepted"
-                                                     },
-                                                     {
-                                                         "Detail": null,
-                                                         "Errors": [],
-                                                         "Instance": null,
-                                                         "StatusCode": 400,
-                                                         "Title": "BadRequest",
-                                                         "Type": "Client.BadRequest"
-                                                     }
-                                                 ]
-                                             },
-                                             "User": {
-                                                 "Addresses": [],
-                                                 "Company": "",
-                                                 "CreatedBy": null,
-                                                 "Department": "",
-                                                 "Description": "",
-                                                 "Email": "",
-                                                 "EscalateTo": null,
-                                                 "Ext": "",
-                                                 "FirstName": "",
-                                                 "FullName": "",
-                                                 "Gender": "",
-                                                 "Groups": [],
-                                                 "ImageID": null,
-                                                 "LastName": "",
-                                                 "PhoneNumber": "",
-                                                 "PreferredLanguage": 0,
-                                                 "Rights": "",
-                                                 "Roles": [],
-                                                 "SubscriptionExpires": null,
-                                                 "Title": "",
-                                                 "UserID": "00000000-0000-0000-0000-000000000000",
-                                                 "UserName": "",
-                                                 "Website": "",
-                                                 "ID": "00000000-0000-0000-0000-000000000000"
-                                             },
-                                             "Files": [
-                                                 {
-                                                     "FileSize": 0,
-                                                     "Hash": "Hash",
-                                                     "ID": "00000000-0000-0000-0000-000000000000",
-                                                     "MetaData": {
-                                                         "FileDescription": null,
-                                                         "FileName": "file.dat",
-                                                         "FileType": "application/octet-stream",
-                                                         "MimeType": 16
-                                                     },
-                                                     "Payload": "payload"
-                                                 }
-                                             ],
                                              "CreateUser": {
                                                  "ConfirmPassword": "",
                                                  "Password": "",
@@ -243,6 +197,41 @@ public class JsonNet_SystemTextJson_Benchmarks
                                                  "Website": "",
                                                  "ID": "00000000-0000-0000-0000-000000000000"
                                              },
+                                             "Errors": {
+                                                 "Alert": null,
+                                                 "Details": [
+                                                     {
+                                                         "Detail": null,
+                                                         "Errors": null,
+                                                         "Instance": null,
+                                                         "StatusCode": 202,
+                                                         "Title": "Accepted",
+                                                         "Type": "Server.Accepted"
+                                                     },
+                                                     {
+                                                         "Detail": null,
+                                                         "Errors": null,
+                                                         "Instance": null,
+                                                         "StatusCode": 400,
+                                                         "Title": "BadRequest",
+                                                         "Type": "Client.BadRequest"
+                                                     }
+                                                 ]
+                                             },
+                                             "Files": [
+                                                 {
+                                                     "FileSize": 0,
+                                                     "Hash": "Hash",
+                                                     "ID": "00000000-0000-0000-0000-000000000000",
+                                                     "MetaData": {
+                                                         "FileDescription": null,
+                                                         "FileName": "file.dat",
+                                                         "FileType": "application/octet-stream",
+                                                         "MimeType": 16
+                                                     },
+                                                     "Payload": "payload"
+                                                 }
+                                             ],
                                              "Location": {
                                                  "Accuracy": null,
                                                  "Altitude": null,
@@ -257,16 +246,38 @@ public class JsonNet_SystemTextJson_Benchmarks
                                                  "Timestamp": "0001-01-01T00:00:00+00:00",
                                                  "VerticalAccuracy": null
                                              },
-                                             "pair": {
-                                                 "Key": "date",
-                                                 "Value": "Friday, September 19, 2025"
+                                             "User": {
+                                                 "Addresses": [],
+                                                 "Company": "",
+                                                 "CreatedBy": null,
+                                                 "Department": "",
+                                                 "Description": "",
+                                                 "Email": "",
+                                                 "EscalateTo": null,
+                                                 "Ext": "",
+                                                 "FirstName": "",
+                                                 "FullName": "",
+                                                 "Gender": "",
+                                                 "Groups": [],
+                                                 "ImageID": null,
+                                                 "LastName": "",
+                                                 "PhoneNumber": "",
+                                                 "PreferredLanguage": 0,
+                                                 "Rights": "",
+                                                 "Roles": [],
+                                                 "SubscriptionExpires": null,
+                                                 "Title": "",
+                                                 "UserID": "00000000-0000-0000-0000-000000000000",
+                                                 "UserName": "",
+                                                 "Website": "",
+                                                 "ID": "00000000-0000-0000-0000-000000000000"
                                              },
                                              "email": {
                                                  "Value": "bite@me.com"
                                              },
                                              "mutableError": {
                                                  "Detail": null,
-                                                 "Errors": [],
+                                                 "Errors": null,
                                                  "Instance": null,
                                                  "StatusCode": 500,
                                                  "Title": "InternalServerError",
@@ -274,79 +285,77 @@ public class JsonNet_SystemTextJson_Benchmarks
                                              },
                                              "readOnlyError": {
                                                  "Detail": null,
-                                                 "Errors": [],
+                                                 "Errors": null,
                                                  "Instance": null,
                                                  "StatusCode": 500,
                                                  "Title": "InternalServerError",
                                                  "Type": "Server.InternalServerError"
+                                             },
+                                             "pair": {
+                                                 "Key": "date",
+                                                 "Value": "Saturday, September 20, 2025"
                                              }
                                          }
                                          """;
 
 
-    private static readonly Node     _node = NODE_JSON.FromJson<Node>(Node.JsonContext);
-    private static readonly TestJson _test = TestJson_JSON.FromJson<TestJson>(TestJson.JsonContext);
+    private static readonly Node                   _node           = NODE_JSON.FromJson<Node>(Node.JsonContext);
+    private static readonly TestJson               _test           = TestJson_JSON.FromJson<TestJson>(TestJson.JsonContext);
+    private static readonly JsonSerializerSettings jsonNetSettings = new() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
 
 
-    [Benchmark, Category("Serialize")]   public string? Node_ToString_Serialize()             => _node.ToString();
-    [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize()              => JsonConvert.SerializeObject(_node, Formatting.None);
-    [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_node, Formatting.Indented);
-    [Benchmark, Category("Serialize")]   public string  Node_SystemTextJson_Serialize()       => JsonSerializer.Serialize(_node, ExperimentContext.Default.Node);
-    [Benchmark, Category("Serialize")]   public string  Node_SystemTextJson_SerializePretty() => JsonSerializer.Serialize(_node, ExperimentContext.Pretty);
-    [Benchmark, Category("Deserialize")] public Node?   Node_Faker_Deserialize()              => Node.NodeFaker.Instance.Generate();
-    [Benchmark, Category("Deserialize")] public Node?   Node_JsonNet_Deserialize()            => JsonConvert.DeserializeObject<Node>(NODE_JSON);
-    [Benchmark, Category("Deserialize")] public Node?   Node_SystemTextJson_Deserialize()     => JsonSerializer.Deserialize(NODE_JSON, ExperimentContext.Default.Node);
+    // [Benchmark, Category("Serialize")]   public string? Node_ToString_Serialize()             => _node.ToString();
+    // [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize()              => JsonConvert.SerializeObject(_node, Formatting.None,     jsonNetSettings);
+    // [Benchmark, Category("Serialize")]   public string  Node_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_node, Formatting.Indented, jsonNetSettings);
+    [Benchmark, Category("Serialize")]   public string Serialize_Node_SystemTextJson()        => JsonSerializer.Serialize(_node, ExperimentContext.Default.Node);
+    [Benchmark, Category("Serialize")]   public string Serialize_Pretty_Node_SystemTextJson() => JsonSerializer.Serialize(_node, ExperimentContext.Pretty);
+    [Benchmark, Category("Deserialize")] public Node?  Deserialize_Node_Faker()               => Node.NodeFaker.Instance.Generate();
+    [Benchmark, Category("Deserialize")] public Node?  Deserialize_Node_JsonNet()             => JsonConvert.DeserializeObject<Node>(NODE_JSON);
+    [Benchmark, Category("Deserialize")] public Node?  Deserialize_PNode_SystemTextJson()     => JsonSerializer.Deserialize(NODE_JSON, ExperimentContext.Default.Node);
 
 
-    [Benchmark, Category("Serialize")]   public string?   TestJson_ToString_Serialize()             => _test.ToString();
-    [Benchmark, Category("Serialize")]   public string    TestJson_JsonNet_Serialize()              => JsonConvert.SerializeObject(_test, Formatting.None);
-    [Benchmark, Category("Serialize")]   public string    TestJson_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_test, Formatting.Indented);
-    [Benchmark, Category("Serialize")]   public string    TestJson_SystemTextJson_Serialize()       => JsonSerializer.Serialize(_test, ExperimentContext.Default.Node);
-    [Benchmark, Category("Serialize")]   public string    TestJson_SystemTextJson_SerializePretty() => JsonSerializer.Serialize(_test, ExperimentContext.Pretty);
-    [Benchmark, Category("Deserialize")] public TestJson? TestJson_JsonNet_Deserialize()            => JsonConvert.DeserializeObject<TestJson>(NODE_JSON);
-    [Benchmark, Category("Deserialize")] public TestJson? TestJson_SystemTextJson_Deserialize()     => JsonSerializer.Deserialize(TestJson_JSON, ExperimentContext.Default.TestJson);
+    // [Benchmark] [Category("Serialize")]   public string?   TestJson_ToString_Serialize()             => _test.ToString();
+    // [Benchmark] [Category("Serialize")]   public string    TestJson_JsonNet_Serialize()              => JsonConvert.SerializeObject(_test, Formatting.None,     jsonNetSettings);
+    // [Benchmark] [Category("Serialize")]   public string    TestJson_JsonNet_Serialize_Pretty()       => JsonConvert.SerializeObject(_test, Formatting.Indented, jsonNetSettings);
+    [Benchmark] [Category("Serialize")]   public string    Serialize_TestJson_SystemTextJson()        => JsonSerializer.Serialize(_test, ExperimentContext.Default.TestJson);
+    [Benchmark] [Category("Serialize")]   public string    Serialize_Pretty_TestJson_SystemTextJson() => JsonSerializer.Serialize(_test, ExperimentContext.Pretty);
+    [Benchmark] [Category("Deserialize")] public TestJson? Deserialize_TestJson_JsonNet()             => JsonConvert.DeserializeObject<TestJson>(NODE_JSON);
+    [Benchmark] [Category("Deserialize")] public TestJson Deserialize_TestJson_SystemTextJson()      => TestJson_JSON.FromJson<TestJson>( ExperimentContext.Default);
 
 
     public static void Test()
     {
         JsonNet_SystemTextJson_Benchmarks benchmarks = new();
 
-        using ( StopWatch.Start(nameof(Node_ToString_Serialize)) ) { benchmarks.Node_ToString_Serialize(); }
-
-        using ( StopWatch.Start(nameof(Node_JsonNet_Deserialize)) ) { benchmarks.Node_JsonNet_Deserialize(); }
-
-        using ( StopWatch.Start(nameof(Node_JsonNet_Serialize_Pretty)) ) { benchmarks.Node_JsonNet_Serialize_Pretty(); }
-
-        using ( StopWatch.Start(nameof(Node_SystemTextJson_Serialize)) ) { benchmarks.Node_SystemTextJson_Serialize(); }
-
-        using ( StopWatch.Start(nameof(Node_SystemTextJson_SerializePretty)) ) { benchmarks.Node_SystemTextJson_SerializePretty(); }
-
-        using ( StopWatch.Start(nameof(Node_Faker_Deserialize)) ) { benchmarks.Node_Faker_Deserialize(); }
-
-        using ( StopWatch.Start(nameof(Node_JsonNet_Deserialize)) ) { benchmarks.Node_JsonNet_Deserialize(); }
-
-        using ( StopWatch.Start(nameof(Node_SystemTextJson_Deserialize)) ) { benchmarks.Node_SystemTextJson_Deserialize(); }
-
-
-        using ( StopWatch.Start(nameof(TestJson_ToString_Serialize)) ) { benchmarks.TestJson_ToString_Serialize(); }
-
-        using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize)) ) { benchmarks.TestJson_JsonNet_Serialize(); }
-
-        using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize_Pretty)) ) { benchmarks.TestJson_JsonNet_Serialize_Pretty(); }
-
-        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_Serialize)) ) { benchmarks.TestJson_SystemTextJson_Serialize(); }
-
-        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_SerializePretty)) ) { benchmarks.TestJson_SystemTextJson_SerializePretty(); }
-
-        using ( StopWatch.Start(nameof(TestJson_JsonNet_Deserialize)) ) { benchmarks.TestJson_JsonNet_Deserialize(); }
-
-        using ( StopWatch.Start(nameof(TestJson_SystemTextJson_Deserialize)) ) { benchmarks.TestJson_SystemTextJson_Deserialize(); }
-    }
-    public static async ValueTask SaveAsync()
-    {
-        using TelemetrySpan span = TelemetrySpan.Create();
-        LocalFile           file = "test.json";
-        await file.WriteAsync(NODE_JSON);
-        Console.WriteLine(file.FullPath);
+        // using ( StopWatch.Start(nameof(Node_ToString_Serialize)) ) { benchmarks.Node_ToString_Serialize(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_JsonNet)) ) { benchmarks.Node_JsonNet(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_JsonNet_Serialize_Pretty)) ) { benchmarks.Node_JsonNet_Serialize_Pretty(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_SystemTextJson_Serialize)) ) { benchmarks.Node_SystemTextJson_Serialize(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_SystemTextJson_SerializePretty)) ) { benchmarks.Node_SystemTextJson_SerializePretty(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_Faker)) ) { benchmarks.Node_Faker(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_JsonNet)) ) { benchmarks.Node_JsonNet(); }
+        //
+        // using ( StopWatch.Start(nameof(Node_SystemTextJson)) ) { benchmarks.Node_SystemTextJson(); }
+        //
+        //
+        // using ( StopWatch.Start(nameof(TestJson_ToString_Serialize)) ) { benchmarks.TestJson_ToString_Serialize(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize)) ) { benchmarks.TestJson_JsonNet_Serialize(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_JsonNet_Serialize_Pretty)) ) { benchmarks.TestJson_JsonNet_Serialize_Pretty(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_SystemTextJson_Serialize)) ) { benchmarks.TestJson_SystemTextJson_Serialize(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_SystemTextJson_SerializePretty)) ) { benchmarks.TestJson_SystemTextJson_SerializePretty(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_JsonNet)) ) { benchmarks.TestJson_JsonNet(); }
+        //
+        // using ( StopWatch.Start(nameof(TestJson_SystemTextJson)) ) { benchmarks.TestJson_SystemTextJson(); }
     }
 }

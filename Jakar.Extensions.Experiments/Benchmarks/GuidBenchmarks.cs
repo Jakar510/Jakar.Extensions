@@ -19,7 +19,15 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 |    AsBase64 | 34.268 ns | 0.6563 ns | 0.6139 ns |    4 | 0.0086 |      72 B |
 |   SpanParse | 44.538 ns | 0.3594 ns | 0.3186 ns |    5 |      - |         - |
  */
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+
+
+
+[JsonExporterAttribute.Full]
+[MarkdownExporterAttribute.GitHub]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[RankColumn]
+[MemoryDiagnoser]
 public class GuidBenchmarks
 {
     private const           string GUID  = "0365BC9B-3DE3-4B75-9F7E-2A0F23EFA5A2";
@@ -27,7 +35,8 @@ public class GuidBenchmarks
     private static readonly string __b64  = __guid.ToBase64();
 
 
-    [Benchmark, MustDisposeResource]
+    [Benchmark]
+    [MustDisposeResource]
     public Buffer<byte> TryWriteBytes()
     {
         return __guid.TryWriteBytes( out Buffer<byte> memory )

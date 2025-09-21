@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/10/2024  23:04
 
-using Microsoft.Extensions.Primitives;
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -14,7 +10,7 @@ public interface IErrorDetails
     string? Detail { get; }
 
 
-    StringTags Errors { get; }
+    StringTags? Errors { get; }
 
     /// <summary> A URI reference that identifies the specific occurrence of the problem. It may or may not yield further information if dereferenced. </summary>
     string? Instance { get; }

@@ -42,7 +42,12 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
 
-[Config( typeof(BenchmarkConfig) ), GroupBenchmarksBy( BenchmarkLogicalGroupRule.ByCategory ), SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), MemoryDiagnoser]
+[MarkdownExporterAttribute.GitHub]
+[Config(typeof(BenchmarkConfig))]
+[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
+[SimpleJob(RuntimeMoniker.HostProcess)]
+[Orderer(SummaryOrderPolicy.FastestToSlowest)]
+[MemoryDiagnoser]
 
 // [RankColumn]
 public class CollectionBenchmarks
@@ -115,17 +120,18 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "Construct" ), Benchmark] public double[]               GetArray()          => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToArray();
-    [BenchmarkCategory( "Construct" ), Benchmark] public double[]               GetSizedArray()     => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToArray( Size );
-    [BenchmarkCategory( "Construct" ), Benchmark] public ImmutableArray<double> GetImmutableArray() => [..Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() )];
-    [BenchmarkCategory( "Construct" ), Benchmark] public ImmutableList<double>  GetImmutableList()  => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToImmutableList();
-    [BenchmarkCategory( "Construct" ), Benchmark] public FrozenSet<double>      GetFrozenSet()      => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToFrozenSet();
-    [BenchmarkCategory( "Construct" ), Benchmark] public List<double>           GetList()           => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToList();
+    [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetArray()          => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToArray();
+    [BenchmarkCategory("Construct")] [Benchmark] public double[]               GetSizedArray()     => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToArray( Size );
+    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableArray<double> GetImmutableArray() => [..Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() )];
+    [BenchmarkCategory("Construct")] [Benchmark] public ImmutableList<double>  GetImmutableList()  => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToImmutableList();
+    [BenchmarkCategory("Construct")] [Benchmark] public FrozenSet<double>      GetFrozenSet()      => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToFrozenSet();
+    [BenchmarkCategory("Construct")] [Benchmark] public List<double>           GetList()           => Enumerable.Range( 0, Size ).Select( i => __random.NextDouble() ).ToList();
 
     // [ BenchmarkCategory( "Construct" ), Benchmark ] public List<double>           GetSizedList()      => Enumerable.Range( 0, Size ).Select( i => _random.NextDouble() ).ToList( Size );
 
 
-    [BenchmarkCategory( "For" ), Benchmark]
+    [BenchmarkCategory("For")]
+    [Benchmark]
     public void ForArray()
     {
         double[] array = __array[Size];
@@ -133,7 +139,8 @@ public class CollectionBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Length; i++ ) { _ = array[i]; }
     }
-    [BenchmarkCategory( "ForEach" ), Benchmark]
+    [BenchmarkCategory("ForEach")]
+    [Benchmark]
     public void ForEachArray()
     {
         double[] array = __array[Size];
@@ -142,7 +149,8 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "For" ), Benchmark]
+    [BenchmarkCategory("For")]
+    [Benchmark]
     public void ForImmutableArray()
     {
         ImmutableArray<double> array = __immutableArray[Size];
@@ -150,7 +158,8 @@ public class CollectionBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Length; i++ ) { _ = array[i]; }
     }
-    [BenchmarkCategory( "ForEach" ), Benchmark]
+    [BenchmarkCategory("ForEach")]
+    [Benchmark]
     public void ForEachImmutableArray()
     {
         ImmutableArray<double> array = __immutableArray[Size];
@@ -159,7 +168,8 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "For" ), Benchmark]
+    [BenchmarkCategory("For")]
+    [Benchmark]
     public void ForList()
     {
         List<double> array = __list[Size];
@@ -167,7 +177,8 @@ public class CollectionBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Count; i++ ) { _ = array[i]; }
     }
-    [BenchmarkCategory( "ForEach" ), Benchmark]
+    [BenchmarkCategory("ForEach")]
+    [Benchmark]
     public void ForEachList()
     {
         List<double> array = __list[Size];
@@ -175,7 +186,8 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "For" ), Benchmark]
+    [BenchmarkCategory("For")]
+    [Benchmark]
     public void ForImmutableList()
     {
         ImmutableList<double> array = __immutableList[Size];
@@ -183,7 +195,8 @@ public class CollectionBenchmarks
         // ReSharper disable once ForCanBeConvertedToForeach
         for ( int i = 0; i < array.Count; i++ ) { _ = array[i]; }
     }
-    [BenchmarkCategory( "ForEach" ), Benchmark]
+    [BenchmarkCategory("ForEach")]
+    [Benchmark]
     public void ForEachImmutableList()
     {
         ImmutableList<double> array = __immutableList[Size];
@@ -191,14 +204,16 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "For" ), Benchmark]
+    [BenchmarkCategory("For")]
+    [Benchmark]
     public void ForFrozenSet()
     {
         FrozenSet<double> array = __set[Size];
 
         foreach ( double d in array ) { _ = d; }
     }
-    [BenchmarkCategory( "ForEach" ), Benchmark]
+    [BenchmarkCategory("ForEach")]
+    [Benchmark]
     public void ForEachFrozenSet()
     {
         FrozenSet<double> array = __set[Size];
@@ -206,35 +221,40 @@ public class CollectionBenchmarks
     }
 
 
-    [BenchmarkCategory( "Select" ), Benchmark]
+    [BenchmarkCategory("Select")]
+    [Benchmark]
     public void SelectArray()
     {
         double[] array = __array[Size];
 
         array.Select( i => i ).Consume( __consumer );
     }
-    [BenchmarkCategory( "Select" ), Benchmark]
+    [BenchmarkCategory("Select")]
+    [Benchmark]
     public void SelectImmutableArray()
     {
         ImmutableArray<double> array = __immutableArray[Size];
 
         array.Select( i => i ).Consume( __consumer );
     }
-    [BenchmarkCategory( "Select" ), Benchmark]
+    [BenchmarkCategory("Select")]
+    [Benchmark]
     public void SelectList()
     {
         List<double> array = __list[Size];
 
         array.Select( i => i ).Consume( __consumer );
     }
-    [BenchmarkCategory( "Select" ), Benchmark]
+    [BenchmarkCategory("Select")]
+    [Benchmark]
     public void SelectImmutableList()
     {
         ImmutableList<double> array = __immutableList[Size];
 
         array.Select( i => i ).Consume( __consumer );
     }
-    [BenchmarkCategory( "Select" ), Benchmark]
+    [BenchmarkCategory("Select")]
+    [Benchmark]
     public void SelectFrozenSet()
     {
         FrozenSet<double> array = __set[Size];
