@@ -31,13 +31,12 @@ public interface ICollectionAlerts<TClass, TValue> : ICollectionAlerts<TValue>, 
 
 
 
-public abstract class CollectionAlerts<TClass, TValue> : ObservableClass, ICollectionAlerts<TValue>
+public abstract class CollectionAlerts<TClass, TValue> : BaseClass, ICollectionAlerts<TValue>
     where TClass : CollectionAlerts<TClass, TValue>, ICollectionAlerts<TClass, TValue>
 {
 // ReSharper disable once StaticMemberInGenericType
-    protected static readonly  NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
-    public abstract            int                              Count          { get; }
-    [JsonExtensionData] public JsonObject?                      AdditionalData { get; set; }
+    protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
+    public abstract           int                              Count { get; }
 
 
     public event NotifyCollectionChangedEventHandler?                 CollectionChanged;

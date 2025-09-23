@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public abstract class PreferenceFile<TClass> : ObservableClass<TClass>, IAsyncDisposable
+public abstract class PreferenceFile<TClass> : BaseClass<TClass>, IAsyncDisposable
     where TClass : PreferenceFile<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
 {
     private readonly Lock              __lock = new();

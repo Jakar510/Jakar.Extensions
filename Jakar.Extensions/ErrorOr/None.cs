@@ -1,4 +1,3 @@
 ﻿namespace Jakar.Extensions;
 
-
-public readonly record struct None;
+[NotSerializable] public readonly record struct None;

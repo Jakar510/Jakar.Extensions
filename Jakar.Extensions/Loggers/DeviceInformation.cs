@@ -6,18 +6,36 @@ using Serilog.Events;
 namespace Jakar.Extensions;
 
 
-public interface IDeviceInformation : IEquatable<IDeviceInformation>
+public interface IDeviceID<out T>
 {
-    public DeviceCategory Category   { get; }
-    public string         DeviceID   { get; set; }
-    public string         DeviceName { get; }
+    public T DeviceID { get; }
+}
+
+
+
+public interface IDeviceID : IDeviceID<Guid>;
+
+
+
+public interface IDeviceName
+{
+    public string DeviceName { get; }
+}
+
+
+
+public interface IDeviceInformation : IEquatable<IDeviceInformation>, IDeviceID<string>
+{
+    public     DeviceCategory Category   { get; }
+    public new string?        DeviceID   { get; set; }
+    public     string?        DeviceName { get; }
 
     /// <summary> Last known <see cref="IPAddress"/> </summary>
     public string? Ip { get; }
 
-    public string         Manufacturer { get; }
-    public string         Model        { get; }
-    string                OsVersion    { get; }
+    public string?        Manufacturer { get; }
+    public string?        Model        { get; }
+    string?               OsVersion    { get; }
     public string?        PackageName  { get; }
     public DevicePlatform Platform     { get; }
     public DeviceTypes    Type         { get; }
@@ -26,18 +44,29 @@ public interface IDeviceInformation : IEquatable<IDeviceInformation>
 
 
 
+public interface IUserDevice<out TID> : IDeviceInformation, IUniqueID<TID>
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+{
+    /// <summary> Last known <see cref="IPAddress"/> </summary>
+    public string? IP { get; }
+
+    public DateTimeOffset TimeStamp { get; }
+}
+
+
+
 [Serializable]
-public class DeviceInformation : ObservableClass, IDeviceInformation, ILogEventEnricher
+public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnricher
 {
     protected AppVersion?       _appVersion;
     protected DeviceCategory    _category = DeviceCategory.Unknown;
     protected DevicePlatform    _platform = DevicePlatform.Unknown;
     protected DeviceTypes       _type;
     protected LogEventProperty? _property;
-    protected string            _deviceName   = string.Empty;
-    protected string            _manufacturer = string.Empty;
-    protected string            _model        = string.Empty;
-    protected string            _osVersion    = string.Empty;
+    protected string?           _deviceName;
+    protected string?           _manufacturer;
+    protected string?           _model;
+    protected string?           _osVersion;
     protected string?           _deviceID;
     protected string?           _ip;
     protected string?           _packageName;
@@ -45,12 +74,12 @@ public class DeviceInformation : ObservableClass, IDeviceInformation, ILogEventE
 
 
     public virtual DeviceCategory Category     { get => _category;                 set => SetProperty(ref _category,     value); }
-    public virtual string         DeviceID     { get => _deviceID ?? string.Empty; set => SetProperty(ref _deviceID,     value); }
-    public virtual string         DeviceName   { get => _deviceName;               set => SetProperty(ref _deviceName,   value); }
+    public virtual string?        DeviceID     { get => _deviceID ?? string.Empty; set => SetProperty(ref _deviceID,     value); }
+    public virtual string?        DeviceName   { get => _deviceName;               set => SetProperty(ref _deviceName,   value); }
     public virtual string?        Ip           { get => _ip;                       set => SetProperty(ref _ip,           value); }
-    public virtual string         Manufacturer { get => _manufacturer;             set => SetProperty(ref _manufacturer, value); }
-    public virtual string         Model        { get => _model;                    set => SetProperty(ref _model,        value); }
-    public virtual string         OsVersion    { get => _osVersion;                set => SetProperty(ref _osVersion,    value); }
+    public virtual string?        Manufacturer { get => _manufacturer;             set => SetProperty(ref _manufacturer, value); }
+    public virtual string?        Model        { get => _model;                    set => SetProperty(ref _model,        value); }
+    public virtual string?        OsVersion    { get => _osVersion;                set => SetProperty(ref _osVersion,    value); }
     public virtual string?        PackageName  { get => _packageName;              set => SetProperty(ref _packageName,  value); }
     public virtual DevicePlatform Platform     { get => _platform;                 set => SetProperty(ref _platform,     value); }
     public virtual DeviceTypes    Type         { get => _type;                     set => SetProperty(ref _type,         value); }
@@ -58,9 +87,7 @@ public class DeviceInformation : ObservableClass, IDeviceInformation, ILogEventE
 
 
     public DeviceInformation() { }
-
-    // ReSharper disable once NullableWarningSuppressionIsUsed
-    public DeviceInformation( string model, string manufacturer, string deviceName, DeviceTypes deviceType, DeviceCategory category, DevicePlatform platform, AppVersion osVersion, string deviceID )
+    public DeviceInformation( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory category, DevicePlatform platform, AppVersion? osVersion, string deviceID )
     {
         Model        = model;
         Manufacturer = manufacturer;
@@ -68,11 +95,9 @@ public class DeviceInformation : ObservableClass, IDeviceInformation, ILogEventE
         Type         = deviceType;
         Category     = category;
         Platform     = platform;
-        OsVersion    = osVersion.ToString();
+        OsVersion    = osVersion?.ToString();
         DeviceID     = deviceID;
     }
-
-    // ReSharper disable once NullableWarningSuppressionIsUsed
     public DeviceInformation( IDeviceInformation device )
     {
         DeviceID     = device.DeviceID;
@@ -142,6 +167,15 @@ public class DeviceInformation : ObservableClass, IDeviceInformation, ILogEventE
 
         if ( ReferenceEquals(this, other) ) { return true; }
 
-        return Type == other.Type && Platform == other.Platform && Category == other.Category && string.Equals(Manufacturer, other.Manufacturer, StringComparison.InvariantCultureIgnoreCase) && string.Equals(Model, other.Model, StringComparison.InvariantCultureIgnoreCase) && string.Equals(DeviceName, other.DeviceName, StringComparison.InvariantCultureIgnoreCase) && string.Equals(DeviceID, other.DeviceID, StringComparison.InvariantCultureIgnoreCase) && string.Equals(Version, other.Version, StringComparison.InvariantCultureIgnoreCase) && string.Equals(PackageName, other.PackageName, StringComparison.InvariantCultureIgnoreCase) && string.Equals(OsVersion, other.OsVersion, StringComparison.InvariantCultureIgnoreCase);
+        return Type     == other.Type                                                                       &&
+               Platform == other.Platform                                                                   &&
+               Category == other.Category                                                                   &&
+               string.Equals(Manufacturer, other.Manufacturer, StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(Model,        other.Model,        StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(DeviceName,   other.DeviceName,   StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(DeviceID,     other.DeviceID,     StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(Version,      other.Version,      StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(PackageName,  other.PackageName,  StringComparison.InvariantCultureIgnoreCase) &&
+               string.Equals(OsVersion,    other.OsVersion,    StringComparison.InvariantCultureIgnoreCase);
     }
 }

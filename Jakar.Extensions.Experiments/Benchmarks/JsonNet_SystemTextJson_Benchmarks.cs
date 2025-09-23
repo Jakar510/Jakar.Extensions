@@ -257,10 +257,10 @@ public class JsonNet_SystemTextJson_Benchmarks
     [GlobalSetup] public void Setup() => Debugger.Launch();
 
 
-    [Benchmark] [Category("Serialize")]   public string    Serialize_TestJson_SystemTextJson()        => _test.ToJson();
-    [Benchmark] [Category("Serialize")]   public string    Serialize_Pretty_TestJson_SystemTextJson() => JsonSerializer.Serialize(_test, ExperimentContext.Default.TestJson);
-    [Benchmark] [Category("Deserialize")] public TestJson? Deserialize_TestJson_JsonNet()             => JsonConvert.DeserializeObject<TestJson>(JSON);
-    [Benchmark] [Category("Deserialize")] public TestJson  Deserialize_TestJson_SystemTextJson()      => JSON.FromJson<TestJson>(ExperimentContext.Default);
+    [Benchmark] [Category("Serialize")]   public string    Serialize_TestJson_SystemTextJson()   => _test.ToJson();
+    [Benchmark] [Category("Serialize")]   public string    Serialize_TestJson_JsonNet()          => JsonConvert.SerializeObject(_test, Formatting.Indented);
+    [Benchmark] [Category("Deserialize")] public TestJson? Deserialize_TestJson_JsonNet()        => JsonConvert.DeserializeObject<TestJson>(JSON);
+    [Benchmark] [Category("Deserialize")] public TestJson  Deserialize_TestJson_SystemTextJson() => JSON.FromJson<TestJson>();
 
 
     public static void Test()
@@ -269,7 +269,7 @@ public class JsonNet_SystemTextJson_Benchmarks
 
         using ( StopWatch.Start(nameof(Serialize_TestJson_SystemTextJson)) ) { benchmarks.Serialize_TestJson_SystemTextJson(); }
 
-        using ( StopWatch.Start(nameof(Serialize_Pretty_TestJson_SystemTextJson)) ) { benchmarks.Serialize_Pretty_TestJson_SystemTextJson(); }
+        using ( StopWatch.Start(nameof(Serialize_TestJson_JsonNet)) ) { benchmarks.Serialize_TestJson_JsonNet(); }
 
         using ( StopWatch.Start(nameof(Deserialize_TestJson_JsonNet)) ) { benchmarks.Deserialize_TestJson_JsonNet(); }
 

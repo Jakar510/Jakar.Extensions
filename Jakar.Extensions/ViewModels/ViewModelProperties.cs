@@ -51,7 +51,7 @@ public static class Properties
 
 
 
-public class ViewModelProperty<TCommand>() : ObservableClass()
+public class ViewModelProperty<TCommand>() : BaseClass()
     where TCommand : class, ICommand
 {
     private bool      __isEnabled = true;

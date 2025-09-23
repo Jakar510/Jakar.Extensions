@@ -31,25 +31,22 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqua
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, IJsonModel
+public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID>, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IJsonModel<TClass>
 {
-    private bool                            __isPrimary;
-    private JsonObject? __additionalData;
-    private string                          __city            = string.Empty;
-    private string                          __country         = string.Empty;
-    private string                          __line1           = string.Empty;
-    private string                          __line2           = string.Empty;
-    private string                          __postalCode      = string.Empty;
-    private string                          __stateOrProvince = string.Empty;
-    private string?                         __address;
-    private TID                             __id;
+    private bool    __isPrimary;
+    private string  __city            = string.Empty;
+    private string  __country         = string.Empty;
+    private string  __line1           = string.Empty;
+    private string  __line2           = string.Empty;
+    private string  __postalCode      = string.Empty;
+    private string  __stateOrProvince = string.Empty;
+    private string? __address;
+    private TID     __id;
 
 
-    [JsonExtensionData]              public JsonObject? AdditionalData { get => __additionalData;         set => SetProperty(ref __additionalData, value); }
-    [StringLength(UNICODE_CAPACITY)] public string?                         Address        { get => __address ??= ToString(); set => SetProperty(ref __address,        value); }
-
+    [StringLength(UNICODE_CAPACITY)] public string? Address { get => __address ??= ToString(); set => SetProperty(ref __address, value); }
 
     [StringLength(UNICODE_CAPACITY)]
     public string City

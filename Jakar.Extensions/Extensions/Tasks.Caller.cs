@@ -6,6 +6,7 @@ namespace Jakar.Extensions;
 
 public static partial class Tasks
 {
+    [NotSerializable]
     public readonly record struct Caller( OneOf<Func<Task>, Func<ValueTask>, Func<CancellationToken, Task>, Func<CancellationToken, ValueTask>> Func, CancellationToken Token )
     {
         public async Task Execute()
@@ -18,7 +19,8 @@ public static partial class Tasks
     }
 
 
-
+    
+    [NotSerializable]
     public readonly record struct Caller<TResult>( OneOf<Func<Task<TResult>>, Func<ValueTask<TResult>>, Func<CancellationToken, Task<TResult>>, Func<CancellationToken, ValueTask<TResult>>> Func, CancellationToken Token )
     {
         public async Task<TResult> Execute()
@@ -34,7 +36,8 @@ public static partial class Tasks
     }
 
 
-
+    
+    [NotSerializable]
     public readonly record struct Caller<T1, TResult>( OneOf<Func<T1, Task<TResult>>, Func<T1, ValueTask<TResult>>, Func<T1, CancellationToken, Task<TResult>>, Func<T1, CancellationToken, ValueTask<TResult>>> Func, T1 Arg1, CancellationToken Token )
     {
         public async Task<TResult> Execute()
@@ -50,7 +53,8 @@ public static partial class Tasks
     }
 
 
-
+    
+    [NotSerializable]
     public readonly record struct Caller<T1, T2, TResult>( OneOf<Func<T1, T2, Task<TResult>>, Func<T1, T2, ValueTask<TResult>>, Func<T1, T2, CancellationToken, Task<TResult>>, Func<T1, T2, CancellationToken, ValueTask<TResult>>> Func, T1 Arg1, T2 Arg2, CancellationToken Token )
     {
         public async Task<TResult> Execute()

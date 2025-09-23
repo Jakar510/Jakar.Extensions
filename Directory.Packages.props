@@ -132,7 +132,7 @@
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
-    <PackageVersion Include="Radzen.Blazor" Version="7.3.5" />
+    <PackageVersion Include="Radzen.Blazor" Version="7.3.6" />
     <PackageVersion Include="Seq.Api" Version="2025.2.2" />
     <PackageVersion Include="Seq.Apps" Version="2023.4.0" />
     <PackageVersion Include="Seq.Extensions.Logging" Version="8.0.0" />
@@ -157,7 +157,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.4" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.4" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.20" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.21" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
@@ -234,31 +234,5 @@
     <PackageVersion Include="prometheus-net.AspNetCore" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.AspNetCore.HealthChecks" Version="8.2.1" />
     <PackageVersion Include="prometheus-net.SystemMetrics" Version="3.1.0" />
-  </ItemGroup>
-  <ItemGroup Condition="'$$(TargetFramework)'=='net6.0'">
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.10" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.13" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="6.0.16" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="6.0.16" />
-  </ItemGroup>
-  <ItemGroup Condition="'$$(TargetFramework)'=='net7.0'">
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="7.0.5" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="7.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.5" />
-  </ItemGroup>
+  </ItemGroup> 
 </Project>

@@ -138,7 +138,7 @@ public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyC
 public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INotifyPropertyChanged
 {
     string                    Group       { get; }
-    InstantMessage.InstantMessageCollection Messages    { get; }
+    InstantMessageCollection Messages    { get; }
     int                       UnreadChats { get; }
     ChatUserCollection        Users       { get; }
     public bool               Active      { get; set; }

@@ -22,7 +22,7 @@ Alternatively, you can use the NuGet Package Manager in Visual Studio.
 
 ### Base classes
 
-- `ObservableClass` : A base class that implements the `INotifyPropertyChanged` and `INotifyPropertyChanging` interface.
+- `BaseClass` : A base class that implements the `INotifyPropertyChanged` and `INotifyPropertyChanging` interface.
 - `ObservableRecord` : A base record that implements the `INotifyPropertyChanged` and `INotifyPropertyChanging` interface.
 
 ### Collection

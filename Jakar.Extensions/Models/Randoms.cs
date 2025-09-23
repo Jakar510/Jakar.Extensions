@@ -13,7 +13,7 @@ namespace Jakar.Extensions;
 ///     <see href="https://www.educative.io/edpresso/how-to-generate-a-random-string--c-sharp"/>
 /// </summary>
 [SuppressMessage("ReSharper", "RedundantVerbatimStringPrefix")]
-public class Randoms : ObservableClass
+public class Randoms : BaseClass
 {
     public const           string ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     public const           string LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";

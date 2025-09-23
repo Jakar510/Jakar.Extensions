@@ -8,8 +8,10 @@ using Microsoft.Extensions.Configuration;
 namespace Jakar.Extensions;
 
 
-public sealed record SecuredString( SecureString Value ) : IDisposable
+[NotSerializable]
+public sealed class SecuredString( SecureString value ) : IDisposable
 {
+    public readonly SecureString Value = value ?? throw new ArgumentNullException( nameof( value ) );
     public static implicit operator string( SecuredString               wrapper ) => wrapper.ToString();
     public static implicit operator ReadOnlySpan<char>( SecuredString   wrapper ) => wrapper.ToString();
     public static implicit operator SecuredString( string               value )   => new(value.ToSecureString());
@@ -23,7 +25,7 @@ public sealed record SecuredString( SecureString Value ) : IDisposable
     public          void   Dispose()  => Value.Dispose();
 
 
-
+    [NotSerializable]
     public readonly struct ResolverOptions
     {
         private readonly Func<CancellationToken, Task<SecuredString>>?                      __value0 = null;

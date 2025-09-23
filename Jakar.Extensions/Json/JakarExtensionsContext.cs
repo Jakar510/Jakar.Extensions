@@ -61,6 +61,7 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(Error[]))]
 [JsonSerializable(typeof(Errors[]))]
 [JsonSerializable(typeof(Alert[]))]
+[JsonSerializable(typeof(AppInformation[]))]
 public sealed partial class JakarExtensionsContext : JsonSerializerContext
 {
     static JakarExtensionsContext()
@@ -146,5 +147,8 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
 
         Default.Error.Register();
         Default.ErrorArray.Register();
+
+        Default.AppInformation.Register();
+        Default.AppInformationArray.Register();
     }
 }

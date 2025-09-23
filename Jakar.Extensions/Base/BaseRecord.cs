@@ -17,7 +17,7 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
     where TClass : BaseRecord<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
-    [JsonExtensionData] public JsonObject? AdditionalData { get; set; }
+    [JsonExtensionData] public virtual JsonObject? AdditionalData { get; set; }
 
 
     public abstract bool Equals( TClass?    other );

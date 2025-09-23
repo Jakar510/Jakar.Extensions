@@ -6,7 +6,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LanguageApi : ObservableClass
+public class LanguageApi : BaseClass
 {
     protected readonly WeakEventManager<Language> _weakEventManager  = new();
     private            LanguageCollection         __languages        = new(Language.Supported);

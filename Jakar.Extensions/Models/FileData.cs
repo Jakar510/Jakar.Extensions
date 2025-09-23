@@ -229,7 +229,6 @@ public sealed class FileMetaData( string? fileName, string? fileType, MimeType? 
     public static                           JsonSerializerContext        JsonContext     => JakarExtensionsContext.Default;
     public static                           JsonTypeInfo<FileMetaData>   JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;
     public static                           JsonTypeInfo<FileMetaData[]> JsonArrayInfo   => JakarExtensionsContext.Default.FileMetaDataArray;
-    [JsonExtensionData]              public JsonObject?                  AdditionalData  { get; set; }
     [StringLength(UNICODE_CAPACITY)] public string?                      FileDescription { get; set; }  = fileDescription;
     [StringLength(UNICODE_CAPACITY)] public string?                      FileName        { get; init; } = fileName;
     [StringLength(UNICODE_CAPACITY)] public string?                      FileType        { get; init; } = fileType;

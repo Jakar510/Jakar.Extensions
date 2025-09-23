@@ -101,8 +101,8 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
 [method: SetsRequiredMembers, JsonConstructor]
 public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IJsonModel<FileData>, IEqualComparable<FileData>
 {
-    public static JsonSerializerContext  JsonContext   => JakarModelsGuidContext.Default;
-    public static JsonTypeInfo<FileData> JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
+    public static JsonSerializerContext    JsonContext   => JakarModelsGuidContext.Default;
+    public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
     public static JsonTypeInfo<FileData[]> JsonArrayInfo => JakarModelsGuidContext.Default.FileDataArray;
     [SetsRequiredMembers] public FileData( IFileData<Guid, FileMetaData> file ) : this(file, file.MetaData) { }
     [SetsRequiredMembers] public FileData( IFileData<Guid>               file,     FileMetaData              metaData ) : this(file.FileSize, file.Hash, file.Payload, metaData) { }
@@ -123,21 +123,21 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 [Serializable]
 public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<Guid>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
 {
-    public static JsonSerializerContext         JsonContext             => JakarModelsGuidContext.Default;
-    public static JsonTypeInfo<CurrentLocation> JsonTypeInfo            => JakarModelsGuidContext.Default.CurrentLocation;
+    public static JsonSerializerContext           JsonContext             => JakarModelsGuidContext.Default;
+    public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsGuidContext.Default.CurrentLocation;
     public static JsonTypeInfo<CurrentLocation[]> JsonArrayInfo           => JakarModelsGuidContext.Default.CurrentLocationArray;
-    public        double?                       Accuracy                { get; init; }
-    public        double?                       Altitude                { get; init; }
-    public        AltitudeReference             AltitudeReferenceSystem { get; init; }
-    public        double?                       Course                  { get; init; }
-    [Key] public  Guid                          ID                      { get; init; }
-    public        Guid                          InstanceID              { get; init; } = Guid.Empty;
-    public        bool                          IsFromMockProvider      { get; init; }
-    public        double                        Latitude                { get; init; }
-    public        double                        Longitude               { get; init; }
-    public        double?                       Speed                   { get; init; }
-    public        DateTimeOffset                Timestamp               { get; init; }
-    public        double?                       VerticalAccuracy        { get; init; }
+    public        double?                         Accuracy                { get; init; }
+    public        double?                         Altitude                { get; init; }
+    public        AltitudeReference               AltitudeReferenceSystem { get; init; }
+    public        double?                         Course                  { get; init; }
+    [Key] public  Guid                            ID                      { get; init; }
+    public        Guid                            InstanceID              { get; init; } = Guid.Empty;
+    public        bool                            IsFromMockProvider      { get; init; }
+    public        double                          Latitude                { get; init; }
+    public        double                          Longitude               { get; init; }
+    public        double?                         Speed                   { get; init; }
+    public        DateTimeOffset                  Timestamp               { get; init; }
+    public        double?                         VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }
@@ -283,8 +283,8 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 [Serializable]
 public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<UserModel>
 {
-    public static JsonSerializerContext   JsonContext   => JakarModelsGuidContext.Default;
-    public static JsonTypeInfo<UserModel> JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
+    public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
+    public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
     public static JsonTypeInfo<UserModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.UserModelArray;
     public UserModel() : base() { }
     public UserModel( IUserData<Guid> value ) : base(value) { }
@@ -317,8 +317,8 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
 [Serializable]
 public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<CreateUserModel>
 {
-    public static JsonSerializerContext         JsonContext   => JakarModelsGuidContext.Default;
-    public static JsonTypeInfo<CreateUserModel> JsonTypeInfo  => JakarModelsGuidContext.Default.CreateUserModel;
+    public static JsonSerializerContext           JsonContext   => JakarModelsGuidContext.Default;
+    public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.CreateUserModel;
     public static JsonTypeInfo<CreateUserModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.CreateUserModelArray;
     public CreateUserModel() : base() { }
     public CreateUserModel( IUserData<Guid> value ) : base(value) { }
@@ -383,4 +383,28 @@ public sealed partial class JakarModelsGuidContext : JsonSerializerContext
         Default.RoleModel.Register();
         Default.CurrentLocation.Register();
     }
+}
+
+
+
+[Serializable]
+public class UserDevice : DeviceInformation, IUserDevice<Guid>
+{
+    private Guid    __id;
+    private string? __ip;
+
+
+    public Guid           ID        { get => __id; set => SetProperty(ref __id, value); }
+    public string?        IP        { get => __ip; set => SetProperty(ref __ip, value); }
+    public DateTimeOffset TimeStamp { get;         init; } = DateTimeOffset.UtcNow;
+
+
+    public UserDevice() { }
+    public UserDevice( IUserDevice<Guid> device ) : base(device)
+    {
+        ID        = device.ID;
+        IP        = device.IP;
+        TimeStamp = device.TimeStamp;
+    }
+    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, string deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
 }

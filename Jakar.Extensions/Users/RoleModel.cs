@@ -23,7 +23,7 @@ public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IEqualComparable<TCl
 
 [Serializable]
 [method: JsonConstructor]
-public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) : ObservableClass<TClass, TID>(id), IRoleModel<TID>
+public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TClass, TID>(id), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
@@ -31,9 +31,8 @@ public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) 
     private string __rights = rights;
 
 
-    [JsonExtensionData]                  public JsonObject? AdditionalData { get;             set; }
-    [StringLength(UNICODE_CAPACITY)]     public string                          NameOfRole     { get => __name;   set => SetProperty(ref __name,   value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string                          Rights         { get => __rights; set => SetProperty(ref __rights, value); }
+    [StringLength(UNICODE_CAPACITY)]     public string NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
+    [StringLength(IUserRights.MAX_SIZE)] public string Rights     { get => __rights; set => SetProperty(ref __rights, value); }
 
 
     public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }

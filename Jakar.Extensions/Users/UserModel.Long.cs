@@ -61,6 +61,7 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
     public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
     public static JsonTypeInfo<GroupModel[]> JsonArrayInfo => JakarModelsLongContext.Default.GroupModelArray;
+    public        long                        ID            { get; init; }
     public GroupModel( string                            nameOfGroup, long? ownerID, long? createdBy, long id, string rights ) : base(nameOfGroup, ownerID, createdBy, id, rights) { }
     public GroupModel( IGroupModel<long>                 model ) : base(model) { }
     public static   GroupModel Create( IGroupModel<long> model )            => new(model);
@@ -382,4 +383,28 @@ public sealed partial class JakarModelsLongContext : JsonSerializerContext
         Default.RoleModel.Register();
         Default.CurrentLocation.Register();
     }
+}
+
+
+
+[Serializable]
+public class UserDevice : DeviceInformation, IUserDevice<long>
+{
+    private long    __id;
+    private string? __ip;
+
+
+    public long           ID        { get => __id; set => SetProperty(ref __id, value); }
+    public string?        IP        { get => __ip; set => SetProperty(ref __ip, value); }
+    public DateTimeOffset TimeStamp { get;         init; } = DateTimeOffset.UtcNow;
+
+
+    public UserDevice() { }
+    public UserDevice( IUserDevice<long> device ) : base(device)
+    {
+        ID        = device.ID;
+        IP        = device.IP;
+        TimeStamp = device.TimeStamp;
+    }
+    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, string deviceID, long id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
 }

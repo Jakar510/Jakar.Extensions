@@ -1,19 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11012.119 d18.0
+VisualStudioVersion = 18.0.11012.119
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Jakar.Extensions", "Jakar.Extensions\Jakar.Extensions.csproj", "{9BE466B0-58AD-49F9-91ED-FDDFEE93932D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nuget", "nuget", "{07C27764-F156-4896-B028-6FD19BB2E82E}"
 	ProjectSection(SolutionItems) = preProject
-		nuget\Jakar.DataBase.nuspec = nuget\Jakar.DataBase.nuspec
-		nuget\Jakar.Extensions.Blazor.nuspec = nuget\Jakar.Extensions.Blazor.nuspec
-		nuget\Jakar.Extensions.Blazor.Syncfusion.nuspec = nuget\Jakar.Extensions.Blazor.Syncfusion.nuspec
-		nuget\Jakar.Extensions.Hosting.nuspec = nuget\Jakar.Extensions.Hosting.nuspec
-		nuget\Jakar.Extensions.Maui.nuspec = nuget\Jakar.Extensions.Maui.nuspec
-		nuget\Jakar.Extensions.nuspec = nuget\Jakar.Extensions.nuspec
-		nuget\Jakar.Xml.nuspec = nuget\Jakar.Xml.nuspec
 		nuget\LICENSE.txt = nuget\LICENSE.txt
 		nuget\nuget.exe = nuget\nuget.exe
 		nuget\pack.bat = nuget\pack.bat

@@ -5,37 +5,35 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : ObservableClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
+public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : BaseClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
 {
-    public const string                        EMPTY_PHONE_NUMBER = "(000) 000-0000";
-    private      JsonObject? __additionalData;
-    private      string                        __company     = string.Empty;
-    private      string                        __department  = string.Empty;
-    private      string                        __email       = string.Empty;
-    private      string                        __ext         = string.Empty;
-    private      string                        __firstName   = string.Empty;
-    private      string                        __gender      = string.Empty;
-    private      string                        __lastName    = string.Empty;
-    private      string                        __phoneNumber = string.Empty;
-    private      string                        __rights      = string.Empty;
-    private      string                        __title       = string.Empty;
-    private      string                        __userName    = string.Empty;
-    private      string                        __website     = string.Empty;
-    protected    string?                       _description;
-    protected    string?                       _fullName;
-    private      SupportedLanguage             __preferredLanguage = SupportedLanguage.English;
-    private      TID?                          __createdBy;
-    private      TID?                          __escalateTo;
-    private      TID?                          __imageID;
+    public const string            EMPTY_PHONE_NUMBER = "(000) 000-0000";
+    private      string            __company          = string.Empty;
+    private      string            __department       = string.Empty;
+    private      string            __email            = string.Empty;
+    private      string            __ext              = string.Empty;
+    private      string            __firstName        = string.Empty;
+    private      string            __gender           = string.Empty;
+    private      string            __lastName         = string.Empty;
+    private      string            __phoneNumber      = string.Empty;
+    private      string            __rights           = string.Empty;
+    private      string            __title            = string.Empty;
+    private      string            __userName         = string.Empty;
+    private      string            __website          = string.Empty;
+    protected    string?           _description;
+    protected    string?           _fullName;
+    private      SupportedLanguage __preferredLanguage = SupportedLanguage.English;
+    private      TID?              __createdBy;
+    private      TID?              __escalateTo;
+    private      TID?              __imageID;
 
 
-    [JsonExtensionData] public JsonObject?  AdditionalData { get => __additionalData; set => SetProperty(ref __additionalData, value); }
-    public                     ObservableCollection<TAddress> Addresses      { get;                     init; } = [];
+    public ObservableCollection<TAddress> Addresses { get; init; } = [];
 
     [StringLength(UNICODE_CAPACITY)]
     public string Company
@@ -141,8 +139,9 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
 
     protected UserModel() : base() { }
-    protected UserModel( IUserData<TID> value ) : base(value.ID)
+    protected UserModel( IUserData<TID> value ) : base()
     {
+        ID = value.ID;
         With(value);
         if ( value is IUserData<Guid> data ) { UserID = data.ID; }
     }
@@ -304,7 +303,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     {
         HashCode hashCode = new();
         hashCode.Add(base.GetHashCode());
-        hashCode.Add(__additionalData);
+        hashCode.Add(_additionalData);
         hashCode.Add(__company);
         hashCode.Add(__department);
         hashCode.Add(__email);

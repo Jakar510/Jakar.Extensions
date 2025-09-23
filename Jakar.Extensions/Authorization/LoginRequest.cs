@@ -10,12 +10,11 @@ public interface ILoginRequestProvider
 
 
 [Serializable]
-public class LoginRequest( string userName, string password ) : BaseClass, ILoginRequest, IJsonModel
+public class LoginRequest( string userName, string password ) : BaseClass, ILoginRequest
 {
-    [JsonExtensionData] public         JsonObject? AdditionalData { get; set; }
-    [JsonIgnore]        public virtual bool                            IsValid        => this.IsValidRequest();
-    [Required]          public         string                          Password       { get; init; } = password;
-    [Required]          public         string                          UserName       { get; init; } = userName;
+    [JsonIgnore] public virtual bool   IsValid  => this.IsValidRequest();
+    [Required]   public         string Password { get; init; } = password;
+    [Required]   public         string UserName { get; init; } = userName;
 
 
     public LoginRequest( ILoginRequest          request ) : this(request.UserName, request.Password) { }

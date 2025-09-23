@@ -24,7 +24,7 @@ public interface IGroupModel<TClass, TID> : IGroupModel<TID>, IEqualComparable<T
 
 [Serializable]
 [method: JsonConstructor]
-public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : ObservableClass<TClass, TID>(id), IGroupModel<TID>
+public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : BaseClass<TClass, TID>(id), IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : GroupModel<TClass, TID>, IGroupModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
 
@@ -35,11 +35,10 @@ public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? cre
     private TID?   __ownerID     = ownerID;
 
 
-    [JsonExtensionData] public                  JsonObject? AdditionalData { get;                  set; }
-    public                                      TID?                            CreatedBy      { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
-    [StringLength(UNICODE_CAPACITY)] public     string                          NameOfGroup    { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
-    public                                      TID?                            OwnerID        { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string                          Rights         { get => __permissions; set => SetProperty(ref __permissions, value); }
+    public                                      TID?   CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
+    [StringLength(UNICODE_CAPACITY)] public     string NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
+    public                                      TID?   OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
+    [StringLength(IUserRights.MAX_SIZE)] public string Rights      { get => __permissions; set => SetProperty(ref __permissions, value); }
 
 
     public GroupModel( IGroupModel<TID> model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }
