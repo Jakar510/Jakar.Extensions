@@ -7,8 +7,8 @@ public class FeedBackTrackerException : Exception
     public FeedBackTrackerException( string message ) : base(message) { }
     public FeedBackTrackerException( string message, Exception inner ) : base(message, inner) { }
 
-     public FeedBackTrackerException( object dict ) : this(dict.ToPrettyJson()) { }
-     public FeedBackTrackerException( object dict, Exception inner ) : this(dict.ToPrettyJson(), inner) { }
+    public FeedBackTrackerException( JsonNode dict ) : this(dict.ToJson()) { }
+    public FeedBackTrackerException( JsonNode dict, Exception inner ) : this(dict.ToJson(), inner) { }
 
 
     protected void Update( object value )

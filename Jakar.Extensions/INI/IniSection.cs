@@ -98,8 +98,8 @@ public partial class IniConfig
 
         #region Gets
 
-        
         public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue? value )
+            where TValue : IJsonModel<TValue>
         {
             string? s = this[key];
 
@@ -109,11 +109,9 @@ public partial class IniConfig
 
             return value is not null;
         }
-        
-        public bool ValueAs<TValue>( string key, [NotNullWhen(true)] out TValue[]? value )
+        public bool ValueAs<TValue>( string key, JsonTypeInfo<TValue[]> info, [NotNullWhen(true)] out TValue[]? value )
         {
-            value = this[key]?.FromJson<TValue[]>();
-
+            value = this[key]?.FromJson(info);
             return value is not null;
         }
 
@@ -122,10 +120,9 @@ public partial class IniConfig
             where TNumber : INumber<TNumber> => TNumber.TryParse(this[key], null, out value);
 
 
-        
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
-            value = this[key]?.FromJson<string[]>();
+            value = this[key]?.FromJson<string[]>(JakarExtensionsContext.Default.StringArray);
 
             return value is not null;
         }
@@ -173,25 +170,24 @@ public partial class IniConfig
 
         #region Adds
 
-        
         public void AddJson<TValue>( string key, TValue value )
-            where TValue : class => this[key] = value.ToJson();
-         public void Add<TValue>( string key, params ReadOnlySpan<TValue> values ) => this[key] = values.ToJson();
+            where TValue : class, IJsonModel<TValue> => this[key] = value.ToJson();
+        public void AddJson<TValue>( string key, TValue value, JsonTypeInfo<TValue> info ) => this[key] = value.ToJson(info);
+        public void Add<TValue>( string key, params ReadOnlySpan<TValue> values )
+            where TValue : IJsonModel<TValue> => this[key] = values.ToJson();
         public void Add<TNumber>( string key, TNumber value )
             where TNumber : INumber<TNumber> => this[key] = value.ToString(null, CultureInfo.CurrentCulture);
-         public void Add<TValue>( string key, IEnumerable<TValue> values )                   => this[key] = values.ToJson();
-         public void Add( string         key, IEnumerable<string> values )                   => this[key] = values.ToJson();
-        public                                                                                                  void Add( string         key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
-        public                                                                                                  void Add( string         key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
-        public                                                                                                  void Add( string         key, TimeSpan            value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, DateTime            value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
-        public                                                                                                  void Add( string         key, DateTimeOffset      value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
-        public                                                                                                  void Add( string         key, IPAddress           value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, Guid                value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, bool                value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, AppVersion          value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, Version             value ) => this[key] = value.ToString();
-        public                                                                                                  void Add( string         key, string?             value ) => this[key] = value;
+        public void Add( string key, IEnumerable<string> values, char   separator ) => this[key] = string.Join(separator, values);
+        public void Add( string key, IEnumerable<string> values, string separator ) => this[key] = string.Join(separator, values);
+        public void Add( string key, TimeSpan            value ) => this[key] = value.ToString();
+        public void Add( string key, DateTime            value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
+        public void Add( string key, DateTimeOffset      value ) => this[key] = value.ToString(CultureInfo.CurrentCulture);
+        public void Add( string key, IPAddress           value ) => this[key] = value.ToString();
+        public void Add( string key, Guid                value ) => this[key] = value.ToString();
+        public void Add( string key, bool                value ) => this[key] = value.ToString();
+        public void Add( string key, AppVersion          value ) => this[key] = value.ToString();
+        public void Add( string key, Version             value ) => this[key] = value.ToString();
+        public void Add( string key, string?             value ) => this[key] = value;
 
 
         public void Add( string key, TimeSpan value, string? format, CultureInfo? culture = null ) =>

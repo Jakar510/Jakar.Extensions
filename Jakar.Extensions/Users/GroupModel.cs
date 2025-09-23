@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights, Json.IJsonModel
+public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     [StringLength(UNICODE_CAPACITY)] string NameOfGroup { get; }

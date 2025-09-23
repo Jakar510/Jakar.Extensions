@@ -18,8 +18,9 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     private readonly WeakEventManager<FileSystemEventArgs> __eventManager       = new();
     private readonly WeakEventManager<RenamedEventArgs>    __renameEventManager = new();
     private          LocalDirectory?                       __directory;
-    public static    JsonSerializerContext                 JsonContext  => JakarExtensionsContext.Default;
-    public static    JsonTypeInfo<LocalFileWatcher>        JsonTypeInfo => JakarExtensionsContext.Default.LocalFileWatcher;
+    public static    JsonSerializerContext                 JsonContext   => JakarExtensionsContext.Default;
+    public static    JsonTypeInfo<LocalFileWatcher>        JsonTypeInfo  => JakarExtensionsContext.Default.LocalFileWatcher;
+    public static    JsonTypeInfo<LocalFileWatcher[]>      JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
 
 
     public event ErrorEventHandler?      Error   { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this,  x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this,  x)); }

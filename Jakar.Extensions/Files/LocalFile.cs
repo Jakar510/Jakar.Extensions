@@ -20,18 +20,19 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
     [JsonIgnore] public readonly FileInfo Info = info;
 
 
-    public static JsonSerializerContext   JsonContext     => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LocalFile> JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
-    public        string                  ContentType     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Mime.ToContentType(); }
-    public        DateTimeOffset          CreationTimeUtc { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.CreationTimeUtc; }
-    public        string?                 DirectoryName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.DirectoryName; }
-    public        bool                    DoesNotExist    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !Exists; }
-    public        bool                    Exists          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Exists; }
-    public        string                  Extension       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Extension; }
-    bool TempFile.ITempFile.              IsTemporary     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTemporary; set => __isTemporary = value; }
-    public DateTimeOffset                 LastAccess      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.LastAccessTime; }
-    public MimeType                       Mime            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Extension.FromExtension(); }
-    public string                         Name            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Name; }
+    public static JsonSerializerContext     JsonContext     => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LocalFile>   JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
+    public static JsonTypeInfo<LocalFile[]> JsonArrayInfo   => JakarExtensionsContext.Default.LocalFileArray;
+    public        string                    ContentType     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Mime.ToContentType(); }
+    public        DateTimeOffset            CreationTimeUtc { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.CreationTimeUtc; }
+    public        string?                   DirectoryName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.DirectoryName; }
+    public        bool                      DoesNotExist    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !Exists; }
+    public        bool                      Exists          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Exists; }
+    public        string                    Extension       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Extension; }
+    bool TempFile.ITempFile.                IsTemporary     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset                   LastAccess      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.LastAccessTime; }
+    public MimeType                         Mime            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Extension.FromExtension(); }
+    public string                           Name            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Name; }
 
     [JsonIgnore]
     public LocalDirectory? Parent
@@ -1018,7 +1019,8 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
-        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default );
+        ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
+            where TValue : IJsonModel<TValue>;
     }
 
 
@@ -1065,6 +1067,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : ObservableC
         /// <returns>
         ///     <see cref="string"/>
         /// </returns>
-        TValue AsJson<TValue>( in TelemetrySpan parent = default );
+        TValue AsJson<TValue>( in TelemetrySpan parent = default )
+            where TValue : IJsonModel<TValue>;
     }
 }

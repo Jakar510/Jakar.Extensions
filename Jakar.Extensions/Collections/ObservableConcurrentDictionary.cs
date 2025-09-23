@@ -11,10 +11,12 @@ namespace Jakar.Extensions;
 public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableConcurrentDictionary<ObservableConcurrentDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableConcurrentDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
-    private static JsonSerializerContext?                                      __jsonContext;
-    private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>? __jsonTypeInfo;
-    public static  JsonSerializerContext                                       JsonContext  { get => Validate.ThrowIfNull(__jsonContext);  set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>  JsonTypeInfo { get => Validate.ThrowIfNull(__jsonTypeInfo); set => __jsonTypeInfo = value; }
+    private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>? __JsonArrayInfo;
+    private static JsonSerializerContext?                                        __jsonContext;
+    private static JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>?   __jsonTypeInfo;
+    public static  JsonSerializerContext                                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
+    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
+    public static  JsonTypeInfo<ObservableConcurrentDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
 
 
     public ObservableConcurrentDictionary() : this(DEFAULT_CAPACITY) { }

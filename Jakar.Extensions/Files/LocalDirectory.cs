@@ -18,18 +18,19 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
 
     /// <summary> Gets or sets the application's fully qualified path of the current working directory. </summary>
     public static LocalDirectory CurrentDirectory { get => new(Environment.CurrentDirectory); set => Environment.CurrentDirectory = value.FullPath; }
-    public static       JsonSerializerContext        JsonContext       => JakarExtensionsContext.Default;
-    public static       JsonTypeInfo<LocalDirectory> JsonTypeInfo      => JakarExtensionsContext.Default.LocalDirectory;
-    public              DateTime                     CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
-    public              bool                         DoesNotExist      => !Exists;
-    public              bool                         Exists            => Info.Exists;
-    [JsonIgnore] public DirectoryInfo                Info              => _info;
-    bool TempFile.ITempFile.                         IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
-    public              DateTime                     LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              DateTime                     LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
-    public              string                       Name              => Info.Name;
-    [JsonIgnore] public LocalDirectory?              Parent            => GetParent();
-    public              string                       Root              => Directory.GetDirectoryRoot(FullPath);
+    public static       JsonSerializerContext          JsonContext       => JakarExtensionsContext.Default;
+    public static       JsonTypeInfo<LocalDirectory>   JsonTypeInfo      => JakarExtensionsContext.Default.LocalDirectory;
+    public static       JsonTypeInfo<LocalDirectory[]> JsonArrayInfo     => JakarExtensionsContext.Default.LocalDirectoryArray;
+    public              DateTime                       CreationTimeUtc   { get => Directory.GetCreationTimeUtc(FullPath); set => Directory.SetCreationTimeUtc(FullPath, value); }
+    public              bool                           DoesNotExist      => !Exists;
+    public              bool                           Exists            => Info.Exists;
+    [JsonIgnore] public DirectoryInfo                  Info              => _info;
+    bool TempFile.ITempFile.                           IsTemporary       { get => __isTemporary;                            set => __isTemporary = value; }
+    public              DateTime                       LastAccessTimeUtc { get => Directory.GetLastAccessTimeUtc(FullPath); set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              DateTime                       LastWriteTimeUtc  { get => Directory.GetLastWriteTimeUtc(FullPath);  set => Directory.SetLastWriteTimeUtc(FullPath, value); }
+    public              string                         Name              => Info.Name;
+    [JsonIgnore] public LocalDirectory?                Parent            => GetParent();
+    public              string                         Root              => Directory.GetDirectoryRoot(FullPath);
 
 
     public LocalDirectory( string path ) : this(Directory.CreateDirectory(path)) { }
@@ -57,13 +58,13 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     }
 
 
-    public static implicit operator string( LocalDirectory                             directory ) => directory.FullPath;
-    public static implicit operator DirectoryInfo( LocalDirectory                      directory ) => directory.Info;
-    public static implicit operator ReadOnlySpan<char>( LocalDirectory                 directory ) => directory.FullPath;
-    public static implicit operator LocalDirectory( DirectoryInfo                      info )      => new(info);
-    public static implicit operator LocalDirectory( ReadOnlySpan<char>                 path )      => new(path.ToString());
-    public static implicit operator LocalDirectory( string                             path )      => new(path);
-    public static implicit operator LocalFileWatcher( LocalDirectory              directory ) => new(directory);
+    public static implicit operator string( LocalDirectory             directory ) => directory.FullPath;
+    public static implicit operator DirectoryInfo( LocalDirectory      directory ) => directory.Info;
+    public static implicit operator ReadOnlySpan<char>( LocalDirectory directory ) => directory.FullPath;
+    public static implicit operator LocalDirectory( DirectoryInfo      info )      => new(info);
+    public static implicit operator LocalDirectory( ReadOnlySpan<char> path )      => new(path.ToString());
+    public static implicit operator LocalDirectory( string             path )      => new(path);
+    public static implicit operator LocalFileWatcher( LocalDirectory   directory ) => new(directory);
 
 
     public static LocalDirectory Create( DirectoryInfo      file ) => file;
@@ -495,4 +496,3 @@ public class LocalDirectory : ObservableClass<LocalDirectory>, TempFile.ITempFil
     public static bool operator <( LocalDirectory   left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) < 0;
     public static bool operator <=( LocalDirectory  left, LocalDirectory  right ) => Comparer<LocalDirectory>.Default.Compare(left, right) <= 0;
 }
-

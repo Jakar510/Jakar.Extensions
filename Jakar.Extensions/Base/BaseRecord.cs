@@ -17,6 +17,9 @@ public record BaseRecord
 public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
     where TClass : BaseRecord<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
+    [JsonExtensionData] public JsonObject? AdditionalData { get; set; }
+
+
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
     public int CompareTo( object? other )
@@ -30,7 +33,7 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
                    : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
 
-    
+
     public virtual JsonNode ToJsonNode() => Validate.ThrowIfNull(JsonSerializer.SerializeToNode((TClass)this, TClass.JsonTypeInfo));
     public virtual string   ToJson()     => Validate.ThrowIfNull(JsonSerializer.Serialize((TClass)this, TClass.JsonTypeInfo));
     public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )

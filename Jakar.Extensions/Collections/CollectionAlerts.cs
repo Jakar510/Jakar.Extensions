@@ -35,8 +35,11 @@ public abstract class CollectionAlerts<TClass, TValue> : ObservableClass, IColle
     where TClass : CollectionAlerts<TClass, TValue>, ICollectionAlerts<TClass, TValue>
 {
 // ReSharper disable once StaticMemberInGenericType
-    protected static readonly NotifyCollectionChangedEventArgs        _resetArgs = new(NotifyCollectionChangedAction.Reset);
-    public abstract           int                                     Count { get; }
+    protected static readonly  NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
+    public abstract            int                              Count          { get; }
+    [JsonExtensionData] public JsonObject?                      AdditionalData { get; set; }
+
+
     public event NotifyCollectionChangedEventHandler?                 CollectionChanged;
     public virtual                                               void Refresh()                                         => Reset();
     protected                                                    void Reset()                                           => OnChanged(_resetArgs);

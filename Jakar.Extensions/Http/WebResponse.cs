@@ -4,25 +4,25 @@
 namespace Jakar.Extensions;
 
 
-[IsNotJsonSerializable, SuppressMessage("ReSharper", "NotAccessedField.Global")]
+[NotSerializable, SuppressMessage("ReSharper", "NotAccessedField.Global")]
 public sealed class WebResponse<TValue>
 {
-    public readonly DateTimeOffset? Expires;
-    public readonly DateTimeOffset? LastModified;
-    public readonly Exception?      Exception;
-    public readonly List<string>    Allow;
-    public readonly List<string>    ContentEncoding;
-    public readonly long?           ContentLength;
-    public readonly OneOfErrors     Errors;
-    public readonly Status          StatusCode;
-    public readonly string?         ContentType;
-    public readonly string?         Method;
-    public readonly string?         Sender;
-    public readonly string?         Server;
-    public readonly string?         StatusDescription;
-    public readonly TValue?         Payload;
-    public readonly Uri?            Location;
-    public readonly Uri?            URL;
+    public readonly DateTimeOffset?   Expires;
+    public readonly DateTimeOffset?   LastModified;
+    public readonly ExceptionDetails? Exception;
+    public readonly List<string>      Allow;
+    public readonly List<string>      ContentEncoding;
+    public readonly long?             ContentLength;
+    public readonly OneOfErrors       Errors;
+    public readonly Status            StatusCode;
+    public readonly string?           ContentType;
+    public readonly string?           Method;
+    public readonly string?           Sender;
+    public readonly string?           Server;
+    public readonly string?           StatusDescription;
+    public readonly TValue?           Payload;
+    public readonly Uri?              Location;
+    public readonly Uri?              URL;
 
 
     [JsonIgnore, MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
@@ -57,7 +57,6 @@ public sealed class WebResponse<TValue>
 
     /// <summary> Gets the payload if available; otherwise throws. </summary>
     /// <exception cref="HttpRequestException"> </exception>
-    
     public TValue GetPayload()
     {
         EnsureSuccessStatusCode();
@@ -98,17 +97,16 @@ public sealed class WebResponse<TValue>
         errorMessage = Errors;
         return false;
     }
-    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x);
-    private Errors GetError( string detail ) => Error.Create(Exception, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage());
+    public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
+    private Errors GetError( string detail ) => Error.Create(Exception?.Value, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
+    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? string.Empty;
 
-     public override string ToString() => this.ToJson();
-    
+
     public void EnsureSuccessStatusCode()
     {
         if ( IsSuccessStatusCode ) { return; }
 
-        throw new HttpRequestException(this.ToPrettyJson(), Exception);
+        throw new HttpRequestException(this.ToString(), Exception);
     }
 
 

@@ -31,7 +31,7 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqua
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, Json.IJsonModel
+public abstract class UserAddress<TClass, TID> : ObservableClass<TClass>, IAddress<TID>, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IJsonModel<TClass>
 {

@@ -151,8 +151,9 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 [Serializable]
 public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>
 {
-    public static JsonSerializerContext            JsonContext  => JakarExtensionsContext.Default;
-    public static JsonTypeInfo<LanguageCollection> JsonTypeInfo => JakarExtensionsContext.Default.LanguageCollection;
+    public static JsonSerializerContext              JsonContext   => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LanguageCollection>   JsonTypeInfo  => JakarExtensionsContext.Default.LanguageCollection;
+    public static JsonTypeInfo<LanguageCollection[]> JsonArrayInfo => JakarExtensionsContext.Default.LanguageCollectionArray;
 
 
     public LanguageCollection() : base(DEFAULT_CAPACITY) { }

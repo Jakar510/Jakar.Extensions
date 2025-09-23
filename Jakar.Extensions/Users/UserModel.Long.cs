@@ -12,8 +12,9 @@ namespace Jakar.Extensions.UserLong;
 [Serializable]
 public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IJsonModel<UserAddress>
 {
-    public static JsonSerializerContext     JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<UserAddress> JsonTypeInfo => JakarModelsLongContext.Default.UserAddress;
+    public static JsonSerializerContext       JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsLongContext.Default.UserAddress;
+    public static JsonTypeInfo<UserAddress[]> JsonArrayInfo => JakarModelsLongContext.Default.UserAddressArray;
     public UserAddress() : base() { }
     public UserAddress( Match                        match ) : base(match) { }
     public UserAddress( IAddress<long>               address ) : base(address) { }
@@ -57,8 +58,9 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 [Serializable]
 public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IJsonModel<GroupModel>
 {
-    public static JsonSerializerContext    JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<GroupModel> JsonTypeInfo => JakarModelsLongContext.Default.GroupModel;
+    public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
+    public static JsonTypeInfo<GroupModel[]> JsonArrayInfo => JakarModelsLongContext.Default.GroupModelArray;
     public GroupModel( string                            nameOfGroup, long? ownerID, long? createdBy, long id, string rights ) : base(nameOfGroup, ownerID, createdBy, id, rights) { }
     public GroupModel( IGroupModel<long>                 model ) : base(model) { }
     public static   GroupModel Create( IGroupModel<long> model )            => new(model);
@@ -77,8 +79,9 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
 [Serializable]
 public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IJsonModel<RoleModel>
 {
-    public static JsonSerializerContext   JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<RoleModel> JsonTypeInfo => JakarModelsLongContext.Default.RoleModel;
+    public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsLongContext.Default.RoleModel;
+    public static JsonTypeInfo<RoleModel[]> JsonArrayInfo => JakarModelsLongContext.Default.RoleModelArray;
     public RoleModel( string                           nameOfRole, string rights, long id ) : base(nameOfRole, rights, id) { }
     public RoleModel( IRoleModel<long>                 model ) : base(model) { }
     public static   RoleModel Create( IRoleModel<long> model )            => new(model);
@@ -98,8 +101,9 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
 [method: SetsRequiredMembers]
 public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IJsonModel<FileData>, IEqualComparable<FileData>
 {
-    public static JsonSerializerContext  JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<FileData> JsonTypeInfo => JakarModelsLongContext.Default.FileData;
+    public static JsonSerializerContext    JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsLongContext.Default.FileData;
+    public static JsonTypeInfo<FileData[]> JsonArrayInfo => JakarModelsLongContext.Default.FileDataArray;
     [SetsRequiredMembers] public FileData( IFileData<long, FileMetaData> file ) : this(file, file.MetaData) { }
     [SetsRequiredMembers] public FileData( IFileData<long>               file,     FileMetaData              metaData ) : this(file.FileSize, file.Hash, file.Payload, metaData) { }
     [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this(content.Length, content.Hash_SHA512(), Convert.ToBase64String(content), metaData) { }
@@ -117,22 +121,23 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : JsonModel<CurrentLocation>, ICurrentLocation<long>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<long>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
 {
-    public static JsonSerializerContext         JsonContext             => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<CurrentLocation> JsonTypeInfo            => JakarModelsLongContext.Default.CurrentLocation;
-    public        double?                       Accuracy                { get; init; }
-    public        double?                       Altitude                { get; init; }
-    public        AltitudeReference             AltitudeReferenceSystem { get; init; }
-    public        double?                       Course                  { get; init; }
-    [Key] public  long                          ID                      { get; init; }
-    public        Guid                          InstanceID              { get; init; } = Guid.Empty;
-    public        bool                          IsFromMockProvider      { get; init; }
-    public        double                        Latitude                { get; init; }
-    public        double                        Longitude               { get; init; }
-    public        double?                       Speed                   { get; init; }
-    public        DateTimeOffset                Timestamp               { get; init; }
-    public        double?                       VerticalAccuracy        { get; init; }
+    public static JsonSerializerContext           JsonContext             => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsLongContext.Default.CurrentLocation;
+    public static JsonTypeInfo<CurrentLocation[]> JsonArrayInfo           => JakarModelsLongContext.Default.CurrentLocationArray;
+    public        double?                         Accuracy                { get; init; }
+    public        double?                         Altitude                { get; init; }
+    public        AltitudeReference               AltitudeReferenceSystem { get; init; }
+    public        double?                         Course                  { get; init; }
+    [Key] public  long                            ID                      { get; init; }
+    public        Guid                            InstanceID              { get; init; } = Guid.Empty;
+    public        bool                            IsFromMockProvider      { get; init; }
+    public        double                          Latitude                { get; init; }
+    public        double                          Longitude               { get; init; }
+    public        double?                         Speed                   { get; init; }
+    public        DateTimeOffset                  Timestamp               { get; init; }
+    public        double?                         VerticalAccuracy        { get; init; }
 
 
     public CurrentLocation() { }
@@ -277,8 +282,9 @@ public sealed class CurrentLocation : JsonModel<CurrentLocation>, ICurrentLocati
 [Serializable]
 public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IJsonModel<UserModel>
 {
-    public static JsonSerializerContext   JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<UserModel> JsonTypeInfo => JakarModelsLongContext.Default.UserModel;
+    public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.UserModel;
+    public static JsonTypeInfo<UserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.UserModelArray;
     public UserModel() : base() { }
     public UserModel( IUserData<long> value ) : base(value) { }
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
@@ -310,8 +316,9 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 [Serializable]
 public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IJsonModel<CreateUserModel>
 {
-    public static JsonSerializerContext         JsonContext  => JakarModelsLongContext.Default;
-    public static JsonTypeInfo<CreateUserModel> JsonTypeInfo => JakarModelsLongContext.Default.CreateUserModel;
+    public static JsonSerializerContext           JsonContext   => JakarModelsLongContext.Default;
+    public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.CreateUserModel;
+    public static JsonTypeInfo<CreateUserModel[]> JsonArrayInfo => JakarModelsLongContext.Default.CreateUserModelArray;
     public CreateUserModel() : base() { }
     public CreateUserModel( IUserData<long> value ) : base(value) { }
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
@@ -357,12 +364,13 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, Use
                              ReadCommentHandling = JsonCommentHandling.Skip,
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
                              RespectRequiredConstructorParameters = true)]
-[JsonSerializable(typeof(UserModel))]
-[JsonSerializable(typeof(CreateUserModel))]
-[JsonSerializable(typeof(FileData))]
-[JsonSerializable(typeof(GroupModel))]
-[JsonSerializable(typeof(RoleModel))]
-[JsonSerializable(typeof(CurrentLocation))]
+[JsonSerializable(typeof(UserModel[]))]
+[JsonSerializable(typeof(CreateUserModel[]))]
+[JsonSerializable(typeof(FileData[]))]
+[JsonSerializable(typeof(GroupModel[]))]
+[JsonSerializable(typeof(RoleModel[]))]
+[JsonSerializable(typeof(CurrentLocation[]))]
+[JsonSerializable(typeof(UserAddress[]))]
 public sealed partial class JakarModelsLongContext : JsonSerializerContext
 {
     static JakarModelsLongContext()

@@ -17,7 +17,7 @@ public interface IUserID : IUserID<Guid>;
 
 
 
-public interface IUserData : IUserName, IUserID, IUserRights, IValidator, Json.IJsonModel
+public interface IUserData : IUserName, IUserID, IUserRights, IValidator, IJsonModel
 {
     public                string            Company             { get; set; }
     public                string            Department          { get; set; }

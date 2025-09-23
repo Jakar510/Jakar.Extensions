@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, Json.IJsonModel
+public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     [StringLength(UNICODE_CAPACITY)] public string NameOfRole { get; }

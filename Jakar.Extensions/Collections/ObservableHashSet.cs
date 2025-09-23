@@ -6,10 +6,12 @@ namespace Jakar.Extensions;
 
 public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHashSet<ObservableHashSet<TValue>, TValue>(values), ICollectionAlerts<ObservableHashSet<TValue>, TValue>
 {
-    private static JsonSerializerContext?                   __jsonContext;
-    private static JsonTypeInfo<ObservableHashSet<TValue>>? __jsonTypeInfo;
-    public static  JsonSerializerContext                    JsonContext  { get => Validate.ThrowIfNull(__jsonContext);  set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableHashSet<TValue>>  JsonTypeInfo { get => Validate.ThrowIfNull(__jsonTypeInfo); set => __jsonTypeInfo = value; }
+    private static JsonTypeInfo<ObservableHashSet<TValue>[]>? __JsonArrayInfo;
+    private static JsonSerializerContext?                     __jsonContext;
+    private static JsonTypeInfo<ObservableHashSet<TValue>>?   __jsonTypeInfo;
+    public static  JsonSerializerContext                      JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
+    public static  JsonTypeInfo<ObservableHashSet<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
+    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo= value; }
 
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
     public ObservableHashSet( int                         capacity ) : this(new HashSet<TValue>(capacity)) { }

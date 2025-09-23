@@ -68,6 +68,10 @@
 		</None>
 	</ItemGroup>
 
+	<PropertyGroup>
+		<IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net9.0'))">true</IsAotCompatible>
+	</PropertyGroup>
+
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<DocumentationFile>bin\Release\Jakar.Extensions.xml</DocumentationFile>
 		<DefineConstants>DEBUG;TRACE</DefineConstants>

@@ -199,7 +199,7 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
 
-        try { SetBlockedPasswords(content.FromJson<string[]>()); }
+        try { SetBlockedPasswords(content.FromJson<string[]>(JakarExtensionsContext.Default.StringArray)); }
         catch ( Exception ) { SetBlockedPasswords(content.SplitAndTrimLines()); }
     }
 
@@ -225,4 +225,3 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
         SetBlockedPasswords(await file.ReadAsync().AsString(token));
     }
 }
-

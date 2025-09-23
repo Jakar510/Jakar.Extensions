@@ -23,8 +23,8 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
                              ReadCommentHandling = JsonCommentHandling.Skip,
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
                              RespectRequiredConstructorParameters = true)]
-[JsonSerializable(typeof(TestJson))]
-[JsonSerializable(typeof(Node))]
+[JsonSerializable(typeof(TestJson[]))]
+[JsonSerializable(typeof(Node[]))]
 public sealed partial class ExperimentContext : JsonSerializerContext;
 
 
@@ -32,13 +32,14 @@ public sealed partial class ExperimentContext : JsonSerializerContext;
 public sealed record Node : BaseRecord<Node>, IEqualComparable<Node>, IJsonModel<Node>
 {
     private static readonly Node[]                __empty = [];
-    public static           JsonSerializerContext JsonContext  => ExperimentContext.Default;
-    public static           JsonTypeInfo<Node>    JsonTypeInfo => ExperimentContext.Default.Node;
-    public                  Node[]                Children     { get; init; } = __empty;
-    public                  DateTimeOffset        Date         { get; init; }
-    public                  string                Description  { get; init; } = string.Empty;
-    public                  string                Name         { get; init; } = string.Empty;
-    public                  double                Price        { get; init; }
+    public static           JsonSerializerContext JsonContext   => ExperimentContext.Default;
+    public static           JsonTypeInfo<Node>    JsonTypeInfo  => ExperimentContext.Default.Node;
+    public static           JsonTypeInfo<Node[]>  JsonArrayInfo => ExperimentContext.Default.NodeArray;
+    public                  Node[]                Children      { get; init; } = __empty;
+    public                  DateTimeOffset        Date          { get; init; }
+    public                  string                Description   { get; init; } = string.Empty;
+    public                  string                Name          { get; init; } = string.Empty;
+    public                  double                Price         { get; init; }
 
 
     public Node() { }
@@ -91,7 +92,7 @@ public sealed record Node : BaseRecord<Node>, IEqualComparable<Node>, IJsonModel
 
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
-public sealed class TestJson
+public sealed class TestJson : BaseClass<TestJson>, IEqualComparable<TestJson>, IJsonModel<TestJson>
 {
     public Email email         = new("bite@me.com");
     public Error mutableError  = Error.InternalServerError();
@@ -136,14 +137,15 @@ public sealed class TestJson
                                                          }
                                               };
 
-    public static JsonSerializerContext          JsonContext  => ExperimentContext.Default;
-    public static JsonTypeInfo<TestJson>         JsonTypeInfo => ExperimentContext.Default.TestJson;
-    public        Node[]                         Nodes        { get; set; } = [];
-    public        CreateUserModel                CreateUser   { get; set; } = new();
-    public        Errors                         Errors       { get; set; } = Errors.Empty;
-    public        ObservableCollection<FileData> Files        { get; set; } = [];
-    public        CurrentLocation                Location     { get; set; } = new();
-    public        UserModel                      User         { get; set; } = new();
+    public static JsonSerializerContext          JsonContext   => ExperimentContext.Default;
+    public static JsonTypeInfo<TestJson>         JsonTypeInfo  => ExperimentContext.Default.TestJson;
+    public static JsonTypeInfo<TestJson[]>       JsonArrayInfo => ExperimentContext.Default.TestJsonArray;
+    public        Node[]                         Nodes         { get; set; } = [];
+    public        CreateUserModel                CreateUser    { get; set; } = new();
+    public        Errors                         Errors        { get; set; } = Errors.Empty;
+    public        ObservableCollection<FileData> Files         { get; set; } = [];
+    public        CurrentLocation                Location      { get; set; } = new();
+    public        UserModel                      User          { get; set; } = new();
 
 
     public static void Print()
@@ -153,4 +155,12 @@ public sealed class TestJson
         Console.WriteLine(json);
         Console.WriteLine();
     }
+    public override bool Equals( TestJson?      other )                 => ReferenceEquals(this, other);
+    public override int  CompareTo( TestJson?   other )                 => 0;
+    public static   bool operator ==( TestJson? left, TestJson? right ) => EqualityComparer<TestJson>.Default.Equals(left, right);
+    public static   bool operator !=( TestJson? left, TestJson? right ) => !EqualityComparer<TestJson>.Default.Equals(left, right);
+    public static   bool operator >( TestJson   left, TestJson  right ) => Comparer<TestJson>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( TestJson  left, TestJson  right ) => Comparer<TestJson>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( TestJson   left, TestJson  right ) => Comparer<TestJson>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( TestJson  left, TestJson  right ) => Comparer<TestJson>.Default.Compare(left, right) <= 0;
 }

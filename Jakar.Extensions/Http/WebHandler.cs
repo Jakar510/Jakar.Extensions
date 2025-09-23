@@ -111,8 +111,9 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken             token )                            => CreateResponse(AsBytes, token);
     public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken              token )                            => AsJson(Json.Options, token);
     public ValueTask<WebResponse<JsonNode>> AsJson( JsonSerializerOptions          options, CancellationToken token ) => CreateResponse(AsJson, options, token);
-    public ValueTask<WebResponse<TResult>>  AsJson<TResult>( CancellationToken     token )                            => AsJson<TResult>(Json.Options, token);
-    public ValueTask<WebResponse<TResult>>  AsJson<TResult>( JsonSerializerOptions options, CancellationToken token ) => CreateResponse(AsJson<TResult>, options, token);
+    public ValueTask<WebResponse<TValue>>  AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
+    public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
+        where TValue : IJsonModel<TValue> => CreateResponse(AsJson<TValue>, token);
 
     public ValueTask<WebResponse<LocalFile>>            AsFile( CancellationToken   token )                                   => CreateResponse(AsFile, token);
     public ValueTask<WebResponse<LocalFile>>            AsFile( string              fileNameHeader, CancellationToken token ) => CreateResponse(AsFile, fileNameHeader, token);
@@ -146,13 +147,15 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         JsonNode?          result  = await stream.FromJson(options, token);
         return Validate.ThrowIfNull(result);
     }
-    public static async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonSerializerOptions options, CancellationToken token )
+    public static ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, CancellationToken token )
+        where TValue : IJsonModel<TValue> => AsJson(response, TValue.JsonTypeInfo, token);
+    public static async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info, CancellationToken token )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync(token);
-        TResult?           result  = await stream.FromJson<TResult>(options, token);
+        TValue?           result  = await stream.FromJson(info, token);
         return Validate.ThrowIfNull(result);
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
@@ -256,11 +259,11 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
 /*
 
-    public async ValueTask<TResult> AsJson<TResult>( HttpResponseMessage response, JsonTypeInfo<TResult> info )
+    public async ValueTask<TValue> AsJson<TValue>( HttpResponseMessage response, JsonTypeInfo<TValue> info )
     {
         await using MemoryStream stream = await AsStream( response );
 
-        TResult? result = await JsonSerializer.DeserializeAsync( stream, info, token );
+        TValue? result = await JsonSerializer.DeserializeAsync( stream, info, token );
         return result ?? throw new NullReferenceException( nameof(JsonSerializer.DeserializeAsync) );
     }
 

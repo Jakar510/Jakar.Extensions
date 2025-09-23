@@ -22,7 +22,7 @@ public static class ConsoleExtensions
         builder.AppendLine();
 
         ExceptionDetails details = self.FullDetails();
-        builder.AppendLine(details.ToPrettyJson());
+        builder.AppendLine(details.ToJson());
 
         builder.AppendLine();
         builder.AppendLine();
@@ -32,7 +32,8 @@ public static class ConsoleExtensions
 
 
     public static StringBuilder PrintJson<TValue>( this TValue self, char c = '-', int length = 80 )
-        where TValue : notnull
+        where TValue : IJsonModel<TValue> => self.PrintJson(TValue.JsonTypeInfo, c, length);
+    public static StringBuilder PrintJson<TValue>( this TValue self, JsonTypeInfo<TValue> info, char c = '-', int length = 80 )
     {
         string wrapper = c.Repeat(length);
 
@@ -42,7 +43,7 @@ public static class ConsoleExtensions
         builder.AppendLine(typeof(TValue).FullName);
         builder.AppendLine();
         builder.AppendLine();
-        builder.AppendLine(self.ToPrettyJson());
+        builder.AppendLine(self.ToJson(info));
         builder.AppendLine();
         builder.AppendLine();
         builder.AppendLine(wrapper);

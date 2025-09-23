@@ -20,6 +20,9 @@ public class BaseClass
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable
     where TClass : BaseClass<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
 {
+    [JsonExtensionData] public JsonObject? AdditionalData { get; set; }
+
+
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
 

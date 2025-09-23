@@ -8,30 +8,6 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 
 /*
 
-BenchmarkDotNet v0.15.3, Windows 11 (10.0.26100.6584/24H2/2024Update/HudsonValley)
-AMD Ryzen 9 3900X 3.80GHz, 1 CPU, 24 logical and 12 physical cores
-.NET SDK 9.0.305
- [Host]     : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3 [AttachedDebugger]
- DefaultJob : .NET 9.0.9 (9.0.9, 9.0.925.41916), X64 RyuJIT x86-64-v3
-
-
-| Method                                  | Mean          | Error       | StdDev        | Rank | Gen0   | Gen1   | Allocated |
-|---------------------------------------- |--------------:|------------:|--------------:|-----:|-------:|-------:|----------:|
-| TestJson_ToString_Serialize             |      7.772 ns |   0.1547 ns |     0.2117 ns |    1 |      - |      - |         - |
-| Node_ToString_Serialize                 |    660.156 ns |   9.1724 ns |     8.1311 ns |    2 | 0.1631 |      - |    1368 B |
-| Node_Faker                              |  1,064.754 ns |  21.0140 ns |    22.4847 ns |    3 | 0.0820 |      - |     690 B |
-| Node_JsonNet_Serialize                  |  1,201.324 ns |  18.9912 ns |    17.7643 ns |    4 | 0.2766 | 0.0010 |    2320 B |
-| Node_JsonNet_Serialize_Pretty           |  1,314.537 ns |  26.2381 ns |    64.8540 ns |    5 | 0.3014 |      - |    2528 B |
-| TestJson_SystemTextJson_Serialize       |  5,141.210 ns |  66.6114 ns |    62.3083 ns |    6 | 0.5035 |      - |    4216 B |
-| Node_SystemTextJson_Serialize           |  6,284.724 ns |  90.7470 ns |    84.8848 ns |    7 | 0.4654 |      - |    3912 B |
-| TestJson_SystemTextJson_SerializePretty |  8,319.549 ns | 163.8312 ns |   240.1416 ns |    8 | 0.7324 |      - |    6301 B |
-| Node_SystemTextJson_SerializePretty     |  8,843.487 ns | 100.1265 ns |    88.7596 ns |    9 | 0.7935 | 0.0153 |    6658 B |
-| TestJson_JsonNet_Serialize              | 17,611.836 ns | 350.1496 ns |   327.5301 ns |   10 | 2.0142 | 0.0610 |   16848 B |
-| Node_SystemTextJson                     | 19,370.384 ns | 385.1058 ns |   472.9445 ns |   11 | 0.9155 |      - |    7704 B |
-| TestJson_JsonNet_Serialize_Pretty       | 20,704.243 ns | 408.3273 ns |   401.0320 ns |   12 | 2.2583 | 0.0610 |   19112 B |
-| TestJson_JsonNet                        | 21,344.637 ns | 393.7377 ns |   368.3025 ns |   12 | 1.8921 | 0.0610 |   15872 B |
-| TestJson_SystemTextJson                 | 27,037.069 ns | 513.6680 ns |   649.6256 ns |   13 | 2.1057 | 0.0610 |   17688 B |
-| Node_JsonNet                            | 27,937.809 ns | 553.1903 ns | 1,325.4088 ns |   13 | 1.2207 |      - |   10416 B |
 
  */
 
@@ -275,7 +251,7 @@ public class JsonNet_SystemTextJson_Benchmarks
 
 
     private static readonly TestJson               _test           = TestJson.Debug;
-    private static readonly JsonSerializerSettings jsonNetSettings = new() { ReferenceLoopHandling = ReferenceLoopHandling.Ignore };
+    private static readonly JsonSerializerSettings jsonNetSettings = new() { ReferenceLoopHandling = ReferenceLoopHandling.Serialize };
 
 
     [GlobalSetup] public void Setup() => Debugger.Launch();

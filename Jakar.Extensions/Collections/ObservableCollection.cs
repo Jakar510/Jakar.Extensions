@@ -21,10 +21,12 @@ namespace Jakar.Extensions;
 public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
-    private static JsonSerializerContext?                      __jsonContext;
-    private static JsonTypeInfo<ObservableCollection<TValue>>? __jsonTypeInfo;
-    public static  JsonSerializerContext                       JsonContext  { get => Validate.ThrowIfNull(__jsonContext);  set => __jsonContext = value; }
-    public static  JsonTypeInfo<ObservableCollection<TValue>>  JsonTypeInfo { get => Validate.ThrowIfNull(__jsonTypeInfo); set => __jsonTypeInfo = value; }
+    private static JsonTypeInfo<ObservableCollection<TValue>[]>? __JsonArrayInfo;
+    private static JsonSerializerContext?                        __jsonContext;
+    private static JsonTypeInfo<ObservableCollection<TValue>>?   __jsonTypeInfo;
+    public static  JsonSerializerContext                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
+    public static  JsonTypeInfo<ObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
+    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
 
 
     public ObservableCollection() : this(Comparer<TValue>.Default) { }
@@ -43,15 +45,15 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
     public ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
 
 
-    public static implicit operator ObservableCollection<TValue>( List<TValue>                                                values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( HashSet<TValue>                                             values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( ConcurrentBag<TValue>                                       values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values )         => new(values);
-    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values )         => new(in values);
-    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values )         => new(in values);
-    public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values )         => new(values);
+    public static implicit operator ObservableCollection<TValue>( List<TValue>                                                values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( HashSet<TValue>                                             values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( ConcurrentBag<TValue>                                       values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
 }
 
 

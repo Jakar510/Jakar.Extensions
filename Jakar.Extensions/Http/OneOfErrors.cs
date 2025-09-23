@@ -4,13 +4,14 @@
 namespace Jakar.Extensions;
 
 
-public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors? Errors ) : IParsable<OneOfErrors>
+[method: JsonConstructor]
+public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors? Errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
 {
     public const           string      ERROR_MESSAGE = "Error Message: ";
     public const           string      UNKNOWN_ERROR = "Unknown Error";
     public static readonly OneOfErrors Empty         = new(null, null, null);
     public readonly        Errors?     Errors        = Errors;
-    public readonly        JsonNode?     Json          = Json;
+    public readonly        JsonNode?   Json          = Json;
     public readonly        string?     Text          = Text;
     public                 bool        IsErrors { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
 
@@ -27,8 +28,8 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
 
 
     public static OneOfErrors From( JsonNode input ) => new(input, null, null);
-    public static OneOfErrors From( string input ) => new(null, input, null);
-    public static OneOfErrors From( Errors input ) => new(null, null, input);
+    public static OneOfErrors From( string   input ) => new(null, input, null);
+    public static OneOfErrors From( Errors   input ) => new(null, null, input);
 
 
     public void Switch( Action<JsonNode>? f0, Action<string>? f1, Action<Errors>? f2 )
@@ -40,7 +41,7 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
     }
 
 
-    public TResult Match<TResult>( Func<JsonNode, TResult>? f0, Func<string, TResult>? f1, Func<Errors, TResult>? f2 )
+    public TValue? Match<TValue>( Func<JsonNode, TValue>? f0, Func<string, TValue>? f1, Func<Errors, TValue>? f2 )
     {
         if ( IsJson && f0 is not null ) { return f0(Json); }
 
@@ -48,9 +49,9 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
 
         if ( IsErrors && f2 is not null ) { return f2(Errors); }
 
-        throw new InvalidOperationException();
+        return default;
     }
-    public async ValueTask<TResult> MatchAsync<TResult>( Func<JsonNode, ValueTask<TResult>>? f0, Func<string, ValueTask<TResult>>? f1, Func<Errors, ValueTask<TResult>>? f2 )
+    public async ValueTask<TValue?> MatchAsync<TValue>( Func<JsonNode, ValueTask<TValue>>? f0, Func<string, ValueTask<TValue>>? f1, Func<Errors, ValueTask<TValue>>? f2 )
     {
         if ( IsJson && f0 is not null ) { return await f0(Json); }
 
@@ -58,9 +59,9 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
 
         if ( IsErrors && f2 is not null ) { return await f2(Errors); }
 
-        throw new InvalidOperationException();
+        return default;
     }
-    public async ValueTask<TResult> MatchAsync<TResult>( Func<JsonNode, CancellationToken, ValueTask<TResult>>? f0, Func<string, CancellationToken, ValueTask<TResult>>? f1, Func<Errors, CancellationToken, ValueTask<TResult>>? f2, CancellationToken token )
+    public async ValueTask<TValue?> MatchAsync<TValue>( Func<JsonNode, CancellationToken, ValueTask<TValue>>? f0, Func<string, CancellationToken, ValueTask<TValue>>? f1, Func<Errors, CancellationToken, ValueTask<TValue>>? f2, CancellationToken token )
     {
         if ( IsJson && f0 is not null ) { return await f0(Json, token); }
 
@@ -68,11 +69,10 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
 
         if ( IsErrors && f2 is not null ) { return await f2(Errors, token); }
 
-        throw new InvalidOperationException();
+        return default;
     }
 
-    
-    
+
     public static OneOfErrors Parse( string? error, IFormatProvider? provider = null )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -96,4 +96,15 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
         result = Parse(error, provider);
         return true;
     }
+    public static JsonSerializerContext       JsonContext   => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<OneOfErrors>   JsonTypeInfo  => JakarExtensionsContext.Default.OneOfErrors;
+    public static JsonTypeInfo<OneOfErrors[]> JsonArrayInfo => JakarExtensionsContext.Default.OneOfErrorsArray;
+    public        JsonNode                    ToJsonNode()  => Validate.ThrowIfNull(this.ToJsonNode<OneOfErrors>());
+    public        string                      ToJson()      => this.ToJson(JsonTypeInfo);
+    public static bool TryFromJson( string? json, out OneOfErrors result )
+    {
+        result = default;
+        return false;
+    }
+    public static OneOfErrors FromJson( string json ) => json.FromJson(JsonTypeInfo);
 }
