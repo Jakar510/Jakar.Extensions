@@ -13,11 +13,10 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
     public readonly        Errors?     Errors        = Errors;
     public readonly        JsonNode?   Json          = Json;
     public readonly        string?     Text          = Text;
-    public                 bool        IsErrors { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
 
-
-    public bool IsJson { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }
-    public bool IsText { [MemberNotNullWhen(true, nameof(Text))] get => Text is not null; }
+    public                     bool        IsErrors       { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
+    public                     bool        IsJson         { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }
+    public                     bool        IsText         { [MemberNotNullWhen(true, nameof(Text))] get => Text is not null; }
 
 
     public static implicit operator OneOfErrors( JsonNode input ) => From(input);

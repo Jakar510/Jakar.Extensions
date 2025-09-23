@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IJsonModel<TValue> : IJsonModel
+public interface IJsonModel<TValue> 
     where TValue : IJsonModel<TValue>
 {
     public abstract static JsonSerializerContext  JsonContext   { get; }

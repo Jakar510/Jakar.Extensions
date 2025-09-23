@@ -1,11 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/12/2025  14:39
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes.Interfaces;
 
 
 public interface ICircle<TSelf> : IShape<TSelf>, IShapeLocation
-    where TSelf : struct, ICircle<TSelf>
+    where TSelf : struct, ICircle<TSelf>, IJsonModel<TSelf>
 {
     ref readonly ReadOnlyPoint Center { get; }
     double                     Radius { get; }
@@ -22,7 +26,7 @@ public interface ICircle<TSelf> : IShape<TSelf>, IShapeLocation
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.X},{self.Y}";

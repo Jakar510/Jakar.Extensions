@@ -1,34 +1,42 @@
 ﻿// TrueLogic :: TrueLogic.Common
 // 05/16/2022  2:09 PM
 
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Extensions.SignalR.Chats;
 
 
 public interface IChatUser : IUserID
 {
-    [StringLength( UNICODE_CAPACITY )] public string FullName { get; }
-    [StringLength( UNICODE_CAPACITY )] public string UserName { get; }
+    [StringLength(UNICODE_CAPACITY)] public string FullName { get; }
+    [StringLength(UNICODE_CAPACITY)] public string UserName { get; }
 }
 
 
 
-public sealed record ChatUser( [property: StringLength( UNICODE_CAPACITY )] string FullName, [property: StringLength( UNICODE_CAPACITY )] string UserName, Guid UserID ) : BaseRecord, IChatUser
+public sealed record ChatUser( [property: StringLength(UNICODE_CAPACITY)] string FullName, [property: StringLength(UNICODE_CAPACITY)] string UserName, Guid UserID ) : BaseRecord, IChatUser
 {
     public static readonly ChatUser Empty = new(string.Empty, string.Empty, Guid.Empty);
-    public ChatUser( IChatUser               data ) : this( data.FullName, data.UserName, data.UserID ) { }
+    public ChatUser( IChatUser               data ) : this(data.FullName, data.UserName, data.UserID) { }
     public static ChatUser Create( IChatUser data ) => new(data.FullName, data.UserName, data.UserID);
-
-
-
-    public sealed class Collection() : ConcurrentObservableCollection<ChatUser>( DEFAULT_CAPACITY )
-    {
-        public Collection( params ReadOnlySpan<ChatUser> enumerable ) : this() => Add( enumerable );
-    }
 }
 
 
 
-public sealed record HubEvent( [property: StringLength( UNICODE_CAPACITY )] string ConnectionID, [property: StringLength( UNICODE_CAPACITY )] string Group, HubEventType Type, ChatUser User, InstantMessage? Message = null ) : BaseRecord;
+public sealed class ChatUserCollection() : ConcurrentObservableCollection<ChatUserCollection, ChatUser>(DEFAULT_CAPACITY), ICollectionAlerts<ChatUserCollection, ChatUser>
+{
+    public ChatUserCollection( params ReadOnlySpan<ChatUser> enumerable ) : this() => Add(enumerable);
+}
+
+
+
+public sealed record HubEvent( [property: StringLength(UNICODE_CAPACITY)] string ConnectionID, [property: StringLength(UNICODE_CAPACITY)] string Group, HubEventType Type, ChatUser User, InstantMessage? Message = null ) : BaseRecord;
 
 
 
@@ -130,9 +138,9 @@ public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyC
 public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INotifyPropertyChanged
 {
     string                    Group       { get; }
-    InstantMessage.Collection Messages    { get; }
+    InstantMessage.InstantMessageCollection Messages    { get; }
     int                       UnreadChats { get; }
-    ChatUser.Collection       Users       { get; }
+    ChatUserCollection        Users       { get; }
     public bool               Active      { get; set; }
 
 

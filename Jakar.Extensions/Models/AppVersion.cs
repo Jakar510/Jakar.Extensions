@@ -14,7 +14,6 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     public static       JsonSerializerContext      JsonContext    => JakarExtensionsContext.Default;
     public static       JsonTypeInfo<AppVersion>   JsonTypeInfo   => JakarExtensionsContext.Default.AppVersion;
     public static       JsonTypeInfo<AppVersion[]> JsonArrayInfo  => JakarExtensionsContext.Default.AppVersionArray;
-    [JsonExtensionData] JsonObject? IJsonModel.    AdditionalData { get;                                                    set; }
     public              int?                       Build          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
     int IReadOnlyCollection<int>.                  Count          => Scheme.AsInt();
     public              AppVersionFlags            Flags          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }

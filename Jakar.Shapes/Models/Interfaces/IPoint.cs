@@ -1,11 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/26/2025  16:26
 
+using Jakar.Extensions;
+
 namespace Jakar.Shapes.Interfaces;
 
 
 public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
-    where TSelf : IPoint<TSelf>
+    where TSelf : IPoint<TSelf>, IJsonModel<TSelf>
 {
     [Pure] public abstract static TSelf Create( double x, double y );
 
@@ -25,7 +27,7 @@ public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.X},{self.Y}";

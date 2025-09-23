@@ -15,7 +15,7 @@ public interface IInstantMessage
 
 
 [Serializable]
-public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage, IEqualComparable<InstantMessage>
+public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage, IEqualComparable<InstantMessage>, IJsonModel<InstantMessage>
 {
     private bool        __hasBeenRead;
     private FileData[]? __data;
@@ -89,11 +89,11 @@ public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMe
     public static bool operator >=( InstantMessage  left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) >= 0;
     public static bool operator <( InstantMessage   left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) < 0;
     public static bool operator <=( InstantMessage  left, InstantMessage  right ) => Comparer<InstantMessage>.Default.Compare(left, right) <= 0;
+}
 
 
 
-    public sealed class Collection() : ConcurrentObservableCollection<InstantMessage>(DEFAULT_CAPACITY)
-    {
-        public Collection( params ReadOnlySpan<InstantMessage> enumerable ) : this() => Add(enumerable);
-    }
+public sealed class InstantMessageCollection() : ConcurrentObservableCollection<InstantMessageCollection, InstantMessage>(DEFAULT_CAPACITY), ICollectionAlerts<InstantMessageCollection, InstantMessage>
+{
+    public InstantMessageCollection( params ReadOnlySpan<InstantMessage> enumerable ) : this() => Add(enumerable);
 }

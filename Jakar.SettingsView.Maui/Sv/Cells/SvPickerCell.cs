@@ -16,6 +16,6 @@ public abstract class SvPickerCell<TValue> : ValueCellBase<TValue>
     {
         return Value is not null
                    ? Value
-                   : Error.Create( Status.NoContent, default );
+                   : Error.Create( Status.NoContent );
     }
 }

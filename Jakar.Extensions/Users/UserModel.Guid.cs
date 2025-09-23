@@ -121,7 +121,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : JsonModel<CurrentLocation>, ICurrentLocation<Guid>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<Guid>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
 {
     public static JsonSerializerContext         JsonContext             => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CurrentLocation> JsonTypeInfo            => JakarModelsGuidContext.Default.CurrentLocation;

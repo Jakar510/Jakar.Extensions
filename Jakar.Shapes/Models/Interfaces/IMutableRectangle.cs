@@ -1,11 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/27/2025  18:22
 
+using Jakar.Extensions;
+
 namespace Jakar.Shapes.Interfaces;
 
 
 public interface IMutableRectangle<TSelf> : IRectangle<TSelf>
-    where TSelf : struct, IMutableRectangle<TSelf>
+    where TSelf : struct, IMutableRectangle<TSelf>, IJsonModel<TSelf>
 {
     public new double X      { get; set; }
     public new double Y      { get; set; }

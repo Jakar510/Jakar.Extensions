@@ -2,11 +2,15 @@
 // 06/26/2025  11:36
 
 
+using Jakar.Extensions;
+
+
+
 namespace Jakar.Shapes.Interfaces;
 
 
 public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
-    where TSelf : IRectangle<TSelf>
+    where TSelf : IRectangle<TSelf>, IJsonModel<TSelf>
 {
     public double        Bottom   { get; }
     public double        Left     { get; }
@@ -52,7 +56,7 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.X},{self.Y},{self.Width},{self.Height}";

@@ -1,11 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Shapes
 // 07/12/2025  19:42
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes.Interfaces;
 
 
 public interface ILine<TSelf> : IShape<TSelf>
-    where TSelf : struct, ILine<TSelf>
+    where TSelf : struct, ILine<TSelf>, IJsonModel<TSelf>
 {
     ReadOnlyPoint Start    { get; }
     ReadOnlyPoint End      { get; }
@@ -31,7 +35,7 @@ public interface ILine<TSelf> : IShape<TSelf>
             case "json":
             case "JSON":
             case "Json":
-                return self.ToJson();
+                return self.ToJson(TSelf.JsonTypeInfo);
 
             case ",":
                 return $"{self.Start.ToString(format, null)},{self.End.ToString(format, null)}";
