@@ -72,25 +72,25 @@ public static class Json
 
     public static bool Remove( this IJsonModel self, string key )
     {
-        JsonObject dict = self.GetData();
+        JsonObject dict = self.GetAdditionalData();
         return dict.Remove(key);
     }
     public static bool Remove( this IJsonModel self, string key, out JsonNode? value )
     {
-        JsonObject dict = self.GetData();
+        JsonObject dict = self.GetAdditionalData();
         dict.TryGetPropertyValue(key, out value);
         return dict.Remove(key);
     }
     public static bool Remove( this IJsonStringModel self, string key )
     {
-        JsonObject additionalData = self.GetData();
+        JsonObject additionalData = self.GetAdditionalData();
         bool       result         = additionalData.Remove(key);
         self.SetAdditionalData(additionalData);
         return result;
     }
     public static bool Remove( this IJsonStringModel self, string key, out JsonNode? value )
     {
-        JsonObject dict = self.GetData();
+        JsonObject dict = self.GetAdditionalData();
         dict.TryGetPropertyValue(key, out value);
         bool result = dict.Remove(key);
         self.SetAdditionalData(dict);
@@ -98,14 +98,13 @@ public static class Json
     }
 
 
-    public static        JsonObject GetData( this           IJsonModel       model ) => model.GetAdditionalData();
-    [Pure] public static JsonObject GetData( this           IJsonStringModel model ) => model.GetAdditionalData() ?? new JsonObject();
     public static        JsonObject GetAdditionalData( this IJsonModel       model ) => model.AdditionalData ??= new JsonObject();
-    public static JsonObject? GetAdditionalData( this IJsonStringModel model )
+    [Pure] public static JsonObject GetAdditionalData( this IJsonStringModel model ) => model.AdditionalData?.GetAdditionalData() ?? new JsonObject();
+    public static JsonObject? GetAdditionalData( this string json )
     {
-        if ( string.IsNullOrWhiteSpace(model.AdditionalData) ) { return null; }
+        if ( string.IsNullOrWhiteSpace(json) ) { return null; }
 
-        using Buffer<byte> bytes   = model.AdditionalData.AsSpanBytes(Encoding.Default);
+        using Buffer<byte> bytes   = json.AsSpanBytes(Encoding.Default);
         Utf8JsonReader     reader  = new(bytes.Values);
         JsonElement        element = JsonElement.ParseValue(ref reader);
         return JsonObject.Create(element);
@@ -238,7 +237,7 @@ public static class Json
         JsonNode? element = JsonSerializer.SerializeToNode(value, TValue.JsonTypeInfo);
         self.Add(key, element);
     }
-    public static void Add( this IJsonModel self, string key, JsonNode? element ) => self.GetData()[key] = element;
+    public static void Add( this IJsonModel self, string key, JsonNode? element ) => self.GetAdditionalData()[key] = element;
 
 
     public static void SetAdditionalData( this IJsonModel       model, JsonObject? data ) => model.AdditionalData = data;
