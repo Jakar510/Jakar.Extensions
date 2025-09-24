@@ -4,16 +4,12 @@
 namespace Jakar.Extensions;
 
 
-public interface IJsonModel<TValue> 
+public interface IJsonModel<TValue>
     where TValue : IJsonModel<TValue>
 {
     public abstract static JsonSerializerContext  JsonContext   { get; }
     public abstract static JsonTypeInfo<TValue>   JsonTypeInfo  { get; }
     public abstract static JsonTypeInfo<TValue[]> JsonArrayInfo { get; }
-
-
-    public JsonNode ToJsonNode();
-    public string   ToJson();
 
 
     // public                 void   Serialize( ref    Utf8JsonWriter writer );

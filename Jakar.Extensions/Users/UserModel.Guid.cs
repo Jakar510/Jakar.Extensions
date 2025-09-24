@@ -15,6 +15,8 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
     public static JsonSerializerContext       JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserAddress;
     public static JsonTypeInfo<UserAddress[]> JsonArrayInfo => JakarModelsGuidContext.Default.UserAddressArray;
+
+
     public UserAddress() : base() { }
     public UserAddress( Match                        match ) : base(match) { }
     public UserAddress( IAddress<Guid>               address ) : base(address) { }
@@ -22,12 +24,14 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
     public static UserAddress Create( Match          match )                                                                                                          => new(match);
     public static UserAddress Create( IAddress<Guid> address )                                                                                                        => new(address);
     public static UserAddress Create( string         line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid id = default ) => new(line1, line2, city, stateOrProvince, postalCode, country, id);
-    public new static UserAddress Parse( string value, IFormatProvider? provider )
+
+
+    public static UserAddress Parse( string value, IFormatProvider? provider )
     {
         Match match = Validate.Re.Address.Match(value);
         return new UserAddress(match);
     }
-    public new static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress? result )
+    public static bool TryParse( string? value, IFormatProvider? provider, [NotNullWhen(true)] out UserAddress? result )
     {
         try
         {
@@ -61,6 +65,8 @@ public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<Group
     public static JsonSerializerContext      JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.GroupModel;
     public static JsonTypeInfo<GroupModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.GroupModelArray;
+
+
     public GroupModel( string                            nameOfGroup, Guid? ownerID, Guid? createdBy, Guid id, string rights ) : base(nameOfGroup, ownerID, createdBy, id, rights) { }
     public GroupModel( IGroupModel<Guid>                 model ) : base(model) { }
     public static   GroupModel Create( IGroupModel<Guid> model )            => new(model);
@@ -82,6 +88,8 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.RoleModel;
     public static JsonTypeInfo<RoleModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.RoleModelArray;
+
+
     public RoleModel( string                           nameOfRole, string rights, Guid id ) : base(nameOfRole, rights, id) { }
     public RoleModel( IRoleModel<Guid>                 model ) : base(model) { }
     public static   RoleModel Create( IRoleModel<Guid> model )            => new(model);
@@ -104,18 +112,22 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
     public static JsonSerializerContext    JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
     public static JsonTypeInfo<FileData[]> JsonArrayInfo => JakarModelsGuidContext.Default.FileDataArray;
+
+
     [SetsRequiredMembers] public FileData( IFileData<Guid, FileMetaData> file ) : this(file, file.MetaData) { }
     [SetsRequiredMembers] public FileData( IFileData<Guid>               file,     FileMetaData              metaData ) : this(file.FileSize, file.Hash, file.Payload, metaData) { }
     [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this(content.Length, content.Hash_SHA512(), Convert.ToBase64String(content), metaData) { }
 
 
-    public static FileData Create( long       fileSize, string    hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);
-    public static bool operator ==( FileData? left,     FileData? right ) => EqualityComparer<FileData>.Default.Equals(left, right);
-    public static bool operator !=( FileData? left,     FileData? right ) => !EqualityComparer<FileData>.Default.Equals(left, right);
-    public static bool operator >( FileData   left,     FileData  right ) => left.CompareTo(right) > 0;
-    public static bool operator >=( FileData  left,     FileData  right ) => left.CompareTo(right) >= 0;
-    public static bool operator <( FileData   left,     FileData  right ) => left.CompareTo(right) < 0;
-    public static bool operator <=( FileData  left,     FileData  right ) => left.CompareTo(right) <= 0;
+    public static   FileData Create( long       fileSize, string    hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);
+    public override int      GetHashCode()                              => base.GetHashCode();
+    public override bool     Equals( object?    other )                 => base.Equals(other);
+    public static   bool operator ==( FileData? left, FileData? right ) => EqualityComparer<FileData>.Default.Equals(left, right);
+    public static   bool operator !=( FileData? left, FileData? right ) => !EqualityComparer<FileData>.Default.Equals(left, right);
+    public static   bool operator >( FileData   left, FileData  right ) => left.CompareTo(right) > 0;
+    public static   bool operator >=( FileData  left, FileData  right ) => left.CompareTo(right) >= 0;
+    public static   bool operator <( FileData   left, FileData  right ) => left.CompareTo(right) < 0;
+    public static   bool operator <=( FileData  left, FileData  right ) => left.CompareTo(right) <= 0;
 }
 
 
@@ -286,6 +298,8 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
     public static JsonTypeInfo<UserModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.UserModelArray;
+
+
     public UserModel() : base() { }
     public UserModel( IUserData<Guid> value ) : base(value) { }
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
@@ -320,6 +334,8 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, Use
     public static JsonSerializerContext           JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.CreateUserModel;
     public static JsonTypeInfo<CreateUserModel[]> JsonArrayInfo => JakarModelsGuidContext.Default.CreateUserModelArray;
+
+
     public CreateUserModel() : base() { }
     public CreateUserModel( IUserData<Guid> value ) : base(value) { }
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }

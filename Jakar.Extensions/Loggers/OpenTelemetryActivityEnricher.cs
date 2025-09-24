@@ -19,9 +19,9 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
     public const     string                         SPAN_ID       = "SpanId";
     public const     string                         TRACE_ID_KEY  = "Serilog.TraceId";
     public const     string                         TRACE_ID      = "TraceId";
-    private readonly LogEventProperty               __appInfo     = Enricher.GetProperty(in source.Info);
+    private readonly LogEventProperty               __appInfo     = source.Info.GetProperty();
     private readonly IOpenTelemetryActivityEnricher __options     = options;
-    private readonly TelemetrySource                __source       = source;
+    private readonly TelemetrySource                __source      = source;
 
 
     public static void Create( LoggerEnrichmentConfiguration enrichment, AppLoggerOptions options, TelemetrySource source ) => enrichment.With(new OpenTelemetryActivityEnricher(options, source));
@@ -41,8 +41,8 @@ public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher optio
 
         if ( log.Level >= LogEventLevel.Warning )
         {
-            log.AddOrUpdateProperty(Enricher.GetProperty(ThreadInfo.Create()));
-            log.AddOrUpdateProperty(Enricher.GetProperty(GcInfo.Create()));
+            log.AddOrUpdateProperty(ThreadInformation.Create().GetProperty());
+            log.AddOrUpdateProperty(GcInfo.Create().GetProperty());
         }
 
         foreach ( ref readonly ILogEventEnricher enricher in enrichers ) { enricher.Enrich(log, factory); }

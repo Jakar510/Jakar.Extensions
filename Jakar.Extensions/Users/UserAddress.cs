@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IAddress<out TID> : IUniqueID<TID>
+public interface IAddress<out TID> : IUniqueID<TID>, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     public            string? Address         { get; }
@@ -31,7 +31,7 @@ public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqua
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID>, IJsonModel
+public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IJsonModel<TClass>
 {

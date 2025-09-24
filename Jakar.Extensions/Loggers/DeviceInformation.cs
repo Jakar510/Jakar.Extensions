@@ -24,7 +24,7 @@ public interface IDeviceName
 
 
 
-public interface IDeviceInformation : IEquatable<IDeviceInformation>, IDeviceID<string>
+public interface IDeviceInformation : IEquatable<IDeviceInformation>, IDeviceID<string?>
 {
     public     DeviceCategory Category   { get; }
     public new string?        DeviceID   { get; set; }

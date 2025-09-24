@@ -409,8 +409,6 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     public override int  GetHashCode()         => HashCode.Combine(Scheme, Major, Minor, Maintenance, MajorRevision, MinorRevision, Build, Flags);
 
 
-    public string   ToJson()     => ToString();
-    public JsonNode ToJsonNode() => Validate.ThrowIfNull(Json.ToJsonNode(this));
     public static bool TryFromJson( string? json, [NotNullWhen(true)] out AppVersion? result )
     {
         try

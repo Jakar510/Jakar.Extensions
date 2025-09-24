@@ -166,12 +166,12 @@ public class LanguageCollection : ObservableCollection<LanguageCollection, Langu
     {
         foreach ( Language language in enumerable ) { Add(language); }
     }
-    public static implicit operator LanguageCollection( List<Language>           values ) => null;
-    public static implicit operator LanguageCollection( HashSet<Language>        values ) => null;
-    public static implicit operator LanguageCollection( ConcurrentBag<Language>  values ) => null;
-    public static implicit operator LanguageCollection( Collection<Language>     values ) => null;
-    public static implicit operator LanguageCollection( Language[]               values ) => null;
-    public static implicit operator LanguageCollection( ImmutableArray<Language> values ) => null;
-    public static implicit operator LanguageCollection( ReadOnlyMemory<Language> values ) => null;
-    public static implicit operator LanguageCollection( ReadOnlySpan<Language>   values ) => null;
+    public static implicit operator LanguageCollection( List<Language>           values ) => new(values);
+    public static implicit operator LanguageCollection( HashSet<Language>        values ) => new(values);
+    public static implicit operator LanguageCollection( ConcurrentBag<Language>  values ) => new(values);
+    public static implicit operator LanguageCollection( Collection<Language>     values ) => new(values);
+    public static implicit operator LanguageCollection( Language[]               values ) => new(values.AsSpan());
+    public static implicit operator LanguageCollection( ImmutableArray<Language> values ) => new(values.AsSpan());
+    public static implicit operator LanguageCollection( ReadOnlyMemory<Language> values ) => new(values.Span);
+    public static implicit operator LanguageCollection( ReadOnlySpan<Language>   values ) => new(values);
 }

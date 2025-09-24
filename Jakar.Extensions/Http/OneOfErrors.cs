@@ -98,8 +98,6 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
     public static JsonSerializerContext       JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<OneOfErrors>   JsonTypeInfo  => JakarExtensionsContext.Default.OneOfErrors;
     public static JsonTypeInfo<OneOfErrors[]> JsonArrayInfo => JakarExtensionsContext.Default.OneOfErrorsArray;
-    public        JsonNode                    ToJsonNode()  => Validate.ThrowIfNull(this.ToJsonNode<OneOfErrors>());
-    public        string                      ToJson()      => this.ToJson(JsonTypeInfo);
     public static bool TryFromJson( string? json, out OneOfErrors result )
     {
         result = default;

@@ -99,33 +99,8 @@ public static class Enricher
         where TEnum : struct, Enum => new(name, new ScalarValue(value.ToString()));
 
 
-    public static LogEventProperty GetProperty( in ReadOnlySpan<GCGenerationInfo> value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
-    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan>         value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
-
-
-    public static LogEventProperty GetProperty( in GCMemoryInfo value, string name ) => new(name,
-                                                                                            new StructureValue([
-                                                                                                                   GetProperty(value.Compacted,                    nameof(value.Compacted)),
-                                                                                                                   GetProperty(value.HighMemoryLoadThresholdBytes, nameof(value.HighMemoryLoadThresholdBytes)),
-                                                                                                                   GetProperty(value.MemoryLoadBytes,              nameof(value.MemoryLoadBytes)),
-                                                                                                                   GetProperty(value.TotalAvailableMemoryBytes,    nameof(value.TotalAvailableMemoryBytes)),
-                                                                                                                   GetProperty(value.HeapSizeBytes,                nameof(value.HeapSizeBytes)),
-                                                                                                                   GetProperty(value.FragmentedBytes,              nameof(value.FragmentedBytes)),
-                                                                                                                   GetProperty(value.Generation,                   nameof(value.Generation)),
-                                                                                                                   GetProperty(value.Concurrent,                   nameof(value.Concurrent)),
-                                                                                                                   GetProperty(value.TotalCommittedBytes,          nameof(value.TotalCommittedBytes)),
-                                                                                                                   GetProperty(value.PromotedBytes,                nameof(value.PromotedBytes)),
-                                                                                                                   GetProperty(value.PinnedObjectsCount,           nameof(value.PinnedObjectsCount)),
-                                                                                                                   GetProperty(value.FinalizationPendingCount,     nameof(value.FinalizationPendingCount)),
-                                                                                                                   GetProperty(value.PauseTimePercentage,          nameof(value.PauseTimePercentage)),
-                                                                                                                   GetProperty(value.GenerationInfo,               nameof(value.GenerationInfo)),
-                                                                                                                   GetProperty(value.PauseDurations,               nameof(value.PauseDurations)),
-                                                                                                               ]));
-    public static LogEventProperty GetProperty( in GCGenerationInfo value, string name ) => new(name, new StructureValue([GetProperty(value.SizeBeforeBytes, nameof(value.SizeBeforeBytes)), GetProperty(value.FragmentationBeforeBytes, nameof(value.FragmentationBeforeBytes)), GetProperty(value.SizeAfterBytes, nameof(value.SizeAfterBytes)), GetProperty(value.FragmentationAfterBytes, nameof(value.FragmentationAfterBytes)),]));
-    public static LogEventProperty GetProperty( in AppInformation   info ) => new(nameof(AppInformation), new StructureValue([GetProperty(info.Version, nameof(AppInformation.Version)), GetProperty(info.AppID,    nameof(AppInformation.AppID)), GetProperty(info.AppName,                          nameof(AppInformation.AppName)), GetProperty(info.PackageName,                     nameof(AppInformation.PackageName))]));
-    public static LogEventProperty GetProperty( in ThreadInfo       info ) => new(nameof(ThreadInfo), new StructureValue([GetProperty(info.Name,        nameof(ThreadInfo.Name)), GetProperty(info.ManagedThreadID, nameof(ThreadInfo.ManagedThreadID)), GetProperty(info.CurrentCulture.DisplayName, nameof(ThreadInfo.CurrentCulture)), GetProperty(info.CurrentUICulture.DisplayName, nameof(ThreadInfo.CurrentUICulture))]));
-    public static LogEventProperty GetProperty( in GcInfo info ) =>
-        new(nameof(GcInfo), new StructureValue([GetProperty(info.TotalMemory, nameof(GcInfo.TotalMemory)), GetProperty(info.TotalPauseDuration, nameof(GcInfo.TotalPauseDuration)), GetProperty(info.TotalAllocatedBytes, nameof(GcInfo.TotalAllocatedBytes)), GetProperty(info.AllocatedBytesForCurrentThread, nameof(GcInfo.AllocatedBytesForCurrentThread)), GetProperty(info.Info, nameof(GcInfo.Info))]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<GCGenerationInformation> value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(static v => v.GetProperty())]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan>                value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
 
 
     public static LogEventProperty GetProperty( string?                                    description, ActivityStatusCode code ) => new(nameof(Activity.Status), new StructureValue([GetProperty(description, "Description"), GetProperty(code, "Code")]));

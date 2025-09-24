@@ -99,8 +99,6 @@ public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, ICompar
     public override int  GetHashCode()           => RuntimeHelpers.GetHashCode(this);
 
 
-    public virtual JsonNode ToJsonNode() => Validate.ThrowIfNull(JsonSerializer.SerializeToNode((TClass)this, TClass.JsonTypeInfo));
-    public virtual string   ToJson()     => Validate.ThrowIfNull(JsonSerializer.Serialize((TClass)this, TClass.JsonTypeInfo));
     public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
     {
         try

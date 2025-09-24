@@ -35,7 +35,7 @@ public sealed class OneTimePassword( string key, string issuer ) : Randoms
     }
 
 
-    public string GetContent( IUserName record )   => GetContent(record.UserName);
+    public string GetContent( IUserName model )   => GetContent(model.UserName);
     public string GetContent( string    userName ) => $"otpauth://totp/{userName}?secret={__secret_Key}&issuer={__issuer}";
 
 

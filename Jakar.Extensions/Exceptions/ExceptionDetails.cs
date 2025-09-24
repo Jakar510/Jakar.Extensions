@@ -27,7 +27,7 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<E
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public ExceptionDetails( Exception exception, bool includeMethodInfo = true )
     {
         Value           = exception ?? throw new ArgumentNullException(nameof(exception));
@@ -38,7 +38,7 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<E
         Source          = exception.Source;
         StackTrace      = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
         MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}";
-        Data            = exception.GetData()?.ToJsonNode();
+        Data            = exception.GetData();
         Str             = exception.ToString();
 
         if ( includeMethodInfo ) { TargetSite = exception.MethodInfo(); }
@@ -47,12 +47,16 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<E
                     ? null
                     : new ExceptionDetails(exception.InnerException);
     }
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static implicit operator ExceptionDetails?( Exception? e )       => TryCreate(e);
-    public static implicit operator                                                                                      Exception?( ExceptionDetails? details ) => details?.Value;
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
+    public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] private static ExceptionDetails Create( Exception exception ) => new(exception);
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    private static ExceptionDetails Create( Exception exception ) => new(exception);
+
+
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     private static ExceptionDetails? TryCreate( [NotNullIfNotNull(nameof(exception))] Exception? exception ) => exception is not null
                                                                                                                     ? Create(exception)
                                                                                                                     : null;

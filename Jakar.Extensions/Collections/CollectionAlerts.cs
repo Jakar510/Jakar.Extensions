@@ -66,8 +66,6 @@ public abstract class CollectionAlerts<TClass, TValue> : BaseClass, ICollectionA
         for ( int i = 0; i < owner.Length; i++ ) { yield return owner.Values[i]; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public virtual JsonNode ToJsonNode()    => Validate.ThrowIfNull(JsonSerializer.SerializeToNode((TClass)this, TClass.JsonTypeInfo));
-    public virtual string   ToJson()        => Validate.ThrowIfNull(JsonSerializer.Serialize((TClass)this, TClass.JsonTypeInfo));
     public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
     {
         try

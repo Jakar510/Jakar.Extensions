@@ -1,7 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/29/2023  1:49 PM
 
-using System.IO.Pipelines;
 using Jakar.Extensions.UserGuid;
 using Jakar.Extensions.UserLong;
 
@@ -12,12 +11,14 @@ namespace Jakar.Extensions;
 
 public static class Json
 {
-    public const            string                                   SerializationRequiresDynamicCodeM = "SerializationRequiresDynamicCodeM";
-    public const            string                                   SerializationUnreferencedCode     = "SerializationUnreferencedCode";
+    public const            string                                   SerializationRequiresDynamicCode = "SerializationRequiresDynamicCode";
+    public const            string                                   SerializationUnreferencedCode    = "SerializationUnreferencedCode";
     private static          JsonDocumentOptions                      __documentOptions;
-    private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos             = new();
-    public static readonly  DefaultJsonTypeInfoResolver              DefaultJsonTypeInfoResolver = new();
-    private static          JsonNodeOptions                          __jsonNodeOptions           = new() { PropertyNameCaseInsensitive = true };
+    private static          JsonNodeOptions                          __jsonNodeOptions = new() { PropertyNameCaseInsensitive = true };
+    private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos   = new();
+
+
+    public static DefaultJsonTypeInfoResolver DefaultJsonTypeInfoResolver { [Pure] get => new(); }
 
 
     // [RequiresUnreferencedCode(Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCodeM)]
@@ -44,6 +45,7 @@ public static class Json
                                                                     TypeInfoResolver                     = JsonTypeInfoResolver.Combine(DefaultJsonTypeInfoResolver, JakarExtensionsContext.Default, JakarModelsGuidContext.Default, JakarModelsLongContext.Default),
                                                                     Converters =
                                                                     {
+                                                                        EncodingConverter.Instance,
                                                                         AppVersionJsonConverter.Instance,
                                                                         VersionConverter.Instance
                                                                     }
@@ -115,38 +117,29 @@ public static class Json
 
 
     public static TValue? Get<TValue>( this IJsonModel self, string key )
+        where TValue : IJsonModel<TValue> => self.Get(key, TValue.JsonTypeInfo);
+    public static TValue? Get<TValue>( this IJsonModel self, string key, JsonTypeInfo<TValue> info )
     {
         JsonNode? token = self.Get(key);
         if ( token is null ) { return default; }
 
-        return token.ToObject<TValue>();
+        return token.ToObject(info);
     }
 
     public static TValue? Get<TValue>( this IJsonStringModel self, string key )
+        where TValue : IJsonModel<TValue> => self.Get(key, TValue.JsonTypeInfo);
+    public static TValue? Get<TValue>( this IJsonStringModel self, string key, JsonTypeInfo<TValue> info )
     {
         JsonNode? token = self.Get(key);
-        return token.ToObject<TValue>();
+        return token.ToObject(info);
     }
 
 
-    public static TValue? ToObject<TValue>( this JsonNode? element, JsonSerializerOptions? options = null ) => element is not null
-                                                                                                                   ? element.Deserialize<TValue>(options)
-                                                                                                                   : default;
     public static TValue? ToObject<TValue>( this JsonNode? element, JsonTypeInfo<TValue> options ) => element is not null
                                                                                                           ? element.Deserialize(options)
                                                                                                           : default;
 
 
-    public static TValue? ToObject<TValue>( this in JsonElement? self, JsonSerializerOptions? options = null ) => self.HasValue
-                                                                                                                      ? self.Value.ToObject<TValue>(options)
-                                                                                                                      : default;
-    public static TValue? ToObject<TValue>( this JsonElement element, JsonSerializerOptions? options = null )
-    {
-        ArrayBufferWriter<byte> bufferWriter = new();
-        using ( Utf8JsonWriter writer = new(bufferWriter) ) { element.WriteTo(writer); }
-
-        return JsonSerializer.Deserialize<TValue>(bufferWriter.WrittenSpan, options);
-    }
     public static TValue? ToObject<TValue>( this JsonElement element, JsonTypeInfo<TValue> options )
     {
         ArrayBufferWriter<byte> bufferWriter = new();
@@ -154,27 +147,23 @@ public static class Json
 
         return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, options);
     }
-    public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue>   options )        => document.RootElement.ToObject(options);
-    public static TValue? ToObject<TValue>( this JsonDocument document, JsonSerializerOptions? options = null ) => document.RootElement.ToObject<TValue>(options);
+    public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue> options ) => document.RootElement.ToObject(options);
 
 
     public static JsonNode? ToJsonNode<TValue>( this TValue value, JsonNodeOptions? nodeOptions = null )
+        where TValue : IJsonModel<TValue> => value.ToJsonNode(TValue.JsonTypeInfo, nodeOptions);
+    public static JsonNode? ToJsonNode<TValue>( this TValue value, JsonTypeInfo<TValue> options, JsonNodeOptions? nodeOptions = null )
     {
-        string             json   = JsonSerializer.Serialize(value, Options);
+        string             json   = JsonSerializer.Serialize(value, options);
         using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
         Utf8JsonReader     reader = new(buffer.Values);
         return JsonNode.Parse(ref reader, nodeOptions);
     }
 
 
+    public static JsonElement ToJsonElement<TValue>( this TValue value )
+        where TValue : IJsonModel<TValue> => value.ToJsonElement(TValue.JsonTypeInfo);
     public static JsonElement ToJsonElement<TValue>( this TValue value, JsonTypeInfo<TValue> options )
-    {
-        string             json   = JsonSerializer.Serialize(value, options);
-        using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
-        Utf8JsonReader     reader = new(buffer.Values);
-        return JsonElement.ParseValue(ref reader);
-    }
-    public static JsonElement ToJsonElement<TValue>( this TValue value, JsonSerializerOptions? options = null )
     {
         string             json   = JsonSerializer.Serialize(value, options);
         using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
@@ -260,7 +249,6 @@ public static class Json
     public static string ToJson<TValue>( this TValue value )
         where TValue : IJsonModel<TValue> => value.ToJson(TValue.JsonTypeInfo);
     public static string ToJson<TValue>( this TValue value, JsonTypeInfo<TValue> info ) => JsonSerializer.Serialize(value, info);
-
 
 
     public static JsonDocumentOptions GetJsonDocumentOptions( this JsonSerializerOptions options ) => new()

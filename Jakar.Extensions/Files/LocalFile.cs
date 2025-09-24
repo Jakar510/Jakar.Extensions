@@ -847,6 +847,13 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         string              content       = await stream.ReadToEndAsync(token);
         return content.FromJson<TValue>();
     }
+    async ValueTask<TValue> IAsyncReadHandler.AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        using StreamReader  stream        = new(OpenRead(), FileEncoding);
+        string              content       = await stream.ReadToEndAsync(token);
+        return content.FromJson(info);
+    }
 
     async ValueTask<byte[]> IAsyncReadHandler.AsBytes( CancellationToken token = default )
     {
@@ -1011,16 +1018,23 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// </returns>
         ValueTask<string> AsString( CancellationToken token = default );
 
-        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="JsonNet.FromJson(string)"/> on it, asynchronously. </summary>
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
         /// <typeparam name="TValue"> </typeparam>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
         /// <exception cref="FileNotFoundException"> if file is not found </exception>
-        /// <exception cref="JsonReaderException"> if an error  deserialization occurs </exception>
         /// <returns>
         ///     <typeparamref name="TValue"/>
         /// </returns>
         ValueTask<TValue> AsJson<TValue>( CancellationToken token = default )
             where TValue : IJsonModel<TValue>;
+        /// <summary> Reads the contents of the file as a <see cref="string"/> , then calls <see cref="Json.FromJson(string)"/> on it, asynchronously. </summary>
+        /// <typeparam name="TValue"> </typeparam>
+        /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>
+        /// <exception cref="FileNotFoundException"> if file is not found </exception>
+        /// <returns>
+        ///     <typeparamref name="TValue"/>
+        /// </returns>
+        ValueTask<TValue> AsJson<TValue>( JsonTypeInfo<TValue> info, CancellationToken token = default );
     }
 
 

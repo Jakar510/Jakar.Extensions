@@ -18,7 +18,8 @@ namespace Jakar.Extensions;
                              PropertyNameCaseInsensitive = false,
                              ReadCommentHandling = JsonCommentHandling.Skip,
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
-                             RespectRequiredConstructorParameters = true)]
+                             RespectRequiredConstructorParameters = true,
+                             Converters = [typeof(EncodingConverter)])]
 [JsonSerializable(typeof(string[]))]
 [JsonSerializable(typeof(string?[]))]
 [JsonSerializable(typeof(double[]))]
@@ -45,7 +46,6 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(DateTimeOffset?[]))]
 [JsonSerializable(typeof(TimeSpan[]))]
 [JsonSerializable(typeof(TimeSpan?[]))]
-[JsonSerializable(typeof(Type[]))]
 [JsonSerializable(typeof(AppVersion[]))]
 [JsonSerializable(typeof(ParameterDetails[]))]
 [JsonSerializable(typeof(MethodDetails[]))]
@@ -62,6 +62,10 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(Errors[]))]
 [JsonSerializable(typeof(Alert[]))]
 [JsonSerializable(typeof(AppInformation[]))]
+[JsonSerializable(typeof(GcInfo[]))]
+[JsonSerializable(typeof(GCMemoryInformation[]))]
+[JsonSerializable(typeof(GCGenerationInformation[]))]
+[JsonSerializable(typeof(ThreadInformation[]))]
 public sealed partial class JakarExtensionsContext : JsonSerializerContext
 {
     static JakarExtensionsContext()
@@ -99,10 +103,7 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
         Default.TimeSpan.Register();
         Default.TimeSpanArray.Register();
 
-        Default.Type.Register();
-        Default.TypeArray.Register();
-
-
+        
         Default.AppVersion.Register();
         Default.AppVersionArray.Register();
 
@@ -150,5 +151,19 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
 
         Default.AppInformation.Register();
         Default.AppInformationArray.Register();
+
+        Default.GcInfo.Register();
+        Default.GcInfoArray.Register();
+
+        Default.GCMemoryInformation.Register();
+        Default.GCMemoryInformationArray.Register();
+
+        Default.GCGenerationInformation.Register();
+        Default.GCGenerationInformationArray.Register();
+
+        Default.ThreadInformation.Register();
+        Default.ThreadInformationArray.Register();
     }
 }
+
+
