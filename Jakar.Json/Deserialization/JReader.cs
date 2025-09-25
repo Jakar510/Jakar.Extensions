@@ -22,14 +22,14 @@ public ref struct JReader
     }
 
 
-    // public static JToken Parse( string json, JsonLoadSettings? settings, JsonReader? reader = default )
+    // public static JsonNode Parse( string json, JsonLoadSettings? settings, JsonReader? reader = default )
     // {
-    //     // reader ??= new JTokenReader(JToken.FromObject(new AppVersion(1, 2, 3, 4)));
+    //     // reader ??= new JTokenReader(JsonNode.FromObject(new AppVersion(1, 2, 3, 4)));
     //     reader ??= new JsonTextReader(new StreamReader(json));
     //
     //     using ( reader )
     //     {
-    //         JToken t = JToken.Load(reader, settings);
+    //         JsonNode t = JsonNode.Load(reader, settings);
     //
     //         while ( reader.Read() )
     //         {

@@ -7,16 +7,19 @@ namespace Jakar.Database;
 public static class Constants // TODO: move to Jakar.Extensions.Sizes
 {
     public const string AND                   = " AND ";
-    public const int    ANSI_CAPACITY         = 8000;
-    public const int    ANSI_TEXT_CAPACITY    = 2_147_483_647;
-    public const int    BINARY_CAPACITY       = ANSI_TEXT_CAPACITY;
     public const string COUNT                 = "count";
-    public const int    DECIMAL_MAX_PRECISION = 38;
-    public const int    DECIMAL_MAX_SCALE     = 29;
     public const string GUID_FORMAT           = "D";
     public const string LIST_SEPARATOR        = ", ";
     public const string OR                    = " OR ";
     public const char   QUOTE                 = '"';
+    public const int    ANSI_CAPACITY         = 8000;
+    public const int    ANSI_TEXT_CAPACITY    = 2_147_483_647;
+    public const int    BINARY_CAPACITY       = ANSI_TEXT_CAPACITY;
+    public const int    DECIMAL_MAX_PRECISION = 38;
+    public const int    DECIMAL_MAX_SCALE     = 29;
+    public const string EMPTY                 = "";
+    public const int    MAX_STRING_SIZE       = int.MaxValue;
+    public const string NULL                  = "null";
     public const int    UNICODE_CAPACITY      = 4000;
     public const int    UNICODE_TEXT_CAPACITY = 1_073_741_823;
 

@@ -6,8 +6,8 @@ namespace Jakar.Database;
 
 public sealed class SqlException : Exception
 {
-    [JsonProperty] public DynamicParameters? Parameters { get; init; }
-    [JsonProperty] public string             SQL        { get; init; }
+    public DynamicParameters? Parameters { get; init; }
+    public string             SQL        { get; init; }
 
     // [JsonProperty] public string Value => base.ToString();
 

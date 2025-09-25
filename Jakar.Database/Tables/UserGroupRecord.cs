@@ -5,10 +5,13 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, ITableRecord<UserGroupRecord>
 {
-    public const  string TABLE_NAME = "user_groups";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                          TABLE_NAME = "user_groups";
+    public static string                          TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext           JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserGroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserGroupRecord;
+    public static JsonTypeInfo<UserGroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserGroupRecordArray;
 
 
     public UserGroupRecord( UserRecord            key, GroupRecord           value ) : base(key, value) { }
@@ -28,9 +31,9 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
         RecordID<UserGroupRecord> id           = new(reader.GetFieldValue<Guid>(nameof(ID)));
         UserGroupRecord           record       = new(key, value, id, dateCreated, lastModified);
         return record.Validate();
-    } 
+    }
 
-    
+
     public static bool operator >( UserGroupRecord  left, UserGroupRecord right ) => left.CompareTo(right) > 0;
     public static bool operator >=( UserGroupRecord left, UserGroupRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( UserGroupRecord  left, UserGroupRecord right ) => left.CompareTo(right) < 0;

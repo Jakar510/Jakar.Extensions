@@ -3,7 +3,7 @@
 
 [Serializable]
 public class RecordCollection<TClass>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TClass>
-    where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : ITableRecord<TClass>
 {
     private readonly List<TClass> __records = new(capacity);
 

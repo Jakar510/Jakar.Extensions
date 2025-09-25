@@ -221,7 +221,7 @@ public ref struct JArray
 
 
     public JArray  AddArray()  => new(__writer);
-    public JObject AddObject() => new(__writer);
+    public JsonObject AddObject() => new(__writer);
 
 
     public JArray AddObjects( IReadOnlyCollection<IJsonizer>? collection )
@@ -232,7 +232,7 @@ public ref struct JArray
 
         foreach ( (int index, IJsonizer item) in collection.Enumerate( 0 ) )
         {
-            JObject node = AddObject();
+            JsonObject node = AddObject();
             item.Serialize( ref node );
 
             if ( index < collection.Count ) { __writer.Next(); }

@@ -13,7 +13,7 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
 
 
 
-public interface IGroupModel<TClass, TID> : IGroupModel<TID>, IEqualComparable<TClass>
+public interface IGroupModel<TClass, TID> : IGroupModel<TID>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : class, IGroupModel<TClass, TID>
 {

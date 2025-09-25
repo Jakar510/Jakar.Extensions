@@ -11,5 +11,4 @@ global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
 global using Jakar.Extensions;
 global using Jakar.Shapes.Interfaces;
-global using Newtonsoft.Json;
-global using static Jakar.Extensions.BaseClass;
+global using static Jakar.Extensions.BaseRecord;

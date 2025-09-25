@@ -26,7 +26,7 @@ public interface IModelErrorState : ICascadingValueName, INotifyPropertyChanged
 
 
 
-public class ModelErrorState : ObservableClass, IModelErrorState
+public class ModelErrorState : BaseClass, IModelErrorState
 {
     public const string               KEY    = nameof(ModelErrorState);
     private      ModelStateDictionary __state = new();

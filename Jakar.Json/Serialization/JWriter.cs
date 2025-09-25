@@ -20,7 +20,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
 
 
     [Pure] public readonly JArray  AddArray()  => new(this);
-    [Pure] public readonly JObject AddObject() => new(this);
+    [Pure] public readonly JsonObject AddObject() => new(this);
 
 
     public JWriter StartBlock( char start )

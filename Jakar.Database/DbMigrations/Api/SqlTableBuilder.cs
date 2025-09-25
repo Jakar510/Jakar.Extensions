@@ -207,7 +207,7 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
 
 [Experimental("SqlTableBuilder")]
 public ref struct SqlTableBuilder<TClass>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>
 {
     private Buffer<ColumnMetaData> __columns = new();
 
@@ -244,11 +244,11 @@ public ref struct SqlTableBuilder<TClass>
 
         if ( typeof(TValue) == typeof(byte[]) ) { return DbType.Binary; }
 
-        if ( typeof(JToken).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
+        if ( typeof(JsonNode).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken>).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
+        if ( typeof(JsonObject).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
-        if ( typeof(IDictionary<string, JToken?>).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
+        if ( typeof(JsonObject).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
         if ( typeof(TValue).IsEnum )
         {

@@ -98,8 +98,8 @@ public static class Json
     }
 
 
-    public static        JsonObject GetAdditionalData( this IJsonModel       model ) => model.AdditionalData ??= new JsonObject();
     [Pure] public static JsonObject GetAdditionalData( this IJsonStringModel model ) => model.AdditionalData?.GetAdditionalData() ?? new JsonObject();
+    public static        JsonObject GetAdditionalData( this IJsonModel       model ) => model.AdditionalData ??= new JsonObject();
     public static JsonObject? GetAdditionalData( this string json )
     {
         if ( string.IsNullOrWhiteSpace(json) ) { return null; }

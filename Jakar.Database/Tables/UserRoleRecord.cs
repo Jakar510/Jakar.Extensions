@@ -5,10 +5,13 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, IDbReaderMapping<UserRoleRecord>
+public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>, ITableRecord<UserRoleRecord>
 {
-    public const  string TABLE_NAME = "user_roles";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                         TABLE_NAME = "user_roles";
+    public static string                         TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonTypeInfo<UserRoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRoleRecordArray;
+    public static JsonSerializerContext          JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserRoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRoleRecord;
 
 
     public UserRoleRecord( UserRecord            key, RoleRecord           value ) : base(key, value) { }

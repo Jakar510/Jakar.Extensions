@@ -12,10 +12,13 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                               RecordID<UserLoginProviderRecord>                                     ID,
                                               RecordID<UserRecord>?                                                 CreatedBy,
                                               DateTimeOffset                                                        DateCreated,
-                                              DateTimeOffset?                                                       LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<UserLoginProviderRecord>
+                                              DateTimeOffset?                                                       LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
-    public const  string TABLE_NAME = "user_login_providers";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                                  TABLE_NAME = "user_login_providers";
+    public static string                                  TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
+    public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
@@ -50,7 +53,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(CreatedBy), user.ID.value);
+        parameters.Add(nameof(CreatedBy), user.ID.Value);
         parameters.Add(nameof(Value),     value);
         return parameters;
     }
@@ -105,7 +108,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                                                                                   };
     public static implicit operator IdentityUserToken<Guid>( UserLoginProviderRecord value ) => new()
                                                                                                 {
-                                                                                                    UserId        = value.CreatedBy?.value ?? Guid.Empty,
+                                                                                                    UserId        = value.CreatedBy?.Value ?? Guid.Empty,
                                                                                                     LoginProvider = value.LoginProvider,
                                                                                                     Name          = value.ProviderDisplayName ?? string.Empty,
                                                                                                     Value         = value.ProviderKey

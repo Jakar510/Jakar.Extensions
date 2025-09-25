@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 namespace Jakar.Extensions.Serilog;
 
 
-public interface IHeaderCells : JsonModels.IJsonModel, IHeader
+public interface IHeaderCells : Json.IJsonModel, IHeader
 {
     HeaderDataCell[]? HeaderCells { get; init; }
 }

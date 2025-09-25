@@ -12,7 +12,7 @@ public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, IJsonModel
 
 
 
-public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IEqualComparable<TClass>
+public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : class, IRoleModel<TClass, TID>
 {

@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IEqualComparable<LocalDirectory>, IJsonModel<LocalDirectory>
+public class LocalDirectory : BaseClass<LocalDirectory>, TempFile.ITempFile, IAsyncDisposable, IJsonModel<LocalDirectory>
 {
     protected readonly DirectoryInfo _info;
     public readonly    string        FullPath;

@@ -6,24 +6,20 @@ namespace Jakar.Database;
 
 
 [DefaultMember(nameof(Empty))]
-public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TClass>>, IComparable<RecordID<TClass>>, ISpanFormattable, ISpanParsable<RecordID<TClass>>, IRegisterDapperTypeHandlers
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+public readonly struct RecordID<TClass>( Guid id ) : IEquatable<RecordID<TClass>>, IComparable<RecordID<TClass>>, ISpanFormattable, ISpanParsable<RecordID<TClass>>, IRegisterDapperTypeHandlers
+    where TClass : ITableRecord<TClass>
 {
     public static readonly RecordID<TClass> Empty = new(Guid.Empty);
-    public readonly        string           key   = $"{TClass.TableName}:{value}";
-    public readonly        Guid             value = value;
-    public                 Guid             Value => value;
-
-
-    public static ValueSorter<RecordID<TClass>> Sorter { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => ValueSorter<RecordID<TClass>>.Default; }
+    public readonly        string           key   = $"{TClass.TableName}:{id}";
+    public readonly        Guid             Value = id;
 
 
     [Pure] public static RecordID<TClass>  New()                                                                     => New(DateTimeOffset.UtcNow);
     [Pure] public static RecordID<TClass>  New( DateTimeOffset                           timeStamp )                 => Create(Guid.CreateVersion7(timeStamp));
     [Pure] public static RecordID<TClass>  Parse( string                                 value )                     => Create(Guid.Parse(value));
     [Pure] public static RecordID<TClass>  Parse( scoped ref readonly ReadOnlySpan<char> value )                     => Create(Guid.Parse(value));
-    [Pure] public static RecordID<TClass>  ID( DbDataReader                              reader )                    => Create(reader, nameof(IRecordPair.ID));
-    [Pure] public static RecordID<TClass>? CreatedBy( DbDataReader                       reader )                    => TryCreate(reader, nameof(IOwnedTableRecord.CreatedBy));
+    [Pure] public static RecordID<TClass>  ID( DbDataReader                              reader )                    => Create(reader, nameof(IDateCreated.ID));
+    [Pure] public static RecordID<TClass>? CreatedBy( DbDataReader                       reader )                    => TryCreate(reader, nameof(ICreatedBy.CreatedBy));
     [Pure] public static RecordID<TClass>? TryCreate( DbDataReader                       reader, string columnName ) => TryCreate(reader.GetFieldValue<Guid?>(columnName));
 
 
@@ -78,33 +74,53 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
     }
 
 
-    public static implicit operator RecordID<TClass>( TClass record ) => new(record.ID.value);
+    public static implicit operator RecordID<TClass>( TClass record ) => new(record.ID.Value);
 
 
     [Pure]
     public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(IRecordPair.ID), value);
+        parameters.Add(nameof(IDateCreated.ID), Value);
         return parameters;
     }
 
 
-    public          bool   IsValid()                                                                                                                      => !Guid.Empty.Equals(value);
-    public          bool   IsNotValid()                                                                                                                   => Guid.Empty.Equals(value);
-    public override string ToString()                                                                                                                     => value.ToString();
-    public          string ToString( string?           format,      IFormatProvider? formatProvider )                                                     => value.ToString(format, formatProvider);
-    public          bool   TryFormat( Span<char>       destination, out int          charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider ) => value.TryFormat(destination, out charsWritten, format);
-    public          bool   Equals( RecordID<TClass>    other )         => value.Equals(other.value);
-    public          int    CompareTo( RecordID<TClass> other )         => value.CompareTo(other.value);
-    public override int    GetHashCode()                               => value.GetHashCode();
-    public override bool   Equals( [NotNullWhen(true)] object? other ) => other is RecordID<TClass> id && Equals(id);
+    public bool IsValid()    => !Guid.Empty.Equals(Value);
+    public bool IsNotValid() => Guid.Empty.Equals(Value);
 
 
-    public static bool operator true( RecordID<TClass>  recordID )              => recordID.IsValid();
-    public static bool operator false( RecordID<TClass> recordID )              => recordID.IsNotValid();
-    public static bool operator ==( RecordID<TClass>    a, RecordID<TClass> b ) => a.Equals(b);
-    public static bool operator !=( RecordID<TClass>    a, RecordID<TClass> b ) => !a.Equals(b);
+    public override string ToString() => Value.ToString();
+    public string ToString( string? format, IFormatProvider? formatProvider ) => string.Equals(format, "b64", StringComparison.InvariantCultureIgnoreCase)
+                                                                                     ? Value.ToBase64()
+                                                                                     : Value.ToString(format, formatProvider);
+    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+    {
+        if ( format is not "b64" ) { return Value.TryFormat(destination, out charsWritten, format); }
+
+        ReadOnlySpan<char> span = Value.ToBase64();
+        span.CopyTo(destination);
+        charsWritten = span.Length;
+        return span.Length > 0;
+    }
+
+
+    public          bool Equals( RecordID<TClass>    other )         => Value.Equals(other.Value);
+    public          int  CompareTo( RecordID<TClass> other )         => Value.CompareTo(other.Value);
+    public override int  GetHashCode()                               => Value.GetHashCode();
+    public override bool Equals( [NotNullWhen(true)] object? other ) => other is RecordID<TClass> id && Equals(id);
+
+
+    public static bool operator true( RecordID<TClass>  recordID )                      => recordID.IsValid();
+    public static bool operator false( RecordID<TClass> recordID )                      => recordID.IsNotValid();
+    public static bool operator ==( RecordID<TClass>?   left, RecordID<TClass>? right ) => Nullable.Equals(left, right);
+    public static bool operator !=( RecordID<TClass>?   left, RecordID<TClass>? right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( RecordID<TClass>    left, RecordID<TClass>  right ) => EqualityComparer<RecordID<TClass>>.Default.Equals(left, right);
+    public static bool operator !=( RecordID<TClass>    left, RecordID<TClass>  right ) => !EqualityComparer<RecordID<TClass>>.Default.Equals(left, right);
+    public static bool operator >( RecordID<TClass>     left, RecordID<TClass>  right ) => Comparer<RecordID<TClass>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( RecordID<TClass>    left, RecordID<TClass>  right ) => Comparer<RecordID<TClass>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( RecordID<TClass>     left, RecordID<TClass>  right ) => Comparer<RecordID<TClass>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( RecordID<TClass>    left, RecordID<TClass>  right ) => Comparer<RecordID<TClass>>.Default.Compare(left, right) <= 0;
 
 
     public static void RegisterDapperTypeHandlers()
@@ -117,7 +133,7 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
 
     public class DapperTypeHandler : SqlConverter<DapperTypeHandler, RecordID<TClass>>
     {
-        public override void SetValue( IDbDataParameter parameter, RecordID<TClass> value ) => parameter.Value = value.value;
+        public override void SetValue( IDbDataParameter parameter, RecordID<TClass> value ) => parameter.Value = value.Value;
 
         public override RecordID<TClass> Parse( object value ) =>
             value switch
@@ -132,23 +148,24 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
 
     public class JsonNetConverter : JsonConverter<RecordID<TClass>>
     {
-        public override RecordID<TClass> ReadJson( JsonReader reader, Type objectType, RecordID<TClass> existingValue, bool hasExistingValue, JsonSerializer serializer )
+        public override RecordID<TClass> Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
         {
-            Guid? guid = serializer.Deserialize<Guid?>(reader);
+            Guid? guid = reader.TryGetGuid(out Guid id)
+                             ? id
+                             : null;
 
             return guid.HasValue
                        ? new RecordID<TClass>(guid.Value)
                        : default;
         }
-
-        public override void WriteJson( JsonWriter writer, RecordID<TClass> value, JsonSerializer serializer ) => serializer.Serialize(writer, value.value);
+        public override void Write( Utf8JsonWriter writer, RecordID<TClass> id, JsonSerializerOptions options ) => writer.WriteStringValue(id.Value);
     }
 
 
 
     public class NullableDapperTypeHandler : SqlConverter<NullableDapperTypeHandler, RecordID<TClass>?>
     {
-        public override void SetValue( IDbDataParameter parameter, RecordID<TClass>? value ) => parameter.Value = value?.value;
+        public override void SetValue( IDbDataParameter parameter, RecordID<TClass>? id ) => parameter.Value = id?.Value;
 
         public override RecordID<TClass>? Parse( object value ) =>
             value switch
@@ -180,9 +197,9 @@ public readonly struct RecordID<TClass>( Guid value ) : IEquatable<RecordID<TCla
         {
             if ( value is RecordID<TClass> idValue )
             {
-                if ( destinationType == typeof(Guid) ) { return idValue.value; }
+                if ( destinationType == typeof(Guid) ) { return idValue.Value; }
 
-                if ( destinationType == typeof(string) ) { return idValue.value.ToString(); }
+                if ( destinationType == typeof(string) ) { return idValue.ToString(); }
             }
 
             return base.ConvertTo(context, culture, value, destinationType);

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/10/2023  10:12 PM
 
+using Jakar.Database.Resx;
+
+
+
 namespace Jakar.Database;
 
 
@@ -12,7 +16,7 @@ public interface IUserSubscription : IUniqueID<Guid>
 
 
 public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExpires, RecordID<TClass> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TClass>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
-    where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass>
+    where TClass : UserSubscription<TClass>
 {
     [Pure]
     public override DynamicParameters ToDynamicParameters()

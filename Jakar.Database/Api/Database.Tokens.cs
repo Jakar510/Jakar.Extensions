@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
-using Status = Jakar.Extensions.Status;
-
-
-
 namespace Jakar.Database;
 
 
@@ -18,14 +14,14 @@ public abstract partial class Database
     public static TimeSpan RefreshTokenExpirationTime { get => __refreshTokenExpirationTime; set => __refreshTokenExpirationTime.Value = value; }
 
 
-    public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials(Settings));
-    public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters(Settings));
+    public virtual ValueTask<SigningCredentials>        GetSigningCredentials( CancellationToken        token ) => new(Configuration.GetSigningCredentials(Options));
+    public virtual ValueTask<TokenValidationParameters> GetTokenValidationParameters( CancellationToken token ) => new(Configuration.GetTokenValidationParameters(Options));
 
 
     public virtual async ValueTask<JwtSecurityToken> GetJwtSecurityToken( IEnumerable<Claim> claims, CancellationToken token )
     {
         SigningCredentials signinCredentials = await GetSigningCredentials(token);
-        JwtSecurityToken   security          = new(Settings.TokenIssuer, Settings.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(15), signinCredentials);
+        JwtSecurityToken   security          = new(Options.TokenIssuer, Options.TokenAudience, claims, DateTime.UtcNow, DateTime.UtcNow.AddMinutes(15), signinCredentials);
         return security;
     }
     public async ValueTask<ClaimsPrincipal?> ValidateToken( string jsonToken, CancellationToken token )
@@ -147,8 +143,8 @@ public abstract partial class Database
                                                                  {
                                                                      Subject            = new ClaimsIdentity(claims),
                                                                      Expires            = GetExpiration(expires, AccessTokenExpirationTime),
-                                                                     Issuer             = Settings.TokenIssuer,
-                                                                     Audience           = Settings.TokenAudience,
+                                                                     Issuer             = Options.TokenIssuer,
+                                                                     Audience           = Options.TokenAudience,
                                                                      IssuedAt           = DateTime.UtcNow,
                                                                      SigningCredentials = credentials
                                                                  });
@@ -157,15 +153,15 @@ public abstract partial class Database
                                                              {
                                                                  Subject            = new ClaimsIdentity(claims),
                                                                  Expires            = refreshExpires,
-                                                                 Issuer             = Settings.TokenIssuer,
-                                                                 Audience           = Settings.TokenAudience,
+                                                                 Issuer             = Options.TokenIssuer,
+                                                                 Audience           = Options.TokenAudience,
                                                                  IssuedAt           = DateTime.UtcNow,
                                                                  SigningCredentials = credentials
                                                              });
 
         record = record.WithRefreshToken(refresh, refreshExpires);
         await Users.Update(connection, transaction, record, token);
-        return new Tokens(record.ID.value, record.FullName, Version, accessToken, refresh);
+        return new Tokens(record.ID.Value, record.FullName, Version, accessToken, refresh);
     }
 
 
@@ -191,15 +187,15 @@ public abstract partial class Database
                                              {
                                                  Subject            = new ClaimsIdentity(claims),
                                                  Expires            = GetExpiration(expires, TimeSpan.FromMinutes(15)),
-                                                 Issuer             = Settings.TokenIssuer,
-                                                 Audience           = Settings.TokenAudience,
+                                                 Issuer             = Options.TokenIssuer,
+                                                 Audience           = Options.TokenAudience,
                                                  IssuedAt           = DateTime.UtcNow,
                                                  SigningCredentials = await GetSigningCredentials(token)
                                              };
 
 
         string accessToken = DbTokenHandler.Instance.CreateToken(descriptor);
-        return new Tokens(record.ID.value, record.FullName, Version, accessToken, refreshToken);
+        return new Tokens(record.ID.Value, record.FullName, Version, accessToken, refreshToken);
     }
 
 
@@ -260,7 +256,7 @@ public abstract partial class Database
 
         if ( !string.IsNullOrWhiteSpace(key) )
         {
-            if ( long.TryParse(token, out _) ) { return OneTimePassword.Create(key, Settings.TokenIssuer).ValidateToken(token); }
+            if ( long.TryParse(token, out _) ) { return OneTimePassword.Create(key, Options.TokenIssuer).ValidateToken(token); }
 
             JwtSecurityTokenHandler   handler    = new();
             TokenValidationParameters parameters = await GetTokenValidationParameters(cancellationToken);

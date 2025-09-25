@@ -13,15 +13,18 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     [property: ProtectedPersonalData] string  PostalCode,
                                     [property: ProtectedPersonalData] string? Address,
                                     bool                                      IsPrimary,
-                                    IDictionary<string, JToken?>?             AdditionalData,
+                                    JsonObject?                               AdditionalData,
                                     RecordID<AddressRecord>                   ID,
                                     RecordID<UserRecord>?                     CreatedBy,
                                     DateTimeOffset                            DateCreated,
-                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IAddress<AddressRecord, Guid>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
-    public static string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    public static string                        TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
+    public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
+
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
                                                           address.Line2,
@@ -65,6 +68,20 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
+    public static AddressRecord Parse( string s, IFormatProvider? provider ) => Create(Extensions.Validate.Re.Address.Match(s));
+    public static bool TryParse( [NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AddressRecord result )
+    {
+        Match match = Extensions.Validate.Re.Address.Match(s);
+
+        if ( !match.Success )
+        {
+            result = null;
+            return false;
+        }
+
+        result = Create(match);
+        return true;
+    }
     [Pure] public static AddressRecord Create( Match          match )   => new(match);
     [Pure] public static AddressRecord Create( IAddress<Guid> address ) => new(address);
     [Pure]
@@ -81,19 +98,19 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     [Pure]
     public static AddressRecord Create( DbDataReader reader )
     {
-        string                        line1           = reader.GetFieldValue<string>(nameof(Line1));
-        string                        line2           = reader.GetFieldValue<string>(nameof(Line2));
-        string                        city            = reader.GetFieldValue<string>(nameof(City));
-        string                        stateOrProvince = reader.GetFieldValue<string>(nameof(StateOrProvince));
-        string                        country         = reader.GetFieldValue<string>(nameof(Country));
-        string                        postalCode      = reader.GetFieldValue<string>(nameof(PostalCode));
-        string                        address         = reader.GetFieldValue<string>(nameof(Address));
-        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
-        bool                          isPrimary       = reader.GetFieldValue<bool>(nameof(IsPrimary));
-        RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID(reader);
-        RecordID<UserRecord>?         ownerUserID     = RecordID<UserRecord>.CreatedBy(reader);
-        DateTimeOffset                dateCreated     = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
-        DateTimeOffset?               lastModified    = reader.GetFieldValue<DateTimeOffset?>(nameof(LastModified));
+        string                  line1           = reader.GetFieldValue<string>(nameof(Line1));
+        string                  line2           = reader.GetFieldValue<string>(nameof(Line2));
+        string                  city            = reader.GetFieldValue<string>(nameof(City));
+        string                  stateOrProvince = reader.GetFieldValue<string>(nameof(StateOrProvince));
+        string                  country         = reader.GetFieldValue<string>(nameof(Country));
+        string                  postalCode      = reader.GetFieldValue<string>(nameof(PostalCode));
+        string                  address         = reader.GetFieldValue<string>(nameof(Address));
+        JsonObject?             additionalData  = reader.GetAdditionalData();
+        bool                    isPrimary       = reader.GetFieldValue<bool>(nameof(IsPrimary));
+        RecordID<AddressRecord> id              = RecordID<AddressRecord>.ID(reader);
+        RecordID<UserRecord>?   ownerUserID     = RecordID<UserRecord>.CreatedBy(reader);
+        DateTimeOffset          dateCreated     = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
+        DateTimeOffset?         lastModified    = reader.GetFieldValue<DateTimeOffset?>(nameof(LastModified));
 
         AddressRecord record = new(line1,
                                    line2,
@@ -185,7 +202,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
-    public UserAddress<Guid> ToAddressModel() => UserAddress<Guid>.Create(this);
+    public UserAddress ToAddressModel() => UserAddress.Create(this);
     public TAddress ToAddressModel<TAddress>()
         where TAddress : class, IAddress<TAddress, Guid> => TAddress.Create(this);
 

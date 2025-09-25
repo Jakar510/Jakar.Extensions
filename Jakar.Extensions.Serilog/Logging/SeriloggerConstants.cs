@@ -4,7 +4,7 @@
 namespace Jakar.Extensions.Serilog;
 
 
-public class SeriloggerConstants : ObservableClass
+public class SeriloggerConstants : BaseClass
 {
     public const           string     DEFAULT_CONSOLE_OUTPUT_TEMPLATE   = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
     public const           string     DEFAULT_DEBUG_OUTPUT_TEMPLATE     = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";

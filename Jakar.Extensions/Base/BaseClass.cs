@@ -4,17 +4,22 @@
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject
 {
-    public const           int            ANSI_CAPACITY    = BaseRecord.ANSI_CAPACITY;
-    public const           int            BINARY_CAPACITY  = BaseRecord.BINARY_CAPACITY;
-    public const           string         EMPTY            = BaseRecord.EMPTY;
-    public const           int            MAX_STRING_SIZE  = BaseRecord.MAX_STRING_SIZE; // 1GB
-    public const           string         NULL             = BaseRecord.NULL;
-    public const           int            UNICODE_CAPACITY = BaseRecord.UNICODE_CAPACITY;
-    public static readonly DateTimeOffset SQLMinDate       = new(1753, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-    public static readonly DateOnly       SQLMinDateOnly   = new(1753, 1, 1);
+    public const           int            ANSI_CAPACITY         = BaseRecord.ANSI_CAPACITY;
+    public const           int            BINARY_CAPACITY       = BaseRecord.BINARY_CAPACITY;
+    public const           string         EMPTY                 = BaseRecord.EMPTY;
+    public const           int            MAX_STRING_SIZE       = BaseRecord.MAX_STRING_SIZE; // 1GB
+    public const           string         NULL                  = BaseRecord.NULL;
+    public const           int            UNICODE_CAPACITY      = BaseRecord.UNICODE_CAPACITY;
+    public const           int            ANSI_TEXT_CAPACITY    = BaseRecord.ANSI_TEXT_CAPACITY;
+    public const           int            DECIMAL_MAX_PRECISION = BaseRecord.DECIMAL_MAX_PRECISION;
+    public const           int            DECIMAL_MAX_SCALE     = BaseRecord.DECIMAL_MAX_SCALE;
+    public const           int            UNICODE_TEXT_CAPACITY = BaseRecord.UNICODE_TEXT_CAPACITY;
+    public static readonly DateTimeOffset SQLMinDate            = new(1753, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
+    public static readonly DateOnly       SQLMinDateOnly        = new(1753, 1, 1);
     protected              JsonObject?    _additionalData;
 
-    [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
+
+    [StringLength(UNICODE_TEXT_CAPACITY), JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -77,7 +82,7 @@ public class BaseClass : IJsonModel, IObservableObject
 
 [Serializable]
 public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, IComparable<TClass>, IComparable
-    where TClass : BaseClass<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
+    where TClass : BaseClass<TClass>, IJsonModel<TClass>
 {
     public abstract bool Equals( TClass?    other );
     public abstract int  CompareTo( TClass? other );
@@ -118,10 +123,24 @@ public abstract class BaseClass<TClass> : BaseClass, IEquatable<TClass>, ICompar
         return false;
     }
     public static TClass FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TClass.JsonTypeInfo));
+
+
+    public TClass WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
+    public virtual TClass WithAdditionalData( JsonObject? additionalData )
+    {
+        if ( additionalData is null ) { return (TClass)this; }
+
+        JsonObject json = _additionalData ??= new JsonObject();
+        foreach ( ( string key, JsonNode? jToken ) in additionalData ) { json[key] = jToken; }
+
+        return (TClass)this;
+    }
 }
 
+
+
 public abstract class BaseClass<TClass, TID> : BaseClass<TClass>, IUniqueID<TID>
-    where TClass : BaseClass<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
+    where TClass : BaseClass<TClass, TID>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     protected TID _id;

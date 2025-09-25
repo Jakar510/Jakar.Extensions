@@ -6,6 +6,7 @@ namespace Jakar.Database;
 
 public static class WebAppExtensions
 {
+    /*
     /// <summary> My config is Pascal Case </summary>
     /// <param name="services"> </param>
     /// <returns> </returns>
@@ -15,6 +16,7 @@ public static class WebAppExtensions
 
         return services.AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null).AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
     }
+    */
     public static WebApplication UseUrls( this WebApplication app, params ReadOnlySpan<string> urls )
     {
         foreach ( string url in urls ) { app.Urls.Add(url); }

@@ -54,6 +54,14 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
     public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(in values);
     public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(in values);
     public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
+
+
+    public static bool operator ==( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
+    public static bool operator !=( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => !EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
+    public static bool operator >( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -80,20 +88,20 @@ public abstract class ObservableCollection<TClass, TValue>( Comparer<TValue> com
     object ICollection.SyncRoot { [MethodImpl(                   MethodImplOptions.AggressiveInlining)] get => buffer; }
 
 
-    public ObservableCollection() : this(Comparer<TValue>.Default) { }
-    public ObservableCollection( int                                 capacity ) : this(Comparer<TValue>.Default, capacity) { }
-    public ObservableCollection( ref readonly Buffer<TValue>         values ) : this(values.Length) => InternalAdd(values.Values);
-    public ObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Values);
-    public ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this(values.Length) => InternalAdd(values.AsSpan());
-    public ObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.AsSpan());
-    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this(values.Length) => InternalAdd(values.Span);
-    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Span);
-    public ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this(values.Length) => InternalAdd(values);
-    public ObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : this(comparer, values.Length) => InternalAdd(values);
-    public ObservableCollection( TValue[]                            values ) : this(values.Length) => InternalAdd();
-    public ObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : this(comparer, new ReadOnlySpan<TValue>(values)) { }
-    public ObservableCollection( IEnumerable<TValue>                 values ) : this(values, Comparer<TValue>.Default) { }
-    public ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
+    protected ObservableCollection() : this(Comparer<TValue>.Default) { }
+    protected ObservableCollection( int                                 capacity ) : this(Comparer<TValue>.Default, capacity) { }
+    protected ObservableCollection( ref readonly Buffer<TValue>         values ) : this(values.Length) => InternalAdd(values.Values);
+    protected ObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Values);
+    protected ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this(values.Length) => InternalAdd(values.AsSpan());
+    protected ObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.AsSpan());
+    protected ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this(values.Length) => InternalAdd(values.Span);
+    protected ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Span);
+    protected ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this(values.Length) => InternalAdd(values);
+    protected ObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : this(comparer, values.Length) => InternalAdd(values);
+    protected ObservableCollection( TValue[]                            values ) : this(values.Length) => InternalAdd();
+    protected ObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : this(comparer, new ReadOnlySpan<TValue>(values)) { }
+    protected ObservableCollection( IEnumerable<TValue>                 values ) : this(values, Comparer<TValue>.Default) { }
+    protected ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
     public virtual void Dispose()
     {
         buffer.Clear();

@@ -1,11 +1,7 @@
-﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+﻿namespace Jakar.Extensions;
 
 
-
-namespace Jakar.Extensions;
-
-
-public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<ExceptionDetails>, IEqualComparable<ExceptionDetails>
+public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
     [JsonIgnore] public readonly Exception?                       Value;
     public static                JsonTypeInfo<ExceptionDetails[]> JsonArrayInfo   => JakarExtensionsContext.Default.ExceptionDetailsArray;

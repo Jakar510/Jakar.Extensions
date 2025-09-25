@@ -5,10 +5,13 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, AddressRecord>, ICreateMapping<UserAddressRecord, UserRecord, AddressRecord>, IDbReaderMapping<UserAddressRecord>
+public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, AddressRecord>, ICreateMapping<UserAddressRecord, UserRecord, AddressRecord>, ITableRecord<UserAddressRecord>
 {
-    public const  string TABLE_NAME = "user_adreesses";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                            TABLE_NAME = "user_adreesses";
+    public static string                            TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext             JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserAddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserAddressRecord;
+    public static JsonTypeInfo<UserAddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserAddressRecordArray;
 
 
     public UserAddressRecord( UserRecord            key, AddressRecord           value ) : base(key, value) { }

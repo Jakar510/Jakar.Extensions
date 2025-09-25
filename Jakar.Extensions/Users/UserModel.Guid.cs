@@ -4,13 +4,17 @@
 
 // ReSharper disable CheckNamespace
 
+using System.Formats.Asn1;
+
+
+
 namespace Jakar.Extensions.UserGuid;
 // ReSharper restore CheckNamespace
 
 
 
 [Serializable]
-public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>, IJsonModel<UserAddress>
+public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid> 
 {
     public static JsonSerializerContext       JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserAddress;
@@ -60,7 +64,7 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IJsonModel<GroupModel>
+public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid> 
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.GroupModel;
@@ -83,7 +87,7 @@ public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IJsonModel<RoleModel>
+public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.RoleModel;
@@ -107,7 +111,7 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
 
 [Serializable]
 [method: SetsRequiredMembers, JsonConstructor]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IJsonModel<FileData>, IEqualComparable<FileData>
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData> 
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
@@ -119,7 +123,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
     [SetsRequiredMembers] public FileData( FileMetaData                  metaData, params ReadOnlySpan<byte> content ) : this(content.Length, content.Hash_SHA512(), Convert.ToBase64String(content), metaData) { }
 
 
-    public static   FileData Create( long       fileSize, string    hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);
+    public static   FileData Create( long fileSize, string hash, string payload, Guid id, FileMetaData metaData ) => new(fileSize, hash, payload, metaData, id);
     public override int      GetHashCode()                              => base.GetHashCode();
     public override bool     Equals( object?    other )                 => base.Equals(other);
     public static   bool operator ==( FileData? left, FileData? right ) => EqualityComparer<FileData>.Default.Equals(left, right);
@@ -133,7 +137,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<Guid>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<Guid>, IJsonModel<CurrentLocation>
 {
     public static JsonSerializerContext           JsonContext             => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsGuidContext.Default.CurrentLocation;
@@ -293,7 +297,7 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<UserModel>
+public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
@@ -422,5 +426,5 @@ public class UserDevice : DeviceInformation, IUserDevice<Guid>
         IP        = device.IP;
         TimeStamp = device.TimeStamp;
     }
-    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, string deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
+    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, Guid deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
 }

@@ -1,12 +1,10 @@
 ﻿namespace Jakar.Database;
 
 
-public class JsonSqlHandler<TConverter, TValue> : SqlConverter<JsonSqlHandler<TValue>, TValue>
-    where TConverter : JsonSqlHandler<TConverter, TValue>, new()
+public abstract class JsonSqlHandler<TClass, TValue> : SqlConverter<TClass, TValue>
+    where TClass : JsonSqlHandler<TClass, TValue>, new()
 {
-    public JsonSqlHandler() { }
-
-
+    public abstract JsonTypeInfo<TValue> TypeInfo { get; }
     public override TValue Parse( object? value )
     {
         string? item = value?.ToString();
@@ -14,12 +12,14 @@ public class JsonSqlHandler<TConverter, TValue> : SqlConverter<JsonSqlHandler<TV
         // ReSharper disable once NullableWarningSuppressionIsUsed
         return item is null
                    ? default!
-                   : item.FromJson<TValue>();
+                   : item.FromJson(TypeInfo);
     }
-
     public override void SetValue( IDbDataParameter parameter, TValue? value )
     {
-        parameter.Value  = value?.ToPrettyJson();
+        parameter.Value = value is null
+                              ? null
+                              : value.ToJson(TypeInfo);
+
         parameter.DbType = DbType.String;
     }
 }
@@ -27,23 +27,24 @@ public class JsonSqlHandler<TConverter, TValue> : SqlConverter<JsonSqlHandler<TV
 
 
 public sealed class JsonSqlHandler<TValue> : JsonSqlHandler<JsonSqlHandler<TValue>, TValue>
+    where TValue : IJsonModel<TValue>
 {
-    public JsonSqlHandler() { }
-
-
+    public override JsonTypeInfo<TValue> TypeInfo => TValue.JsonTypeInfo;
     public override TValue Parse( object? value )
     {
-        string? s = value?.ToString();
+        string? item = value?.ToString();
 
         // ReSharper disable once NullableWarningSuppressionIsUsed
-        return s is null
+        return item is null
                    ? default!
-                   : s.FromJson<TValue>();
+                   : item.FromJson(TypeInfo);
     }
-
     public override void SetValue( IDbDataParameter parameter, TValue? value )
     {
-        parameter.Value  = value?.ToPrettyJson();
+        parameter.Value = value is null
+                              ? null
+                              : value.ToJson(TypeInfo);
+
         parameter.DbType = DbType.String;
     }
 }

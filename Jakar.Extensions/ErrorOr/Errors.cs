@@ -1,7 +1,8 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/23/2024  11:04
 
-using Microsoft.Extensions.Primitives;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
@@ -10,7 +11,7 @@ namespace Jakar.Extensions;
 
 [Serializable, DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
-public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJsonModel<Errors>
+public sealed class Errors() : BaseClass<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
 {
     private static readonly Error[] __details = [];
     public static readonly Errors Empty = new()
@@ -39,8 +40,9 @@ public sealed class Errors() : BaseClass<Errors>, IEqualComparable<Errors>, IJso
                                                                             };
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public        Status GetStatus()                 => Details.GetStatus(Status.Ok);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Status GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
+    public        ValueEnumerable<FromArray<Error>, Error> AsValueEnumerable()         => new(new FromArray<Error>(Details));
+    public        Status                                   GetStatus()                 => Details.GetStatus(Status.Ok);
+    public static Status                                   GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
 
 
     public static implicit operator ReadOnlySpan<Error>( Errors   result )  => result.Details;

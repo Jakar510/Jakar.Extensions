@@ -1,10 +1,14 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/17/2022  4:16 PM
 
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+
+
 namespace Jakar.Database;
 
 
-public abstract class Service : ObservableClass, IAsyncDisposable, IValidator
+public abstract class Service : BaseClass, IAsyncDisposable, IValidator
 {
     private readonly SynchronizedValue<bool> __isAlive = new(false);
     public           string                  ClassName { get; }

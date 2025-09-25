@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 1/8/2024  21:46
 
-using Microsoft.Extensions.DependencyInjection.Extensions;
-
-
-
 namespace Jakar.Database;
 
 

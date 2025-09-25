@@ -14,7 +14,7 @@ namespace Jakar.Database.DbMigrations;
 ///     </para>
 /// </summary>
 public abstract class Migration<TClass> : Migration
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>
 {
     public string TableName { get; } = typeof(TClass).GetTableName();
 
@@ -62,12 +62,12 @@ public abstract class Migration<TClass> : Migration
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
-    where TClass : Mapping<TClass, TKey, TValue>, ITableRecord<TClass>, IDbReaderMapping<TClass>, ICreateMapping<TClass, TKey, TValue>
-    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
-    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
+    where TClass : Mapping<TClass, TKey, TValue>, ITableRecord<TClass>, ICreateMapping<TClass, TKey, TValue>
+    where TKey : class, ITableRecord<TKey>
+    where TValue : class, ITableRecord<TValue>
 {
-    public static readonly string KeyForeignKeyName   = $"{TClass.TableName}-{TKey.TableName}.{nameof(IRecordPair.ID)}";
-    public static readonly string ValueForeignKeyName = $"{TClass.TableName}-{TValue.TableName}.{nameof(IRecordPair.ID)}";
+    public static readonly string KeyForeignKeyName   = $"{TClass.TableName}-{TKey.TableName}.{nameof(IDateCreated.ID)}";
+    public static readonly string ValueForeignKeyName = $"{TClass.TableName}-{TValue.TableName}.{nameof(IDateCreated.ID)}";
     protected Migration() : base() { }
 
 
@@ -75,8 +75,8 @@ public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.KeyID)).AsGuid().ForeignKey(KeyForeignKeyName, TKey.TableName, nameof(IRecordPair.ID)).NotNullable();
-        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.ValueID)).AsGuid().ForeignKey(ValueForeignKeyName, TValue.TableName, nameof(IRecordPair.ID)).NotNullable();
+        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.KeyID)).AsGuid().ForeignKey(KeyForeignKeyName, TKey.TableName, nameof(IDateCreated.ID)).NotNullable();
+        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.ValueID)).AsGuid().ForeignKey(ValueForeignKeyName, TValue.TableName, nameof(IDateCreated.ID)).NotNullable();
 
         return table;
     }
@@ -85,12 +85,12 @@ public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
 
 
 public abstract class OwnedMigration<TClass> : Migration<TClass>
-    where TClass : class, IOwnedTableRecord, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>, ICreatedBy
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
-        table.WithColumn(nameof(IOwnedTableRecord.CreatedBy)).AsGuid().Nullable().ForeignKey($"{nameof(UserRecord.CreatedBy)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID));
+        table.WithColumn(nameof(ICreatedBy.CreatedBy)).AsGuid().Nullable().ForeignKey($"{nameof(UserRecord.CreatedBy)}.{nameof(UserRecord.ID)}", UserRecord.TableName, nameof(UserRecord.ID));
         return table;
     }
 }

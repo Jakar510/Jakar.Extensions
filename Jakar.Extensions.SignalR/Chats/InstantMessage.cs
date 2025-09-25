@@ -15,7 +15,7 @@ public interface IInstantMessage
 
 
 [Serializable]
-public sealed class InstantMessage : ObservableClass<InstantMessage>, IInstantMessage, IEqualComparable<InstantMessage>, IJsonModel<InstantMessage>
+public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage, IJsonModel<InstantMessage>
 {
     private bool        __hasBeenRead;
     private FileData[]? __data;

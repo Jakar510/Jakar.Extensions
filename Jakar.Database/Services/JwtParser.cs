@@ -1,8 +1,4 @@
-﻿using System.Text.Json.Nodes;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 public static class JwtParser
@@ -27,18 +23,19 @@ public static class JwtParser
         List<Claim> claims        = [];
         string      payload       = jwt.Split('.')[1];
         string      jsonBytes     = ParseBase64WithoutPadding(payload).ConvertToString(Encoding.Default);
-        JsonObject  keyValuePairs = jsonBytes.GetAdditionalData();
+        JsonObject  keyValuePairs = jsonBytes.GetAdditionalData() ?? new JsonObject();
 
         ExtractRolesFromJwt(claims, keyValuePairs);
-        claims.AddRange(keyValuePairs.Select(static kvp => new Claim(kvp.Key, kvp.Value.ToString() ?? string.Empty)));
+        claims.AddRange(keyValuePairs.Select(static kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? string.Empty)));
 
         return claims;
     }
-    private static void ExtractRolesFromJwt( List<Claim> claims, Dictionary<string, object> keyValuePairs )
+    private static void ExtractRolesFromJwt( List<Claim> claims, JsonObject keyValuePairs )
     {
-        if ( !keyValuePairs.TryGetValue(ClaimTypes.Role, out object? roles) ) { return; }
+        JsonNode? roles = keyValuePairs[ClaimTypes.Role];
+        if ( roles is null ) { return; }
 
-        ReadOnlySpan<string> parsedRoles = roles.ToString()?.Trim().TrimStart('[').TrimEnd(']').Split(',');
+        ReadOnlySpan<string> parsedRoles = roles.ToString().Trim().TrimStart('[').TrimEnd(']').Split(',');
 
         if ( !parsedRoles.IsEmpty )
         {

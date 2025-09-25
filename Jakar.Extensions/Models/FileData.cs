@@ -14,7 +14,7 @@ public interface IFileMetaData : IJsonModel
 
 
 
-public interface IFileMetaData<TFileMetaData> : IFileMetaData, IEqualComparable<TFileMetaData>
+public interface IFileMetaData<TFileMetaData> : IFileMetaData, IJsonModel<TFileMetaData>
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public abstract static TFileMetaData  Create( IFileMetaData                                      data );
@@ -57,7 +57,7 @@ public interface IFileData<out TID, out TFileMetaData> : IFileData<TID>
 
 
 [SuppressMessage("ReSharper", "TypeParameterCanBeVariant")]
-public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IComparable<TSelf>, IEquatable<TSelf>
+public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMetaData>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
     where TSelf : class, IFileData<TSelf, TID, TFileMetaData>
@@ -224,7 +224,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 [Serializable, SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: JsonConstructor]
-public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>, IJsonModel<FileMetaData>
+public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {
     public static                           JsonSerializerContext        JsonContext     => JakarExtensionsContext.Default;
     public static                           JsonTypeInfo<FileMetaData>   JsonTypeInfo    => JakarExtensionsContext.Default.FileMetaData;

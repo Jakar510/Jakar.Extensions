@@ -13,7 +13,6 @@
 		<PackageReference Include="Bogus" />
 		<PackageReference Include="Hashids.net" />
 		<PackageReference Include="Microsoft.VisualStudio.DiagnosticsHub.BenchmarkDotNetDiagnosers" />
-		<PackageReference Include="Newtonsoft.Json" />
 	</ItemGroup>
 
 	<ItemGroup>

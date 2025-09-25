@@ -111,7 +111,7 @@
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.Memory" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" />
 		<PackageReference Include="ZiggyCreatures.FusionCache.OpenTelemetry" />
-		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.NewtonsoftJson" />
+		<PackageReference Include="ZiggyCreatures.FusionCache.Serialization.SystemTextJson" />
 		<PackageReference Include="ZXing.Net" />
 		<PackageReference Include="Hardware.Info" />
 		<PackageReference Include="System.Security.Cryptography.Xml" />

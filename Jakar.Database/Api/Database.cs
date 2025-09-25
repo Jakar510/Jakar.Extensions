@@ -1,9 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
-using ZiggyCreatures.Caching.Fusion;
 using IsolationLevel = System.Data.IsolationLevel;
-using Status = Jakar.Extensions.Status;
 
 
 
@@ -15,7 +13,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 {
     public const       ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
     protected readonly ConcurrentBag<IDbTable>          _tables             = [];
-    public readonly    DbOptions                        Settings;
+    public readonly    DbOptions                        Options;
     public readonly    DbTable<AddressRecord>           Addresses;
     public readonly    DbTable<FileRecord>              Files;
     public readonly    DbTable<GroupRecord>             Groups;
@@ -34,14 +32,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected          string?                          _className;
 
 
-    public static      Database?         Current                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public static      DataProtector     DataProtector             { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             string            ClassName                 { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType().GetFullName(); }
-    public             int?              CommandTimeout            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.CommandTimeout; }
-    protected internal SecuredString?    ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public             PasswordValidator PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.PasswordRequirements.GetValidator(); }
-    public             IsolationLevel    TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion        Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Settings.AppInformation.Version; }
+    public static      Database?                    Current                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    public static      DataProtector                DataProtector             { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public             string                       ClassName                 { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType().GetFullName(); }
+    protected internal SecuredString?               ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    public             PasswordValidator            PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Options.PasswordRequirements.GetValidator(); }
+    public             IsolationLevel               TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion                   Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Options.AppInformation.Version; }
+    ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
 
 
     static Database()
@@ -70,7 +68,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     {
         _cache            = cache;
         Configuration     = configuration;
-        Settings          = options.Value;
+        Options           = options.Value;
         Users             = Create<UserRecord>();
         Roles             = Create<RoleRecord>();
         UserRoles         = Create<UserRoleRecord>();
@@ -103,9 +101,9 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     protected async Task InitDataProtector()
     {
-        if ( Settings.DataProtectorKey.HasValue )
+        if ( Options.DataProtectorKey.HasValue )
         {
-            ( LocalFile pem, SecuredStringResolverOptions password ) = Settings.DataProtectorKey.Value;
+            ( LocalFile pem, SecuredStringResolverOptions password ) = Options.DataProtectorKey.Value;
             await InitDataProtector(pem, password);
         }
     }
@@ -115,7 +113,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected virtual NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure.ToString());
     public async ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token )
     {
-        ConnectionString ??= await Settings.GetConnectionStringAsync(Configuration, token);
+        ConnectionString ??= await Options.GetConnectionStringAsync(Configuration, token);
         NpgsqlConnection connection = CreateConnection(ConnectionString);
         await connection.OpenAsync(token);
         return connection;
@@ -124,7 +122,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected virtual DbTable<TClass> Create<TClass>()
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+        where TClass : class, ITableRecord<TClass>
     {
         DbTable<TClass> table = new(this, _cache);
         return AddDisposable(table);
@@ -145,19 +143,19 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         where TValue : class, IDapperSqlCommand
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, CommandTimeout, commandType, CommandFlags.Buffered, token);
+        return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, Options.CommandTimeout, commandType, CommandFlags.Buffered, token);
     }
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(transaction, token, CommandTimeout);
+        return sql.ToCommandDefinition(transaction, token, Options.CommandTimeout);
     }
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
     public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(connection, transaction, token, CommandTimeout);
+        return sql.ToCommandDefinition(connection, transaction, token, Options.CommandTimeout);
     }
 
 
@@ -232,7 +230,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public virtual async IAsyncEnumerable<TClass> Where<TClass>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TClass : class, IDbReaderMapping<TClass>, IRecordPair
+        where TClass : class, ITableRecord<TClass>, IDateCreated
     {
         DbDataReader reader;
 

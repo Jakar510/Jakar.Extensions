@@ -244,8 +244,8 @@ public static class Strings
     {
         if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-        StringBuilder    builder          = new(span.Length + span.Count(' ') + span.Count(Randoms.UPPER_CASE));
-        UnicodeCategory? previousCategory = null;
+        using ValueStringBuilder builder          = new(span.Length + span.Count(' ') + span.Count(Randoms.UPPER_CASE));
+        UnicodeCategory?         previousCategory = null;
 
         for ( int currentIndex = 0; currentIndex < span.Length; currentIndex++ )
         {
