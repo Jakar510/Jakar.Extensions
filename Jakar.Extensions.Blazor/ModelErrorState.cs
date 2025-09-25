@@ -1,6 +1,13 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 06/18/2024  22:06
 
+using System.Reflection;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Extensions.Blazor;
 
 
@@ -26,29 +33,32 @@ public interface IModelErrorState : ICascadingValueName, INotifyPropertyChanged
 
 
 
-public class ModelErrorState : BaseClass, IModelErrorState
+public class ModelErrorState : BaseClass<ModelErrorState>, IModelErrorState, IBaseClass<ModelErrorState>
 {
-    public const string               KEY    = nameof(ModelErrorState);
+    public const string               KEY     = nameof(ModelErrorState);
     private      ModelStateDictionary __state = new();
     private      string?              __errorText;
 
 
-    public static string CascadingName => KEY;
+    public static JsonSerializerContext           JsonContext   { get; }
+    public static JsonTypeInfo<ModelErrorState>   JsonTypeInfo  { get; }
+    public static JsonTypeInfo<ModelErrorState[]> JsonArrayInfo { get; }
+    public static string                          CascadingName => KEY;
     public virtual string? ErrorText
     {
         get => __errorText;
         set
         {
-            if ( SetProperty( ref __errorText, value ) ) { OnPropertyChanged( nameof(HasError) ); }
+            if ( SetProperty(ref __errorText, value) ) { OnPropertyChanged(nameof(HasError)); }
         }
     }
-    public virtual bool HasError => !string.IsNullOrEmpty( ErrorText ) || __state.ErrorCount > 0;
+    public virtual bool HasError => !string.IsNullOrEmpty(ErrorText) || __state.ErrorCount > 0;
     public virtual ModelStateDictionary State
     {
         get => __state;
         set
         {
-            if ( SetProperty( ref __state, value ) ) { OnPropertyChanged( nameof(HasError) ); }
+            if ( SetProperty(ref __state, value) ) { OnPropertyChanged(nameof(HasError)); }
         }
     }
 
@@ -58,73 +68,83 @@ public class ModelErrorState : BaseClass, IModelErrorState
 
     public virtual bool TryAddModelException( string key, Exception exception )
     {
-        bool result = __state.TryAddModelException( key, exception );
-        OnPropertyChanged( nameof(__state) );
+        bool result = __state.TryAddModelException(key, exception);
+        OnPropertyChanged(nameof(__state));
         return result;
     }
     public virtual void AddModelError( string key, Exception exception, ModelMetadata metadata )
     {
-        __state.AddModelError( key, exception, metadata );
-        OnPropertyChanged( nameof(__state) );
+        __state.AddModelError(key, exception, metadata);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual bool TryAddModelError( string key, Exception exception, ModelMetadata metadata )
     {
-        bool result = __state.TryAddModelError( key, exception, metadata );
-        OnPropertyChanged( nameof(__state) );
+        bool result = __state.TryAddModelError(key, exception, metadata);
+        OnPropertyChanged(nameof(__state));
         return result;
     }
     public virtual void AddModelError( string key, string errorMessage )
     {
-        __state.AddModelError( key, errorMessage );
-        OnPropertyChanged( nameof(__state) );
+        __state.AddModelError(key, errorMessage);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual bool TryAddModelError( string key, string errorMessage )
     {
-        bool result = __state.TryAddModelError( key, errorMessage );
-        OnPropertyChanged( nameof(__state) );
+        bool result = __state.TryAddModelError(key, errorMessage);
+        OnPropertyChanged(nameof(__state));
         return result;
     }
     public virtual void MarkFieldValid( string key )
     {
-        __state.MarkFieldValid( key );
-        OnPropertyChanged( nameof(__state) );
+        __state.MarkFieldValid(key);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void MarkFieldSkipped( string key )
     {
-        __state.MarkFieldSkipped( key );
-        OnPropertyChanged( nameof(__state) );
+        __state.MarkFieldSkipped(key);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void Merge( ModelStateDictionary dictionary )
     {
-        __state.Merge( dictionary );
-        OnPropertyChanged( nameof(__state) );
+        __state.Merge(dictionary);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void SetModelValue( string key, object? rawValue, string? attemptedValue )
     {
-        __state.SetModelValue( key, rawValue, attemptedValue );
-        OnPropertyChanged( nameof(__state) );
+        __state.SetModelValue(key, rawValue, attemptedValue);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void SetModelValue( string key, ValueProviderResult valueProviderResult )
     {
-        __state.SetModelValue( key, valueProviderResult );
-        OnPropertyChanged( nameof(__state) );
+        __state.SetModelValue(key, valueProviderResult);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void ClearValidationState( string key )
     {
-        __state.ClearValidationState( key );
-        OnPropertyChanged( nameof(__state) );
+        __state.ClearValidationState(key);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void Remove( string key )
     {
-        __state.Remove( key );
-        OnPropertyChanged( nameof(__state) );
+        __state.Remove(key);
+        OnPropertyChanged(nameof(__state));
     }
     public virtual void Clear()
     {
         ErrorText = null;
         __state.Clear();
-        OnPropertyChanged( nameof(__state) );
+        OnPropertyChanged(nameof(__state));
     }
+
+
+    public override bool Equals( ModelErrorState?      other )                        => ReferenceEquals(this, other);
+    public override int  CompareTo( ModelErrorState?   other )                        => string.Compare(ErrorText, other?.ErrorText, StringComparison.InvariantCultureIgnoreCase);
+    public static   bool operator ==( ModelErrorState? left, ModelErrorState? right ) => false;
+    public static   bool operator !=( ModelErrorState? left, ModelErrorState? right ) => false;
+    public static   bool operator >( ModelErrorState   left, ModelErrorState  right ) => false;
+    public static   bool operator >=( ModelErrorState  left, ModelErrorState  right ) => false;
+    public static   bool operator <( ModelErrorState   left, ModelErrorState  right ) => false;
+    public static   bool operator <=( ModelErrorState  left, ModelErrorState  right ) => false;
 }
 
 
@@ -132,7 +152,7 @@ public class ModelErrorState : BaseClass, IModelErrorState
 public interface IModelState<TValue>
     where TValue : IModelErrorState
 {
-    [CascadingParameter( Name = ModelErrorState.KEY )] public TValue State { get; set; }
+    [CascadingParameter(Name = ModelErrorState.KEY)] public TValue State { get; set; }
 }
 
 

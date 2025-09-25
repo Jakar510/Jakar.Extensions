@@ -75,16 +75,6 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     }
 
 
-    public static implicit operator LocalFileWatcher( List<LocalFile>           values ) => new(values);
-    public static implicit operator LocalFileWatcher( HashSet<LocalFile>        values ) => new(values);
-    public static implicit operator LocalFileWatcher( ConcurrentBag<LocalFile>  values ) => new(values);
-    public static implicit operator LocalFileWatcher( Collection<LocalFile>     values ) => new(values);
-    public static implicit operator LocalFileWatcher( LocalFile[]               values ) => new(values.AsSpan());
-    public static implicit operator LocalFileWatcher( ImmutableArray<LocalFile> values ) => new(values.AsSpan());
-    public static implicit operator LocalFileWatcher( ReadOnlyMemory<LocalFile> values ) => new(values.Span);
-    public static implicit operator LocalFileWatcher( ReadOnlySpan<LocalFile>   values ) => new(values);
-
-
     public LocalFileWatcher() { }
     public LocalFileWatcher( IEnumerable<LocalFile>         files ) : this() { Add(files); }
     public LocalFileWatcher( params ReadOnlySpan<LocalFile> files ) : this() { Add(files); }
@@ -123,4 +113,22 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
         Add(e.FullPath);
         __renameEventManager.RaiseEvent(e, nameof(Renamed));
     }
+
+
+    public static implicit operator LocalFileWatcher( List<LocalFile>           values ) => new(values);
+    public static implicit operator LocalFileWatcher( HashSet<LocalFile>        values ) => new(values);
+    public static implicit operator LocalFileWatcher( ConcurrentBag<LocalFile>  values ) => new(values);
+    public static implicit operator LocalFileWatcher( Collection<LocalFile>     values ) => new(values);
+    public static implicit operator LocalFileWatcher( LocalFile[]               values ) => new(values.AsSpan());
+    public static implicit operator LocalFileWatcher( ImmutableArray<LocalFile> values ) => new(values.AsSpan());
+    public static implicit operator LocalFileWatcher( ReadOnlyMemory<LocalFile> values ) => new(values.Span);
+    public static implicit operator LocalFileWatcher( ReadOnlySpan<LocalFile>   values ) => new(values);
+
+
+    public static bool operator ==( LocalFileWatcher? left, LocalFileWatcher? right ) => EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
+    public static bool operator !=( LocalFileWatcher? left, LocalFileWatcher? right ) => !EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
+    public static bool operator >( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) > 0;
+    public static bool operator >=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) >= 0;
+    public static bool operator <( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) < 0;
+    public static bool operator <=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) <= 0;
 }

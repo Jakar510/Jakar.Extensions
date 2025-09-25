@@ -174,4 +174,12 @@ public class LanguageCollection : ObservableCollection<LanguageCollection, Langu
     public static implicit operator LanguageCollection( ImmutableArray<Language> values ) => new(values.AsSpan());
     public static implicit operator LanguageCollection( ReadOnlyMemory<Language> values ) => new(values.Span);
     public static implicit operator LanguageCollection( ReadOnlySpan<Language>   values ) => new(values);
+
+    
+    public static bool operator ==( LanguageCollection? left, LanguageCollection? right ) => EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static bool operator !=( LanguageCollection? left, LanguageCollection? right ) => !EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static bool operator >( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) > 0;
+    public static bool operator >=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) >= 0;
+    public static bool operator <( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) < 0;
+    public static bool operator <=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) <= 0;
 }

@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-public interface ICreateMapping<out TSelf, TKey, TValue>
+public interface ICreateMapping<TSelf, TKey, TValue> : ITableRecord<TSelf>
     where TValue : class, ITableRecord<TValue>
     where TKey : class, ITableRecord<TKey>
     where TSelf : class, ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>

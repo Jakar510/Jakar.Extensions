@@ -5,7 +5,7 @@ public static class TableExtensions
 {
     public static JsonObject? GetAdditionalData( this DbDataReader reader ) =>
         reader.GetFieldValue<object?>(nameof(IJsonModel.AdditionalData)) is string value
-            ? value.GetAdditionalData()
+            ? Json.GetAdditionalData(value)
             : null;
 
 

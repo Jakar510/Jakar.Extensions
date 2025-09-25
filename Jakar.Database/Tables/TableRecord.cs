@@ -40,7 +40,7 @@ public interface IRecordPair<TClass> : ILastModified
 
 
 
-public interface ITableRecord<TClass> : IRecordPair<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
+public interface ITableRecord<TClass> : IRecordPair<TClass>, IBaseClass<TClass>
     where TClass : ITableRecord<TClass>
 {
     public abstract static        string            TableName { [Pure] get; }
@@ -69,7 +69,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     [Pure]
     public UInt128 GetHash()
     {
-        ReadOnlySpan<char> json = ToJson();
+        ReadOnlySpan<char> json = ( (TClass)this ).ToJson();
         return json.Hash128();
     }
     public TClass Modified()
@@ -99,7 +99,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
 
         string message = $"""
                           {typeof(TClass).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(Properties)}.Length ({Properties.Length})
-                          {missing.ToPrettyJson()}
+                          {missing.ToJson(JakarDatabaseContext.Default.HashSetString)}
                           """;
 
         throw new InvalidOperationException(message);
@@ -110,14 +110,14 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     public static DynamicParameters GetDynamicParameters( ref readonly RecordID<TClass> id )
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(ID), id.value);
+        parameters.Add(nameof(ID), id.Value);
         return parameters;
     }
 
     public virtual DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(ID),           ID.value);
+        parameters.Add(nameof(ID),           ID.Value);
         parameters.Add(nameof(DateCreated),  DateCreated);
         parameters.Add(nameof(LastModified), LastModified);
         return parameters;
@@ -145,7 +145,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
 
 [Serializable]
 public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>(in ID, in DateCreated, in LastModified), ICreatedBy
-    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>
+    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>, IBaseClass<TClass>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
 
@@ -153,7 +153,7 @@ public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecor
     public static DynamicParameters GetDynamicParameters( UserRecord user )
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(CreatedBy), user.ID.value);
+        parameters.Add(nameof(CreatedBy), user.ID.Value);
         return parameters;
     }
     protected static DynamicParameters GetDynamicParameters( OwnedTableRecord<TClass> record )

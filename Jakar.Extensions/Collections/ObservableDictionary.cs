@@ -13,7 +13,7 @@ public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<Ob
     private static JsonTypeInfo<ObservableDictionary<TKey, TValue>>?   __jsonTypeInfo;
     public static  JsonSerializerContext                               JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo= value; }
+    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
 
 
     public ObservableDictionary() : this(DEFAULT_CAPACITY) { }
@@ -31,6 +31,14 @@ public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<Ob
     public static implicit operator ObservableDictionary<TKey, TValue>( ImmutableArray<KeyValuePair<TKey, TValue>> values ) => new(values.AsSpan());
     public static implicit operator ObservableDictionary<TKey, TValue>( ReadOnlyMemory<KeyValuePair<TKey, TValue>> values ) => new(values.Span);
     public static implicit operator ObservableDictionary<TKey, TValue>( ReadOnlySpan<KeyValuePair<TKey, TValue>>   values ) => new(values);
+
+
+    public static bool operator ==( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static bool operator !=( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => !EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static bool operator >( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) <= 0;
 }
 
 

@@ -35,6 +35,14 @@ public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableCon
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ImmutableArray<KeyValuePair<TKey, TValue>> values ) => new(values.AsSpan());
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ReadOnlyMemory<KeyValuePair<TKey, TValue>> values ) => new(values.Span);
     public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ReadOnlySpan<KeyValuePair<TKey, TValue>>   values ) => new(values);
+
+
+    public static bool operator ==( ObservableConcurrentDictionary<TKey, TValue>? left, ObservableConcurrentDictionary<TKey, TValue>? right ) => EqualityComparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static bool operator !=( ObservableConcurrentDictionary<TKey, TValue>? left, ObservableConcurrentDictionary<TKey, TValue>? right ) => !EqualityComparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static bool operator >( ObservableConcurrentDictionary<TKey, TValue>   left, ObservableConcurrentDictionary<TKey, TValue>  right ) => Comparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ObservableConcurrentDictionary<TKey, TValue>  left, ObservableConcurrentDictionary<TKey, TValue>  right ) => Comparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ObservableConcurrentDictionary<TKey, TValue>   left, ObservableConcurrentDictionary<TKey, TValue>  right ) => Comparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ObservableConcurrentDictionary<TKey, TValue>  left, ObservableConcurrentDictionary<TKey, TValue>  right ) => Comparer<ObservableConcurrentDictionary<TKey, TValue>>.Default.Compare(left, right) <= 0;
 }
 
 

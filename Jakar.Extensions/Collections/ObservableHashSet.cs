@@ -11,7 +11,7 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
     private static JsonTypeInfo<ObservableHashSet<TValue>>?   __jsonTypeInfo;
     public static  JsonSerializerContext                      JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableHashSet<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo= value; }
+    public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
 
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
     public ObservableHashSet( int                         capacity ) : this(new HashSet<TValue>(capacity)) { }
@@ -27,6 +27,14 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
     public static implicit operator ObservableHashSet<TValue>( ImmutableArray<TValue> values ) => new(values.AsSpan());
     public static implicit operator ObservableHashSet<TValue>( ReadOnlyMemory<TValue> values ) => new(values.Span);
     public static implicit operator ObservableHashSet<TValue>( ReadOnlySpan<TValue>   values ) => new(values);
+
+
+    public static bool operator ==( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
+    public static bool operator !=( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => !EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
+    public static bool operator >( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) <= 0;
 }
 
 

@@ -42,6 +42,8 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(DateTime?[]))]
 [JsonSerializable(typeof(DateOnly[]))]
 [JsonSerializable(typeof(DateOnly?[]))]
+[JsonSerializable(typeof(TimeOnly[]))]
+[JsonSerializable(typeof(TimeOnly?[]))]
 [JsonSerializable(typeof(DateTimeOffset[]))]
 [JsonSerializable(typeof(DateTimeOffset?[]))]
 [JsonSerializable(typeof(TimeSpan[]))]
@@ -63,47 +65,103 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(Alert[]))]
 [JsonSerializable(typeof(AppInformation[]))]
 [JsonSerializable(typeof(GcInfo[]))]
-[JsonSerializable(typeof(GCMemoryInformation[]))]
-[JsonSerializable(typeof(GCGenerationInformation[]))]
+[JsonSerializable(typeof(GcMemoryInformation[]))]
+[JsonSerializable(typeof(GcGenerationInformation[]))]
 [JsonSerializable(typeof(ThreadInformation[]))]
+[JsonSerializable(typeof(HashSet<string>))]
+[JsonSerializable(typeof(HashSet<double>))]
+[JsonSerializable(typeof(HashSet<float>))]
+[JsonSerializable(typeof(HashSet<long>))]
+[JsonSerializable(typeof(HashSet<ulong>))]
+[JsonSerializable(typeof(HashSet<int>))]
+[JsonSerializable(typeof(HashSet<uint>))]
+[JsonSerializable(typeof(HashSet<short>))]
+[JsonSerializable(typeof(HashSet<ushort>))]
+[JsonSerializable(typeof(HashSet<Guid>))]
+[JsonSerializable(typeof(HashSet<DateTime>))]
+[JsonSerializable(typeof(HashSet<DateTimeOffset>))]
+[JsonSerializable(typeof(HashSet<DateOnly>))]
+[JsonSerializable(typeof(HashSet<TimeOnly>))]
+[JsonSerializable(typeof(HashSet<TimeSpan>))]
 public sealed partial class JakarExtensionsContext : JsonSerializerContext
 {
     static JakarExtensionsContext()
     {
+        Default.HashSetString.Register();
+        Default.HashSetDouble.Register();
+        Default.HashSetSingle.Register();
+        Default.HashSetInt64.Register();
+        Default.HashSetUInt64.Register();
+        Default.HashSetInt32.Register();
+        Default.HashSetUInt32.Register();
+        Default.HashSetInt16.Register();
+        Default.HashSetUInt16.Register();
+        Default.HashSetGuid.Register();
+        Default.HashSetDateTime.Register();
+        Default.HashSetDateTimeOffset.Register();
+        Default.HashSetDateOnly.Register();
+        Default.HashSetTimeOnly.Register();
+        Default.HashSetTimeSpan.Register();
+
         Default.StringArray.Register();
         Default.NullableSingleArray.Register();
 
+        Default.Int16.Register();
+        Default.NullableInt16.Register();
         Default.Int16Array.Register();
         Default.NullableInt16Array.Register();
 
+        Default.Int32.Register();
+        Default.NullableInt32.Register();
         Default.Int32Array.Register();
         Default.NullableInt32Array.Register();
 
+        Default.Int64.Register();
+        Default.NullableInt64.Register();
         Default.Int64Array.Register();
         Default.NullableInt64Array.Register();
 
+        Default.UInt64.Register();
+        Default.NullableUInt64.Register();
         Default.UInt64Array.Register();
         Default.NullableUInt64Array.Register();
 
+        Default.Single.Register();
+        Default.NullableSingle.Register();
         Default.SingleArray.Register();
         Default.NullableSingleArray.Register();
 
+        Default.Double.Register();
+        Default.NullableDouble.Register();
         Default.DoubleArray.Register();
         Default.NullableDoubleArray.Register();
 
         Default.DateTime.Register();
         Default.DateTimeArray.Register();
+        Default.NullableDateTime.Register();
+        Default.NullableDateTimeArray.Register();
 
         Default.DateTimeOffset.Register();
         Default.DateTimeOffsetArray.Register();
+        Default.NullableDateTimeOffset.Register();
+        Default.NullableDateTimeOffsetArray.Register();
 
         Default.DateOnly.Register();
         Default.DateOnlyArray.Register();
+        Default.NullableDateOnly.Register();
+        Default.NullableDateOnlyArray.Register();
+
+        Default.TimeOnly.Register();
+        Default.TimeOnlyArray.Register();
+        Default.NullableTimeOnly.Register();
+        Default.NullableTimeOnlyArray.Register();
 
         Default.TimeSpan.Register();
         Default.TimeSpanArray.Register();
+        Default.NullableTimeSpan.Register();
+        Default.NullableTimeSpanArray.Register();
 
-        
+
         Default.AppVersion.Register();
         Default.AppVersionArray.Register();
 
@@ -155,15 +213,13 @@ public sealed partial class JakarExtensionsContext : JsonSerializerContext
         Default.GcInfo.Register();
         Default.GcInfoArray.Register();
 
-        Default.GCMemoryInformation.Register();
-        Default.GCMemoryInformationArray.Register();
+        Default.GcMemoryInformation.Register();
+        Default.GcMemoryInformationArray.Register();
 
-        Default.GCGenerationInformation.Register();
-        Default.GCGenerationInformationArray.Register();
+        Default.GcGenerationInformation.Register();
+        Default.GcGenerationInformationArray.Register();
 
         Default.ThreadInformation.Register();
         Default.ThreadInformationArray.Register();
     }
 }
-
-

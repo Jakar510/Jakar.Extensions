@@ -12,13 +12,13 @@ namespace Jakar.Extensions;
 
 [Serializable]
 [method: JsonConstructor]
-public readonly struct GcInfo( long TotalMemory, long TotalAllocatedBytes, long AllocatedBytesForCurrentThread, TimeSpan TotalPauseDuration, in GCMemoryInformation Info ) : IJsonModel<GcInfo>, IEqualComparable<GcInfo>
+public readonly struct GcInfo( long totalMemory, long totalAllocatedBytes, long allocatedBytesForCurrentThread, TimeSpan totalPauseDuration, in GcMemoryInformation info ) : IJsonModel<GcInfo>
 {
-    public readonly long                TotalMemory                    = TotalMemory;
-    public readonly TimeSpan            TotalPauseDuration             = TotalPauseDuration;
-    public readonly long                TotalAllocatedBytes            = TotalAllocatedBytes;
-    public readonly long                AllocatedBytesForCurrentThread = AllocatedBytesForCurrentThread;
-    public readonly GCMemoryInformation MemoryInfo                     = Info;
+    public readonly long                TotalMemory                    = totalMemory;
+    public readonly TimeSpan            TotalPauseDuration             = totalPauseDuration;
+    public readonly long                TotalAllocatedBytes            = totalAllocatedBytes;
+    public readonly long                AllocatedBytesForCurrentThread = allocatedBytesForCurrentThread;
+    public readonly GcMemoryInformation MemoryInfo                     = info;
 
 
     public static JsonSerializerContext  JsonContext   => JakarExtensionsContext.Default;
@@ -102,7 +102,7 @@ public readonly struct GcInfo( long TotalMemory, long TotalAllocatedBytes, long 
 /// </remarks>
 [Serializable]
 [method: JsonConstructor]
-public readonly struct GCMemoryInformation( bool                      compacted,
+public readonly struct GcMemoryInformation( bool                      compacted,
                                             bool                      concurrent,
                                             long                      finalizationPendingCount,
                                             long                      fragmentedBytes,
@@ -117,7 +117,7 @@ public readonly struct GCMemoryInformation( bool                      compacted,
                                             long                      totalAvailableMemoryBytes,
                                             long                      totalCommittedBytes,
                                             TimeSpan[]                pauseDurations,
-                                            GCGenerationInformation[] generationInfo ) : IEquatable<GCMemoryInformation>
+                                            GcGenerationInformation[] generationInfo ) : IEquatable<GcMemoryInformation>
 {
     /// <summary>
     /// High memory load threshold when this GC occurred
@@ -214,10 +214,10 @@ public readonly struct GCMemoryInformation( bool                      compacted,
     /// <summary>
     /// Generation info for all generations.
     /// </summary>
-    public readonly GCGenerationInformation[] GenerationInfo = generationInfo;
+    public readonly GcGenerationInformation[] GenerationInfo = generationInfo;
 
 
-    public GCMemoryInformation( in GCMemoryInfo data ) : this(data.Compacted,
+    public GcMemoryInformation( in GCMemoryInfo data ) : this(data.Compacted,
                                                               data.Concurrent,
                                                               data.FinalizationPendingCount,
                                                               data.FragmentedBytes,
@@ -232,10 +232,10 @@ public readonly struct GCMemoryInformation( bool                      compacted,
                                                               data.TotalAvailableMemoryBytes,
                                                               data.TotalCommittedBytes,
                                                               data.PauseDurations.ToArray(),
-                                                              [.. data.GenerationInfo.AsValueEnumerable().Select(static x => new GCGenerationInformation(x))]) { }
+                                                              [.. data.GenerationInfo.AsValueEnumerable().Select(static x => new GcGenerationInformation(x))]) { }
 
 
-    public static implicit operator GCMemoryInformation( GCMemoryInfo info ) => new(in info);
+    public static implicit operator GcMemoryInformation( GCMemoryInfo info ) => new(in info);
 
 
     public StructureValue GetProperty() =>
@@ -259,7 +259,7 @@ public readonly struct GCMemoryInformation( bool                      compacted,
     public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
 
-    public bool Equals( GCMemoryInformation other ) => HighMemoryLoadThresholdBytes == other.HighMemoryLoadThresholdBytes &&
+    public bool Equals( GcMemoryInformation other ) => HighMemoryLoadThresholdBytes == other.HighMemoryLoadThresholdBytes &&
                                                        MemoryLoadBytes              == other.MemoryLoadBytes              &&
                                                        TotalAvailableMemoryBytes    == other.TotalAvailableMemoryBytes    &&
                                                        HeapSizeBytes                == other.HeapSizeBytes                &&
@@ -275,7 +275,7 @@ public readonly struct GCMemoryInformation( bool                      compacted,
                                                        PauseDurations.Equals(other.PauseDurations)                        &&
                                                        PauseTimePercentage.Equals(other.PauseTimePercentage)              &&
                                                        GenerationInfo.Equals(other.GenerationInfo);
-    public override bool Equals( object? obj ) => obj is GCMemoryInformation other && Equals(other);
+    public override bool Equals( object? obj ) => obj is GcMemoryInformation other && Equals(other);
     public override int GetHashCode()
     {
         HashCode hashCode = new HashCode();
@@ -297,15 +297,15 @@ public readonly struct GCMemoryInformation( bool                      compacted,
         hashCode.Add(GenerationInfo);
         return hashCode.ToHashCode();
     }
-    public static bool operator ==( GCMemoryInformation left, GCMemoryInformation right ) => left.Equals(right);
-    public static bool operator !=( GCMemoryInformation left, GCMemoryInformation right ) => !left.Equals(right);
+    public static bool operator ==( GcMemoryInformation left, GcMemoryInformation right ) => left.Equals(right);
+    public static bool operator !=( GcMemoryInformation left, GcMemoryInformation right ) => !left.Equals(right);
 }
 
 
 
 [Serializable]
 [method: JsonConstructor]
-public readonly struct GCGenerationInformation( long fragmentationAfterBytes, long fragmentationBeforeBytes, long sizeAfterBytes, long sizeBeforeBytes ) : IEquatable<GCGenerationInformation>
+public readonly struct GcGenerationInformation( long fragmentationAfterBytes, long fragmentationBeforeBytes, long sizeAfterBytes, long sizeBeforeBytes ) : IEquatable<GcGenerationInformation>
 {
     /// <summary>Size in bytes on entry to the reported collection.</summary>
     public readonly long SizeBeforeBytes = sizeBeforeBytes;
@@ -320,16 +320,16 @@ public readonly struct GCGenerationInformation( long fragmentationAfterBytes, lo
     public readonly long FragmentationAfterBytes = fragmentationAfterBytes;
 
 
-    public GCGenerationInformation( in GCGenerationInfo                       info ) : this(info.FragmentationAfterBytes, info.FragmentationBeforeBytes, info.SizeAfterBytes, info.SizeBeforeBytes) { }
-    public static implicit operator GCGenerationInformation( GCGenerationInfo info ) => new(in info);
+    public GcGenerationInformation( in GCGenerationInfo                       info ) : this(info.FragmentationAfterBytes, info.FragmentationBeforeBytes, info.SizeAfterBytes, info.SizeBeforeBytes) { }
+    public static implicit operator GcGenerationInformation( GCGenerationInfo info ) => new(in info);
 
 
     public StructureValue   GetProperty()              => new([Enricher.GetProperty(SizeBeforeBytes, nameof(SizeBeforeBytes)), Enricher.GetProperty(FragmentationBeforeBytes, nameof(FragmentationBeforeBytes)), Enricher.GetProperty(SizeAfterBytes, nameof(SizeAfterBytes)), Enricher.GetProperty(FragmentationAfterBytes, nameof(FragmentationAfterBytes)),]);
     public LogEventProperty GetProperty( string name ) => new(name, GetProperty());
 
-    public          bool Equals( GCGenerationInformation other )                                    => SizeBeforeBytes == other.SizeBeforeBytes && FragmentationBeforeBytes == other.FragmentationBeforeBytes && SizeAfterBytes == other.SizeAfterBytes && FragmentationAfterBytes == other.FragmentationAfterBytes;
-    public override bool Equals( object?                 obj )                                      => obj is GCGenerationInformation other     && Equals(other);
+    public          bool Equals( GcGenerationInformation other )                                    => SizeBeforeBytes == other.SizeBeforeBytes && FragmentationBeforeBytes == other.FragmentationBeforeBytes && SizeAfterBytes == other.SizeAfterBytes && FragmentationAfterBytes == other.FragmentationAfterBytes;
+    public override bool Equals( object?                 obj )                                      => obj is GcGenerationInformation other     && Equals(other);
     public override int  GetHashCode()                                                              => HashCode.Combine(SizeBeforeBytes, FragmentationBeforeBytes, SizeAfterBytes, FragmentationAfterBytes);
-    public static   bool operator ==( GCGenerationInformation left, GCGenerationInformation right ) => left.Equals(right);
-    public static   bool operator !=( GCGenerationInformation left, GCGenerationInformation right ) => !left.Equals(right);
+    public static   bool operator ==( GcGenerationInformation left, GcGenerationInformation right ) => left.Equals(right);
+    public static   bool operator !=( GcGenerationInformation left, GcGenerationInformation right ) => !left.Equals(right);
 }

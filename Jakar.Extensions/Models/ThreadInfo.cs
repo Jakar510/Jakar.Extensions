@@ -11,16 +11,16 @@ namespace Jakar.Extensions;
 [Serializable]
 [StructLayout(LayoutKind.Auto)]
 [method: JsonConstructor]
-public readonly struct ThreadInformation( string Name, int ManagedThreadID, Language CurrentCulture, Language CurrentUICulture ) : IJsonModel<ThreadInformation>, IEqualComparable<ThreadInformation>
+public readonly struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture ) : IJsonModel<ThreadInformation>
 {
     public ThreadInformation() : this(Thread.CurrentThread) { }
     public ThreadInformation( Thread                          thread ) : this(thread.Name ?? string.Empty, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }
     public static implicit operator ThreadInformation( Thread thread ) => new(thread);
-    public readonly                 string                     Name             = Name;
-    public readonly                 int                        ManagedThreadID  = ManagedThreadID;
-    public readonly                 Language                   CurrentCulture   = CurrentCulture;
-    public readonly                 Language                   CurrentUICulture = CurrentUICulture;
-    public static                   JsonSerializerContext      JsonContext   => JakarExtensionsContext.Default;
+    public readonly                 string                            Name             = name;
+    public readonly                 int                               ManagedThreadID  = managedThreadID;
+    public readonly                 Language                          CurrentCulture   = currentCulture;
+    public readonly                 Language                          CurrentUICulture = currentUICulture;
+    public static                   JsonSerializerContext             JsonContext   => JakarExtensionsContext.Default;
     public static                   JsonTypeInfo<ThreadInformation>   JsonTypeInfo  => JakarExtensionsContext.Default.ThreadInformation;
     public static                   JsonTypeInfo<ThreadInformation[]> JsonArrayInfo => JakarExtensionsContext.Default.ThreadInformationArray;
 
@@ -70,7 +70,7 @@ public readonly struct ThreadInformation( string Name, int ManagedThreadID, Lang
         return CurrentUICulture.CompareTo(other.CurrentUICulture);
     }
     public          bool Equals( ThreadInformation other ) => string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase) && ManagedThreadID == other.ManagedThreadID && CurrentCulture.Equals(other.CurrentCulture) && CurrentUICulture.Equals(other.CurrentUICulture);
-    public override bool Equals( object?    obj )   => obj is ThreadInformation other                                                      && Equals(other);
+    public override bool Equals( object?           obj )   => obj is ThreadInformation other                                               && Equals(other);
     public override int GetHashCode()
     {
         HashCode hashCode = new HashCode();

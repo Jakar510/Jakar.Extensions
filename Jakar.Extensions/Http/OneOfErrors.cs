@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 [method: JsonConstructor]
-public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors? Errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
+public readonly struct OneOfErrors( JsonNode? Json, string? Text, Errors? Errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
 {
     public const           string      ERROR_MESSAGE = "Error Message: ";
     public const           string      UNKNOWN_ERROR = "Unknown Error";
@@ -14,9 +14,9 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
     public readonly        JsonNode?   Json          = Json;
     public readonly        string?     Text          = Text;
 
-    public                     bool        IsErrors       { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
-    public                     bool        IsJson         { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }
-    public                     bool        IsText         { [MemberNotNullWhen(true, nameof(Text))] get => Text is not null; }
+    public bool IsErrors { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
+    public bool IsJson   { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }
+    public bool IsText   { [MemberNotNullWhen(true, nameof(Text))] get => Text is not null; }
 
 
     public static implicit operator OneOfErrors( JsonNode input ) => From(input);
@@ -104,4 +104,29 @@ public readonly record struct OneOfErrors( JsonNode? Json, string? Text, Errors?
         return false;
     }
     public static OneOfErrors FromJson( string json ) => json.FromJson(JsonTypeInfo);
+
+
+    public int CompareTo( OneOfErrors other )
+    {
+        int errorsComparison = Comparer<Errors?>.Default.Compare(Errors, other.Errors);
+        if ( errorsComparison != 0 ) { return errorsComparison; }
+
+        return string.Compare(Text, other.Text, StringComparison.InvariantCultureIgnoreCase);
+    }
+    public          bool Equals( OneOfErrors other ) => Equals(Errors, other.Errors) && Equals(Json, other.Json) && string.Equals(Text, other.Text, StringComparison.InvariantCultureIgnoreCase);
+    public override bool Equals( object?     other ) => other is OneOfErrors x       && Equals(x);
+    public override int  GetHashCode()               => HashCode.Combine(Errors, Json, Text);
+    public int CompareTo( object? other ) => other is OneOfErrors x
+                                                 ? CompareTo(x)
+                                                 : throw new ExpectedValueTypeException(other, typeof(OneOfErrors));
+
+
+    public static bool operator ==( OneOfErrors? left, OneOfErrors? right ) => Nullable.Equals(left, right);
+    public static bool operator !=( OneOfErrors? left, OneOfErrors? right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( OneOfErrors  left, OneOfErrors  right ) => EqualityComparer<OneOfErrors>.Default.Equals(left, right);
+    public static bool operator !=( OneOfErrors  left, OneOfErrors  right ) => !EqualityComparer<OneOfErrors>.Default.Equals(left, right);
+    public static bool operator >( OneOfErrors   left, OneOfErrors  right ) => Comparer<OneOfErrors>.Default.Compare(left, right) > 0;
+    public static bool operator >=( OneOfErrors  left, OneOfErrors  right ) => Comparer<OneOfErrors>.Default.Compare(left, right) >= 0;
+    public static bool operator <( OneOfErrors   left, OneOfErrors  right ) => Comparer<OneOfErrors>.Default.Compare(left, right) < 0;
+    public static bool operator <=( OneOfErrors  left, OneOfErrors  right ) => Comparer<OneOfErrors>.Default.Compare(left, right) <= 0;
 }

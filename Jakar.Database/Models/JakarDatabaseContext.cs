@@ -23,6 +23,7 @@ namespace Jakar.Database;
                              ReadCommentHandling = JsonCommentHandling.Skip,
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
                              RespectRequiredConstructorParameters = true)]
+[JsonSerializable(typeof(HashSet<string>))]
 [JsonSerializable(typeof(DbOptions[]))]
 [JsonSerializable(typeof(EmailSettings[]))]
 [JsonSerializable(typeof(ResxRowRecord[]))]
@@ -41,6 +42,8 @@ public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()
     {
+        Default.HashSetString.Register();
+
         Default.EmailSettings.Register();
         Default.EmailSettingsArray.Register();
 

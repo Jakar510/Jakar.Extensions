@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 [StructLayout(LayoutKind.Auto), Serializable, DefaultValue(nameof(Invalid))]
 [method: JsonConstructor]
-public readonly struct AppInformation( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IJsonModel<AppInformation>, IEqualComparable<AppInformation>
+public readonly struct AppInformation( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IJsonModel<AppInformation>
 {
     public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
     public readonly        AppVersion     Version     = Version;
