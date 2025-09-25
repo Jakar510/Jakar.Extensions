@@ -66,6 +66,5 @@
 
 	<ItemGroup>
 		<PackageReference Include="Jakar.Extensions" />
-		<PackageReference Include="Newtonsoft.Json" />
 	</ItemGroup>
 </Project>

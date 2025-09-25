@@ -8,7 +8,7 @@ namespace Jakar.Database;
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
 public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnumerable<TClass>, IAsyncEnumerator<TClass>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>
 {
     private readonly AsyncKeyGenerator<TClass> __generator = new(table);
     private readonly DbTable<TClass>           __table     = table;

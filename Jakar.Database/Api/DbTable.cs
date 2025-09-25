@@ -2,16 +2,12 @@
 // 10/16/2022  4:54 PM
 
 
-using ZiggyCreatures.Caching.Fusion;
-
-
-
 namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TClass> : IConnectableDb
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass> 
 {
     protected readonly     FusionCache        _cache;
     protected readonly     IConnectableDbRoot _database;
@@ -21,7 +17,6 @@ public partial class DbTable<TClass> : IConnectableDb
     public static TClass[]                 Empty                     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
     public static ImmutableArray<TClass>   EmptyArray                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
     public static FrozenSet<TClass>        Set                       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FrozenSet<TClass>.Empty; }
-    public        int?                     CommandTimeout            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _database.CommandTimeout; }
     public        FusionCacheEntryOptions? Options                   { get; set; }
     public        RecordGenerator<TClass>  Records                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
     public        IsolationLevel           TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _database.TransactionIsolationLevel; }

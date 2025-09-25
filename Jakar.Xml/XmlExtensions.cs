@@ -135,7 +135,7 @@ public static class XmlExtensions
     public static string SetMappedIDs<TValue>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(TValue).GetTableName() } );
 
 
-    public static string ToXml( this JObject item )
+    public static string ToXml( this JsonObject item )
     {
         XmlDocument? node = JsonConvert.DeserializeXmlNode( item.ToJson(), nameof(item), true, true );
 
@@ -143,7 +143,7 @@ public static class XmlExtensions
         return result ?? throw new InvalidOperationException();
     }
 
-    public static string ToXml( this IEnumerable<JObject> item )
+    public static string ToXml( this IEnumerable<JsonObject> item )
     {
         XmlDocument? node = JsonConvert.DeserializeXmlNode( item.ToJson(), nameof(item), true, true );
 

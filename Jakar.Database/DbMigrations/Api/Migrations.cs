@@ -132,7 +132,7 @@ public static partial class Migrations
     {
         if ( col.CreateColumn_Enum(propInfo, propertyType) ) { return true; }
 
-        if ( propertyType == typeof(JObject) || propertyType == typeof(JToken) || propertyType == typeof(List<JObject>) || propertyType == typeof(List<JObject?>) || propertyType == typeof(IDictionary<string, JToken?>) || propertyType == typeof(IDictionary<string, JToken>) ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
+        if ( propertyType == typeof(JsonObject) || propertyType == typeof(JsonNode) || propertyType == typeof(List<JsonObject>) || propertyType == typeof(List<JsonObject?>) || propertyType == typeof(JsonObject[]) || propertyType == typeof(JsonObject) ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
 
         if ( ( propertyType.IsGenericType && propertyType.IsList() ) || propertyType.IsSet() || propertyType.IsCollection() ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
 
@@ -349,12 +349,12 @@ public static partial class Migrations
                                              typeof(DateTimeOffset),
                                              typeof(TimeSpan),
                                              typeof(Enum),
-                                             typeof(JObject),
-                                             typeof(JToken),
-                                             typeof(List<JObject>),
-                                             typeof(List<JObject?>),
-                                             typeof(IDictionary<string, JToken?>),
-                                             typeof(IDictionary<string, JToken>),
+                                             typeof(JsonObject),
+                                             typeof(JsonNode),
+                                             typeof(List<JsonObject>),
+                                             typeof(List<JsonObject?>),
+                                             typeof(JsonObject),
+                                             typeof(JsonObject),
                                              typeof(IDictionary),
                                              typeof(IList));
     }

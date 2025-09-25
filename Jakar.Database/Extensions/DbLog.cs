@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Database
 // 12/22/2023  12:5
 
+using ILogger = Microsoft.Extensions.Logging.ILogger;
+
+
+
 namespace Jakar.Database;
 
 

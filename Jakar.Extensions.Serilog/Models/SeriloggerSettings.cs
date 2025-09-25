@@ -25,7 +25,7 @@ public sealed class SeriloggerSettings : SeriloggerSettings<SeriloggerSettings, 
 
 
 [SuppressMessage( "ReSharper", "StaticMemberInGenericType" )]
-public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableClass, ISeriloggerSettings
+public abstract class SeriloggerSettings<TClass, THeaderContext> : BaseClass, ISeriloggerSettings
     where THeaderContext : class, IHeaderContext
     where TClass : SeriloggerSettings<TClass, THeaderContext>, ICreateSeriloggerSettings<TClass>
 
@@ -142,7 +142,7 @@ public abstract class SeriloggerSettings<TClass, THeaderContext> : ObservableCla
 
 
 
-    public sealed class Setting( bool value, Func<bool, string> hinter, Action<bool>? action = null ) : ObservableClass
+    public sealed class Setting( bool value, Func<bool, string> hinter, Action<bool>? action = null ) : BaseClass
     {
         private readonly Action<bool>?      __action = action;
         private readonly Func<bool, string> __hinter = hinter;

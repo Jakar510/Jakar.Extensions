@@ -36,7 +36,7 @@ public interface IUserData : IUserName, IUserID, IUserRights, IValidator, IJsonM
 
 
     public static string GetFullName( IUserData    data ) => $"{data.FirstName} {data.LastName}".Trim();
-    public static string GetDescription( IUserData data ) => GetDescription( data.Department, data.Title, data.Company );
+    public static string GetDescription( IUserData data ) => GetDescription(data.Department, data.Title, data.Company);
     public static string GetDescription( scoped in ReadOnlySpan<char> department, scoped in ReadOnlySpan<char> title, scoped in ReadOnlySpan<char> company )
     {
         if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return string.Empty; }
@@ -120,7 +120,7 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
     public TClass With( params ReadOnlySpan<TGroupModel> values );
     public TClass With( IEnumerable<TRoleModel>          values );
     public TClass With( params ReadOnlySpan<TRoleModel>  values );
-    public TClass With( JsonObject?    data );
+    public TClass With( JsonObject?                      data );
     public TClass With<TValue>( TValue value )
         where TValue : IUserData<TID>;
 
@@ -132,7 +132,7 @@ public interface ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel
 
 
 
-public interface ICreateUserModel<TClass, TID> : IUserData<TID>, IEqualComparable<TClass>
+public interface ICreateUserModel<TClass, TID> : IUserData<TID>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : class, ICreateUserModel<TClass, TID>
 {
@@ -175,12 +175,4 @@ public interface IUserRecord<TID> : IUserDetailsModel<TID>
     public DateTimeOffset? LastModified   { get; set; }
     public string          PasswordHash   { get; set; }
     public TID?            SubscriptionID { get; set; }
-}
-
-
-
-public interface ISessionID<out TID> : IDeviceID
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    public TID SessionID { get; }
 }

@@ -323,7 +323,7 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
 
 
 
-    public sealed class Log : BaseClass, JsonModels.IJsonModel
+    public sealed class Log : BaseClass, Json.IJsonModel
     {
         private static readonly    JsonSerializer                __serializer = JsonSerializer.CreateDefault();
         public                     ExceptionDetails?             Exception       { get; init; }
@@ -333,7 +333,7 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
         public                     ActivitySpanId?               SpanId          { get; init; }
         public                     DateTimeOffset                Timestamp       { get; init; }
         public                     ActivityTraceId?              TraceId         { get; init; }
-        [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData  { get; set; }
+        [JsonExtensionData] public JsonObject? AdditionalData  { get; set; }
 
 
         public Log( LogEvent log )
@@ -347,15 +347,15 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
             Exception       = log.Exception?.FullDetails();
             if ( log.Properties.Count <= 0 ) { return; }
 
-            IDictionary<string, JToken?> data = AdditionalData ??= new Dictionary<string, JToken?>( log.Properties.Count );
+            JsonObject data = AdditionalData ??= new Dictionary<string, JsonNode?>( log.Properties.Count );
             foreach ( (string key, LogEventPropertyValue value) in log.Properties ) { data[key] = Convert( value ); }
         }
         public static Log Create( LogEvent log ) => new(log);
 
 
-        private static JObject Convert( IReadOnlyDictionary<ScalarValue, LogEventPropertyValue> elements )
+        private static JsonObject Convert( IReadOnlyDictionary<ScalarValue, LogEventPropertyValue> elements )
         {
-            JObject result = new();
+            JsonObject result = new();
 
             foreach ( (ScalarValue key, LogEventPropertyValue logEventPropertyValue) in elements )
             {
@@ -367,9 +367,9 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
 
             return result;
         }
-        private static JObject Convert( IReadOnlyList<LogEventProperty> properties )
+        private static JsonObject Convert( IReadOnlyList<LogEventProperty> properties )
         {
-            JObject result = new();
+            JsonObject result = new();
 
             foreach ( LogEventProperty property in properties )
             {
@@ -387,22 +387,22 @@ public sealed class RemoteLogger : BackgroundService, ILogEventSink, ISetLogging
 
             foreach ( LogEventPropertyValue element in elements )
             {
-                JToken? token = Convert( element );
+                JsonNode? token = Convert( element );
                 if ( token is not null ) { result.Add( token ); }
             }
 
             return result;
         }
-        private static JToken? Convert( ScalarValue value ) => value.Value is null
+        private static JsonNode? Convert( ScalarValue value ) => value.Value is null
                                                                    ? null
-                                                                   : JToken.FromObject( value.Value, __serializer );
-        private static JToken? Convert( LogEventPropertyValue value ) => value switch
+                                                                   : JsonNode.FromObject( value.Value, __serializer );
+        private static JsonNode? Convert( LogEventPropertyValue value ) => value switch
                                                                          {
                                                                              ScalarValue sv                                      => Convert( sv ),
                                                                              DictionaryValue { Elements.Count : > 0 } dictionary => Convert( dictionary.Elements ),
                                                                              StructureValue { Properties.Count: > 0 } structure  => Convert( structure.Properties ),
                                                                              SequenceValue { Elements.Count   : > 0 } sequence   => Convert( sequence.Elements ),
-                                                                             _                                                   => JToken.FromObject( value.ToString(), __serializer )
+                                                                             _                                                   => JsonNode.FromObject( value.ToString(), __serializer )
                                                                          };
     }
 }

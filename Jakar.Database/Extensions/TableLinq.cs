@@ -7,7 +7,7 @@ namespace Jakar.Database;
 public static class TableLinq
 {
     public static async IAsyncEnumerable<TClass> CreateAsync<TClass>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-        where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+        where TClass : class, ITableRecord<TClass>
     {
         while ( await reader.ReadAsync(token) ) { yield return TClass.Create(reader); }
     }

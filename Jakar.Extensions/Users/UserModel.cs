@@ -10,7 +10,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
+    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
     public const string            EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      string            __company          = string.Empty;

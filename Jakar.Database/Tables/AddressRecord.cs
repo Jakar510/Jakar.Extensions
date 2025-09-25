@@ -13,15 +13,15 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     [property: ProtectedPersonalData] string  PostalCode,
                                     [property: ProtectedPersonalData] string? Address,
                                     bool                                      IsPrimary,
-                                    IDictionary<string, JToken?>?             AdditionalData,
+                                    JsonObject?             AdditionalData,
                                     RecordID<AddressRecord>                   ID,
                                     RecordID<UserRecord>?                     CreatedBy,
                                     DateTimeOffset                            DateCreated,
-                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IAddress<AddressRecord, Guid>, IDbReaderMapping<AddressRecord>
+                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    public        IDictionary<string, JToken?>? AdditionalData { get; set; } = AdditionalData;
+    public        JsonObject? AdditionalData { get; set; } = AdditionalData;
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
                                                           address.Line2,
@@ -88,7 +88,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         string                        country         = reader.GetFieldValue<string>(nameof(Country));
         string                        postalCode      = reader.GetFieldValue<string>(nameof(PostalCode));
         string                        address         = reader.GetFieldValue<string>(nameof(Address));
-        IDictionary<string, JToken?>? additionalData  = reader.GetAdditionalData();
+        JsonObject? additionalData  = reader.GetAdditionalData();
         bool                          isPrimary       = reader.GetFieldValue<bool>(nameof(IsPrimary));
         RecordID<AddressRecord>       id              = RecordID<AddressRecord>.ID(reader);
         RecordID<UserRecord>?         ownerUserID     = RecordID<UserRecord>.CreatedBy(reader);

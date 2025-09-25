@@ -2,6 +2,10 @@
 // 4/2/2024  17:43
 
 
+using TelemetrySpan = Jakar.Extensions.TelemetrySpan;
+
+
+
 namespace Jakar.Database;
 
 
@@ -16,11 +20,11 @@ public sealed record FileRecord( string?              FileName,
                                  string?              FullPath,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
-                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), IDbReaderMapping<FileRecord>, IFileData<Guid>, IFileMetaData
+                                 DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
 {
     public const               string                        TABLE_NAME = "Files";
     public static              string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    [JsonExtensionData] public JsonObject? AdditionalData { get; set; }
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }

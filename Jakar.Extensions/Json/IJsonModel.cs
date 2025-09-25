@@ -4,18 +4,18 @@
 namespace Jakar.Extensions;
 
 
-public interface IJsonModel<TValue>
-    where TValue : IJsonModel<TValue>
+public interface IJsonModel<TSelf> : IEqualComparable<TSelf>
+    where TSelf : IJsonModel<TSelf>
 {
-    public abstract static JsonSerializerContext  JsonContext   { get; }
-    public abstract static JsonTypeInfo<TValue>   JsonTypeInfo  { get; }
-    public abstract static JsonTypeInfo<TValue[]> JsonArrayInfo { get; }
+    public abstract static JsonSerializerContext JsonContext   { get; }
+    public abstract static JsonTypeInfo<TSelf>   JsonTypeInfo  { get; }
+    public abstract static JsonTypeInfo<TSelf[]> JsonArrayInfo { get; }
 
 
     // public                 void   Serialize( ref    Utf8JsonWriter writer );
-    // public abstract static TValue Parse( scoped ref Utf8JsonReader reader );
+    // public abstract static TSelf Parse( scoped ref Utf8JsonReader reader );
 
 
-    public abstract static bool   TryFromJson( string? json, [NotNullWhen(true)] out TValue? result );
-    public abstract static TValue FromJson( string     json );
+    public abstract static bool  TryFromJson( string? json, [NotNullWhen(true)] out TSelf? result );
+    public abstract static TSelf FromJson( string     json );
 }

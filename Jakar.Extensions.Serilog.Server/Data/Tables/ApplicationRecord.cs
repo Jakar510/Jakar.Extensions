@@ -2,7 +2,7 @@
 
 
 [Table( TABLE_NAME )]
-public record ApplicationRecord( string ApplicationName, RecordID<UserRecord>? CreatedBy, RecordID<ApplicationRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ApplicationRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), IDbReaderMapping<ApplicationRecord>
+public record ApplicationRecord( string ApplicationName, RecordID<UserRecord>? CreatedBy, RecordID<ApplicationRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ApplicationRecord>( in CreatedBy, in ID, in DateCreated, in LastModified ), ITableRecord<ApplicationRecord>
 {
     private const string TABLE_NAME = "Applications";
     public static string TableName => TABLE_NAME;

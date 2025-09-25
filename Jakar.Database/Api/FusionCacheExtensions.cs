@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/24/2025  07:01
 
-using ZiggyCreatures.Caching.Fusion;
-
-
-
 namespace Jakar.Database;
 
 

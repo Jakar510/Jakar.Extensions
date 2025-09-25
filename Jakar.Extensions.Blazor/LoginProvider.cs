@@ -22,7 +22,7 @@ public interface ILoginUserState : ICascadingValueName, INotifyPropertyChanged, 
 
 
 
-public class LoginUserState( HttpContext context, IAuthenticationService authentication ) : ObservableClass, ILoginUserState
+public class LoginUserState( HttpContext context, IAuthenticationService authentication ) : BaseClass, ILoginUserState
 {
     public const       string                    KEY             = nameof(LoginUserState);
     protected readonly HttpContext               _context        = context;

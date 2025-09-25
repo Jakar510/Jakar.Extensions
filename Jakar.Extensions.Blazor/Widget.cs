@@ -28,7 +28,7 @@ public abstract class Widget : ComponentBase, IWidget
 
 
 
-public class BlazorSetting<T>( T value ) : ObservableClass
+public class BlazorSetting<T>( T value ) : BaseClass
 {
     private T __value = value;
     public T Value

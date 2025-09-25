@@ -6,12 +6,12 @@ namespace Jakar.Database;
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
 public sealed class SqlCache<TClass>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>
 {
     private const           string                               SPACER          = ",      \n";
-    private static readonly string                               __createdBy     = nameof(IOwnedTableRecord.CreatedBy).ToSnakeCase();
-    private static readonly string                               __dateCreated   = nameof(IRecordPair.DateCreated).ToSnakeCase();
-    private static readonly string                               __id            = nameof(IRecordPair.ID).ToSnakeCase();
+    private static readonly string                               __createdBy     = nameof(ICreatedBy.CreatedBy).ToSnakeCase();
+    private static readonly string                               __dateCreated   = nameof(IDateCreated.DateCreated).ToSnakeCase();
+    private static readonly string                               __id            = nameof(IDateCreated.ID).ToSnakeCase();
     private static readonly FrozenDictionary<string, Descriptor> __sqlProperties = Descriptor.CreateMapping<TClass>();
 
 
@@ -109,7 +109,7 @@ public sealed class SqlCache<TClass>
                        WHERE {{__id}} = '{0}';
                        """;
 
-        return new SqlCommand(string.Format(sql, id.value.ToString()));
+        return new SqlCommand(string.Format(sql, id.Value.ToString()));
     }
     public SqlCommand Get( IEnumerable<RecordID<TClass>> ids )
     {
@@ -172,7 +172,7 @@ public sealed class SqlCache<TClass>
     {
         string sql = $"""
                       DELETE FROM {TClass.TableName}
-                      WHERE {__id} = '{id.value}';
+                      WHERE {__id} = '{id.Value}';
                       """;
 
         return new SqlCommand(sql);
@@ -288,5 +288,5 @@ public sealed class SqlCache<TClass>
 
     public static IEnumerable<string> GetKeyValuePairs( DynamicParameters parameters ) => parameters.ParameterNames.Select(GetKeyValuePair);
     public static string              GetKeyValuePair( string             columnName ) => __sqlProperties[columnName].KeyValuePair;
-    public static Guid                GetValue( RecordID<TClass>          id )         => id.value;
+    public static Guid                GetValue( RecordID<TClass>          id )         => id.Value;
 }

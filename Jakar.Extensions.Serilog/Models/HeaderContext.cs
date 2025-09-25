@@ -47,7 +47,7 @@ public interface IHeaderContext<TImageSource> : IHeaderContext
 
 
 
-public class HeaderContext<TImageSource> : ObservableClass, IHeaderContext<TImageSource>
+public class HeaderContext<TImageSource> : BaseClass, IHeaderContext<TImageSource>
 {
     private bool               __isCollapsable;
     private bool               __isExpanded;

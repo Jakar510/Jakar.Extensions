@@ -4,7 +4,8 @@
 namespace Jakar.Extensions;
 
 
-public sealed class ParameterDetails : BaseClass<ParameterDetails>, IJsonModel<ParameterDetails>, IEqualComparable<ParameterDetails>
+[Serializable]
+public sealed class ParameterDetails : BaseClass<ParameterDetails>, IJsonModel<ParameterDetails>
 {
     public static JsonTypeInfo<ParameterDetails[]> JsonArrayInfo   => JakarExtensionsContext.Default.ParameterDetailsArray;
     public static JsonSerializerContext            JsonContext     => JakarExtensionsContext.Default;

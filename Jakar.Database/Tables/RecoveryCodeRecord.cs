@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<RecoveryCodeRecord>
+public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
@@ -139,7 +139,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, IDbReaderMapping<UserRecoveryCodeRecord>
+public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ITableRecord<UserRecoveryCodeRecord>
 {
     public const  string TABLE_NAME = "UserRecoveryCodes";
     public static string TableName => TABLE_NAME;

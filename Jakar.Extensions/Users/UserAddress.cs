@@ -19,7 +19,7 @@ public interface IAddress<out TID> : IUniqueID<TID>, IJsonModel
 
 
 
-public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IEqualComparable<TClass>
+public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IJsonModel<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TClass : class, IAddress<TClass, TID>
 {

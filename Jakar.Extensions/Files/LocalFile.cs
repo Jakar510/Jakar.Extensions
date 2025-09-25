@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IJsonModel<LocalFile>
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     public readonly              string   FullPath     = info.FullName;

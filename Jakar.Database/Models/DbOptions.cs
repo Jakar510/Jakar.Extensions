@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/16/2022  5:46 PM
 
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Logs;
-using Serilog.Core;
-using ZiggyCreatures.Caching.Fusion;
 using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
 
@@ -14,7 +10,7 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
-public sealed class DbOptions : IOptions<DbOptions>, IDbOptions
+public sealed class DbOptions : IOptions<DbOptions>
 {
     public const           string         AUTHENTICATION_TYPE = JwtBearerDefaults.AuthenticationScheme;
     public const           int            COMMAND_TIMEOUT     = 300;

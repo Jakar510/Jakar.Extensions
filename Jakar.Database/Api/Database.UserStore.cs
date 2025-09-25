@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Primitives;
-
-
-#pragma warning disable IDE0060
+﻿#pragma warning disable IDE0060
 #pragma warning disable CA1822
 
 
@@ -35,9 +32,9 @@ public partial class Database
     #region User Auth Providers
 
     public IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TClass>( TClass record, [EnumeratorCancellation] CancellationToken token )
-        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => this.TryCall(GetLoginsAsync, record, token);
+        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => this.TryCall(GetLoginsAsync, record, token);
     public virtual IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TClass>( NpgsqlConnection connection, DbTransaction transaction, TClass record, [EnumeratorCancellation] CancellationToken token )
-        where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass> => UserLogins.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
+        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => UserLogins.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
 
 
     public ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall(AddLoginAsync, user, login, token);
@@ -49,7 +46,7 @@ public partial class Database
         {
             Error  provider = Error.NotFound(nameof(UserLoginProviderRecord.LoginProvider), login.LoginProvider);
             Error  key      = Error.NotFound(nameof(UserLoginProviderRecord.ProviderKey),   login.ProviderKey);
-            Error  userID   = Error.NotFound(nameof(UserLoginProviderRecord.CreatedBy),     user.ID.value.ToString());
+            Error  userID   = Error.NotFound(nameof(UserLoginProviderRecord.CreatedBy),     user.ID.Value.ToString());
             Errors errors   = Errors.Create(provider, key, userID);
             return ErrorOrResult<UserLoginProviderRecord>.Create(errors);
         }
@@ -80,7 +77,7 @@ public partial class Database
     }
 
 
-    public         ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord   user,       CancellationToken token )                                                 => this.TryCall(GetAuthenticatorKeyAsync, user, token);
+    public         ValueTask<string?> GetAuthenticatorKeyAsync( UserRecord       user,       CancellationToken token )                                                 => this.TryCall(GetAuthenticatorKeyAsync, user, token);
     public virtual ValueTask<string?> GetAuthenticatorKeyAsync( NpgsqlConnection connection, DbTransaction     transaction, UserRecord user, CancellationToken token ) => new(user.AuthenticatorKey);
 
 
@@ -218,7 +215,7 @@ public partial class Database
             : await Users.Get(connection, transaction, nameof(UserRecord.UserName), userID, token);
 
 
-    public static readonly StringValues                         UserFullName = new([nameof(UserRecord.UserName), nameof(UserRecord.FullName)]);
+    public static readonly StringTags                           UserFullName = new([nameof(UserRecord.UserName), nameof(UserRecord.FullName)]);
     public                 ValueTask<ErrorOrResult<UserRecord>> FindByNameAsync( string normalizedUserName, CancellationToken token ) => this.TryCall(FindByNameAsync, normalizedUserName, token);
     public virtual async ValueTask<ErrorOrResult<UserRecord>> FindByNameAsync( NpgsqlConnection connection, DbTransaction transaction, string normalizedUserName, CancellationToken token )
     {
@@ -232,7 +229,7 @@ public partial class Database
     }
 
 
-    public       ValueTask<UserRecord?> FindByEmailAsync( string       email,      CancellationToken token )                                              => this.TryCall(FindByEmailAsync, email, token);
+    public       ValueTask<UserRecord?> FindByEmailAsync( string           email,      CancellationToken token )                                              => this.TryCall(FindByEmailAsync, email, token);
     public async ValueTask<UserRecord?> FindByEmailAsync( NpgsqlConnection connection, DbTransaction     transaction, string email, CancellationToken token ) => await Users.Get(connection, transaction, nameof(UserRecord.Email), email, token);
 
     #endregion
@@ -245,7 +242,7 @@ public partial class Database
     public virtual async ValueTask<IdentityResult> CreateAsync( NpgsqlConnection connection, DbTransaction transaction, UserRecord record, CancellationToken token )
     {
         ErrorOrResult<UserRecord> user = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(record.UserName), token);
-        if ( user.HasValue ) { return IdentityResult.Failed(new IdentityError { Description = Settings.UserExists }); }
+        if ( user.HasValue ) { return IdentityResult.Failed(new IdentityError { Description = Options.UserExists }); }
 
         await Users.Insert(connection, transaction, record, token);
         return IdentityResult.Success;
@@ -307,11 +304,11 @@ public partial class Database
 
     #region Claims
 
-    public         ValueTask AddClaimsAsync( UserRecord   user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall(AddClaimsAsync, user, claims, token);
+    public         ValueTask AddClaimsAsync( UserRecord       user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall(AddClaimsAsync, user, claims, token);
     public virtual ValueTask AddClaimsAsync( NpgsqlConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
-    public         ValueTask<Claim[]> GetClaimsAsync( UserRecord   user,       ClaimType      types,       CancellationToken token )                                          => this.Call(GetClaimsAsync, user, types, token);
+    public         ValueTask<Claim[]> GetClaimsAsync( UserRecord       user,       ClaimType      types,       CancellationToken token )                                          => this.Call(GetClaimsAsync, user, types, token);
     public virtual ValueTask<Claim[]> GetClaimsAsync( NpgsqlConnection connection, DbTransaction? transaction, UserRecord        user, ClaimType types, CancellationToken token ) => user.GetUserClaims(connection, transaction, this, types, token);
 
 
@@ -322,11 +319,11 @@ public partial class Database
     }
 
 
-    public         ValueTask RemoveClaimsAsync( UserRecord   user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall(RemoveClaimsAsync, user, claims, token);
+    public         ValueTask RemoveClaimsAsync( UserRecord       user,       IEnumerable<Claim> claims,      CancellationToken token )                                                    => this.TryCall(RemoveClaimsAsync, user, claims, token);
     public virtual ValueTask RemoveClaimsAsync( NpgsqlConnection connection, DbTransaction      transaction, UserRecord        user, IEnumerable<Claim> claims, CancellationToken token ) => ValueTask.CompletedTask;
 
 
-    public         ValueTask ReplaceClaimAsync( UserRecord   user,       Claim         claim,       Claim      newClaim, CancellationToken token )                                          => this.TryCall(ReplaceClaimAsync, user, claim, newClaim, token);
+    public         ValueTask ReplaceClaimAsync( UserRecord       user,       Claim         claim,       Claim      newClaim, CancellationToken token )                                          => this.TryCall(ReplaceClaimAsync, user, claim, newClaim, token);
     public virtual ValueTask ReplaceClaimAsync( NpgsqlConnection connection, DbTransaction transaction, UserRecord user,     Claim             claim, Claim newClaim, CancellationToken token ) => ValueTask.CompletedTask;
 
     #endregion

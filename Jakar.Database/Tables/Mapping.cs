@@ -2,9 +2,9 @@
 
 
 public interface ICreateMapping<out TSelf, TKey, TValue>
-    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
-    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
-    where TSelf : class, ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
+    where TValue : class, ITableRecord<TValue>
+    where TKey : class, ITableRecord<TKey>
+    where TSelf : class, ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>
 {
     public abstract static TSelf Create( TKey           key, TValue           value );
     public abstract static TSelf Create( RecordID<TKey> key, RecordID<TValue> value );
@@ -14,9 +14,9 @@ public interface ICreateMapping<out TSelf, TKey, TValue>
 
 [Serializable]
 public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, RecordID<TValue> ValueID, RecordID<TSelf> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : TableRecord<TSelf>(in ID, in DateCreated, in LastModified)
-    where TValue : class, ITableRecord<TValue>, IDbReaderMapping<TValue>
-    where TKey : class, ITableRecord<TKey>, IDbReaderMapping<TKey>
-    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, IDbReaderMapping<TSelf>
+    where TValue : class, ITableRecord<TValue>
+    where TKey : class, ITableRecord<TKey>
+    where TSelf : Mapping<TSelf, TKey, TValue>, ICreateMapping<TSelf, TKey, TValue>, ITableRecord<TSelf>
 {
     private WeakReference<TKey>?   __owner;
     private WeakReference<TValue>? __value;
@@ -109,7 +109,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     public static async ValueTask TryAdd( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
     {
         DynamicParameters parameters = GetDynamicParameters(key);
-        string            ids        = string.Join(", ", values.Select(static x => x.value));
+        string            ids        = string.Join(", ", values.Select(static x => x.Value));
 
         string sql = $"""
                       SELECT * FROM {TValue.TableName}
@@ -236,7 +236,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
     {
-        string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join(',', values.Select(static x => x.value))} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
+        string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join(',', values.Select(static x => x.Value))} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
 
         await foreach ( TSelf record in selfTable.Where(connection, transaction, sql, GetDynamicParameters(key), token) ) { await selfTable.Delete(connection, transaction, record.ID, token); }
     }

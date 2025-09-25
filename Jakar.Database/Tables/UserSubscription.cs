@@ -12,7 +12,7 @@ public interface IUserSubscription : IUniqueID<Guid>
 
 
 public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExpires, RecordID<TClass> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TClass>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
-    where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass>
+    where TClass : UserSubscription<TClass>
 {
     [Pure]
     public override DynamicParameters ToDynamicParameters()

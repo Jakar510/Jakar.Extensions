@@ -29,7 +29,7 @@ public sealed partial class ExperimentContext : JsonSerializerContext;
 
 
 
-public sealed record Node : BaseRecord<Node>, IEqualComparable<Node>, IJsonModel<Node>
+public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 {
     private static readonly Node[]                __empty = [];
     public static           JsonSerializerContext JsonContext   => ExperimentContext.Default;
@@ -92,7 +92,7 @@ public sealed record Node : BaseRecord<Node>, IEqualComparable<Node>, IJsonModel
 
 
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
-public sealed class TestJson : BaseClass<TestJson>, IEqualComparable<TestJson>, IJsonModel<TestJson>
+public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
 {
     public Email email         = new("bite@me.com");
     public Error mutableError  = Error.InternalServerError();

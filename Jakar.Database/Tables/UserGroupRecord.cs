@@ -5,7 +5,7 @@ namespace Jakar.Database;
 
 
 [Serializable, Table(TABLE_NAME)]
-public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, IDbReaderMapping<UserGroupRecord>
+public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>, ITableRecord<UserGroupRecord>
 {
     public const  string TABLE_NAME = "user_groups";
     public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }

@@ -10,7 +10,7 @@ namespace Jakar.Extensions.UserLong;
 
 
 [Serializable]
-public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IJsonModel<UserAddress>
+public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>
 {
     public static JsonSerializerContext       JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsLongContext.Default.UserAddress;
@@ -60,7 +60,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IJsonModel<GroupModel>
+public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
@@ -83,7 +83,7 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IJsonModel<RoleModel>
+public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsLongContext.Default.RoleModel;
@@ -107,7 +107,7 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
 
 [Serializable]
 [method: SetsRequiredMembers]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IJsonModel<FileData>, IEqualComparable<FileData>
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsLongContext.Default.FileData;
@@ -133,7 +133,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<long>, IEqualComparable<CurrentLocation>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<long>, IJsonModel<CurrentLocation>
 {
     public static JsonSerializerContext           JsonContext             => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsLongContext.Default.CurrentLocation;
@@ -292,7 +292,7 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IJsonModel<UserModel>
+public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel> 
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.UserModel;
@@ -328,7 +328,7 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IJsonModel<CreateUserModel>
+public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>
 {
     public static JsonSerializerContext           JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.CreateUserModel;
@@ -421,5 +421,5 @@ public class UserDevice : DeviceInformation, IUserDevice<long>
         IP        = device.IP;
         TimeStamp = device.TimeStamp;
     }
-    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, string deviceID, long id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
+    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, Guid deviceID, long id = 0 ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
 }

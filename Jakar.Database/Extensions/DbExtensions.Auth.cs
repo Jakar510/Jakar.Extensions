@@ -1,8 +1,4 @@
-﻿using ZLinq;
-
-
-
-namespace Jakar.Database;
+﻿namespace Jakar.Database;
 
 
 // TODO: asp.net authorization dapper

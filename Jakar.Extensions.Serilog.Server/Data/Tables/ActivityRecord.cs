@@ -5,7 +5,7 @@ namespace Jakar.Extensions.Serilog.Server.Data.Tables;
 
 
 [Table(TABLE_NAME)]
-public record ActivityRecord( string ApplicationName, RecordID<ApplicationRecord>? ApplicationID, RecordID<UserRecord>? CreatedBy, RecordID<ActivityRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ActivityRecord>(CreatedBy, ID, DateCreated, LastModified), IDbReaderMapping<ActivityRecord>
+public record ActivityRecord( string ApplicationName, RecordID<ApplicationRecord>? ApplicationID, RecordID<UserRecord>? CreatedBy, RecordID<ActivityRecord> ID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<ActivityRecord>(CreatedBy, ID, DateCreated, LastModified), ITableRecord<ActivityRecord>
 {
     private const string TABLE_NAME = "Applications";
     public static string TableName => TABLE_NAME;

@@ -8,7 +8,7 @@ namespace Jakar.Database;
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
 public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, CancellationToken token = default ) : IAsyncEnumerator<RecordID<TClass>>, IAsyncEnumerable<RecordID<TClass>>
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+    where TClass : class, ITableRecord<TClass>
 {
     private readonly DbTable<TClass>      __table = table;
     private          CancellationToken    __token = token;
@@ -47,7 +47,7 @@ public sealed class AsyncKeyGenerator<TClass>( DbTable<TClass> table, Cancellati
             __generator = default;
         }
 
-        return Current.value != Guid.Empty;
+        return Current.Value != Guid.Empty;
     }
 
 

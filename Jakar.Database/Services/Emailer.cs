@@ -1,4 +1,5 @@
 using MailKit.Net.Smtp;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 
 
@@ -42,7 +43,7 @@ public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configura
 
 
     protected      EmailSettings _Settings => _settings ??= _options.GetSettings(_configuration);
-    public virtual Uri           Domain    => _dataBase.Settings.Domain;
+    public virtual Uri           Domain    => _dataBase.Options.Domain;
 
 
     public static Emailer Create( IServiceProvider provider )

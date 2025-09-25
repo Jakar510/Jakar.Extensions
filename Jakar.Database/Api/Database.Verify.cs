@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:53 PM
 
-using Status = Jakar.Extensions.Status;
-
-
-
 namespace Jakar.Database;
 
 
@@ -22,7 +18,7 @@ public abstract partial class Database
 {
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( NpgsqlConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(record.SubscriptionExpires);
     public virtual ValueTask<ErrorOrResult<TClass>> TryGetSubscription<TClass>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
-        where TClass : UserSubscription<TClass>, IDbReaderMapping<TClass> => default;
+        where TClass : UserSubscription<TClass> => default;
 
 
     /// <summary> </summary>
@@ -121,7 +117,7 @@ public abstract partial class Database
         where TUser : class, IUserData<Guid>
     {
         UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
-        if ( record is not null ) { return Error.Create(Status.Conflict, $"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}"); }
+        if ( record is not null ) { return Error.Conflict($"{nameof(UserRecord.UserName)} is already taken. Chose another {nameof(request.UserName)}"); }
 
         record = CreateNewUser(request);
         record = await Users.Insert(connection, transaction, record, token);

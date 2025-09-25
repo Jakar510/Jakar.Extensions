@@ -4,56 +4,58 @@
 namespace Jakar.Database;
 
 
-public interface IRecordPair : IUniqueID<Guid>
+public interface IUniqueID : IUniqueID<Guid>;
+
+
+
+public interface IDateCreated : IUniqueID
 {
     public DateTimeOffset DateCreated { get; }
 }
 
 
 
-public interface ITableRecord : IRecordPair
+public interface ILastModified : IDateCreated
 {
     public DateTimeOffset? LastModified { get; }
 }
 
 
 
-public interface IOwnedTableRecord : ITableRecord
+public interface ICreatedBy : ILastModified
 {
     public RecordID<UserRecord>? CreatedBy { get; }
 }
 
 
 
-public interface ITableRecord<TClass> : ITableRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
-    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
+public interface IRecordPair<TClass> : ILastModified
+    where TClass : IRecordPair<TClass>, ITableRecord<TClass>
 {
-    Guid IUniqueID<Guid>.       ID => ID.value;
+    Guid IUniqueID<Guid>.       ID => ID.Value;
     public new RecordID<TClass> ID { get; }
 
-
-    [Pure] public RecordPair<TClass> ToPair();
-    [Pure] public UInt128            GetHash();
-    public        TClass             NewID( RecordID<TClass> id );
+    [Pure] public UInt128 GetHash();
 }
 
 
 
-public interface IDbReaderMapping<TClass> : ITableRecord<TClass>, IEqualComparable<TClass>
-    where TClass : class, IDbReaderMapping<TClass>, IRecordPair
+public interface ITableRecord<TClass> : IRecordPair<TClass>, IEqualComparable<TClass>, IJsonModel<TClass>
+    where TClass : ITableRecord<TClass>
 {
     public abstract static        string            TableName { [Pure] get; }
     [Pure] public abstract static TClass            Create( DbDataReader reader );
     [Pure] public                 DynamicParameters ToDynamicParameters();
 
-    // [Pure] public abstract static IAsyncEnumerable<TClass> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default );
+    [Pure] public RecordPair<TClass> ToPair();
+    public        TClass             NewID( RecordID<TClass> id );
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord<TClass>, ITableRecord<TClass>
-    where TClass : TableRecord<TClass>, IDbReaderMapping<TClass>
+public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord<TClass>, IRecordPair<TClass>
+    where TClass : TableRecord<TClass>, ITableRecord<TClass>
 {
     protected internal static readonly PropertyInfo[]   Properties    = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
     protected                          DateTimeOffset?  _lastModified = LastModified;
@@ -142,8 +144,8 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>(in ID, in DateCreated, in LastModified), IOwnedTableRecord
-    where TClass : OwnedTableRecord<TClass>, IDbReaderMapping<TClass>
+public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>(in ID, in DateCreated, in LastModified), ICreatedBy
+    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
 
