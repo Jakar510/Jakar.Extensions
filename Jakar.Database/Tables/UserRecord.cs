@@ -1,52 +1,9 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
-[SuppressMessage("ReSharper", "InconsistentNaming")]
-public sealed record UserRecord( string                UserName,
-                                 string                FirstName,
-                                 string                LastName,
-                                 string                FullName,
-                                 string                Gender,
-                                 string                Description,
-                                 string                Company,
-                                 string                Department,
-                                 string                Title,
-                                 string                Website,
-                                 SupportedLanguage     PreferredLanguage,
-                                 string                Email,
-                                 bool                  IsEmailConfirmed,
-                                 string                PhoneNumber,
-                                 string                Ext,
-                                 bool                  IsPhoneNumberConfirmed,
-                                 string                AuthenticatorKey,
-                                 bool                  IsTwoFactorEnabled,
-                                 bool                  IsActive,
-                                 bool                  IsDisabled,
-                                 Guid?                 SubscriptionID,
-                                 DateTimeOffset?       SubscriptionExpires,
-                                 DateTimeOffset?       LastBadAttempt,
-                                 DateTimeOffset?       LastLogin,
-                                 int?                  BadLogins,
-                                 bool                  IsLocked,
-                                 DateTimeOffset?       LockDate,
-                                 DateTimeOffset?       LockoutEnd,
-                                 string                RefreshToken,
-                                 DateTimeOffset?       RefreshTokenExpiryTime,
-                                 Guid?                 SessionID,
-                                 string                SecurityStamp,
-                                 string                ConcurrencyStamp,
-                                 string                Rights,
-                                 RecordID<UserRecord>? EscalateTo,
-                                 JsonObject?           AdditionalData,
-                                 string                PasswordHash,
-                                 RecordID<FileRecord>? ImageID,
-                                 RecordID<UserRecord>  ID,
-                                 RecordID<UserRecord>? CreatedBy,
-                                 DateTimeOffset        DateCreated,
-                                 DateTimeOffset?       LastModified = null ) : OwnedTableRecord<UserRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord
+[Serializable, Table(TABLE_NAME), SuppressMessage("ReSharper", "InconsistentNaming")]
+public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord
 {
-    public override        int      GetHashCode() => HashCode.Combine(base.GetHashCode(), UserName, FullName, FirstName, LastName);
     public const           int      DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const           int      ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
     public const           int      MAX_PASSWORD_SIZE                   = 250;
@@ -54,51 +11,140 @@ public sealed record UserRecord( string                UserName,
     public static readonly TimeSpan DefaultLockoutTime                  = TimeSpan.FromHours(6);
 
 
-    public static                                                                                             string      TableName              { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_TEXT_CAPACITY), JsonExtensionData] public override JsonObject? AdditionalData         { get => _additionalData; set => _additionalData = value; } = AdditionalData;
-    [StringLength(                       Constants.ANSI_CAPACITY)]                            public          string      AuthenticatorKey       { get;                    set; }                            = AuthenticatorKey;
-    public                                                                                                    int?        BadLogins              { get;                    set; }                            = BadLogins;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public                                  string      Company                { get;                    set; }                            = Company;
-    [StringLength(                       Constants.ANSI_CAPACITY)]    public                                  string      ConcurrencyStamp       { get;                    set; }                            = ConcurrencyStamp;
-    Guid? ICreatedByUser<Guid>.                                                                                           CreatedBy              => CreatedBy?.Value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Department             { get; set; } = Department;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Description            { get; set; } = Description;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Email                  { get; set; } = Email;
-    public                                                                   RecordID<UserRecord>?                        EscalateTo             { get; set; } = EscalateTo;
-    Guid? IEscalateToUser<Guid>.                                                                                          EscalateTo             => EscalateTo?.Value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Ext                    { get; set; } = Ext;
-    [ProtectedPersonalData, StringLength(2000)]                       public string                                       FirstName              { get; set; } = FirstName;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       FullName               { get; set; } = FullName;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Gender                 { get; set; } = Gender;
-    Guid? IImageID<Guid>.                                                                                                 ImageID                => ImageID?.Value;
-    public   RecordID<FileRecord>?                                                                                        ImageID                { get; set; } = ImageID;
-    public   bool                                                                                                         IsActive               { get; set; } = IsActive;
-    public   bool                                                                                                         IsDisabled             { get; set; } = IsDisabled;
-    public   bool                                                                                                         IsEmailConfirmed       { get; set; } = IsEmailConfirmed;
-    public   bool                                                                                                         IsLocked               { get; set; } = IsLocked;
-    public   bool                                                                                                         IsPhoneNumberConfirmed { get; set; } = IsPhoneNumberConfirmed;
-    public   bool                                                                                                         IsTwoFactorEnabled     { get; set; } = IsTwoFactorEnabled;
-    internal bool                                                                                                         IsValid                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
-    bool IValidator.                                                                                                      IsValid                => IsValid;
-    public DateTimeOffset?                                                                                                LastBadAttempt         { get;                  set; } = LastBadAttempt;
-    public DateTimeOffset?                                                                                                LastLogin              { get;                  set; } = LastLogin;
-    DateTimeOffset? IUserRecord<Guid>.                                                                                    LastModified           { get => _lastModified; set => _lastModified = value; }
-    [ProtectedPersonalData, StringLength(2000)] public                        string                                      LastName               { get;                  set; } = LastName;
-    public                                                                    DateTimeOffset?                             LockDate               { get;                  set; } = LockDate;
-    public                                                                    DateTimeOffset?                             LockoutEnd             { get;                  set; } = LockoutEnd;
-    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE)] public string                                      PasswordHash           { get;                  set; } = PasswordHash;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)]  public string                                      PhoneNumber            { get;                  set; } = PhoneNumber;
-    [StringLength(                       512)]                         public SupportedLanguage                           PreferredLanguage      { get;                  set; } = PreferredLanguage;
-    [StringLength(                       Constants.ANSI_CAPACITY)]     public string                                      RefreshToken           { get;                  set; } = RefreshToken;
-    public                                                                    DateTimeOffset?                             RefreshTokenExpiryTime { get;                  set; } = RefreshTokenExpiryTime;
-    [StringLength(IUserRights.MAX_SIZE)]    public                            string                                      Rights                 { get;                  set; } = Rights;
-    [StringLength(Constants.ANSI_CAPACITY)] public                            string                                      SecurityStamp          { get;                  set; } = SecurityStamp;
-    public                                                                    Guid?                                       SessionID              { get;                  set; } = SessionID;
-    public                                                                    DateTimeOffset?                             SubscriptionExpires    { get;                  set; } = SubscriptionExpires;
-    public                                                                    Guid?                                       SubscriptionID         { get;                  set; } = SubscriptionID;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public  string                                      Title                  { get;                  set; } = Title;
-    Guid IUserID<Guid>.                                                                                                   UserID                 => ID.Value;
-    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                       Website                { get; set; } = Website;
+    public static                                                                                             JsonTypeInfo<UserRecord[]> JsonArrayInfo          => JakarDatabaseContext.Default.UserRecordArray;
+    public static                                                                                             JsonSerializerContext      JsonContext            => JakarDatabaseContext.Default;
+    public static                                                                                             JsonTypeInfo<UserRecord>   JsonTypeInfo           => JakarDatabaseContext.Default.UserRecord;
+    public static                                                                                             string                     TableName              { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_TEXT_CAPACITY), JsonExtensionData] public override JsonObject?                AdditionalData         { get => _additionalData; set => _additionalData = value; }
+    [StringLength(                       Constants.ANSI_CAPACITY)]                            public          string                     AuthenticatorKey       { get;                    set; }
+    public                                                                                                    int?                       BadLogins              { get;                    set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public                                  string                     Company                { get;                    set; }
+    [StringLength(                       Constants.ANSI_CAPACITY)]    public                                  string                     ConcurrencyStamp       { get;                    set; }
+    Guid? ICreatedByUser<Guid>.                                                                                                          CreatedBy              => CreatedBy?.Value;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Department             { get; set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Description            { get; set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Email                  { get; set; }
+    public                                                                   RecordID<UserRecord>?                                       EscalateTo             { get; set; }
+    Guid? IEscalateToUser<Guid>.                                                                                                         EscalateTo             => EscalateTo?.Value;
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Ext                    { get; set; }
+    [ProtectedPersonalData, StringLength(2000)]                       public string                                                      FirstName              { get; set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      FullName               { get; set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Gender                 { get; set; }
+    Guid? IImageID<Guid>.                                                                                                                ImageID                => ImageID?.Value;
+    public   RecordID<FileRecord>?                                                                                                       ImageID                { get; set; }
+    public   bool                                                                                                                        IsActive               { get; set; }
+    public   bool                                                                                                                        IsDisabled             { get; set; }
+    public   bool                                                                                                                        IsEmailConfirmed       { get; set; }
+    public   bool                                                                                                                        IsLocked               { get; set; }
+    public   bool                                                                                                                        IsPhoneNumberConfirmed { get; set; }
+    public   bool                                                                                                                        IsTwoFactorEnabled     { get; set; }
+    internal bool                                                                                                                        IsValid                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
+    bool IValidator.                                                                                                                     IsValid                => IsValid;
+    public DateTimeOffset?                                                                                                               LastBadAttempt         { get;                  set; }
+    public DateTimeOffset?                                                                                                               LastLogin              { get;                  set; }
+    DateTimeOffset? IUserRecord<Guid>.                                                                                                   LastModified           { get => _lastModified; set => _lastModified = value; }
+    [ProtectedPersonalData, StringLength(2000)] public                        string                                                     LastName               { get;                  set; }
+    public                                                                    DateTimeOffset?                                            LockDate               { get;                  set; }
+    public                                                                    DateTimeOffset?                                            LockoutEnd             { get;                  set; }
+    [StringLength(                       ENCRYPTED_MAX_PASSWORD_SIZE)] public string                                                     PasswordHash           { get;                  set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)]  public string                                                     PhoneNumber            { get;                  set; }
+    [StringLength(                       512)]                         public SupportedLanguage                                          PreferredLanguage      { get;                  set; }
+    [StringLength(                       Constants.ANSI_CAPACITY)]     public string                                                     RefreshToken           { get;                  set; }
+    public                                                                    DateTimeOffset?                                            RefreshTokenExpiryTime { get;                  set; }
+    [StringLength(IUserRights.MAX_SIZE)]    public                            string                                                     Rights                 { get;                  set; }
+    [StringLength(Constants.ANSI_CAPACITY)] public                            string                                                     SecurityStamp          { get;                  set; }
+    public                                                                    Guid?                                                      SessionID              { get;                  set; }
+    public                                                                    DateTimeOffset?                                            SubscriptionExpires    { get;                  set; }
+    public                                                                    Guid?                                                      SubscriptionID         { get;                  set; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public  string                                                     Title                  { get;                  set; }
+    Guid IUserID<Guid>.                                                                                                                  UserID                 => ID.Value;
+    public                                                                   string                                                      UserName               { get; init; }
+    [ProtectedPersonalData, StringLength(Constants.UNICODE_CAPACITY)] public string                                                      Website                { get; set; }
+
+
+    public UserRecord( string                UserName,
+                       string                FirstName,
+                       string                LastName,
+                       string                FullName,
+                       string                Gender,
+                       string                Description,
+                       string                Company,
+                       string                Department,
+                       string                Title,
+                       string                Website,
+                       SupportedLanguage     PreferredLanguage,
+                       string                Email,
+                       bool                  IsEmailConfirmed,
+                       string                PhoneNumber,
+                       string                Ext,
+                       bool                  IsPhoneNumberConfirmed,
+                       string                AuthenticatorKey,
+                       bool                  IsTwoFactorEnabled,
+                       bool                  IsActive,
+                       bool                  IsDisabled,
+                       Guid?                 SubscriptionID,
+                       DateTimeOffset?       SubscriptionExpires,
+                       DateTimeOffset?       LastBadAttempt,
+                       DateTimeOffset?       LastLogin,
+                       int?                  BadLogins,
+                       bool                  IsLocked,
+                       DateTimeOffset?       LockDate,
+                       DateTimeOffset?       LockoutEnd,
+                       string                RefreshToken,
+                       DateTimeOffset?       RefreshTokenExpiryTime,
+                       Guid?                 SessionID,
+                       string                SecurityStamp,
+                       string                ConcurrencyStamp,
+                       string                Rights,
+                       RecordID<UserRecord>? EscalateTo,
+                       JsonObject?           AdditionalData,
+                       string                PasswordHash,
+                       RecordID<FileRecord>? ImageID,
+                       RecordID<UserRecord>  ID,
+                       RecordID<UserRecord>? CreatedBy,
+                       DateTimeOffset        DateCreated,
+                       DateTimeOffset?       LastModified = null
+    ) : base(in CreatedBy, in ID, in DateCreated, in LastModified)
+    {
+        this.UserName               = UserName;
+        this.AdditionalData         = AdditionalData;
+        this.AuthenticatorKey       = AuthenticatorKey;
+        this.BadLogins              = BadLogins;
+        this.Company                = Company;
+        this.ConcurrencyStamp       = ConcurrencyStamp;
+        this.Department             = Department;
+        this.Description            = Description;
+        this.Email                  = Email;
+        this.EscalateTo             = EscalateTo;
+        this.Ext                    = Ext;
+        this.FirstName              = FirstName;
+        this.FullName               = FullName;
+        this.Gender                 = Gender;
+        this.ImageID                = ImageID;
+        this.IsActive               = IsActive;
+        this.IsDisabled             = IsDisabled;
+        this.IsEmailConfirmed       = IsEmailConfirmed;
+        this.IsLocked               = IsLocked;
+        this.IsPhoneNumberConfirmed = IsPhoneNumberConfirmed;
+        this.IsTwoFactorEnabled     = IsTwoFactorEnabled;
+        this.LastBadAttempt         = LastBadAttempt;
+        this.LastLogin              = LastLogin;
+        this.LastName               = LastName;
+        this.LockDate               = LockDate;
+        this.LockoutEnd             = LockoutEnd;
+        this.PasswordHash           = PasswordHash;
+        this.PhoneNumber            = PhoneNumber;
+        this.PreferredLanguage      = PreferredLanguage;
+        this.RefreshToken           = RefreshToken;
+        this.RefreshTokenExpiryTime = RefreshTokenExpiryTime;
+        this.Rights                 = Rights;
+        this.SecurityStamp          = SecurityStamp;
+        this.SessionID              = SessionID;
+        this.SubscriptionExpires    = SubscriptionExpires;
+        this.SubscriptionID         = SubscriptionID;
+        this.Title                  = Title;
+        this.Website                = Website;
+    }
 
 
     public override DynamicParameters ToDynamicParameters()
@@ -521,6 +567,7 @@ public sealed record UserRecord( string                UserName,
 
         return string.Compare(Company, other.Company, StringComparison.Ordinal);
     }
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), UserName, FullName, FirstName, LastName);
 
 
     public static bool operator >( UserRecord  left, UserRecord right ) => left.CompareTo(right) > 0;
@@ -557,6 +604,95 @@ public sealed record UserRecord( string                UserName,
         await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { model.Roles.Add(record.ToRoleModel<TRoleModel>()); }
 
         return model;
+    }
+
+
+    public void Deconstruct( out string                UserName,
+                             out string                FirstName,
+                             out string                LastName,
+                             out string                FullName,
+                             out string                Gender,
+                             out string                Description,
+                             out string                Company,
+                             out string                Department,
+                             out string                Title,
+                             out string                Website,
+                             out SupportedLanguage     PreferredLanguage,
+                             out string                Email,
+                             out bool                  IsEmailConfirmed,
+                             out string                PhoneNumber,
+                             out string                Ext,
+                             out bool                  IsPhoneNumberConfirmed,
+                             out string                AuthenticatorKey,
+                             out bool                  IsTwoFactorEnabled,
+                             out bool                  IsActive,
+                             out bool                  IsDisabled,
+                             out Guid?                 SubscriptionID,
+                             out DateTimeOffset?       SubscriptionExpires,
+                             out DateTimeOffset?       LastBadAttempt,
+                             out DateTimeOffset?       LastLogin,
+                             out int?                  BadLogins,
+                             out bool                  IsLocked,
+                             out DateTimeOffset?       LockDate,
+                             out DateTimeOffset?       LockoutEnd,
+                             out string                RefreshToken,
+                             out DateTimeOffset?       RefreshTokenExpiryTime,
+                             out Guid?                 SessionID,
+                             out string                SecurityStamp,
+                             out string                ConcurrencyStamp,
+                             out string                Rights,
+                             out RecordID<UserRecord>? EscalateTo,
+                             out JsonObject?           AdditionalData,
+                             out string                PasswordHash,
+                             out RecordID<FileRecord>? ImageID,
+                             out RecordID<UserRecord>  ID,
+                             out RecordID<UserRecord>? CreatedBy,
+                             out DateTimeOffset        DateCreated,
+                             out DateTimeOffset?       LastModified
+    )
+    {
+        UserName               = this.UserName;
+        FirstName              = this.FirstName;
+        LastName               = this.LastName;
+        FullName               = this.FullName;
+        Gender                 = this.Gender;
+        Description            = this.Description;
+        Company                = this.Company;
+        Department             = this.Department;
+        Title                  = this.Title;
+        Website                = this.Website;
+        PreferredLanguage      = this.PreferredLanguage;
+        Email                  = this.Email;
+        IsEmailConfirmed       = this.IsEmailConfirmed;
+        PhoneNumber            = this.PhoneNumber;
+        Ext                    = this.Ext;
+        IsPhoneNumberConfirmed = this.IsPhoneNumberConfirmed;
+        AuthenticatorKey       = this.AuthenticatorKey;
+        IsTwoFactorEnabled     = this.IsTwoFactorEnabled;
+        IsActive               = this.IsActive;
+        IsDisabled             = this.IsDisabled;
+        SubscriptionID         = this.SubscriptionID;
+        SubscriptionExpires    = this.SubscriptionExpires;
+        LastBadAttempt         = this.LastBadAttempt;
+        LastLogin              = this.LastLogin;
+        BadLogins              = this.BadLogins;
+        IsLocked               = this.IsLocked;
+        LockDate               = this.LockDate;
+        LockoutEnd             = this.LockoutEnd;
+        RefreshToken           = this.RefreshToken;
+        RefreshTokenExpiryTime = this.RefreshTokenExpiryTime;
+        SessionID              = this.SessionID;
+        SecurityStamp          = this.SecurityStamp;
+        ConcurrencyStamp       = this.ConcurrencyStamp;
+        Rights                 = this.Rights;
+        EscalateTo             = this.EscalateTo;
+        AdditionalData         = this.AdditionalData;
+        PasswordHash           = this.PasswordHash;
+        ImageID                = this.ImageID;
+        ID                     = this.ID;
+        CreatedBy              = this.CreatedBy;
+        DateCreated            = this.DateCreated;
+        LastModified           = this.LastModified;
     }
 
 

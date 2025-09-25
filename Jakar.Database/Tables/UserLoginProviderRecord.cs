@@ -14,8 +14,11 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                               DateTimeOffset                                                        DateCreated,
                                               DateTimeOffset?                                                       LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
-    public const  string TABLE_NAME = "user_login_providers";
-    public static string TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public const  string                                  TABLE_NAME = "user_login_providers";
+    public static string                                  TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
+    public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }

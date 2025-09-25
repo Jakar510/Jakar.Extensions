@@ -9,7 +9,10 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
-    public static           string                             TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static           string                             TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static           JsonSerializerContext              JsonContext   => JakarDatabaseContext.Default;
+    public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
+    public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this(code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
@@ -32,7 +35,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID(reader);
         RecoveryCodeRecord           record       = new(code, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
-    } 
+    }
 
 
     [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
@@ -141,8 +144,12 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 [Serializable, Table(TABLE_NAME)]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ITableRecord<UserRecoveryCodeRecord>
 {
-    public const  string TABLE_NAME = "UserRecoveryCodes";
-    public static string TableName => TABLE_NAME;
+    public const  string                                 TABLE_NAME = "UserRecoveryCodes";
+    public static string                                 TableName     => TABLE_NAME;
+    public static JsonSerializerContext                  JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<UserRecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecoveryCodeRecord;
+    public static JsonTypeInfo<UserRecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRecoveryCodeRecordArray;
+
 
     public UserRecoveryCodeRecord( UserRecord                         key, RecoveryCodeRecord           value ) : base(key, value) { }
     public UserRecoveryCodeRecord( RecordID<UserRecord>               key, RecordID<RecoveryCodeRecord> value ) : base(key, value) { }

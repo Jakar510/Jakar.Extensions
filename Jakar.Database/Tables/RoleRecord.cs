@@ -11,10 +11,12 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                  DateTimeOffset                        DateCreated,
                                  DateTimeOffset?                       LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
 {
-    public const                                string                        TABLE_NAME = "roles";
-    public static                               string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [JsonExtensionData]                  public JsonObject? AdditionalData { get; set; }
-    [StringLength(IUserRights.MAX_SIZE)] public string                        Rights         { get; set; } = Rights;
+    public const                                string                     TABLE_NAME = "roles";
+    public static                               string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static                               JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static                               JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
+    public static                               JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
+    [StringLength(IUserRights.MAX_SIZE)] public string                     Rights        { get; set; } = Rights;
 
 
     public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller) { }

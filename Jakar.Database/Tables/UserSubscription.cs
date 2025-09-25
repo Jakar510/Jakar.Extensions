@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/10/2023  10:12 PM
 
+using Jakar.Database.Resx;
+
+
+
 namespace Jakar.Database;
 
 

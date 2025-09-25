@@ -24,8 +24,11 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     DateTimeOffset          DateCreated,
                                     DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>(in ID, in DateCreated, in LastModified), ITableRecord<ResxRowRecord>
 {
-    public const  string TABLE_NAME = "Resx";
-    public static string TableName => TABLE_NAME;
+    public const  string                        TABLE_NAME = "Resx";
+    public static string                        TableName     => TABLE_NAME;
+    public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<ResxRowRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.ResxRowRecord;
+    public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
 
 
     public ResxRowRecord( string key, long keyID ) : this(key, keyID, string.Empty) { }
@@ -247,7 +250,7 @@ public sealed record ResxRowRecord( long                    KeyID,
         return Neutral == other.Neutral || ID == other.ID;
     }
 
-    
+
     public static bool operator >( ResxRowRecord  left, ResxRowRecord right ) => left.CompareTo(right) > 0;
     public static bool operator >=( ResxRowRecord left, ResxRowRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( ResxRowRecord  left, ResxRowRecord right ) => left.CompareTo(right) < 0;

@@ -31,7 +31,7 @@ public interface ICollectionAlerts<TClass, TValue> : ICollectionAlerts<TValue>, 
 
 
 
-public abstract class CollectionAlerts<TClass, TValue> : BaseClass, ICollectionAlerts<TValue>
+public abstract class CollectionAlerts<TClass, TValue> : BaseClass<TClass>, ICollectionAlerts<TValue>
     where TClass : CollectionAlerts<TClass, TValue>, ICollectionAlerts<TClass, TValue>
 {
 // ReSharper disable once StaticMemberInGenericType
@@ -39,7 +39,12 @@ public abstract class CollectionAlerts<TClass, TValue> : BaseClass, ICollectionA
     public abstract           int                              Count { get; }
 
 
-    public event NotifyCollectionChangedEventHandler?                 CollectionChanged;
+    public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
+    public override bool Equals( TClass?    other ) => ReferenceEquals(this, other);
+    public override int  CompareTo( TClass? other ) => Nullable.Compare(Count, other?.Count);
+
+
     public virtual                                               void Refresh()                                         => Reset();
     protected                                                    void Reset()                                           => OnChanged(_resetArgs);
     protected                                                    void Added( TValue[]                value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
@@ -66,23 +71,4 @@ public abstract class CollectionAlerts<TClass, TValue> : BaseClass, ICollectionA
         for ( int i = 0; i < owner.Length; i++ ) { yield return owner.Values[i]; }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = null;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = null;
-        return false;
-    }
-    public static TClass FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TClass.JsonTypeInfo));
 }

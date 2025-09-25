@@ -6,13 +6,15 @@
 public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>
 {
-    public const               int                           MAX_SIZE   = 1024;
-    public const               string                        TABLE_NAME = "Groups";
-    public static              string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    [JsonExtensionData] public JsonObject? AdditionalData { get; set; }
-    Guid? ICreatedByUser<Guid>.                              CreatedBy      => CreatedBy?.value;
-    Guid? IGroupModel<Guid>.                                 OwnerID        => CreatedBy?.value;
-    [StringLength(IUserRights.MAX_SIZE)] public string       Rights         { get; set; } = Rights;
+    public const  int                                  MAX_SIZE   = 1024;
+    public const  string                               TABLE_NAME = "Groups";
+    public static string                               TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext                JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<GroupRecord>            JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord;
+    public static JsonTypeInfo<GroupRecord[]>          JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
+    Guid? ICreatedByUser<Guid>.                        CreatedBy     => CreatedBy?.Value;
+    Guid? IGroupModel<Guid>.                           OwnerID       => CreatedBy?.Value;
+    [StringLength(IUserRights.MAX_SIZE)] public string Rights        { get; set; } = Rights;
 
 
     public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }

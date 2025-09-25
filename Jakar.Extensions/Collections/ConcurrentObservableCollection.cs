@@ -48,6 +48,14 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
     public static implicit operator ConcurrentObservableCollection<TValue>( ImmutableArray<TValue> values ) => new(in values);
     public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlyMemory<TValue> values ) => new(in values);
     public static implicit operator ConcurrentObservableCollection<TValue>( ReadOnlySpan<TValue>   values ) => new(values);
+
+
+    public static bool operator ==( ConcurrentObservableCollection<TValue>? left, ConcurrentObservableCollection<TValue>? right ) => EqualityComparer<ConcurrentObservableCollection<TValue>>.Default.Equals(left, right);
+    public static bool operator !=( ConcurrentObservableCollection<TValue>? left, ConcurrentObservableCollection<TValue>? right ) => !EqualityComparer<ConcurrentObservableCollection<TValue>>.Default.Equals(left, right);
+    public static bool operator >( ConcurrentObservableCollection<TValue>   left, ConcurrentObservableCollection<TValue>  right ) => Comparer<ConcurrentObservableCollection<TValue>>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ConcurrentObservableCollection<TValue>  left, ConcurrentObservableCollection<TValue>  right ) => Comparer<ConcurrentObservableCollection<TValue>>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ConcurrentObservableCollection<TValue>   left, ConcurrentObservableCollection<TValue>  right ) => Comparer<ConcurrentObservableCollection<TValue>>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ConcurrentObservableCollection<TValue>  left, ConcurrentObservableCollection<TValue>  right ) => Comparer<ConcurrentObservableCollection<TValue>>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -70,21 +78,23 @@ public abstract class ConcurrentObservableCollection<TClass, TValue> : Observabl
     public LockerEnumerator<TValue, LockCloser> Values { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
 
 
-    public ConcurrentObservableCollection() : base() { }
-    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, int capacity = DEFAULT_CAPACITY ) : base(comparer, capacity) { }
-    public ConcurrentObservableCollection( int                                 capacity ) : base(capacity) { }
-    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values ) : base(in values) { }
-    public ConcurrentObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : base(in values, comparer) { }
-    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values ) : base(in values) { }
-    public ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
-    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : base(in values) { }
-    public ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
-    public ConcurrentObservableCollection( params       ReadOnlySpan<TValue>   values ) : base(values) { }
-    public ConcurrentObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : base(comparer, values) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue>                 values ) : base(values) { }
-    public ConcurrentObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : base(comparer) { }
-    public ConcurrentObservableCollection( TValue[]                            values ) : base(values) { }
-    public ConcurrentObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : base(values, comparer) { }
+    protected ConcurrentObservableCollection() : base() { }
+    protected ConcurrentObservableCollection( Comparer<TValue>                    comparer, int capacity = DEFAULT_CAPACITY ) : base(comparer, capacity) { }
+    protected ConcurrentObservableCollection( int                                 capacity ) : base(capacity) { }
+    protected ConcurrentObservableCollection( ref readonly Buffer<TValue>         values ) : base(in values) { }
+    protected ConcurrentObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    protected ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values ) : base(in values) { }
+    protected ConcurrentObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    protected ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : base(in values) { }
+    protected ConcurrentObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : base(in values, comparer) { }
+    protected ConcurrentObservableCollection( params       ReadOnlySpan<TValue>   values ) : base(values) { }
+    protected ConcurrentObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : base(comparer, values) { }
+    protected ConcurrentObservableCollection( IEnumerable<TValue>                 values ) : base(values) { }
+    protected ConcurrentObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : base(comparer) { }
+    protected ConcurrentObservableCollection( TValue[]                            values ) : base(values) { }
+    protected ConcurrentObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : base(values, comparer) { }
+
+    
 
 
     public override void Set( int index, TValue value )

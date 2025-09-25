@@ -28,14 +28,15 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(ResxRowRecord[]))]
 [JsonSerializable(typeof(UserRecord[]))]
 [JsonSerializable(typeof(AddressRecord[]))]
+[JsonSerializable(typeof(UserAddressRecord[]))]
 [JsonSerializable(typeof(FileRecord[]))]
 [JsonSerializable(typeof(GroupRecord[]))]
-[JsonSerializable(typeof(RoleRecord[]))]
-[JsonSerializable(typeof(UserAddressRecord[]))]
 [JsonSerializable(typeof(UserGroupRecord[]))]
-[JsonSerializable(typeof(UserLoginProviderRecord[]))]
+[JsonSerializable(typeof(RoleRecord[]))]
 [JsonSerializable(typeof(UserRoleRecord[]))]
+[JsonSerializable(typeof(UserLoginProviderRecord[]))]
 [JsonSerializable(typeof(RecoveryCodeRecord[]))]
+[JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()
