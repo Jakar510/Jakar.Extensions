@@ -18,7 +18,7 @@ public abstract partial class Database
 {
     public virtual ValueTask<DateTimeOffset?> GetSubscriptionExpiration( NpgsqlConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default ) => new(record.SubscriptionExpires);
     public virtual ValueTask<ErrorOrResult<TClass>> TryGetSubscription<TClass>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord record, CancellationToken token = default )
-        where TClass : UserSubscription<TClass> => default;
+        where TClass : UserSubscription<TClass>, ITableRecord<TClass> => default;
 
 
     /// <summary> </summary>

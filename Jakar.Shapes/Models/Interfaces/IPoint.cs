@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/26/2025  16:26
 
-using Jakar.Extensions;
-
 namespace Jakar.Shapes.Interfaces;
 
 
@@ -19,7 +17,7 @@ public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
     [Pure] public double Magnitude();
     public        double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 );
 
-    
+
     public static string ToString( ref readonly TSelf self, string? format )
     {
         switch ( format )

@@ -2,10 +2,6 @@
 // 06/26/2025  11:36
 
 
-using Jakar.Extensions;
-
-
-
 namespace Jakar.Shapes.Interfaces;
 
 
@@ -13,12 +9,12 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     where TSelf : IRectangle<TSelf>, IJsonModel<TSelf>
 {
     public double        Bottom   { get; }
-    public double        Left     { get; }
-    public double        Right    { get; }
-    public double        Top      { get; }
     public ReadOnlyPoint Center   { get; }
+    public double        Left     { get; }
     public ReadOnlyPoint Location { get; }
+    public double        Right    { get; }
     public ReadOnlySize  Size     { get; }
+    public double        Top      { get; }
 
 
     public abstract static implicit operator Rectangle( TSelf  self );

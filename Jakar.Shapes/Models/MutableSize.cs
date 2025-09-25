@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  15:17
 
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -225,10 +226,23 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static        JsonSerializerContext       JsonContext   => JakarShapesContext.Default;
     public static        JsonTypeInfo<MutableSize>   JsonTypeInfo  => JakarShapesContext.Default.MutableSize;
     public static        JsonTypeInfo<MutableSize[]> JsonArrayInfo => JakarShapesContext.Default.MutableSizeArray;
-    public static        bool                        TryFromJson( string? json, out MutableSize result )
+    public static bool TryFromJson( string? json, out MutableSize result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static MutableSize FromJson( string json ) => default;
+    public static MutableSize FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

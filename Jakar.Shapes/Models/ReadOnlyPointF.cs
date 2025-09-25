@@ -2,6 +2,7 @@
 // 01/19/2025  21:01
 
 
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -19,7 +20,7 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public readonly        float          X       = x;
     public readonly        float          Y       = y;
 
-     
+
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Zero    => ref Zero;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Invalid => ref Invalid;
     static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One     => ref One;
@@ -107,7 +108,7 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public override string ToString()                                                  => ToString(null, null);
     public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPointF>.ToString(in this, format);
 
-    
+
     public static bool operator ==( ReadOnlyPointF?         left, ReadOnlyPointF?                  right ) => Nullable.Equals(left, right);
     public static bool operator !=( ReadOnlyPointF?         left, ReadOnlyPointF?                  right ) => !Nullable.Equals(left, right);
     public static bool operator ==( ReadOnlyPointF          left, ReadOnlyPointF                   right ) => EqualityComparer<ReadOnlyPointF>.Default.Equals(left, right);
@@ -151,10 +152,23 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public static JsonSerializerContext          JsonContext   => JakarShapesContext.Default;
     public static JsonTypeInfo<ReadOnlyPointF>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPointF;
     public static JsonTypeInfo<ReadOnlyPointF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointFArray;
-    public static bool                           TryFromJson( string? json, out ReadOnlyPointF result )
+    public static bool TryFromJson( string? json, out ReadOnlyPointF result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static ReadOnlyPointF FromJson( string json ) => default;
+    public static ReadOnlyPointF FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

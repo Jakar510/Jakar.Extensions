@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -167,10 +168,23 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public static JsonSerializerContext         JsonContext   => JakarShapesContext.Default;
     public static JsonTypeInfo<ReadOnlyPoint>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPoint;
     public static JsonTypeInfo<ReadOnlyPoint[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointArray;
-    public static bool                          TryFromJson( string? json, out ReadOnlyPoint result )
+    public static bool TryFromJson( string? json, out ReadOnlyPoint result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static ReadOnlyPoint FromJson( string json ) => default;
+    public static ReadOnlyPoint FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

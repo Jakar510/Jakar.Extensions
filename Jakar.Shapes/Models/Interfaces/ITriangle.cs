@@ -8,16 +8,16 @@ public interface ITriangle<TSelf> : IShape<TSelf>, IShapeLocation
     where TSelf : struct, ITriangle<TSelf>
 {
     ReadOnlyPoint        A        { get; }
-    ReadOnlyPoint        B        { get; }
-    ReadOnlyPoint        C        { get; }
     public ReadOnlyLine  Ab       { get; }
-    public ReadOnlyLine  Bc       { get; }
-    public ReadOnlyLine  Ca       { get; }
-    public double        Area     { get; }
-    public ReadOnlyPoint Centroid { get; }
     public Degrees       Abc      { get; }
+    public double        Area     { get; }
+    ReadOnlyPoint        B        { get; }
     public Degrees       Bac      { get; }
+    public ReadOnlyLine  Bc       { get; }
+    ReadOnlyPoint        C        { get; }
+    public ReadOnlyLine  Ca       { get; }
     public Degrees       Cab      { get; }
+    public ReadOnlyPoint Centroid { get; }
 
 
     public static string ToString( ref readonly TSelf self, string? format )

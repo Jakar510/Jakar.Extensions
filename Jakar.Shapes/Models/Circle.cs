@@ -1,7 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  18:56
 
-using System.Security.Cryptography;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using JetBrains.Annotations;
 
@@ -296,8 +296,21 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public static JsonTypeInfo<Circle[]> JsonArrayInfo => JakarShapesContext.Default.CircleArray;
     public static bool TryFromJson( string? json, out Circle result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static Circle FromJson( string json ) => default;
+    public static Circle FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

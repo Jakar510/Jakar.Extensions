@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -16,16 +17,19 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public readonly        double       Width   = width;
 
 
-    static ref readonly ReadOnlySize IShape<ReadOnlySize>.Zero        => ref Zero;
-    static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid     => ref Invalid;
-    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One         => ref One;
-    public              bool                              IsValid     => !IsNaN && !IsEmpty;
-    [JsonIgnore] public bool                              IsEmpty     => IsNaN || Width < 0 || Height < 0;
-    public              bool                              IsLandscape => Width < Height;
-    public              bool                              IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
-    public              bool                              IsPortrait  => Width > Height;
-    double IShapeSize.                                    Width       => Width;
-    double IShapeSize.                                    Height      => Height;
+    public static       JsonSerializerContext             JsonContext   => JakarShapesContext.Default;
+    public static       JsonTypeInfo<ReadOnlySize>        JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySize;
+    public static       JsonTypeInfo<ReadOnlySize[]>      JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeArray;
+    static ref readonly ReadOnlySize IShape<ReadOnlySize>.Zero          => ref Zero;
+    static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid       => ref Invalid;
+    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One           => ref One;
+    public              bool                              IsValid       => !IsNaN && !IsEmpty;
+    [JsonIgnore] public bool                              IsEmpty       => IsNaN || Width < 0 || Height < 0;
+    public              bool                              IsLandscape   => Width < Height;
+    public              bool                              IsNaN         => double.IsNaN(Width) || double.IsNaN(Height);
+    public              bool                              IsPortrait    => Width > Height;
+    double IShapeSize.                                    Width         => Width;
+    double IShapeSize.                                    Height        => Height;
 
 
     [Pure] public static ReadOnlySize Create( float  width, float  height ) => new(width, height);
@@ -33,6 +37,27 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     [Pure] public        ReadOnlySize Reverse() => new(Height, Width);
     [Pure] public        ReadOnlySize Round()   => new(Width.Round(), Height.Round());
     [Pure] public        ReadOnlySize Floor()   => new(Width.Floor(), Height.Floor());
+
+
+    public static bool TryFromJson( string? json, out ReadOnlySize result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
+    }
+    public static ReadOnlySize FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 
 
     public void Deconstruct( out double width, out double height )
@@ -114,13 +139,4 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static ReadOnlySize operator -( ReadOnlySize left, float                            value ) => new(left.Width - value, left.Height - value);
     public static ReadOnlySize operator +( ReadOnlySize left, int                              value ) => new(left.Width + value, left.Height + value);
     public static ReadOnlySize operator -( ReadOnlySize left, int                              value ) => new(left.Width - value, left.Height - value);
-    public static JsonSerializerContext        JsonContext   => JakarShapesContext.Default;
-    public static JsonTypeInfo<ReadOnlySize>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySize;
-    public static JsonTypeInfo<ReadOnlySize[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeArray;
-    public static bool                         TryFromJson( string? json, out ReadOnlySize result )
-    {
-        result = default;
-        return false;
-    }
-    public static ReadOnlySize FromJson( string json ) => default;
 }

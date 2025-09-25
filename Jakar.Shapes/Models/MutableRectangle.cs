@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization.Metadata;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 
 
 
@@ -310,8 +311,21 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static        JsonTypeInfo<MutableRectangle[]> JsonArrayInfo => JakarShapesContext.Default.MutableRectangleArray;
     public static bool TryFromJson( string? json, out MutableRectangle result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static MutableRectangle FromJson( string json ) => default;
+    public static MutableRectangle FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

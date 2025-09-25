@@ -26,6 +26,7 @@ namespace Jakar.Shapes;
                              Converters = [typeof(EncodingConverter)])]
 [JsonSerializable(typeof(Circle[]))]
 [JsonSerializable(typeof(Triangle[]))]
+[JsonSerializable(typeof(ReadOnlyThickness[]))]
 [JsonSerializable(typeof(ReadOnlyLine[]))]
 [JsonSerializable(typeof(ReadOnlyPoint[]))]
 [JsonSerializable(typeof(ReadOnlyPointF[]))]

@@ -12,6 +12,7 @@ public readonly record struct Degrees( double Value ) : IFormattable, IMathOpera
     public static readonly Degrees   Zero      = new(0);
     public static readonly Degrees[] Angles    = CreateAngles();
 
+
     public readonly                 double Value = Value;
     public static implicit operator Degrees( Radians radians ) => new(radians.Value * ( INCREMENT / Math.PI ));
     public static implicit operator Degrees( double  degrees ) => Normalize(degrees);

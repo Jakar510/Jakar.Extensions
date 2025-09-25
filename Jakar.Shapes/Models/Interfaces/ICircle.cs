@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/12/2025  14:39
 
-using System.Text.Json.Serialization.Metadata;
-
-
-
 namespace Jakar.Shapes.Interfaces;
 
 

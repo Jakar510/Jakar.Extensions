@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  15:58
 
-using Jakar.Shapes.Interfaces;
-
-
-
 namespace Jakar.Shapes;
 
 

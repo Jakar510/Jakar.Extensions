@@ -1,6 +1,14 @@
 // TrueLogic :: TrueLogic.Common
 // 05/11/2022  12:24 PM
 
+using System.Collections.Concurrent;
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Extensions.SignalR.Chats;
 
 
@@ -23,24 +31,25 @@ public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage,
     private string      __message   = string.Empty;
 
 
-    public                                           FileData[]?    Data        { get => __data;        set => SetProperty(ref __data,        value); }
-    [StringLength(UNICODE_CAPACITY)] public required string         GroupName   { get => __groupName;   set => SetProperty(ref __groupName,   value); }
-    public                                           bool           HasBeenRead { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
-    [StringLength(UNICODE_CAPACITY)] public required string         Message     { get => __message;     set => SetProperty(ref __message,     value); }
-    public                                           DateTimeOffset TimeStamp   { get;                  init; }
+    public static                                    JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;
+    public static                                    JsonTypeInfo<InstantMessage>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessage;
+    public static                                    JsonTypeInfo<InstantMessage[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageArray;
+    public                                           FileData[]?                    Data          { get => __data;        set => SetProperty(ref __data,        value); }
+    [StringLength(UNICODE_CAPACITY)] public required string                         GroupName     { get => __groupName;   set => SetProperty(ref __groupName,   value); }
+    public                                           bool                           HasBeenRead   { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
+    [StringLength(UNICODE_CAPACITY)] public required string                         Message       { get => __message;     set => SetProperty(ref __message,     value); }
+    public                                           DateTimeOffset                 TimeStamp     { get;                  init; }
 
 
     public InstantMessage() { }
 
-    [SetsRequiredMembers]
-    public InstantMessage( string message, string groupName )
+    [SetsRequiredMembers] public InstantMessage( string message, string groupName )
     {
         Message   = message;
         GroupName = groupName;
         TimeStamp = DateTimeOffset.UtcNow;
     }
-    [SetsRequiredMembers]
-    public InstantMessage( IInstantMessage message )
+    [SetsRequiredMembers] public InstantMessage( IInstantMessage message )
     {
         Message     = message.Message;
         TimeStamp   = message.TimeStamp;
@@ -93,7 +102,33 @@ public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage,
 
 
 
-public sealed class InstantMessageCollection() : ConcurrentObservableCollection<InstantMessageCollection, InstantMessage>(DEFAULT_CAPACITY), ICollectionAlerts<InstantMessageCollection, InstantMessage>
+public sealed class InstantMessageCollection : ConcurrentObservableCollection<InstantMessageCollection, InstantMessage>, ICollectionAlerts<InstantMessageCollection, InstantMessage>
 {
-    public InstantMessageCollection( params ReadOnlySpan<InstantMessage> enumerable ) : this() => Add(enumerable);
+    public static JsonSerializerContext                    JsonContext   => JakarSignalRContext.Default;
+    public static JsonTypeInfo<InstantMessageCollection>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessageCollection;
+    public static JsonTypeInfo<InstantMessageCollection[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageCollectionArray;
+
+
+    public InstantMessageCollection() : this(DEFAULT_CAPACITY) { }
+    public InstantMessageCollection( int                                 capacity ) : base(capacity) { }
+    public InstantMessageCollection( IEnumerable<InstantMessage>         enumerable ) : base(enumerable) { }
+    public InstantMessageCollection( params ReadOnlySpan<InstantMessage> enumerable ) : base(enumerable) { }
+
+
+    public static bool operator ==( InstantMessageCollection? left, InstantMessageCollection? right ) => EqualityComparer<InstantMessageCollection>.Default.Equals(left, right);
+    public static bool operator !=( InstantMessageCollection? left, InstantMessageCollection? right ) => !EqualityComparer<InstantMessageCollection>.Default.Equals(left, right);
+    public static bool operator >( InstantMessageCollection   left, InstantMessageCollection  right ) => Comparer<InstantMessageCollection>.Default.Compare(left, right) > 0;
+    public static bool operator >=( InstantMessageCollection  left, InstantMessageCollection  right ) => Comparer<InstantMessageCollection>.Default.Compare(left, right) >= 0;
+    public static bool operator <( InstantMessageCollection   left, InstantMessageCollection  right ) => Comparer<InstantMessageCollection>.Default.Compare(left, right) < 0;
+    public static bool operator <=( InstantMessageCollection  left, InstantMessageCollection  right ) => Comparer<InstantMessageCollection>.Default.Compare(left, right) <= 0;
+
+
+    public static implicit operator InstantMessageCollection( List<InstantMessage>           values ) => new(values);
+    public static implicit operator InstantMessageCollection( HashSet<InstantMessage>        values ) => new(values);
+    public static implicit operator InstantMessageCollection( ConcurrentBag<InstantMessage>  values ) => new(values);
+    public static implicit operator InstantMessageCollection( Collection<InstantMessage>     values ) => new(values);
+    public static implicit operator InstantMessageCollection( InstantMessage[]               values ) => new(values.AsSpan());
+    public static implicit operator InstantMessageCollection( ImmutableArray<InstantMessage> values ) => new(values.AsSpan());
+    public static implicit operator InstantMessageCollection( ReadOnlyMemory<InstantMessage> values ) => new(values.Span);
+    public static implicit operator InstantMessageCollection( ReadOnlySpan<InstantMessage>   values ) => new(values);
 }

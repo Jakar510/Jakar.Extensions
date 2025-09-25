@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using ZLinq;
 using ZLinq.Linq;
@@ -23,9 +24,10 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public readonly         ReadOnlyPoint[] Points  = points ?? __empty;
 
 
+    public static JsonSerializerContext  JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<Spline>   JsonTypeInfo  => JakarShapesContext.Default.Spline;
+    public static JsonTypeInfo<Spline[]> JsonArrayInfo => JakarShapesContext.Default.SplineArray;
     public ref ReadOnlyPoint this[ int index ] => ref Points[index];
-
-
     static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
     static ref readonly Spline IShape<Spline>.      One     => ref One;
     static ref readonly Spline IShape<Spline>.      Invalid => ref Invalid;
@@ -50,6 +52,27 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     [Pure] public        Spline                                                   Round()                                  => new(Points.AsValueEnumerable().Select(static x => x.Round()).ToArray());
     [Pure] public        Spline                                                   Floor()                                  => new(Points.AsValueEnumerable().Select(static x => x.Floor()).ToArray());
     [Pure] public        ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable()                      => new(new FromArray<ReadOnlyPoint>(Points));
+    
+
+    public static bool TryFromJson( string? json, out Spline result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
+    }
+    public static Spline FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 
 
     public int CompareTo( object? other, IComparer comparer ) => other is Spline spline
@@ -167,13 +190,4 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public static Spline operator /( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
     public static Spline operator /( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
     public static Spline operator /( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
-    public static JsonSerializerContext  JsonContext   => JakarShapesContext.Default;
-    public static JsonTypeInfo<Spline>   JsonTypeInfo  => JakarShapesContext.Default.Spline;
-    public static JsonTypeInfo<Spline[]> JsonArrayInfo => JakarShapesContext.Default.SplineArray;
-    public static bool                   TryFromJson( string? json, out Spline result )
-    {
-        result = default;
-        return false;
-    }
-    public static Spline FromJson( string json ) => default;
 }

@@ -1,6 +1,7 @@
 ﻿// TrueLogic :: iTrueLogic.Shared
 // 09/21/2023  5:37 PM
 
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -165,10 +166,23 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public static JsonSerializerContext             JsonContext   => JakarShapesContext.Default;
     public static JsonTypeInfo<ReadOnlyRectangle>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyRectangle;
     public static JsonTypeInfo<ReadOnlyRectangle[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyRectangleArray;
-    public static bool                              TryFromJson( string? json, out ReadOnlyRectangle result )
+    public static bool TryFromJson( string? json, out ReadOnlyRectangle result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static ReadOnlyRectangle FromJson( string json ) => default;
+    public static ReadOnlyRectangle FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

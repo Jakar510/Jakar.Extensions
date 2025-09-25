@@ -2,6 +2,7 @@
 // 07/12/2025  19:15
 
 
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -121,10 +122,23 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public static JsonSerializerContext        JsonContext   => JakarShapesContext.Default;
     public static JsonTypeInfo<ReadOnlyLine>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyLine;
     public static JsonTypeInfo<ReadOnlyLine[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyLineArray;
-    public static bool                         TryFromJson( string? json, out ReadOnlyLine result )
+    public static bool TryFromJson( string? json, out ReadOnlyLine result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static ReadOnlyLine FromJson( string json ) => default;
+    public static ReadOnlyLine FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

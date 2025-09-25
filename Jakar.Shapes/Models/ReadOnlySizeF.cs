@@ -1,6 +1,7 @@
 ﻿// TrueLogic :: TrueLogic.Common.Maui
 // 01/20/2025  08:01
 
+using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 
 
@@ -124,8 +125,21 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static JsonTypeInfo<ReadOnlySizeF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeFArray;
     public static bool TryFromJson( string? json, out ReadOnlySizeF result )
     {
-        result = default;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
         return false;
     }
-    public static ReadOnlySizeF FromJson( string json ) => default;
+    public static ReadOnlySizeF FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

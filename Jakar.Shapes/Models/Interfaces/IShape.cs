@@ -8,8 +8,8 @@ public interface IShape<TSelf> : IFormattable, IValidator, IJsonModel<TSelf>
     where TSelf : IShape<TSelf>
 {
     public abstract static ref readonly TSelf Invalid { get; }
-    public abstract static ref readonly TSelf Zero    { get; }
     public abstract static ref readonly TSelf One     { get; }
+    public abstract static ref readonly TSelf Zero    { get; }
     public                              bool  IsNaN   { get; }
 
 
@@ -43,8 +43,8 @@ public interface IShape<TSelf> : IFormattable, IValidator, IJsonModel<TSelf>
 
 public interface IShapeSize
 {
-    public double Width  { get; }
     public double Height { get; }
+    public double Width  { get; }
 
 
     public void Deconstruct( out double width, out double height );

@@ -7,15 +7,16 @@ namespace Jakar.Shapes;
 [DefaultValue(nameof(Invalid))]
 public readonly struct CalculatedLine( Func<double, double> func ) : IEqualityOperators<CalculatedLine>
 {
-    private readonly       Func<double, double> __func   = func;
+    private readonly       Func<double, double> __func  = func;
     public static readonly CalculatedLine       Invalid = new();
 
 
-    public double this[ double x ] => __func(x);
+    public double this[ double x ] { [Pure] get => __func(x); }
 
 
     public CalculatedLine() : this(static _ => double.NaN) { }
     [Pure] public static CalculatedLine Create( Func<double, double> func ) => new(func);
+
 
     [Pure]
     public static CalculatedLine Create( ReadOnlyLine line )
@@ -24,6 +25,13 @@ public readonly struct CalculatedLine( Func<double, double> func ) : IEqualityOp
         double b = line.Start.Y - m * line.Start.X;
         return new CalculatedLine(func);
         double func( double y ) => m * y + b;
+    }
+    public Spline ToSpline( params ReadOnlySpan<double> xValues )
+    {
+        ReadOnlyPoint[] points = new ReadOnlyPoint[xValues.Length];
+        for ( int i = 0; i < xValues.Length; i++ ) { points[i] = new ReadOnlyPoint(xValues[i], this[xValues[i]]); }
+
+        return new Spline(points);
     }
 
 
