@@ -2,10 +2,15 @@
 // 01/19/2025  21:01
 
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPointF>, IMathOperators<ReadOnlyPointF>
 {
     public static readonly ReadOnlyPointF Invalid = new(float.NaN, float.NaN);
@@ -103,14 +108,14 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPointF>.ToString(in this, format);
 
     
-    public static bool operator ==( ReadOnlyPointF? left, ReadOnlyPointF? right ) => Nullable.Equals(left, right);
-    public static bool operator !=( ReadOnlyPointF? left, ReadOnlyPointF? right ) => !Nullable.Equals(left, right);
-    public static bool operator ==( ReadOnlyPointF  left, ReadOnlyPointF  right ) => EqualityComparer<ReadOnlyPointF>.Default.Equals(left, right);
-    public static bool operator !=( ReadOnlyPointF  left, ReadOnlyPointF  right ) => !EqualityComparer<ReadOnlyPointF>.Default.Equals(left, right);
-    public static bool operator >( ReadOnlyPointF   left, ReadOnlyPointF  right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) > 0;
-    public static bool operator >=( ReadOnlyPointF  left, ReadOnlyPointF  right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) >= 0;
-    public static bool operator <( ReadOnlyPointF   left, ReadOnlyPointF  right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) < 0;
-    public static bool operator <=( ReadOnlyPointF  left, ReadOnlyPointF  right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) <= 0;
+    public static bool operator ==( ReadOnlyPointF?         left, ReadOnlyPointF?                  right ) => Nullable.Equals(left, right);
+    public static bool operator !=( ReadOnlyPointF?         left, ReadOnlyPointF?                  right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( ReadOnlyPointF          left, ReadOnlyPointF                   right ) => EqualityComparer<ReadOnlyPointF>.Default.Equals(left, right);
+    public static bool operator !=( ReadOnlyPointF          left, ReadOnlyPointF                   right ) => !EqualityComparer<ReadOnlyPointF>.Default.Equals(left, right);
+    public static bool operator >( ReadOnlyPointF           left, ReadOnlyPointF                   right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) > 0;
+    public static bool operator >=( ReadOnlyPointF          left, ReadOnlyPointF                   right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) >= 0;
+    public static bool operator <( ReadOnlyPointF           left, ReadOnlyPointF                   right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) < 0;
+    public static bool operator <=( ReadOnlyPointF          left, ReadOnlyPointF                   right ) => Comparer<ReadOnlyPointF>.Default.Compare(left, right) <= 0;
     public static ReadOnlyPointF operator +( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X + value.X ), (float)( size.Y + value.Y ));
     public static ReadOnlyPointF operator -( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X - value.X ), (float)( size.Y - value.Y ));
     public static ReadOnlyPointF operator *( ReadOnlyPointF size, ReadOnlyPoint                    value ) => new((float)( size.X * value.X ), (float)( size.Y * value.Y ));
@@ -143,4 +148,13 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public static ReadOnlyPointF operator -( ReadOnlyPointF left, int                              value ) => new(left.X - value, left.Y - value);
     public static ReadOnlyPointF operator /( ReadOnlyPointF size, int                              value ) => new(size.X / value, size.Y / value);
     public static ReadOnlyPointF operator *( ReadOnlyPointF size, int                              value ) => new(size.X * value, size.Y * value);
+    public static JsonSerializerContext          JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlyPointF>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPointF;
+    public static JsonTypeInfo<ReadOnlyPointF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointFArray;
+    public static bool                           TryFromJson( string? json, out ReadOnlyPointF result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlyPointF FromJson( string json ) => default;
 }

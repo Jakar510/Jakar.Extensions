@@ -9,7 +9,7 @@ namespace Jakar.Database;
 
 
 [Serializable]
-public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IBaseClass<EmailSettings>
+public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IJsonModel<EmailSettings>
 {
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<EmailSettings>   JsonTypeInfo  => JakarDatabaseContext.Default.EmailSettings;

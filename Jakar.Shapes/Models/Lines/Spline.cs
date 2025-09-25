@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Text;
+using System.Text.Json.Serialization.Metadata;
 using ZLinq;
 using ZLinq.Linq;
 
@@ -12,6 +13,7 @@ namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Invalid))]
+[method: JsonConstructor]
 public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>, IStructuralComparable, IValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint>
 {
     public static readonly  Spline          Invalid = new(null);
@@ -165,4 +167,13 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public static Spline operator /( Spline self, (int xOffset, int yOffset)       other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
     public static Spline operator /( Spline self, (float xOffset, float yOffset)   other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
     public static Spline operator /( Spline self, (double xOffset, double yOffset) other ) => self.Points.Create<ReadOnlyPoint>(( ref readonly ReadOnlyPoint x ) => x / other);
+    public static JsonSerializerContext  JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<Spline>   JsonTypeInfo  => JakarShapesContext.Default.Spline;
+    public static JsonTypeInfo<Spline[]> JsonArrayInfo => JakarShapesContext.Default.SplineArray;
+    public static bool                   TryFromJson( string? json, out Spline result )
+    {
+        result = default;
+        return false;
+    }
+    public static Spline FromJson( string json ) => default;
 }

@@ -1,13 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 06/26/2025  12:17
 
-using Jakar.Extensions;
-
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IShape<TSelf> : IFormattable, IValidator, IEqualComparable<TSelf>
-    where TSelf : IShape<TSelf>, IJsonModel<TSelf>
+public interface IShape<TSelf> : IFormattable, IValidator, IJsonModel<TSelf>
+    where TSelf : IShape<TSelf>
 {
     public abstract static ref readonly TSelf Invalid { get; }
     public abstract static ref readonly TSelf Zero    { get; }

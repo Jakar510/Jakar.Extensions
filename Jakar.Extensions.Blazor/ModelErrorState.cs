@@ -1,8 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
 // 06/18/2024  22:06
 
-using System.Reflection;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 
@@ -33,7 +31,8 @@ public interface IModelErrorState : ICascadingValueName, INotifyPropertyChanged
 
 
 
-public class ModelErrorState : BaseClass<ModelErrorState>, IModelErrorState, IBaseClass<ModelErrorState>
+[Serializable]
+public class ModelErrorState : BaseClass<ModelErrorState>, IModelErrorState, IJsonModel<ModelErrorState>
 {
     public const string               KEY     = nameof(ModelErrorState);
     private      ModelStateDictionary __state = new();

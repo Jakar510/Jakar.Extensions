@@ -1,7 +1,12 @@
-﻿namespace Jakar.Shapes;
+﻿using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadOnlySize>, IMathOperators<ReadOnlySize>
 {
     public static readonly ReadOnlySize Invalid = new(double.NaN, double.NaN);
@@ -109,4 +114,13 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static ReadOnlySize operator -( ReadOnlySize left, float                            value ) => new(left.Width - value, left.Height - value);
     public static ReadOnlySize operator +( ReadOnlySize left, int                              value ) => new(left.Width + value, left.Height + value);
     public static ReadOnlySize operator -( ReadOnlySize left, int                              value ) => new(left.Width - value, left.Height - value);
+    public static JsonSerializerContext        JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlySize>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySize;
+    public static JsonTypeInfo<ReadOnlySize[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeArray;
+    public static bool                         TryFromJson( string? json, out ReadOnlySize result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlySize FromJson( string json ) => default;
 }

@@ -1,7 +1,12 @@
-﻿namespace Jakar.Shapes;
+﻿using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>
 {
     public static readonly ReadOnlyPoint Invalid       = new(double.NaN, double.NaN);
@@ -159,4 +164,13 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public static ReadOnlyPoint operator -( ReadOnlyPoint left, int                              value ) => new(left.X - value, left.Y - value);
     public static ReadOnlyPoint operator /( ReadOnlyPoint size, int                              value ) => new(size.X / value, size.Y / value);
     public static ReadOnlyPoint operator *( ReadOnlyPoint size, int                              value ) => new(size.X * value, size.Y * value);
+    public static JsonSerializerContext         JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlyPoint>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPoint;
+    public static JsonTypeInfo<ReadOnlyPoint[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointArray;
+    public static bool                          TryFromJson( string? json, out ReadOnlyPoint result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlyPoint FromJson( string json ) => default;
 }

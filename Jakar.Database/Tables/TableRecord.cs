@@ -40,7 +40,7 @@ public interface IRecordPair<TClass> : ILastModified
 
 
 
-public interface ITableRecord<TClass> : IRecordPair<TClass>, IBaseClass<TClass>
+public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     where TClass : ITableRecord<TClass>
 {
     public abstract static        string            TableName { [Pure] get; }
@@ -145,7 +145,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
 
 [Serializable]
 public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>(in ID, in DateCreated, in LastModified), ICreatedBy
-    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>, IBaseClass<TClass>
+    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
 

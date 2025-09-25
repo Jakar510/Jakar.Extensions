@@ -1,10 +1,15 @@
 ﻿// TrueLogic :: TrueLogic.Common.Maui
 // 01/20/2025  08:01
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOnlySizeF>, IMathOperators<ReadOnlySizeF>
 {
     public static readonly ReadOnlySizeF Invalid = new(float.NaN, float.NaN);
@@ -114,4 +119,13 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static ReadOnlySizeF operator -( ReadOnlySizeF left, float                            value ) => new(left.Width - value, left.Height           - value);
     public static ReadOnlySizeF operator +( ReadOnlySizeF left, int                              value ) => new(left.Width + value, left.Height           + value);
     public static ReadOnlySizeF operator -( ReadOnlySizeF left, int                              value ) => new(left.Width - value, left.Height           - value);
+    public static JsonSerializerContext         JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlySizeF>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySizeF;
+    public static JsonTypeInfo<ReadOnlySizeF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeFArray;
+    public static bool TryFromJson( string? json, out ReadOnlySizeF result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlySizeF FromJson( string json ) => default;
 }

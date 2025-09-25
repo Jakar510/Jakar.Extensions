@@ -1,10 +1,15 @@
 ﻿// TrueLogic :: TrueLogic.Common.Maui
 // 01/20/2025  08:01
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [StructLayout(LayoutKind.Sequential), DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlyRectangleF( float x, float y, float width, float height ) : IRectangle<ReadOnlyRectangleF>
 {
     public static readonly ReadOnlyRectangleF Invalid = new(float.NaN, float.NaN, float.NaN, float.NaN);
@@ -194,4 +199,13 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (int xOffset, int yOffset)       value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (float xOffset, float yOffset)   value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static ReadOnlyRectangleF operator /( ReadOnlyRectangleF self, (double xOffset, double yOffset) value ) => new((float)( self.X / value.xOffset ), (float)( self.Y / value.yOffset ), self.Width, self.Height);
+    public static JsonSerializerContext              JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlyRectangleF>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyRectangleF;
+    public static JsonTypeInfo<ReadOnlyRectangleF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyRectangleFArray;
+    public static bool TryFromJson( string? json, out ReadOnlyRectangleF result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlyRectangleF FromJson( string json ) => default;
 }

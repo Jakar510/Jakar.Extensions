@@ -1,7 +1,12 @@
-﻿namespace Jakar.Shapes;
+﻿using System.Text.Json.Serialization.Metadata;
+
+
+
+namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public struct MutableRectangle( double x, double y, double width, double height ) : IMutableRectangle<MutableRectangle>
 {
     public static readonly MutableRectangle Invalid = new(double.NaN, double.NaN, double.NaN, double.NaN);
@@ -300,4 +305,13 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static        MutableRectangle operator /( MutableRectangle self, (int xOffset, int yOffset)       value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static        MutableRectangle operator /( MutableRectangle self, (float xOffset, float yOffset)   value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static        MutableRectangle operator /( MutableRectangle self, (double xOffset, double yOffset) value )  => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static        JsonSerializerContext            JsonContext   => JakarShapesContext.Default;
+    public static        JsonTypeInfo<MutableRectangle>   JsonTypeInfo  => JakarShapesContext.Default.MutableRectangle;
+    public static        JsonTypeInfo<MutableRectangle[]> JsonArrayInfo => JakarShapesContext.Default.MutableRectangleArray;
+    public static bool TryFromJson( string? json, out MutableRectangle result )
+    {
+        result = default;
+        return false;
+    }
+    public static MutableRectangle FromJson( string json ) => default;
 }

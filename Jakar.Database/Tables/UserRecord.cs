@@ -749,7 +749,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public bool DoesNotOwn<TClass>( TClass record )
-        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => record.CreatedBy != ID;
+        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>  => record.CreatedBy != ID;
     public bool Owns<TClass>( TClass record )
         where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => record.CreatedBy == ID;
 

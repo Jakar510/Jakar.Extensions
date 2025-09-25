@@ -1,10 +1,6 @@
 ﻿// TrueLogic :: TrueLogic.Common
 // 10/22/2024  13:10
 
-using System.Text.Json.Serialization;
-
-
-
 namespace Jakar.Shapes;
 
 

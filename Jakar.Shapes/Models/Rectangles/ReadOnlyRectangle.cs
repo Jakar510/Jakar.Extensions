@@ -1,10 +1,15 @@
 ﻿// TrueLogic :: iTrueLogic.Shared
 // 09/21/2023  5:37 PM
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [StructLayout(LayoutKind.Sequential), DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle>
 {
     public static readonly ReadOnlyRectangle Invalid = new(double.NaN, double.NaN, double.NaN, double.NaN);
@@ -157,4 +162,13 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public static ReadOnlyRectangle operator /( ReadOnlyRectangle self, (int xOffset, int yOffset)       value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static ReadOnlyRectangle operator /( ReadOnlyRectangle self, (float xOffset, float yOffset)   value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
     public static ReadOnlyRectangle operator /( ReadOnlyRectangle self, (double xOffset, double yOffset) value ) => new(self.X / value.xOffset, self.Y / value.yOffset, self.Width, self.Height);
+    public static JsonSerializerContext             JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlyRectangle>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyRectangle;
+    public static JsonTypeInfo<ReadOnlyRectangle[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyRectangleArray;
+    public static bool                              TryFromJson( string? json, out ReadOnlyRectangle result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlyRectangle FromJson( string json ) => default;
 }

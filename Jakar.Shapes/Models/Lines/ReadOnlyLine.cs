@@ -2,10 +2,15 @@
 // 07/12/2025  19:15
 
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, bool isFinite = true ) : ILine<ReadOnlyLine>, IMathOperators<ReadOnlyLine>
 {
     public static readonly ReadOnlyLine  Invalid  = new(ReadOnlyPoint.Invalid, ReadOnlyPoint.Invalid);
@@ -113,4 +118,13 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public static ReadOnlyLine operator -( ReadOnlyLine self, int                              other ) => new(self.Start - other, self.End - other);
     public static ReadOnlyLine operator -( ReadOnlyLine self, float                            other ) => new(self.Start - other, self.End - other);
     public static ReadOnlyLine operator -( ReadOnlyLine self, double                           other ) => new(self.Start - other, self.End - other);
+    public static JsonSerializerContext        JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<ReadOnlyLine>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyLine;
+    public static JsonTypeInfo<ReadOnlyLine[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyLineArray;
+    public static bool                         TryFromJson( string? json, out ReadOnlyLine result )
+    {
+        result = default;
+        return false;
+    }
+    public static ReadOnlyLine FromJson( string json ) => default;
 }

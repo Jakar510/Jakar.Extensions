@@ -1,10 +1,15 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 07/11/2025  15:17
 
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public struct MutableSize( double width, double height ) : ISize<MutableSize>
 {
     public static readonly MutableSize Invalid = new(double.NaN, double.NaN);
@@ -217,4 +222,13 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static        MutableSize operator /( MutableSize self, (int xOffset, int yOffset)       value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
     public static        MutableSize operator /( MutableSize self, (float xOffset, float yOffset)   value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
     public static        MutableSize operator /( MutableSize self, (double xOffset, double yOffset) value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
+    public static        JsonSerializerContext       JsonContext   => JakarShapesContext.Default;
+    public static        JsonTypeInfo<MutableSize>   JsonTypeInfo  => JakarShapesContext.Default.MutableSize;
+    public static        JsonTypeInfo<MutableSize[]> JsonArrayInfo => JakarShapesContext.Default.MutableSizeArray;
+    public static        bool                        TryFromJson( string? json, out MutableSize result )
+    {
+        result = default;
+        return false;
+    }
+    public static MutableSize FromJson( string json ) => default;
 }

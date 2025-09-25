@@ -9,6 +9,7 @@ global using System.Diagnostics.Contracts;
 global using System.Drawing;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.InteropServices;
+global using System.Text.Json.Serialization;
 global using Jakar.Extensions;
 global using Jakar.Shapes.Interfaces;
 global using static Jakar.Extensions.BaseRecord;

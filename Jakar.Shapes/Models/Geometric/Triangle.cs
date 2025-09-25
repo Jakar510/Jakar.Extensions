@@ -1,11 +1,17 @@
 ﻿// Jakar.Extensions :: Jakar.Shapes
 // 07/14/2025  10:08
 
+using System.Reflection;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
+
+
+
 namespace Jakar.Shapes;
 
 
-[Experimental("Jakar_Shapes_Triangle")]
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint c ) : ITriangle<Triangle>
 {
     public static readonly Triangle      Invalid = new(ReadOnlyPoint.Invalid, ReadOnlyPoint.Invalid, ReadOnlyPoint.Invalid);
@@ -101,4 +107,15 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public static Triangle operator /( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A / other, self.B / other, self.C / other);
     public static Triangle operator /( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A / other, self.B / other, self.C / other);
     public static Triangle operator /( Triangle self, (double xOffset, double yOffset) other ) => new(self.A / other, self.B / other, self.C / other);
+
+
+    public static JsonSerializerContext    JsonContext   { get; }
+    public static JsonTypeInfo<Triangle>   JsonTypeInfo  { get; }
+    public static JsonTypeInfo<Triangle[]> JsonArrayInfo { get; }
+    public static bool TryFromJson( string? json, out Triangle result )
+    {
+        result = default;
+        return false;
+    }
+    public static Triangle FromJson( string json ) => default;
 }

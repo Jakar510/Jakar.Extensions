@@ -2,6 +2,7 @@
 // 07/11/2025  18:56
 
 using System.Security.Cryptography;
+using System.Text.Json.Serialization.Metadata;
 using JetBrains.Annotations;
 
 
@@ -11,6 +12,7 @@ namespace Jakar.Shapes;
 
 // [Experimental("Jakar_Shapes_Circle")]
 [DefaultValue(nameof(Zero))]
+[method: JsonConstructor]
 public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<Circle>, IMathOperators<Circle>
 {
     private const          double        TOLERANCE = 1e-8;
@@ -289,4 +291,13 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public static Circle operator -( Circle self, int                              other ) => new(self.Center, self.Radius - other);
     public static Circle operator -( Circle self, float                            other ) => new(self.Center, self.Radius - other);
     public static Circle operator -( Circle self, double                           other ) => new(self.Center, self.Radius - other);
+    public static JsonSerializerContext  JsonContext   => JakarShapesContext.Default;
+    public static JsonTypeInfo<Circle>   JsonTypeInfo  => JakarShapesContext.Default.Circle;
+    public static JsonTypeInfo<Circle[]> JsonArrayInfo => JakarShapesContext.Default.CircleArray;
+    public static bool TryFromJson( string? json, out Circle result )
+    {
+        result = default;
+        return false;
+    }
+    public static Circle FromJson( string json ) => default;
 }
