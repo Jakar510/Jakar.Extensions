@@ -40,12 +40,12 @@ public static class RightsExtensions
 
 
 
-[DefaultMember( nameof(Default) ), SuppressMessage( "ReSharper", "FieldCanBeMadeReadOnly.Local" ), SuppressMessage( "ReSharper", "LoopCanBeConvertedToQuery" )]
+[DefaultMember( nameof(Default) )][SuppressMessage( "ReSharper", "FieldCanBeMadeReadOnly.Local" )][SuppressMessage( "ReSharper", "LoopCanBeConvertedToQuery" )]
 public ref struct UserRights<TEnum>
     where TEnum : struct, Enum
 {
-    public const            char               VALID       = '+';
-    public const            char               INVALID     = '-';
+    public const            char               VALID        = '+';
+    public const            char               INVALID      = '-';
     private static readonly TEnum[]            __enumValues = Enum.GetValues<TEnum>();
     private readonly        IMemoryOwner<char> __rights     = MemoryPool<char>.Shared.Rent( __enumValues.Length );
     internal                Span<char>         span;

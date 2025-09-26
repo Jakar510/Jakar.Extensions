@@ -22,7 +22,8 @@ namespace Jakar.Database;
                              PropertyNameCaseInsensitive = false,
                              ReadCommentHandling = JsonCommentHandling.Skip,
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
-                             RespectRequiredConstructorParameters = true)]
+                             RespectRequiredConstructorParameters = true,
+                             GenerationMode = JsonSourceGenerationMode.Metadata)]
 [JsonSerializable(typeof(HashSet<string>))]
 [JsonSerializable(typeof(DbOptions[]))]
 [JsonSerializable(typeof(EmailSettings[]))]
@@ -38,10 +39,13 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(UserLoginProviderRecord[]))]
 [JsonSerializable(typeof(RecoveryCodeRecord[]))]
 [JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
+[JsonSerializable(typeof(FusionCacheEntryOptionsWrapper))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()
     {
+        Default.FusionCacheEntryOptionsWrapper.Register();
+
         Default.HashSetString.Register();
 
         Default.EmailSettings.Register();
@@ -78,3 +82,28 @@ public sealed partial class JakarDatabaseContext : JsonSerializerContext
         Default.RecoveryCodeRecordArray.Register();
     }
 }
+
+
+
+/*
+public sealed class ObsoleteIgnoringResolver( IJsonTypeInfoResolver inner ) : IJsonTypeInfoResolver
+{
+    private readonly IJsonTypeInfoResolver __inner = inner;
+
+    public JsonTypeInfo? GetTypeInfo( Type type, JsonSerializerOptions options )
+    {
+        JsonTypeInfo? info = __inner.GetTypeInfo(type, options);
+
+        if ( info?.Kind is JsonTypeInfoKind.Object )
+        {
+            for ( int i = info.Properties.Count - 1; i >= 0; i-- )
+            {
+                MemberInfo? memberInfo = info.Properties[i].AttributeProvider as MemberInfo;
+                if ( memberInfo?.GetCustomAttribute<ObsoleteAttribute>() is not null ) { info.Properties.RemoveAt(i); }
+            }
+        }
+
+        return info;
+    }
+}
+*/

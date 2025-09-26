@@ -9,13 +9,13 @@ using System.Linq;
 namespace Jakar.Extensions.Tests.Collections;
 
 
-[TestFixture, TestOf(typeof(ObservableCollection<>))]
+[TestFixture][TestOf(typeof(ObservableCollection<>))]
 public class ObservableCollection_Tests : Assert
 {
     internal static Comparer<int> Sorter => Comparer<int>.Default;
 
 
-    [Test, TestCase(10), TestCase(20), TestCase(30), TestCase(40)]
+    [Test][TestCase(10)][TestCase(20)][TestCase(30)][TestCase(40)]
     public void Indexes( int value )
     {
         ObservableCollection<int> collection = new(Enumerable.Range(0, 100)) { IsReadOnly = true };
@@ -54,7 +54,7 @@ public class ObservableCollection_Tests : Assert
     }
 
 
-    [Test, TestCase(1), TestCase(2), TestCase(3), TestCase(4), TestCase("1"), TestCase("2"), TestCase("3"), TestCase("4")]
+    [Test][TestCase(1)][TestCase(2)][TestCase(3)][TestCase(4)][TestCase("1")][TestCase("2")][TestCase("3")][TestCase("4")]
     public void Run<TValue>( TValue value )
         where TValue : IEquatable<TValue>
     {

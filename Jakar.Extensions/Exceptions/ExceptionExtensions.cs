@@ -3,7 +3,7 @@
 
 public static class ExceptionExtensions
 {
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException(nameof(e)); }
@@ -18,7 +18,7 @@ public static class ExceptionExtensions
     }
 
     
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         Dictionary<string, object?> dictionary = new();
@@ -29,11 +29,11 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static ExceptionDetails Details( this Exception e ) => new(e, false);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static ExceptionDetails FullDetails( this Exception e ) => new(e);
 
 
@@ -82,11 +82,11 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
-    [RequiresUnreferencedCode(Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode(Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static JsonNode? GetData( this Exception e ) => JsonSerializer.SerializeToNode(e.Data, Json.Options);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
         dict = new Dictionary<string, string?>(10);
@@ -94,7 +94,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static void Details<TValue>( this Exception e, in TValue dict )
         where TValue : class, IDictionary<string, string?>
     {
@@ -108,7 +108,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
@@ -144,7 +144,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode(Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode(Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref JsonObject dictionary )
         where TValue : Exception
     {
@@ -159,7 +159,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
     {
         JsonArray            array = new();

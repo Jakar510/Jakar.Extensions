@@ -8,7 +8,7 @@ using System.Net;
 namespace Jakar.Extensions.Tests.Collections;
 
 
-[TestFixture, TestOf( typeof(IniConfig) )]
+[TestFixture][TestOf( typeof(IniConfig) )]
 
 // ReSharper disable once InconsistentNaming
 public class IniConfig_Tests : Assert
@@ -16,7 +16,7 @@ public class IniConfig_Tests : Assert
     private const           string    APP_NAME = "AppName";
     private const           string    PROJECT  = "Project";
     private const           string    SERVER   = "Server";
-    private static readonly IniConfig __ini     = GetConfig();
+    private static readonly IniConfig __ini    = GetConfig();
 
 
     private static IniConfig GetConfig()

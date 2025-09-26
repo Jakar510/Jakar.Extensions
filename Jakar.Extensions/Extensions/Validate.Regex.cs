@@ -43,7 +43,7 @@ public static partial class Validate
 
 
 
-        [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" ), SuppressMessage( "ReSharper", "InconsistentNaming" )]
+        [SuppressMessage( "ReSharper", "PartialTypeWithSinglePart" )][SuppressMessage( "ReSharper", "InconsistentNaming" )]
         public static partial class PhoneNumbers
         {
             /// <summary> <see href="https://phoneregex.com/"/> </summary>

@@ -10,7 +10,7 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat(100);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SerializationUnreferencedCode)][RequiresDynamicCode(Json.SerializationRequiresDynamicCode)]
     public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
         where TValue : Exception
     {

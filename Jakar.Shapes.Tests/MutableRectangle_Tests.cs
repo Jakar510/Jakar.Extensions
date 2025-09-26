@@ -4,7 +4,7 @@
 namespace Jakar.Shapes.Tests;
 
 
-[TestFixture, TestOf(typeof(MutableRectangle))]
+[TestFixture][TestOf(typeof(MutableRectangle))]
 public sealed class MutableRectangle_Tests : Assert
 {
     private static readonly ReadOnlyPoint    __five     = 5;

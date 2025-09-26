@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRole,
                                  [property: StringLength(1024)] string NormalizedName,
                                  [property: StringLength(4096)] string ConcurrencyStamp,

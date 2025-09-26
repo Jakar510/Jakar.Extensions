@@ -1,4 +1,5 @@
-﻿using Serilog;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using Serilog;
 
 
 
@@ -8,7 +9,7 @@ namespace TestMauiApp;
 public sealed partial class App : Application, IDisposable
 {
     public static readonly ActivitySource ActivitySource = new(nameof(TestMauiApp));
-
+    /*
     public static readonly Serilogger Logger = Serilogger.Create( new SeriloggerOptions
                                                                   {
                                                                       Paths          = Paths,
@@ -21,8 +22,9 @@ public sealed partial class App : Application, IDisposable
                                                                       AppName        = TestMauiApp.AppName,
                                                                       AppVersion     = TestMauiApp.AppVersion,
                                                                   } );
+    */
 
-    public new static App       Current => (App)(Application.Current ?? throw new NullReferenceException( nameof(Current) ));
+    public new static App       Current => (App)( Application.Current ?? throw new NullReferenceException(nameof(Current)) );
     public static     FilePaths Paths   { get; } = new(FileSystem.AppDataDirectory, FileSystem.CacheDirectory);
 
 
@@ -31,6 +33,7 @@ public sealed partial class App : Application, IDisposable
         InitializeComponent();
         MainPage = new AppShell();
     }
+    public static ILogger<T> CreateLogger<T>() => Current.Handler?.MauiContext?.Services.GetRequiredService<ILoggerFactory>().CreateLogger<T>() ?? NullLogger<T>.Instance;
 
 
     protected override void OnStart()  => base.OnStart();
@@ -38,9 +41,5 @@ public sealed partial class App : Application, IDisposable
     protected override void OnResume() => base.OnResume();
 
 
-    public void Dispose()
-    {
-        Log.CloseAndFlush();
-        Logger.Dispose();
-    }
+    public void Dispose() => Log.CloseAndFlush();
 }

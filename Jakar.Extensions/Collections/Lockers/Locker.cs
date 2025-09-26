@@ -18,8 +18,8 @@ public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue
     ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
-    [Pure, MustDisposeResource] FilterBuffer<TValue>                               Copy();
-    [Pure, MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
+    [Pure][MustDisposeResource] FilterBuffer<TValue>                               Copy();
+    [Pure][MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
 }
 
 
@@ -55,7 +55,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
     public                  void     Dispose() => __locker?.Exit();
 
 
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     public static LockCloser Enter( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -64,7 +64,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
 
         return new LockCloser(locker);
     }
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
@@ -106,9 +106,9 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Type                  __index;
     private          bool                  __isTaken;
 
-    public static Locker    Default { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => new SemaphoreSlim(1, 1); }
-    public        bool      IsTaken { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTaken; }
-    public        TimeSpan? TimeOut { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public static Locker    Default { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => new SemaphoreSlim(1, 1); }
+    public        bool      IsTaken { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTaken; }
+    public        TimeSpan? TimeOut { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
 
 
     public Locker() : this(Type.Object) { }

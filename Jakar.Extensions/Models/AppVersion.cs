@@ -2,7 +2,7 @@
 
 
 /// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
-[Serializable, JsonConverter(typeof(AppVersionJsonConverter))]
+[Serializable][JsonConverter(typeof(AppVersionJsonConverter))]
 public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char       SEPARATOR = '.';

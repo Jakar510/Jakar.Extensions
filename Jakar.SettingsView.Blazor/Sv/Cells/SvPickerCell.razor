@@ -34,7 +34,7 @@
     public override                             WidgetType           Type       => WidgetType.Picker;
     [Parameter]                 public          IList<TValue>        Values     { get; set; } = new ObservableCollection<TValue>();
     [Parameter]                 public          Func<TValue, string> Formatter  { get; set; } = OptionsPopup<TValue>.DefaultFormatter;
-    [Parameter, EditorRequired] public required string               PopupTitle { get; set; }
+    [Parameter][EditorRequired] public required string               PopupTitle { get; set; }
 
 
     protected override void OnParametersSet()

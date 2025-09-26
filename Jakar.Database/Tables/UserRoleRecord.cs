@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>
 {
     public const  string                         TABLE_NAME = "user_roles";

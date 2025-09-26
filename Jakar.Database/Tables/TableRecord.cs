@@ -54,20 +54,29 @@ public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
 
 
 [Serializable]
-public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : BaseRecord<TClass>, IRecordPair<TClass>
+public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TClass>
     where TClass : TableRecord<TClass>, ITableRecord<TClass>
 {
-    protected internal static readonly PropertyInfo[]   Properties    = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-    protected                          DateTimeOffset?  _lastModified = LastModified;
-    private                            RecordID<TClass> __id          = ID;
+    protected internal static readonly PropertyInfo[]   Properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    protected                          DateTimeOffset?  _lastModified;
+    private                            RecordID<TClass> __id;
 
 
     [Key] public RecordID<TClass> ID           { get => __id;          init => __id = value; }
     public       DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
+    public       DateTimeOffset   DateCreated  { get;                  init; }
 
 
-    [Pure]
-    public UInt128 GetHash()
+    protected TableRecord( ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
+    {
+        this.DateCreated    = dateCreated;
+        _lastModified       = lastModified;
+        __id                = id;
+        this.AdditionalData = additionalData;
+    }
+
+
+    [Pure] public UInt128 GetHash()
     {
         ReadOnlySpan<char> json = ( (TClass)this ).ToJson();
         return json.Hash128();
@@ -85,8 +94,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     [Pure] public RecordPair<TClass> ToPair() => new(ID, DateCreated);
 
 
-    [Pure]
-    protected internal TClass Validate()
+    [Pure] protected internal TClass Validate()
     {
         if ( !Debugger.IsAttached ) { return (TClass)this; }
 
@@ -124,8 +132,7 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
     }
 
 
-    [Pure]
-    protected static TValue TryGet<TValue>( DbDataReader reader, string key )
+    [Pure] protected static TValue TryGet<TValue>( DbDataReader reader, string key )
     {
         int index = reader.GetOrdinal(key);
         return (TValue)reader.GetValue(index);
@@ -139,15 +146,28 @@ public abstract record TableRecord<TClass>( ref readonly RecordID<TClass> ID, re
         public RecordCollection( params ReadOnlySpan<TClass> values ) : this() => Add(values);
         public RecordCollection( IEnumerable<TClass>         values ) : this() => Add(values);
     }
+
+
+
+    public void Deconstruct( out RecordID<TClass> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
+    {
+        additionalData = this.AdditionalData;
+        id             = this.ID;
+        dateCreated    = this.DateCreated;
+        lastModified   = this.LastModified;
+    }
 }
 
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecord>? CreatedBy, ref readonly RecordID<TClass> ID, ref readonly DateTimeOffset DateCreated, ref readonly DateTimeOffset? LastModified ) : TableRecord<TClass>(in ID, in DateCreated, in LastModified), ICreatedBy
+public abstract record OwnedTableRecord<TClass> : TableRecord<TClass>, ICreatedBy
     where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>
 {
-    public RecordID<UserRecord>? CreatedBy { get; set; } = CreatedBy;
+    public RecordID<UserRecord>? CreatedBy { get; set; }
+
+
+    protected OwnedTableRecord( ref readonly RecordID<UserRecord>? createdBy, ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null ) : base(in id, in dateCreated, in lastModified, additionalData) { this.CreatedBy = createdBy; }
 
 
     public static DynamicParameters GetDynamicParameters( UserRecord user )
@@ -187,5 +207,13 @@ public abstract record OwnedTableRecord<TClass>( ref readonly RecordID<UserRecor
         if ( ReferenceEquals(this, other) ) { return 0; }
 
         return Nullable.Compare(CreatedBy, other.CreatedBy);
+    }
+    public void Deconstruct( out RecordID<UserRecord>? CreatedBy, out RecordID<TClass> ID, out DateTimeOffset DateCreated, out DateTimeOffset? LastModified, out JsonObject? AdditionalData )
+    {
+        CreatedBy      = this.CreatedBy;
+        ID             = this.ID;
+        DateCreated    = this.DateCreated;
+        LastModified   = this.LastModified;
+        AdditionalData = this.AdditionalData;
     }
 }

@@ -22,8 +22,8 @@
 
 @code
 {
-    [Parameter, EditorRequired] public required string               Title     { get; set; }
-    [Parameter, EditorRequired] public required Func<TValue, string> Formatter { get; set; }
+    [Parameter][EditorRequired] public required string               Title     { get; set; }
+    [Parameter][EditorRequired] public required Func<TValue, string> Formatter { get; set; }
 
 
     public static string DefaultFormatter( TValue x ) => x?.ToString() ?? string.Empty;

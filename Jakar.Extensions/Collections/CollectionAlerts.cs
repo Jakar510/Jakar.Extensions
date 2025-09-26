@@ -63,8 +63,8 @@ public abstract class CollectionAlerts<TClass, TValue> : BaseClass<TClass>, ICol
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }
     }
     protected virtual                                       bool                                          Filter( int index, ref readonly TValue? value ) => true;
-    [Pure, MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
-    [Pure, MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
+    [Pure][MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
+    [Pure][MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
     public virtual IEnumerator<TValue> GetEnumerator()
     {
         using FilterBuffer<TValue> owner = FilteredValues();

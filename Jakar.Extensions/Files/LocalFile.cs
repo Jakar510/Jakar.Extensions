@@ -923,7 +923,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         IReadHandler        handler       = this;
         return handler.AsMemory();
     }
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

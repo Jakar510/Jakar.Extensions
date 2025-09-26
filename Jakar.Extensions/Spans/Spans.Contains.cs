@@ -188,7 +188,7 @@ public static partial class Spans
     }
 
 
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     public static ReadOnlySpan<Vector<TValue>> GetVectors<TValue>( this scoped in ReadOnlySpan<TValue> values )
         where TValue : IEquatable<TValue>
     {

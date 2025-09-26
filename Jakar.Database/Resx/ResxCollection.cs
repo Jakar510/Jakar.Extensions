@@ -15,7 +15,7 @@ public sealed class ResxCollection : IResxCollection
 
     public ResxSet GetSet( in SupportedLanguage language )
     {
-        ResxSet set = new(Count);
+        ResxSet set = new(DbOptions.ConcurrencyLevel, Count);
         foreach ( ResxRowRecord row in this ) { set[row.KeyID] = row.GetValue(language); }
 
         return set;

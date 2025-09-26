@@ -3,30 +3,30 @@
 
 public static class Numbers
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static double  Round( this double  value ) => Math.Round( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static float   Round( this float   value ) => (float)Math.Round( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static decimal Round( this decimal value ) => Math.Round( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static double  Floor( this double  value ) => Math.Floor( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static float   Floor( this float   value ) => (float)Math.Floor( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static decimal Floor( this decimal value ) => Math.Floor( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static double  Round( this double  value ) => Math.Round( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static float   Round( this float   value ) => (float)Math.Round( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static decimal Round( this decimal value ) => Math.Round( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static double  Floor( this double  value ) => Math.Floor( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static float   Floor( this float   value ) => (float)Math.Floor( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static decimal Floor( this decimal value ) => Math.Floor( value );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static short   Abs( this short   value ) => Math.Abs( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static int     Abs( this int     value ) => Math.Abs( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static long    Abs( this long    value ) => Math.Abs( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static float   Abs( this float   value ) => Math.Abs( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static double  Abs( this double  value ) => Math.Abs( value );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static decimal Abs( this decimal value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static short   Abs( this short   value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static int     Abs( this int     value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static long    Abs( this long    value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static float   Abs( this float   value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static double  Abs( this double  value ) => Math.Abs( value );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static decimal Abs( this decimal value ) => Math.Abs( value );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static short   Clamp( this short   value, short   min, short   max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static int     Clamp( this int     value, int     min, int     max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static uint    Clamp( this uint    value, uint    min, uint    max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static long    Clamp( this long    value, long    min, long    max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static ulong   Clamp( this ulong   value, ulong   min, ulong   max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static float   Clamp( this float   value, float   min, float   max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static double  Clamp( this double  value, double  min, double  max ) => Math.Clamp( value, min, max );
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), Pure] public static decimal Clamp( this decimal value, decimal min, decimal max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static short   Clamp( this short   value, short   min, short   max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static int     Clamp( this int     value, int     min, int     max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static uint    Clamp( this uint    value, uint    min, uint    max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static long    Clamp( this long    value, long    min, long    max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static ulong   Clamp( this ulong   value, ulong   min, ulong   max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static float   Clamp( this float   value, float   min, float   max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static double  Clamp( this double  value, double  min, double  max ) => Math.Clamp( value, min, max );
+    [MethodImpl(MethodImplOptions.AggressiveInlining )][Pure] public static decimal Clamp( this decimal value, decimal min, decimal max ) => Math.Clamp( value, min, max );
 
 
     public static T Clamp<T>( this T value, T min, T max )

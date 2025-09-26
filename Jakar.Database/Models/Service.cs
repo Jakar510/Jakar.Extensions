@@ -47,14 +47,14 @@ public abstract class Service : BaseClass, IAsyncDisposable, IValidator
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden, DoesNotReturn]
+    [StackTraceHidden][DoesNotReturn]
 #endif
 
     protected virtual void ThrowDisabled( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ApiDisabledException($"{ClassName}.{caller}", inner);
 
 
 #if NET6_0_OR_GREATER
-    [StackTraceHidden, DoesNotReturn]
+    [StackTraceHidden][DoesNotReturn]
 #endif
 
     protected void ThrowDisposed( Exception? inner = null, [CallerMemberName] string? caller = null ) => throw new ObjectDisposedException($"{ClassName}.{caller}", inner);

@@ -115,7 +115,7 @@ public abstract class ObservableHashSet<TClass, TValue>( HashSet<TValue> values 
     public         void CopyTo( TValue[] array, int arrayIndex ) => buffer.CopyTo(array, arrayIndex);
 
 
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     protected internal override FilterBuffer<TValue> FilteredValues()
     {
         int                  count  = buffer.Count;

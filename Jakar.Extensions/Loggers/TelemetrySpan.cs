@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-[NotSerializable, DefaultValue(nameof(Empty))]
+[NotSerializable][DefaultValue(nameof(Empty))]
 public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 {
     public const           string        APP           = nameof(APP);
@@ -71,9 +71,9 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
                                                                            : new ActivityLink(__activity.Context, tags);
 
 
-    [Pure, MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, __activity);
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
-    [Pure, MustDisposeResource] public static TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
+    [Pure][MustDisposeResource] public        TelemetrySpan SubSpan( [CallerMemberName] string         name                                   = EMPTY ) => new(name, __activity);
+    [Pure][MustDisposeResource] public static TelemetrySpan Create( [CallerMemberName]  string         name                                   = EMPTY ) => new(name, Activity.Current);
+    [Pure][MustDisposeResource] public static TelemetrySpan Create( ref readonly        TelemetrySpan? parent, [CallerMemberName] string name = EMPTY ) => parent?.SubSpan(name) ?? Create(name);
 
 
     public TelemetrySpan AddTag( string key, string? value )

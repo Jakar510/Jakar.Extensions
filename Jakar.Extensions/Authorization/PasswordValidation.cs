@@ -9,7 +9,7 @@ using System.Formats.Asn1;
 namespace Jakar.Extensions;
 
 
-[DefaultValue(nameof(Default)), SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
+[DefaultValue(nameof(Default))][SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public readonly ref struct PasswordValidator
 {
     private readonly Requirements __requirements;
@@ -103,7 +103,7 @@ public readonly ref struct PasswordValidator
 
 
 
-[DefaultValue(nameof(Default)), SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor")]
+[DefaultValue(nameof(Default))][SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor")]
 public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
                                          int                  minLength,
                                          int                  maxLength,

@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>

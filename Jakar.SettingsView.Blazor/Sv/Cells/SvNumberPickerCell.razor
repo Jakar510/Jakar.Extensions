@@ -33,7 +33,7 @@
     public override                             WidgetType            Type       => WidgetType.NumberPicker;
     [Parameter]                 public          IList<double>         Values     { get; set; } = new ObservableCollection<double>();
     [Parameter]                 public          Func<double, string>? Formatter  { get; set; }
-    [Parameter, EditorRequired] public required string                PopupTitle { get; set; }
+    [Parameter][EditorRequired] public required string                PopupTitle { get; set; }
 
 
     protected override void OnParametersSet()

@@ -4676,7 +4676,7 @@
 			<typeparam name="TElement"> </typeparam>
 		</member>
 		<member name="TValue:Jakar.Extensions.AppVersion">
-			<summary> See <see cref="TValue:Jakar.Extensions.AppVersion.Format" /> for formatting details. </summary>
+			<summary> See <see cref="TValue:Jakar.Extensions.AppVersionFormat" /> for formatting details. </summary>
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.TryParse(System.ReadOnlySpan{System.Char},Jakar.Extensions.AppVersion@)">
 			<summary> </summary>
@@ -4686,8 +4686,8 @@
 		</member>
 		<member name="M:Jakar.Extensions.AppVersion.ToVersion">
 			<summary>
-				If the <see cref="P:Jakar.Extensions.AppVersion.Scheme" /> is any of [ <see cref="F:Jakar.Extensions.AppVersion.Format.Singular" /> ,
-				<see cref="F:Jakar.Extensions.AppVersion.Format.DetailedRevisions" /> , <see cref="F:Jakar.Extensions.AppVersion.Format.Complete" /> ], will throw
+				If the <see cref="P:Jakar.Extensions.AppVersion.Scheme" /> is any of [ <see cref="F:Jakar.Extensions.AppVersionFormat.Singular" /> ,
+				<see cref="F:Jakar.Extensions.AppVersionFormat.DetailedRevisions" /> , <see cref="F:Jakar.Extensions.AppVersionFormat.Complete" /> ], will throw
 				<see cref="TValue:System.InvalidOperationException" />
 			</summary>
 			<returns> </returns>
@@ -4745,22 +4745,22 @@
 			</returns>
 			<exception cref="TValue:System.ArgumentException"> If something goes wrong, and the <paramref name="other" /> is not comparable. </exception>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Singular">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Singular">
 			<summary> Major </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Minimal">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Minimal">
 			<summary> Major.Minor </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Typical">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Typical">
 			<summary> Major.Minor.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Detailed">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Detailed">
 			<summary> Major.Minor.Maintenance.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.DetailedRevisions">
+		<member name="F:Jakar.Extensions.AppVersionFormat.DetailedRevisions">
 			<summary> Major.Minor.Maintenance.MajorRevision.Build </summary>
 		</member>
-		<member name="F:Jakar.Extensions.AppVersion.Format.Complete">
+		<member name="F:Jakar.Extensions.AppVersionFormat.Complete">
 			<summary> Major.Minor.Maintenance.MajorRevision.MinorRevision.Build </summary>
 		</member>
 		<member name="TValue:Jakar.Extensions.NullScope">

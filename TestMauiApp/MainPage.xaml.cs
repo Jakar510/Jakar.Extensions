@@ -9,24 +9,24 @@ public partial class MainPage : ContentPage, IDisposable
 {
     private readonly ObservableCollection<string> __collection = [];
     private          int                          __count;
-    private readonly Logger                       __logger;
+    private readonly ILogger<MainPage>            __logger;
 
     // private readonly System.Collections.ObjectModel.ObservableCollection<string> _collection = [];
 
 
-    public MainPage() : this( App.Current ) { }
+    public MainPage() : this(App.Current) { }
     public MainPage( App app )
     {
         InitializeComponent();
-        Cv.ItemsSource                =  __collection;
+        Cv.ItemsSource                 =  __collection;
         __collection.CollectionChanged += OnCollectionChanged;
-        __logger                       =  App.Logger.CreateLogger<MainPage>();
+        __logger                       =  App.CreateLogger<MainPage>();
     }
     public void Dispose()
     {
         __collection.CollectionChanged -= OnCollectionChanged;
         __collection.Dispose();
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
     }
     private static void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args ) => args.Action.WriteToDebug(); // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
 
@@ -34,14 +34,16 @@ public partial class MainPage : ContentPage, IDisposable
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.CreateVersion7().ToString() ).SetBaggage( "SessionID", __count.ToString() ).AddTag( "X", "Y" );
-        __logger.Information( "{Event}", nameof(OnAppearing) );
+        ActivityEvent e = new("OnAppearing");
+        Activity.Current?.AddEvent(e).SetBaggage("UserID", Guid.CreateVersion7().ToString()).SetBaggage("SessionID", __count.ToString()).AddTag("X", "Y");
+        __logger.LogInformation("{Event}", nameof(OnAppearing));
     }
     protected override void OnDisappearing()
     {
         base.OnDisappearing();
-        Activity.Current?.AddEvent();
-        __logger.Information( "{Event}", nameof(OnDisappearing) );
+        ActivityEvent e = new("OnDisappearing");
+        Activity.Current?.AddEvent(e);
+        __logger.LogInformation("{Event}", nameof(OnDisappearing));
     }
 
 
@@ -54,11 +56,11 @@ public partial class MainPage : ContentPage, IDisposable
                                              ? $"Clicked {__count} time"
                                              : $"Clicked {__count} times";
 
-        Activity.Current?.SetCustomProperty( nameof(__count), __count.ToString() );
-        __logger.Information( "CounterClicked.{Value}", value );
+        Activity.Current?.SetCustomProperty(nameof(__count), __count.ToString());
+        __logger.Information("CounterClicked.{Value}", value);
         if ( __count % 5 == 0 ) { __collection.Clear(); }
 
-        __collection.Add( value );
+        __collection.Add(value);
     }
     private void OnCounterClicked( object sender, EventArgs e )
     {
@@ -66,7 +68,7 @@ public partial class MainPage : ContentPage, IDisposable
         catch ( Exception exception )
         {
             Console.WriteLine();
-            Console.WriteLine( exception.ToString() );
+            Console.WriteLine(exception.ToString());
             Console.WriteLine();
         }
     }

@@ -4,7 +4,7 @@
 [SuppressMessage( "ReSharper", "SuggestBaseTypeForParameterInConstructor" )]
 public static class ArrayExtensions
 {
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" ), SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )][SuppressMessage( "ReSharper", "InvokeAsExtensionMethod" )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this IEnumerable<TElement> values ) => values switch
                                                                                                             {
                                                                                                                 TElement[] array                   => array,
@@ -18,7 +18,7 @@ public static class ArrayExtensions
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this List<TElement> list ) => CollectionsMarshal.AsSpan( list );
 
 
-    [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" ), MethodImpl( MethodImplOptions.AggressiveInlining )]
+    [RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )][MethodImpl( MethodImplOptions.AggressiveInlining )]
     public static ReadOnlySpan<TElement> GetInternalArray<TElement>( this Collection<TElement> list ) => ArrayAccessor<TElement>.CollectionGetter( list ).GetInternalArray();
 
 

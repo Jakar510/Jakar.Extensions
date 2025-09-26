@@ -17,7 +17,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     private string __userPassword    = string.Empty;
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
+    [Required][StringLength(UNICODE_CAPACITY)]
     public virtual string ConfirmPassword
     {
         get => __confirmPassword;
@@ -29,10 +29,10 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
 
 
     [JsonIgnore]                                                                     public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.IsValid                         && IsValidPassword; }
-    [JsonIgnore, MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
+    [JsonIgnore][MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
+    [Required][StringLength(UNICODE_CAPACITY)]
     public virtual string Password
     {
         get => __userPassword;
@@ -43,7 +43,7 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     }
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
+    [Required][StringLength(UNICODE_CAPACITY)]
     public override string UserName
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.UserName;

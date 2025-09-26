@@ -25,7 +25,7 @@ public class Popup<TValue> : RadzenComponent
     [Parameter]                 public          bool                  Lazy           { get; set; }
     [Parameter]                 public          EventCallback<TValue> Open           { get; set; }
     [Parameter]                 public          bool                  PreventDefault { get; set; }
-    [Parameter, EditorRequired] public required string                ID             { get; set; }
+    [Parameter][EditorRequired] public required string                ID             { get; set; }
 
 
     protected override void BuildRenderTree( RenderTreeBuilder builder )

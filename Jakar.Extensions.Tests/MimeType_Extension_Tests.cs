@@ -1,7 +1,7 @@
 namespace Jakar.Extensions.Tests;
 
 
-[TestFixture, TestOf( typeof(MimeTypes) )]
+[TestFixture][TestOf( typeof(MimeTypes) )]
 
 // ReSharper disable once InconsistentNaming
 public class MimeType_Extension_Tests : Assert

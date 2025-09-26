@@ -75,11 +75,11 @@ public abstract class ObservableCollection<TClass, TValue>( Comparer<TValue> com
     protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public          int  Capacity       { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
-    public override int  Count          { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count == 0; }
+    public          int  Capacity       { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int  Count          { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
+    public          bool IsEmpty        { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count == 0; }
     bool IList.          IsFixedSize    { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
-    public bool          IsNotEmpty     { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count > 0; }
+    public bool          IsNotEmpty     { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count > 0; }
     public bool          IsReadOnly     { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get; init; }
     bool ICollection.    IsSynchronized { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => false; }
     object? IList.this[ int                index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); [MethodImpl(MethodImplOptions.AggressiveInlining)] set => Set(index, (TValue)value!); }
@@ -662,7 +662,7 @@ public abstract class ObservableCollection<TClass, TValue>( Comparer<TValue> com
     }
 
 
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     protected internal override FilterBuffer<TValue> FilteredValues()
     {
         ReadOnlySpan<TValue> span   = AsSpan();

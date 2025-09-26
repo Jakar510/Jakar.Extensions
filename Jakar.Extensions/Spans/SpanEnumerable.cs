@@ -18,8 +18,8 @@ public ref struct SpanEnumerator<TValue>( scoped in ReadOnlySpan<TValue> span )
 
     public readonly Item Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => new(__span, __index); }
 
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanEnumerator<TValue> GetEnumerator() => this;
-    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public          bool                   MoveNext()      => ++__index < __span.Length;
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining )] public readonly SpanEnumerator<TValue> GetEnumerator() => this;
+    [MethodImpl(      MethodImplOptions.AggressiveInlining )] public          bool                   MoveNext()      => ++__index < __span.Length;
 
 
 

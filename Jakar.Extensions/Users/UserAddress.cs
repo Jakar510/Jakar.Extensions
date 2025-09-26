@@ -117,7 +117,7 @@ public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID
     }
 
 
-    [Required, StringLength(UNICODE_CAPACITY)]
+    [Required][StringLength(UNICODE_CAPACITY)]
     public string PostalCode
     {
         get => __postalCode;

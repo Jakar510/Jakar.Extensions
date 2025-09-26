@@ -23,7 +23,7 @@ public interface IErrorOrResult<TValue>
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-[Serializable, DefaultValue(nameof(Empty))]
+[Serializable][DefaultValue(nameof(Empty))]
 public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrResult<bool?>
 {
     public static readonly ErrorOrResult Empty = new(null, Errors.Empty);
@@ -61,7 +61,7 @@ public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrRes
                                                                                                                       : value(this);
 
 
-    [MemberNotNullWhen(true, nameof(Value)), MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value, [NotNullWhen(false)] out Errors? errors )
+    [MemberNotNullWhen(true, nameof(Value))][MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value, [NotNullWhen(false)] out Errors? errors )
     {
         value  = Value;
         errors = null;
@@ -69,7 +69,7 @@ public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrRes
     }
 
 
-    [MemberNotNullWhen(true, nameof(Value)), MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value )
+    [MemberNotNullWhen(true, nameof(Value))][MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out bool? value )
     {
         value = Value;
         return value is true;
@@ -126,7 +126,7 @@ public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrRes
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-[Serializable, DefaultValue(nameof(Empty))]
+[Serializable][DefaultValue(nameof(Empty))]
 public readonly struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : IErrorOrResult<TValue>
 {
     public static readonly ErrorOrResult<TValue> Empty = new(default, Errors.Empty);
@@ -134,7 +134,7 @@ public readonly struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : I
     public readonly        TValue?               Value = Value;
 
 
-    [MemberNotNullWhen(false, nameof(Value)), MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true && Value is null;
+    [MemberNotNullWhen(false, nameof(Value))][MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true && Value is null;
     [MemberNotNullWhen(true,  nameof(Value))]                                         public bool HasValue  => Value is not null;
 
 
@@ -157,7 +157,7 @@ public readonly struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : I
             : errors(e);
 
 
-    [MemberNotNullWhen(true, nameof(Value)), MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value, [NotNullWhen(false)] out Errors? errors )
+    [MemberNotNullWhen(true, nameof(Value))][MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value, [NotNullWhen(false)] out Errors? errors )
     {
         errors = Error;
         value  = Value;
@@ -165,7 +165,7 @@ public readonly struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : I
     }
 
 
-    [MemberNotNullWhen(true, nameof(Value)), MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value )
+    [MemberNotNullWhen(true, nameof(Value))][MemberNotNullWhen(false, nameof(Error))] public bool TryGetValue( [NotNullWhen(true)] out TValue? value )
     {
         value = Value;
         return value is not null;

@@ -19,7 +19,7 @@ public class BaseClass : IJsonModel, IObservableObject
     protected              JsonObject?    _additionalData;
 
 
-    [StringLength(UNICODE_TEXT_CAPACITY), JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
+    [StringLength(UNICODE_TEXT_CAPACITY)][JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;

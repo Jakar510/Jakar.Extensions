@@ -53,22 +53,22 @@ public static partial class Tasks
     [MethodImpl( MethodImplOptions.AggressiveInlining )] public static Task<TValue> Run<TValue>( this Func<CancellationToken, ValueTask<TValue>> func, CancellationToken token = default ) => Task.Run( new Caller<TValue>( func, token ).Execute, token );
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static Task WhenAny( this IEnumerable<Task> tasks ) => Task.WhenAny( tasks.GetInternalArray() );
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static Task<Task<TResult>> WhenAny<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAny( tasks.GetInternalArray() );
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static Task WhenAll( this IEnumerable<Task> tasks ) => Task.WhenAll( tasks.GetInternalArray() );
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static Task<TResult[]> WhenAll<TResult>( this IEnumerable<Task<TResult>> tasks ) => Task.WhenAll( tasks.GetInternalArray() );
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static void WaitAll( this IEnumerable<Task> tasks, CancellationToken token = default ) => tasks.WhenAll().Wait( token );
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining ), RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
+    [MethodImpl( MethodImplOptions.AggressiveInlining )][RequiresDynamicCode( "Jakar.Extensions.ArrayExtensions.ArrayAccessor<TElement>.GetCollectionGetter()" )]
     public static int WaitAny( this IEnumerable<Task> tasks, CancellationToken token = default ) => Task.WaitAny( tasks.ToArray(), token );
 
 

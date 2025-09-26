@@ -9,7 +9,7 @@ using ZLinq.Linq;
 namespace Jakar.Extensions;
 
 
-[Serializable, DefaultValue(nameof(Empty))]
+[Serializable][DefaultValue(nameof(Empty))]
 [method: JsonConstructor]
 public sealed class Errors() : BaseClass<Errors>, IJsonModel<Errors>, IValueEnumerable<FromArray<Error>, Error>
 {

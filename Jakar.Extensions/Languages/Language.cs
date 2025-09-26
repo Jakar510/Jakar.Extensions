@@ -6,7 +6,7 @@ using ZLinq.Linq;
 namespace Jakar.Extensions;
 
 
-[Serializable, DebuggerDisplay(nameof(DisplayName))]
+[Serializable][DebuggerDisplay(nameof(DisplayName))]
 public sealed class Language : BaseClass, IEqualComparable<Language>
 {
     private readonly CultureInfo __culture;

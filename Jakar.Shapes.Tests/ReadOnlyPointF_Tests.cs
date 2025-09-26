@@ -4,7 +4,7 @@
 namespace Jakar.Shapes.Tests;
 
 
-[TestFixture, TestOf(typeof(ReadOnlyPointF))]
+[TestFixture][TestOf(typeof(ReadOnlyPointF))]
 public sealed class ReadOnlyPointF_Tests : Assert
 {
     [Test]

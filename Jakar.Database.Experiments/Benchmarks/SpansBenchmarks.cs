@@ -65,7 +65,7 @@ namespace Jakar.Database.Experiments.Benchmarks;
 
 
 
-[SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
+[SimpleJob( RuntimeMoniker.HostProcess )][Orderer( SummaryOrderPolicy.FastestToSlowest )][RankColumn][MemoryDiagnoser]
 public class SpansBenchmarks
 {
     private const string ALPHABET        = Randoms.ALPHANUMERIC;

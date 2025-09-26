@@ -17,7 +17,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     RecordID<AddressRecord>                   ID,
                                     RecordID<UserRecord>?                     CreatedBy,
                                     DateTimeOffset                            DateCreated,
-                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
+                                    DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified, AdditionalData), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "Address";
     public static string                        TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
@@ -53,8 +53,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                                                                        DateTimeOffset.UtcNow) { }
 
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Line1),           Line1);
@@ -71,7 +70,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static AddressRecord Parse( string s, IFormatProvider? provider ) => Create(Extensions.Validate.Re.Address.Match(s));
     public static bool TryParse( [NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AddressRecord result )
     {
-        Match match = Extensions.Validate.Re.Address.Match(s);
+        Match match = Extensions.Validate.Re.Address.Match(s ?? string.Empty);
 
         if ( !match.Success )
         {
@@ -84,19 +83,17 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
     [Pure] public static AddressRecord Create( Match          match )   => new(match);
     [Pure] public static AddressRecord Create( IAddress<Guid> address ) => new(address);
-    [Pure]
-    public static AddressRecord Create( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid id = default ) => new(line1,
-                                                                                                                                                                       line2,
-                                                                                                                                                                       city,
-                                                                                                                                                                       stateOrProvince,
-                                                                                                                                                                       postalCode,
-                                                                                                                                                                       country,
-                                                                                                                                                                       id.IsValidID()
-                                                                                                                                                                           ? id
-                                                                                                                                                                           : Guid.NewGuid());
+    [Pure] public static AddressRecord Create( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid id = default ) => new(line1,
+                                                                                                                                                                              line2,
+                                                                                                                                                                              city,
+                                                                                                                                                                              stateOrProvince,
+                                                                                                                                                                              postalCode,
+                                                                                                                                                                              country,
+                                                                                                                                                                              id.IsValidID()
+                                                                                                                                                                                  ? id
+                                                                                                                                                                                  : Guid.NewGuid());
 
-    [Pure]
-    public static AddressRecord Create( DbDataReader reader )
+    [Pure] public static AddressRecord Create( DbDataReader reader )
     {
         string                  line1           = reader.GetFieldValue<string>(nameof(Line1));
         string                  line2           = reader.GetFieldValue<string>(nameof(Line2));
@@ -130,8 +127,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
-    [Pure]
-    public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
+    [Pure] public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         DynamicParameters   parameters = new();
         ReadOnlySpan<Claim> span       = claims;
@@ -150,8 +146,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
-    [Pure]
-    public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
+    [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         DynamicParameters parameters = new();
 
@@ -182,8 +177,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
-    [Pure]
-    public IEnumerable<Claim> GetUserClaims( ClaimType types )
+    [Pure] public IEnumerable<Claim> GetUserClaims( ClaimType types )
     {
         if ( hasFlag(types, ClaimType.StreetAddressLine1) ) { yield return new Claim(ClaimType.StreetAddressLine1.ToClaimTypes(), Line1, ClaimValueTypes.String); }
 
@@ -207,8 +201,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         where TAddress : class, IAddress<TAddress, Guid> => TAddress.Create(this);
 
 
-    [Pure]
-    public AddressRecord WithUserData( IAddress<Guid> value ) =>
+    [Pure] public AddressRecord WithUserData( IAddress<Guid> value ) =>
         this with
         {
             Line1 = value.Line1,

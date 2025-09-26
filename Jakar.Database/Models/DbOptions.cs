@@ -3,6 +3,7 @@
 
 using ZiggyCreatures.Caching.Fusion.Backplane.Memory;
 using ZiggyCreatures.Caching.Fusion.Backplane.StackExchangeRedis;
+using ZiggyCreatures.Caching.Fusion.Events;
 
 
 
@@ -12,51 +13,54 @@ namespace Jakar.Database;
 [SuppressMessage("ReSharper", "MemberCanBeMadeStatic.Global")]
 public sealed class DbOptions : IOptions<DbOptions>
 {
-    public const           string         AUTHENTICATION_TYPE = JwtBearerDefaults.AuthenticationScheme;
-    public const           int            COMMAND_TIMEOUT     = 300;
-    public const           string         JWT_ALGORITHM       = SecurityAlgorithms.HmacSha512Signature;
-    public const           string         JWT_KEY             = "JWT";
-    public const           string         USER_EXISTS         = "User Exists";
-    public static readonly Uri            Local_433           = new("https://localhost:443");
-    public static readonly Uri            Local_80            = new("http://localhost:80");
-    public                 AppInformation AppInformation                  { get; set; } = AppInformation.Invalid;
-    public                 string         AuthenticationScheme            { get; set; } = DbServices.AUTHENTICATION_SCHEME;
-    public                 string         AuthenticationSchemeDisplayName { get; set; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
+    public const           string AUTHENTICATION_TYPE = JwtBearerDefaults.AuthenticationScheme;
+    public const           int    COMMAND_TIMEOUT     = 300;
+    public const           string JWT_ALGORITHM       = SecurityAlgorithms.HmacSha512Signature;
+    public const           string JWT_KEY             = "JWT";
+    public const           string USER_EXISTS         = "User Exists";
+    public static readonly Uri    Local_433           = new("https://localhost:443");
+    public static readonly Uri    Local_80            = new("http://localhost:80");
 
 
-    public string                                                  AuthenticationType             { get;                                 set; } = AUTHENTICATION_TYPE;
-    public TimeSpan                                                ClockSkew                      { get;                                 set; } = TimeSpan.FromMinutes(1);
-    public int?                                                    CommandTimeout                 { get;                                 set; } = COMMAND_TIMEOUT;
-    public Action<CookieAuthenticationOptions>?                    ConfigureApplicationCookie     { get;                                 set; }
-    public Action<AuthenticationOptions>?                          ConfigureAuthentication        { get;                                 set; }
-    public Action<RedisBackplaneOptions>?                          ConfigureAuthenticationOptions { get;                                 set; }
-    public Action<CookieAuthenticationOptions>?                    ConfigureCookieAuth            { get;                                 set; }
-    public Action<CookieAuthenticationOptions>?                    ConfigureExternalCookie        { get;                                 set; }
-    public Action<GoogleOptions>?                                  ConfigureGoogle                { get;                                 set; }
-    public Action<IdentityOptions>                                 ConfigureIdentityOptions       { get;                                 set; }
-    public Action<LoggerProviderBuilder>?                          ConfigureLoggerProviderBuilder { get;                                 set; }
-    public Action<MemoryBackplaneOptions>?                         ConfigureMemoryBackplane       { get;                                 set; }
-    public Action<OtlpExporterOptions>?                            ConfigureMeterOtlpExporter     { get;                                 set; }
-    public Action<MicrosoftAccountOptions>?                        ConfigureMicrosoftAccount      { get;                                 set; }
-    public Action<OpenIdConnectOptions>?                           ConfigureOpenIdConnect         { get;                                 set; }
-    public Action<OpenTelemetryLoggerOptions>?                     ConfigureOpenTelemetryLogger   { get;                                 set; }
-    public Action<RedisBackplaneOptions>?                          ConfigureRedisBackplane        { get;                                 set; }
-    public Action<OtlpExporterOptions>?                            ConfigureTracerOtlpExporter    { get;                                 set; }
-    public SecuredStringResolverOptions                            ConnectionStringResolver       { get;                                 set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
-    public (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey               { get;                                 set; }
-    public Uri                                                     Domain                         { get;                                 set; } = Local_433;
-    public FusionCacheEntryOptions                                 FusionCacheEntryOptions        { get;                                 set; } = new() { Duration = TimeSpan.FromMinutes(2) };
-    public string                                                  JWTAlgorithm                   { get;                                 set; } = JWT_ALGORITHM;
-    public string                                                  JWTKey                         { get;                                 set; } = JWT_KEY;
-    public AppLoggerOptions                                        LoggerOptions                  { get;                                 set; } = new();
-    public PasswordRequirements                                    PasswordRequirements           { get => PasswordRequirements.Current; set => PasswordRequirements.Current = value; }
-    public SeqConfig                                               SeqConfig                      { get;                                 set; }
-    public Logger?                                                 Serilogger                     { get;                                 set; }
-    public TelemetrySource?                                        TelemetrySource                { get => TelemetrySource.Current;      set => TelemetrySource.Current = value; }
-    public string                                                  TokenAudience                  { get;                                 set; } = string.Empty;
-    public string                                                  TokenIssuer                    { get;                                 set; } = string.Empty;
-    public string                                                  UserExists                     { get;                                 set; } = USER_EXISTS;
-    DbOptions IOptions<DbOptions>.                                 Value                          => this;
+    public static PasswordRequirements PasswordRequirements { get => PasswordRequirements.Current; set => PasswordRequirements.Current = value; }
+    public static TelemetrySource?     TelemetrySource      { get => TelemetrySource.Current;      set => TelemetrySource.Current = value; }
+    public static int                  ConcurrencyLevel     { get;                                 set; }
+
+
+    public AppInformation                                          AppInformation                  { get; set; } = AppInformation.Invalid;
+    public string                                                  AuthenticationScheme            { get; set; } = DbServices.AUTHENTICATION_SCHEME;
+    public string                                                  AuthenticationSchemeDisplayName { get; set; } = DbServices.AUTHENTICATION_SCHEME_DISPLAY_NAME;
+    public string                                                  AuthenticationType              { get; set; } = AUTHENTICATION_TYPE;
+    public TimeSpan                                                ClockSkew                       { get; set; } = TimeSpan.FromMinutes(1);
+    public int?                                                    CommandTimeout                  { get; set; } = COMMAND_TIMEOUT;
+    public Action<CookieAuthenticationOptions>?                    ConfigureApplicationCookie      { get; set; }
+    public Action<AuthenticationOptions>?                          ConfigureAuthentication         { get; set; }
+    public Action<RedisBackplaneOptions>?                          ConfigureAuthenticationOptions  { get; set; }
+    public Action<CookieAuthenticationOptions>?                    ConfigureCookieAuth             { get; set; }
+    public Action<CookieAuthenticationOptions>?                    ConfigureExternalCookie         { get; set; }
+    public Action<GoogleOptions>?                                  ConfigureGoogle                 { get; set; }
+    public Action<IdentityOptions>                                 ConfigureIdentityOptions        { get; set; }
+    public Action<LoggerProviderBuilder>?                          ConfigureLoggerProviderBuilder  { get; set; }
+    public Action<MemoryBackplaneOptions>?                         ConfigureMemoryBackplane        { get; set; }
+    public Action<OtlpExporterOptions>?                            ConfigureMeterOtlpExporter      { get; set; }
+    public Action<MicrosoftAccountOptions>?                        ConfigureMicrosoftAccount       { get; set; }
+    public Action<OpenIdConnectOptions>?                           ConfigureOpenIdConnect          { get; set; }
+    public Action<OpenTelemetryLoggerOptions>?                     ConfigureOpenTelemetryLogger    { get; set; }
+    public Action<RedisBackplaneOptions>?                          ConfigureRedisBackplane         { get; set; }
+    public Action<OtlpExporterOptions>?                            ConfigureTracerOtlpExporter     { get; set; }
+    public SecuredStringResolverOptions                            ConnectionStringResolver        { get; set; } = (Func<IConfiguration, SecuredString>)GetConnectionString;
+    public (LocalFile Pem, SecuredStringResolverOptions Password)? DataProtectorKey                { get; set; }
+    public Uri                                                     Domain                          { get; set; } = Local_433;
+    public FusionCacheEntryOptionsWrapper                          FusionCacheEntryOptions         { get; set; } = new() { Duration = TimeSpan.FromMinutes(2) };
+    public string                                                  JWTAlgorithm                    { get; set; } = JWT_ALGORITHM;
+    public string                                                  JWTKey                          { get; set; } = JWT_KEY;
+    public AppLoggerOptions                                        LoggerOptions                   { get; set; } = new();
+    public SeqConfig                                               SeqConfig                       { get; set; }
+    public Logger?                                                 Serilogger                      { get; set; }
+    public string                                                  TokenAudience                   { get; set; } = string.Empty;
+    public string                                                  TokenIssuer                     { get; set; } = string.Empty;
+    public string                                                  UserExists                      { get; set; } = USER_EXISTS;
+    DbOptions IOptions<DbOptions>.                                 Value                           => this;
 
 
     public DbOptions() => ConfigureIdentityOptions = DefaultConfigureIdentityOptions;

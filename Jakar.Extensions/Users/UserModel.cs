@@ -64,11 +64,11 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     }
 
     [StringLength(              UNICODE_CAPACITY)] public string Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress, StringLength(UNICODE_CAPACITY)] public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
+    [EmailAddress][StringLength(UNICODE_CAPACITY)] public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
     public                                                TID?   EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
     [StringLength(UNICODE_CAPACITY)] public               string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
 
-    [Required, StringLength(2000)]
+    [Required][StringLength(2000)]
     public string FirstName
     {
         get => __firstName;
@@ -92,7 +92,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
     [JsonIgnore] public virtual             bool                              IsValidUserName    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName); }
     [JsonIgnore] public virtual             bool                              IsValidWebsite     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _); }
 
-    [Required, StringLength(2000)]
+    [Required][StringLength(2000)]
     public string LastName
     {
         get => __lastName;
@@ -105,7 +105,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         }
     }
 
-    [Phone, StringLength(UNICODE_CAPACITY)]   public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
+    [Phone][StringLength(UNICODE_CAPACITY)]   public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
     [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => __preferredLanguage; set => SetProperty(ref __preferredLanguage, value); }
     [StringLength(IUserRights.MAX_SIZE)]      public string                           Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
     public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
@@ -135,7 +135,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         }
     }
 
-    [Url, StringLength(UNICODE_CAPACITY)] public string Website { get => __website; set => SetProperty(ref __website, value); }
+    [Url][StringLength(UNICODE_CAPACITY)] public string Website { get => __website; set => SetProperty(ref __website, value); }
 
 
     protected UserModel() : base() { }

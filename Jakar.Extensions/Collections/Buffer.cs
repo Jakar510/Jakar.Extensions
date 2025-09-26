@@ -30,17 +30,17 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
             Interlocked.Exchange(ref _length, value);
         }
     }
-    public bool IsEmpty    { [Pure, MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length == 0; }
-    public bool IsNotEmpty { [Pure, MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length > 0; }
-    public bool IsReadOnly { [Pure, MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; init; } = false;
-    public ref TValue this[ int     index ] { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
-    public ref TValue this[ Index   index ] { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
-    public Span<TValue> this[ Range range ] { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => Values[range]; }
+    public bool IsEmpty    { [Pure][MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length == 0; }
+    public bool IsNotEmpty { [Pure][MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length > 0; }
+    public bool IsReadOnly { [Pure][MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; init; } = false;
+    public ref TValue this[ int     index ] { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
+    public ref TValue this[ Index   index ] { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
+    public Span<TValue> this[ Range range ] { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => Values[range]; }
     public Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
-    public Memory<TValue> Memory { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => _array.Memory; }
-    public Span<TValue>   Next   { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[Length..]; }
-    public Span<TValue>   Span   { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => Memory.Span; }
-    public Span<TValue>   Values { [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[..Length]; }
+    public Memory<TValue> Memory { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => _array.Memory; }
+    public Span<TValue>   Next   { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[Length..]; }
+    public Span<TValue>   Span   { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => Memory.Span; }
+    public Span<TValue>   Values { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[..Length]; }
 
 
     [MustDisposeResource] public Buffer() : this(DEFAULT_CAPACITY) { }
@@ -462,7 +462,7 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     public Buffer<TValue> Grow( uint additionalRequestedCapacity )
     {
         ThrowIfReadOnly();

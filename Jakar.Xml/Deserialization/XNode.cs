@@ -25,7 +25,7 @@ public readonly ref struct XNode
 
     public Buffer<char> EndTag
     {
-        [Pure, MustDisposeResource]
+        [Pure][MustDisposeResource]
         get
         {
             ReadOnlySpan<char> name = Name.Span;

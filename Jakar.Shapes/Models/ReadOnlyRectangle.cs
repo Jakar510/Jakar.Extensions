@@ -9,7 +9,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Shapes;
 
 
-[StructLayout(LayoutKind.Sequential), DefaultValue(nameof(Zero))]
+[StructLayout(LayoutKind.Sequential)][DefaultValue(nameof(Zero))]
 [method: JsonConstructor]
 public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle>
 {

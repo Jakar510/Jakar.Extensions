@@ -78,7 +78,7 @@ public static class TelemetrySpans
      */
 
 
-    [Pure, MustDisposeResource]
+    [Pure][MustDisposeResource]
     public static OpenTelemetry.Trace.TelemetrySpan StartSpan( this Activity activity, [CallerMemberName] string caller = BaseClass.EMPTY ) =>
         ReferenceEquals(activity, Activity.Current)
             ? Tracer.CurrentSpan

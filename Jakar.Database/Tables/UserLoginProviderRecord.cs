@@ -4,15 +4,15 @@
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
-public sealed record UserLoginProviderRecord( [property: StringLength(                       int.MaxValue)] string  LoginProvider,
-                                              [property: StringLength(                       int.MaxValue)] string? ProviderDisplayName,
-                                              [property: ProtectedPersonalData, StringLength(int.MaxValue)] string  ProviderKey,
-                                              [property: ProtectedPersonalData]                             string? Value,
-                                              RecordID<UserLoginProviderRecord>                                     ID,
-                                              RecordID<UserRecord>?                                                 CreatedBy,
-                                              DateTimeOffset                                                        DateCreated,
-                                              DateTimeOffset?                                                       LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
+[Serializable][Table(TABLE_NAME)]
+public sealed record UserLoginProviderRecord( [property: StringLength(                                 int.MaxValue)] string  LoginProvider,
+                                              [property: StringLength(                                 int.MaxValue)] string? ProviderDisplayName,
+                                              [property: ProtectedPersonalData][property: StringLength(int.MaxValue)] string  ProviderKey,
+                                              [property: ProtectedPersonalData]                                       string? Value,
+                                              RecordID<UserLoginProviderRecord>                                               ID,
+                                              RecordID<UserRecord>?                                                           CreatedBy,
+                                              DateTimeOffset                                                                  DateCreated,
+                                              DateTimeOffset?                                                                 LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
     public const  string                                  TABLE_NAME = "user_login_providers";
     public static string                                  TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }

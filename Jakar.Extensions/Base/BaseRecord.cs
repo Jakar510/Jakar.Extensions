@@ -17,7 +17,7 @@ public record BaseRecord
     protected    JsonObject? _additionalData;
 
 
-    [StringLength(UNICODE_TEXT_CAPACITY), JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    [StringLength(UNICODE_TEXT_CAPACITY)] [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 }
 
 

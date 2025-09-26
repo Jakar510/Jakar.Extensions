@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "recovery_codes";
@@ -38,9 +38,9 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     }
 
 
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
-    [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
+    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
 
     [Pure]
     public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
@@ -141,7 +141,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>
 {
     public const  string                                 TABLE_NAME = "UserRecoveryCodes";

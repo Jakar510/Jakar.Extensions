@@ -33,7 +33,7 @@
     public override                             WidgetType            Type          => WidgetType.TextPicker;
     [Parameter]                 public          IList<string>         Values        { get; set; } = new ObservableCollection<string>();
     [Parameter]                 public          EventCallback<string> OnCPopupClose { get; set; }
-    [Parameter, EditorRequired] public required string                PopupTitle    { get; set; }
+    [Parameter][EditorRequired] public required string                PopupTitle    { get; set; }
 
 
     protected override void OnParametersSet()

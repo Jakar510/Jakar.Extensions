@@ -9,7 +9,7 @@ using TelemetrySpan = Jakar.Extensions.TelemetrySpan;
 namespace Jakar.Database;
 
 
-[Serializable, Table(TABLE_NAME)]
+[Serializable][Table(TABLE_NAME)]
 public sealed record FileRecord( string?              FileName,
                                  string?              FileDescription,
                                  string?              FileType,

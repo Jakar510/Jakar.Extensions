@@ -14,7 +14,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     protected override NpgsqlConnection CreateConnection( in SecuredString secure ) => new(secure);
 
 
-    [Experimental("SqlTableBuilder"), Conditional("DEBUG")]
+    [Experimental("SqlTableBuilder")][Conditional("DEBUG")]
     public static async void TestAsync()
     {
         try

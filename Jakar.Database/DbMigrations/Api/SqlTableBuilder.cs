@@ -52,7 +52,7 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-[Experimental("SqlTableBuilder"), Flags]
+[Experimental("SqlTableBuilder")][Flags]
 public enum ColumnOptions
 {
     AlwaysIdentity  = 1 << 0,
