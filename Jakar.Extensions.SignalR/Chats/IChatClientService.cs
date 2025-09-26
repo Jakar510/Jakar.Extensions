@@ -6,9 +6,8 @@ namespace Jakar.Extensions.SignalR.Chats;
 
 public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyChanged
 {
-    public const string    PATH = "/Chat/hub";
-    public       ChatRooms Rooms       { get; }
-    public       long      UnreadChats { get; }
+    public const string PATH = "/Chat/hub";
+    public       long   UnreadChats { get; }
 
 
     /// <summary> Occurs when the <see cref="HubConnection"/> starts reconnecting after losing its underlying connection. </summary>
@@ -38,29 +37,39 @@ public interface IChatClientService : IHostedService, IChatHub, INotifyPropertyC
     /// </example>
     public event Func<string?, Task>? Reconnected;
 
-
     public event EventHandler<HubEvent>? OnEvent;
 
+    public event Action? OnMessageReceived;
 
-    public ValueTask Login( IChatRoom room, CancellationToken token                            = default );
-    public ValueTask Send( IChatRoom  room, InstantMessage    message, CancellationToken token = default );
-
-
-    public ValueTask<InstantMessage[]> History( IChatRoom room, CancellationToken token = default );
+    public void SendEvent( HubEvent value );
+}
 
 
-    public ValueTask JoinRoom( IEnumerable<IChatRoom> rooms, CancellationToken token = default );
-    public ValueTask JoinRoom( IChatRoom              room,  CancellationToken token = default );
+
+public interface IChatClientService<out TChatRooms, in TRoom> : IChatClientService
+    where TChatRooms : ChatRooms<TChatRooms, TRoom>, ICollectionAlerts<TChatRooms, TRoom>
+    where TRoom : IChatRoom<TRoom>
+{
+    public TChatRooms Rooms { get; }
 
 
-    public ValueTask LeaveRoom( IEnumerable<IChatRoom> rooms, CancellationToken token = default );
-    public ValueTask LeaveRoom( IChatRoom              room,  CancellationToken token = default );
+    public ValueTask Login( TRoom room, CancellationToken token                            = default );
+    public ValueTask Send( TRoom  room, InstantMessage    message, CancellationToken token = default );
 
 
-    public ValueTask Logout( IChatRoom room, CancellationToken token = default );
-    public ValueTask Typing( IChatRoom room, CancellationToken token = default );
+    public ValueTask<InstantMessage[]> History( TRoom room, CancellationToken token = default );
 
 
-    public void     SendEvent( HubEvent    value );
-    public HubEvent GetHubEvent( IChatRoom room, HubEventType type, InstantMessage? message = null );
+    public ValueTask JoinRoom( IEnumerable<TRoom> rooms, CancellationToken token = default );
+    public ValueTask JoinRoom( TRoom              room,  CancellationToken token = default );
+
+
+    public ValueTask LeaveRoom( IEnumerable<TRoom> rooms, CancellationToken token = default );
+    public ValueTask LeaveRoom( TRoom              room,  CancellationToken token = default );
+
+
+    public ValueTask Logout( TRoom room, CancellationToken token = default );
+    public ValueTask Typing( TRoom room, CancellationToken token = default );
+
+    public HubEvent GetHubEvent( TRoom room, HubEventType type, InstantMessage? message = null );
 }

@@ -126,10 +126,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Jakar.Extensions.Serilog\Jakar.Extensions.Serilog.csproj" /> 
-	</ItemGroup>
-
-	<ItemGroup>
 	  <MauiXaml Update="LogsPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

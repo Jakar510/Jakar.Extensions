@@ -25,10 +25,11 @@ public interface IInstantMessage
 [Serializable]
 public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage, IJsonModel<InstantMessage>
 {
-    private bool        __hasBeenRead;
-    private FileData[]? __data;
-    private string      __groupName = string.Empty;
-    private string      __message   = string.Empty;
+    public static readonly InstantMessage[] Empty = [];
+    private                bool             __hasBeenRead;
+    private                FileData[]?      __data;
+    private                string           __groupName = string.Empty;
+    private                string           __message   = string.Empty;
 
 
     public static                                    JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;

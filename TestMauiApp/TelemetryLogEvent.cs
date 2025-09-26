@@ -19,7 +19,7 @@ public sealed record TelemetryLogEvent( DateTimeOffset TimeStamp, LogEventLevel 
     public static IEnumerable<TelemetryLogEvent> Create( IEnumerable<LogEvent> logEvent ) => logEvent.Select( Create );
     public static TelemetryLogEvent Create( LogEvent logEvent )
     {
-        Dictionary<string, JsonNode?> dictionary = new(logEvent.Properties.Count);
+        JsonObject dictionary = new(logEvent.Properties.Count);
         foreach ( KeyValuePair<string, LogEventPropertyValue> pair in logEvent.Properties ) { dictionary[pair.Key] = Convert( pair.Value ); }
 
         return new TelemetryLogEvent( logEvent.Timestamp.DateTime,
@@ -90,7 +90,7 @@ public sealed record TelemetryLogEvent( DateTimeOffset TimeStamp, LogEventLevel 
     {
         if ( value is null ) { return null; }
 
-        Dictionary<string, JsonNode?> array = value.Elements.Select( Convert ).ToDictionary( StringComparer.Ordinal );
+        JsonObject array = value.Elements.Select( Convert ).ToDictionary( StringComparer.Ordinal );
         return JsonNode.FromObject( array, JsonNet.Serializer );
     }
 }

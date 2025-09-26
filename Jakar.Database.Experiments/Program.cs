@@ -44,7 +44,7 @@ finally { "Bye".WriteToConsole(); }
 //     //
 //     // .Where( x => x.DisplayName.Contains( "Czech", StringComparison.OrdinalIgnoreCase ) )
 //    .Where( x => x.AppVersion is not null )
-//    .ToPrettyJson()
+//    .Toson()
 //    .WriteToConsole();
 
 

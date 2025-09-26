@@ -23,7 +23,7 @@ global using System.Collections.Specialized;
 global using System.Collections.ObjectModel;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Threading;
-global using System.Threading.Tasks; 
+global using System.Threading.Tasks;
 global using System.Drawing;
 global using System.IO.Compression;
 global using System.IO.Hashing;
@@ -47,7 +47,7 @@ global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Options; 
+global using Microsoft.Extensions.Options;
 global using OneOf;
 global using OneOf.Types;
 global using static Jakar.Extensions.BaseRecord;
@@ -55,6 +55,8 @@ global using static Jakar.Extensions.Buffers;
 global using static Jakar.Extensions.Claims;
 global using static Jakar.Extensions.WebRequester;
 global using ErrorEventArgs = System.IO.ErrorEventArgs;
+global using ILogger = Microsoft.Extensions.Logging.ILogger;
+global using ISerilogger = Serilog.ILogger;
 
 
 /*

@@ -78,7 +78,7 @@ public sealed record JsonTest( string Name, double Number, params JsonTest[] Chi
         Serialize( ref node );
     }
     public void Serialize( ref JsonObject parent ) => parent.Add( Name ).AddNumber( Number ).AddArray( Children ).Complete();
-    public void Serialize( ref JArray parent )
+    public void Serialize( ref JsonArray parent )
     {
         JsonObject node = parent.AddObject();
         Serialize( ref node );

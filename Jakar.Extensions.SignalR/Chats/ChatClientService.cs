@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 05/21/2025  16:51
 
+using AsyncAwaitBestPractices;
 using Microsoft.AspNetCore.Http.Connections.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -16,38 +17,21 @@ namespace Jakar.Extensions.SignalR.Chats;
 ///         cref="IChatClientService"/>
 ///     .
 /// </summary>
-/// <remarks> The <see cref="ChatClientService"/> provides functionality to manage chat rooms, send and receive messages, handle user login/logout, and track unread chats. It also supports event handling for reconnection, disconnection, and property changes. </remarks>
-public abstract class ChatClientService : BackgroundService, IChatClientService
+/// <remarks> The <see cref="ChatClientService(TChatRoom, TRoom)"/> provides functionality to manage chat rooms, send and receive messages, handle user login/logout, and track unread chats. It also supports event handling for reconnection, disconnection, and property changes. </remarks>
+public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, IChatClientService<TChatRoom, TRoom>
+    where TChatRoom : ChatRooms<TChatRoom, TRoom>, ICollectionAlerts<TChatRoom, TRoom>
+    where TRoom : IChatRoom<TRoom>
 {
-    public const           string                                    PATH          = "/Chat/hub";
-    public static readonly InstantMessage[]                          EmptyMessages = [];
-    private readonly       Disposables                               __disposables = [];
-    protected              ChatUser                                  _user         = ChatUser.Empty;
-    protected              ConcurrentObservableCollection<IChatRoom> _rooms        = [];
-    protected              HubConnection?                            _connection; // SignalR.Client
-    protected              Tokens?                                   _tokens;
-    private                bool                                      __isDisposed;
-    public abstract        Uri                                       HostInfo { get; }
+    protected readonly Disposables      __disposables      = [];
+    protected readonly WeakEventManager _onMessageReceived = new();
+    protected          bool             __isDisposed;
+    protected          ChatUser         _user = ChatUser.Empty;
+    protected          HubConnection?   _connection; // SignalR.Client
+    protected          Tokens?          _tokens;
 
 
-    public ConcurrentObservableCollection<IChatRoom> Rooms
-    {
-        get => _rooms;
-        set
-        {
-            _rooms = value;
-            OnPropertyChanged();
-        }
-    }
-    public virtual Uri TargetHost => new(HostInfo, IChatClientService.PATH);
-    public long UnreadChats
-    {
-        get
-        {
-            ReadOnlySpan<IChatRoom> span = Rooms.AsSpan();
-            return span.Sum(room => room.UnreadChats);
-        }
-    }
+    public abstract Uri       HostInfo { get; }
+    public abstract TChatRoom Rooms    { get; }
     public virtual ChatUser Sender
     {
         get => _user;
@@ -57,6 +41,15 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
 
             _user = value;
             OnPropertyChanged();
+        }
+    }
+    public virtual Uri TargetHost => new(HostInfo, IChatClientService.PATH);
+    public long UnreadChats
+    {
+        get
+        {
+            ReadOnlySpan<TRoom> span = Rooms.AsSpan();
+            return span.Sum(static room => room.UnreadChats);
         }
     }
 
@@ -84,9 +77,12 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
             if ( _connection is not null ) { _connection.Reconnected -= value; }
         }
     }
-
     public event EventHandler<HubEvent>?      OnEvent;
     public event PropertyChangedEventHandler? PropertyChanged;
+
+
+    public event Action? OnMessageReceived { add => _onMessageReceived.AddEventHandler(value); remove => _onMessageReceived.RemoveEventHandler(value); }
+
 
     public override void Dispose()
     {
@@ -96,9 +92,8 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
     }
 
 
-    public    void SendEvent( HubEvent                           value )               => OnEvent?.Invoke(this, value);
     protected void OnPropertyChanged( [CallerMemberName] string? propertyName = null ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    public HubEvent GetHubEvent( IChatRoom room, HubEventType type, InstantMessage? message = null )
+    public HubEvent GetHubEvent( TRoom room, HubEventType type, InstantMessage? message = null )
     {
         ObjectDisposedException.ThrowIf(__isDisposed, this);
         string connectionID = _connection?.ConnectionId ?? throw new InvalidOperationException($"{nameof(_connection)} is null. Make sure to call {nameof(StartAsync)} first.");
@@ -106,9 +101,14 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
     }
 
 
+    public void SendEvent( HubEvent value ) => OnEvent?.Invoke(this, value);
     protected override async Task ExecuteAsync( CancellationToken token )
     {
-        if ( _connection is not null ) { await _connection.DisposeAsync(); }
+        if ( _connection is not null )
+        {
+            await _connection.DisposeAsync();
+            _connection = null;
+        }
 
         IOptions<HttpConnectionOptions> options;
         await StopAsync(token);
@@ -130,54 +130,56 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
         __disposables.Dispose();
         _connection = null;
     }
+
+
     protected virtual  void          ConfigureHttpConnection( HttpConnectionOptions options ) => options.AccessTokenProvider = OptionsAccessTokenProvider;
     protected virtual  HubConnection CreateConnection()                                       => new HubConnectionBuilder().AddJsonProtocol().WithAutomaticReconnect().WithUrl(TargetHost, ConfigureHttpConnection).Build();
     protected abstract Task<string?> OptionsAccessTokenProvider();
 
 
-    public async ValueTask Login( IChatRoom room, CancellationToken token = default )
+    public async ValueTask Login( TRoom room, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.Login);
         await Login(hubEvent, token);
     }
-    public async ValueTask Send( IChatRoom room, InstantMessage message, CancellationToken token = default )
+    public async ValueTask Send( TRoom room, InstantMessage message, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.Send, message);
         await Send(hubEvent, token);
     }
 
 
-    public async ValueTask<InstantMessage[]> History( IChatRoom room, CancellationToken token = default ) { return await History(room.Group, Sender, token); }
+    public async ValueTask<InstantMessage[]> History( TRoom room, CancellationToken token = default ) => await History(room.Group, Sender, token);
 
 
-    public async ValueTask JoinRoom( IEnumerable<IChatRoom> rooms, CancellationToken token = default )
+    public async ValueTask JoinRoom( IEnumerable<TRoom> rooms, CancellationToken token = default )
     {
-        foreach ( IChatRoom room in rooms ) { await JoinRoom(room, token); }
+        foreach ( TRoom room in rooms ) { await JoinRoom(room, token); }
     }
-    public async ValueTask JoinRoom( IChatRoom room, CancellationToken token = default )
+    public async ValueTask JoinRoom( TRoom room, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.JoinRoom);
         await JoinRoom(hubEvent, token);
     }
 
 
-    public async ValueTask LeaveRoom( IEnumerable<IChatRoom> rooms, CancellationToken token = default )
+    public async ValueTask LeaveRoom( IEnumerable<TRoom> rooms, CancellationToken token = default )
     {
-        foreach ( IChatRoom room in rooms ) { await LeaveRoom(room, token); }
+        foreach ( TRoom room in rooms ) { await LeaveRoom(room, token); }
     }
-    public async ValueTask LeaveRoom( IChatRoom room, CancellationToken token = default )
+    public async ValueTask LeaveRoom( TRoom room, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.LeaveRoom);
         await LeaveRoom(hubEvent, token);
     }
 
 
-    public async ValueTask Logout( IChatRoom room, CancellationToken token = default )
+    public async ValueTask Logout( TRoom room, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.Logout);
         await Logout(hubEvent, token);
     }
-    public async ValueTask Typing( IChatRoom room, CancellationToken token = default )
+    public async ValueTask Typing( TRoom room, CancellationToken token = default )
     {
         HubEvent hubEvent = GetHubEvent(room, HubEventType.Typing);
         await Typing(hubEvent, token);
@@ -250,6 +252,6 @@ public abstract class ChatClientService : BackgroundService, IChatClientService
     }
     public async Task<InstantMessage[]> History( string group, ChatUser user, CancellationToken token = default ) =>
         _connection is null
-            ? EmptyMessages
+            ? InstantMessage.Empty
             : await _connection.InvokeAsync<InstantMessage[]>(nameof(History), group, user, token);
 }

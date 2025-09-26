@@ -13,6 +13,9 @@ public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INot
     ChatUserCollection       Users       { get; }
 
 
+    public event Action? OnMessageReceived;
+
+
     public Task Join( CancellationToken   appToken = default );
     public Task Leave( CancellationToken  appToken = default );
     public Task Login( CancellationToken  token    = default );
@@ -22,8 +25,13 @@ public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INot
 
 
 
+public interface IChatRoom<TSelf> : IChatRoom, IJsonModel<TSelf>
+    where TSelf : IChatRoom<TSelf>;
+
+
+
 public abstract class ChatRooms<TClass, TRoom> : ConcurrentObservableCollection<TClass, TRoom>
-    where TRoom : IChatRoom, IEquatable<TRoom>
+    where TRoom : IChatRoom<TRoom>
     where TClass : ChatRooms<TClass, TRoom>, ICollectionAlerts<TClass, TRoom>
 {
     private bool __showAll;

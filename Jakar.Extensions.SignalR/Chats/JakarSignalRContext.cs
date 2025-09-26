@@ -25,6 +25,7 @@ namespace Jakar.Extensions.SignalR.Chats;
                              UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
                              RespectRequiredConstructorParameters = true,
                              Converters = [typeof(EncodingConverter)])]
+[JsonSerializable(typeof(HubEvent[]))]
 [JsonSerializable(typeof(InstantMessage[]))]
 [JsonSerializable(typeof(InstantMessageCollection[]))]
 [JsonSerializable(typeof(ChatUserCollection[]))]

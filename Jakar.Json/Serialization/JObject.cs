@@ -138,7 +138,7 @@ public ref struct JsonObject
     }
 
 
-    public readonly JArray AddArray( ReadOnlySpan<char> key ) => Start( key ).AddArray();
+    public readonly JsonArray AddArray( ReadOnlySpan<char> key ) => Start( key ).AddArray();
     public readonly JsonObject AddArray( IReadOnlyCollection<IJsonizer>? value, [CallerArgumentExpression( nameof(value) )] string? key = null )
     {
         AddArray( key ).AddObjects( value );

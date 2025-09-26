@@ -135,4 +135,8 @@
 		<PackageReference Include="ZLinq.FileSystem" />
 		<PackageReference Include="ZXing.Net" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="SorterEqualizer\" />
+	</ItemGroup>
 </Project>

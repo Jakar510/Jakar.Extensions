@@ -1,6 +1,10 @@
 // Jakar.Extensions :: Jakar.Extensions
 // 07/30/2025  14:40
 
+using System;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -53,8 +57,8 @@ public static class SelfLogger
     {
         public virtual void OnLoggingFailed<TKind, TLogEvent>( object sender, TKind kind, string message, Exception? exception ) =>
             __output?.Invoke(exception is not null
-                                ? string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind}){Environment.NewLine}{exception}")
-                                : string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind})"));
+                                 ? string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind}){Environment.NewLine}{exception}")
+                                 : string.Format($"{DateTime.UtcNow:o} {sender.GetType()}: {message} ({kind})"));
 
 
         public virtual void OnLoggingFailed<TKind, TLogEvent>( object sender, TKind kind, string message, IReadOnlyCollection<TLogEvent>? events, Exception? exception )

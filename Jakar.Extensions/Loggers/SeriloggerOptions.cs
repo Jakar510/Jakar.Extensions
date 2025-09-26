@@ -80,9 +80,10 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
             Directory.CreateDirectory(value);
         }
     }
-    public TakeScreenShotAsync                  TakeScreenShot { get; set; } = ScreenShot.Empty;
-    public ConsoleTheme?                        Theme          { get; set; }
-    AppLoggerOptions IOptions<AppLoggerOptions>.Value          => this;
+    public TakeScreenShotAsync                  TakeScreenShot        { get; set; } = ScreenShot.Empty;
+    public ConsoleTheme?                        Theme                 { get; set; }
+    AppLoggerOptions IOptions<AppLoggerOptions>.Value                 => this;
+    public virtual bool                         TakeScreenshotOnError { get; set; }
 
 
     public AppLoggerOptions() => Current = this;
@@ -135,11 +136,11 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
         enrichment.FromLogContext();
         OpenTelemetryActivityEnricher.Create(enrichment, this, source);
 
-        Debug(in sinkTo);
-        File(in sinkTo);
+        SinkToDebug(in sinkTo);
+        SinkToFile(in sinkTo);
     }
-    public static void Debug( in LoggerSinkConfiguration sinkTo ) => sinkTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
-    public        void File( in  LoggerSinkConfiguration sinkTo ) => sinkTo.File(Formatter, Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
+    public static void SinkToDebug( in LoggerSinkConfiguration sinkTo ) => sinkTo.Debug(LogEventLevel.Verbose, DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE, CultureInfo.InvariantCulture);
+    public        void SinkToFile( in  LoggerSinkConfiguration sinkTo ) => sinkTo.File(Formatter, Paths.LogsFile.FullPath, flushToDiskInterval: TimeSpan.FromSeconds(2), rollingInterval: RollingInterval.Day, rollOnFileSizeLimit: true, encoding: Encoding.Default, hooks: Hooks, retainedFileTimeLimit: TimeSpan.FromDays(15));
 }
 
 

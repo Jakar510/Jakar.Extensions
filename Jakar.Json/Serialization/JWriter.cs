@@ -1,4 +1,8 @@
-﻿namespace Jakar.Json.Serialization;
+﻿using System.Xml;
+
+
+
+namespace Jakar.Json.Serialization;
 
 
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
@@ -19,7 +23,7 @@ public ref struct JWriter( int capacity, Formatting formatting )
     public readonly override string ToString() => __sb.ToString();
 
 
-    [Pure] public readonly JArray  AddArray()  => new(this);
+    [Pure] public readonly JsonArray  AddArray()  => new(this);
     [Pure] public readonly JsonObject AddObject() => new(this);
 
 
