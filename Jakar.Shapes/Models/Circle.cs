@@ -3,6 +3,7 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using JetBrains.Annotations;
 
 
 
@@ -44,11 +45,11 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public static implicit operator Circle( double         other ) => new(ReadOnlyPoint.Zero, other);
 
 
-    [Pure] public static Circle Create( in ReadOnlyPoint center, double radius ) => new(center, radius);
-    [Pure] public static Circle Create( float            x,      float  y )      => Create(new ReadOnlyPoint(x, y), 1);
-    [Pure] public static Circle Create( double           x,      double y )      => Create(new ReadOnlyPoint(x, y), 1);
-    [Pure] public        Circle Round() => new(Center, Radius.Round());
-    [Pure] public        Circle Floor() => new(Center, Radius.Floor());
+    [System.Diagnostics.Contracts.Pure] public static Circle Create( in ReadOnlyPoint center, double radius ) => new(center, radius);
+    [System.Diagnostics.Contracts.Pure] public static Circle Create( float            x,      float  y )      => Create(new ReadOnlyPoint(x, y), 1);
+    [System.Diagnostics.Contracts.Pure] public static Circle Create( double           x,      double y )      => Create(new ReadOnlyPoint(x, y), 1);
+    [System.Diagnostics.Contracts.Pure] public        Circle Round() => new(Center, Radius.Round());
+    [System.Diagnostics.Contracts.Pure] public        Circle Floor() => new(Center, Radius.Floor());
 
 
     public bool IsTangent( ref readonly  ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Tangent;

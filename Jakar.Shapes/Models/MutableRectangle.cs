@@ -62,6 +62,8 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static implicit operator ReadOnlyRectangle( MutableRectangle  rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( Rectangle          rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( RectangleF         rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( ReadOnlyRectangle  rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
+    public static implicit operator MutableRectangle( ReadOnlyRectangleF rect )  => new(rect.X, rect.Y, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( ReadOnlySize       rect )  => new(0, 0, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( ReadOnlySizeF      rect )  => new(0, 0, rect.Width, rect.Height);
     public static implicit operator MutableRectangle( MutableSize        rect )  => new(0, 0, rect.Width, rect.Height);
