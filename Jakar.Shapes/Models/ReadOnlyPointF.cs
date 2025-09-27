@@ -21,14 +21,15 @@ public readonly struct ReadOnlyPointF( float x, float y ) : IPoint<ReadOnlyPoint
     public readonly        float          Y       = y;
 
 
-    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Zero    => ref Zero;
-    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Invalid => ref Invalid;
-    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One     => ref One;
-    public              bool                                  IsEmpty => X == 0 && Y == 0;
-    public              bool                                  IsNaN   => float.IsNaN(X) || float.IsNaN(Y);
-    public              bool                                  IsValid => !IsNaN;
-    double IShapeLocation.                                    X       => X;
-    double IShapeLocation.                                    Y       => Y;
+    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Zero     => ref Zero;
+    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.Invalid  => ref Invalid;
+    static ref readonly ReadOnlyPointF IShape<ReadOnlyPointF>.One      => ref One;
+    ReadOnlyPoint IShapeLocation.                             Location => this;
+    public bool                                               IsEmpty  => X == 0 && Y == 0;
+    public bool                                               IsNaN    => float.IsNaN(X) || float.IsNaN(Y);
+    public bool                                               IsValid  => !IsNaN;
+    double IShapeLocation.                                    X        => X;
+    double IShapeLocation.                                    Y        => Y;
 
 
     public static implicit operator ReadOnlyPointF( Point  value ) => new(value.X, value.Y);

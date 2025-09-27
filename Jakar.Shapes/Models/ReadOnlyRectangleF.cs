@@ -3,13 +3,16 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
 namespace Jakar.Shapes;
 
 
-[StructLayout(LayoutKind.Sequential)][DefaultValue(nameof(Zero))]
+[StructLayout(LayoutKind.Sequential)]
+[DefaultValue(nameof(Zero))]
 [method: JsonConstructor]
 public readonly struct ReadOnlyRectangleF( float x, float y, float width, float height ) : IRectangle<ReadOnlyRectangleF>
 {
@@ -22,40 +25,37 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     public readonly        float              Height  = height;
 
 
-    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Zero     => ref Zero;
-    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Invalid  => ref Invalid;
-    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.One      => ref One;
-    public              bool                                          IsEmpty  => double.IsNaN(Bottom) || double.IsNaN(Top) || double.IsNegative(Left) || double.IsNaN(Left) || double.IsNaN(Right) || double.IsNegative(Right);
-    double IShapeLocation.                                            X        => X;
-    double IShapeLocation.                                            Y        => Y;
-    double IShapeSize.                                                Width    => Width;
-    double IShapeSize.                                                Height   => Height;
-    public bool                                                       IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                       IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
-    public ReadOnlyPointF                                             Center   => new(Right / 2, Bottom / 2);
-    public ReadOnlyPointF                                             Location => new(X, Y);
-    public ReadOnlySizeF                                              Size     => new(Width, Height);
-    public float                                                      Bottom   => Y + Height;
-    public float                                                      Left     => X;
-    public float                                                      Right    => X + Width;
-    public float                                                      Top      => Y;
-    ReadOnlyPoint IRectangle<ReadOnlyRectangleF>.                     Center   => new(Right / 2, Bottom / 2);
-    ReadOnlyPoint IRectangle<ReadOnlyRectangleF>.                     Location => new(X, Y);
-    ReadOnlySize IRectangle<ReadOnlyRectangleF>.                      Size     => new(Width, Height);
-    double IRectangle<ReadOnlyRectangleF>.                            Bottom   => Y + Height;
-    double IRectangle<ReadOnlyRectangleF>.                            Left     => X;
-    double IRectangle<ReadOnlyRectangleF>.                            Right    => X + Width;
-    double IRectangle<ReadOnlyRectangleF>.                            Top      => Y;
+    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Zero        => ref Zero;
+    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.Invalid     => ref Invalid;
+    static ref readonly ReadOnlyRectangleF IShape<ReadOnlyRectangleF>.One         => ref One;
+    public              bool                                          IsEmpty     => IRectangle<ReadOnlyRectangleF>.CheckIfEmpty(in this);
+    double IShapeLocation.                                            X           => X;
+    double IShapeLocation.                                            Y           => Y;
+    double IShapeSize.                                                Width       => Width;
+    double IShapeSize.                                                Height      => Height;
+    public bool                                                       IsNaN       => IRectangle<ReadOnlyRectangleF>.CheckIfNaN(in this);
+    public bool                                                       IsValid     => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public ReadOnlyPoint                                              Center      => new(( X + Width ) / 2, ( Y + Height ) / 2);
+    public ReadOnlyPoint                                              Location    => new(X, Y);
+    public ReadOnlySize                                               Size        => new(Width, Height);
+    public ReadOnlyPoint                                              TopLeft     => new(X, Y);
+    public ReadOnlyPoint                                              TopRight    => new(X    + Width, Y);
+    public ReadOnlyPoint                                              BottomLeft  => new(X, Y + Height);
+    public ReadOnlyPoint                                              BottomRight => new(X    + Width, Y + Height);
+    public ReadOnlyLine                                               Bottom      => new(BottomLeft, BottomRight);
+    public ReadOnlyLine                                               Left        => new(TopLeft, BottomLeft);
+    public ReadOnlyLine                                               Right       => new(TopRight, BottomRight);
+    public ReadOnlyLine                                               Top         => new(TopLeft, TopRight);
 
 
     public static implicit operator Rectangle( ReadOnlyRectangleF  self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());
     public static implicit operator RectangleF( ReadOnlyRectangleF self )  => new(self.X, self.Y, self.Width, self.Height);
     public static implicit operator ReadOnlyRectangleF( Rectangle  self )  => new(self.X, self.Y, self.Width, self.Height);
     public static implicit operator ReadOnlyRectangleF( RectangleF self )  => new(self.X, self.Y, self.Width, self.Height);
-    public static implicit operator ReadOnlyRectangleF( int        value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangleF( long       value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangleF( float      value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangleF( double     value ) => value.AsFloat();
+    public static implicit operator ReadOnlyRectangleF( int        value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangleF( long       value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangleF( float      value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangleF( double     value ) => Create<ReadOnlySize>(0, 0, value.AsFloat());
 
 
     public void Deconstruct( out double x, out double y )
@@ -65,53 +65,40 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     }
 
 
-    [Pure]
-    public static ReadOnlySize AddMargin( in ReadOnlySize value, in ReadOnlyThickness margin )
+    [Pure] public static ReadOnlyRectangleF Create<TPoint>( params ReadOnlySpan<TPoint> points )
+        where TPoint : IPoint<TPoint>
     {
-        ReadOnlySize result = new(value.Width + margin.HorizontalThickness, value.Height + margin.VerticalThickness);
-        Debug.Assert(result >= value);
-        return result;
+        if ( points.Length <= 0 ) { return Zero; }
+
+        ValueEnumerable<FromSpan<TPoint>, TPoint> enumerable = points.AsValueEnumerable();
+
+        double x      = enumerable.Min(static p => p.X);
+        double y      = enumerable.Min(static p => p.Y);
+        double width  = enumerable.Max(static p => p.X) - x;
+        double height = enumerable.Max(static p => p.Y) - y;
+
+        return Create(x, y, width, height);
     }
-
-
-    [Pure]
-    public static ReadOnlyRectangleF Create<T>( ref readonly T rect )
-        where T : IRectangle<T>
+    [Pure] public static ReadOnlyRectangleF Create<TRectangle>( in TRectangle rectangle )
+        where TRectangle : IRectangle<TRectangle> => Create(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height);
+    [Pure] public static ReadOnlyRectangleF Create( float  x, float  y, float  width, float  height ) => new(x, y, width, height);
+    [Pure] public static ReadOnlyRectangleF Create( double x, double y, double width, double height ) => new((float)x, (float)y, (float)width, (float)height);
+    [Pure] public static ReadOnlyRectangleF Create<TPoint>( in TPoint topLeft, in TPoint bottomRight )
+        where TPoint : IPoint<TPoint> => Create(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
+    [Pure] public static ReadOnlyRectangleF Create<TPoint, TSize>( in TPoint point, in TSize size )
+        where TPoint : IPoint<TPoint>
+        where TSize : ISize<TSize> => Create(point.X, point.Y, size.Width, size.Height);
+    [Pure] public static ReadOnlyRectangleF Create<TSize>( double x, double y, in TSize size )
+        where TSize : ISize<TSize> => Create(x, y, size.Width, size.Height);
+    [Pure] public static ReadOnlyRectangleF Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
+        where TRectangle : IRectangle<TRectangle>
     {
-        return new ReadOnlyRectangleF(rect.X.AsFloat(), rect.Y.AsFloat(), rect.Width.AsFloat(), rect.Height.AsFloat());
+        double x      = ( rectangle.X      + padding.Left );
+        double y      = ( rectangle.Y      + padding.Top );
+        double width  = ( rectangle.Width  - padding.HorizontalThickness );
+        double height = ( rectangle.Height - padding.VerticalThickness );
+        return Create(x, y, width, height);
     }
-    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPoint>  points )                                 => MutableRectangle.Create(points);
-    [Pure] public static ReadOnlyRectangleF Create( params ReadOnlySpan<ReadOnlyPointF> points )                                 => MutableRectangle.Create(points);
-    [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPoint                point,   in ReadOnlySize   size )        => new(point.X.AsFloat(), point.Y.AsFloat(), size.Width.AsFloat(), size.Height.AsFloat());
-    [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPointF               point,   in ReadOnlySizeF  size )        => new(point.X, point.Y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPoint                topLeft, in ReadOnlyPoint  bottomRight ) => new(topLeft.X.AsFloat(), topLeft.Y.AsFloat(), ( bottomRight.X - topLeft.X ).AsFloat(), ( bottomRight.Y - topLeft.Y ).AsFloat());
-    [Pure] public static ReadOnlyRectangleF Create( in     ReadOnlyPointF               topLeft, in ReadOnlyPointF bottomRight ) => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
-
-    [Pure]
-    public static ReadOnlyRectangleF Create( in ReadOnlyRectangle self, in ReadOnlyThickness padding )
-    {
-        float x      = (float)( self.Left   + padding.Left );
-        float y      = (float)( self.Top    + padding.Top );
-        float width  = (float)( self.Width  - padding.HorizontalThickness );
-        float height = (float)( self.Height - padding.VerticalThickness );
-        return new ReadOnlyRectangleF(x, y, width, height);
-    }
-
-    [Pure]
-    public static ReadOnlyRectangleF Create( in ReadOnlyRectangleF self, in ReadOnlyThickness padding )
-    {
-        float x      = (float)( self.Left   + padding.HorizontalThickness );
-        float y      = (float)( self.Top    + padding.VerticalThickness );
-        float width  = (float)( self.Width  - padding.HorizontalThickness );
-        float height = (float)( self.Height - padding.VerticalThickness );
-        return new ReadOnlyRectangleF(x, y, width, height);
-    }
-
-
-    [Pure] public static ReadOnlyRectangleF Create( double x, double y, in ReadOnlySize  size )                 => new(x.AsFloat(), y.AsFloat(), size.Width.AsFloat(), size.Height.AsFloat());
-    [Pure] public static ReadOnlyRectangleF Create( double x, double y, double           width, double height ) => new(x.AsFloat(), y.AsFloat(), width.AsFloat(), height.AsFloat());
-    [Pure] public static ReadOnlyRectangleF Create( float  x, float  y, in ReadOnlySizeF size )                => new(x, y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangleF Create( float  x, float  y, float            width, float height ) => new(x, y, width, height);
 
 
     public int CompareTo( object? other )

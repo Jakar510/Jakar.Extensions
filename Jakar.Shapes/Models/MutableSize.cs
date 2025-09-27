@@ -18,16 +18,17 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static readonly MutableSize One     = 1;
 
 
-    static ref readonly          MutableSize IShape<MutableSize>.Zero        => ref Zero;
-    static ref readonly          MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
-    static ref readonly          MutableSize IShape<MutableSize>.One         => ref One;
-    public                       bool                            IsLandscape => Width < Height;
-    public                       bool                            IsPortrait  => Width > Height;
-    public                       double                          Width       { get; set; } = width;
-    public                       double                          Height      { get; set; } = height;
-    public readonly              bool                            IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
-    public readonly              bool                            IsValid     => !IsNaN && !IsEmpty;
-    [JsonIgnore] public readonly bool                            IsEmpty     => IsNaN || Width < 0 || Height < 0;
+    static ref readonly MutableSize IShape<MutableSize>.Zero        => ref Zero;
+    static ref readonly MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
+    static ref readonly MutableSize IShape<MutableSize>.One         => ref One;
+    public              bool                            IsLandscape => Width < Height;
+    public              bool                            IsPortrait  => Width > Height;
+    public              double                          Width       { get; set; } = width;
+    ReadOnlySize IShapeSize.                            Size        => this;
+    public                       double                 Height      { get; set; } = height;
+    public readonly              bool                   IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
+    public readonly              bool                   IsValid     => !IsNaN && !IsEmpty;
+    [JsonIgnore] public readonly bool                   IsEmpty     => IsNaN || Width < 0 || Height < 0;
 
 
     public static implicit operator ReadOnlySize( MutableSize  rect )  => new(rect.Width, rect.Height);
@@ -44,8 +45,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static implicit operator MutableSize( double        value ) => new(value, value);
 
 
-    [Pure]
-    public static MutableSize Min( params ReadOnlySpan<ReadOnlySize> points )
+    [Pure] public static MutableSize Min( params ReadOnlySpan<ReadOnlySize> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
@@ -59,8 +59,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
 
         return result;
     }
-    [Pure]
-    public static MutableSize Min( params ReadOnlySpan<ReadOnlySizeF> points )
+    [Pure] public static MutableSize Min( params ReadOnlySpan<ReadOnlySizeF> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
@@ -76,8 +75,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     }
 
 
-    [Pure]
-    public static MutableSize Max( params ReadOnlySpan<ReadOnlySize> points )
+    [Pure] public static MutableSize Max( params ReadOnlySpan<ReadOnlySize> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
@@ -91,8 +89,7 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
 
         return result;
     }
-    [Pure]
-    public static MutableSize Max( params ReadOnlySpan<ReadOnlySizeF> points )
+    [Pure] public static MutableSize Max( params ReadOnlySpan<ReadOnlySizeF> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 

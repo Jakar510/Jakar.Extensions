@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
@@ -22,12 +24,10 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public                       double                                    Y       { get; set; } = y;
     public                       double                                    Width   { get; set; } = width;
     public                       double                                    Height  { get; set; } = height;
-    public readonly              bool                                      IsNaN   => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
+    public readonly              bool                                      IsNaN   => IRectangle<MutableRectangle>.CheckIfNaN(in this);
     public readonly              bool                                      IsValid => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
-    [JsonIgnore] public readonly double                                    Bottom  => Y + Height;
     [JsonIgnore] public readonly ReadOnlyPoint                             Center  => new(( X + Width ) / 2, ( Y + Height ) / 2);
-    [JsonIgnore] public readonly bool                                      IsEmpty => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || Width <= 0 || double.IsNaN(Height) || Height <= 0;
-    [JsonIgnore] public readonly double                                    Left    => X;
+    public                       bool                                      IsEmpty => IRectangle<MutableRectangle>.CheckIfEmpty(in this);
     public ReadOnlyPoint Location
     {
         readonly get => new(X, Y);
@@ -37,7 +37,6 @@ public struct MutableRectangle( double x, double y, double width, double height 
             Y = value.Y;
         }
     }
-    [JsonIgnore] public readonly double Right => X + Width;
     public ReadOnlySize Size
     {
         readonly get => new(Width, Height);
@@ -47,7 +46,14 @@ public struct MutableRectangle( double x, double y, double width, double height 
             Height = value.Height;
         }
     }
-    [JsonIgnore] public readonly double Top => Y;
+    public readonly ReadOnlyPoint TopLeft     => new(X, Y);
+    public readonly ReadOnlyPoint TopRight    => new(X    + Width, Y);
+    public readonly ReadOnlyPoint BottomLeft  => new(X, Y + Height);
+    public readonly ReadOnlyPoint BottomRight => new(X    + Width, Y + Height);
+    public readonly ReadOnlyLine  Bottom      => new(BottomLeft, BottomRight);
+    public readonly ReadOnlyLine  Left        => new(TopLeft, BottomLeft);
+    public readonly ReadOnlyLine  Right       => new(TopRight, BottomRight);
+    public readonly ReadOnlyLine  Top         => new(TopLeft, TopRight);
 
 
     public static implicit operator Rectangle( MutableRectangle          self )  => new((int)self.X, (int)self.Y, (int)self.Width, (int)self.Height);
@@ -67,56 +73,49 @@ public struct MutableRectangle( double x, double y, double width, double height 
     public static implicit operator MutableRectangle( double             value ) => new(value, value, value, value);
 
 
-    [Pure]
-    public static MutableRectangle Create( params ReadOnlySpan<ReadOnlyPoint> points )
+    [Pure] public static MutableRectangle Create<TPoint>( params ReadOnlySpan<TPoint> points )
+        where TPoint : IPoint<TPoint>
     {
         if ( points.Length <= 0 ) { return Zero; }
 
-        MutableRectangle self = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
+        ValueEnumerable<FromSpan<TPoint>, TPoint> enumerable = points.AsValueEnumerable();
 
-        foreach ( ReadOnlyPoint point in points )
-        {
-            if ( point.X      < self.Left ) { self.X      = point.X; }
-            else if ( point.X > self.Right ) { self.Width = point.X - self.Left; }
+        double x      = enumerable.Min(static p => p.X);
+        double y      = enumerable.Min(static p => p.Y);
+        double width  = enumerable.Max(static p => p.X) - x;
+        double height = enumerable.Max(static p => p.Y) - y;
 
-            if ( point.Y      < self.Top ) { self.Y         = point.Y; }
-            else if ( point.Y > self.Bottom ) { self.Height = point.Y - self.Top; }
-        }
-
-        return self;
+        return Create(x, y, width, height);
     }
-    [Pure]
-    public static MutableRectangle Create( params ReadOnlySpan<ReadOnlyPointF> points )
+    [Pure] public static MutableRectangle Create<T>( in T rect )
+        where T : IRectangle<T> => new(rect.X, rect.Y, rect.Width, rect.Height);
+    [Pure] public static MutableRectangle Create( float  left, float  top, float  right, float  bottom ) => new(left, top, right - left, bottom - top);
+    [Pure] public static MutableRectangle Create( double left, double top, double right, double bottom ) => new(left, top, right - left, bottom - top);
+    [Pure] public static MutableRectangle Create<TPoint>( in TPoint topLeft, in TPoint bottomRight )
+        where TPoint : IPoint<TPoint> => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
+    [Pure] public static MutableRectangle Create<TPoint, TSize>( in TPoint point, in TSize size )
+        where TPoint : IPoint<TPoint>
+        where TSize : ISize<TSize> => new(point.X, point.Y, size.Width, size.Height);
+    [Pure] public static MutableRectangle Create<TSize>( double x, double y, in TSize size )
+        where TSize : ISize<TSize> => new(x, y, size.Width, size.Height);
+    [Pure] public static MutableRectangle Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
+        where TRectangle : IRectangle<TRectangle>
     {
-        if ( points.Length <= 0 ) { return Zero; }
-
-        MutableRectangle self = Create(points[0].X, points[0].Y, points[0].X, points[0].Y);
-
-        foreach ( ReadOnlyPointF point in points )
-        {
-            if ( point.X      < self.Left ) { self.X      = point.X; }
-            else if ( point.X > self.Right ) { self.Width = point.X - self.Left; }
-
-            if ( point.Y      < self.Top ) { self.Y         = point.Y; }
-            else if ( point.Y > self.Bottom ) { self.Height = point.Y - self.Top; }
-        }
-
-        return self;
+        double x      = ( rectangle.X      + padding.Left );
+        double y      = ( rectangle.Y      + padding.Top );
+        double width  = ( rectangle.Width  - padding.HorizontalThickness );
+        double height = ( rectangle.Height - padding.VerticalThickness );
+        return new MutableRectangle(x, y, width, height);
     }
 
-    [Pure]
-    public static MutableRectangle Create<T>( ref readonly T rect )
-        where T : IRectangle<T>
+
+    public void AddMargin( in ReadOnlyThickness margin )
     {
-        return new MutableRectangle(rect.X, rect.Y, rect.Width, rect.Height);
+        X      -= margin.Left;
+        Y      -= margin.Top;
+        Width  += margin.Right;
+        Height += margin.Bottom;
     }
-    [Pure] public static MutableRectangle Create( double              x,         double               y,   in ReadOnlySize size )                 => new(x, y, size.Width, size.Height);
-    [Pure] public static MutableRectangle Create( double              left,      double               top, double          right, double bottom ) => new(left, top, right - left, bottom - top);
-    [Pure] public static MutableRectangle Create( in ReadOnlyPoint    point,     in ReadOnlySize      size )        => new(point.X, point.Y, size.Width, size.Height);
-    [Pure] public static MutableRectangle Create( in ReadOnlyPointF   point,     in ReadOnlySizeF     size )        => new(point.X, point.Y, size.Width, size.Height);
-    [Pure] public static MutableRectangle Create( in ReadOnlyPoint    topLeft,   in ReadOnlyPoint     bottomRight ) => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
-    [Pure] public static MutableRectangle Create( in ReadOnlyPointF   topLeft,   in ReadOnlyPointF    bottomRight ) => new(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
-    [Pure] public static MutableRectangle Create( in MutableRectangle rectangle, in ReadOnlyThickness padding )     => rectangle + padding;
 
 
     public void Deconstruct( out double x, out double y )

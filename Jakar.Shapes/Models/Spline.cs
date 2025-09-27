@@ -15,7 +15,7 @@ namespace Jakar.Shapes;
 
 [DefaultValue(nameof(Invalid))]
 [method: JsonConstructor]
-public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>, IStructuralComparable, IValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint>
+public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline>
 {
     public static readonly  Spline          Invalid = new(null);
     public static readonly  Spline          Zero    = new(ReadOnlyPoint.Zero);
@@ -27,7 +27,9 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public static JsonSerializerContext  JsonContext   => JakarShapesContext.Default;
     public static JsonTypeInfo<Spline>   JsonTypeInfo  => JakarShapesContext.Default.Spline;
     public static JsonTypeInfo<Spline[]> JsonArrayInfo => JakarShapesContext.Default.SplineArray;
-    public ref ReadOnlyPoint this[ int index ] => ref Points[index];
+    public ref readonly ReadOnlyPoint this[ int   index ] => ref Points[index];
+    public ref readonly ReadOnlyPoint this[ Index index ] => ref Points[index];
+    public Spline this[ Range                     index ] { [Pure] get => new(Points[index]); }
     static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
     static ref readonly Spline IShape<Spline>.      One     => ref One;
     static ref readonly Spline IShape<Spline>.      Invalid => ref Invalid;
@@ -45,14 +47,14 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public bool IsValid => !IsEmpty && !IsNaN;
 
 
-    public static implicit operator Spline( ReadOnlyPoint[]? points ) => new(points);
+    public static implicit operator Spline( ReadOnlyPoint[]?               points ) => Create(points);
+    [Pure] public static            Spline Create( params ReadOnlyPoint[]? points ) => new(points);
+    [Pure] public                   Spline Round()                                  => new(Points.AsValueEnumerable().Select(static x => x.Round()).ToArray());
+    [Pure] public                   Spline Floor()                                  => new(Points.AsValueEnumerable().Select(static x => x.Floor()).ToArray());
 
 
-    [Pure] public static Spline                                                   Create( params ReadOnlyPoint[]? points ) => new(points);
-    [Pure] public        Spline                                                   Round()                                  => new(Points.AsValueEnumerable().Select(static x => x.Round()).ToArray());
-    [Pure] public        Spline                                                   Floor()                                  => new(Points.AsValueEnumerable().Select(static x => x.Floor()).ToArray());
-    [Pure] public        ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable()                      => new(new FromArray<ReadOnlyPoint>(Points));
-    
+    [Pure] public ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable() => new(new FromArray<ReadOnlyPoint>(Points));
+
 
     public static bool TryFromJson( string? json, out Spline result )
     {
@@ -78,6 +80,7 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : IShape<Spline>
     public int CompareTo( object? other, IComparer comparer ) => other is Spline spline
                                                                      ? CompareTo(spline)
                                                                      : throw new ExpectedValueTypeException(other, typeof(Spline));
+    public int CompareTo( Spline other, IComparer<Spline> comparer ) => comparer.Compare(this, other);
     public int CompareTo( Spline other )
     {
         int lengthComparison = Length.CompareTo(other.Length);

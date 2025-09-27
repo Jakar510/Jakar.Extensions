@@ -7,8 +7,13 @@ namespace Jakar.Shapes.Interfaces;
 public interface ICircle<TSelf> : IShape<TSelf>, IShapeLocation
     where TSelf : struct, ICircle<TSelf>, IJsonModel<TSelf>
 {
-    ref readonly ReadOnlyPoint Center { get; }
-    double                     Radius { get; }
+    ReadOnlyPoint Center { get; }
+    double        Radius { get; }
+
+
+    [Pure] public abstract static TSelf Create( in ReadOnlyPoint center, double radius );
+    [Pure] public                 TSelf Round();
+    [Pure] public                 TSelf Floor();
 
 
     public void Deconstruct( out double        x,     out double y, out double radius );

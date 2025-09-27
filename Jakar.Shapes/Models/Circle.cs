@@ -3,7 +3,6 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using JetBrains.Annotations;
 
 
 
@@ -23,16 +22,17 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public readonly        double        Radius    = radius;
 
 
-    static ref readonly Circle IShape<Circle>.Zero    => ref Zero;
-    static ref readonly Circle IShape<Circle>.One     => ref One;
-    static ref readonly Circle IShape<Circle>.Invalid => ref Invalid;
-    double ICircle<Circle>.                   Radius  => Radius;
-    ReadOnlyPoint ICircle<Circle>.            Center  => Center;
-    public bool                               IsEmpty => Center.IsEmpty || double.IsNaN(Radius);
-    public bool                               IsNaN   => Center.IsNaN   || double.IsNaN(Radius);
-    public bool                               IsValid => !IsNaN && Radius >= 0;
-    double IShapeLocation.                    X       => Center.X;
-    double IShapeLocation.                    Y       => Center.Y;
+    static ref readonly Circle IShape<Circle>.Zero     => ref Zero;
+    static ref readonly Circle IShape<Circle>.One      => ref One;
+    static ref readonly Circle IShape<Circle>.Invalid  => ref Invalid;
+    double ICircle<Circle>.                   Radius   => Radius;
+    ReadOnlyPoint ICircle<Circle>.            Center   => Center;
+    ReadOnlyPoint IShapeLocation.             Location => Center;
+    public bool                               IsEmpty  => Center.IsEmpty || double.IsNaN(Radius);
+    public bool                               IsNaN    => Center.IsNaN   || double.IsNaN(Radius);
+    public bool                               IsValid  => !IsNaN && Radius >= 0;
+    double IShapeLocation.                    X        => Center.X;
+    double IShapeLocation.                    Y        => Center.Y;
 
 
     public static implicit operator Circle( ReadOnlyPointF point ) => new(point.X, point.Y);
@@ -44,10 +44,11 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     public static implicit operator Circle( double         other ) => new(ReadOnlyPoint.Zero, other);
 
 
-    [System.Diagnostics.Contracts.Pure] public static Circle Create( float  x, float  y ) => new(x, y);
-    [System.Diagnostics.Contracts.Pure] public static Circle Create( double x, double y ) => new(x, y);
-    [System.Diagnostics.Contracts.Pure] public        Circle Round() => new(Center, Radius.Round());
-    [System.Diagnostics.Contracts.Pure] public        Circle Floor() => new(Center, Radius.Floor());
+    [Pure] public static Circle Create( in ReadOnlyPoint center, double radius ) => new(center, radius);
+    [Pure] public static Circle Create( float            x,      float  y )      => Create(new ReadOnlyPoint(x, y), 1);
+    [Pure] public static Circle Create( double           x,      double y )      => Create(new ReadOnlyPoint(x, y), 1);
+    [Pure] public        Circle Round() => new(Center, Radius.Round());
+    [Pure] public        Circle Floor() => new(Center, Radius.Floor());
 
 
     public bool IsTangent( ref readonly  ReadOnlyLine line ) => GetLineRelation(in line) is CircleLineRelation.Tangent;
@@ -129,8 +130,7 @@ public readonly struct Circle( ReadOnlyPoint center, double radius ) : ICircle<C
     }
 
 
-    [MustDisposeResource]
-    public FilterBuffer<ReadOnlyPoint> Intersections( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE )
+    [MustDisposeResource] public FilterBuffer<ReadOnlyPoint> Intersections( ref readonly CalculatedLine curve, in double xMin, in double xMax, in int samples = 1000, in double tolerance = TOLERANCE )
     {
         double                      r2            = Radius * Radius;
         FilterBuffer<ReadOnlyPoint> intersections = new(samples);

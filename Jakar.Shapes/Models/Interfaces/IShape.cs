@@ -43,20 +43,16 @@ public interface IShape<TSelf> : IFormattable, IValidator, IJsonModel<TSelf>
 
 public interface IShapeSize
 {
-    public double Height { get; }
-    public double Width  { get; }
-
-
-    public void Deconstruct( out double width, out double height );
+    public double       Height { get; }
+    public double       Width  { get; }
+    public ReadOnlySize Size   { get; }
 }
 
 
 
 public interface IShapeLocation
 {
-    public double X { get; }
-    public double Y { get; }
-
-
-    public void Deconstruct( out double x, out double y );
+    public double        X        { get; }
+    public double        Y        { get; }
+    public ReadOnlyPoint Location { get; }
 }

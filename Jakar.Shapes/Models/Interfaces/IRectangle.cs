@@ -8,13 +8,15 @@ namespace Jakar.Shapes.Interfaces;
 public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     where TSelf : IRectangle<TSelf>, IJsonModel<TSelf>
 {
-    public double        Bottom   { get; }
-    public ReadOnlyPoint Center   { get; }
-    public double        Left     { get; }
-    public ReadOnlyPoint Location { get; }
-    public double        Right    { get; }
-    public ReadOnlySize  Size     { get; }
-    public double        Top      { get; }
+    public ReadOnlyLine  Bottom      { get; }
+    public ReadOnlyPoint Center      { get; }
+    public ReadOnlyLine  Left        { get; }
+    public ReadOnlyLine  Right       { get; }
+    public ReadOnlyLine  Top         { get; }
+    public ReadOnlyPoint TopLeft     { get; }
+    public ReadOnlyPoint TopRight    { get; }
+    public ReadOnlyPoint BottomLeft  { get; }
+    public ReadOnlyPoint BottomRight { get; }
 
 
     public abstract static implicit operator Rectangle( TSelf  self );
@@ -25,18 +27,25 @@ public interface IRectangle<TSelf> : IShape<TSelf>, IShapeSize, IShapeLocation
     public abstract static implicit operator TSelf( double     value );
 
 
-    public static bool CheckIfEmpty( in TSelf self ) => double.IsNaN(self.Bottom) || double.IsNaN(self.Top) || double.IsNegative(self.Left) || double.IsNaN(self.Left) || double.IsNaN(self.Right) || double.IsNegative(self.Right);
+    public static bool CheckIfNaN( in   TSelf self ) => double.IsNaN(self.X) || double.IsNaN(self.Y) || double.IsNaN(self.Width) || double.IsNaN(self.Height);
+    public static bool CheckIfEmpty( in TSelf self ) => double.IsNaN(self.X) || double.IsNaN(self.Y) || double.IsNaN(self.Width) || self.Width <= 0 || double.IsNaN(self.Height) || self.Height <= 0;
 
 
-    [Pure] public abstract static TSelf Create( params ReadOnlySpan<ReadOnlyPoint> points );
-    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               point,     in ReadOnlySize      size );
-    [Pure] public abstract static TSelf Create( in     ReadOnlyPoint               topLeft,   in ReadOnlyPoint     bottomRight );
-    [Pure] public abstract static TSelf Create( in     TSelf                       rectangle, in ReadOnlyThickness padding );
-    [Pure] public abstract static TSelf Create( double                             x,         double               y, in ReadOnlySize size );
-    [Pure] public abstract static TSelf Create( double                             x,         double               y, double          width, double height );
-    [Pure]
-    public abstract static TSelf Create<T>( ref readonly T rect )
-        where T : IRectangle<T>;
+    [Pure] public abstract static TSelf Create( float  x, float  y, float  width, float  height );
+    [Pure] public abstract static TSelf Create( double x, double y, double width, double height );
+    [Pure] public abstract static TSelf Create<TPoint>( params ReadOnlySpan<TPoint> points )
+        where TPoint : IPoint<TPoint>;
+    [Pure] public abstract static TSelf Create<TPoint>( in TPoint topLeft, in TPoint bottomRight )
+        where TPoint : IPoint<TPoint>;
+    [Pure] public abstract static TSelf Create<TPoint, TSize>( in TPoint point, in TSize size )
+        where TPoint : IPoint<TPoint>
+        where TSize : ISize<TSize>;
+    [Pure] public abstract static TSelf Create<TRectangle>( in TRectangle rectangle )
+        where TRectangle : IRectangle<TRectangle>;
+    [Pure] public abstract static TSelf Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
+        where TRectangle : IRectangle<TRectangle>;
+    [Pure] public abstract static TSelf Create<TSize>( double x, double y, in TSize size )
+        where TSize : ISize<TSize>;
 
 
     public void Deconstruct( out float          x,     out float         y, out float  width, out float  height );

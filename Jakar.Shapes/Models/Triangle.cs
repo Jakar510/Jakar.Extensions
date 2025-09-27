@@ -24,9 +24,10 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     static ref readonly Triangle IShape<Triangle>.Zero     => ref Zero;
     static ref readonly Triangle IShape<Triangle>.One      => ref One;
     static ref readonly Triangle IShape<Triangle>.Invalid  => ref Invalid;
-    public              bool                      IsEmpty  => A.IsOneOf(B, C) || B.IsOneOf(A, C) || C.IsOneOf(A, B);
-    public              bool                      IsNaN    => A.IsNaN         || B.IsNaN         || C.IsNaN;
-    public              bool                      IsValid  => !IsNaN;
+    ReadOnlyPoint IShapeLocation.                 Location => Centroid;
+    public bool                                   IsEmpty  => A.IsOneOf(B, C) || B.IsOneOf(A, C) || C.IsOneOf(A, B);
+    public bool                                   IsNaN    => A.IsNaN         || B.IsNaN         || C.IsNaN;
+    public bool                                   IsValid  => !IsNaN;
     ReadOnlyPoint ITriangle<Triangle>.            A        => A;
     ReadOnlyPoint ITriangle<Triangle>.            B        => B;
     ReadOnlyPoint ITriangle<Triangle>.            C        => C;

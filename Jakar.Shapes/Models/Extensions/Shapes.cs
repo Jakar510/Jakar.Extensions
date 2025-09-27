@@ -19,16 +19,16 @@ public static class Shapes
     public static CalculatedLine RadiusCalculatedLine<TCircle>( this TCircle self, in Radians radians )
         where TCircle : struct, ICircle<TCircle>
     {
-        ref readonly ReadOnlyPoint start = ref self.Center;
-        ReadOnlyPoint              end   = new(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint center = self.Center;
+        ReadOnlyPoint end   = new(self.Center.X + self.Radius * Math.Cos(radians.Value), self.Center.Y + self.Radius * Math.Sin(radians.Value));
 
-        double dx = end.X - start.X;
-        double dy = end.Y - start.Y;
+        double dx = end.X - center.X;
+        double dy = end.Y - center.Y;
 
         if ( Math.Abs(dx) < double.Epsilon ) { return CalculatedLine.Create(x => self.Center.X); }
 
         double m = dy / dx;
-        double b = start.Y - m * start.X;
+        double b = center.Y - m * center.X;
 
         return CalculatedLine.Create(x => m * x + b);
     }
@@ -37,9 +37,9 @@ public static class Shapes
     public static ReadOnlyLine DiameterLine<TCircle>( this TCircle self, in Radians radians )
         where TCircle : struct, ICircle<TCircle>
     {
-        ref readonly ReadOnlyPoint center = ref self.Center;
-        ReadOnlyPoint              start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
-        ReadOnlyPoint              end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint center = self.Center;
+        ReadOnlyPoint start  = new(center.X - self.Radius * Math.Cos(radians.Value), center.Y - self.Radius * Math.Sin(radians.Value));
+        ReadOnlyPoint end    = new(center.X + self.Radius * Math.Cos(radians.Value), center.Y + self.Radius * Math.Sin(radians.Value));
         return new ReadOnlyLine(start, end);
     }
     public static CalculatedLine DiameterCalculatedLine<TCircle>( this TCircle self, in Radians radians )
@@ -132,15 +132,14 @@ public static class Shapes
     }
 
 
-    [Pure]
-    public static TRectangle Union<TRectangle, TOther>( this TRectangle self, in TOther other )
+    [Pure] public static TRectangle Union<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
         where TOther : IRectangle<TOther>
     {
         double x      = Math.Min(self.X, other.X);
         double y      = Math.Min(self.Y, other.Y);
-        double width  = Math.Max(self.Right,  other.Right)  - self.X;
-        double height = Math.Max(self.Bottom, other.Bottom) - self.Y;
+        double width  = Math.Max(self.X + self.Width, other.X + other.Width) - self.X;
+        double height = Math.Max(self.Y + self.Height, other.Y + other.Height) - self.Y;
 
         return width < 0 || height < 0
                    ? TRectangle.Zero
@@ -148,8 +147,7 @@ public static class Shapes
     }
 
 
-    [Pure]
-    public static TRectangle Intersection<TRectangle, TOther>( this TRectangle self, in TOther other )
+    [Pure] public static TRectangle Intersection<TRectangle, TOther>( this TRectangle self, in TOther other )
         where TRectangle : IRectangle<TRectangle>
         where TOther : IRectangle<TOther>
     {

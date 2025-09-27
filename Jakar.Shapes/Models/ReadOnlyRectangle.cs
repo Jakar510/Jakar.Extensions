@@ -3,13 +3,16 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
 namespace Jakar.Shapes;
 
 
-[StructLayout(LayoutKind.Sequential)][DefaultValue(nameof(Zero))]
+[StructLayout(LayoutKind.Sequential)]
+[DefaultValue(nameof(Zero))]
 [method: JsonConstructor]
 public readonly struct ReadOnlyRectangle( double x, double y, double width, double height ) : IRectangle<ReadOnlyRectangle>
 {
@@ -22,52 +25,72 @@ public readonly struct ReadOnlyRectangle( double x, double y, double width, doub
     public readonly        double            Height  = height;
 
 
-    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero     => ref Zero;
-    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid  => ref Invalid;
-    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One      => ref One;
-    public              bool                                        IsEmpty  => IRectangle<ReadOnlyRectangle>.CheckIfEmpty(in this);
-    double IShapeLocation.                                          X        => X;
-    double IShapeLocation.                                          Y        => Y;
-    double IShapeSize.                                              Width    => Width;
-    double IShapeSize.                                              Height   => Height;
-    public bool                                                     IsNaN    => double.IsNaN(X) || double.IsNaN(Y) || double.IsNaN(Width) || double.IsNaN(Height);
-    public bool                                                     IsValid  => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
-    public ReadOnlyPoint                                            Center   => new(Right / 2, Bottom / 2);
-    public ReadOnlyPoint                                            Location => new(X, Y);
-    public ReadOnlySize                                             Size     => new(Width, Height);
-    public double                                                   Bottom   => Y + Height;
-    public double                                                   Left     => X;
-    public double                                                   Right    => X + Width;
-    public double                                                   Top      => Y;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Zero        => ref Zero;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.Invalid     => ref Invalid;
+    static ref readonly ReadOnlyRectangle IShape<ReadOnlyRectangle>.One         => ref One;
+    public              bool                                        IsEmpty     => IRectangle<ReadOnlyRectangle>.CheckIfEmpty(in this);
+    public              bool                                        IsNaN       => IRectangle<ReadOnlyRectangle>.CheckIfNaN(in this);
+    double IShapeLocation.                                          X           => X;
+    double IShapeLocation.                                          Y           => Y;
+    double IShapeSize.                                              Width       => Width;
+    double IShapeSize.                                              Height      => Height;
+    public bool                                                     IsValid     => !IsNaN && X >= 0 && Y >= 0 && Width >= 0 && Height >= 0;
+    public ReadOnlyPoint                                            Center      => new(( X + Width ) / 2, ( Y + Height ) / 2);
+    public ReadOnlyPoint                                            Location    => new(X, Y);
+    public ReadOnlySize                                             Size        => new(Width, Height);
+    public ReadOnlyPoint                                            TopLeft     => new(X, Y);
+    public ReadOnlyPoint                                            TopRight    => new(X    + Width, Y);
+    public ReadOnlyPoint                                            BottomLeft  => new(X, Y + Height);
+    public ReadOnlyPoint                                            BottomRight => new(X    + Width, Y + Height);
+    public ReadOnlyLine                                             Bottom      => new(BottomLeft, BottomRight);
+    public ReadOnlyLine                                             Left        => new(TopLeft, BottomLeft);
+    public ReadOnlyLine                                             Right       => new(TopRight, BottomRight);
+    public ReadOnlyLine                                             Top         => new(TopLeft, TopRight);
 
 
     public static implicit operator Rectangle( ReadOnlyRectangle          self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());
     public static implicit operator RectangleF( ReadOnlyRectangle         self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
     public static implicit operator ReadOnlyRectangleF( ReadOnlyRectangle self )  => new(self.X.AsFloat(), self.Y.AsFloat(), self.Width.AsFloat(), self.Height.AsFloat());
-    public static implicit operator ReadOnlyRectangle( int                value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( long               value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( float              value ) => new(value, value, value, value);
-    public static implicit operator ReadOnlyRectangle( double             value ) => new(value, value, value, value);
+    public static implicit operator ReadOnlyRectangle( int                value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangle( long               value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangle( float              value ) => Create<ReadOnlySize>(0, 0, value);
+    public static implicit operator ReadOnlyRectangle( double             value ) => Create<ReadOnlySize>(0, 0, value.AsFloat());
 
 
-    [Pure]
-    public static ReadOnlyRectangle Create<T>( ref readonly T rect )
-        where T : IRectangle<T>
+    [Pure] public static ReadOnlyRectangle Create<TPoint>( params ReadOnlySpan<TPoint> points )
+        where TPoint : IPoint<TPoint>
     {
-        return new ReadOnlyRectangle(rect.X, rect.Y, rect.Width, rect.Height);
+        if ( points.Length <= 0 ) { return Zero; }
+
+        ValueEnumerable<FromSpan<TPoint>, TPoint> enumerable = points.AsValueEnumerable();
+
+        double x      = enumerable.Min(static p => p.X);
+        double y      = enumerable.Min(static p => p.Y);
+        double width  = enumerable.Max(static p => p.X) - x;
+        double height = enumerable.Max(static p => p.Y) - y;
+
+        return Create(x, y, width, height);
     }
-    [Pure] public static ReadOnlyRectangle Create( params ReadOnlySpan<ReadOnlyPoint> points )                                                                  => MutableRectangle.Create(points);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyPoint               point,     in ReadOnlySize      size )                                    => new(point.X, point.Y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyPointF              point,     in ReadOnlySizeF     size )                                    => new(point.X, point.Y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyPoint               topLeft,   in ReadOnlyPoint     bottomRight )                             => new(topLeft.X, topLeft.Y, bottomRight.X        - topLeft.X, bottomRight.Y                      - topLeft.Y);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyPoint               topLeft,   in ReadOnlyPointF    bottomRight )                             => new(topLeft.X, topLeft.Y, bottomRight.X        - topLeft.X, bottomRight.Y                      - topLeft.Y);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyPointF              topLeft,   in ReadOnlyPointF    bottomRight )                             => new(topLeft.X, topLeft.Y, bottomRight.X        - topLeft.X, bottomRight.Y                      - topLeft.Y);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyRectangle           rectangle, in ReadOnlyThickness padding )                                 => new(padding.Left, padding.Top, rectangle.Width - padding.HorizontalThickness, rectangle.Height - padding.VerticalThickness);
-    [Pure] public static ReadOnlyRectangle Create( in     ReadOnlyRectangleF          rectangle, in ReadOnlyThickness padding )                                 => new(padding.Left, padding.Top, rectangle.Width - padding.HorizontalThickness, rectangle.Height - padding.VerticalThickness);
-    [Pure] public static ReadOnlyRectangle Create( float                              x,         float                y, in ReadOnlySize size )                 => new(x, y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangle Create( double                             x,         double               y, in ReadOnlySize size )                 => new(x, y, size.Width, size.Height);
-    [Pure] public static ReadOnlyRectangle Create( float                              x,         float                y, float           width, float  height ) => new(x, y, width, height);
-    [Pure] public static ReadOnlyRectangle Create( double                             x,         double               y, double          width, double height ) => new(x, y, width, height);
+    [Pure] public static ReadOnlyRectangle Create<T>( in T rect )
+        where T : IRectangle<T> => Create(rect.X, rect.Y, rect.Width, rect.Height);
+    [Pure] public static ReadOnlyRectangle Create( float  x, float  y, float  width, float  height ) => new(x, y, width, height);
+    [Pure] public static ReadOnlyRectangle Create( double x, double y, double width, double height ) => new(x, y, width, height);
+    [Pure] public static ReadOnlyRectangle Create<TPoint>( in TPoint topLeft, in TPoint bottomRight )
+        where TPoint : IPoint<TPoint> => Create(topLeft.X, topLeft.Y, bottomRight.X - topLeft.X, bottomRight.Y - topLeft.Y);
+    [Pure] public static ReadOnlyRectangle Create<TPoint, TSize>( in TPoint point, in TSize size )
+        where TPoint : IPoint<TPoint>
+        where TSize : ISize<TSize> => Create(point.X, point.Y, size.Width, size.Height);
+    [Pure] public static ReadOnlyRectangle Create<TSize>( double x, double y, in TSize size )
+        where TSize : ISize<TSize> => Create(x, y, size.Width, size.Height);
+    [Pure] public static ReadOnlyRectangle Create<TRectangle>( in TRectangle rectangle, in ReadOnlyThickness padding )
+        where TRectangle : IRectangle<TRectangle>
+    {
+        double x      = ( rectangle.X      + padding.Left );
+        double y      = ( rectangle.Y      + padding.Top );
+        double width  = ( rectangle.Width  - padding.HorizontalThickness );
+        double height = ( rectangle.Height - padding.VerticalThickness );
+        return Create(x, y, width, height);
+    }
 
 
     public void Deconstruct( out double x, out double y )
