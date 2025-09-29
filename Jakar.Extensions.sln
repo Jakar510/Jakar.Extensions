@@ -84,6 +84,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Blazor.Syn
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Telemetry.Server", "Jakar.Extensions.Telemetry.Server\Jakar.Extensions.Telemetry.Server.csproj", "{B180D6BE-0D59-49CE-9182-F29A47F579C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Shapes.Experiments", "Jakar.Shapes.Experiments\Jakar.Shapes.Experiments.csproj", "{60EA32AE-F5F9-474C-8F70-1909B18D947C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -393,6 +395,18 @@ Global
 		{B180D6BE-0D59-49CE-9182-F29A47F579C3}.Release|iPhone.Build.0 = Release|Any CPU
 		{B180D6BE-0D59-49CE-9182-F29A47F579C3}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{B180D6BE-0D59-49CE-9182-F29A47F579C3}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhone.Build.0 = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
