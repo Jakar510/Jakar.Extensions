@@ -26,9 +26,9 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public                       double                 Height      { get; set; } = height;
     [JsonIgnore] public readonly bool                   IsEmpty     => ISize<MutableSize>.CheckIfEmpty(in this);
     public readonly              bool                   IsLandscape => ISize<MutableSize>.CheckIfLandscape(in this);
-    public readonly              bool                   IsNaN       => ISize<MutableSize>.CheckIfInvalid(in this);
+    public readonly              bool                   IsNaN       => ISize<MutableSize>.CheckIfNan(in this);
     public readonly              bool                   IsPortrait  => ISize<MutableSize>.CheckIfPortrait(in this);
-    public readonly              bool                   IsValid     => !IsNaN && !IsEmpty;
+    public                       bool                   IsValid     => ISize<MutableSize>.CheckIfValid(in this);
 
 
     public static implicit operator ReadOnlySize( MutableSize  rect )  => new(rect.Width, rect.Height);

@@ -24,10 +24,10 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid       => ref Invalid;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.One           => ref One;
     ReadOnlySize IShapeSize.                              Size          => this;
-    public              bool                              IsValid       => !IsNaN && !IsEmpty;
+    public              bool                              IsValid       => ISize<ReadOnlySize>.CheckIfValid(in this);
     [JsonIgnore] public bool                              IsEmpty       => ISize<ReadOnlySize>.CheckIfEmpty(in this);
     public              bool                              IsLandscape   => ISize<ReadOnlySize>.CheckIfLandscape(in this);
-    public              bool                              IsNaN         => ISize<ReadOnlySize>.CheckIfInvalid(in this);
+    public              bool                              IsNaN         => ISize<ReadOnlySize>.CheckIfNan(in this);
     public              bool                              IsPortrait    => ISize<ReadOnlySize>.CheckIfPortrait(in this);
     double IShapeSize.                                    Width         => Width;
     double IShapeSize.                                    Height        => Height;
