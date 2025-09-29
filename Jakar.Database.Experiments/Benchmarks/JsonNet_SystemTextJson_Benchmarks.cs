@@ -31,31 +31,31 @@ public class JsonNet_SystemTextJson_Benchmarks
 {
     private const string JSON = """
                                 {
-                                  "Name": "Gorgeous Plastic Shirt",
+                                  "AppName": "Gorgeous Plastic Shirt",
                                   "Description": "Fantastic",
                                   "Price": 23.474790677749812,
                                   "Date": "2023-12-03T18:16:23.6915673+00:00",
                                   "Children": [
                                     {
-                                      "Name": "Awesome Plastic Car",
+                                      "AppName": "Awesome Plastic Car",
                                       "Description": "Small",
                                       "Price": 30.657281164019174,
                                       "Date": "2023-12-03T18:16:23.6929482+00:00",
                                       "Children": [
                                         {
-                                          "Name": "Unbranded Concrete Pizza",
+                                          "AppName": "Unbranded Concrete Pizza",
                                           "Description": "Fantastic",
                                           "Price": 94.07766085149403,
                                           "Date": "2023-12-04T18:16:23.6929638+00:00",
                                           "Children": [
                                             {
-                                              "Name": "Unbranded Granite Salad",
+                                              "AppName": "Unbranded Granite Salad",
                                               "Description": "Small",
                                               "Price": 66.06374753622815,
                                               "Date": "2023-12-05T18:16:23.6929664+00:00",
                                               "Children": [
                                                 {
-                                                  "Name": "Refined Frozen Pants",
+                                                  "AppName": "Refined Frozen Pants",
                                                   "Description": "Tasty",
                                                   "Price": 8.501224852951566,
                                                   "Date": "2023-11-24T18:16:23.6929686+00:00",
@@ -64,7 +64,7 @@ public class JsonNet_SystemTextJson_Benchmarks
                                               ]
                                             },
                                             {
-                                              "Name": "Small Metal Sausages",
+                                              "AppName": "Small Metal Sausages",
                                               "Description": "Generic",
                                               "Price": 40.94389211369755,
                                               "Date": "2023-12-08T18:16:23.6930666+00:00",
@@ -73,21 +73,21 @@ public class JsonNet_SystemTextJson_Benchmarks
                                           ]
                                         },
                                         {
-                                          "Name": "Fantastic Granite Bike",
+                                          "AppName": "Fantastic Granite Bike",
                                           "Description": "Rustic",
                                           "Price": 22.186910049957202,
                                           "Date": "2023-12-03T18:16:23.6930708+00:00",
                                           "Children": []
                                         },
                                         {
-                                          "Name": "Fantastic Granite Bacon",
+                                          "AppName": "Fantastic Granite Bacon",
                                           "Description": "Handcrafted",
                                           "Price": 47.41072325681185,
                                           "Date": "2023-12-06T18:16:23.693073+00:00",
                                           "Children": []
                                         },
                                         {
-                                          "Name": "Awesome Granite Car",
+                                          "AppName": "Awesome Granite Car",
                                           "Description": "Practical",
                                           "Price": 53.86904665950482,
                                           "Date": "2023-11-26T18:16:23.6930752+00:00",
@@ -96,49 +96,49 @@ public class JsonNet_SystemTextJson_Benchmarks
                                       ]
                                     },
                                     {
-                                      "Name": "Generic Wooden Chips",
+                                      "AppName": "Generic Wooden Chips",
                                       "Description": "Rustic",
                                       "Price": 98.79916960229026,
                                       "Date": "2023-11-29T18:16:23.6930775+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Intelligent Plastic Shirt",
+                                      "AppName": "Intelligent Plastic Shirt",
                                       "Description": "Unbranded",
                                       "Price": 44.68665022123856,
                                       "Date": "2023-11-23T18:16:23.6930796+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Gorgeous Fresh Pants",
+                                      "AppName": "Gorgeous Fresh Pants",
                                       "Description": "Incredible",
                                       "Price": 30.797002792335935,
                                       "Date": "2023-11-28T18:16:23.6930815+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Unbranded Steel Fish",
+                                      "AppName": "Unbranded Steel Fish",
                                       "Description": "Incredible",
                                       "Price": 93.00952775914556,
                                       "Date": "2023-12-06T18:16:23.6930836+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Gorgeous Concrete Pants",
+                                      "AppName": "Gorgeous Concrete Pants",
                                       "Description": "Refined",
                                       "Price": 67.5470646020505,
                                       "Date": "2023-12-06T18:16:23.6930857+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Gorgeous Plastic Pants",
+                                      "AppName": "Gorgeous Plastic Pants",
                                       "Description": "Generic",
                                       "Price": 84.19487140880095,
                                       "Date": "2023-11-30T18:16:23.6930876+00:00",
                                       "Children": []
                                     },
                                     {
-                                      "Name": "Generic Plastic Soap",
+                                      "AppName": "Generic Plastic Soap",
                                       "Description": "Handmade",
                                       "Price": 40.52820379402765,
                                       "Date": "2023-12-04T18:16:23.6930897+00:00",
@@ -150,21 +150,22 @@ public class JsonNet_SystemTextJson_Benchmarks
     private static readonly Node _node = JSON.FromJson<Node>();
 
 
-    [Benchmark, Category( "Serialize" )]  public string? ToStringSerialize()             => _node.ToString();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerialize()              => _node.ToJson();
-    [Benchmark, Category( "Serialize" )]  public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
-    [Benchmark, Category( "Serialize" )]  public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
+    [Benchmark, Category( "Serialize" )] public string? ToStringSerialize()             => _node.ToString();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerialize()              => _node.ToJson();
+    [Benchmark, Category( "Serialize" )] public string? JsonNetSerializePretty()        => _node.ToPrettyJson();
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerialize()       => JsonSerializer.Serialize( _node, NodeContext.Default.Node );
+    [Benchmark, Category( "Serialize" )] public string? SystemTextJsonSerializePretty() => JsonSerializer.Serialize( _node, NodeContext.Pretty );
 
 
-    [Benchmark, Category( "Deserialize" )]  public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
-    [Benchmark, Category( "Deserialize" )]  public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
-    [Benchmark, Category( "Deserialize" )]  public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
+    [Benchmark, Category( "Deserialize" )] public Node? FakerDeserialize()          => NodeFaker.Instance.Generate();
+    [Benchmark, Category( "Deserialize" )] public Node? JsonNetDeserialize()        => JSON.FromJson<Node>();
+    [Benchmark, Category( "Deserialize" )] public Node? SystemTextJsonDeserialize() => JsonSerializer.Deserialize( JSON, NodeContext.Default.Node );
 
 
     public static async ValueTask SaveAsync()
     {
-        LocalFile file = "test.json";
+        using TelemetrySpan span = TelemetrySpan.Create();
+        LocalFile           file = "test.json";
         await file.WriteAsync( JSON );
         Console.WriteLine( file.FullPath );
     }
@@ -175,7 +176,7 @@ public class JsonNet_SystemTextJson_Benchmarks
 public sealed class NodeFaker : Faker<Node>
 {
     public static readonly NodeFaker Instance = new();
-    private                uint      _depth   = (uint)Random.Shared.Next( 5, 10 );
+    private                uint      __depth   = (uint)Random.Shared.Next( 5, 10 );
 
 
     public NodeFaker()
@@ -188,14 +189,14 @@ public sealed class NodeFaker : Faker<Node>
     }
     private Node[] GetChildren( Faker f )
     {
-        if ( _depth > 0 )
+        if ( __depth > 0 )
         {
-            uint depth = _depth;
-            _depth = depth / 2;
+            uint depth = __depth;
+            __depth = depth / 2;
             return Generate( (int)depth ).ToArray();
         }
 
-        return Array.Empty<Node>();
+        return [];
     }
 }
 
@@ -203,7 +204,7 @@ public sealed class NodeFaker : Faker<Node>
 
 public sealed record Node
 {
-    public Node[]         Children    { get; init; } = Array.Empty<Node>();
+    public Node[]         Children    { get; init; } = [];
     public DateTimeOffset Date        { get; init; }
     public string         Description { get; init; } = string.Empty;
     public string         Name        { get; init; } = string.Empty;

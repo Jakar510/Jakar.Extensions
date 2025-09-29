@@ -6,17 +6,15 @@
 /// </summary>
 public sealed class EmailBuilder
 {
-    private readonly List<Attachment>     _attachments = new();
-    private readonly List<MailboxAddress> _recipients  = new();
+    private readonly List<Attachment>     __attachments = new(Buffers.DEFAULT_CAPACITY);
+    private readonly List<MailboxAddress> __recipients  = new(Buffers.DEFAULT_CAPACITY);
+    private readonly MailboxAddress[]     __senders;
+    private          string               __subject = string.Empty;
+    private          string?              __body;
+    private          string?              __html;
 
 
-    private readonly MailboxAddress[] _senders;
-    private          string           _subject = string.Empty;
-    private          string?          _body;
-    private          string?          _html;
-
-
-    private EmailBuilder( MailboxAddress[] senders ) => _senders = senders;
+    private EmailBuilder( MailboxAddress[] senders ) => __senders = senders;
 
 
     public static EmailBuilder From( params MailboxAddress[] senders ) => new(senders);
@@ -24,67 +22,67 @@ public sealed class EmailBuilder
 
     public EmailBuilder To( MailboxAddress recipient )
     {
-        _recipients.Add( recipient );
+        __recipients.Add(recipient);
         return this;
     }
     public EmailBuilder To( IEnumerable<MailboxAddress> recipients )
     {
-        _recipients.AddRange( recipients );
+        __recipients.AddRange(recipients);
         return this;
     }
-    public EmailBuilder To( params MailboxAddress[] recipients )
+    public EmailBuilder To( params ReadOnlySpan<MailboxAddress> recipients )
     {
-        _recipients.AddRange( recipients );
+        __recipients.AddRange(recipients);
         return this;
     }
 
 
     public EmailBuilder WithAttachment( Attachment attachment )
     {
-        _attachments.Add( attachment );
+        __attachments.Add(attachment);
         return this;
     }
     public EmailBuilder WithAttachment( IEnumerable<Attachment> attachments )
     {
-        _attachments.AddRange( attachments );
+        __attachments.AddRange(attachments);
         return this;
     }
-    public EmailBuilder WithAttachment( params Attachment[] attachments )
+    public EmailBuilder WithAttachment( params ReadOnlySpan<Attachment> attachments )
     {
-        _attachments.AddRange( attachments );
+        __attachments.AddRange(attachments);
         return this;
     }
 
 
     public EmailBuilder WithBody( string? body )
     {
-        _body = body;
+        __body = body;
         return this;
     }
     public EmailBuilder WithHTML( string? html )
     {
-        _html = html;
+        __html = html;
         return this;
     }
 
 
     public EmailBuilder WithSubject( string subject )
     {
-        _subject = subject;
+        __subject = subject;
         return this;
     }
 
 
     public async ValueTask<MimeMessage> Create()
     {
-        BodyBuilder builder = new BodyBuilder
+        BodyBuilder builder = new()
                               {
-                                  TextBody = _body,
-                                  HtmlBody = _html
+                                  TextBody = __body,
+                                  HtmlBody = __html
                               };
 
-        foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync( element.Name, element.ContentStream ); }
+        foreach ( Attachment element in __attachments ) { await builder.Attachments.AddAsync(element.Name, element.ContentStream); }
 
-        return new MimeMessage( _senders, _recipients, _subject, builder.ToMessageBody() );
+        return new MimeMessage(__senders, __recipients, __subject, builder.ToMessageBody());
     }
 }

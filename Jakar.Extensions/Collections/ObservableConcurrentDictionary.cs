@@ -24,10 +24,14 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
         {
             bool exists = TryGetValue( key, out TValue? old );
             buffer[key] = value;
+            KeyValuePair<TKey, TValue> pair = new(key, value);
 
-            // ReSharper disable once NullableWarningSuppressionIsUsed
-            if ( exists ) { Replaced( new KeyValuePair<TKey, TValue>( key, old! ), new KeyValuePair<TKey, TValue>( key, value ) ); }
-            else { Added( new KeyValuePair<TKey, TValue>( key,             value ) ); }
+            if ( exists )
+            {
+                KeyValuePair<TKey, TValue> oldPair = new(key, old!);
+                Replaced( in oldPair, in pair, -1 );
+            }
+            else { Added( in pair, -1 ); }
         }
     }
 
@@ -50,12 +54,11 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     protected ObservableConcurrentDictionary( ConcurrentDictionary<TKey, TValue>   dictionary ) => buffer = dictionary;
 
 
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>                 items ) => new(items);
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>              items ) => new(items);
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>>        items ) => new(items);
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ObservableCollection<KeyValuePair<TKey, TValue>> items ) => new(items);
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>           items ) => new(items);
-    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]                     items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( List<KeyValuePair<TKey, TValue>>          items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( HashSet<KeyValuePair<TKey, TValue>>       items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( ConcurrentBag<KeyValuePair<TKey, TValue>> items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( Collection<KeyValuePair<TKey, TValue>>    items ) => new(items);
+    public static implicit operator ObservableConcurrentDictionary<TKey, TValue>( KeyValuePair<TKey, TValue>[]              items ) => new(items);
 
 
     public void Clear()
@@ -71,7 +74,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     {
         if ( !buffer.TryAdd( key, value ) ) { return false; }
 
-        Added( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Added( in pair, -1 );
         return true;
     }
 
@@ -103,7 +107,8 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
 
         if ( !buffer.TryRemove( key, out TValue? value ) ) { return false; }
 
-        Removed( new KeyValuePair<TKey, TValue>( key, value ) );
+        KeyValuePair<TKey, TValue> pair = new(key, value);
+        Removed( in pair, -1 );
         OnCountChanged();
         return true;
     }
@@ -129,18 +134,19 @@ public class ObservableConcurrentDictionary<TKey, TValue> : CollectionAlerts<Key
     }
 
 
-    protected internal override ReadOnlyMemory<KeyValuePair<TKey, TValue>> FilteredValues()
+    [Pure, MustDisposeResource, SuppressMessage( "ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator" )]
+    protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;
-        using Buffer<KeyValuePair<TKey, TValue>> values = new(count);
+        FilterBuffer<KeyValuePair<TKey, TValue>> values = new(count);
+        int                                      index  = 0;
 
-        // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-        foreach ( KeyValuePair<TKey, TValue> t in buffer )
+        foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter( t ) ) { values.Add( t ); }
+            if ( Filter( index++, in pair ) ) { values.Add( in pair ); }
         }
 
-        return values.ToArray();
+        return values;
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 }

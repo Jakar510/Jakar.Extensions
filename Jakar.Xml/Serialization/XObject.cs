@@ -15,85 +15,85 @@ namespace Jakar.Xml.Serialization;
 [SuppressMessage( "ReSharper", "PossiblyImpureMethodCallOnReadonlyVariable" )]
 public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
 {
-    private readonly ReadOnlySpan<char> _name   = key;
-    private          XWriter            _writer = context;
+    private readonly ReadOnlySpan<char> __name   = key;
+    private          XWriter            __writer = context;
 
 
     public XObject Init()
     {
-        _writer.StartBlock( _name );
+        __writer.StartBlock( __name );
         return this;
     }
     public XObject Init( XAttributeBuilder builder )
     {
-        _writer.StartBlock( _name, builder );
+        __writer.StartBlock( __name, builder );
         return this;
     }
 
 
     public XObject Null( ReadOnlySpan<char> key )
     {
-        _writer.Indent( key ).Append( XWriter.NULL ).Next( key );
+        __writer.Indent( key ).Append( XWriter.NULL ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, char value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, short value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, ushort value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, int value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, uint value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, long value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, ulong value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, float value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, double value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
     public XObject Add( ReadOnlySpan<char> key, decimal value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
@@ -134,7 +134,7 @@ public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
     public XObject Add( ReadOnlySpan<char> key, string value ) => Add( key, value.AsSpan() );
     public XObject Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
-        _writer.Indent( key ).Append( value ).Next( key );
+        __writer.Indent( key ).Append( value ).Next( key );
 
         return this;
     }
@@ -144,20 +144,20 @@ public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
     public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, CultureInfo culture ) => Add( key, value, bufferSize, default, culture );
     public XObject Add( ReadOnlySpan<char> key, ISpanFormattable value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
     {
-        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
+        __writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
 
 
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize )
-        where T : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, CultureInfo culture )
-        where T : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
-    public XObject Add<T>( ReadOnlySpan<char> key, T? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
-        where T : struct, ISpanFormattable
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize )
+        where TValue : struct, ISpanFormattable => Add( key, value, bufferSize, CultureInfo.CurrentCulture );
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize, CultureInfo culture )
+        where TValue : struct, ISpanFormattable => Add( key, value, bufferSize, default, culture );
+    public XObject Add<TValue>( ReadOnlySpan<char> key, TValue? value, int bufferSize, ReadOnlySpan<char> format, CultureInfo culture )
+        where TValue : struct, ISpanFormattable
     {
-        _writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
+        __writer.Indent( key ).Append( value, format, culture, bufferSize ).Next( key );
 
         return this;
     }
@@ -213,9 +213,9 @@ public ref struct XObject( ReadOnlySpan<char> key, XWriter context )
     }
 
 
-    public XArray  AddArray( ReadOnlySpan<char>  key ) => new(key, _writer);
-    public XObject AddObject( ReadOnlySpan<char> key ) => new(key, _writer);
+    public XArray  AddArray( ReadOnlySpan<char>  key ) => new(key, __writer);
+    public XObject AddObject( ReadOnlySpan<char> key ) => new(key, __writer);
 
 
-    public void Dispose() => _writer.FinishBlock( _name );
+    public void Dispose() => __writer.FinishBlock( __name );
 }

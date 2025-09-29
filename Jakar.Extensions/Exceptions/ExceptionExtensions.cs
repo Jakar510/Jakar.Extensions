@@ -3,56 +3,43 @@
 
 public static class ExceptionExtensions
 {
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(GetInnerExceptions) )]
-#endif
-    private static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
-        if ( e is null ) { throw new NullReferenceException( nameof(e) ); }
+        if ( e is null ) { throw new NullReferenceException(nameof(e)); }
 
         if ( e.InnerException is null ) { return dict; }
 
-        e.Details( out Dictionary<string, object?> inner, includeFullMethodInfo );
+        e.Details(out Dictionary<string, object?> inner, includeFullMethodInfo);
 
-        dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions( ref inner, includeFullMethodInfo );
+        dict[nameof(e.InnerException)] = e.InnerException.GetInnerExceptions(ref inner, includeFullMethodInfo);
 
         return dict;
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(GetProperties) )]
-#endif
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
-        Dictionary<string, object> dictionary = new Dictionary<string, object?>();
+        Dictionary<string, object?> dictionary = new();
 
-        e.GetProperties( ref dictionary );
+        e.GetProperties(ref dictionary);
 
         return dictionary;
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(Details) )]
-#endif
-    public static ExceptionDetails Details( this Exception e ) => new(e);
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static ExceptionDetails Details( this     Exception e ) => new(e);
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(FullDetails) )]
-#endif
-    public static ExceptionDetails FullDetails( this Exception e ) => new(e, true);
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(Frames) )]
-#endif
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static IEnumerable<string> Frames( StackTrace trace )
     {
-        foreach ( StackFrame frame in trace.GetFrames()! )
+        foreach ( StackFrame frame in trace.GetFrames() )
         {
-            MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-            string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+            MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException(nameof(frame.GetMethod));
+            string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Types.MethodClass));
 
 
             switch ( method.Name )
@@ -70,56 +57,28 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodInfo) )]
-#endif
-    public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static MethodDetails? MethodInfo( this Exception e ) => e.TargetSite?.MethodInfo();
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string         CallStack( Exception       e ) => CallStack(new StackTrace(e));
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string         CallStack()                    => CallStack(new StackTrace());
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string         CallStack( StackTrace trace )  => string.Join("->", Frames(trace));
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack( Exception e ) => CallStack( new StackTrace( e ) );
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack() => CallStack( new StackTrace() );
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static string CallStack( StackTrace trace ) => string.Join( "->", Frames( trace ) );
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(Frame) )]
-#endif
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static string Frame( StackFrame frame )
     {
-        MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException( nameof(frame.GetMethod) );
-        string     className = method.MethodClass() ?? throw new NullReferenceException( nameof(TypeExtensions.MethodClass) );
+        MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException(nameof(frame.GetMethod));
+        string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Types.MethodClass));
 
         return $"{className}::{method.Name}";
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodClass) )]
-#endif
-    public static string? MethodClass( this Exception e ) => e.TargetSite?.MethodClass();
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodClass( this     Exception e ) => e.TargetSite?.MethodClass();
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodName( this      Exception e ) => e.TargetSite?.MethodName();
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
-#endif
-    public static string? MethodName( this Exception e ) => e.TargetSite?.MethodName();
-
-
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodSignature) )]
-#endif
-    public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
-
-
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     public static Dictionary<string, JToken?> GetData( this Exception e )
     {
         Dictionary<string, JToken?> data = new();
@@ -134,26 +93,24 @@ public static class ExceptionExtensions
 
             data[key] = pair.Value is null
                             ? null
-                            : JToken.FromObject( pair.Value );
+                            : JToken.FromObject(pair.Value);
         }
 
         return data;
     }
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
+
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
-        dict = new Dictionary<string, string?>( 10 );
-        e.Details( dict );
+        dict = new Dictionary<string, string?>(10);
+        e.Details(dict);
     }
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
-    public static void Details<T>( this Exception e, in T dict )
-        where T : class, IDictionary<string, string?>
+
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
+    public static void Details<TValue>( this Exception e, in TValue dict )
+        where TValue : class, IDictionary<string, string?>
     {
         dict[nameof(Type)]               = e.GetType().FullName;
         dict[nameof(e.Source)]           = e.Source;
@@ -165,9 +122,7 @@ public static class ExceptionExtensions
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(CallStack) )]
-#endif
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
@@ -185,52 +140,45 @@ public static class ExceptionExtensions
         if ( includeFullMethodInfo ) { dict[nameof(Exception.TargetSite)]         = e.MethodInfo(); }
         else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
-        e.GetProperties( ref dict );
+        e.GetProperties(ref dict);
     }
-    public static void GetProperties<
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
-    #endif
-        T>( this T e, ref Dictionary<string, object?> dictionary )
-        where T : Exception
+
+
+    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref Dictionary<string, object?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
         {
             string key = info.Name;
 
-            if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
+            if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
 
-            dictionary[key] = info.GetValue( e, null );
+            dictionary[key] = info.GetValue(e, null);
         }
     }
 
 
-    public static void GetProperties<
-    #if NET6_0_OR_GREATER
-        [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties )]
-    #endif
-        T>( this T e, ref Dictionary<string, JToken?> dictionary )
-        where T : Exception
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties(BindingFlags.Instance | BindingFlags.Public) )
         {
             string key = info.Name;
 
-            if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
+            if ( dictionary.ContainsKey(key) || !info.CanRead || key == "TargetSite" ) { continue; }
 
 
-            object? value = info.GetValue( e, null );
+            object? value = info.GetValue(e, null);
 
             dictionary[key] = value is not null
-                                  ? JToken.FromObject( value )
+                                  ? JToken.FromObject(value)
                                   : null;
         }
     }
 
 
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(Details) )]
-#endif
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed"), RequiresDynamicCode(JsonModels.AOT_WARNING)]
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, JToken?>
@@ -240,8 +188,8 @@ public static class ExceptionExtensions
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,
                    [nameof(Exception.Message)]    = e.Message,
-                   [nameof(Exception.Data)]       = JToken.FromObject( e.GetData() ),
-                   [nameof(Exception.StackTrace)] = JToken.FromObject( e.StackTrace?.SplitAndTrimLines() ?? Array.Empty<string>() )
+                   [nameof(Exception.Data)]       = JToken.FromObject(e.GetData()),
+                   [nameof(Exception.StackTrace)] = JToken.FromObject(e.StackTrace?.SplitAndTrimLines() ?? [])
                };
 
 
@@ -250,23 +198,22 @@ public static class ExceptionExtensions
             MethodDetails? info = e.MethodInfo();
 
             dict[nameof(Exception.TargetSite)] = info is not null
-                                                     ? JToken.FromObject( info )
+                                                     ? JToken.FromObject(info)
                                                      : null;
         }
         else if ( e.TargetSite is not null ) { dict[nameof(Exception.TargetSite)] = $"{e.MethodClass()}::{e.MethodSignature()}"; }
 
-        e.GetProperties( ref dict );
+        e.GetProperties(ref dict);
     }
 
 
 /*
-#if NET6_0_OR_GREATER
-    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] T>( this T e, ref Dictionary<string, JToken?> dictionary )
-        where T : Exception
+    public static void GetProperties<[ DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.PublicProperties ) ] TValue>( this TValue e, ref Dictionary<string, JToken?> dictionary )
+        where TValue : Exception
     {
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
+        foreach ( PropertyInfo info in typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public ) )
         {
-            string key = info.Name;
+            string key = info.AppName;
 
             if ( dictionary.ContainsKey( key ) || !info.CanRead || key == "TargetSite" ) { continue; }
 
@@ -275,7 +222,8 @@ public static class ExceptionExtensions
         }
     }
 
-    [ RequiresUnreferencedCode( nameof(Details) ) ]
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public static void Details( this Exception e, out Dictionary<string, JToken?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, JToken?>
@@ -299,6 +247,5 @@ public static class ExceptionExtensions
 
         e.GetProperties( ref dict );
     }
-#endif
 */
 }

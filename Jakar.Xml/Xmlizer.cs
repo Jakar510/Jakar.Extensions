@@ -24,19 +24,19 @@ public interface IXmlizer
 public static partial class Xmlizer
 {
     /// <summary> Maps <see cref="XmlNode.Name"/> to <see cref="Type"/> </summary>
-    internal static readonly ConcurrentDictionary<string, Type> mapper = new();
+    internal static readonly ConcurrentDictionary<string, Type> Mapper = new();
 
 
     /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
     /// </summary>
-    internal static readonly ConcurrentDictionary<string, Type> nameToType = new();
+    internal static readonly ConcurrentDictionary<string, Type> NameToType = new();
 
 
     /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="NodeNames.GetTypeName"/> to get the <see cref="Type.FullName"/> </para>
     /// </summary>
-    internal static readonly ConcurrentDictionary<Type, Func<string, object>> parsers = new();
+    internal static readonly ConcurrentDictionary<Type, Func<string, object>> Parsers = new();
     /// <summary> register System built-ins </summary>
     static Xmlizer() => Register( typeof(bool?),
                                   typeof(byte?),
@@ -71,11 +71,11 @@ public static partial class Xmlizer
                                   typeof(double),
                                   typeof(decimal),
                                   typeof(TimeSpan) );
-    public static string ToXml<T>( this T obj, in IDictionary<string, string>? attributes = default ) => Serialize( obj, attributes );
+    public static string ToXml<TValue>( this TValue obj, in IDictionary<string, string>? attributes = null ) => Serialize( obj, attributes );
 
 
-    public static T FromXml<T>( this string xml, out IDictionary<string, string>? attributes )
-        where T : new() => Deserialize<T>( xml, out attributes );
+    public static TValue FromXml<TValue>( this string xml, out IDictionary<string, string>? attributes )
+        where TValue : new() => Deserialize<TValue>( xml, out attributes );
 
 
     // Register(typeof(IPAddress),
@@ -83,20 +83,20 @@ public static partial class Xmlizer
     // typeof(SocketAddress));
     public static void Register( Assembly assembly ) => Register( assembly.GetTypes() );
 
-    public static void Register<T>() => Register( typeof(T) );
+    public static void Register<TValue>() => Register( typeof(TValue) );
 
     public static void Register( params Type[] types )
     {
         foreach ( Type type in types ) { Register( type ); }
     }
 
-    public static void Register( Type type, string? nodeName = default )
+    public static void Register( Type type, string? nodeName = null )
     {
-        if ( nameToType.Values.Contains( type ) ) { return; }
+        if ( NameToType.Values.Contains( type ) ) { return; }
 
-        nameToType[type.GetTypeName( true )] = type;
+        NameToType[type.GetTypeName( true )] = type;
 
-        if ( type.HasInterface<IConvertible>() ) { parsers[type] = value => value.ConvertTo( type ); }
+        if ( type.HasInterface<IConvertible>() ) { Parsers[type] = value => value.ConvertTo( type ); }
 
         NodeNames.RegisterNodeName( type, nodeName );
     }

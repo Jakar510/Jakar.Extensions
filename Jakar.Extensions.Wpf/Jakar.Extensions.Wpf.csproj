@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net9.0-windows</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<LangVersion>latest</LangVersion>
-		<NoWarn>$(NoWarn);CA1416</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<OutputType>library</OutputType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<SupportedOSPlatform>windows</SupportedOSPlatform>
@@ -23,7 +23,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="Jakar.Extensions" Version="8.10.3" />
+	  <PackageReference Include="Jakar.Extensions" />
 	</ItemGroup>
 
 </Project>

@@ -10,10 +10,10 @@ namespace Jakar.Xml.Deserialization;
 
 public ref struct XDocument
 {
-    private readonly ReadOnlySpan<char> _xml;
-    private          ReadOnlySpan<char> _span;
-    private          long               _startIndex = default;
-    private          long               _endIndex   = default;
+    private readonly ReadOnlySpan<char> __xml;
+    private          ReadOnlySpan<char> __span;
+    private          long               __startIndex = 0;
+    private          long               __endIndex   = 0;
     public           XNode              Current { get; } = default;
 
 
@@ -22,12 +22,12 @@ public ref struct XDocument
     {
         if ( xml.IsEmpty ) { throw new ArgumentNullException( nameof(xml) ); }
 
-        _span = _xml = xml;
+        __span = __xml = xml;
     }
 
 
     public XDocument GetEnumerator() => this;
-    public void      Reset()         => _span = _xml;
+    public void      Reset()         => __span = __xml;
     public bool      MoveNext()      => false;
     public void      Dispose()       { }
 }

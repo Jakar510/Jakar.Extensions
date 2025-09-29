@@ -6,6 +6,6 @@ namespace Jakar.SqlBuilder;
 
 public struct UpdateChainBuilder( in UpdateClauseBuilder update, ref EasySqlBuilder builder )
 {
-    private readonly UpdateClauseBuilder _update  = update;
-    private          EasySqlBuilder      _builder = builder;
+    private readonly UpdateClauseBuilder __update  = update;
+    private          EasySqlBuilder      __builder = builder;
 }

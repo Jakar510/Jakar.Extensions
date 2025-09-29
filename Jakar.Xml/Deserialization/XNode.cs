@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using Jakar.Extensions;
+using JetBrains.Annotations;
 
 
 
@@ -18,29 +18,30 @@ public readonly ref struct XNode
     private readonly ReadOnlyMemory<char> _xml;
 
 
-    public bool HasAttributes => !Attributes.IsEmpty;
+    public bool                 HasAttributes => !Attributes.IsEmpty;
+    public ReadOnlyMemory<char> Name          => _xml[1.._xml.Span.IndexOf( '>' )].Trim();
+    public ReadOnlyMemory<char> Attributes    => _xml[(Name.Length                + 1).._xml.Span.IndexOf( '>' )].Trim();
+    public ReadOnlyMemory<char> StartTag      => _xml[..(_xml.Span.IndexOf( '>' ) + 1)].Trim();
 
-    public ReadOnlyMemory<char> Name => _xml[1.._xml.Span.IndexOf( '>' )].Trim();
-
-    public ReadOnlyMemory<char> Attributes => _xml[(Name.Length + 1).._xml.Span.IndexOf( '>' )].Trim();
-
-    public ReadOnlyMemory<char> StartTag => _xml[..(_xml.Span.IndexOf( '>' ) + 1)].Trim();
-
-    public ReadOnlySpan<char> EndTag
+    public Buffer<char> EndTag
     {
+        [Pure, MustDisposeResource]
         get
         {
-            ReadOnlySpan<char> name   = Name.Span;
-            Span<char>         buffer = stackalloc char[name.Length + 3];
-            buffer[0] = '<';
-            buffer[1] = '/';
+            ReadOnlySpan<char> name = Name.Span;
+
+            Buffer<char> buffer = new(name.Length + 3)
+                                  {
+                                      [0] = '<',
+                                      [1] = '/'
+                                  };
+
             for ( int i = 0; i < name.Length; i++ ) { buffer[i + 2] = name[i]; }
 
             buffer[^1] = '>';
-            return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), buffer.Length );
+            return buffer;
         }
     }
-
     public ReadOnlyMemory<char> XMLS
     {
         get
@@ -81,7 +82,7 @@ public readonly ref struct XNode
 
     public IReadOnlyDictionary<string, string> ToAttributeCollection()
     {
-        Dictionary<string, string> attributes = new Dictionary<string, string>();
+        Dictionary<string, string> attributes = new();
 
         foreach ( JAttribute attribute in GetAttributes() )
         {

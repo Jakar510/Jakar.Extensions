@@ -2,13 +2,11 @@
 // 04/22/2024  14:04
 
 
-namespace Jakar.Extensions.Loggers;
-
-
-#if NET8_0_OR_GREATER
+namespace Jakar.Extensions;
 
 
 
+/*
 public sealed class FileLoggerProviderOptions : IOptions<FileLoggerProviderOptions>
 {
     public const string                                           FILE_NAME = "App.logs";
@@ -17,9 +15,7 @@ public sealed class FileLoggerProviderOptions : IOptions<FileLoggerProviderOptio
     public       Func<FileLoggerProvider.LogEvent, string>        Formatter { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = DefaultFormatter;
     public       LocalFile                                        File      { get;                                                      set; } = FILE_NAME;
     FileLoggerProviderOptions IOptions<FileLoggerProviderOptions>.Value     => this;
-
-
-    public       OneOf<LocalFile, FileLoggerRolloverOptions>      Mode      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new LocalFile( FILE_NAME );
+    public OneOf<LocalFile, FileLoggerRolloverOptions>            Mode      { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; set; } = new LocalFile( FILE_NAME );
 
 
     public static string DefaultFormatter( FileLoggerProvider.LogEvent log ) => log.ToString();
@@ -28,7 +24,4 @@ public sealed class FileLoggerProviderOptions : IOptions<FileLoggerProviderOptio
 
 
 public readonly record struct FileLoggerRolloverOptions( LocalDirectory Directory, TimeSpan? LifeSpan, int MaxFiles = 10, long MaxSize = 10_485_760 );
-
-
-
-#endif
+*/

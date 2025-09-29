@@ -2,10 +2,3 @@
 // 10/16/2022  5:48 PM
 
 namespace Jakar.Database;
-
-
-public enum DbTypeInstance
-{
-    MsSql,
-    Postgres
-}

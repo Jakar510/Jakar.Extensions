@@ -1,102 +1,94 @@
-﻿namespace Jakar.Extensions;
+﻿using AsyncAwaitBestPractices;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]
-public sealed class LanguageApi : ObservableClass
+public class LanguageApi : ObservableClass
 {
-    // private readonly WeakEventManager<Language> _eventManager     = new();
-    private Language.Collection _languages        = new(Language.Supported);
-    private CultureInfo         _currentCulture   = CultureInfo.CurrentCulture;
-    private CultureInfo         _currentUiCulture = CultureInfo.CurrentUICulture;
-    private CultureInfo?        _defaultThreadCurrentCulture;
-    private CultureInfo?        _defaultThreadCurrentUiCulture;
-    private Language?           _selectedLanguage;
+    protected readonly WeakEventManager<Language> _weakEventManager = new();
+    private          Language.Collection        __languages        = new(Language.Supported);
+    private          CultureInfo                __currentCulture   = CultureInfo.CurrentCulture;
+    private          CultureInfo                __currentUiCulture = CultureInfo.CurrentUICulture;
+    private          CultureInfo?               __defaultThreadCurrentCulture;
+    private          CultureInfo?               __defaultThreadCurrentUiCulture;
+    private          Language?                  __selectedLanguage;
 
 
-    public CultureInfo CurrentCulture
+    public virtual CultureInfo CurrentCulture
     {
-        get => _currentCulture;
+        get => __currentCulture;
         set
         {
-            if ( !SetProperty( ref _currentCulture, value ) ) { return; }
+            if ( !SetProperty( ref __currentCulture, value ) ) { return; }
 
             CultureInfo.CurrentCulture = value;
         }
     }
-    public CultureInfo CurrentUICulture
+    public virtual CultureInfo CurrentUICulture
     {
-        get => _currentUiCulture;
+        get => __currentUiCulture;
         set
         {
-            if ( !SetProperty( ref _currentUiCulture, value ) ) { return; }
+            if ( !SetProperty( ref __currentUiCulture, value ) ) { return; }
 
             CultureInfo.CurrentUICulture = value;
         }
     }
-    public CultureInfo? DefaultThreadCurrentCulture
+    public virtual CultureInfo? DefaultThreadCurrentCulture
     {
-        get => _defaultThreadCurrentCulture;
+        get => __defaultThreadCurrentCulture;
         set
         {
-            if ( !SetProperty( ref _defaultThreadCurrentCulture, value ) ) { return; }
+            if ( !SetProperty( ref __defaultThreadCurrentCulture, value ) ) { return; }
 
             CultureInfo.DefaultThreadCurrentCulture = value;
         }
     }
-
-
-    public CultureInfo? DefaultThreadCurrentUiCulture
+    public virtual CultureInfo? DefaultThreadCurrentUiCulture
     {
-        get => _defaultThreadCurrentUiCulture;
+        get => __defaultThreadCurrentUiCulture;
         set
         {
-            if ( !SetProperty( ref _defaultThreadCurrentUiCulture, value ) ) { return; }
+            if ( !SetProperty( ref __defaultThreadCurrentUiCulture, value ) ) { return; }
 
             CultureInfo.DefaultThreadCurrentUICulture = value;
         }
     }
-    public Language.Collection Languages
+    public virtual Language.Collection Languages
     {
-        get => _languages;
+        get => __languages;
         set
         {
-            if ( !SetProperty( ref _languages, value ) ) { return; }
+            if ( !SetProperty( ref __languages, value ) ) { return; }
 
             if ( value.Contains( SelectedLanguage ) ) { return; }
 
             value.Add( SelectedLanguage );
         }
     }
-    public Language SelectedLanguage
+    public virtual Language SelectedLanguage
     {
-        get => _selectedLanguage ?? throw new NullReferenceException( nameof(_selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
+        get => __selectedLanguage ?? throw new NullReferenceException( nameof(__selectedLanguage) ); // ?? throw new NullReferenceException(nameof(_selectedLanguage));
         set
         {
-            if ( !SetProperty( ref _selectedLanguage, value ) ) { return; }
+            if ( !SetProperty( ref __selectedLanguage, value ) ) { return; }
 
-            // _eventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
-            OnLanguageChanged?.Invoke( value );
+            _weakEventManager.RaiseEvent( value, nameof(OnLanguageChanged) );
             CurrentUICulture = value;
         }
     }
+
+
+    public event Action<Language> OnLanguageChanged { add => _weakEventManager.AddEventHandler( value ); remove => _weakEventManager.RemoveEventHandler( value ); }
 
 
     public LanguageApi() : this( CultureInfo.CurrentUICulture ) { }
     public LanguageApi( Language culture )
     {
         SelectedLanguage = culture;
-        if ( Languages.Contains( culture ) ) { return; }
-
-        Languages.Add( culture );
+        Languages.TryAdd( culture );
     }
-
-
-    public event Action<Language>? OnLanguageChanged;
-
-    /*
-    public event Action<Language> OnLanguageChanged
-    {
-        add => _eventManager.AddEventHandler( value );
-        remove => _eventManager.AddEventHandler( value );
-    }*/
 }

@@ -23,7 +23,7 @@ public static class XmlExtensions
     public static ICollection<TValue> ToList<TValue>( this XmlDocument document, out IDictionary<string, string>? attributes )
         where TValue : IConvertible
     {
-        List<TValue> results = new List<TValue>();
+        List<TValue> results = new();
 
         XmlNode? root = document.ChildNodes[0];
 
@@ -58,11 +58,11 @@ public static class XmlExtensions
         attributes = null;
         if ( attributes is null ) { throw new NullReferenceException( nameof(attributes) ); }
 
-        Type keyType   = Xmlizer.nameToType[attributes[Constants.KEY]];
-        Type valueType = Xmlizer.nameToType[attributes[Constants.VALUE]];
+        Type keyType   = Xmlizer.NameToType[attributes[Constants.KEY]];
+        Type valueType = Xmlizer.NameToType[attributes[Constants.VALUE]];
 
-        Type         target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
-        IDictionary? results = (IDictionary)Activator.CreateInstance( target );
+        Type        target  = typeof(Dictionary<,>).MakeGenericType( keyType, valueType );
+        IDictionary results = (IDictionary?)Activator.CreateInstance( target ) ?? throw new InvalidOperationException( $"Cannot Create instance of '{target.Name}'" );
 
         for ( int i = 0; i < root.ChildNodes.Count; i++ )
         {
@@ -72,7 +72,7 @@ public static class XmlExtensions
             if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new SerializationException( nameof(node.Name) ); }
 
             string  key   = string.Empty;
-            object? value = default;
+            object? value = null;
 
             for ( int c = 0; c < node.ChildNodes.Count; c++ )
             {
@@ -111,7 +111,7 @@ public static class XmlExtensions
     public static string GetNameSpaceUri( this Type type, string       nameSpace ) => type.GetTypeName() + Constants.Dividers.NS + nameSpace;
 
 
-    public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = default )
+    public static string PrettyXml( this XmlDocument document, XmlWriterSettings? settings = null )
     {
         settings ??= new XmlWriterSettings
                      {
@@ -122,17 +122,17 @@ public static class XmlExtensions
                          IndentChars         = new string( ' ', 4 )
                      };
 
-        StringBuilder builder = new StringBuilder();
-        XmlWriter writer  = XmlWriter.Create( builder, settings );
+        StringBuilder builder = new();
+        XmlWriter     writer  = XmlWriter.Create( builder, settings );
         document.Save( writer );
         return builder.ToString();
     }
-    public static string SetMappedIDs<T>( this IEnumerable<IEnumerable<T>> items )
-        where T : IUniqueID<long> => items.Consolidate().SetMappedIDs();
-    public static string SetMappedIDs<T>( this IEnumerable<T> items )
-        where T : IUniqueID<long> => items.Select( item => item.ID ).SetMappedIDs<T>();
+    public static string SetMappedIDs<TValue>( this IEnumerable<IEnumerable<TValue>> items )
+        where TValue : IUniqueID<long> => items.Consolidate().SetMappedIDs();
+    public static string SetMappedIDs<TValue>( this IEnumerable<TValue> items )
+        where TValue : IUniqueID<long> => items.Select( item => item.ID ).SetMappedIDs<TValue>();
 
-    public static string SetMappedIDs<T>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(T).GetTableName() } );
+    public static string SetMappedIDs<TValue>( this IEnumerable<long> listOfIds ) => listOfIds.ToXml( new Dictionary<string, string> { [Constants.GROUP] = typeof(TValue).GetTableName() } );
 
 
     public static string ToXml( this JObject item )
@@ -154,7 +154,7 @@ public static class XmlExtensions
     {
         if ( string.IsNullOrWhiteSpace( xml ) ) { return default; }
 
-        XmlDocument doc = new XmlDocument();
+        XmlDocument doc = new();
         doc.LoadXml( xml );
 
         string json = JsonConvert.SerializeXmlNode( doc );
@@ -163,7 +163,7 @@ public static class XmlExtensions
 
     public static XmlDocument ToRawXml( this string xml )
     {
-        XmlDocument document = new XmlDocument();
+        XmlDocument document = new();
         document.LoadXml( xml );
 
         return document;

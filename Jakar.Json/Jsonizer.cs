@@ -13,9 +13,9 @@ public sealed class JsonizerAttribute : Attribute { }
 ///     <see cref="Jakar.Extensions.MsJsonModels.IJsonModel"/> </summary>
 public static class Jsonizer
 {
-    // public static T FromJson<T>( this string json ) where T : IJsonizer, new()
+    // public static TValue FromJson<TValue>( this string json ) where TValue : IJsonizer, new()
     // {
-    //     var       value    = new T();
+    //     var       value    = new TValue();
     //     using var document = new JReader(json);
     //     value.Deserialize(document);
     //     return value;
@@ -24,7 +24,7 @@ public static class Jsonizer
 
     public static string ToJson( this IJsonizer value, Formatting formatting = Formatting.Indented )
     {
-        JWriter writer = new JWriter( value.JsonSize(), formatting );
+        JWriter writer = new( value.JsonSize(), formatting );
 
         try
         {

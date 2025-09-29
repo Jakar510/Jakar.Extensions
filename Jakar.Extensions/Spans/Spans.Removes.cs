@@ -6,211 +6,71 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    public static Span<T> Replace<T>( this ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue )
-        where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, TValue c )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        Buffer<T> buffer = new Buffer<T>( value.Length );
-
-        try
-        {
-            Replace( value, oldValue, newValue, ref buffer );
-            int length = buffer.Length;
-            T[] array  = AsyncLinq.GetArray<T>( length );
-            buffer.Span.CopyTo( array );
-            Debug.Assert( length <= array.Length );
-            return new Span<T>( array, 0, length );
-        }
-        finally { buffer.Dispose(); }
+        Span<TValue> result = stackalloc TValue[source.Length];
+        RemoveAll( in source, in c, in result, out int length );
+        return result[..length].ToArray();
     }
 
 
-    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped ref Buffer<T> buffer )
-        where T : unmanaged, IEquatable<T>
+    public static ReadOnlySpan<TValue> RemoveAll<TValue>( this scoped ref readonly ReadOnlySpan<TValue> source, params ReadOnlySpan<TValue> removed )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        if ( source.Contains( oldValue ) is false )
-        {
-            buffer.Append( source );
-            return;
-        }
-
-        int sourceIndex = 0;
-
-        while ( sourceIndex < source.Length )
-        {
-            ReadOnlySpan<T> window = source[sourceIndex..];
-
-            if ( window.StartsWith( oldValue ) )
-            {
-                buffer.EnsureCapacity( newValue.Length );
-                buffer.Append( newValue );
-                sourceIndex += oldValue.Length;
-            }
-            else
-            {
-                buffer.Append( source[sourceIndex] );
-                sourceIndex++;
-            }
-        }
+        Span<TValue>         result = stackalloc TValue[source.Length];
+        ReadOnlySpan<TValue> temp   = removed;
+        RemoveAll( in source, in temp, in result, out int length );
+        return result[..length].ToArray();
     }
 
 
-    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped ref Span<T> buffer, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static Span<TValue> RemoveAll<TValue>( this scoped ref readonly Span<TValue> source, params ReadOnlySpan<TValue> removed )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        if ( source.Contains( oldValue ) is false )
-        {
-            source.CopyTo( buffer );
-            length = source.Length;
-            return;
-        }
-
-        length = 0;
-        int sourceIndex = 0;
-
-        while ( sourceIndex < source.Length )
-        {
-            ReadOnlySpan<T> window = source[sourceIndex..];
-
-            if ( window.StartsWith( oldValue ) )
-            {
-                if ( length + newValue.Length >= buffer.Length )
-                {
-                    T[] newBuffer = new T[buffer.Length * 2];
-                    buffer.CopyTo( newBuffer );
-                    buffer = newBuffer;
-                }
-
-                newValue.CopyTo( buffer[length..] );
-                length      += newValue.Length;
-                sourceIndex += oldValue.Length;
-            }
-            else
-            {
-                if ( length >= buffer.Length )
-                {
-                    T[] newBuffer = new T[buffer.Length * 2];
-                    buffer.CopyTo( newBuffer );
-                    buffer = newBuffer;
-                }
-
-                buffer[length] = source[sourceIndex];
-                length++;
-                sourceIndex++;
-            }
-        }
+        using IMemoryOwner<TValue> owner  = MemoryPool<TValue>.Shared.Rent( source.Length );
+        Span<TValue>               result = owner.Memory.Span;
+        ReadOnlySpan<TValue>       temp   = removed;
+        ReadOnlySpan<TValue>       span   = source;
+        RemoveAll( in span, in temp, in result, out int length );
+        return result[..length].ToArray();
     }
 
 
-    public static Span<T> Replace<T>( this ReadOnlySpan<T> value, scoped ref ReadOnlySpan<T> oldValue, scoped ref ReadOnlySpan<T> newValue, T startValue, T endValue )
-        where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly TValue value, scoped ref readonly Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        Span<T> buffer = stackalloc T[value.Length + newValue.Length + 1];
-        Replace( value, oldValue, newValue, startValue, endValue, ref buffer, out int length );
-        return MemoryMarshal.CreateSpan( ref buffer.GetPinnableReference(), length );
-    }
-
-
-    public static void Replace<T>( scoped in ReadOnlySpan<T> source, scoped in ReadOnlySpan<T> oldValue, scoped in ReadOnlySpan<T> newValue, scoped in T startValue, scoped in T endValue, scoped ref Span<T> buffer, out int length )
-        where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor( source.Length + newValue.Length - 1, buffer, nameof(buffer) );
-
-        if ( source.Contains( oldValue ) is false )
-        {
-            source.CopyTo( buffer );
-            length = source.Length;
-            return;
-        }
-
-        do
-        {
-            int start = source.IndexOf( oldValue );
-            int end   = start + oldValue.Length;
-
-            if ( oldValue.StartsWith( startValue ) is false && start > 0 ) { start--; }
-
-            if ( oldValue.EndsWith( endValue ) is false ) { end++; }
-
-            Guard.IsInRangeFor( start, source, nameof(source) );
-            ReadOnlySpan<T> sourceStart  = source[..start];
-            ReadOnlySpan<T> tempNewValue = newValue;
-            Join( in sourceStart, in tempNewValue, ref buffer, out int first );
-
-            Guard.IsInRangeFor( end, source, nameof(source) );
-            ReadOnlySpan<T> bufferStart = buffer[..first];
-            ReadOnlySpan<T> sourceEnd   = source[end..];
-            Join( in bufferStart, in sourceEnd, ref buffer, out int second );
-            length = first + second;
-        }
-        while ( source.Contains( oldValue ) );
-    }
-
-
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, T c )
-        where T : unmanaged, IEquatable<T>
-    {
-        Span<T> buffer = stackalloc T[value.Length];
-        RemoveAll( value, c, buffer, out int length );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-    }
-
-
-    public static ReadOnlySpan<T> RemoveAll<T>( this ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> removed )
-        where T : unmanaged, IEquatable<T>
-    {
-        Span<T>         buffer = stackalloc T[value.Length];
-        ReadOnlySpan<T> temp   = removed;
-        RemoveAll( value, temp, buffer, out int length );
-        return MemoryMarshal.CreateReadOnlySpan( ref buffer.GetPinnableReference(), length );
-    }
-
-
-    public static Span<T> RemoveAll<T>( this Span<T> value, scoped in ReadOnlySpan<T> removed )
-        where T : unmanaged, IEquatable<T>
-    {
-        T[]             array  = AsyncLinq.GetArray<T>( value.Length );
-        ReadOnlySpan<T> span   = value;
-        Span<T>         buffer = array;
-        ReadOnlySpan<T> temp   = removed;
-        RemoveAll( span, temp, buffer, out int length );
-        return new Span<T>( array, 0, length );
-    }
-
-
-    public static void RemoveAll<T>( scoped in ReadOnlySpan<T> value, scoped in T c, scoped in Span<T> buffer, out int length )
-        where T : unmanaged, IEquatable<T>
-    {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        Guard.IsInRangeFor( source.Length - 1, result, nameof(result) );
         int offset = 0;
 
-        for ( int i = 0; i < value.Length; i++ )
+        for ( int i = 0; i < source.Length; i++ )
         {
-            if ( value[i].Equals( c ) )
+            if ( source[i].Equals( value ) )
             {
                 offset++;
                 continue;
             }
 
-            buffer[i - offset] = value[i];
+            result[i - offset] = source[i];
         }
 
-        length = value.Length - offset;
+        length = source.Length - offset;
     }
 
 
-    public static void RemoveAll<T>( scoped in ReadOnlySpan<T> value, scoped in ReadOnlySpan<T> removed, scoped in Span<T> buffer, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static void RemoveAll<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, scoped ref readonly ReadOnlySpan<TValue> removed, scoped ref readonly Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        Guard.IsInRangeFor( value.Length - 1, buffer, nameof(buffer) );
+        Guard.IsInRangeFor( source.Length - 1, result, nameof(result) );
         int offset = 0;
 
-        for ( int i = 0; i < value.Length; i++ )
+        for ( int i = 0; i < source.Length; i++ )
         {
             bool skip = false;
 
-            foreach ( T item in removed )
+            foreach ( TValue item in removed )
             {
-                if ( !value[i].Equals( item ) ) { continue; }
+                if ( !source[i].Equals( item ) ) { continue; }
 
                 offset++;
                 skip = true;
@@ -218,20 +78,21 @@ public static partial class Spans
 
             if ( skip ) { continue; }
 
-            buffer[i - offset] = value[i];
+            result[i - offset] = source[i];
         }
 
-        length = value.Length - offset;
+        length = source.Length - offset;
     }
 
 
-    public static ReadOnlySpan<T> Slice<T>( this ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds )
-        where T : unmanaged, IEquatable<T>
+    [Pure]
+    public static ReadOnlySpan<TValue> Slice<TValue>( this ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        int start = value.IndexOf( startValue );
-        int end   = value.IndexOf( endValue );
+        int start = source.IndexOf( startValue );
+        int end   = source.IndexOf( endValue );
 
-        if ( start < 0 && end < 0 ) { return value; }
+        if ( start < 0 && end < 0 ) { return source; }
 
         start += includeEnds
                      ? 0
@@ -243,20 +104,17 @@ public static partial class Spans
 
         int length = end - start;
 
-        if ( start + length >= value.Length ) { return value[start..]; }
+        if ( start + length >= source.Length ) { return source[start..]; }
 
-        Guard.IsInRangeFor( start, value, nameof(value) );
-        Guard.IsInRangeFor( end,   value, nameof(value) );
-        ReadOnlySpan<T> result = value.Slice( start, length );
-        return result.AsReadOnlySpan();
-
-        // return MemoryMarshal.CreateReadOnlySpan( in result.GetPinnableReference(), result.Length );
+        Guard.IsInRangeFor( start, source, nameof(source) );
+        Guard.IsInRangeFor( end,   source, nameof(source) );
+        return source.Slice( start, length );
     }
-    public static void Slice<T>( scoped in ReadOnlySpan<T> value, T startValue, T endValue, bool includeEnds, scoped ref Span<T> buffer, out int length )
-        where T : unmanaged, IEquatable<T>
+    public static void Slice<TValue>( scoped ref readonly ReadOnlySpan<TValue> source, TValue startValue, TValue endValue, bool includeEnds, scoped ref Span<TValue> result, out int length )
+        where TValue : unmanaged, IEquatable<TValue>
     {
-        int start = value.IndexOf( startValue );
-        int end   = value.IndexOf( endValue );
+        int start = source.IndexOf( startValue );
+        int end   = source.IndexOf( endValue );
 
         if ( start > 0 && end > 0 )
         {
@@ -268,16 +126,16 @@ public static partial class Spans
                        ? 1
                        : 0;
 
-            ReadOnlySpan<T> result = start + end - start >= value.Length
-                                         ? value[start..]
-                                         : value.Slice( start, end );
+            ReadOnlySpan<TValue> span = start + end - start >= source.Length
+                                            ? source[start..]
+                                            : source.Slice( start, end );
 
-            result.CopyTo( buffer );
-            length = result.Length;
+            span.CopyTo( result );
+            length = span.Length;
             return;
         }
 
-        value.CopyTo( buffer );
-        length = value.Length;
+        source.CopyTo( result );
+        length = source.Length;
     }
 }

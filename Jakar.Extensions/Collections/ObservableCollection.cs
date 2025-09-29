@@ -12,207 +12,263 @@ namespace Jakar.Extensions;
 ///         <see href="https://stackoverflow.com/a/14602121/9530917"> How do I update an ObservableCollection via a worker thread? </see>
 ///     </para>
 /// </summary>
-/// <typeparam name="T"> </typeparam>
+/// <typeparam name="TValue"> </typeparam>
 [Serializable]
-public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T> equalityComparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<T>, IList<T>, IReadOnlyList<T>, IList, IDisposable
+public class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : CollectionAlerts<TValue>, IIObservableCollection<TValue>, IList<TValue>, IReadOnlyList<TValue>, IList
+    where TValue : IEquatable<TValue>
 {
-    protected internal readonly IComparer<T>         comparer         = comparer;
-    protected internal readonly IEqualityComparer<T> equalityComparer = equalityComparer;
-    protected internal readonly List<T>              buffer           = new(capacity);
+    protected internal readonly Comparer<TValue> comparer = comparer;
+    protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public          int  Capacity       { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Capacity; }
-    public override int  Count          { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
-    bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((IList)buffer).IsReadOnly; }
-    public bool          IsNotEmpty     { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count > 0; }
-    bool IList.          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((IList)buffer).IsReadOnly; }
-    bool ICollection<T>. IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => ((ICollection<T>)buffer).IsReadOnly; }
-    bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining )] get => false; }
-    object? IList.this[ int      index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); [MethodImpl( MethodImplOptions.AggressiveInlining )] set => Set( index, (T)value! ); }
-    public T this[ int           index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); [MethodImpl( MethodImplOptions.AggressiveInlining )] set => Set( index, value ); }
-    T IReadOnlyList<T>.this[ int index ] { [MethodImpl(      MethodImplOptions.AggressiveInlining )] get => Get( index ); }
-    object ICollection.SyncRoot { [MethodImpl(               MethodImplOptions.AggressiveInlining )] get => buffer; }
+    public          int  Capacity       { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int  Count          { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
+    public          bool IsEmpty        { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count == 0; }
+    bool IList.          IsFixedSize    { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
+    public bool          IsNotEmpty     { [Pure, MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count > 0; }
+    public bool          IsReadOnly     { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get; init; }
+    bool ICollection.    IsSynchronized { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => false; }
+    object? IList.this[ int                index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); [MethodImpl(MethodImplOptions.AggressiveInlining)] set => Set(index, (TValue)value!); }
+    public TValue this[ int                index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); [MethodImpl(MethodImplOptions.AggressiveInlining)] set => Set(index, value); }
+    TValue IReadOnlyList<TValue>.this[ int index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); }
+    object ICollection.SyncRoot { [MethodImpl(                   MethodImplOptions.AggressiveInlining)] get => buffer; }
 
 
-    public ObservableCollection() : this( Comparer<T>.Default, EqualityComparer<T>.Default ) { }
-    public ObservableCollection( int                       capacity ) : this( Comparer<T>.Default, EqualityComparer<T>.Default, capacity ) { }
-    public ObservableCollection( scoped in ReadOnlySpan<T> values ) : this( values.Length ) => InternalAdd( values );
-    public ObservableCollection( scoped in ReadOnlySpan<T> values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer, values.Length ) => InternalAdd( values );
-    public ObservableCollection( IEnumerable<T>            values ) : this( values, Comparer<T>.Default, EqualityComparer<T>.Default ) { }
-    public ObservableCollection( IEnumerable<T>            values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( comparer, equalityComparer ) => InternalAdd( values );
-    public ObservableCollection( T[]                       values ) : this( values.Length ) => InternalAdd( values.AsSpan() );
-    public ObservableCollection( T[]                       values, IComparer<T> comparer, IEqualityComparer<T> equalityComparer ) : this( values.AsSpan(), comparer, equalityComparer ) { }
-
-
-    public virtual void Dispose() => GC.SuppressFinalize( this );
-
-
-    // public static implicit operator ObservableCollection<T>( MemoryBuffer<T>                                        values ) => new(values);
-    public static implicit operator ObservableCollection<T>( List<T>                                                values ) => new(values);
-    public static implicit operator ObservableCollection<T>( HashSet<T>                                             values ) => new(values);
-    public static implicit operator ObservableCollection<T>( ConcurrentBag<T>                                       values ) => new(values);
-    public static implicit operator ObservableCollection<T>( Collection<T>                                          values ) => new(values);
-    public static implicit operator ObservableCollection<T>( System.Collections.ObjectModel.ObservableCollection<T> values ) => new(values);
-    public static implicit operator ObservableCollection<T>( T[]                                                    values ) => new(values);
-    public static implicit operator ObservableCollection<T>( ReadOnlyMemory<T>                                      values ) => new(values.Span);
-    public static implicit operator ObservableCollection<T>( ReadOnlySpan<T>                                        values ) => new(values);
-
-
-    public T[] ToArray() => [.. buffer];
-
-
-    protected internal void InternalInsert( int i, in T value )
+    public ObservableCollection() : this(Comparer<TValue>.Default) { }
+    public ObservableCollection( int                                 capacity ) : this(Comparer<TValue>.Default, capacity) { }
+    public ObservableCollection( ref readonly Buffer<TValue>         values ) : this(values.Length) => InternalAdd(values.Values);
+    public ObservableCollection( ref readonly Buffer<TValue>         values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Values);
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values ) : this(values.Length) => InternalAdd(values.AsSpan());
+    public ObservableCollection( ref readonly ImmutableArray<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.AsSpan());
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values ) : this(values.Length) => InternalAdd(values.Span);
+    public ObservableCollection( ref readonly ReadOnlyMemory<TValue> values, Comparer<TValue> comparer ) : this(comparer, values.Length) => InternalAdd(values.Span);
+    public ObservableCollection( params       ReadOnlySpan<TValue>   values ) : this(values.Length) => InternalAdd(values);
+    public ObservableCollection( Comparer<TValue>                    comparer, params ReadOnlySpan<TValue> values ) : this(comparer, values.Length) => InternalAdd(values);
+    public ObservableCollection( TValue[]                            values ) : this(values.Length) => InternalAdd();
+    public ObservableCollection( TValue[]                            values, Comparer<TValue> comparer ) : this(comparer, new ReadOnlySpan<TValue>(values)) { }
+    public ObservableCollection( IEnumerable<TValue>                 values ) : this(values, Comparer<TValue>.Default) { }
+    public ObservableCollection( IEnumerable<TValue>                 values, Comparer<TValue> comparer ) : this(comparer) => InternalAdd(values);
+    public virtual void Dispose()
     {
-        buffer.Insert( i, value );
-        Added( value, i );
-    }
-    protected internal void InternalInsert( int index, IEnumerable<T> collection )
-    {
-        foreach ( (int i, T? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
-    }
-    protected internal void InternalInsert( int index, scoped in ReadOnlySpan<T> collection )
-    {
-        foreach ( (int i, T? value) in collection.Enumerate( index ) ) { InternalInsert( i, value ); }
+        buffer.Clear();
+        GC.SuppressFinalize(this);
     }
 
 
-    protected internal void InternalRemoveRange( int start, int count )
+    public static implicit operator ObservableCollection<TValue>( Buffer<TValue>                                              values ) => new(values.Span);
+    public static implicit operator ObservableCollection<TValue>( List<TValue>                                                values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( HashSet<TValue>                                             values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( ConcurrentBag<TValue>                                       values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( Collection<TValue>                                          values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( System.Collections.ObjectModel.ObservableCollection<TValue> values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( TValue[]                                                    values ) => new(values);
+    public static implicit operator ObservableCollection<TValue>( ImmutableArray<TValue>                                      values ) => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlyMemory<TValue>                                      values ) => new(in values);
+    public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
+
+
+    public TValue[] ToArray() => buffer.ToArray();
+
+
+    protected internal virtual void InternalInsert( int i, ref readonly TValue value )
     {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        Guard.IsInRangeFor( count, buffer, nameof(count) );
+        ThrowIfReadOnly();
+        EnsureCapacity(1);
+        buffer.Insert(i, value);
+        Added(in value, i);
+    }
+    protected internal virtual void InternalInsert( int startIndex, IEnumerable<TValue> collection )
+    {
+        ThrowIfReadOnly();
+        foreach ( ( int i, TValue? value ) in collection.Enumerate(startIndex) ) { InternalInsert(i, in value); }
+    }
+    protected internal virtual void InternalInsert( int startIndex, params ReadOnlySpan<TValue> collection )
+    {
+        ThrowIfReadOnly();
+        EnsureCapacity(startIndex + collection.Length);
+        foreach ( ( int i, TValue? value ) in collection.Enumerate(startIndex) ) { InternalInsert(i, in value); }
+    }
+    protected internal virtual void InternalInsert( int index, ref readonly TValue value, int count )
+    {
+        ThrowIfReadOnly();
+        EnsureCapacity(count);
+        for ( int i = 0; i < count; i++ ) { InternalInsert(index + i, in value); }
+    }
+
+
+    protected internal virtual void InternalReplace( int startIndex, ref readonly TValue value, int count )
+    {
+        ThrowIfReadOnly();
+        EnsureCapacity(count);
+        for ( int i = 0; i < count; i++ ) { buffer[i + startIndex] = value; }
+
+        Reset();
+    }
+    protected internal virtual void InternalReplace( int startIndex, params ReadOnlySpan<TValue> value )
+    {
+        ThrowIfReadOnly();
+        EnsureCapacity(value.Length);
+        for ( int i = 0; i < value.Length; i++ ) { buffer[i + startIndex] = value[i]; }
+
+        Reset();
+    }
+
+
+    protected internal virtual void InternalRemove( int start, int count )
+    {
+        ThrowIfReadOnly();
+        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start + count, buffer, nameof(count));
 
         for ( int x = start; x < start + count; x++ )
         {
-            buffer.RemoveAt( x );
-            Removed( x );
+            buffer.RemoveAt(x);
+            Removed(x);
         }
     }
 
 
-    protected internal bool InternalRemove( in T value )
+    protected internal virtual bool InternalRemove( ref readonly TValue value )
     {
-        bool result = buffer.Remove( value );
-        if ( result ) { Removed( value ); }
+        ThrowIfReadOnly();
+        int index = buffer.IndexOf(value);
+        if ( index < 0 ) { return false; }
 
-        return result;
+        buffer.RemoveAt(index);
+        Removed(in value, index);
+        return true;
     }
-    protected internal int InternalRemove( in Func<T, bool> match )
+    protected internal virtual int InternalRemove( RefCheck<TValue> match )
     {
-        int count = 0;
+        ThrowIfReadOnly();
+        ReadOnlySpan<TValue> span  = AsSpan();
+        int                  count = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T value in buffer.Where( match ) )
+        foreach ( TValue value in span )
         {
-            if ( Remove( value ) ) { count++; }
+            if ( match(in value) && InternalRemove(in value) ) { count++; }
         }
 
         return count;
     }
 
 
-    protected internal void InternalClear()
+    protected internal virtual bool InternalContains( ref readonly TValue value ) => buffer.Contains(value);
+    protected internal virtual void InternalClear()
     {
+        ThrowIfReadOnly();
         buffer.Clear();
         Reset();
     }
 
 
-    protected internal bool InternalRemoveAt( int index, [NotNullWhen( true )] out T? value )
+    protected internal virtual bool InternalRemoveAt( int index, [NotNullWhen(true)] out TValue? value )
     {
-        if ( index < 0 || index >= buffer.Count )
+        ThrowIfReadOnly();
+
+        if ( index < 0 || index >= Count )
         {
             value = default;
             return false;
         }
 
         value = buffer[index];
-        buffer.RemoveAt( index );
-        Removed( value, index );
-        return value is not null;
+        buffer.RemoveAt(index);
+        Removed(in value, index);
+        return true;
     }
-    protected internal bool InternalTryAdd( in T value )
+    protected internal virtual bool InternalTryAdd( ref readonly TValue value )
     {
-        if ( buffer.Contains( value ) ) { return false; }
+        ThrowIfReadOnly();
+        if ( buffer.Contains(value) ) { return false; }
 
-        InternalAdd( value );
+        InternalAdd(in value);
         return true;
     }
 
 
-    protected internal void InternalAdd( in T value )
+    protected internal virtual void InternalAdd( ref readonly TValue value )
     {
-        buffer.Add( value );
-        Added( value, buffer.Count - 1 );
+        ThrowIfReadOnly();
+        buffer.Add(value);
+        Added(in value, Count - 1);
     }
-    protected internal void InternalAdd( IEnumerable<T> value )
+    protected internal virtual void InternalAdd( ref readonly TValue value, int count )
     {
-        buffer.AddRange( value );
+        ThrowIfReadOnly();
+        EnsureCapacity(count);
+        for ( int i = 0; i < count; i++ ) { InternalAdd(in value); }
+    }
+    protected internal virtual void InternalAdd( IEnumerable<TValue> values )
+    {
+        ThrowIfReadOnly();
+        buffer.AddRange(values);
         Reset();
     }
-    protected internal void InternalAdd( scoped in ReadOnlySpan<T> values )
+    protected internal virtual void InternalAdd( params ReadOnlySpan<TValue> values )
     {
-    #if NET8_0_OR_GREATER
-        buffer.AddRange( values );
-    #else
-        buffer.Add( values );
-    #endif
-        Reset();
-    }
-
-
-    protected internal void InternalAddOrUpdate( in T value )
-    {
-        int index = buffer.IndexOf( value );
-
-        if ( index >= 0 ) { InternalSet( index, value ); }
-        else { InternalAdd( value ); }
-    }
-
-
-    protected internal void InternalSort() => InternalSort( comparer );
-    protected internal void InternalSort( IComparer<T> compare )
-    {
-        buffer.Sort( compare );
-        Reset();
-    }
-    protected internal void InternalSort( Comparison<T> compare )
-    {
-        buffer.Sort( compare );
-        Reset();
-    }
-    protected internal void InternalSort( int start, int length ) => InternalSort( start, length, comparer );
-    protected internal void InternalSort( int start, int length, IComparer<T> compare )
-    {
-        Guard.IsInRangeFor( start,  buffer, nameof(start) );
-        Guard.IsInRangeFor( length, buffer, nameof(length) );
-        buffer.Sort( start, length, compare );
+        ThrowIfReadOnly();
+        EnsureCapacity(values.Length);
+        buffer.AddRange(values);
         Reset();
     }
 
 
-    protected internal int InternalRemove( IEnumerable<T> values )
+    protected internal virtual void InternalAddOrUpdate( ref readonly TValue value )
     {
+        ThrowIfReadOnly();
+        int index = buffer.IndexOf(value);
+
+        if ( index >= 0 ) { InternalSet(index, in value); }
+        else { InternalAdd(in value); }
+    }
+
+
+    protected internal virtual void InternalSort( Comparer<TValue> compare )
+    {
+        ThrowIfReadOnly();
+        CollectionsMarshal.AsSpan(buffer).Sort(compare);
+        Reset();
+    }
+    protected internal virtual void InternalSort( Comparison<TValue> compare )
+    {
+        ThrowIfReadOnly();
+        CollectionsMarshal.AsSpan(buffer).Sort(compare);
+        Reset();
+    }
+    protected internal virtual void InternalSort( int start, int length, Comparer<TValue> compare )
+    {
+        ThrowIfReadOnly();
+        CollectionsMarshal.AsSpan(buffer).Slice(start, length).Sort(compare);
+        Reset();
+    }
+
+
+    protected internal virtual int InternalRemove( IEnumerable<TValue> values )
+    {
+        ThrowIfReadOnly();
         int results = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T value in values )
+        foreach ( TValue value in values )
         {
-            if ( InternalRemove( value ) is false ) { continue; }
+            if ( !InternalRemove(in value) ) { continue; }
 
             results++;
         }
 
         return results;
     }
-    protected internal int InternalRemove( scoped in ReadOnlySpan<T> values )
+    protected internal virtual int InternalRemove( params ReadOnlySpan<TValue> values )
     {
+        ThrowIfReadOnly();
         int results = 0;
 
         // ReSharper disable once LoopCanBeConvertedToQuery
-        foreach ( T value in values )
+        foreach ( TValue value in values )
         {
-            if ( InternalRemove( value ) is false ) { continue; }
+            if ( !InternalRemove(in value) ) { continue; }
 
             results++;
         }
@@ -221,240 +277,371 @@ public class ObservableCollection<T>( IComparer<T> comparer, IEqualityComparer<T
     }
 
 
-    protected internal void InternalReverse()
+    protected internal virtual void InternalReverse()
     {
+        ThrowIfReadOnly();
         buffer.Reverse();
         Reset();
     }
-    protected internal void InternalReverse( int start, int length )
+    protected internal virtual void InternalReverse( int start, int length )
     {
-        Guard.IsInRangeFor( start,  buffer, nameof(start) );
-        Guard.IsInRangeFor( length, buffer, nameof(length) );
-        buffer.Reverse( start, length );
+        ThrowIfReadOnly();
+        Guard.IsInRangeFor(start,          buffer, nameof(start));
+        Guard.IsInRangeFor(start + length, buffer, nameof(length));
+        buffer.Reverse(start, length);
         Reset();
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    protected internal T InternalGet( int index )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected void ThrowIfReadOnly()
     {
-        Guard.IsInRangeFor( index, buffer, nameof(index) );
-        T result = buffer[index];
+        if ( IsReadOnly ) { throw new NotSupportedException("Collection is read-only."); }
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected internal virtual TValue InternalGet( int index )
+    {
+        Guard.IsInRangeFor(index, buffer, nameof(index));
+        TValue result = buffer[index];
         return result;
     }
-    protected internal void InternalSet( int index, T value )
+    protected internal virtual void InternalSet( int index, ref readonly TValue value )
     {
-        T? old = index < buffer.Count
-                     ? buffer[index]
-                     : default;
+        ThrowIfReadOnly();
 
-        Guard.IsInRangeFor( index, buffer, nameof(index) );
+        TValue? old = index < buffer.Count && index >= 0
+                          ? buffer[index]
+                          : default;
+
+        Guard.IsInRangeFor(index, buffer, nameof(index));
         buffer[index] = value;
-        Replaced( old, value, index );
+        Replaced(in old, in value, index);
     }
 
 
-    public virtual T    Get( int index )          => InternalGet( index );
-    public virtual void Set( int index, T value ) => InternalSet( index, value );
+    public virtual TValue Get( int index )               => InternalGet(index);
+    public virtual void   Set( int index, TValue value ) => InternalSet(index, in value);
 
 
-    public virtual bool Exists( Predicate<T>     match ) => buffer.FindIndex( match ) >= 0;
-    public virtual int  FindCount( Func<T, bool> match ) => buffer.Count( match );
+    public virtual bool Exists( RefCheck<TValue> match ) => FindIndex(match) >= 0;
 
 
-    public virtual int FindIndex( Predicate<T> match, int start, int endInclusive )
+    public virtual int FindIndex( RefCheck<TValue> match, int start = 0 )
     {
-        Guard.IsInRangeFor( start,        buffer, nameof(start) );
-        Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
-        return buffer.FindIndex( start, endInclusive, match );
+        Guard.IsInRangeFor(start, buffer, nameof(start));
+        return FindIndex(match, start, Count - 1);
     }
-    public virtual int FindIndex( Predicate<T> match, int start = 0 )
+    public virtual int FindIndex( RefCheck<TValue> match, int start, int endInclusive )
     {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.FindIndex( start, match );
-    }
+        Guard.IsInRangeFor(start,        buffer, nameof(start));
+        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        ReadOnlySpan<TValue> span = AsSpan();
 
-
-    public virtual int FindLastIndex( Predicate<T> match, int start, int endInclusive )
-    {
-        Guard.IsInRangeFor( start,        buffer, nameof(start) );
-        Guard.IsInRangeFor( endInclusive, buffer, nameof(endInclusive) );
-        return buffer.FindLastIndex( start, endInclusive, match );
-    }
-    public virtual int FindLastIndex( Predicate<T> match, int start = 0 )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.FindLastIndex( start, match );
-    }
-
-
-    public int IndexOf( T value ) => IndexOf( value, 0 );
-    public virtual int IndexOf( T value, int start )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.IndexOf( value, start );
-    }
-    public virtual int IndexOf( T value, int start, int count )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.IndexOf( value, start, count );
-    }
-
-
-    public virtual int LastIndexOf( T value ) => buffer.LastIndexOf( value );
-    public virtual int LastIndexOf( T value, int start )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        return buffer.LastIndexOf( value, start );
-    }
-    public virtual int LastIndexOf( T value, int start, int count )
-    {
-        Guard.IsInRangeFor( start, buffer, nameof(start) );
-        Guard.IsInRangeFor( count, buffer, nameof(count) );
-        return buffer.LastIndexOf( value, start, count );
-    }
-
-
-    public virtual T[] FindAll( Predicate<T>  match ) => [.. buffer.FindAll( match )];
-    public virtual T?  Find( Predicate<T>     match ) => buffer.Find( match );
-    public virtual T?  FindLast( Predicate<T> match ) => buffer.FindLast( match );
-
-
-    public virtual bool TryAdd( T           value )  => InternalTryAdd( value );
-    public virtual void Add( params T[]     values ) => Add( new ReadOnlySpan<T>( values ) );
-    public virtual void Add( IEnumerable<T> values ) => InternalAdd( values );
-    public virtual void Add( SpanEnumerable<T, EnumerableProducer<T>> values )
-    {
-        foreach ( T value in values ) { InternalAdd( value ); }
-    }
-    public virtual void Add( scoped in ReadOnlySpan<T>   values ) => InternalAdd( values );
-    public         void Add( scoped in ReadOnlyMemory<T> values ) => InternalAdd( values.Span );
-    public         void Add( scoped in ImmutableArray<T> values ) => InternalAdd( values.AsSpan() );
-
-
-    public virtual void AddOrUpdate( T value )
-    {
-        int index = buffer.IndexOf( value );
-
-        if ( index >= 0 ) { buffer[index] = value; }
-        else { buffer.Add( value ); }
-    }
-    public virtual void AddOrUpdate( IEnumerable<T> values )
-    {
-        foreach ( T value in values )
+        for ( int i = start; i < endInclusive; i++ )
         {
-            int index = buffer.IndexOf( value );
-
-            if ( index >= 0 ) { buffer[index] = value; }
-            else { buffer.Add( value ); }
+            if ( match(in span[i]) ) { return i; }
         }
+
+        return NOT_FOUND;
     }
-    public virtual void AddOrUpdate( scoped in ReadOnlySpan<T> values )
+
+
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start = 0 )
     {
-        foreach ( T value in values )
+        Guard.IsInRangeFor(start, buffer, nameof(start));
+        return FindLastIndex(match, Count - 1, start);
+    }
+    public virtual int FindLastIndex( RefCheck<TValue> match, int start, int endInclusive )
+    {
+        Guard.IsInRangeFor(start,        buffer, nameof(start));
+        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        ReadOnlySpan<TValue> span = AsSpan();
+
+        for ( int i = start; i < endInclusive; i-- )
         {
-            int index = buffer.IndexOf( value );
-
-            if ( index >= 0 ) { buffer[index] = value; }
-            else { buffer.Add( value ); }
+            if ( match(in span[i]) ) { return i; }
         }
+
+        return NOT_FOUND;
     }
 
 
-    public virtual void CopyTo( T[] array )                                                                  => buffer.CopyTo( array );
-    public virtual void CopyTo( T[] array, int destinationStartIndex )                                       => buffer.CopyTo( array,            destinationStartIndex );
-    public virtual void CopyTo( T[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 ) => buffer.CopyTo( sourceStartIndex, array, length, destinationStartIndex );
-
-
-    public virtual void InsertRange( int index, IEnumerable<T>              collection ) => InternalInsert( index, collection );
-    public virtual void InsertRange( int index, scoped in ReadOnlySpan<T>   collection ) => InternalInsert( index, collection );
-    public         void InsertRange( int index, scoped in ReadOnlyMemory<T> collection ) => InsertRange( index, collection.Span );
-    public         void InsertRange( int index, scoped in ImmutableArray<T> collection ) => InsertRange( index, collection.AsSpan() );
-
-
-    public virtual void RemoveRange( int start, int count ) => InternalRemoveRange( start, count );
-
-
-    public virtual int  Remove( Func<T, bool>               match )  => InternalRemove( match );
-    public virtual bool Remove( T                           value )  => InternalRemove( value );
-    public virtual int  Remove( IEnumerable<T>              values ) => InternalRemove( values );
-    public virtual int  Remove( scoped in ReadOnlySpan<T>   values ) => InternalRemove( values );
-    public         int  Remove( scoped in ReadOnlyMemory<T> values ) => Remove( values.Span );
-    public         int  Remove( scoped in ImmutableArray<T> values ) => Remove( values.AsSpan() );
-
-
-    public virtual void RemoveAt( int index )                                     => InternalRemoveAt( index, out _ );
-    public virtual bool RemoveAt( int index, [NotNullWhen( true )] out T? value ) => InternalRemoveAt( index, out value );
-
-
-    public virtual void Reverse()
+    public virtual int IndexOf( TValue value ) => buffer.IndexOf(value);
+    public virtual int IndexOf( TValue value, int start )
     {
-        buffer.Reverse();
-        Reset();
+        Guard.IsInRangeFor(start, buffer, nameof(start));
+        return buffer.IndexOf(value, start);
     }
-    public virtual void Reverse( int start, int count )
+    public virtual int IndexOf( TValue value, int start, int count )
     {
-        buffer.Reverse( start, count );
-        Reset();
+        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start + count, buffer, nameof(count));
+        return buffer.IndexOf(value, start, count);
     }
 
 
-    public         void Sort()                                                       => InternalSort();
-    public virtual void Sort( IComparer<T>  compare )                                => InternalSort( compare );
-    public virtual void Sort( Comparison<T> compare )                                => InternalSort( compare );
-    public virtual void Sort( int           start, int count )                       => InternalSort( start, count, comparer );
-    public virtual void Sort( int           start, int count, IComparer<T> compare ) => InternalSort( start, count, compare );
+    public virtual int LastIndexOf( TValue value ) => buffer.LastIndexOf(value);
+    public virtual int LastIndexOf( TValue value, int start )
+    {
+        Guard.IsInRangeFor(start, buffer, nameof(start));
+        return buffer.LastIndexOf(value, start);
+    }
+    public virtual int LastIndexOf( TValue value, int start, int count )
+    {
+        Guard.IsInRangeFor(start,         buffer, nameof(start));
+        Guard.IsInRangeFor(start + count, buffer, nameof(count));
+        return buffer.LastIndexOf(value, start, count);
+    }
+
+
+    public virtual int FindCount( RefCheck<TValue> match )
+    {
+        ReadOnlySpan<TValue> span = AsSpan();
+        return span.Count(match);
+    }
+    public virtual TValue? Find( RefCheck<TValue> match )            => Find(match, 0);
+    public virtual TValue? Find( RefCheck<TValue> match, int start ) => Find(match, start, Count - 1);
+    public virtual TValue? Find( RefCheck<TValue> match, int start, int endInclusive )
+    {
+        Guard.IsLessThanOrEqualTo(start, endInclusive);
+        Guard.IsInRangeFor(start,        buffer, nameof(start));
+        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
+        return span.FirstOrDefault(match);
+    }
+    public virtual TValue? FindLast( RefCheck<TValue> match )            => FindLast(match, 0);
+    public virtual TValue? FindLast( RefCheck<TValue> match, int start ) => FindLast(match, start, Count - 1);
+    public virtual TValue? FindLast( RefCheck<TValue> match, int start, int endInclusive )
+    {
+        Guard.IsLessThanOrEqualTo(start, endInclusive);
+        Guard.IsInRangeFor(start,        buffer, nameof(start));
+        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+
+        ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
+        return span.LastOrDefault(match);
+    }
+    public virtual TValue[] FindAll( RefCheck<TValue> match )            => FindAll(match, 0);
+    public virtual TValue[] FindAll( RefCheck<TValue> match, int start ) => FindAll(match, start, Count - 1);
+    public virtual TValue[] FindAll( RefCheck<TValue> match, int start, int endInclusive )
+    {
+        Guard.IsLessThanOrEqualTo(start, endInclusive);
+        Guard.IsInRangeFor(start,        buffer, nameof(start));
+        Guard.IsInRangeFor(endInclusive, buffer, nameof(endInclusive));
+        List<TValue>         list = new(Count);
+        ReadOnlySpan<TValue> span = AsSpan(start, endInclusive - start);
+
+        foreach ( TValue value in span )
+        {
+            if ( match(in value) ) { list.Add(value); }
+        }
+
+        return list.ToArray();
+    }
+
+
+    public virtual bool TryAdd( TValue                           value )            => InternalTryAdd(in value);
+    public virtual void Add( TValue                              value )            => InternalAdd(in value);
+    public virtual void Add( TValue                              value, int count ) => InternalAdd(in value, count);
+    public virtual void Add( params ReadOnlySpan<TValue>         values ) => InternalAdd(values);
+    public virtual void Add( IEnumerable<TValue>                 values ) => InternalAdd(values);
+    public virtual void Add( ref readonly ReadOnlyMemory<TValue> values ) => InternalAdd(values.Span);
+    public virtual void Add( ref readonly ImmutableArray<TValue> values ) => InternalAdd(values.AsSpan());
+    public virtual ValueTask AddAsync( TValue value, CancellationToken token = default )
+    {
+        InternalAdd(in value);
+        return ValueTask.CompletedTask;
+    }
+
+
+    public virtual ValueTask<bool> TryAddAsync( TValue value, CancellationToken token = default ) { return ValueTask.FromResult(InternalTryAdd(in value)); }
+    public virtual ValueTask TryAddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    {
+        foreach ( TValue value in values ) { InternalTryAdd(in value); }
+
+        return ValueTask.CompletedTask;
+    }
+    public virtual async ValueTask TryAddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await foreach ( TValue value in values.WithCancellation(token) ) { InternalTryAdd(in value); }
+    }
+    public virtual ValueTask AddAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default )
+    {
+        InternalAdd(values.Span);
+        return ValueTask.CompletedTask;
+    }
+    public virtual ValueTask AddAsync( ImmutableArray<TValue> values, CancellationToken token = default )
+    {
+        InternalAdd(values.AsSpan());
+        return ValueTask.CompletedTask;
+    }
+    public virtual ValueTask AddAsync( IEnumerable<TValue> values, CancellationToken token = default )
+    {
+        InternalAdd(values);
+        return ValueTask.CompletedTask;
+    }
+    public virtual async ValueTask AddAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await foreach ( TValue value in values.WithCancellation(token) ) { InternalAdd(in value); }
+    }
+
+
+    public virtual async ValueTask AddOrUpdate( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+        await foreach ( TValue value in values.WithCancellation(token) ) { InternalAddOrUpdate(in value); }
+    }
+    public virtual void AddOrUpdate( TValue value ) => InternalAddOrUpdate(in value);
+    public virtual void AddOrUpdate( IEnumerable<TValue> values )
+    {
+        foreach ( TValue value in values ) { InternalAddOrUpdate(in value); }
+    }
+    public void AddOrUpdate( ref readonly ReadOnlyMemory<TValue> values ) => AddOrUpdate(values.Span);
+    public void AddOrUpdate( ref readonly ImmutableArray<TValue> values ) => AddOrUpdate(values.AsSpan());
+    public virtual void AddOrUpdate( params ReadOnlySpan<TValue> values )
+    {
+        Sort();
+        foreach ( TValue value in values ) { InternalAddOrUpdate(in value); }
+    }
+    public virtual void AddRange( TValue                      value, int count ) => InternalAdd(in value, count);
+    public virtual void AddRange( params ReadOnlySpan<TValue> values )     => InternalAdd(values);
+    public virtual void AddRange( IEnumerable<TValue>         enumerable ) => InternalAdd(enumerable);
+
+
+    public virtual void CopyTo( TValue[] array )                                                                  => buffer.CopyTo(array);
+    public virtual void CopyTo( TValue[] array, int destinationStartIndex )                                       => buffer.CopyTo(array,            destinationStartIndex);
+    public virtual void CopyTo( TValue[] array, int destinationStartIndex, int length, int sourceStartIndex = 0 ) => buffer.CopyTo(sourceStartIndex, array, length, destinationStartIndex);
+
+
+    public virtual void Insert( int index,      TValue                              value )            => InternalInsert(index,      in value);
+    public virtual void Insert( int startIndex, TValue                              value, int count ) => InternalInsert(startIndex, in value, count);
+    public virtual void Insert( int startIndex, IEnumerable<TValue>                 collection ) => InternalInsert(startIndex, collection);
+    public virtual void Insert( int startIndex, params       ReadOnlySpan<TValue>   values )     => InternalInsert(startIndex, values);
+    public virtual void Insert( int startIndex, ref readonly ReadOnlyMemory<TValue> collection ) => Insert(startIndex, collection.Span);
+    public virtual void Insert( int startIndex, ref readonly ImmutableArray<TValue> collection ) => Insert(startIndex, collection.AsSpan());
+    public virtual ValueTask InsertAsync( int index, TValue value, CancellationToken token = default )
+    {
+        InternalInsert(index, in value);
+        return ValueTask.CompletedTask;
+    }
+
+
+    public         void Replace( int     startIndex, TValue                      value, int count = 1 ) => InternalReplace(startIndex, in value, count);
+    public         void Replace( int     startIndex, params ReadOnlySpan<TValue> values ) => InternalReplace(startIndex, values);
+    public virtual void RemoveRange( int startIndex, int                         count )  => InternalRemove(startIndex, count);
+
+
+    public virtual ValueTask<bool> RemoveAsync( TValue              value,  CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(in value)); }
+    public virtual ValueTask<int>  RemoveAsync( RefCheck<TValue>    match,  CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(match)); }
+    public virtual ValueTask<int>  RemoveAsync( IEnumerable<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values)); }
+    public virtual async ValueTask RemoveAsync( IAsyncEnumerable<TValue> values, CancellationToken token = default )
+    {
+        await foreach ( TValue value in values.WithCancellation(token) ) { InternalRemove(in value); }
+    }
+    public virtual ValueTask<int> RemoveAsync( ReadOnlyMemory<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values.Span)); }
+    public virtual ValueTask<int> RemoveAsync( ImmutableArray<TValue> values, CancellationToken token = default ) { return ValueTask.FromResult(InternalRemove(values.AsSpan())); }
+
+    public virtual int  Remove( RefCheck<TValue>                    match )                                        => InternalRemove(match);
+    public virtual bool Remove( TValue                              value )                                        => InternalRemove(in value);
+    public virtual int  Remove( IEnumerable<TValue>                 values )                                       => InternalRemove(values);
+    public virtual int  Remove( params       ReadOnlySpan<TValue>   values )                                       => InternalRemove(values);
+    public         int  Remove( ref readonly ReadOnlyMemory<TValue> values )                                       => Remove(values.Span);
+    public         int  Remove( ref readonly ImmutableArray<TValue> values )                                       => Remove(values.AsSpan());
+    void IList<TValue>. RemoveAt( int                               index )                                        => RemoveAt(index);
+    void IList.         RemoveAt( int                               index )                                        => RemoveAt(index);
+    public virtual bool RemoveAt( int                               index )                                        => InternalRemoveAt(index, out _);
+    public virtual bool RemoveAt( int                               index, [NotNullWhen(true)] out TValue? value ) => InternalRemoveAt(index, out value);
+
+
+    public virtual void Reverse()                       => InternalReverse();
+    public virtual void Reverse( int start, int count ) => InternalReverse(start, count);
+
+
+    public virtual void Sort()                                                                => InternalSort(comparer);
+    public virtual void Sort( Comparer<TValue>   compare )                                    => InternalSort(compare);
+    public virtual void Sort( Comparison<TValue> compare )                                    => InternalSort(compare);
+    public virtual void Sort( int                start, int count )                           => InternalSort(start, count, comparer);
+    public virtual void Sort( int                start, int count, Comparer<TValue> compare ) => InternalSort(start, count, compare);
+    public virtual ValueTask SortAsync( Comparison<TValue> compare, CancellationToken token = default )
+    {
+        InternalSort(compare);
+        return ValueTask.CompletedTask;
+    }
+    public virtual ValueTask SortAsync( int start, int count, CancellationToken token = default ) => SortAsync(start, count, comparer, token);
+    public virtual ValueTask SortAsync( int start, int count, Comparer<TValue> compare, CancellationToken token = default )
+    {
+        InternalSort(start, count, compare);
+        return ValueTask.CompletedTask;
+    }
 
 
     void ICollection.CopyTo( Array array, int start )
     {
-        if ( array is T[] values ) { buffer.CopyTo( values, start ); }
+        if ( array is TValue[] values ) { CopyTo(values, start); }
     }
     void IList.Remove( object? value )
     {
-        if ( value is T x ) { buffer.Remove( x ); }
+        if ( value is TValue x ) { buffer.Remove(x); }
     }
     int IList.Add( object? value )
     {
-        if ( value is not T x ) { return NOT_FOUND; }
+        if ( value is not TValue x ) { return NOT_FOUND; }
 
-        buffer.Add( x );
+        buffer.Add(x);
         return buffer.Count;
     }
-    bool IList.Contains( object? value ) => value is T x && buffer.Contains( x );
-    int IList.IndexOf( object? value ) =>
-        value is T x
-            ? buffer.IndexOf( x )
-            : NOT_FOUND;
+    bool IList.Contains( object? value ) => value is TValue x && buffer.Contains(x);
+    int IList.IndexOf( object? value ) => value is TValue x
+                                              ? buffer.IndexOf(x)
+                                              : NOT_FOUND;
     void IList.Insert( int index, object? value )
     {
-        if ( value is T x ) { buffer[index] = x; }
+        if ( value is TValue x ) { buffer[index] = x; }
     }
 
 
-    public virtual bool Contains( T value )          => buffer.Contains( value );
-    public virtual void Add( T      value )          => InternalAdd( value );
-    public virtual void Insert( int index, T value ) => InternalInsert( index, value );
-    public virtual void Clear() => InternalClear();
-
-
-    protected internal override ReadOnlyMemory<T> FilteredValues()
+    public virtual bool Contains( TValue value ) => InternalContains(in value);
+    public virtual bool Contains( params ReadOnlySpan<TValue> values )
     {
-        int             count  = buffer.Count;
-        using Buffer<T> values = new(count);
+        ReadOnlySpan<TValue> span = AsSpan();
+        return span.ContainsAny(values);
+    }
+    public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) { return ValueTask.FromResult(InternalContains(in value)); }
 
-        for ( int i = 0; i < count; i++ )
+
+    public virtual void Clear() => InternalClear();
+    public virtual ValueTask ClearAsync( CancellationToken token = default )
+    {
+        InternalClear();
+        return ValueTask.CompletedTask;
+    }
+
+
+    [Pure, MustDisposeResource]
+    protected internal override FilterBuffer<TValue> FilteredValues()
+    {
+        ReadOnlySpan<TValue> span   = AsSpan();
+        FilterBuffer<TValue> values = new(span.Length);
+
+        for ( int i = 0; i < span.Length; i++ )
         {
-            T t = buffer[i];
-            if ( Filter( t ) ) { values.Add( t ); }
+            if ( Filter(i, in span[i]) ) { values.Add(in span[i]); }
         }
 
-        return values.ToArray();
+        return values;
     }
 
 
-#if NET6_0_OR_GREATER
-    protected internal ReadOnlySpan<T> AsSpan()                          => CollectionsMarshal.AsSpan( buffer );
-    public             void            EnsureCapacity( in int capacity ) => buffer.EnsureCapacity( capacity );
-#endif
+    /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
+    public virtual ReadOnlySpan<TValue> AsSpan() => CollectionsMarshal.AsSpan(buffer);
+
+    /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
+    public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => AsSpan().Slice(start, length);
+
+
+    public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity(buffer.Count + capacity);
+    public virtual void TrimExcess()                   => buffer.TrimExcess();
 }

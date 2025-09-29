@@ -9,9 +9,9 @@ public class AppVersionHandler : SqlConverter<AppVersionHandler, AppVersion>
     public override AppVersion Parse( object value ) =>
         value switch
         {
-            AppVersion x                                              => x,
-            string s when AppVersion.TryParse( s, out AppVersion? x ) => x,
-            _                                                         => throw new ExpectedValueTypeException( nameof(value), value, typeof(DateOnly), typeof(string) )
+            AppVersion x                                            => x,
+            string s when AppVersion.TryParse(s, out AppVersion? x) => x,
+            _                                                       => throw new ExpectedValueTypeException(nameof(value), value, typeof(DateOnly), typeof(string))
         };
     public override void SetValue( IDbDataParameter parameter, AppVersion? value )
     {

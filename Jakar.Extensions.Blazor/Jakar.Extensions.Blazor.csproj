@@ -1,61 +1,86 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<NoWarn>$(NoWarn);1591;IDE0079</NoWarn>
+		<TargetFramework>net9.0</TargetFramework>
 		<Nullable>enable</Nullable>
-		<LangVersion>12.0</LangVersion>
+		<LangVersion>latest</LangVersion>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>6.0.0.1-beta</Version>
+		<Version>9.1.0</Version>
 		<PackageId>Jakar.Extensions.Blazor</PackageId>
 		<Company>Tyler Stegmaier</Company>
 		<Authors>Tyler Stegmaier</Authors>
 		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
 		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
-		<PackageTags>Jakar Api Extensions Web Host Database Server</PackageTags>
+		<PackageTags>Blazor</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>icon.png</PackageIcon>
-		<PackageReleaseNotes>
-			Jakar.Extensions.Blazor 6.0.0
-			Initial Release
-		</PackageReleaseNotes>
+		<PackageReleaseNotes>Jakar.Extensions.Blazor 9.1.0</PackageReleaseNotes>
 		<Description>Extensions to aid in development.</Description>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Jakar.Extensions.Blazor</Title>
+		<NeutralLanguage>en</NeutralLanguage>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
-		<PackageReference Include="Blazored.Modal" Version="7.3.1" />
-		<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
-		<PackageReference Include="Blazored.TextEditor" Version="1.1.0" />
-		<PackageReference Include="Blazored.Toast" Version="4.2.1" />
-		<PackageReference Include="Blazored.Video" Version="1.0.1" />
-		<PackageReference Include="BlazorComponentUtilities" Version="1.8.0" />
-		<PackageReference Include="BlazorPro.BlazorSize" Version="8.0.0" />
-		<PackageReference Include="PanoramicData.Blazor" Version="8.0.62" />
-		<PackageReference Include="Radzen.Blazor" Version="4.31.4" />
-		<PackageReference Include="Jakar.Extensions" Version="8.10.3" />
-		<PackageReference Include="Hardware.Info" Version="100.1.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-		<PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.6.1" />
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="8.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.5" />
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="8.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.5" />
+	  <None Include="..\images\icon.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\LICENSE.txt">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazored.LocalStorage" />
+		<PackageReference Include="Blazored.Modal" />
+		<PackageReference Include="Blazored.SessionStorage" />
+		<PackageReference Include="Blazored.TextEditor" />
+		<PackageReference Include="Blazored.Toast" />
+		<PackageReference Include="Blazored.Video" />
+		<PackageReference Include="BlazorComponentUtilities" />
+		<PackageReference Include="BlazorPro.BlazorSize" />
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="Cropper.Blazor" />
+		<PackageReference Include="MudBlazor" />
+		<PackageReference Include="MudBlazor.Markdown" />
+		<PackageReference Include="MudBlazor.ThemeManager" />
+		<PackageReference Include="PanoramicData.Blazor" />
+		<PackageReference Include="Radzen.Blazor" />
+		<PackageReference Include="Jakar.Extensions" />
+		<PackageReference Include="Hardware.Info" />
+		<PackageReference Include="Microsoft.Extensions.Hosting" />
+		<PackageReference Include="Microsoft.NETCore.Platforms" />
+		<PackageReference Include="Swashbuckle.AspNetCore" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Annotations" />
+		<PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" />
+		<PackageReference Include="Syncfusion.Maui.Toolkit" />
+		<PackageReference Include="System.Security.Cryptography.Xml" />
+		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+	</ItemGroup>
+
 </Project>

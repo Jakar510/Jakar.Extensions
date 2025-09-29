@@ -3,18 +3,18 @@
 
 public ref struct RangeEnumerator
 {
-    private readonly Range _range;
+    private readonly Range __range;
     public           int   Current { get; private set; }
 
 
     public RangeEnumerator( Range range )
     {
-        _range  = range;
-        Current = _range.Start.Value - 1;
+        __range  = range;
+        Current = __range.Start.Value - 1;
     }
 
 
-    public bool MoveNext() => ++Current <= _range.End.Value;
+    public bool MoveNext() => ++Current <= __range.End.Value;
 }
 
 

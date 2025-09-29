@@ -149,8 +149,8 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( value - offset, Validate.Min<DateTime>( value, value - offset ) );
         this.AreEqual( value,          Validate.Min<DateTime>( value, value + offset ) );
 
-        this.AreEqual( value - offset, Validate.Min<DateTime>( default, value - offset ) );
-        this.AreEqual( value + offset, Validate.Min<DateTime>( default, value + offset ) );
+        this.AreEqual( value - offset, Validate.Min<DateTime>( null, value - offset ) );
+        this.AreEqual( value + offset, Validate.Min<DateTime>( null, value + offset ) );
     }
     private void TestMax( in DateTime value )
     {
@@ -159,8 +159,8 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( value,          Validate.Max<DateTime>( value, value - offset ) );
         this.AreEqual( value + offset, Validate.Max<DateTime>( value, value + offset ) );
 
-        this.AreEqual( value - offset, Validate.Max<DateTime>( default, value - offset ) );
-        this.AreEqual( value + offset, Validate.Max<DateTime>( default, value + offset ) );
+        this.AreEqual( value - offset, Validate.Max<DateTime>( null, value - offset ) );
+        this.AreEqual( value + offset, Validate.Max<DateTime>( null, value + offset ) );
     }
     private void TestMin( in DateTimeOffset value )
     {
@@ -169,8 +169,8 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( value - offset, Validate.Min<DateTimeOffset>( value, value - offset ) );
         this.AreEqual( value,          Validate.Min<DateTimeOffset>( value, value + offset ) );
 
-        this.AreEqual( value - offset, Validate.Min<DateTimeOffset>( default, value - offset ) );
-        this.AreEqual( value + offset, Validate.Min<DateTimeOffset>( default, value + offset ) );
+        this.AreEqual( value - offset, Validate.Min<DateTimeOffset>( null, value - offset ) );
+        this.AreEqual( value + offset, Validate.Min<DateTimeOffset>( null, value + offset ) );
     }
     private void TestMax( in DateTimeOffset value )
     {
@@ -179,7 +179,7 @@ public class Validate_MinMax_Tests : Assert
         this.AreEqual( value,          Validate.Max<DateTimeOffset>( value, value - offset ) );
         this.AreEqual( value + offset, Validate.Max<DateTimeOffset>( value, value + offset ) );
 
-        this.AreEqual( value - offset, Validate.Max<DateTimeOffset>( default, value - offset ) );
-        this.AreEqual( value + offset, Validate.Max<DateTimeOffset>( default, value + offset ) );
+        this.AreEqual( value - offset, Validate.Max<DateTimeOffset>( null, value - offset ) );
+        this.AreEqual( value + offset, Validate.Max<DateTimeOffset>( null, value + offset ) );
     }
 }

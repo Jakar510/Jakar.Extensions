@@ -7,14 +7,14 @@ public class HeaderCollection : Dictionary<string, object>
     {
         get => TryGetValue( nameof(HttpRequestHeader.ContentEncoding), out object? value )
                    ? value.ToString()
-                   : default;
+                   : null;
         set => this[nameof(HttpRequestHeader.ContentEncoding)] = value ?? string.Empty;
     }
     public string? ContentType
     {
         get => TryGetValue( nameof(HttpRequestHeader.ContentType), out object? value )
                    ? value.ToString()
-                   : default;
+                   : null;
         set => this[nameof(HttpRequestHeader.ContentType)] = value ?? string.Empty;
     }
     public Encoding Encoding
@@ -80,13 +80,9 @@ public class HeaderCollection : Dictionary<string, object>
         {
             switch ( value )
             {
-                case string s:
-                    headers.Add( key, s );
-                    break;
+                case string s: headers.Add( key, s ); break;
 
-                case IEnumerable<string> items:
-                    headers.Add( key, items );
-                    break;
+                case IEnumerable<string> items: headers.Add( key, items ); break;
             }
         }
 
@@ -98,13 +94,9 @@ public class HeaderCollection : Dictionary<string, object>
         {
             switch ( value )
             {
-                case string s:
-                    headers.Add( key, s );
-                    break;
+                case string s: headers.Add( key, s ); break;
 
-                case IEnumerable<string> items:
-                    headers.Add( key, items );
-                    break;
+                case IEnumerable<string> items: headers.Add( key, items ); break;
             }
         }
 

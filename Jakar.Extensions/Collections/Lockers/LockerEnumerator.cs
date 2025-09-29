@@ -4,25 +4,27 @@
 namespace Jakar.Extensions;
 
 
-public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
+public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
+    where TCloser : IDisposable
 {
-    private const    int                       START_INDEX = 0;
-    private readonly ILockedCollection<TValue> _collection = collection;
-    private          int                       _index      = START_INDEX;
-    private          ReadOnlyMemory<TValue>    _memory;
-    private          bool                      _isDisposed;
+    private const    int                                START_INDEX = 0;
+    private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          bool                               __isDisposed;
+    private          FilterBuffer<TValue>?              __owner;
+    private          int                                __index = START_INDEX;
 
-    public ref readonly TValue  Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref Span[_index]; }
-    TValue IEnumerator<TValue>. Current => Current;
-    object? IEnumerator.        Current => Current;
-    public int                  Length  { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _memory.Length; }
-    public ReadOnlySpan<TValue> Span    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _memory.Span; }
+
+    private             ReadOnlyMemory<TValue> __Memory => __owner?.Memory ?? ReadOnlyMemory<TValue>.Empty;
+    public ref readonly TValue                 Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
+    TValue IEnumerator<TValue>.                Current => Current;
+    object? IEnumerator.                       Current => Current;
 
 
     public void Dispose()
     {
-        _isDisposed = true;
-        _memory     = ReadOnlyMemory<TValue>.Empty;
+        __isDisposed = true;
+        __owner?.Dispose();
+        __owner = null;
         GC.SuppressFinalize( this );
     }
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
@@ -32,28 +34,18 @@ public class LockerEnumerator<TValue>( ILockedCollection<TValue> collection ) : 
     public bool MoveNext()
     {
         ThrowIfDisposed();
-        if ( _memory.IsEmpty ) { Reset(); }
+        if ( __Memory.IsEmpty ) { Reset(); }
 
-        if ( (uint)_index >= (uint)_memory.Length ) { return false; }
-
-        _index++;
-        return true;
+        return (uint)++__index < (uint)__Memory.Length;
     }
     public void Reset()
     {
         ThrowIfDisposed();
-        _memory = _collection.Copy();
-        _index  = START_INDEX;
+        __owner?.Dispose();
+        __owner = __collection.Copy();
+        __index = START_INDEX;
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private void ThrowIfDisposed()
-    {
-    #if NET7_0_OR_GREATER
-        ObjectDisposedException.ThrowIf( _isDisposed, this );
-    #else
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
-    #endif
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
 }

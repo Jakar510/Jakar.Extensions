@@ -4,39 +4,43 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+public partial class DbTable<TClass>
 {
-    public ValueTask<TRecord?> Last( CancellationToken token = default ) => this.Call( Last, token );
+    public ValueTask<ErrorOrResult<TClass>> Last( CancellationToken token = default ) => this.Call(Last, token);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Last( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async ValueTask<ErrorOrResult<TClass>> Last( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Last();
+        SqlCommand sql = SQLCache.GetLast();
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            return await connection.QueryFirstAsync<TClass>(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
 
-    public ValueTask<TRecord?> LastOrDefault( CancellationToken token = default ) => this.Call( LastOrDefault, token );
+    public ValueTask<ErrorOrResult<TClass>> LastOrDefault( CancellationToken token = default ) => this.Call(LastOrDefault, token);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> LastOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async ValueTask<ErrorOrResult<TClass>> LastOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Last();
+        SqlCommand sql = SQLCache.GetLast();
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            TClass?           record  = await connection.QueryFirstOrDefaultAsync<TClass>(command);
+
+            return record is null
+                       ? Error.NotFound()
+                       : record;
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 }

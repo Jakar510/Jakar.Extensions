@@ -1,36 +1,45 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions.Blazor
-// 09/26/2022  10:09 AM
+// 06/13/2024  20:06
+
+using System.Linq.Expressions;
+
+
 
 namespace Jakar.Extensions.Blazor;
 
 
-public abstract class Widget<TServices> : ComponentBase, IModelState
-    where TServices : AppServices
+public interface IWidget<TLoginState, TErrorState> : IModelState<TErrorState>, ILoginState<TLoginState>
+    where TLoginState : ILoginUserState
+    where TErrorState : IModelErrorState;
+
+
+
+public interface IWidget : IWidget<LoginUserState, ModelErrorState>, IModelState, ILoginState;
+
+
+
+public abstract class Widget : ComponentBase, IWidget
 {
-    private IModalReference? _popup;
+    [CascadingParameter( Name = ModelErrorState.KEY )] public required ModelErrorState State { get; set; }
+    [CascadingParameter( Name = LoginUserState.KEY )]  public required LoginUserState  User  { get; set; }
 
-
-    protected IModalReference? _Popup
-    {
-        get => _popup;
-        set
-        {
-            _popup?.Close();
-            _popup = value;
-        }
-    }
-    public string? ErrorText { get; set; }
-    public bool    HasError  => !string.IsNullOrEmpty( ErrorText ) || ModelState.ErrorCount > 0;
-
-
-    [CascadingParameter( Name = ModelStateDictionaryCascadingValueSource.KEY )] public ModelStateDictionary ModelState { get; set; } = new();
-    [Inject]                                                                    public TServices            Services   { get; set; } = default!;
-    [Parameter]                                                                 public string?              Title      { get; set; }
-
-
-    public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
+    // public Task StateHasChangedAsync() => InvokeAsync( StateHasChanged );
 }
 
 
 
-public abstract class Widget : Widget<AppServices>;
+public class BlazorSetting<T>( T value ) : ObservableClass
+{
+    private T __value = value;
+    public T Value
+    {
+        get => __value;
+        set
+        {
+            SetProperty(ref __value, value);
+            _ = ValueChanged.InvokeAsync(value);
+        }
+    }
+    public EventCallback<T>     ValueChanged    { get; set; }
+    public Expression<Func<T>>? ValueExpression { get; set; }
+}

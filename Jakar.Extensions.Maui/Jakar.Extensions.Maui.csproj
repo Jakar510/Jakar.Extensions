@@ -1,34 +1,99 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;net6.0-android;net6.0-ios;net6.0-maccatalyst</TargetFrameworks>
-		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net6.0-windows10.0.19041.0</TargetFrameworks>
+		<TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
+		<TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net9.0-windows10.0.19041.0</TargetFrameworks>
 		<!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
-		<!-- <TargetFrameworks>$(TargetFrameworks);net6.0-tizen</TargetFrameworks> -->
+		<!-- <TargetFrameworks>$(TargetFrameworks);net9.0-tizen</TargetFrameworks> -->
 		<UseMaui>true</UseMaui>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591</NoWarn>
+		<LangVersion>latest</LangVersion>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
+		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+		<Version>9.0.0</Version>
+		<PackageId>Jakar.Extensions.Maui</PackageId>
+		<Company>Tyler Stegmaier</Company>
+		<Authors>Tyler Stegmaier</Authors>
+		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
+		<PackageTags>Maui Android iOS MacOSX Maccatalyst Windows</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReleaseNotes>Jakar.Extensions.Maui 9.0.0</PackageReleaseNotes>
+		<Description>Extensions to aid in development.</Description>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Title>Jakar.Extensions.Maui</Title>
+		<NeutralLanguage>en</NeutralLanguage>
+		<IncludeSymbols>True</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">14.2</SupportedOSPlatformVersion>
-		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">14.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
-		<IncludeSymbols>True</IncludeSymbols>
-		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Jakar.Extensions" Version="6.0.0.63-beta" />
+		<None Include="..\images\icon.png">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\LICENSE.txt">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Update="README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Converters\" />
+		<PackageReference Include="Microsoft.Maui.Controls" />
+		<PackageReference Include="Microsoft.Maui.Controls.Core" />
+		<PackageReference Include="Microsoft.Maui.Controls.Compatibility" />
+		<PackageReference Include="CommunityToolkit.Mvvm" />
+		<PackageReference Include="CommunityToolkit.Maui" />
+		<PackageReference Include="CommunityToolkit.Maui.MediaElement" />
+		<PackageReference Include="CommunityToolkit.Maui.Markup" />
+		<PackageReference Include="ZXing.Net.Maui" />
+		<PackageReference Include="ZXing.Net.Maui.Controls" />
+		<PackageReference Include="Plugin.Fingerprint" />
+		<PackageReference Include="Plugin.Maui.Audio" />
+		<PackageReference Include="UraniumUI" />
+		<PackageReference Include="UraniumUI.Blurs" />
+		<PackageReference Include="UraniumUI.Dialogs.CommunityToolkit" />
+		<PackageReference Include="UraniumUI.Dialogs.Mopups" />
+		<PackageReference Include="UraniumUI.Icons.FontAwesome" />
+		<PackageReference Include="UraniumUI.Icons.MaterialIcons" />
+		<PackageReference Include="UraniumUI.Icons.SegoeFluent" />
+		<PackageReference Include="UraniumUI.Material" />
+		<PackageReference Include="UraniumUI.Validations.DataAnnotations" />
+		<PackageReference Include="UraniumUI.WebComponents" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.SegoeFluent" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Cupertino" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Fluent" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Fluent.Filled" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Material" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Material.Outlined" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Material.Rounded" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.Material.Sharp" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Solid" />
+		<PackageReference Include="AathifMahir.Maui.MauiIcons.FontAwesome.Brand" />
+		<PackageReference Include="AiForms.Maui.SettingsView" />
+		<PackageReference Include="Jakar.Extensions" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="WifiManager.Maui" />
+		<PackageReference Include="Xam.Plugin.Media" />
 	</ItemGroup>
 </Project>

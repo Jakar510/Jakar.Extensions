@@ -13,7 +13,7 @@ public sealed class ProtectedDataProvider : IDataProtectionProvider
     public static void Register( IServiceCollection builder ) => builder.TryAddSingleton<IDataProtectionProvider, ProtectedDataProvider>();
     public IProtectedData CreateProtector( string purpose )
     {
-        ProtectedData data = new ProtectedData( Database.DataProtector );
+        ProtectedData data = new(Database.DataProtector);
         return data;
     }
 }
@@ -22,8 +22,8 @@ public sealed class ProtectedDataProvider : IDataProtectionProvider
 
 public sealed class ProtectedData( IDataProtector protector ) : IProtectedData
 {
-    private readonly IDataProtector _protector = protector;
+    private readonly IDataProtector __protector = protector;
     public           IProtectedData CreateProtector( string purpose )       => this;
-    public           byte[]         Protect( byte[]         plaintext )     => _protector.Encrypt( plaintext );
-    public           byte[]         Unprotect( byte[]       protectedData ) => _protector.Decrypt( protectedData );
+    public           byte[]         Protect( byte[]         plaintext )     => __protector.Encrypt(plaintext);
+    public           byte[]         Unprotect( byte[]       protectedData ) => __protector.Decrypt(protectedData);
 }

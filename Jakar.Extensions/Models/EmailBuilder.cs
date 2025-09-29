@@ -14,7 +14,7 @@
 // {
 //     public interface IFromSyntax
 //     {
-//         public IToSenderSyntax From( params MailboxAddress[] senders );
+//         public IToSenderSyntax From( params ReadOnlySpan<MailboxAddress> senders );
 //     }
 //
 //
@@ -23,7 +23,7 @@
 //     {
 //         public IWithAttachmentsSyntax To( MailboxAddress              recipient );
 //         public IWithAttachmentsSyntax To( IEnumerable<MailboxAddress> recipients );
-//         public IWithAttachmentsSyntax To( params MailboxAddress[]     recipients );
+//         public IWithAttachmentsSyntax To( params ReadOnlySpan<MailboxAddress>     recipients );
 //     }
 //
 //
@@ -32,7 +32,7 @@
 //     {
 //         public ISubjectSyntax WithAttachments( Attachment              attachment );
 //         public ISubjectSyntax WithAttachments( IEnumerable<Attachment> attachments );
-//         public ISubjectSyntax WithAttachments( params Attachment[]     attachments );
+//         public ISubjectSyntax WithAttachments( params ReadOnlySpan<Attachment> attachments );
 //     }
 //
 //
@@ -70,7 +70,7 @@
 // #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 //
 //
-//     public static IToSenderSyntax From( params MailboxAddress[] senders ) => new EmailBuilder(senders);
+//     public static IToSenderSyntax From( params ReadOnlySpan<MailboxAddress> senders ) => new EmailBuilder(senders);
 //
 //
 //     public IWithAttachmentsSyntax To( MailboxAddress recipient )
@@ -83,7 +83,7 @@
 //         _recipients.AddRange(recipients);
 //         return this;
 //     }
-//     public IWithAttachmentsSyntax To( params MailboxAddress[] recipients )
+//     public IWithAttachmentsSyntax To( params ReadOnlySpan<MailboxAddress> recipients )
 //     {
 //         _recipients.AddRange(recipients);
 //         return this;
@@ -100,7 +100,7 @@
 //         _attachments.AddRange(attachments);
 //         return this;
 //     }
-//     public ISubjectSyntax WithAttachments( params Attachment[] attachments )
+//     public ISubjectSyntax WithAttachments( params ReadOnlySpan<Attachment> attachments )
 //     {
 //         _attachments.AddRange(attachments);
 //         return this;
@@ -129,7 +129,7 @@
 //                           TextBody = _body
 //                       };
 //
-//         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync(element.Name, element.ContentStream); }
+//         foreach ( Attachment element in _attachments ) { await builder.Attachments.AddAsync(element.AppName, element.ContentStream); }
 //
 //         return new MimeMessage(_senders, _recipients, _subject, builder.ToMessageBody());
 //     }

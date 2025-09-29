@@ -1,4 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
+using ZLinq;
+using ZLinq.Linq;
 
 
 
@@ -8,64 +12,80 @@ namespace Jakar.SqlBuilder;
 [SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
 public record struct EasySqlBuilder()
 {
-    private readonly StringBuilder _sb          = new(10240);
-    private          bool          _needToClose = false;
+    private readonly StringBuilder __sb          = new(10240);
+    private          long          __needToClose = 0;
 
     public string Result => ToString();
 
 
-    internal EasySqlBuilder AddRange<T>( char separator, IEnumerable<string> names ) => AddRange( separator, names.Select( KeyWords.GetName<T> ) );
-    internal EasySqlBuilder AddRange( char separator, IEnumerable<string> names )
+    internal EasySqlBuilder AddRange<TValue>( char separator, params ReadOnlySpan<string?> names )
     {
-        _sb.AppendJoin( separator, names );
+        using IMemoryOwner<string?>                                           owner      = MemoryPool<string?>.Shared.Rent( names.Length );
+        ValueEnumerable<Select<FromSpan<string?>, string?, string?>, string?> enumerable = names.AsValueEnumerable().Select( KeyWords.GetName<TValue> );
+        int                                                                   count      = enumerable.CopyTo( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..count] );
+    }
+    internal EasySqlBuilder AddRange( char separator, params IEnumerable<string?> names )
+    {
+        __sb.AppendJoin( separator, names );
 
         return Space();
     }
-    internal EasySqlBuilder AddRange<T>( string separator, IEnumerable<string> names ) => AddRange( separator, names.Select( KeyWords.GetName<T> ) );
-    internal EasySqlBuilder AddRange( string separator, IEnumerable<string> names )
+    internal EasySqlBuilder AddRange( char separator, params ReadOnlySpan<string?> names )
     {
-        _sb.AppendJoin( separator, names );
+        __sb.AppendJoin( separator, names );
+
+        return Space();
+    }
+    internal EasySqlBuilder AddRange<TValue>( string separator, params ReadOnlySpan<string?> names )
+    {
+        using IMemoryOwner<string?>                                           owner      = MemoryPool<string?>.Shared.Rent( names.Length );
+        ValueEnumerable<Select<FromSpan<string?>, string?, string?>, string?> enumerable = names.AsValueEnumerable().Select( KeyWords.GetName<TValue> );
+        int                                                                   count      = enumerable.CopyTo( owner.Memory.Span );
+        return AddRange( separator, owner.Memory.Span[..count] );
+    }
+    internal EasySqlBuilder AddRange( string separator, params ReadOnlySpan<string?> names )
+    {
+        __sb.AppendJoin( separator, names );
         return Space();
     }
 
 
     internal EasySqlBuilder Append( string value )
     {
-        _sb.Append( value );
+        __sb.Append( value );
         return this;
     }
     internal EasySqlBuilder Add( char c )
     {
-        _sb.Append( c );
+        __sb.Append( c );
         return this;
     }
-    internal EasySqlBuilder Add( string          value ) => Space().Append( value ).Space();
-    internal EasySqlBuilder Add( params string[] names ) => AddRange( ' ', names );
+    internal EasySqlBuilder Add( string                       value ) => Space().Append( value ).Space();
+    internal EasySqlBuilder Add( params ReadOnlySpan<string?> names ) => AddRange( ' ', names );
 
 
     internal EasySqlBuilder NewLine()
     {
-        _sb.AppendLine();
+        __sb.AppendLine();
         return this;
     }
 
 
     internal EasySqlBuilder AggregateFunction( char func = '*' )
     {
-        _sb.Append( func );
+        __sb.Append( func );
         return Space();
     }
-    internal EasySqlBuilder AggregateFunction( string func, string? columnName = default )
+    internal EasySqlBuilder AggregateFunction( string func, string? columnName = null )
     {
-        _sb.Append( func );
+        __sb.Append( func );
         Begin();
 
-        if ( columnName is null ) { _sb.Append( '*' ); }
-        else { _sb.Append( columnName ); }
+        if ( columnName is null ) { __sb.Append( '*' ); }
+        else { __sb.Append( columnName ); }
 
-        End();
-
-        return Space();
+        return End().Space();
     }
 
 
@@ -74,19 +94,19 @@ public record struct EasySqlBuilder()
     internal EasySqlBuilder Space() => Add( ' ' );
 
 
-    internal EasySqlBuilder Begin()
+    internal EasySqlBuilder Begin( char start = '(' )
     {
-        _needToClose = true;
-        return Add( '(' );
+        Interlocked.Increment( ref __needToClose );
+        return Add( start );
     }
-    internal EasySqlBuilder End()
+    internal EasySqlBuilder End( char end = ')' )
     {
-        _needToClose = false;
-        return Add( ')' );
+        Interlocked.Decrement( ref __needToClose );
+        return Add( end );
     }
     internal EasySqlBuilder VerifyParentheses()
     {
-        if ( _needToClose ) { End(); }
+        if ( Interlocked.Read( ref __needToClose ) != 0 ) { throw new InvalidOperationException( "Invalid SQL" ); }
 
         return this;
     }
@@ -95,7 +115,7 @@ public record struct EasySqlBuilder()
     public override string ToString()
     {
         VerifyParentheses();
-        string result = _sb.Append( ';' ).ToString();
+        string result = __sb.Append( ';' ).ToString();
 
 
         // int start = result.LastIndexOf('(');

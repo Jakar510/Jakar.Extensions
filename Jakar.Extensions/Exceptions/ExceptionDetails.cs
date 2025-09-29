@@ -10,16 +10,16 @@ public sealed class ExceptionDetails
     public string                       Message         { get; init; } = string.Empty;
     public string?                      MethodSignature { get; init; }
     public string?                      Source          { get; init; }
-    public string[]                     StackTrace      { get; init; } = Array.Empty<string>();
+    public string[]                     StackTrace      { get; init; } = [];
     public string                       Str             { get; init; } = string.Empty;
     public MethodDetails?               TargetSite      { get; init; }
     public string?                      Type            { get; init; }
 
 
     public ExceptionDetails() { }
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(ExceptionDetails) )]
-#endif
+
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
     public ExceptionDetails( Exception e, bool includeMethodInfo = false )
     {
         Message = e.Message;
@@ -30,7 +30,7 @@ public sealed class ExceptionDetails
         HelpLink = e.HelpLink;
         Source   = e.Source;
 
-        StackTrace = e.StackTrace?.SplitAndTrimLines().ToArray() ?? Array.Empty<string>();
+        StackTrace = e.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
 
         MethodSignature = $"{e.MethodClass()}::{e.MethodSignature()}";
         Data            = e.GetData();

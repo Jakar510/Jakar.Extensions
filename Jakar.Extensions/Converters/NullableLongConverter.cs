@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class NullableLongConverter : JsonConverter<long?>
+public sealed class NullableLongConverter() : JsonConverter<long?>()
 {
     public override void WriteJson( JsonWriter writer, long? value, JsonSerializer serializer ) => writer.WriteValue( value );
     public override long? ReadJson( JsonReader reader, Type objectType, long? existingValue, bool hasExistingValue, JsonSerializer serializer ) =>
@@ -14,6 +14,6 @@ public sealed class NullableLongConverter : JsonConverter<long?>
             string s => long.TryParse( s, out long n )
                             ? n
                             : null,
-            _ => throw new OutOfRangeException( nameof(reader.Value), reader.Value )
+            _ => throw new OutOfRangeException( reader.Value )
         };
 }

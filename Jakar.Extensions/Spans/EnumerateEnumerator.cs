@@ -5,65 +5,31 @@ namespace Jakar.Extensions;
 
 
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct EnumerateEnumerator<T>( scoped in ReadOnlySpan<T> span, int index = 0 )
+public ref struct EnumerateEnumerator<TValue>( ReadOnlySpan<TValue> span )
 {
-    private readonly ReadOnlySpan<T> _span  = span;
-    private          int             _index = index;
+    private readonly ReadOnlySpan<TValue> __buffer = span;
+    private          int                  __index  = 0;
 
+    public (int Index, TValue Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
 
-    public (int Index, T Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
+    public EnumerateEnumerator( int startIndex, ReadOnlySpan<TValue> span ) : this( span ) => __index = startIndex;
 
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly EnumerateEnumerator<T> GetEnumerator() => this;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly EnumerateEnumerator<TValue> GetEnumerator() => this;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext()
     {
-        int index = _index;
-        if ( index >= _span.Length ) { return false; }
+        int index = int.CreateChecked( __index );
 
-        Current = new ValueTuple<int, T>( index, _span[index] );
-        _index  = index + 1;
-        return true;
-    }
-}
-
-
-
-#if NET7_0_OR_GREATER
-[method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct EnumerateEnumerator<T, TNumber>( scoped in ReadOnlySpan<T> span, TNumber start )
-    where TNumber : struct, INumber<TNumber>
-{
-    private readonly ReadOnlySpan<T> _span = span;
-    private readonly TNumber         _start = start;
-    private          TNumber         _number = start;
-    private          int             _index = 0;
-
-
-    public (TNumber Index, T Value) Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default;
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly EnumerateEnumerator<T, TNumber> GetEnumerator() => this;
-
-
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    public bool MoveNext()
-    {
-        int index = _index;
-
-        if ( index >= _span.Length )
+        if ( index >= __buffer.Length )
         {
-            _number = _start;
-            _index = 0;
+            __index = 0;
             return false;
         }
 
-        Current = (_number, _span[index]);
-        _index = index + 1;
-        _number++;
+        Current = (__index, __buffer[index]);
+        __index++;
         return true;
     }
 }
-#endif

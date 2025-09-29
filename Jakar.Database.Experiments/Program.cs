@@ -1,6 +1,9 @@
 ﻿using Jakar.Database;
 
 
+[assembly: Experimental( "SqlTableBuilder" )]
+
+
 try
 {
     "Hello World!".WriteToConsole();
@@ -16,7 +19,7 @@ try
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    TestDatabase.TestAsync<DbExperiments>();
+    TestDatabase.TestAsync();
 
     // JsonTest.Run();
 
@@ -28,7 +31,7 @@ try
     //               .WriteToDebug();
 
 
-    // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.Name ).Distinct() ) { Console.WriteLine( name ); }
+    // foreach ( string name in typeof(Spans).GetMethods().Select( x => x.AppName ).Distinct() ) { Console.WriteLine( name ); }
 }
 catch ( Exception e ) { e.WriteToConsole(); }
 finally { "Bye".WriteToConsole(); }
@@ -40,7 +43,7 @@ finally { "Bye".WriteToConsole(); }
 //
 //     //
 //     // .Where( x => x.DisplayName.Contains( "Czech", StringComparison.OrdinalIgnoreCase ) )
-//    .Where( x => x.Version is not null )
+//    .Where( x => x.AppVersion is not null )
 //    .ToPrettyJson()
 //    .WriteToConsole();
 
@@ -61,18 +64,18 @@ finally { "Bye".WriteToConsole(); }
 
 // var project = new IniConfig.Section( "Project" )
 //               {
-//                   ["Name"] = nameof(Program),
+//                   ["AppName"] = nameof(Program),
 //               };
 //
 // project.Add( nameof(DateTime),       DateTime.Now );
 // project.Add( nameof(DateTimeOffset), DateTimeOffset.UtcNow );
-// project.Add( nameof(Guid),           Guid.NewGuid() );
+// project.Add( nameof(Guid),           Guid.CreateVersion7() );
 //
 // project.Add( nameof(AppVersion), new AppVersion( 1, 2, 3, 4, 5, 6, AppVersionFlags.Alpha( 1 ) ) );
 //
 // var server = new IniConfig.Section( "Server" )
 //              {
-//                  ["Name"] = nameof(ServicePoint),
+//                  ["AppName"] = nameof(ServicePoint),
 //              };
 //
 // server.Add( "Port", Random.Shared.Next( IPEndPoint.MinPort, IPEndPoint.MaxPort ) );
@@ -161,7 +164,7 @@ finally { "Bye".WriteToConsole(); }
 // builder = builder.Append( '.', 5 );
 // builder = builder.Append( ' ' );
 // builder = builder.AppendSpanFormattable( DateTime.Now, "dd/mm/yyyy hh:ss" );
-// builder = builder.Replace( 0, 'T' );
+// builder = builder.Replace( 0, 'TValue' );
 //
 // builder = builder.Insert( builder.Span.IndexOf( 't' ), "Yes " );
 // builder = builder.Insert( 4,                           ' ', 5 );
@@ -182,7 +185,7 @@ finally { "Bye".WriteToConsole(); }
 // await Test_HttpBuilder();
 
 
-// var id = Guid.NewGuid();
+// var id = Guid.CreateVersion7();
 // id.WriteToConsole();
 //
 // var b64 = id.ToBase64();

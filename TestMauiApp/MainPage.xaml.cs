@@ -1,44 +1,64 @@
-﻿using System.Collections.Specialized;
-using Jakar.Extensions;
+﻿using Serilog.Core;
 
 
 
 namespace TestMauiApp;
 
 
-public partial class MainPage : ContentPage
+public partial class MainPage : ContentPage, IDisposable
 {
-    private int _count;
-
-    private readonly ObservableCollection<string> _collection = [];
+    private readonly ObservableCollection<string> __collection = [];
+    private          int                          __count;
+    private readonly Logger                       __logger;
 
     // private readonly System.Collections.ObjectModel.ObservableCollection<string> _collection = [];
 
 
-    public MainPage()
+    public MainPage() : this( App.Current ) { }
+    public MainPage( App app )
     {
         InitializeComponent();
-        Cv.ItemsSource                =  _collection;
-        _collection.CollectionChanged += OnCollectionChanged;
+        Cv.ItemsSource                =  __collection;
+        __collection.CollectionChanged += OnCollectionChanged;
+        __logger                       =  App.Logger.CreateLogger<MainPage>();
     }
-    private void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args )
+    public void Dispose()
     {
-        // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
-        args.Action.WriteToDebug();
+        __collection.CollectionChanged -= OnCollectionChanged;
+        __collection.Dispose();
+        GC.SuppressFinalize( this );
+    }
+    private static void OnCollectionChanged( object? sender, NotifyCollectionChangedEventArgs args ) => args.Action.WriteToDebug(); // Cv.ScrollTo( _collection.Last(), ScrollToPosition.End );
+
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        Activity.Current?.AddEvent().SetBaggage( "UserID", Guid.CreateVersion7().ToString() ).SetBaggage( "SessionID", __count.ToString() ).AddTag( "X", "Y" );
+        __logger.Information( "{Event}", nameof(OnAppearing) );
+    }
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+        Activity.Current?.AddEvent();
+        __logger.Information( "{Event}", nameof(OnDisappearing) );
     }
 
 
     private void CounterClicked()
     {
-        _count++;
+        Activity.Current?.AddEvent();
+        __count++;
 
-        string value = CounterBtn.Text = _count == 1
-                                             ? $"Clicked {_count} time"
-                                             : $"Clicked {_count} times";
+        string value = CounterBtn.Text = __count == 1
+                                             ? $"Clicked {__count} time"
+                                             : $"Clicked {__count} times";
 
-        if ( _count % 5 == 0 ) { _collection.Clear(); }
+        Activity.Current?.SetCustomProperty( nameof(__count), __count.ToString() );
+        __logger.Information( "CounterClicked.{Value}", value );
+        if ( __count % 5 == 0 ) { __collection.Clear(); }
 
-        _collection.Add( value );
+        __collection.Add( value );
     }
     private void OnCounterClicked( object sender, EventArgs e )
     {
@@ -46,9 +66,7 @@ public partial class MainPage : ContentPage
         catch ( Exception exception )
         {
             Console.WriteLine();
-            Console.WriteLine();
             Console.WriteLine( exception.ToString() );
-            Console.WriteLine();
             Console.WriteLine();
         }
     }

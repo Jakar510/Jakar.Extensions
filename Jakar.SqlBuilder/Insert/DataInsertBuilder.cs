@@ -6,33 +6,33 @@ namespace Jakar.SqlBuilder;
 
 public struct DataInsertBuilder( in InsertClauseBuilder insert, ref EasySqlBuilder builder )
 {
-    private readonly Dictionary<string, string> _cache   = new();
-    private readonly InsertClauseBuilder        _insert  = insert;
-    private          EasySqlBuilder             _builder = builder;
+    private readonly Dictionary<string, string> __cache   = new();
+    private readonly InsertClauseBuilder        __insert  = insert;
+    private          EasySqlBuilder             __builder = builder;
 
 
-    public DataInsertBuilder With<T>( string columnName, T data )
+    public DataInsertBuilder With<TValue>( string columnName, TValue data )
     {
-        _cache[columnName] = data?.ToString() ?? NULL;
+        __cache[columnName] = data?.ToString() ?? NULL;
         return this;
     }
 
 
     public EasySqlBuilder Done()
     {
-        if ( !_cache.Any() ) { return _builder.NewLine(); }
+        if ( !__cache.Any() ) { return __builder.NewLine(); }
 
-        _builder.Begin();
-        _builder.AddRange( ',', _cache.Keys );
-        _builder.End();
+        __builder.Begin();
+        __builder.AddRange( ',', __cache.Keys );
+        __builder.End();
 
-        _builder.Add( VALUES );
+        __builder.Add( VALUES );
 
-        _builder.Begin();
-        _builder.AddRange( ',', _cache.Values );
-        _builder.End();
+        __builder.Begin();
+        __builder.AddRange( ',', __cache.Values );
+        __builder.End();
 
 
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
 }

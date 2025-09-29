@@ -13,11 +13,11 @@ public static class WebAppExtensions
     {
         JsonConvert.DefaultSettings = () => new JsonSerializerSettings { ContractResolver = new DefaultContractResolver() };
 
-        return services.AddJsonOptions( options => options.JsonSerializerOptions.PropertyNamingPolicy = null ).AddNewtonsoftJson( options => options.SerializerSettings.ContractResolver = new DefaultContractResolver() );
+        return services.AddJsonOptions(options => options.JsonSerializerOptions.PropertyNamingPolicy = null).AddNewtonsoftJson(options => options.SerializerSettings.ContractResolver = new DefaultContractResolver());
     }
-    public static WebApplication UseUrls( this WebApplication app, params string[] urls )
+    public static WebApplication UseUrls( this WebApplication app, params ReadOnlySpan<string> urls )
     {
-        foreach ( string url in urls ) { app.Urls.Add( url ); }
+        foreach ( string url in urls ) { app.Urls.Add(url); }
 
         return app;
     }
@@ -28,9 +28,9 @@ public static class WebAppExtensions
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static void UseUrls( this WebApplicationBuilder builder, params string[] urls )
     {
-        if ( urls is null ) { throw new ArgumentNullException( nameof(urls) ); }
+        if ( urls is null ) { throw new ArgumentNullException(nameof(urls)); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.ServerUrlsKey, string.Join( ';', urls ) );
+        builder.WebHost.UseSetting(WebHostDefaults.ServerUrlsKey, string.Join(';', urls));
     }
 
     /// <summary> Specify the webroot directory to be used by the web host. </summary>
@@ -39,8 +39,8 @@ public static class WebAppExtensions
     /// <returns> The <see cref="WebApplicationBuilder"/> . </returns>
     public static void UseWebRoot( this WebApplicationBuilder builder, string webRoot )
     {
-        if ( webRoot is null ) { throw new ArgumentNullException( nameof(webRoot) ); }
+        if ( webRoot is null ) { throw new ArgumentNullException(nameof(webRoot)); }
 
-        builder.WebHost.UseSetting( WebHostDefaults.WebRootKey, webRoot );
+        builder.WebHost.UseSetting(WebHostDefaults.WebRootKey, webRoot);
     }
 }

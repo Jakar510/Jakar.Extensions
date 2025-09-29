@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b885cf44-44b4-4b33-8edb-ed33f9595a62" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Api/Caches/BaseSqlCache.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Api/Caches/BaseSqlCache.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Api/Caches/MsSqlServer.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Api/Caches/MsSqlServer.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Api/Caches/PostgresSql.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Api/Caches/PostgresSql.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Api/Caches/SQL.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Api/Caches/SQL.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Api/Database.UserStore.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Api/Database.UserStore.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/DbMigrations/Migration.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/DbMigrations/Migration.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Models/RecordID.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Models/RecordID.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Services/UserValidator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Services/UserValidator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/AddressRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/AddressRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/DbMigrations/Migrate_Groups.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/DbMigrations/Migrate_Groups.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/GroupRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/GroupRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/RecoveryCodeRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/RecoveryCodeRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/RoleRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/RoleRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/TableRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/TableRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/UserLoginInfoRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/UserLoginInfoRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/UserRecord.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/UserRecord.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/Tables/UserSubscription.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/Tables/UserSubscription.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Database/TestDatabase.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Database/TestDatabase.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Extensions.Experiments/Tests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Extensions.Experiments/Tests.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Extensions/Authorization/PasswordValidation.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Extensions/Authorization/PasswordValidation.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Extensions/Extensions/Hashes.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Extensions/Extensions/Hashes.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Extensions/Jakar.Extensions.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Jakar.Extensions/Jakar.Extensions.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Jakar.Extensions/Spans/Spans.Hashes.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6
+}</component>
+  <component name="ProjectId" id="2hpMortbDLHkk08ZEFq7CHmdxnC" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "Development",
+    "ignore.virus.scanning.warn.message": "true",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "stardust.markdown.MarkdownSplitEditorSuppressor:keyList": []
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-1d06a55b98c1-0b3e54e931b4-JavaScript-WS-241.17890.13" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b885cf44-44b4-4b33-8edb-ed33f9595a62" name="Changes" comment="" />
+      <created>1718286743782</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1718286743782</updated>
+      <workItem from="1718286745351" duration="19000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

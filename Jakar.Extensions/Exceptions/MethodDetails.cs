@@ -22,15 +22,11 @@ public sealed class MethodDetails
     public bool               IsStatic            { get; init; }
     public bool               IsVirtual           { get; init; }
     public string             Name                { get; init; } = string.Empty;
-    public ParameterDetails[] Parameters          { get; init; } = Array.Empty<ParameterDetails>();
+    public ParameterDetails[] Parameters          { get; init; } = [];
     public string             Signature           { get; init; } = string.Empty;
 
 
     public MethodDetails() { }
-#if NET6_0_OR_GREATER
-    [RequiresUnreferencedCode( nameof(MethodDetails) )]
-#endif
-    public MethodDetails( Exception e ) : this( e.TargetSite ?? throw new NullReferenceException( nameof(e.TargetSite) ) ) { }
     public MethodDetails( MethodBase method )
     {
         DeclaringType       = method.MethodClass();
@@ -51,4 +47,11 @@ public sealed class MethodDetails
         IsFamilyOrAssembly  = method.IsFamilyOrAssembly;
         Parameters          = ParameterDetails.Create( method );
     }
+
+
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )]
+    public static MethodDetails? TryCreate( MethodBase? method ) => method is not null
+                                                                        ? new MethodDetails( method )
+                                                                        : null;
+    [RequiresUnreferencedCode( "Metadata for the method might be incomplete or removed" )] public static MethodDetails? TryCreate( Exception e ) => TryCreate( e.TargetSite );
 }

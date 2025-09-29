@@ -8,11 +8,11 @@ public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToke
     where TList : IReadOnlyList<TValue>
 {
     private const    int               START_INDEX = NOT_FOUND;
-    private readonly TList             _list       = list;
-    private          CancellationToken _token      = token;
-    private          int               _index      = START_INDEX;
-    public           TValue            Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _list[_index]; }
-    internal         bool              ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && _index < _list.Count; }
+    private readonly TList             __list       = list;
+    private          CancellationToken __token      = token;
+    private          int               __index      = START_INDEX;
+    public           TValue            Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __list[__index]; }
+    internal         bool              ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __token.ShouldContinue() && __index < __list.Count; }
 
 
     public ValueTask DisposeAsync() => default;
@@ -20,18 +20,18 @@ public sealed class AsyncEnumerator<TValue, TList>( TList list, CancellationToke
 
     public ValueTask<bool> MoveNextAsync()
     {
-        _index++;
+        __index++;
         return new ValueTask<bool>( ShouldContinue );
     }
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
     public AsyncEnumerator<TValue, TList> GetAsyncEnumerator( CancellationToken token = default )
     {
         Reset();
-        _token = token;
+        __token = token;
         return this;
     }
-    public void Reset() => _index = START_INDEX;
+    public void Reset() => __index = START_INDEX;
 
 
-    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
+    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(__index)} : {__index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
 }

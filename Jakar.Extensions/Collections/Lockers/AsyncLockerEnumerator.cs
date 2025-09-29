@@ -4,27 +4,30 @@
 namespace Jakar.Extensions;
 
 
-public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
+    where TCloser : IDisposable
 {
-    private const    int                       START_INDEX = 0;
-    private readonly ILockedCollection<TValue> _collection = collection;
-    private          bool                      _isDisposed;
-    private          CancellationToken         _token = token;
-    private          int                       _index = START_INDEX;
-    private          ReadOnlyMemory<TValue>    _memory;
+    private const    int                                START_INDEX = 0;
+    private readonly ILockedCollection<TValue, TCloser> __collection = collection;
+    private          bool                               __isDisposed;
+    private          CancellationToken                  __token = token;
+    private          FilterBuffer<TValue>?              __buffer;
+    private          int                                __index = START_INDEX;
 
 
+    private ReadOnlyMemory<TValue>  __Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
     TValue IAsyncEnumerator<TValue>.Current        => Current;
-    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _memory.Span[_index]; }
-    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _token.ShouldContinue() && (uint)_index < (uint)_memory.Length; }
+    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
+    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __token.ShouldContinue() && (uint)__index < (uint)__Memory.Length; }
 
 
     public ValueTask DisposeAsync()
     {
         GC.SuppressFinalize( this );
-        _isDisposed = true;
-        _memory     = ReadOnlyMemory<TValue>.Empty;
-        return default;
+        __isDisposed = true;
+        __buffer?.Dispose();
+        __buffer = null;
+        return ValueTask.CompletedTask;
     }
 
 
@@ -32,38 +35,32 @@ public class AsyncLockerEnumerator<TValue>( ILockedCollection<TValue> collection
     {
         ThrowIfDisposed();
 
-        if ( _memory.IsEmpty )
+        if ( __Memory.IsEmpty )
         {
-            _memory = await _collection.CopyAsync( _token );
-            _index  = START_INDEX;
+            __buffer?.Dispose();
+            __buffer = await __collection.CopyAsync( __token );
+            __index  = START_INDEX;
         }
 
-        if ( _token.IsCancellationRequested || (uint)_index >= (uint)_memory.Length ) { return false; }
+        if ( __token.IsCancellationRequested || (uint)__index >= (uint)__Memory.Length ) { return false; }
 
-        _index++;
+        __index++;
         return true;
     }
 
 
     IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
-    public AsyncLockerEnumerator<TValue> GetAsyncEnumerator( CancellationToken token = default )
+    public AsyncLockerEnumerator<TValue, TCloser> GetAsyncEnumerator( CancellationToken token = default )
     {
         ThrowIfDisposed();
-        _memory = ReadOnlyMemory<TValue>.Empty;
-        _index  = START_INDEX;
-        _token  = token;
+        __buffer?.Dispose();
+        __buffer = null;
+        __index  = START_INDEX;
+        __token  = token;
         return this;
     }
-    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(_index)} : {_index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
+    public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(__index)} : {__index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )]
-    private void ThrowIfDisposed()
-    {
-    #if NET7_0_OR_GREATER
-        ObjectDisposedException.ThrowIf( _isDisposed, this );
-    #else
-        if ( _isDisposed ) { throw new ObjectDisposedException( nameof(AsyncLockerEnumerator<TValue>) ); }
-    #endif
-    }
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
 }

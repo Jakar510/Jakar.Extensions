@@ -1,0 +1,103 @@
+﻿@using System.Globalization
+@inherits ComponentBase
+
+
+<CascadingValue IsFixed="true"
+                TValue="SettingsView"
+                Value="@( this )" >
+    <CascadingValue IsFixed="false"
+                    Name="@SV_SECTION_HEADER_ICON_EXPANDED"
+                    TValue="string"
+                    Value="@_expandedIcon" >
+        <CascadingValue IsFixed="false"
+                        Name="@SV_SECTION_HEADER_ICON_COLLAPSED"
+                        TValue="string"
+                        Value="@_collapsedIcon" >
+            <div class="@SV_ROOT"
+                 for="@ID" >
+                <ol class="@SV_ROOT_LIST" >
+                    @foreach ( SvSection section in Sections )
+                    {
+                        @if ( !section.IsVisible ) { continue; }
+
+                        <li class="@SV_SECTION"
+                            @key="@section.ID" >
+                            @section.Fragment
+                        </li>
+                    }
+                </ol>
+            </div>
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>
+
+
+@code
+{
+    [Parameter]                                public string                               ID                      { get; init; } = GetID();
+    [Parameter]                                public IList<SvSection>                     Sections                { get; set; }  = new ObservableCollection<SvSection>();
+    [Parameter]                                public string?                              ExpandedIcon            { get; set; }
+    [Parameter]                                public EventCallback<string?>               ExpandedIconChanged     { get; set; }
+    [Parameter]                                public Expression<Func<string>>?            ExpandedIconExpression  { get; set; }
+    [Parameter]                                public string?                              CollapsedIcon           { get; set; }
+    [Parameter]                                public EventCallback<string?>               CollapsedIconChanged    { get; set; }
+    [Parameter]                                public Expression<Func<string?>>?           CollapsedIconExpression { get; set; }
+    [Parameter]                                public bool                                 IsExpanded              { get; set; }
+    [Parameter]                                public EventCallback<bool>                  IsExpandedChanged       { get; set; }
+    [Parameter]                                public Expression<Func<bool>>?              IsExpandedExpression    { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public IReadOnlyDictionary<string, object>? HtmlAttributes          { get; set; }
+    [CascadingParameter]                       public EditContext?                         CascadedEditContext     { get; set; }
+    [Parameter]                                public CultureInfo?                         Culture                 { get; set; }
+    [CascadingParameter]                       public CultureInfo?                         DefaultCulture          { get; set; }
+    public                                            CultureInfo                          CurrentCulture          => Culture ?? DefaultCulture ?? CultureInfo.CurrentUICulture;
+
+    protected bool    _isExpanded;
+    protected string? _expandedIcon;
+    protected string? _collapsedIcon;
+
+
+    protected override void OnAfterRender( bool firstRender )
+    {
+        base.OnAfterRender(firstRender);
+        if ( firstRender ) { OnAppearing(); }
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        await SetExpandedIcon(ExpandedIcon);
+        await SetCollapsedIcon(CollapsedIcon);
+    }
+
+
+    public async Task SetExpandedIcon( string? value )
+    {
+        if ( string.Equals(_expandedIcon, value, StringComparison.Ordinal) ) { return; }
+
+        _expandedIcon = value;
+        await ExpandedIconChanged.InvokeAsync(value);
+    }
+    public async Task SetCollapsedIcon( string? value )
+    {
+        if ( string.Equals(_collapsedIcon, value, StringComparison.Ordinal) ) { return; }
+
+        _collapsedIcon = value;
+        await CollapsedIconChanged.InvokeAsync(value);
+    }
+    public async Task SetIsCollapsed( bool value )
+    {
+        if ( _isExpanded == value ) { return; }
+
+        IsExpandedExpression?.Compile().Invoke();
+        _isExpanded = value;
+        await IsExpandedChanged.InvokeAsync(value);
+    }
+
+
+    public void OnAppearing()
+    {
+        foreach ( SvSection section in Sections ) { section.OnAppearing(); }
+    }
+    public void OnDisappearing()
+    {
+        foreach ( SvSection section in Sections ) { section.OnDisappearing(); }
+    }
+}

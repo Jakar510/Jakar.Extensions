@@ -1,4 +1,8 @@
-﻿namespace Jakar.SqlBuilder;
+﻿using System.Diagnostics.CodeAnalysis;
+
+
+
+namespace Jakar.SqlBuilder;
 
 
 public static class KeyWords
@@ -49,9 +53,14 @@ public static class KeyWords
     public const string WHERE              = nameof(WHERE);
 
 
-    public static string GetName( this    Type   type )                    => type.GetTableName();
-    public static string GetName<T>( this T      _ )                       => typeof(T).GetTableName();
-    public static string GetName<T>( this T      _,    string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
-    public static string GetName( this    Type   type, string columnName ) => $"{type.GetTableName()}.{columnName}";
-    public static string GetName<T>( this string columnName ) => $"{typeof(T).GetTableName()}.{columnName}";
+    public static string GetName( this    Type   type )                  => type.GetTableName();
+    public static string GetName<TValue>( this TValue      _ )                     => typeof(TValue).GetTableName();
+    public static string GetName<TValue>( this string columnName, TValue    _ )    => $"{typeof(TValue).GetTableName()}.{columnName}";
+    public static string GetName( this    string columnName, Type type ) => $"{type.GetTableName()}.{columnName}";
+    public static string? GetName<TValue>( [NotNullIfNotNull( nameof(columnName) )] this string? columnName )
+    {
+        return columnName is null
+                   ? null
+                   : $"{typeof(TValue).GetTableName()}.{columnName}";
+    }
 }

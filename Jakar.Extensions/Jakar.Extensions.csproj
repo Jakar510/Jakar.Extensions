@@ -1,94 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+		<TargetFrameworks>net9.0</TargetFrameworks>
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
-		<NoWarn>$(NoWarn);1591;IDE0079;CS1658;CS1591</NoWarn>
+		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
-		<Version>8.0.0</Version>
+		<Version>9.17.2</Version>
+		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
-		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>
-		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
-		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
-		<PackageTags>Api Extension Linq Http Files Files Strings Types Languages Collections Ini</PackageTags>
+		<PackageIcon>icon.png</PackageIcon>
+		<Company></Company>
+		<PackageReleaseNotes>Bug Fixes</PackageReleaseNotes>
+		<Description>Extensions to aid in development.</Description>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/Jakar510/Jakar.Extensions</RepositoryUrl>
-		<PackageReleaseNotes>
-			Jakar.Extensions 8.0.0
-
-		</PackageReleaseNotes>
-		<Description>Extensions to aid in development.</Description>
+		<PackageProjectUrl>https://github.com/Jakar510/Jakar.Extensions</PackageProjectUrl>
+		<Copyright>https://raw.githubusercontent.com/Jakar510/Jakar.Extensions/master/LICENSE.txt</Copyright>
+		<PackageTags>Extension AsynLinq Linq Http Files Strings Types Languages Collections Ini</PackageTags>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
+		<AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<ProduceReferenceAssembly>true</ProduceReferenceAssembly>
 		<EnableNETAnalyzers>true</EnableNETAnalyzers>
 		<NeutralLanguage>en</NeutralLanguage>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<PackageIcon>icon.png</PackageIcon>
-		<PackageLicenseFile>W:\WorkSpace\Jakar.Extensions\LICENSE.txt</PackageLicenseFile>
 		<StripSymbols>false</StripSymbols>
+		<IncludeSymbols>true</IncludeSymbols>
 		<IsAotCompatible>true</IsAotCompatible>
 		<OptimizationPreference>Speed</OptimizationPreference>
 		<EventSourceSupport>true</EventSourceSupport>
+		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Loggers\**" />
-	  <Compile Remove="WeakEventManagers\**" />
-	  <EmbeddedResource Remove="Loggers\**" />
-	  <EmbeddedResource Remove="WeakEventManagers\**" />
-	  <None Remove="Loggers\**" />
-	  <None Remove="WeakEventManagers\**" />
+		<Compile Remove="WeakEventManagers\**" />
+		<EmbeddedResource Remove="WeakEventManagers\**" />
+		<None Remove="WeakEventManagers\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<InternalsVisibleTo Include="Jakar.Extensions.Experiments" />
+		<InternalsVisibleTo Include="Jakar.Extensions.Tests" />
 	</ItemGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.1|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.1|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net6.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net7.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net7.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0|AnyCPU'">
-		<DefineConstants>$(DefineConstants);__WINDOWS__;__LINUX__;__IOS__;__ANDROID__;__MACOS__</DefineConstants>
-	</PropertyGroup>
-
 
 	<ItemGroup>
 		<None Include="..\images\icon.png">
-			<Pack>True</Pack>
+			<Pack>true</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
+		<None Include="..\LICENSE.txt">
+			<Pack>true</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="README.md">
+			<Pack>true</Pack>
 			<PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
@@ -104,59 +76,55 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Include="..\images\icon.png">
-			<Pack>True</Pack>
-			<PackagePath></PackagePath>
-		</None>
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0">
+		<PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="CommunityToolkit.Diagnostics" Version="8.2.2" />
-		<PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Options" Version="8.0.2" />
-		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="7.5.2" />
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Nito.Collections.Deque" Version="1.2.1" />
-		<PackageReference Include="NoAlloq" Version="0.2.0" />
-		<PackageReference Include="Otp.NET" Version="1.4.0" />
-		<PackageReference Include="Portable.BouncyCastle" Version="1.9.0" />
-		<PackageReference Include="System.Collections.Immutable" Version="8.0.0" />
-		<PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
-		<PackageReference Include="System.Net.Http" Version="4.3.4" />
-		<PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-		<PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" />
-		<PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
-		<PackageReference Include="System.Threading.Tasks" Version="4.3.0" />
-		<PackageReference Include="System.Threading.Tasks.Dataflow" Version="8.0.0" />
-		<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
-		<PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-		<PackageReference Include="OneOf" Version="3.0.263" />
-		<PackageReference Include="OneOf.Extended" Version="3.0.263" />
-		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.263" />
-		<PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
-		<PackageReference Include="ValueOf" Version="2.0.31" />
-		<PackageReference Include="ZXing.Net" Version="0.16.9" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='net6.0'">
-		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='net7.0'">
-		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(TargetFramework)'=='net8.0'">
-		<PackageReference Include="System.IO.Hashing" Version="8.0.0" />
+		<PackageReference Include="AsyncAwaitBestPractices" />
+		<PackageReference Include="CommunityToolkit.Diagnostics" />
+		<PackageReference Include="JetBrains.Annotations" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
+ 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.Http" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.Options" />
+		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
+		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
+		<PackageReference Include="Newtonsoft.Json" />
+		<PackageReference Include="Nito.Collections.Deque" />
+ 		<PackageReference Include="Otp.NET" />
+		<PackageReference Include="Portable.BouncyCastle" />
+		<PackageReference Include="Serilog" />
+		<PackageReference Include="Serilog.Formatting.Compact" />
+		<PackageReference Include="Serilog.Sinks.Async" />
+		<PackageReference Include="Serilog.Sinks.Console" />
+		<PackageReference Include="Serilog.Sinks.Debug" />
+		<PackageReference Include="Serilog.Sinks.File" />
+		<PackageReference Include="System.Collections.Immutable" />
+		<PackageReference Include="System.ComponentModel.Annotations" />
+		<PackageReference Include="System.IO.Hashing" />
+		<PackageReference Include="System.Net.Http" />
+		<PackageReference Include="System.Text.Encoding.CodePages" />
+		<PackageReference Include="System.Text.Encodings.Web" />
+		<PackageReference Include="System.Text.RegularExpressions" />
+		<PackageReference Include="System.Threading.Tasks" />
+		<PackageReference Include="System.Threading.Tasks.Dataflow" />
+		<PackageReference Include="System.Threading.Tasks.Extensions" />
+		<PackageReference Include="System.Threading.Tasks.Parallel" />
+		<PackageReference Include="System.Threading.ThreadPool" />
+		<PackageReference Include="OneOf" />
+		<PackageReference Include="OneOf.Extended" />
+		<PackageReference Include="OneOf.SourceGenerator" />
+		<PackageReference Include="ValueOf" />
+		<PackageReference Include="ZLinq" />
+		<PackageReference Include="ZLinq.DropInGenerator">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ZLinq.FileSystem" />
+		<PackageReference Include="ZXing.Net" />
 	</ItemGroup>
 </Project>

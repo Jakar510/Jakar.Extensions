@@ -5,30 +5,30 @@ namespace Jakar.Extensions;
 
 
 [method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct SpanSelector<T, TNext>( ReadOnlySpan<T> span, Func<T, TNext> func )
+public ref struct SpanSelector<TValue, TNext>( ReadOnlySpan<TValue> span, Func<TValue, TNext> func )
 {
-    private readonly ReadOnlySpan<T> _span  = span;
-    private readonly Func<T, TNext>  _func  = func;
-    private          int             _index = NOT_FOUND;
+    private readonly ReadOnlySpan<TValue> __span  = span;
+    private readonly Func<TValue, TNext>  __func  = func;
+    private volatile int                  __index = -1;
 
-    public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; }
+    public TNext Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; private set; } = default!;
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanSelector<T, TNext> GetEnumerator() => this;
+    [MethodImpl( MethodImplOptions.AggressiveInlining )] public readonly SpanSelector<TValue, TNext> GetEnumerator() => this;
 
 
     [MethodImpl( MethodImplOptions.AggressiveInlining )]
     public bool MoveNext()
     {
-        int index = _index + 1;
-        if ( index >= _span.Length ) { return false; }
+        int index = __index + 1;
+        if ( index >= __span.Length ) { return false; }
 
-        Current = _func( _span[index] );
-        _index  = index;
+        Current = __func( __span[index] );
+        __index  = index;
         return true;
     }
     public void Reset()
     {
-        Interlocked.Exchange( ref _index, NOT_FOUND );
+        Interlocked.Exchange( ref __index, -1 );
         Current = default!;
     }
 }

@@ -11,22 +11,22 @@ public interface IToSyntax<out TNext>
 
     /// <summary>
     ///     <para>
-    ///         <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///         <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     ///     </para>
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext To<T>( T obj );
+    public TNext To<TValue>( TValue obj );
 
     /// <summary>
-    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="T"/> to get the table_name using <see cref="TableExtensions.GetTableName{T}"/> </para>
+    ///     <para> Uses the <see cref="Type"/> of <typeparamref name="TValue"/> to get the table_name using <see cref="TableExtensions.GetTableName{TValue}"/> </para>
     /// </summary>
-    /// <typeparam name="T"> The type being passed </typeparam>
+    /// <typeparam name="TValue"> The type being passed </typeparam>
     /// <returns>
     ///     <typeparamref name="TNext"/>
     /// </returns>
-    public TNext To<T>()
-        where T : class;
+    public TNext To<TValue>()
+        where TValue : class;
 }

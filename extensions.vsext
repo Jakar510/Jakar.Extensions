@@ -1,32 +1,20 @@
 {
-    "id": "be446d55-eafc-4799-bb6a-d60b5bcfb621",
+    "id": "4146a3b5-e33c-4799-b767-917fba38bd7d",
     "version": "1.0",
     "name": "My Visual Studio extensions",
     "description": "A collection of my Visual Studio extensions",
     "extensions": [
         {
-            "vsixId": "BlazorTemplates.316c4442-1dec-424e-9a59-e9c637daede6",
-            "name": "Blazor Desktop Templates",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=egvijayanand.blazor-desktop-templates",
-            "downloadUrl": "https://egvijayanand.gallery.vsassets.io:443/_apis/public/gallery/publisher/egvijayanand/extension/blazor-desktop-templates/4.0.0.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "TemplateStudioForWPF.f4e060e0-bdf6-4ed0-9924-983506ec9862",
-            "name": "Template Studio for WPF",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=TemplateStudio.TemplateStudioForWPF",
-            "downloadUrl": "https://templatestudio.gallery.vsassets.io:443/_apis/public/gallery/publisher/TemplateStudio/extension/TemplateStudioForWPF/5.3/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "43b35fe0-1f30-48de-887a-68256474202a",
-            "name": "ResXManager",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=TomEnglert.ResXManager",
-            "downloadUrl": "https://tomenglert.gallery.vsassets.io:443/_apis/public/gallery/publisher/TomEnglert/extension/ResXManager/1.84.6269.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "VisualStudioThemePack.453e3fa1-2e0e-467e-abbd-1d08fe6468d1",
+            "name": "Visual Studio Theme Pack",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=idex.vsthemepack",
+            "downloadUrl": "https://idex.gallery.vsassets.io:443/_apis/public/gallery/publisher/idex/extension/vsthemepack/1.2/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "Npgsql.VSIX.07074491-d0c6-4138-9d44-ea3f8920e84b",
             "name": "Npgsql PostgreSQL Integration",
             "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=RojanskyS.NpgsqlPostgreSQLIntegration",
-            "downloadUrl": "https://rojanskys.gallery.vsassets.io:443/_apis/public/gallery/publisher/RojanskyS/extension/NpgsqlPostgreSQLIntegration/4.1.12/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "downloadUrl": "https://rojanskys.gallery.vsassets.io:443/_apis/public/gallery/publisher/RojanskyS/extension/NpgsqlPostgreSQLIntegration/4.1.14/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "A274A0E2-E41E-40CC-A694-8D5D14BBD2D0",
@@ -35,22 +23,28 @@
             "downloadUrl": "https://mlnet.gallery.vsassets.io:443/_apis/public/gallery/publisher/MLNET/extension/ModelBuilder2022/17.18.2.2415501/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
-            "vsixId": "Microsoft.VisualStudio.LiveShare.2022",
-            "name": "Live Share 2022",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsls-vs-2022",
-            "downloadUrl": "https://ms-vsliveshare.gallery.vsassets.io:443/_apis/public/gallery/publisher/MS-vsliveshare/extension/vsls-vs-2022/1.0.5919.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "Microsoft.SingleProjectMSIXPackagingTools.Dev17",
+            "name": "Single-project MSIX Packaging Tools for VS 2022",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=ProjectReunion.MicrosoftSingleProjectMSIXPackagingToolsDev17",
+            "downloadUrl": "https://projectreunion.gallery.vsassets.io:443/_apis/public/gallery/publisher/ProjectReunion/extension/MicrosoftSingleProjectMSIXPackagingToolsDev17/1.5.0.2311290/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "Caphyon.AdvancedInstaller.8ce74dd8-0586-4ec3-ba1d-ff35fefaa4d7",
             "name": "Advanced Installer for Visual Studio 2022",
             "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=caphyon.AdvancedInstallerforVisualStudio2022",
-            "downloadUrl": "https://caphyon.gallery.vsassets.io:443/_apis/public/gallery/publisher/caphyon/extension/AdvancedInstallerforVisualStudio2022/21.6/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "downloadUrl": "https://caphyon.gallery.vsassets.io:443/_apis/public/gallery/publisher/caphyon/extension/AdvancedInstallerforVisualStudio2022/22.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
-            "vsixId": "VSOutputEnhancer.Nikolay Balakin.a06be4c3-f97e-425c-8a0d-bdef08ac2abb",
-            "name": "Output enhancer",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=NikolayBalakin.Outputenhancer",
-            "downloadUrl": "https://nikolaybalakin.gallery.vsassets.io:443/_apis/public/gallery/publisher/NikolayBalakin/extension/Outputenhancer/1.8/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "BlazorWebFormVSIX.4c89f55a-0f7f-4a27-b389-8b6be7b623b4",
+            "name": "Blazor ASP.NET WebForm Template",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=Jurio-Li.BlazorWebFormTemplate",
+            "downloadUrl": "https://jurio-li.gallery.vsassets.io:443/_apis/public/gallery/publisher/Jurio-Li/extension/BlazorWebFormTemplate/2.4.1.2/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "BlazorTemplates.316c4442-1dec-424e-9a59-e9c637daede6",
+            "name": "Blazor Desktop Templates",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=egvijayanand.blazor-desktop-templates",
+            "downloadUrl": "https://egvijayanand.gallery.vsassets.io:443/_apis/public/gallery/publisher/egvijayanand/extension/blazor-desktop-templates/4.3.0.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "blazor_extension.348090da-88b7-47c8-a966-44dad2825490",
@@ -59,46 +53,10 @@
             "downloadUrl": "https://chenxu.gallery.vsassets.io:443/_apis/public/gallery/publisher/chenxu/extension/blazor-component-item-template/1.1/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
-            "vsixId": "Microsoft.SingleProjectMSIXPackagingTools.Dev17",
-            "name": "Single-project MSIX Packaging Tools for VS 2022",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=ProjectReunion.MicrosoftSingleProjectMSIXPackagingToolsDev17",
-            "downloadUrl": "https://projectreunion.gallery.vsassets.io:443/_apis/public/gallery/publisher/ProjectReunion/extension/MicrosoftSingleProjectMSIXPackagingToolsDev17/1.5.0.2311290/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "BootstrapBlazorVsix.c821b4dc-2e1f-4784-98da-16692643a224",
-            "name": "Bootstrap Blazor Project Template",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=Longbow.BootstrapBlazorUITemplate",
-            "downloadUrl": "https://longbow.gallery.vsassets.io:443/_apis/public/gallery/publisher/Longbow/extension/BootstrapBlazorUITemplate/8.0.4/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "7f30a50b-8211-40cf-b881-bd1eb2866478",
-            "name": "HTML Snippet Pack",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MadsKristensen.HTMLSnippetPack",
-            "downloadUrl": "https://madskristensen.gallery.vsassets.io:443/_apis/public/gallery/publisher/MadsKristensen/extension/HTMLSnippetPack/1.1.14/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "3a7b4930-a5fb-46ec-a9b8-9610c8f953b8",
-            "name": "File Icons",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MadsKristensen.FileIcons",
-            "downloadUrl": "https://madskristensen.gallery.vsassets.io:443/_apis/public/gallery/publisher/MadsKristensen/extension/FileIcons/2.8.239/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "VisualStudioThemePack.453e3fa1-2e0e-467e-abbd-1d08fe6468d1",
-            "name": "Visual Studio Theme Pack",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=idex.vsthemepack",
-            "downloadUrl": "https://idex.gallery.vsassets.io:443/_apis/public/gallery/publisher/idex/extension/vsthemepack/1.2/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "Microsoft.NET.UpgradeAssistant",
-            "name": ".NET Upgrade Assistant",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.upgradeassistant",
-            "downloadUrl": "https://ms-dotnettools.gallery.vsassets.io:443/_apis/public/gallery/publisher/ms-dotnettools/extension/upgradeassistant/0.5.617.36348/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
-        },
-        {
-            "vsixId": "GitHub.Copilot",
-            "name": "GitHub Copilot",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=GitHub.copilotvs",
-            "downloadUrl": "https://github.gallery.vsassets.io:443/_apis/public/gallery/publisher/GitHub/extension/copilotvs/1.156.0.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "VSOutputEnhancer.Nikolay Balakin.a06be4c3-f97e-425c-8a0d-bdef08ac2abb",
+            "name": "Output enhancer",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=NikolayBalakin.Outputenhancer",
+            "downloadUrl": "https://nikolaybalakin.gallery.vsassets.io:443/_apis/public/gallery/publisher/NikolayBalakin/extension/Outputenhancer/1.8/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "2a20580c-7be4-4440-bcd6-8dcf5aa2004e",
@@ -107,22 +65,58 @@
             "downloadUrl": "https://madskristensen.gallery.vsassets.io:443/_apis/public/gallery/publisher/MadsKristensen/extension/JavaScriptSnippetPack/1.2.25/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
-            "vsixId": "VS.GitHub.Copilot",
-            "name": "GitHub Copilot Chat",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=VisualStudioExptTeam.VSGitHubCopilot",
-            "downloadUrl": "https://visualstudioexptteam.gallery.vsassets.io:443/_apis/public/gallery/publisher/VisualStudioExptTeam/extension/VSGitHubCopilot/0.2.755.36570/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "TemplateStudioForWPF.f4e060e0-bdf6-4ed0-9924-983506ec9862",
+            "name": "Template Studio for WPF",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=TemplateStudio.TemplateStudioForWPF",
+            "downloadUrl": "https://templatestudio.gallery.vsassets.io:443/_apis/public/gallery/publisher/TemplateStudio/extension/TemplateStudioForWPF/5.3/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
-            "vsixId": "BlazorWebFormVSIX.4c89f55a-0f7f-4a27-b389-8b6be7b623b4",
-            "name": "Blazor ASP.NET WebForm Template",
-            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=Jurio-Li.BlazorWebFormTemplate",
-            "downloadUrl": "https://jurio-li.gallery.vsassets.io:443/_apis/public/gallery/publisher/Jurio-Li/extension/BlazorWebFormTemplate/2.4.0.9/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+            "vsixId": "7f30a50b-8211-40cf-b881-bd1eb2866478",
+            "name": "HTML Snippet Pack",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MadsKristensen.HTMLSnippetPack",
+            "downloadUrl": "https://madskristensen.gallery.vsassets.io:443/_apis/public/gallery/publisher/MadsKristensen/extension/HTMLSnippetPack/1.1.14/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "BootstrapBlazorVsix.c821b4dc-2e1f-4784-98da-16692643a224",
+            "name": "Bootstrap Blazor Project Template",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=Longbow.BootstrapBlazorUITemplate",
+            "downloadUrl": "https://longbow.gallery.vsassets.io:443/_apis/public/gallery/publisher/Longbow/extension/BootstrapBlazorUITemplate/8.0.4/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "3a7b4930-a5fb-46ec-a9b8-9610c8f953b8",
+            "name": "File Icons",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MadsKristensen.FileIcons",
+            "downloadUrl": "https://madskristensen.gallery.vsassets.io:443/_apis/public/gallery/publisher/MadsKristensen/extension/FileIcons/2.8.239/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         },
         {
             "vsixId": "VSInstallerProjects2022",
             "name": "Microsoft Visual Studio Installer Projects 2022",
             "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=VisualStudioClient.MicrosoftVisualStudio2022InstallerProjects",
             "downloadUrl": "https://visualstudioclient.gallery.vsassets.io:443/_apis/public/gallery/publisher/VisualStudioClient/extension/MicrosoftVisualStudio2022InstallerProjects/2.0.1/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "Microsoft.VisualStudio.LiveShare.2022",
+            "name": "Live Share 2022",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=MS-vsliveshare.vsls-vs-2022",
+            "downloadUrl": "https://ms-vsliveshare.gallery.vsassets.io:443/_apis/public/gallery/publisher/MS-vsliveshare/extension/vsls-vs-2022/1.0.5940.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "43b35fe0-1f30-48de-887a-68256474202a",
+            "name": "ResXManager",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=TomEnglert.ResXManager",
+            "downloadUrl": "https://tomenglert.gallery.vsassets.io:443/_apis/public/gallery/publisher/TomEnglert/extension/ResXManager/1.85.6305.0/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "cb5b6a78-6fa1-4830-a272-760862eb77af",
+            "name": "Project System Tools 2022",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=VisualStudioProductTeam.ProjectSystemTools2022",
+            "downloadUrl": "https://visualstudioproductteam.gallery.vsassets.io:443/_apis/public/gallery/publisher/VisualStudioProductTeam/extension/ProjectSystemTools2022/1.0.2.2305901/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
+        },
+        {
+            "vsixId": "Microsoft.NET.UpgradeAssistant",
+            "name": ".NET Upgrade Assistant",
+            "moreInfoUrl": "https://marketplace.visualstudio.com/items?itemName=ms-dotnettools.upgradeassistant",
+            "downloadUrl": "https://ms-dotnettools.gallery.vsassets.io:443/_apis/public/gallery/publisher/ms-dotnettools/extension/upgradeassistant/0.5.711.53382/assetbyname/Microsoft.VisualStudio.Ide.Payload?redirect=true\u0026update=true"
         }
     ]
 }

@@ -6,68 +6,80 @@ public record BaseRecord
 {
     public const int    ANSI_CAPACITY    = 8000;
     public const int    BINARY_CAPACITY  = int.MaxValue;
-    public const int    MAX_STRING_SIZE  = int.MaxValue;
-    public const int    UNICODE_CAPACITY = 4000;
     public const string EMPTY            = "";
+    public const int    MAX_STRING_SIZE  = int.MaxValue;
     public const string NULL             = "null";
+    public const int    UNICODE_CAPACITY = 4000;
 }
 
 
 
-public abstract record BaseRecord<TRecord> : BaseRecord, IEquatable<TRecord>, IComparable<TRecord>, IComparable
-    where TRecord : BaseRecord<TRecord>
+public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable, IParsable<TClass>
+    where TClass : BaseRecord<TClass>, IEqualityOperators<TClass>, IComparisonOperators<TClass>
 {
-    public static Equalizer<TRecord> Equalizer { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Equalizer<TRecord>.Default; }
-    public static Sorter<TRecord>    Sorter    { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Sorter<TRecord>.Default; }
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToJson()       => this.ToJson(Formatting.None);
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)] public virtual string ToPrettyJson() => this.ToJson(Formatting.Indented);
 
 
-    public static TRecord? FromJson( [NotNullIfNotNull( nameof(json) )] string? json ) => json?.FromJson<TRecord>();
-    public        string   ToJson()                                                    => this.ToJson( Formatting.None );
-    public        string   ToPrettyJson()                                              => this.ToJson( Formatting.Indented );
-
-
+    public abstract bool Equals( TClass?    other );
+    public abstract int  CompareTo( TClass? other );
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return other is TRecord t
-                   ? CompareTo( t )
-                   : throw new ExpectedValueTypeException( nameof(other), other, typeof(TRecord) );
+        return other is TClass t
+                   ? CompareTo(t)
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
     }
-    public abstract int  CompareTo( TRecord? other );
-    public abstract bool Equals( TRecord?    other );
+
+
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    public static TClass Parse( [NotNullIfNotNull(nameof(json))] string? json, IFormatProvider? provider )
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(json);
+        return json.FromJson<TClass>();
+    }
+    [RequiresUnreferencedCode(JsonModels.TRIM_WARNING), RequiresDynamicCode(JsonModels.AOT_WARNING)]
+    public static bool TryParse( [NotNullWhen(true)] string? json, IFormatProvider? provider, [NotNullWhen(true)] out TClass? result )
+    {
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        try
+        {
+            result = json?.FromJson<TClass>();
+            return result is not null;
+        }
+        catch ( Exception e )
+        {
+            telemetrySpan.AddException(e);
+            result = null;
+            return false;
+        }
+    }
 }
 
 
 
-public abstract record BaseRecord<TRecord, TID> : BaseRecord<TRecord>, IUniqueID<TID>
-    where TRecord : BaseRecord<TRecord, TID>
-#if NET8_0_OR_GREATER
+public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<TID>
+    where TClass : BaseRecord<TClass, TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
-    private TID _id;
+    private TID __id;
 
 
-    public virtual TID ID { get => _id; init => _id = value; }
+    public virtual TID ID { get => __id; init => __id = value; }
 
 
     protected BaseRecord() : base() { }
     protected BaseRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TRecord record ) => SetID( record.ID );
+    protected bool SetID( TClass record ) => SetID(record.ID);
     protected bool SetID( TID id )
     {
-        _id = id;
+        __id = id;
         return true;
     }
 }

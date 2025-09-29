@@ -1,23 +1,26 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable, Table( TABLE_NAME )]
-public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE )] string? CustomerID, [property: StringLength( GroupRecord.MAX_SIZE )] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? OwnerUserID, DateTimeOffset DateCreated, DateTimeOffset? LastModified = default )
-    : OwnedTableRecord<GroupRecord>( ID, OwnerUserID, DateCreated, LastModified ), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
+[Serializable, Table(TABLE_NAME)]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
+    : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), IDbReaderMapping<GroupRecord>, IGroupModel<Guid>
 {
-    public const  int                                    MAX_SIZE   = 1024;
-    public const  string                                 TABLE_NAME = "Groups";
-    public static string                                 TableName { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => TABLE_NAME; }
-    Guid? ICreatedByUser<Guid>.                          CreatedBy => OwnerUserID?.Value;
-    Guid? IGroupModel<Guid>.                             OwnerID   => OwnerUserID?.Value;
-    [StringLength( IUserRights.MAX_SIZE )] public string Rights    { get; set; } = Rights;
+    public const               int                           MAX_SIZE   = 1024;
+    public const               string                        TABLE_NAME = "Groups";
+    public static              string                        TableName      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    [JsonExtensionData] public IDictionary<string, JToken?>? AdditionalData { get; set; }
+    Guid? ICreatedByUser<Guid>.                              CreatedBy      => CreatedBy?.value;
+    Guid? IGroupModel<Guid>.                                 OwnerID        => CreatedBy?.value;
+    [StringLength(IUserRights.MAX_SIZE)] public string       Rights         { get; set; } = Rights;
 
 
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID ) : this( customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow ) { }
-    public GroupRecord( UserRecord owner, string nameOfGroup, string? customerID, string rights ) : this( customerID, nameOfGroup, rights, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow ) { }
-    public GroupModel<Guid> ToGroupModel() => new(this);
+    public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
+    public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID, string rights ) : this(customerID, nameOfGroup, rights, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
+    public GroupModel ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()
-        where TGroupModel : IGroupModel<TGroupModel, Guid> => TGroupModel.Create( this );
+        where TGroupModel : class, IGroupModel<TGroupModel, Guid> => TGroupModel.Create(this);
+
 
     public GroupRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
         where TEnum : struct, Enum
@@ -27,36 +30,70 @@ public sealed record GroupRecord( [property: StringLength( GroupRecord.MAX_SIZE 
     }
 
 
+    public override int CompareTo( GroupRecord? other )
+    {
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        if ( other is null ) { return 1; }
+
+        int nameOfGroupComparison = string.Compare(NameOfGroup, other.NameOfGroup, StringComparison.Ordinal);
+        if ( nameOfGroupComparison != 0 ) { return nameOfGroupComparison; }
+
+        int rightsComparison = string.Compare(Rights, other.Rights, StringComparison.Ordinal);
+        if ( rightsComparison != 0 ) { return rightsComparison; }
+
+        int customerIDComparison = string.Compare(CustomerID, other.CustomerID, StringComparison.Ordinal);
+        if ( customerIDComparison != 0 ) { return customerIDComparison; }
+
+        int lastModifiedComparison = Nullable.Compare(LastModified, other.LastModified);
+        if ( lastModifiedComparison != 0 ) { return lastModifiedComparison; }
+
+        return DateCreated.CompareTo(other.DateCreated);
+    }
+    public override bool Equals( GroupRecord? other )
+    {
+        if ( other is null ) { return false; }
+
+        if ( ReferenceEquals(this, other) ) { return true; }
+
+        return base.Equals(other) && NameOfGroup == other.NameOfGroup && Rights == other.Rights && CustomerID == other.CustomerID;
+    }
+    public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), NameOfGroup, Rights, CustomerID);
+
+
     [Pure]
     public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
-        parameters.Add( nameof(CustomerID),  CustomerID );
-        parameters.Add( nameof(NameOfGroup), NameOfGroup );
-        parameters.Add( nameof(OwnerUserID), OwnerUserID );
-        parameters.Add( nameof(Rights),      Rights );
+        parameters.Add(nameof(CustomerID),  CustomerID);
+        parameters.Add(nameof(NameOfGroup), NameOfGroup);
+        parameters.Add(nameof(CreatedBy),   CreatedBy);
+        parameters.Add(nameof(Rights),      Rights);
         return parameters;
     }
+
+
     [Pure]
     public static GroupRecord Create( DbDataReader reader )
     {
-        string                customerID   = reader.GetFieldValue<string>( nameof(CustomerID) );
-        string                nameOfGroup  = reader.GetFieldValue<string>( nameof(NameOfGroup) );
-        string                rights       = reader.GetFieldValue<string>( nameof(Rights) );
-        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>( nameof(DateCreated) );
-        DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>( nameof(LastModified) );
-        RecordID<UserRecord>? ownerUserID  = RecordID<UserRecord>.OwnerUserID( reader );
-        RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID( reader );
-        GroupRecord           record       = new GroupRecord( customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified );
-        record.Validate();
-        return record;
-    }
-    [Pure]
-    public static async IAsyncEnumerable<GroupRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        while ( await reader.ReadAsync( token ) ) { yield return Create( reader ); }
+        string                customerID   = reader.GetFieldValue<string>(nameof(CustomerID));
+        string                nameOfGroup  = reader.GetFieldValue<string>(nameof(NameOfGroup));
+        string                rights       = reader.GetFieldValue<string>(nameof(Rights));
+        DateTimeOffset        dateCreated  = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
+        DateTimeOffset?       lastModified = reader.GetFieldValue<DateTimeOffset?>(nameof(LastModified));
+        RecordID<UserRecord>? ownerUserID  = RecordID<UserRecord>.CreatedBy(reader);
+        RecordID<GroupRecord> id           = RecordID<GroupRecord>.ID(reader);
+        GroupRecord           record       = new(customerID, nameOfGroup, rights, id, ownerUserID, dateCreated, lastModified);
+        return record.Validate();
     }
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get( connection, transaction, OwnerUserID, token );
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( DbConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where( connection, transaction, db.Users, this, token );
+
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where(connection, transaction, db.Users, this, token);
+
+
+    public static bool operator >( GroupRecord  left, GroupRecord right ) => left.CompareTo(right) > 0;
+    public static bool operator >=( GroupRecord left, GroupRecord right ) => left.CompareTo(right) >= 0;
+    public static bool operator <( GroupRecord  left, GroupRecord right ) => left.CompareTo(right) < 0;
+    public static bool operator <=( GroupRecord left, GroupRecord right ) => left.CompareTo(right) <= 0;
 }

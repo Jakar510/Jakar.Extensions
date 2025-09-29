@@ -3,60 +3,58 @@
 
 public struct InsertClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
-    public EasySqlBuilder Into<T>( string tableName, T obj )
+    public EasySqlBuilder Into<TValue>( string tableName, TValue value )
     {
-        _builder.Add( INSERT, INTO, obj.GetName( tableName ) );
-        return SetValues( obj );
+        __builder.Add( INSERT, INTO, tableName.GetName( value ) );
+        return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( T obj )
+    public EasySqlBuilder Into<TValue>( TValue value )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
-        return SetValues( obj );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
+        return SetValues( value );
     }
-    public EasySqlBuilder Into<T>( IEnumerable<T> obj )
+    public EasySqlBuilder Into<TValue>( IEnumerable<TValue> values )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetTableName() );
-        return SetValues( obj );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetTableName() );
+        return SetValues( values );
     }
-    private EasySqlBuilder SetValues<T>( T obj )
+    private EasySqlBuilder SetValues<TValue>( TValue value )
     {
-        Dictionary<string, string> cache = new Dictionary<string, string>();
+        PropertyInfo[]             properties = typeof(TValue).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty );
+        Dictionary<string, string> cache      = new(properties.Length);
 
-        foreach ( PropertyInfo info in typeof(T).GetProperties( BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty ) )
+        foreach ( PropertyInfo info in properties )
         {
-            string value = info.GetValue( obj )?.ToString() ?? NULL;
-
-            cache[info.Name] = value;
+            string x = info.GetValue( value )?.ToString() ?? NULL;
+            cache[info.Name] = x;
         }
 
+        __builder.Begin().AddRange( ',', cache.Keys ).End();
 
-        _builder.Begin().AddRange( ',', cache.Keys ).End();
+        __builder.Add( VALUES );
+        __builder.Begin().AddRange( ',', cache.Values ).End();
 
-        _builder.Add( VALUES );
-
-        _builder.Begin().AddRange( ',', cache.Values ).End();
-
-        return _builder.NewLine();
+        return __builder.NewLine();
     }
 
 
-    public DataInsertBuilder In() => new(this, ref _builder);
+    public DataInsertBuilder In() => new(this, ref __builder);
     public DataInsertBuilder In( string tableName )
     {
-        _builder.Add( INSERT, INTO, tableName );
+        __builder.Add( INSERT, INTO, tableName );
         return In();
     }
-    public DataInsertBuilder In<T>()
+    public DataInsertBuilder In<TValue>()
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
-    public DataInsertBuilder In<T>( T _ )
+    public DataInsertBuilder In<TValue>( TValue _ )
     {
-        _builder.Add( INSERT, INTO, typeof(T).GetName() );
+        __builder.Add( INSERT, INTO, typeof(TValue).GetName() );
         return In();
     }
 }

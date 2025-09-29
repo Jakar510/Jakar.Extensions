@@ -12,16 +12,16 @@ public static class NodeNames
     /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="RegisterNodeName"/> to register the name. </para>
     /// </summary>
-    private static readonly ConcurrentDictionary<string, Type> _nodeNameToType = new();
+    private static readonly ConcurrentDictionary<string, Type> __nodeNameToType = new();
 
     /// <summary> Maps <see cref="Type.FullName"/> to <see cref="Type"/> .
     ///     <para> Uses <see cref="RegisterNodeName"/> to register the name. </para>
     /// </summary>
-    private static readonly ConcurrentDictionary<Type, string> _typeToNodeName = new();
-    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => _typeToNodeName.TryGetValue( type, out nodeName );
+    private static readonly ConcurrentDictionary<Type, string> __typeToNodeName = new();
+    private static bool GetName( Type type, [NotNullWhen( true )] out string? nodeName ) => __typeToNodeName.TryGetValue( type, out nodeName );
 
 
-    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => _nodeNameToType.TryGetValue( nodeName, out type );
+    private static bool GetType( string nodeName, [NotNullWhen( true )] out Type? type ) => __nodeNameToType.TryGetValue( nodeName, out type );
 
     public static string GetNodeName( this Type type, in bool useFullName = false )
     {
@@ -63,24 +63,24 @@ public static class NodeNames
 
     private static void AddOrUpdate( Type type, string nodeName )
     {
-        Type AddValue( string s ) => type;
+        Type addValue( string s ) => type;
 
-        Type UpdateValue( string s, Type t ) => type;
+        Type updateValue( string s, Type t ) => type;
 
-        _nodeNameToType.AddOrUpdate( nodeName, AddValue, UpdateValue );
+        __nodeNameToType.AddOrUpdate( nodeName, addValue, updateValue );
     }
 
     private static void AddOrUpdate( string nodeName, Type type )
     {
-        string AddValue( Type t ) => nodeName;
+        string addValue( Type t ) => nodeName;
 
-        string UpdateValue( Type t, string s ) => nodeName;
+        string updateValue( Type t, string s ) => nodeName;
 
-        _typeToNodeName.AddOrUpdate( type, AddValue, UpdateValue );
+        __typeToNodeName.AddOrUpdate( type, addValue, updateValue );
     }
 
 
-    public static void RegisterNodeName( Type type, string? nodeName = default )
+    public static void RegisterNodeName( Type type, string? nodeName = null )
     {
         ReadOnlySpan<char> name = nodeName ??
                                   (type.IsArray

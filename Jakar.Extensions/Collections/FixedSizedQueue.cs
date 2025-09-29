@@ -4,49 +4,42 @@
 /// <summary>
 ///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name="T"> </typeparam>
-public class FixedSizedQueue<T>( int size, Locker? locker = null )
+public class FixedSizedQueue<TValue>( int size )
 {
-    protected readonly Locker   _lock = locker ?? Locker.Default;
-    protected readonly Queue<T> _q    = new(size);
-
-    public int Size { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = size;
+    public readonly    int                   Length  = size;
+    protected readonly LockFreeStack<TValue> _values = new();
 
 
-    public bool Contains( T obj )
+    public int  Count   { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => _values.Count; }
+    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+
+    
+    public virtual bool Contains( TValue value ) => _values.Contains( value );
+    public virtual ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default ) =>
+        token.IsCancellationRequested
+            ? ValueTask.FromCanceled<bool>( token )
+            : ValueTask.FromResult( _values.Contains( value ) );
+
+
+    public virtual TValue? Dequeue() => _values.TryPop();
+    public virtual ValueTask<TValue?> DequeueAsync( CancellationToken token = default ) =>
+        token.IsCancellationRequested
+            ? ValueTask.FromCanceled<TValue?>( token )
+            : ValueTask.FromResult( _values.TryPop() );
+
+
+    public virtual void Enqueue( TValue value )
     {
-        using ( _lock.Enter() ) { return _q.Contains( obj ); }
+        _values.Push( value );
+        while ( _values.Count > Length ) { _values.TryPop( out _ ); }
     }
-    public async ValueTask<bool> ContainsAsync( T obj, CancellationToken token = default )
+    public virtual ValueTask EnqueueAsync( TValue value, CancellationToken token = default )
     {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) ) { return _q.Contains( obj ); }
-    }
+        _values.Push( value );
+        while ( _values.Count > Length ) { _values.TryPop( out _ ); }
 
-
-    public T Dequeue()
-    {
-        using ( _lock.Enter() ) { return _q.Dequeue(); }
-    }
-    public async ValueTask<T> DequeueAsync( CancellationToken token = default )
-    {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) ) { return _q.Dequeue(); }
-    }
-
-
-    public void Enqueue( T obj )
-    {
-        using ( _lock.Enter() )
-        {
-            _q.Enqueue( obj );
-            while ( _q.Count > Size ) { _q.Dequeue(); }
-        }
-    }
-    public async ValueTask EnqueueAsync( T obj, CancellationToken token = default )
-    {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) )
-        {
-            _q.Enqueue( obj );
-            while ( _q.Count > Size ) { _q.Dequeue(); }
-        }
+        return token.IsCancellationRequested
+                   ? ValueTask.FromCanceled( token )
+                   : ValueTask.CompletedTask;
     }
 }

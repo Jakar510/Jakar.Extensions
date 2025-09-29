@@ -4,53 +4,57 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+public partial class DbTable<TClass>
 {
-    public ValueTask<TRecord?>                         Next( RecordPair<TRecord>    pair, CancellationToken token = default ) => this.Call( Next,   pair, token );
-    public ValueTask<Guid?>                            NextID( RecordPair<TRecord>  pair, CancellationToken token = default ) => this.Call( NextID, pair, token );
-    public ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( CancellationToken token = default ) => this.Call( SortedIDs, token );
+    public ValueTask<ErrorOrResult<TClass>>           Next( RecordPair<TClass>     pair, CancellationToken token = default ) => this.Call(Next,   pair, token);
+    public ValueTask<Guid?>                           NextID( RecordPair<TClass>   pair, CancellationToken token = default ) => this.Call(NextID, pair, token);
+    public ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( CancellationToken token = default ) => this.Call(SortedIDs, token);
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<TRecord?> Next( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async ValueTask<ErrorOrResult<TClass>> Next( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.Next( pair );
+        SqlCommand sql = SQLCache.GetNext(in pair);
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.ExecuteScalarAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            TClass?           record  = await connection.ExecuteScalarAsync<TClass>(command);
+
+            return record is null
+                       ? Error.NotFound()
+                       : record;
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<IEnumerable<RecordPair<TRecord>>> SortedIDs( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.SortedIDs();
+        SqlCommand sql = SQLCache.GetSortedID();
 
         try
         {
-            CommandDefinition                command = _database.GetCommand( sql, transaction, token );
-            IEnumerable<RecordPair<TRecord>> pairs   = await connection.QueryAsync<RecordPair<TRecord>>( command );
+            CommandDefinition               command = _database.GetCommand(in sql, transaction, token);
+            IEnumerable<RecordPair<TClass>> pairs   = await connection.QueryAsync<RecordPair<TClass>>(command);
             return pairs;
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public virtual async ValueTask<Guid?> NextID( DbConnection connection, DbTransaction? transaction, RecordPair<TRecord> pair, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.NextID( pair );
+        SqlCommand sql = SQLCache.GetNextID(in pair);
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.ExecuteScalarAsync<Guid>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            return await connection.ExecuteScalarAsync<Guid>(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 }

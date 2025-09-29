@@ -1,7 +1,7 @@
 ﻿// **********************************************
 // *** Synchronized access wrapper class V1.0 ***
 // **********************************************
-// *** (C)2009 S.T.A. snc                     ***
+// *** (C)2009 S.TValue.A. snc                     ***
 // **********************************************
 
 
@@ -13,21 +13,35 @@ namespace Jakar.Extensions;
 /// </summary>
 /// <typeparam name="TValue"> The value type. </typeparam>
 public sealed class Synchronized<TValue>( TValue value )
+    where TValue : class?
 {
-    private TValue _value = value;
+    private volatile TValue __value = value;
+
+    public TValue Value { get => Interlocked.CompareExchange( ref __value!, null, null ); set => Interlocked.Exchange( ref __value, value ); }
+
+
+    public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;
+}
+
+
+
+public sealed class SynchronizedValue<TValue>( TValue value )
+{
+    private readonly Lock   __lock  = new();
+    private          TValue __value = value;
 
     public TValue Value
     {
         get
         {
-            lock (this) { return _value; }
+            lock (__lock) { return __value; }
         }
         set
         {
-            lock (this) { _value = value; }
+            lock (__lock) { __value = value; }
         }
     }
 
 
-    public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;
+    public static implicit operator TValue( SynchronizedValue<TValue> value ) => value.Value;
 }

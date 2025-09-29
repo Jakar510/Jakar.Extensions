@@ -3,14 +3,14 @@
 
 public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
     /// <summary> Simple ORDER BY <paramref name="columnNames"/> delimited by <paramref name="separator"/> </summary>
     /// <returns>
     ///     <see cref="EasySqlBuilder"/>
     /// </returns>
-    public EasySqlBuilder By( string separator, params string[] columnNames ) => _builder.Begin().Add( ORDER, BY ).AddRange( separator, columnNames ).End();
+    public EasySqlBuilder By( string separator, params string[] columnNames ) => __builder.Begin().Add( ORDER, BY ).AddRange( separator, columnNames ).End();
 
 
     /// <summary> Starts an ORDER BY chain </summary>
@@ -19,9 +19,9 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseChainBuilder Chain()
     {
-        _builder.Add( ORDER, BY ).Begin();
+        __builder.Add( ORDER, BY ).Begin();
 
-        return new OrderByClauseChainBuilder( this, ref _builder );
+        return new OrderByClauseChainBuilder( this, ref __builder );
     }
     /// <summary> Starts an ORDER BY chain starting with <paramref name="columnName"/> </summary>
     /// <returns>
@@ -29,27 +29,27 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseChainBuilder Chain( string columnName )
     {
-        _builder.Add( ORDER, BY ).Begin().Add( columnName );
+        __builder.Add( ORDER, BY ).Begin().Add( columnName );
 
-        return new OrderByClauseChainBuilder( this, ref _builder );
+        return new OrderByClauseChainBuilder( this, ref __builder );
     }
 
 
     public EasySqlBuilder Done()
     {
-        _builder.VerifyParentheses().NewLine();
+        __builder.VerifyParentheses().NewLine();
 
-        return _builder;
+        return __builder;
     }
     public OrderByClauseBuilder Next()
     {
-        _builder.VerifyParentheses().Add( ORDER, BY ).Begin();
+        __builder.VerifyParentheses().Add( ORDER, BY ).Begin();
 
         return this;
     }
 
 
-    public SortersBuilder<OrderByClauseBuilder> SortBy() => new(this, ref _builder);
+    public SortersBuilder<OrderByClauseBuilder> SortBy() => new(this, ref __builder);
 
 
     /// <summary> continues previous clause and adds <paramref name="columnName"/> </summary>
@@ -59,7 +59,7 @@ public struct OrderByClauseBuilder( ref EasySqlBuilder builder )
     /// </returns>
     public OrderByClauseBuilder By( string columnName )
     {
-        _builder.Begin().Add( ORDER, BY ).Space().Add( columnName );
+        __builder.Begin().Add( ORDER, BY ).Space().Add( columnName );
 
         return this;
     }

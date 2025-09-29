@@ -1,5 +1,7 @@
 ﻿global using System;
 global using System.Buffers;
+global using System.ComponentModel;
+global using System.ComponentModel.DataAnnotations;
 global using System.IO;
 global using System.Text;
 global using System.Text.RegularExpressions;
@@ -9,7 +11,6 @@ global using System.Reflection;
 global using System.Globalization;
 global using System.Diagnostics;
 global using System.Linq;
-global using System.ComponentModel;
 global using System.Security.Cryptography;
 global using System.Runtime.CompilerServices;
 global using System.Runtime.Serialization;
@@ -23,7 +24,6 @@ global using System.Collections.ObjectModel;
 global using System.Diagnostics.CodeAnalysis;
 global using System.Threading;
 global using System.Threading.Tasks;
-global using System.ComponentModel.DataAnnotations;
 global using Newtonsoft.Json;
 global using Newtonsoft.Json.Linq;
 global using Newtonsoft.Json.Serialization;
@@ -46,11 +46,10 @@ global using JetBrains.Annotations;
 global using ValueOf;
 global using CommunityToolkit.Diagnostics;
 global using Microsoft.Extensions.Logging;
-global using Microsoft.Extensions.Options;
-global using NoAlloq;
-global using NoAlloq.Producers;
+global using Microsoft.Extensions.Options; 
 global using OneOf;
 global using OneOf.Types;
+global using static Jakar.Extensions.BaseRecord;
 global using static Jakar.Extensions.Buffers;
 global using static Jakar.Extensions.Claims;
 global using static Jakar.Extensions.WebRequester;
@@ -58,7 +57,6 @@ global using ErrorEventArgs = System.IO.ErrorEventArgs;
 
 
 /*
-#if NET6_0_OR_GREATER
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
@@ -68,5 +66,4 @@ global using MsJsonExtensionDataAttribute = System.Text.Json.Serialization.JsonE
 global using MsJsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 global using MsJsonSerializer = System.Text.Json.JsonSerializer;
 global using MsJsonSerializerOptions = System.Text.Json.JsonSerializerOptions;
-#endif
 */

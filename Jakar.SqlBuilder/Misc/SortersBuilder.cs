@@ -3,8 +3,8 @@
 
 public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next    = next;
-    private          EasySqlBuilder _builder = builder;
+    private readonly TNext          __next    = next;
+    private          EasySqlBuilder __builder = builder;
 
 
     /// <summary> Ends with a ASC and returns to <typeparamref name="TNext"/> </summary>
@@ -14,8 +14,8 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// </returns>
     public TNext Ascending()
     {
-        _builder.Add( ASC );
-        return _next;
+        __builder.Add( ASC );
+        return __next;
     }
 
     /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by ASC </summary>
@@ -25,8 +25,8 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// </returns>
     public TNext Ascending( string columnName )
     {
-        _builder.Add( columnName, ASC );
-        return _next;
+        __builder.Add( columnName, ASC );
+        return __next;
     }
 
 
@@ -37,8 +37,8 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// </returns>
     public TNext Descending()
     {
-        _builder.Add( DESC );
-        return _next;
+        __builder.Add( DESC );
+        return __next;
     }
 
     /// <summary> continues previous clause and adds <paramref name="columnName"/> followed by DESC </summary>
@@ -48,7 +48,7 @@ public struct SortersBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
     /// </returns>
     public TNext Descending( string columnName )
     {
-        _builder.Add( columnName, DESC );
-        return _next;
+        __builder.Add( columnName, DESC );
+        return __next;
     }
 }

@@ -9,7 +9,7 @@ public static class MigrationExtensions
     public static void MigrateUp( this WebApplication app )
     {
         using IServiceScope scope  = app.Services.CreateScope();
-        IMigrationRunner                 runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner    runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
@@ -17,7 +17,7 @@ public static class MigrationExtensions
     public static async ValueTask MigrateUpAsync( this WebApplication app )
     {
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
         runner.ListMigrations();
 
         if ( runner.HasMigrationsToApplyUp() ) { runner.MigrateUp(); }
@@ -26,20 +26,20 @@ public static class MigrationExtensions
     {
         if ( app.Environment.IsProduction() ) { return; }
 
-        if ( app.Configuration.GetValue( key, true ) is false ) { return; }
+        if ( !app.Configuration.GetValue(key, true) ) { return; }
 
         using IServiceScope scope  = app.Services.CreateScope();
-        IMigrationRunner                 runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateDown( version );
+        IMigrationRunner    runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateDown(version);
     }
     public static async ValueTask MigrateDownAsync( this WebApplication app, string key = "DB_DOWN", long version = 0 )
     {
         if ( app.Environment.IsProduction() ) { return; }
 
-        if ( app.Configuration.GetValue( key, true ) is false ) { return; }
+        if ( !app.Configuration.GetValue(key, true) ) { return; }
 
         await using AsyncServiceScope scope  = app.Services.CreateAsyncScope();
-        IMigrationRunner                           runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        runner.MigrateDown( version );
+        IMigrationRunner              runner = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
+        runner.MigrateDown(version);
     }
 }

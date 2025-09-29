@@ -10,12 +10,12 @@
 // ///         <see href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-6.0&tabs=visual-studio"/>
 // ///     </para>
 // /// </summary>
-// public abstract class TimedHostedService<T> : Service, IHostedService where T : TimedHostedService<T>
+// public abstract class TimedHostedService<TValue> : Service, IHostedService where TValue : TimedHostedService<TValue>
 // {
-//     private readonly ILogger<T> _logger;
+//     private readonly ILogger<TValue> _logger;
 //     private          Timer      _timer = null!;
 //
-//     protected TimedHostedService( ILogger<T> logger ) => _logger = logger;
+//     protected TimedHostedService( ILogger<TValue> logger ) => _logger = logger;
 //
 //     protected abstract void DoWork( object? state );
 //     public Task StartAsync( TimeSpan period, CancellationToken token )

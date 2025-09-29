@@ -4,81 +4,59 @@
 namespace Jakar.Extensions;
 
 
-public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights
-#if NET8_0_OR_GREATER
+public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, JsonModels.IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
-    [StringLength( BaseRecord.UNICODE_CAPACITY )] public string NameOfRole { get; }
+    [StringLength(UNICODE_CAPACITY)] public string NameOfRole { get; }
 }
 
 
 
-#if NET8_0_OR_GREATER
-public interface IRoleModel<out T, TID> : IRoleModel<TID>
+public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IEqualComparable<TClass>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where T : IRoleModel<T, TID>
+    where TClass : class, IRoleModel<TClass, TID>
 {
-    public abstract static T Create( IRoleModel<TID> model );
+    public abstract static TClass Create( IRoleModel<TID> model );
 }
-#endif
 
 
 
 [Serializable]
 [method: JsonConstructor]
-public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID ) : ObservableRecord<TRecord, TID>( ID ), IRoleModel<TID>
-#if NET8_0_OR_GREATER
+public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) : ObservableClass<TClass, TID>(id), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
-
-#if NET8_0_OR_GREATER
-    where TRecord : RoleModel<TRecord, TID>, IRoleModel<TRecord, TID>
-#else
-    where TRecord : RoleModel<TRecord, TID>
-#endif
+    where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IEqualComparable<TClass>
 {
-    private string _name   = NameOfRole;
-    private string _rights = Rights;
+    private string __name   = nameOfRole;
+    private string __rights = rights;
 
 
-    [StringLength( UNICODE_CAPACITY )] public string NameOfRole { get => _name;   set => SetProperty( ref _name,   value ); }
-    [StringLength( IUserRights.MAX_SIZE )]    public string Rights     { get => _rights; set => SetProperty( ref _rights, value ); }
+    [JsonExtensionData]                  public IDictionary<string, JToken?>? AdditionalData { get;            set; }
+    [StringLength(UNICODE_CAPACITY)]     public string                        NameOfRole     { get => __name;   set => SetProperty(ref __name,   value); }
+    [StringLength(IUserRights.MAX_SIZE)] public string                        Rights         { get => __rights; set => SetProperty(ref __rights, value); }
 
 
-    public RoleModel( IRoleModel<TID> model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
+    public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }
 
 
-    public override int CompareTo( TRecord? other )
+    public override int CompareTo( TClass? other )
     {
         if ( other is null ) { return 1; }
 
-        if ( ReferenceEquals( this, other ) ) { return 0; }
+        if ( ReferenceEquals(this, other) ) { return 0; }
 
-        int nameComparison = string.Compare( NameOfRole, other.NameOfRole, StringComparison.Ordinal );
+        int nameComparison = string.Compare(NameOfRole, other.NameOfRole, StringComparison.Ordinal);
         if ( nameComparison != 0 ) { return nameComparison; }
 
-        return ID.CompareTo( other.ID );
+        return ID.CompareTo(other.ID);
     }
-    public override bool Equals( TRecord? other )
+    public override bool Equals( TClass? other )
     {
         if ( other is null ) { return false; }
 
-        if ( ReferenceEquals( this, other ) ) { return true; }
+        if ( ReferenceEquals(this, other) ) { return true; }
 
-        return string.Equals( NameOfRole, other.NameOfRole ) && ID.Equals( other.ID );
+        return string.Equals(NameOfRole, other.NameOfRole) && ID.Equals(other.ID);
     }
 }
 
@@ -86,24 +64,19 @@ public record RoleModel<TRecord, TID>( string NameOfRole, string Rights, TID ID 
 
 [Serializable]
 [method: JsonConstructor]
-public sealed record RoleModel<TID>( string NameOfRole, string Rights, TID ID ) :
-#if NET8_0_OR_GREATER
-    RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID ),
-    IRoleModel<RoleModel<TID>, TID>
-#else
-    RoleModel<RoleModel<TID>, TID>( NameOfRole, Rights, ID )
-#endif
-
-#if NET8_0_OR_GREATER
+public sealed class RoleModel<TID>( string nameOfRole, string rights, TID id ) : RoleModel<RoleModel<TID>, TID>(nameOfRole, rights, id), IRoleModel<RoleModel<TID>, TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
-    public RoleModel( IRoleModel<TID>                    model ) : this( model.NameOfRole, model.Rights, model.ID ) { }
+    public RoleModel( IRoleModel<TID>                    model ) : this(model.NameOfRole, model.Rights, model.ID) { }
     public static RoleModel<TID> Create( IRoleModel<TID> model ) => new(model);
+
+
+    public override bool Equals( object? other )                                    => other is RoleModel<TID> x && Equals(x);
+    public override int  GetHashCode()                                              => HashCode.Combine(NameOfRole, ID, Rights);
+    public static   bool operator ==( RoleModel<TID>? left, RoleModel<TID>? right ) => EqualityComparer<RoleModel<TID>>.Default.Equals(left, right);
+    public static   bool operator !=( RoleModel<TID>? left, RoleModel<TID>? right ) => !EqualityComparer<RoleModel<TID>>.Default.Equals(left, right);
+    public static   bool operator >( RoleModel<TID>   left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( RoleModel<TID>  left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( RoleModel<TID>   left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( RoleModel<TID>  left, RoleModel<TID>  right ) => Comparer<RoleModel<TID>>.Default.Compare(left, right) <= 0;
 }

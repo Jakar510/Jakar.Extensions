@@ -2,13 +2,6 @@
 // 05/03/2022  9:01 AM
 
 
-#if NETSTANDARD2_1
-using System.Security.Authentication;
-using System.Security.Cryptography.X509Certificates;
-#endif
-
-
-
 namespace Jakar.Extensions;
 
 
@@ -19,210 +12,181 @@ namespace Jakar.Extensions;
 /// </summary>
 public partial class WebRequester
 {
-    public ref struct Builder( IHostInfo value )
+    [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+    public class Builder( IHostInfo value ) : IHttpClientFactory
     {
-        private readonly WebHeaders                 _headers                      = [];
-        private readonly IHostInfo                  _hostInfo                     = value;
-        private          Encoding                   _encoding                     = Encoding.Default;
-        private          bool?                      _useProxy                     = default;
-        private          IWebProxy?                 _proxy                        = default;
-        private          bool?                      _allowAutoRedirect            = default;
-        private          int?                       _maxAutomaticRedirections     = default;
-        private          ICredentials?              _defaultProxyCredentials      = default;
-        private          ICredentials?              _credentials                  = default;
-        private          bool?                      _preAuthenticate              = default;
-        private          bool?                      _useCookies                   = default;
-        private          CookieContainer?           _cookieContainer              = default;
-        private          int?                       _maxResponseHeadersLength     = default;
-        private          int?                       _maxConnectionsPerServer      = default;
-        private          AuthenticationHeaderValue? _authenticationHeader         = default;
-        private          TimeSpan?                  _connectTimeout               = default;
-        private          RetryPolicy?               _retryPolicy                  = default;
-        private          int?                       _maxResponseContentBufferSize = default;
-        private          ILogger?                   _logger                       = default;
-
-    #if NETSTANDARD2_1
-        private SslProtocols?              _sslProtocols                = default;
-        private ClientCertificateOption?   _clientCertificateOptions    = default;
-        private X509CertificateCollection? _clientCertificates          = default;
-        private DecompressionMethods?      _automaticDecompression      = default;
-        private long?                      _maxRequestContentBufferSize = default;
-    #else
-        private SslClientAuthenticationOptions? _sslOptions = default;
-        private TimeSpan?                       _responseDrainTimeout = default;
-        private HttpKeepAlivePingPolicy?        _keepAlivePingPolicy = default;
-        private TimeSpan?                       _keepAlivePingTimeout = default;
-        private TimeSpan?                       _keepAlivePingDelay = default;
-        private TimeSpan?                       _pooledConnectionLifetime = default;
-        private TimeSpan?                       _pooledConnectionIdleTimeout = default;
-        private int?                            _maxResponseDrainSize = default;
-    #endif
+        private readonly IHostInfo                       __hostInfo = value;
+        private readonly WebHeaders                      __headers  = [];
+        private          AuthenticationHeaderValue?      __authenticationHeader;
+        private          bool?                           __allowAutoRedirect;
+        private          bool?                           __preAuthenticate;
+        private          bool?                           __useCookies;
+        private          bool?                           __useProxy;
+        private          CookieContainer?                __cookieContainer;
+        private          Encoding                        __encoding = Encoding.Default;
+        private          HttpKeepAlivePingPolicy?        __keepAlivePingPolicy;
+        private          ICredentials?                   __credentials;
+        private          ICredentials?                   __defaultProxyCredentials;
+        private          ILogger?                        __logger;
+        private          int?                            __maxAutomaticRedirections;
+        private          int?                            __maxConnectionsPerServer;
+        private          int?                            __maxResponseContentBufferSize;
+        private          int?                            __maxResponseDrainSize;
+        private          int?                            __maxResponseHeadersLength;
+        private          IWebProxy?                      __proxy;
+        private          RetryPolicy?                    __retryPolicy;
+        private          SslClientAuthenticationOptions? __sslOptions;
+        private          TimeSpan?                       __connectTimeout;
+        private          TimeSpan?                       __keepAlivePingDelay;
+        private          TimeSpan?                       __keepAlivePingTimeout;
+        private          TimeSpan?                       __pooledConnectionIdleTimeout;
+        private          TimeSpan?                       __pooledConnectionLifetime;
+        private          TimeSpan?                       __responseDrainTimeout;
 
 
         public static Builder Create( IHostInfo       value ) => new(value);
-        public static Builder Create( Uri             value ) => new(new HostHolder( value ));
-        public static Builder Create( Func<IHostInfo> value ) => new(new MethodHolder( value ));
-        public static Builder Create( Func<Uri>       value ) => new(new MethodUriHolder( value ));
+        public static Builder Create( Uri             value ) => Create( new HostHolder( value ) );
+        public static Builder Create( Func<IHostInfo> value ) => Create( new HostHolder( value ) );
+        public static Builder Create( Func<Uri>       value ) => Create( new HostHolder( value ) );
 
 
-        public readonly Builder Reset() => Create( _hostInfo );
+        [Pure] public Builder Reset() => Create( __hostInfo );
 
 
-        private readonly HttpClient GetClient()
+        protected virtual HttpClient GetClient()
         {
             HttpClient client = new(GetHandler());
-            foreach ( (string? key, IEnumerable<string>? value) in _headers ) { client.DefaultRequestHeaders.Add( key, value ); }
+            foreach ( (string key, IEnumerable<string> value) in __headers ) { client.DefaultRequestHeaders.Add( key, value ); }
 
-            client.DefaultRequestHeaders.Authorization = _authenticationHeader;
-            if ( _connectTimeout.HasValue ) { client.Timeout = _connectTimeout.Value; }
+            client.DefaultRequestHeaders.Authorization = __authenticationHeader;
+            if ( __connectTimeout.HasValue ) { client.Timeout = __connectTimeout.Value; }
 
-            if ( _maxResponseContentBufferSize.HasValue ) { client.MaxResponseContentBufferSize = _maxResponseContentBufferSize.Value; }
+            if ( __maxResponseContentBufferSize.HasValue ) { client.MaxResponseContentBufferSize = __maxResponseContentBufferSize.Value; }
 
             return client;
         }
-        private readonly HttpMessageHandler GetHandler()
+        protected virtual HttpMessageHandler GetHandler()
         {
-        #if NETSTANDARD2_1
-            HttpClientHandler handler = new HttpClientHandler();
+            SocketsHttpHandler handler = new();
 
+            if ( __connectTimeout.HasValue ) { handler.ConnectTimeout = __connectTimeout.Value; }
 
-            if ( _sslProtocols.HasValue ) { handler.SslProtocols = _sslProtocols.Value; }
+            if ( __keepAlivePingPolicy.HasValue ) { handler.KeepAlivePingPolicy = __keepAlivePingPolicy.Value; }
 
-            if ( _maxRequestContentBufferSize.HasValue ) { handler.MaxRequestContentBufferSize = _maxRequestContentBufferSize.Value; }
+            if ( __keepAlivePingTimeout.HasValue ) { handler.KeepAlivePingTimeout = __keepAlivePingTimeout.Value; }
 
-            if ( _automaticDecompression.HasValue ) { handler.AutomaticDecompression = _automaticDecompression.Value; }
+            if ( __keepAlivePingDelay.HasValue ) { handler.KeepAlivePingDelay = __keepAlivePingDelay.Value; }
 
-            if ( _clientCertificateOptions.HasValue ) { handler.ClientCertificateOptions = _clientCertificateOptions.Value; }
+            if ( __sslOptions is not null ) { handler.SslOptions = __sslOptions; }
 
-            if ( _clientCertificates is not null ) { handler.ClientCertificates.AddRange( _clientCertificates ); }
+            if ( __maxResponseDrainSize.HasValue ) { handler.MaxResponseDrainSize = __maxResponseDrainSize.Value; }
 
-        #else
-            SocketsHttpHandler handler = new SocketsHttpHandler();
+            if ( __responseDrainTimeout.HasValue ) { handler.ResponseDrainTimeout = __responseDrainTimeout.Value; }
 
+            if ( __pooledConnectionLifetime.HasValue ) { handler.PooledConnectionLifetime = __pooledConnectionLifetime.Value; }
 
-            if ( _connectTimeout.HasValue ) { handler.ConnectTimeout = _connectTimeout.Value; }
+            if ( __pooledConnectionIdleTimeout.HasValue ) { handler.PooledConnectionIdleTimeout = __pooledConnectionIdleTimeout.Value; }
 
-            if ( _keepAlivePingPolicy.HasValue ) { handler.KeepAlivePingPolicy = _keepAlivePingPolicy.Value; }
+            if ( __maxResponseHeadersLength.HasValue ) { handler.MaxResponseHeadersLength = __maxResponseHeadersLength.Value; }
 
-            if ( _keepAlivePingTimeout.HasValue ) { handler.KeepAlivePingTimeout = _keepAlivePingTimeout.Value; }
+            if ( __maxConnectionsPerServer.HasValue ) { handler.MaxConnectionsPerServer = __maxConnectionsPerServer.Value; }
 
-            if ( _keepAlivePingDelay.HasValue ) { handler.KeepAlivePingDelay = _keepAlivePingDelay.Value; }
+            if ( __maxAutomaticRedirections.HasValue ) { handler.MaxAutomaticRedirections = __maxAutomaticRedirections.Value; }
 
-            if ( _sslOptions is not null ) { handler.SslOptions = _sslOptions; }
+            if ( __allowAutoRedirect.HasValue ) { handler.AllowAutoRedirect = __allowAutoRedirect.Value; }
 
-            if ( _maxResponseDrainSize.HasValue ) { handler.MaxResponseDrainSize = _maxResponseDrainSize.Value; }
+            if ( __useProxy.HasValue ) { handler.UseProxy = __useProxy.Value; }
 
-            if ( _responseDrainTimeout.HasValue ) { handler.ResponseDrainTimeout = _responseDrainTimeout.Value; }
+            if ( __proxy is not null ) { handler.Proxy = __proxy; }
 
-            if ( _pooledConnectionLifetime.HasValue ) { handler.PooledConnectionLifetime = _pooledConnectionLifetime.Value; }
+            if ( __defaultProxyCredentials is not null ) { handler.DefaultProxyCredentials = __defaultProxyCredentials; }
 
-            if ( _pooledConnectionIdleTimeout.HasValue ) { handler.PooledConnectionIdleTimeout = _pooledConnectionIdleTimeout.Value; }
+            if ( __credentials is not null ) { handler.Credentials = __credentials; }
 
-        #endif
+            if ( __preAuthenticate.HasValue ) { handler.PreAuthenticate = __preAuthenticate.Value; }
 
+            if ( __useCookies.HasValue ) { handler.UseCookies = __useCookies.Value; }
 
-            if ( _maxResponseHeadersLength.HasValue ) { handler.MaxResponseHeadersLength = _maxResponseHeadersLength.Value; }
-
-            if ( _maxConnectionsPerServer.HasValue ) { handler.MaxConnectionsPerServer = _maxConnectionsPerServer.Value; }
-
-            if ( _maxAutomaticRedirections.HasValue ) { handler.MaxAutomaticRedirections = _maxAutomaticRedirections.Value; }
-
-            if ( _allowAutoRedirect.HasValue ) { handler.AllowAutoRedirect = _allowAutoRedirect.Value; }
-
-
-            if ( _useProxy.HasValue ) { handler.UseProxy = _useProxy.Value; }
-
-            if ( _proxy is not null ) { handler.Proxy = _proxy; }
-
-            if ( _defaultProxyCredentials is not null ) { handler.DefaultProxyCredentials = _defaultProxyCredentials; }
-
-
-            if ( _credentials is not null ) { handler.Credentials = _credentials; }
-
-            if ( _preAuthenticate.HasValue ) { handler.PreAuthenticate = _preAuthenticate.Value; }
-
-
-            if ( _useCookies.HasValue ) { handler.UseCookies = _useCookies.Value; }
-
-            if ( _cookieContainer is not null ) { handler.CookieContainer = _cookieContainer; }
+            if ( __cookieContainer is not null ) { handler.CookieContainer = __cookieContainer; }
 
             return handler;
         }
-        public readonly WebRequester Build() => new(GetClient(), _hostInfo, _encoding, _logger, _retryPolicy);
+        public WebRequester Build()                     => new(GetClient(), __hostInfo, __logger, __encoding) { Retries = __retryPolicy };
+        public HttpClient   CreateClient( string name ) => GetClient();
 
 
         public Builder With_Logger( ILogger logger )
         {
-            _logger = logger;
+            __logger = logger;
             return this;
         }
 
 
-        public readonly Builder With_Header( string name, IEnumerable<string?> values )
+        public Builder With_Header( string name, IEnumerable<string?> values )
         {
-            _headers.Add( name, values );
+            __headers.Add( name, values );
             return this;
         }
-        public readonly Builder With_Header( string name, string? value )
+        public Builder With_Header( string name, string? value )
         {
-            _headers.Add( name, value );
+            __headers.Add( name, value );
             return this;
         }
 
 
         public Builder With_MaxResponseContentBufferSize( int value )
         {
-            _maxResponseContentBufferSize = Math.Max( 0, value );
+            __maxResponseContentBufferSize = Math.Max( 0, value );
             return this;
         }
 
 
-        public Builder With_Retry() => With_Retry( new RetryPolicy( true ) );
+        public Builder With_Retry()                                                        => With_Retry( RetryPolicy.Default );
+        public Builder With_Retry( ushort   maxRetires )                                   => With_Retry( RetryPolicy.Create( maxRetires ) );
+        public Builder With_Retry( TimeSpan delay, TimeSpan scale, ushort maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
         public Builder With_Retry( RetryPolicy policy )
         {
-            _retryPolicy = policy;
+            __retryPolicy = policy;
             return this;
         }
-        public Builder With_Retry( uint     maxRetires )                                 => With_Retry( new RetryPolicy( true,  maxRetires ) );
-        public Builder With_Retry( TimeSpan delay, TimeSpan scale, uint maxRetires = 3 ) => With_Retry( new RetryPolicy( delay, scale, maxRetires ) );
 
 
         public Builder With_Encoding( Encoding value )
         {
-            _encoding = value;
+            __encoding = value;
             return this;
         }
 
 
         public Builder With_Proxy( IWebProxy value )
         {
-            _proxy    = value;
-            _useProxy = true;
+            __proxy    = value;
+            __useProxy = true;
             return this;
         }
         public Builder With_Proxy( IWebProxy value, ICredentials credentials )
         {
-            _proxy                   = value;
-            _useProxy                = true;
-            _defaultProxyCredentials = credentials;
+            __proxy                   = value;
+            __useProxy                = true;
+            __defaultProxyCredentials = credentials;
             return this;
         }
 
 
         public Builder With_MaxResponseHeadersLength( int value )
         {
-            _maxResponseHeadersLength = value;
+            __maxResponseHeadersLength = value;
             return this;
         }
         public Builder With_MaxConnectionsPerServer( int value )
         {
-            _maxConnectionsPerServer = value;
+            __maxConnectionsPerServer = value;
             return this;
         }
         public Builder With_MaxRedirects( int value )
         {
-            _maxAutomaticRedirections = value;
-            _allowAutoRedirect        = value > 0;
+            __maxAutomaticRedirections = value;
+            __allowAutoRedirect        = value > 0;
             return this;
         }
 
@@ -230,37 +194,37 @@ public partial class WebRequester
         public Builder With_Credentials( string scheme, string? value ) => With_Credentials( new AuthenticationHeaderValue( scheme, value ) );
         public Builder With_Credentials( AuthenticationHeaderValue? value )
         {
-            _authenticationHeader = value;
+            __authenticationHeader = value;
             return this;
         }
         public Builder With_Credentials( ICredentials? value ) => With_Credentials( value, value is not null );
         public Builder With_Credentials( ICredentials? value, bool preAuthenticate )
         {
-            _credentials     = value;
-            _preAuthenticate = preAuthenticate;
+            __credentials     = value;
+            __preAuthenticate = preAuthenticate;
             return this;
         }
 
 
         public Builder With_Cookie( Uri url, Cookie value )
         {
-            _cookieContainer ??= new CookieContainer();
-            _cookieContainer.Add( url, value );
-            _useCookies = true;
+            __cookieContainer ??= new CookieContainer();
+            __cookieContainer.Add( url, value );
+            __useCookies = true;
             return this;
         }
-        public Builder With_Cookie( params Cookie[] value )
+        public Builder With_Cookie( params ReadOnlySpan<Cookie> value )
         {
-            CookieContainer container = _cookieContainer ??= new CookieContainer();
+            CookieContainer container = __cookieContainer ??= new CookieContainer();
             foreach ( Cookie cookie in value ) { container.Add( cookie ); }
 
-            _useCookies = true;
+            __useCookies = true;
             return this;
         }
         public Builder With_Cookie( CookieContainer value )
         {
-            _cookieContainer = value;
-            _useCookies      = true;
+            __cookieContainer = value;
+            __useCookies      = true;
             return this;
         }
 
@@ -270,15 +234,14 @@ public partial class WebRequester
         public Builder With_Timeout( double milliseconds ) => With_Timeout( TimeSpan.FromMilliseconds( milliseconds ) );
         public Builder With_Timeout( TimeSpan value )
         {
-            _connectTimeout = value;
+            __connectTimeout = value;
             return this;
         }
 
 
-    #if NET6_0_OR_GREATER
         public Builder With_MaxResponseDrainSize( int value )
         {
-            _maxResponseDrainSize = value;
+            __maxResponseDrainSize = value;
             return this;
         }
 
@@ -291,16 +254,16 @@ public partial class WebRequester
             With_KeepAlive( TimeSpan.FromMilliseconds( pingDelayMilliseconds ), TimeSpan.FromMilliseconds( pingTimeoutMilliseconds ), policy );
         public Builder With_KeepAlive( TimeSpan pingDelay, TimeSpan pingTimeout, HttpKeepAlivePingPolicy policy = HttpKeepAlivePingPolicy.WithActiveRequests )
         {
-            _keepAlivePingDelay = pingDelay;
-            _keepAlivePingTimeout = pingTimeout;
-            _keepAlivePingPolicy = policy;
+            __keepAlivePingDelay   = pingDelay;
+            __keepAlivePingTimeout = pingTimeout;
+            __keepAlivePingPolicy  = policy;
             return this;
         }
 
 
         public Builder With_SSL( SslClientAuthenticationOptions value )
         {
-            _sslOptions = value;
+            __sslOptions = value;
             return this;
         }
 
@@ -310,7 +273,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionIdleTimeout( double milliseconds ) => With_PooledConnectionIdleTimeout( TimeSpan.FromMilliseconds( milliseconds ) );
         public Builder With_PooledConnectionIdleTimeout( TimeSpan value )
         {
-            _pooledConnectionIdleTimeout = value;
+            __pooledConnectionIdleTimeout = value;
             return this;
         }
 
@@ -320,7 +283,7 @@ public partial class WebRequester
         public Builder With_PooledConnectionLifetime( double milliseconds ) => With_PooledConnectionLifetime( TimeSpan.FromMilliseconds( milliseconds ) );
         public Builder With_PooledConnectionLifetime( TimeSpan value )
         {
-            _pooledConnectionLifetime = value;
+            __pooledConnectionLifetime = value;
             return this;
         }
 
@@ -330,86 +293,16 @@ public partial class WebRequester
         public Builder With_ResponseDrainTimeout( double milliseconds ) => With_ResponseDrainTimeout( TimeSpan.FromMilliseconds( milliseconds ) );
         public Builder With_ResponseDrainTimeout( TimeSpan value )
         {
-            _responseDrainTimeout = value;
-            return this;
-        }
-
-    #else
-        public Builder With_MaxRequestContentBufferSize( int value )
-        {
-            _maxRequestContentBufferSize = value;
+            __responseDrainTimeout = value;
             return this;
         }
 
 
-        public Builder With_ClientCertificateOptions( ClientCertificateOption value )
+
+        public sealed class HostHolder( OneOf<Uri, Func<Uri>, Func<IHostInfo>> hostInfo ) : IHostInfo
         {
-            _clientCertificateOptions = value;
-            return this;
-        }
-        public Builder With_ClientCertificates( X509Certificate value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            _clientCertificates.Add( value );
-            return this;
-        }
-        public Builder With_ClientCertificates( params X509Certificate[] value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            _clientCertificates.AddRange( value );
-            return this;
-        }
-        public Builder With_ClientCertificates( IEnumerable<X509Certificate> value )
-        {
-            _clientCertificates ??= new X509CertificateCollection();
-            foreach ( X509Certificate certificate in value ) { _clientCertificates.Add( certificate ); }
-
-            return this;
-        }
-        public Builder With_ClientCertificates( X509CertificateCollection value )
-        {
-            _clientCertificates = value;
-            return this;
-        }
-
-
-        public Builder With_AutomaticDecompression( DecompressionMethods value )
-        {
-            _automaticDecompression = value;
-            return this;
-        }
-
-
-        public Builder With_SSL( SslProtocols value )
-        {
-            _sslProtocols = value;
-            return this;
-        }
-    #endif
-
-
-
-        public sealed record HostHolder( Uri HostInfo ) : IHostInfo;
-
-
-
-        public sealed record MethodHolder : IHostInfo
-        {
-            private readonly Func<IHostInfo> _value;
-
-            public Uri HostInfo => _value().HostInfo;
-
-            public MethodHolder( Func<IHostInfo> value ) => _value = value;
-        }
-
-
-
-        public sealed record MethodUriHolder : IHostInfo
-        {
-            private readonly Func<Uri> _value;
-            public           Uri       HostInfo => _value();
-
-            public MethodUriHolder( Func<Uri> value ) => _value = value;
+            private readonly OneOf<Uri, Func<Uri>, Func<IHostInfo>> __hostInfo = hostInfo;
+            public           Uri                                    HostInfo => __hostInfo.Match( static x => x, static x => x(), static x => x().HostInfo );
         }
     }
 }

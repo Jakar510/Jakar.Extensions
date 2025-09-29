@@ -1,8 +1,7 @@
 ﻿// Jakar.Extensions :: Experiments
 // 08/20/2023  9:51 PM
 
-using BenchmarkDotNet.Configs;
-using HashidsNet;
+using Hashids = HashidsNet.Hashids;
 
 
 
@@ -30,9 +29,9 @@ public class HashBenchmarks
 {
     private const    string  HASH    = "xOEDj6A8g15z";
     private const    long    VALUE   = 69;
-    private readonly Hashids _hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
+    private readonly Hashids __hasher = new("49C7BCFE-D7B4-46FA-BF33-5B1D1032339A", 12);
 
 
-    [Benchmark] public long   GetLong() => _hasher.DecodeSingleLong( HASH );
-    [Benchmark] public string GetHash() => _hasher.EncodeLong( VALUE );
+    [Benchmark] public long   GetLong() => __hasher.DecodeSingleLong( HASH );
+    [Benchmark] public string GetHash() => __hasher.EncodeLong( VALUE );
 }

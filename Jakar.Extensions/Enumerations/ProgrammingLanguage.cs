@@ -17,11 +17,11 @@ public enum ProgrammingLanguage
     R,
     Rust,
     Swift,
-    PHP,
+    Php,
     Dart,
     Kotlin,
     Perl,
     Ruby,
     Scala,
-    NodeJS
+    NodeJs
 }

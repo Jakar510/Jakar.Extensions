@@ -1,59 +1,108 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/23/2024  11:04
 
+using Microsoft.Extensions.Primitives;
+
+
+
 namespace Jakar.Extensions;
 
 
-public static class Errors
+[Serializable, DefaultValue(nameof(Empty))]
+public readonly record struct Alert()
 {
-    public const string BLOCKED_PASSED             = "Password cannot be a blocked password";
-    public const string CONFLICT_TITLE             = "A conflict has occurred.";
-    public const string CONFLICT_TYPE              = "General.Conflict";
-    public const string DISABLED_TITLE             = "User is disabled.";
-    public const string DISABLED_TYPE              = "User.Disabled";
-    public const string EXPIRED_SUBSCRIPTION_TITLE = "User's subscription is expired.";
-    public const string EXPIRED_SUBSCRIPTION_TYPE  = "User.Subscription.Expired";
-    public const string FORBIDDEN_TITLE            = "A 'Forbidden' has occurred.";
-    public const string FORBIDDEN_TYPE             = "General.Forbidden";
-    public const string GENERAL_TITLE              = "A failure has occurred.";
-    public const string GENERAL_TYPE               = "General.Failure";
-    public const string INVALID_SUBSCRIPTION_TITLE = "User's subscription is no longer valid.";
-    public const string INVALID_SUBSCRIPTION_TYPE  = "User.Subscription.Invalid";
-    public const string LENGTH_PASSED              = "Password not long enough";
-    public const string LOCKED_TITLE               = "User is locked.";
-    public const string LOCKED_TYPE                = "User.Disabled";
-    public const string LOWER_PASSED               = "Password must contain a lower case character";
-    public const string MUST_BE_TRIMMED            = "Password must be trimmed";
-    public const string NO_SUBSCRIPTION_TITLE      = "User is not subscribed.";
-    public const string NO_SUBSCRIPTION_TYPE       = "User.Subscription.None";
-    public const string NOT_FOUND_TITLE            = "A 'Not Found' has occurred.";
-    public const string NOT_FOUND_TYPE             = "General.NotFound";
-    public const string NUMERIC_PASSED             = "Password must contain a numeric character";
-    public const string PASSWORD_VALIDATION_TITLE  = "Password validation failed";
-    public const string PASSWORD_VALIDATION_TYPE   = "Password.Unauthorized";
-    public const string SPECIAL_PASSED             = "Password must contain a special character";
-    public const string UNAUTHORIZED_TITLE         = "A 'Unauthorized' has occurred.";
-    public const string UNAUTHORIZED_TYPE          = "General.Unauthorized";
-    public const string UNEXPECTED_TITLE           = "A unexpected has occurred.";
-    public const string UNEXPECTED_TYPE            = "General.Unexpected";
-    public const string UPPER_PASSED               = "Password must contain a upper case character";
-    public const string VALIDATION_TITLE           = "A validation has occurred.";
-    public const string VALIDATION_TYPE            = "General.Unexpected";
+    public static readonly Alert Empty = new(null);
+    public                 bool  IsNotValid => !CheckIsValid(Title, Message);
 
 
-    public static Status GetStatus( this IEnumerable<Error>? errors )                            => errors?.Max( GetStatus ) ?? Status.Ok;
-    public static Status GetStatus( this Error[]?            errors, Status status = Status.Ok ) => new ReadOnlySpan<Error>( errors ).GetStatus( status );
-    public static Status GetStatus( this ReadOnlySpan<Error> errors, Status status = Status.Ok )
+    public bool      IsValid => CheckIsValid(Title, Message);
+    public string?   Message { get; init; }
+    public string?   Title   { get; init; }
+    public TimeSpan? TTL     { get; init; }
+
+
+    public Alert( string? title, string? message, double ttlSeconds ) : this(title, message, TimeSpan.FromSeconds(ttlSeconds)) { }
+    public Alert( string? title, string? message = null, TimeSpan? ttl = null ) : this()
     {
-        if ( errors.IsEmpty ) { return status; }
-
-        foreach ( Error error in errors )
-        {
-            Status? code = error.StatusCode;
-            if ( code > status ) { status = code.Value; }
-        }
-
-        return status;
+        Title   = title;
+        Message = message;
+        TTL     = ttl;
     }
-    private static Status GetStatus( this Error error ) => error.StatusCode ?? Status.Ok;
+    public static bool CheckIsValid( string? title, string? message ) => !string.IsNullOrWhiteSpace(title) || !string.IsNullOrWhiteSpace(message);
+
+    public static implicit operator Alert( string? value ) => new(value);
+
+
+    [Pure] public Error ToError() => new(null, null, Title, Message, null, StringValues.Empty);
+}
+
+
+
+[Serializable, DefaultValue(nameof(Empty))]
+[method: JsonConstructor]
+public sealed class Errors() : BaseClass, IEqualComparable<Errors>
+{
+    private static readonly Error[] __details = [];
+    public static readonly Errors Empty = new()
+                                          {
+                                              Alert   = null,
+                                              Details = __details
+                                          };
+
+
+    [JsonRequired] public required Alert?  Alert       { get; init; }
+    public                         string  Description => Details.GetMessage();
+    [JsonRequired] public required Error[] Details     { get; init; }
+    public                         bool    IsValid     => Alert?.IsValid is true || ( !ReferenceEquals(Details, __details) && Details.Length > 0 );
+
+
+    public static Errors Create( params Error[]? details ) => Create(null,                                     details);
+    public static Errors Create( Error           details ) => Create(new Alert(details.Title, details.Detail), details);
+    public static Errors Create( Alert           details ) => Create(details,                                  details.ToError());
+    public static Errors Create( Alert? alert, params Error[]? details ) => new()
+                                                                            {
+                                                                                Alert   = alert,
+                                                                                Details = details ?? __details
+                                                                            };
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public        Status GetStatus()                 => Details.GetStatus(Status.Ok);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Status GetStatus( Errors? errors ) => errors?.GetStatus() ?? Status.Ok;
+
+
+    public static implicit operator ReadOnlySpan<Error>( Errors   result )  => result.Details;
+    public static implicit operator ReadOnlyMemory<Error>( Errors result )  => result.Details;
+    public static implicit operator Errors( string                title )   => Create(new Alert(title));
+    public static implicit operator Errors( Alert                 details ) => Create(details);
+    public static implicit operator Errors( Error                 details ) => Create(details);
+    public static implicit operator Errors( Error[]               details ) => Create(null, details);
+    public static implicit operator Errors( List<Error>           details ) => Create(details.ToArray());
+    public static implicit operator Errors( ReadOnlySpan<Error>   details ) => Create(details.ToArray());
+
+
+    public bool Equals( Errors? other )
+    {
+        if ( other is null ) { return false; }
+
+        return ReferenceEquals(this, other) || ( Nullable.Equals(Alert, other.Alert) && Error.Equals(Details, other.Details) );
+    }
+    public int CompareTo( Errors? other ) => string.CompareOrdinal(Description, other?.Description);
+    public int CompareTo( object? other )
+    {
+        if ( other is null ) { return 1; }
+
+        if ( ReferenceEquals(this, other) ) { return 0; }
+
+        if ( other is Errors errors ) { return CompareTo(errors); }
+
+        throw new ExpectedValueTypeException(nameof(other), other, typeof(Errors));
+    }
+    public override bool Equals( object? obj )                      => ReferenceEquals(this, obj) || ( obj is Errors other && Equals(other) );
+    public override int  GetHashCode()                              => HashCode.Combine(Alert, Details);
+    public static   bool operator ==( Errors? left, Errors? right ) => EqualityComparer<Errors>.Default.Equals(left, right);
+    public static   bool operator !=( Errors? left, Errors? right ) => !EqualityComparer<Errors>.Default.Equals(left, right);
+    public static   bool operator >( Errors   left, Errors  right ) => Comparer<Errors>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( Errors  left, Errors  right ) => Comparer<Errors>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( Errors   left, Errors  right ) => Comparer<Errors>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( Errors  left, Errors  right ) => Comparer<Errors>.Default.Compare(left, right) <= 0;
 }

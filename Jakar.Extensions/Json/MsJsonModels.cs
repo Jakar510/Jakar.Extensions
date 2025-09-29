@@ -102,9 +102,9 @@ public static class MsJsonModels
         return self.Add( key, node );
     }
 
-    public static TClass Add<T, TClass>( this TClass self, string key, T value )
+    public static TClass Add<TValue, TClass>( this TClass self, string key, TValue value )
         where TClass : IJsonModel
-        where T : IJsonizer => self.Add( key, value.GetProperties() );
+        where TValue : IJsonizer => self.Add( key, value.GetProperties() );
 
     public static TClass Add<TClass>( this TClass self, string key, JToken? value )
         where TClass : IJsonModel
@@ -126,12 +126,7 @@ public static class MsJsonModels
         using var stream = new MemoryStream();
         await JsonSerializer.SerializeAsync( stream, model, info, token );
         using var reader = new StreamReader( stream );
-
-    #if NET7_0_OR_GREATER
         return await reader.ReadToEndAsync( token );
-    #else
-        return await reader.ReadToEndAsync();
-    #endif
     }
     [ Pure ]
     public static string ToJson<TClass>( this TClass model, JsonTypeInfo<TClass> info, bool writeIndented )
@@ -158,41 +153,33 @@ public static class MsJsonModels
 
 
     public interface IJsonModel<TClass> : IJsonModel
-        where TClass : IJsonModel<TClass>
-#if NET8_0_OR_GREATER
-        , IJsonizer<TClass>
-#endif
+        where TClass : IJsonModel<TClass>, IJsonizer<TClass>
     { }
 
 
-
-#if NET8_0_OR_GREATER
-    public static string ToJson<TClass>( this TClass model )
-        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), false );
-    public static string ToPrettyJson<TClass>( this TClass model )
-        where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), true );
+   public static string ToJson<TClass>( this TClass model )
+       where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), false );
+   public static string ToPrettyJson<TClass>( this TClass model )
+       where TClass : IJsonizer<TClass> => model.ToJson( TClass.JsonTypeInfo(), true );
 
 
-    public static Task<string> ToJsonAsync<TClass>( this TClass model )
-        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), false );
-    public static Task<string> ToPrettyJsonAsync<TClass>( this TClass model )
-        where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), true );
+   public static Task<string> ToJsonAsync<TClass>( this TClass model )
+       where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), false );
+   public static Task<string> ToPrettyJsonAsync<TClass>( this TClass model )
+       where TClass : IJsonModel, IJsonizer<TClass> => ToJsonAsync( model, TClass.JsonTypeInfo(), true );
 
 
-    public static TClass FromJson<TClass>( this string json )
-        where TClass : IJsonizer<TClass> => json.FromJson( TClass.JsonTypeInfo() ) ?? throw new InvalidOperationException( nameof(json) );
+   public static TClass FromJson<TClass>( this string json )
+       where TClass : IJsonizer<TClass> => json.FromJson( TClass.JsonTypeInfo() ) ?? throw new InvalidOperationException( nameof(json) );
 
 
 
-    public interface IJsonizer<TClass>
-    {
-        [ Pure ] public abstract static JsonTypeInfo<TClass>  JsonTypeInfo();
-        [ Pure ] public abstract static TClass                FromJson( string  json );
-        [ Pure ] public abstract static JsonSerializerOptions JsonOptions( bool writeIndented );
-    }
-
-
-#endif
+   public interface IJsonizer<TClass>
+   {
+       [ Pure ] public abstract static JsonTypeInfo<TClass>  JsonTypeInfo();
+       [ Pure ] public abstract static TClass                FromJson( string  json );
+       [ Pure ] public abstract static JsonSerializerOptions JsonOptions( bool writeIndented );
+   }
 }
 */
 

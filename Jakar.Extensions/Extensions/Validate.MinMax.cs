@@ -3,10 +3,10 @@
 
 public static partial class Validate
 {
-    public static T? Min<T>( [NotNullIfNotNull( "left" )] this T? left, [NotNullIfNotNull( "right" )] T? right )
-        where T : struct, IComparable<T>
+    public static TValue? Min<TValue>( [NotNullIfNotNull( "left" )] this TValue? left, [NotNullIfNotNull( "right" )] TValue? right )
+        where TValue : struct, IComparable<TValue>
     {
-        if ( left is null && right is null ) { return default; }
+        if ( left is null && right is null ) { return null; }
 
         return Nullable.Compare( left, right ) == NOT_FOUND
                    ? left  ?? right
@@ -14,10 +14,10 @@ public static partial class Validate
     }
 
 
-    public static T? Max<T>( [NotNullIfNotNull( "left" )] this T? left, [NotNullIfNotNull( "right" )] T? right )
-        where T : struct, IComparable<T>
+    public static TValue? Max<TValue>( [NotNullIfNotNull( "left" )] this TValue? left, [NotNullIfNotNull( "right" )] TValue? right )
+        where TValue : struct, IComparable<TValue>
     {
-        if ( left is null && right is null ) { return default; }
+        if ( left is null && right is null ) { return null; }
 
         return Nullable.Compare( left, right ) == 1
                    ? left  ?? right

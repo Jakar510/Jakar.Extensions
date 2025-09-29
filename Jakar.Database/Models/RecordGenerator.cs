@@ -7,47 +7,51 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public struct RecordGenerator<TRecord>( DbTable<TRecord> table ) : IAsyncEnumerable<TRecord>, IAsyncEnumerator<TRecord>
-    where TRecord : class, ITableRecord<TRecord>, IDbReaderMapping<TRecord>
+public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnumerable<TClass>, IAsyncEnumerator<TClass>
+    where TClass : class, ITableRecord<TClass>, IDbReaderMapping<TClass>
 {
-    private readonly DbTable<TRecord>           _table     = table;
-    private readonly CancellationToken          _token     = default;
-    private          TRecord?                   _current   = default;
-    private          AsyncKeyGenerator<TRecord> _generator = new(table);
+    private readonly AsyncKeyGenerator<TClass> __generator = new(table);
+    private readonly DbTable<TClass>           __table     = table;
+    private          CancellationToken         __token;
+    private          TClass?                   __current;
 
 
-    public TRecord Current => _current ?? throw new NullReferenceException( nameof(_current) );
+    public TClass Current { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __current ?? throw new NullReferenceException(nameof(__current)); }
 
 
-    public RecordGenerator( DbTable<TRecord> table, CancellationToken token ) : this( table ) => _token = token;
+    public RecordGenerator( DbTable<TClass> table, CancellationToken token ) : this(table) => __token = token;
     public async ValueTask DisposeAsync()
     {
-        _current = default;
-        await _generator.DisposeAsync();
-        this = default;
+        __current = null;
+        await __generator.DisposeAsync();
     }
 
 
-    public ValueTask<bool> MoveNextAsync() => _table.Call( MoveNextAsync, _token );
-    public async ValueTask<bool> MoveNextAsync( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public ValueTask<bool> MoveNextAsync() => __table.Call(MoveNextAsync, __token);
+    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         if ( token.IsCancellationRequested )
         {
-            _current = default;
+            __current = null;
             return false;
         }
 
-        if ( await _generator.MoveNextAsync( connection, transaction, token ) ) { _current = await _table.Get( connection, transaction, _generator.Current, token ); }
+        if ( await __generator.MoveNextAsync(connection, transaction, token) ) { __current = await __table.Get(connection, transaction, __generator.Current, token); }
         else
         {
-            _current = default;
-            _generator.Reset();
+            __current = null;
+            __generator.Reset();
         }
 
-        return _current is not null;
+        return __current is not null;
     }
 
 
-    IAsyncEnumerator<TRecord> IAsyncEnumerable<TRecord>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation( token );
-    public RecordGenerator<TRecord>                     WithCancellation( CancellationToken   token ) => new(_table, token);
+    IAsyncEnumerator<TClass> IAsyncEnumerable<TClass>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation(token);
+    public RecordGenerator<TClass> WithCancellation( CancellationToken token )
+    {
+        __token = token;
+        __generator.WithCancellation(token);
+        return this;
+    }
 }

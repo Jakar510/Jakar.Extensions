@@ -1,17 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/22/2024  14:04
 
-using Microsoft.Extensions.DependencyInjection;
+namespace Jakar.Extensions;
 
 
 
-namespace Jakar.Extensions.Loggers;
-
-
-#if NET8_0_OR_GREATER
-
-
-
+/*
 public static class FileLoggerProviderExtensions
 {
     public static ILoggingBuilder AddFileLogger( this ILoggingBuilder builder, FileLoggerProviderOptions options )
@@ -24,4 +18,4 @@ public static class FileLoggerProviderExtensions
         return builder;
     }
 }
-#endif
+*/

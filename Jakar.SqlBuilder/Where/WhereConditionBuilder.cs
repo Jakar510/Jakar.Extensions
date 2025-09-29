@@ -6,29 +6,29 @@ namespace Jakar.SqlBuilder;
 
 public struct WhereConditionBuilder<TNext>( in TNext next, ref EasySqlBuilder builder )
 {
-    private readonly TNext          _next    = next;
-    private          EasySqlBuilder _builder = builder;
-    private readonly List<string>   _cache   = new();
+    private readonly TNext          __next    = next;
+    private          EasySqlBuilder __builder = builder;
+    private readonly List<string>   __cache   = new();
 
 
     public TNext Done()
     {
-        _builder.AddRange( ',', _cache );
+        __builder.AddRange( ',', __cache );
 
-        _builder.VerifyParentheses().NewLine();
+        __builder.VerifyParentheses().NewLine();
 
-        return _next;
+        return __next;
     }
 
     public WhereConditionBuilder<TNext> With( string columnName, string? value )
     {
-        _cache.Add( $"{columnName}={value ?? NULL}" );
+        __cache.Add( $"{columnName}={value ?? NULL}" );
         return this;
     }
-    public WhereConditionBuilder<TNext> With<T>( string columnName, T value )
-        where T : struct
+    public WhereConditionBuilder<TNext> With<TValue>( string columnName, TValue value )
+        where TValue : struct
     {
-        _cache.Add( $"{columnName}={value}" );
+        __cache.Add( $"{columnName}={value}" );
         return this;
     }
 }

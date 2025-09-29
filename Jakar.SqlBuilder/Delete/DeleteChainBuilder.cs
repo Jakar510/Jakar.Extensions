@@ -6,6 +6,6 @@ namespace Jakar.SqlBuilder;
 
 public struct DeleteChainBuilder( in DeleteClauseBuilder delete, ref EasySqlBuilder builder )
 {
-    private readonly DeleteClauseBuilder _delete  = delete;
-    private          EasySqlBuilder      _builder = builder;
+    private readonly DeleteClauseBuilder __delete  = delete;
+    private          EasySqlBuilder      __builder = builder;
 }

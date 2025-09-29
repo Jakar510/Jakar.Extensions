@@ -4,7 +4,7 @@
 /// <summary> Validator Extensions </summary>
 public static partial class Validate
 {
-    private static volatile string _demo = "DEMO";
+    private static volatile string __demo = "DEMO";
 
 
     public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber( CultureInfo.CurrentCulture, maxDecimals );
@@ -19,37 +19,50 @@ public static partial class Validate
     public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace( string.Format( info, $"{{0:n{maxDecimals}}}", value ), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty );
 
 
-    public static bool IsDemo( this string value ) => value.AsSpan().IsDemo();
-    public static bool IsDemo( this ReadOnlySpan<char> value )
+    public static bool IsDemo( this string value, params ReadOnlySpan<string> options )
+    {
+        ReadOnlySpan<char> span = value.AsSpan();
+        span = span.Trim();
+        return span.IsDemo( options );
+    }
+    public static bool IsDemo( this ref readonly ReadOnlySpan<char> value, params ReadOnlySpan<string> options )
     {
         if ( value.IsEmpty ) { return false; }
 
-        return value.CompareTo( _demo, StringComparison.OrdinalIgnoreCase ) == 0;
+        if ( value.Contains( __demo, StringComparison.OrdinalIgnoreCase ) ) { return true; }
+
+        foreach ( string option in options )
+        {
+            if ( value.Contains( option, StringComparison.OrdinalIgnoreCase ) ) { return true; }
+        }
+
+        return false;
     }
 
 
-    public static bool IsDouble( this string             value ) => double.TryParse( value, out double _ );
-    public static bool IsDouble( this ReadOnlySpan<char> value ) => double.TryParse( value, out double _ );
+    public static bool IsDouble( this              string             value ) => double.TryParse( value, out double _ );
+    public static bool IsDouble( this ref readonly ReadOnlySpan<char> value ) => double.TryParse( value, out double _ );
 
 
-    public static bool IsInteger( this string             value ) => int.TryParse( value, out int _ );
-    public static bool IsInteger( this ReadOnlySpan<char> value ) => int.TryParse( value, out int _ );
+    public static bool IsInteger( this              string             value ) => int.TryParse( value, out int _ );
+    public static bool IsInteger( this ref readonly ReadOnlySpan<char> value ) => int.TryParse( value, out int _ );
 
 
-    public static bool IsIPAddress( this string             value ) => value.AsSpan().IsIPAddress();
-    public static bool IsIPAddress( this ReadOnlySpan<char> value ) => value.ParseIPAddress() is not null;
+    public static bool IsIPAddress( this string value )
+    {
+        ReadOnlySpan<char> span = value;
+        return span.IsIPAddress();
+    }
+    public static bool IsIPAddress( this ref readonly ReadOnlySpan<char> value ) => value.ParseIPAddress() is not null;
 
 
-    public static bool IsEmailAddress( this string value ) => Re.Email.IsMatch( value );
-
-#if NET7_0_OR_GREATER
-    public static bool IsEmailAddress( this ReadOnlySpan<char> value ) => Re.Email.IsMatch( value );
-#endif
+    public static bool IsEmailAddress( this              string             value ) => Re.Email.IsMatch( value );
+    public static bool IsEmailAddress( this ref readonly ReadOnlySpan<char> value ) => Re.Email.IsMatch( value );
 
 
-    public static bool IsValidPort( this string             value ) => int.TryParse( value, out int n ) && n.IsValidPort();
-    public static bool IsValidPort( this ReadOnlySpan<char> value ) => int.TryParse( value, out int n ) && n.IsValidPort();
-    public static bool IsValidPort( this int                value ) => value is > 0 and <= IPEndPoint.MaxPort;
+    public static bool IsValidPort( this              string             value ) => int.TryParse( value, out int n ) && n.IsValidPort();
+    public static bool IsValidPort( this ref readonly ReadOnlySpan<char> value ) => int.TryParse( value, out int n ) && n.IsValidPort();
+    public static bool IsValidPort( this              int                value ) => value is > IPEndPoint.MinPort and <= IPEndPoint.MaxPort;
 
 
     public static bool IsWebAddress( this string value )
@@ -61,62 +74,45 @@ public static partial class Validate
     }
 
 
-    public static IPAddress? ParseIPAddress( this string? value ) => value?.AsSpan().ParseIPAddress();
-    public static IPAddress? ParseIPAddress( this ReadOnlySpan<char> value )
+    public static IPAddress? ParseIPAddress( this string? value )
     {
-        if ( value.IsEmpty ) { return default; }
-
-        if ( IPAddress.TryParse( value, out IPAddress? address ) ) { return address; }
-
-
-        Span<byte> ip = stackalloc byte[16];
-        int        i  = 0;
-
-        if ( value.Contains( ':' ) )
-        {
-            foreach ( ReadOnlySpan<char> line in value.SplitOn( ':' ) )
-            {
-                if ( i >= 16 ) { return default; }
-
-                if ( !byte.TryParse( line, out byte n ) ) { return default; }
-
-                ip[i++] = n;
-            }
-        }
-        else
-        {
-            foreach ( ReadOnlySpan<char> line in value.SplitOn( '.' ) )
-            {
-                if ( i >= 16 ) { return default; }
-
-                if ( !byte.TryParse( line, out byte n ) ) { return default; }
-
-                ip[i++] = n;
-            }
-        }
-
-        return new IPAddress( ip[..i] );
+        ReadOnlySpan<char> span = value;
+        return span.ParseIPAddress();
     }
+    public static IPAddress? ParseIPAddress( this ref readonly ReadOnlySpan<char> value ) => value.IsEmpty
+                                                                                                 ? null
+                                                                                                 : IPAddress.TryParse( value, out IPAddress? address )
+                                                                                                     ? address
+                                                                                                     : IPAddress.TryParse( value.Trim(), out IPAddress? address2 )
+                                                                                                         ? address2
+                                                                                                         : null;
 
 
     public static Uri? ParseWebAddress( this string value ) => Uri.TryCreate( value, UriKind.Absolute, out Uri? uriResult )
                                                                    ? uriResult
-                                                                   : default;
+                                                                   : null;
 
 
     public static string SetDemo( string value )
     {
         if ( value is null ) { throw new ArgumentNullException( nameof(value) ); }
 
-        return Interlocked.Exchange( ref _demo, value );
+        return Interlocked.Exchange( ref __demo, value );
     }
 
 
-    // TODO: CallerArgumentExpression : https://stackoverflow.com/questions/70034586/how-can-i-use-callerargumentexpression-with-visual-studio-2022-and-net-standard
-    public static T ThrowIfNull<T>( T? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => value ?? throw new ArgumentNullException( name, caller );
+    [Pure]
+    public static TValue ThrowIfNull<TValue>( TValue? value, string? message = null, [CallerArgumentExpression( nameof(value) )] string? name = null, [CallerMemberName] string? caller = null ) => value ??
+                                                                                                                                                                                                    throw new ArgumentNullException( name,
+                                                                                                                                                                                                                                     message is null
+                                                                                                                                                                                                                                         ? caller
+                                                                                                                                                                                                                                         : $"{caller}: '{message}'" );
 
-
-    public static string ThrowIfNull( string? value, [CallerArgumentExpression( "value" )] string? name = default, [CallerMemberName] string? caller = default ) => string.IsNullOrWhiteSpace( value )
-                                                                                                                                                                        ? throw new ArgumentNullException( name, caller )
-                                                                                                                                                                        : value;
+    [Pure]
+    public static string ThrowIfNull( string? value, string? message = null, [CallerArgumentExpression( nameof(value) )] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace( value )
+                                                                                                                                                                                                ? throw new ArgumentNullException( name,
+                                                                                                                                                                                                                                   message is null
+                                                                                                                                                                                                                                       ? caller
+                                                                                                                                                                                                                                       : $"{caller}: '{message}'" )
+                                                                                                                                                                                                : value;
 }

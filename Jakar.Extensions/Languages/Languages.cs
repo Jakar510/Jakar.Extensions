@@ -1,29 +1,24 @@
 ﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "StringLiteralTypo" )]
+[SuppressMessage("ReSharper", "StringLiteralTypo")]
 public static class Languages
 {
-    public static readonly FrozenSet<SupportedLanguage> All =
-    #if NET6_0_OR_GREATER
-            Enum.GetValues<SupportedLanguage>().ToFrozenSet();
-    #else
-        Enum.GetValues( typeof(SupportedLanguage) ).Cast<SupportedLanguage>().ToFrozenSet();
-#endif
-    public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary( ToStringFast, SelectSelf );
-    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary( SelectSelf,   GetShortName );
-    public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary( GetShortName, SelectSelf );
-    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseNames      = All.ToFrozenDictionary( SelectSelf,   ToStringFast );
-    public static readonly FrozenDictionary<string, SupportedLanguage> Names             = All.ToFrozenDictionary( GetName,      SelectSelf );
+    public static readonly FrozenSet<SupportedLanguage>                All               = Enum.GetValues<SupportedLanguage>().ToFrozenSet();
+    public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary(ToStringFast, SelectSelf);
+    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary(SelectSelf,   GetShortName);
+    public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary(GetShortName, SelectSelf);
+    public static readonly FrozenDictionary<SupportedLanguage, string> ReverseNames      = All.ToFrozenDictionary(SelectSelf,   ToStringFast);
+    public static readonly FrozenDictionary<string, SupportedLanguage> Names             = All.ToFrozenDictionary(GetName,      SelectSelf);
 
 
-    private static T SelectSelf<T>( T v ) => v;
+    private static TValue SelectSelf<TValue>( TValue v ) => v;
 
 
     public static CultureInfo GetCultureInfo( this SupportedLanguage language, CultureInfo defaultValue ) =>
-        language is SupportedLanguage.Unspecified || All.Contains( language ) is false
+        language is SupportedLanguage.Unspecified || !All.Contains(language)
             ? defaultValue
-            : new CultureInfo( language.GetShortName() );
+            : new CultureInfo(language.GetShortName());
 
 
     public static string GetName( this SupportedLanguage language ) => language switch
@@ -63,7 +58,7 @@ public static class Languages
                                                                                 SupportedLanguage.Korean      => "ko",
                                                                                 SupportedLanguage.Arabic      => "ar",
                                                                                 SupportedLanguage.Unspecified => string.Empty,
-                                                                                _                             => throw new OutOfRangeException( nameof(language), language )
+                                                                                _                             => throw new OutOfRangeException(language)
                                                                             };
 
     public static string ToStringFast( this SupportedLanguage language ) => language switch
@@ -83,7 +78,7 @@ public static class Languages
                                                                                 SupportedLanguage.Dutch       => nameof(SupportedLanguage.Dutch),
                                                                                 SupportedLanguage.Korean      => nameof(SupportedLanguage.Korean),
                                                                                 SupportedLanguage.Arabic      => nameof(SupportedLanguage.Arabic),
-                                                                                _                             => throw new ArgumentOutOfRangeException( nameof(language), language, null )
+                                                                                _                             => throw new OutOfRangeException(language)
                                                                             };
     public static string? ToStringFast( this SupportedLanguage? language ) => language?.ToStringFast();
 
@@ -91,21 +86,21 @@ public static class Languages
     public static SupportedLanguage? GetSupportedLanguage( this CultureInfo culture )
     {
         string name = culture.DisplayName;
-        if ( string.IsNullOrEmpty( name ) ) { return null; }
+        if ( string.IsNullOrEmpty(name) ) { return null; }
 
-        foreach ( (string? key, SupportedLanguage value) in Values )
+        foreach ( ( string key, SupportedLanguage value ) in Values )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        foreach ( (string? key, SupportedLanguage value) in Names )
+        foreach ( ( string key, SupportedLanguage value ) in Names )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        foreach ( (string? key, SupportedLanguage value) in ShortNames )
+        foreach ( ( string key, SupportedLanguage value ) in ShortNames )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
         return null;
@@ -115,21 +110,21 @@ public static class Languages
         if ( culture is CultureInfo info ) { return info.GetSupportedLanguage(); }
 
         string? name = culture.ToString();
-        if ( string.IsNullOrEmpty( name ) ) { return null; }
+        if ( string.IsNullOrEmpty(name) ) { return null; }
 
-        foreach ( (string? key, SupportedLanguage value) in Values )
+        foreach ( ( string key, SupportedLanguage value ) in Values )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        foreach ( (string? key, SupportedLanguage value) in Names )
+        foreach ( ( string key, SupportedLanguage value ) in Names )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
-        foreach ( (string? key, SupportedLanguage value) in ShortNames )
+        foreach ( ( string key, SupportedLanguage value ) in ShortNames )
         {
-            if ( name.Contains( key, StringComparison.OrdinalIgnoreCase ) ) { return value; }
+            if ( name.Contains(key, StringComparison.OrdinalIgnoreCase) ) { return value; }
         }
 
         return null;

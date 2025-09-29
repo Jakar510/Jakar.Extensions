@@ -4,14 +4,14 @@
 [Serializable]
 public class ScreenShotException : Exception
 {
-    private string? _screenShotFilePath;
+    private string? __screenShotFilePath;
 
     public string? FilePath
     {
-        get => _screenShotFilePath;
+        get => __screenShotFilePath;
         set
         {
-            _screenShotFilePath = value;
+            __screenShotFilePath = value;
 
             Data[nameof(FilePath)] = value;
         }

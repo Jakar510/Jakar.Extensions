@@ -94,7 +94,7 @@ public sealed record JsonTest( string Name, double Number, params JsonTest[] Chi
 
 // public sealed record JsonTest
 // {
-//     public string?        Name      { get; init; }
+//     public string?        AppName      { get; init; }
 //     public DateTimeOffset TimeStamp { get; init; }
 //     public double         Value     { get; init; }
 // }

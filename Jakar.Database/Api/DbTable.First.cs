@@ -4,33 +4,37 @@
 namespace Jakar.Database;
 
 
-[SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
-public partial class DbTable<TRecord>
+[SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
+public partial class DbTable<TClass>
 {
-    public ValueTask<TRecord?> First( CancellationToken          token = default ) => this.Call( First,          token );
-    public ValueTask<TRecord?> FirstOrDefault( CancellationToken token = default ) => this.Call( FirstOrDefault, token );
+    public ValueTask<ErrorOrResult<TClass>> First( CancellationToken          token = default ) => this.Call(First,          token);
+    public ValueTask<ErrorOrResult<TClass>> FirstOrDefault( CancellationToken token = default ) => this.Call(FirstOrDefault, token);
 
 
-    public virtual async ValueTask<TRecord?> First( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> First( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.First();
+        SqlCommand sql = SQLCache.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.QueryFirstAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            return await connection.QueryFirstAsync<TClass>(command);
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
-    public virtual async ValueTask<TRecord?> FirstOrDefault( DbConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TClass>> FirstOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = _sqlCache.First();
+        SqlCommand sql = SQLCache.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand( sql, transaction, token );
-            return await connection.QueryFirstOrDefaultAsync<TRecord>( command );
+            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
+            TClass?           record  = await connection.QueryFirstOrDefaultAsync<TClass>(command);
+
+            return record is null
+                       ? Error.NotFound()
+                       : record;
         }
-        catch ( Exception e ) { throw new SqlException( sql, e ); }
+        catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 }

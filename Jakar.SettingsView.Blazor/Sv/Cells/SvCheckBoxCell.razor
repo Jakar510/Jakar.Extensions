@@ -1,0 +1,33 @@
+﻿@inherits ValueCellBase<bool>
+
+
+<div class="@SvConstants.Cells.LABEL @Class"
+     id="@ID" >
+    <div class="@SV_CELL_BODY" >
+        <div class="@SV_CELL_BODY_TITLE"
+             id="@ID-title" >
+            @Title
+        </div>
+        <div class="@SV_CELL_BODY_DESCRIPTION"
+             id="@ID-description" >
+            @Description
+        </div>
+        <div class="@SV_CELL_BODY_HINT"
+             id="@ID-hint" >
+            @Hint
+        </div>
+        <div class="@SV_CELL_BODY_VALUE_ENTRY"
+             id="@ID-value" >
+            <InputCheckbox Value="@Value"
+                           ValueChanged="ValueChanged"
+                           ValueExpression="ValueExpression" />
+        </div>
+    </div>
+</div>
+
+
+@code
+{
+    public override WidgetType Type => WidgetType.CheckBox;
+
+}

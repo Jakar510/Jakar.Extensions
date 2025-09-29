@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Console.Experiments
 // 09/15/2022  11:39 AM
 
-using BenchmarkDotNet.Configs;
-
-
-
 namespace Jakar.Extensions.Experiments.Benchmarks;
 
 
@@ -25,7 +21,7 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 public class AsyncLinqBenchmarks
 {
     // private readonly Dictionary<long, Guid> _dict = new();
-    private static readonly AsyncEnumerator<long, long[]> _data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
+    private static readonly AsyncEnumerator<long, long[]> __data = AsyncLinq.Range( 0L, 10_000 ).AsAsyncEnumerable();
 
 
     // [Benchmark]
@@ -38,13 +34,13 @@ public class AsyncLinqBenchmarks
     //     results.Count.WriteToConsole();
     //     return results;
     // }
-    [Benchmark] public ValueTask<List<long>> WhereValueTask() => _data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList();
+    [Benchmark] public ValueTask<List<long>> WhereValueTask() => __data.Where( x => x > 0 ).Where( x => x % 5 == 0 ).ToList();
 
 
     [GlobalSetup]
     public void Setup()
     {
-        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.NewGuid(); }
+        // for ( long i = 0; i < 10_000; i++ ) { _dict[i] = Guid.CreateVersion7(); }
     }
 
     // [Benchmark] public void Pairs() => _dict.ForEach(( KeyValuePair<long, Guid>           x ) => { });

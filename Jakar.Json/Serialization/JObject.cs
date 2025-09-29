@@ -12,24 +12,24 @@ public ref struct JObject
 {
     public const char    START = '{';
     public const char    END   = '}';
-    private      JWriter _writer;
+    private      JWriter __writer;
 
 
     public JObject( JWriter writer )
     {
-        _writer = writer;
+        __writer = writer;
         Begin();
     }
-    public readonly void Empty() => _writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
+    public readonly void Empty() => __writer.Append( START ).Append( JWriter.SPACE ).Append( END ).FinishBlock();
     public JObject Begin()
     {
-        _writer.StartBlock( START );
+        __writer.StartBlock( START );
         return this;
     }
-    public void Complete() => _writer.FinishBlock( END );
+    public void Complete() => __writer.FinishBlock( END );
 
 
-    private readonly JWriter Start( ReadOnlySpan<char> key ) => _writer.Indent().Append( JWriter.QUOTE ).Append( key ).Append( JWriter.QUOTE ).Append( JWriter.COLON ).Append( JWriter.SPACE );
+    private readonly JWriter Start( ReadOnlySpan<char> key ) => __writer.Indent().Append( JWriter.QUOTE ).Append( key ).Append( JWriter.QUOTE ).Append( JWriter.COLON ).Append( JWriter.SPACE );
     public readonly JObject Null( ReadOnlySpan<char> key )
     {
         Start( key ).Null().Next();
@@ -38,7 +38,7 @@ public ref struct JObject
     }
 
 
-    public readonly JObject Add( string value, [CallerArgumentExpression( nameof(value) )] string? key = default ) => Add( key.AsSpan(), value.AsSpan() );
+    public readonly JObject Add( string value, [CallerArgumentExpression( nameof(value) )] string? key = null ) => Add( key.AsSpan(), value.AsSpan() );
     public readonly JObject Add( ReadOnlySpan<char> key, ReadOnlySpan<char> value )
     {
         Start( key ).Append( JWriter.QUOTE ).Append( value ).Append( JWriter.QUOTE ).Next();
@@ -53,12 +53,12 @@ public ref struct JObject
     }
 
 
-    public readonly JObject Add<T>( T? value, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : ISpanFormattable => Add( value, CultureInfo.CurrentCulture, key );
-    public readonly JObject Add<T>( T? value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : ISpanFormattable => Add( value, JWriter.GetDefaultFormat<T>(), provider, key );
-    public readonly JObject Add<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : ISpanFormattable
+    public readonly JObject Add<TValue>( TValue? value, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : ISpanFormattable => Add( value, CultureInfo.CurrentCulture, key );
+    public readonly JObject Add<TValue>( TValue? value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : ISpanFormattable => Add( value, JWriter.GetDefaultFormat<TValue>(), provider, key );
+    public readonly JObject Add<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : ISpanFormattable
     {
         if ( value is null ) { Start( key ).Null().Next(); }
         else { Start( key ).Append( JWriter.QUOTE ).Append( value, format, provider ).Append( JWriter.QUOTE ).Next(); }
@@ -67,26 +67,26 @@ public ref struct JObject
     }
 
 
-    public readonly JObject AddValue<T>( T? value, int bufferSize, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, ISpanFormattable => AddValue( value, bufferSize, CultureInfo.CurrentCulture, key );
-    public readonly JObject AddValue<T>( T? value, int bufferSize, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, ISpanFormattable =>
+    public readonly JObject AddValue<TValue>( TValue? value, int bufferSize, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, ISpanFormattable => AddValue( value, bufferSize, CultureInfo.CurrentCulture, key );
+    public readonly JObject AddValue<TValue>( TValue? value, int bufferSize, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, ISpanFormattable =>
         AddValue( value, bufferSize, default, provider, key );
-    public readonly JObject AddValue<T>( T? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, ISpanFormattable
+    public readonly JObject AddValue<TValue>( TValue? value, int bufferSize, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, ISpanFormattable
     {
         Start( key ).Append( JWriter.QUOTE ).AppendValue( value, format, bufferSize, provider ).Append( JWriter.QUOTE ).Next();
 
         return this;
     }
 
-    public readonly JObject AddNumber<T>( T? value, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture, key );
-    public readonly JObject AddNumber<T>( T? value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable =>
-        AddNumber( value, JWriter.GetDefaultFormat<T>(), provider, key );
-    public readonly JObject AddNumber<T>( T? value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JObject AddNumber<TValue>( TValue? value, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture, key );
+    public readonly JObject AddNumber<TValue>( TValue? value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable =>
+        AddNumber( value, JWriter.GetDefaultFormat<TValue>(), provider, key );
+    public readonly JObject AddNumber<TValue>( TValue? value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         if ( value is null ) { Start( key ).Null().Next(); }
         else { Start( key ).AppendValue( value, format, provider ).Next(); }
@@ -95,13 +95,13 @@ public ref struct JObject
         return this;
     }
 
-    public readonly JObject AddNumber<T>( T value, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture, key );
-    public readonly JObject AddNumber<T>( T value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable =>
-        AddNumber( value, JWriter.GetDefaultFormat<T>(), provider, key );
-    public readonly JObject AddNumber<T>( T value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = default )
-        where T : struct, INumber<T>, ISpanFormattable
+    public readonly JObject AddNumber<TValue>( TValue value, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( value, CultureInfo.CurrentCulture, key );
+    public readonly JObject AddNumber<TValue>( TValue value, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable =>
+        AddNumber( value, JWriter.GetDefaultFormat<TValue>(), provider, key );
+    public readonly JObject AddNumber<TValue>( TValue value, ReadOnlySpan<char> format, IFormatProvider? provider, [CallerArgumentExpression( nameof(value) )] string? key = null )
+        where TValue : struct, INumber<TValue>, ISpanFormattable
     {
         Start( key ).AppendValue( value, format, provider ).Next();
 
@@ -115,12 +115,12 @@ public ref struct JObject
     public readonly JObject Add( KeyValuePair<string, TimeSpan>       pair ) => Add( pair.Value, pair.Key );
     public readonly JObject Add( KeyValuePair<string, DateTimeOffset> pair ) => Add( pair.Value, pair.Key );
     public readonly JObject Add( KeyValuePair<string, DateTime>       pair ) => Add( pair.Value, pair.Key );
-    public readonly JObject Add<T>( KeyValuePair<string, T> pair )
-        where T : ISpanFormattable => Add( pair.Value, pair.Key );
-    public readonly JObject AddNumber<T>( KeyValuePair<string, T> pair )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( pair.Value, pair.Key );
-    public readonly JObject AddNumber<T>( KeyValuePair<string, T?> pair )
-        where T : struct, INumber<T>, ISpanFormattable => AddNumber( pair.Value, pair.Key );
+    public readonly JObject Add<TValue>( KeyValuePair<string, TValue> pair )
+        where TValue : ISpanFormattable => Add( pair.Value, pair.Key );
+    public readonly JObject AddNumber<TValue>( KeyValuePair<string, TValue> pair )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( pair.Value, pair.Key );
+    public readonly JObject AddNumber<TValue>( KeyValuePair<string, TValue?> pair )
+        where TValue : struct, INumber<TValue>, ISpanFormattable => AddNumber( pair.Value, pair.Key );
 
 
     public readonly JObject Add( in DictionaryEntry pair )
@@ -139,7 +139,7 @@ public ref struct JObject
 
 
     public readonly JArray AddArray( ReadOnlySpan<char> key ) => Start( key ).AddArray();
-    public readonly JObject AddArray( IReadOnlyCollection<IJsonizer>? value, [CallerArgumentExpression( nameof(value) )] string? key = default )
+    public readonly JObject AddArray( IReadOnlyCollection<IJsonizer>? value, [CallerArgumentExpression( nameof(value) )] string? key = null )
     {
         AddArray( key ).AddObjects( value );
 
@@ -148,7 +148,7 @@ public ref struct JObject
 
 
     public readonly JObject AddObject( ReadOnlySpan<char> key ) => Start( key ).AddObject();
-    public readonly JObject AddObject( IDictionary value, [CallerArgumentExpression( nameof(value) )] string? key = default )
+    public readonly JObject AddObject( IDictionary value, [CallerArgumentExpression( nameof(value) )] string? key = null )
     {
         JObject node = AddObject( key );
 
@@ -164,13 +164,13 @@ public ref struct JObject
         foreach ( DictionaryEntry pair in value )
         {
             node.Add( pair );
-            node._writer.Next();
+            node.__writer.Next();
         }
 
         node.Complete();
         return this;
     }
-    public readonly JObject AddObject( IReadOnlyDictionary<string, IJsonizer> value, [CallerArgumentExpression( nameof(value) )] string? key = default )
+    public readonly JObject AddObject( IReadOnlyDictionary<string, IJsonizer> value, [CallerArgumentExpression( nameof(value) )] string? key = null )
     {
         JObject node = AddObject( key );
 
@@ -188,15 +188,15 @@ public ref struct JObject
             (string? k, IJsonizer? jsonizer) = pair;
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
-            item._writer.Next();
+            item.__writer.Next();
 
-            if ( index < value.Count ) { node._writer.Next(); }
+            if ( index < value.Count ) { node.__writer.Next(); }
         }
 
         node.Complete();
         return this;
     }
-    public readonly JObject AddObject( IReadOnlyCollection<KeyValuePair<string, IJsonizer>> value, [CallerArgumentExpression( nameof(value) )] string? key = default )
+    public readonly JObject AddObject( IReadOnlyCollection<KeyValuePair<string, IJsonizer>> value, [CallerArgumentExpression( nameof(value) )] string? key = null )
     {
         JObject node = AddObject( key );
 
@@ -213,9 +213,9 @@ public ref struct JObject
         {
             JObject item = node.AddObject( k );
             jsonizer.Serialize( ref item );
-            item._writer.Next();
+            item.__writer.Next();
 
-            if ( index < value.Count ) { node._writer.Next(); }
+            if ( index < value.Count ) { node.__writer.Next(); }
         }
 
         node.Complete();

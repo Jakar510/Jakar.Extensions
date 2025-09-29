@@ -5,7 +5,7 @@ public readonly record struct Some;
 
 
 
-public readonly record struct Some<T>( T Value )
+public readonly record struct Some<TValue>( TValue Value )
 {
-    public static implicit operator Some<T>( T value ) => new(value);
+    public static implicit operator Some<TValue>( TValue value ) => new(value);
 }

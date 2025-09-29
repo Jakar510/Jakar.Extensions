@@ -6,10 +6,10 @@ public interface IHaving : IAggregateFunctions<IHaving>, IComparators<IHaving>, 
     /// <summary>
     ///     <para> finishes the Having chain with the <paramref name="obj"/> . </para>
     /// </summary>
-    /// <typeparam name="T"> the <see cref="Type"/> of value </typeparam>
+    /// <typeparam name="TValue"> the <see cref="Type"/> of value </typeparam>
     /// <param name="obj"> the value being inserted </param>
     /// <returns>
     ///     <see cref="IHaving"/>
     /// </returns>
-    public IHaving Value<T>( T obj );
+    public IHaving Value<TValue>( TValue obj );
 }

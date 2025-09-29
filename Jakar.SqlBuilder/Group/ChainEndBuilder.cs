@@ -6,9 +6,9 @@ namespace Jakar.SqlBuilder;
 
 public struct GroupByChainEndBuilder( in GroupByClauseBuilder group, ref EasySqlBuilder builder )
 {
-    private readonly GroupByClauseBuilder _group   = group;
-    private          EasySqlBuilder       _builder = builder;
+    private readonly GroupByClauseBuilder __group   = group;
+    private          EasySqlBuilder       __builder = builder;
 
 
-    public EasySqlBuilder Done() => _builder.VerifyParentheses();
+    public EasySqlBuilder Done() => __builder.VerifyParentheses();
 }

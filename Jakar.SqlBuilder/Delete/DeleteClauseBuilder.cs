@@ -3,61 +3,61 @@
 
 public struct DeleteClauseBuilder( ref EasySqlBuilder builder )
 {
-    private EasySqlBuilder _builder = builder;
+    private EasySqlBuilder __builder = builder;
 
 
     public DeleteChainBuilder From( string tableName, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, tableName ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM, tableName ); }
 
-        else { _builder.Add( FROM, tableName, AS, alias ); }
+        else { __builder.Add( FROM, tableName, AS, alias ); }
 
-        _builder.NewLine();
+        __builder.NewLine();
 
-        return new DeleteChainBuilder( this, ref _builder );
+        return new DeleteChainBuilder( this, ref __builder );
     }
 
-    public DeleteChainBuilder From<T>( T _, string? alias )
+    public DeleteChainBuilder From<TValue>( TValue _, string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM, typeof(TValue).GetTableName() ); }
 
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { __builder.Add( FROM, typeof(TValue).GetName(), AS, alias ); }
 
-        _builder.NewLine();
+        __builder.NewLine();
 
-        return new DeleteChainBuilder( this, ref _builder );
+        return new DeleteChainBuilder( this, ref __builder );
     }
 
-    public DeleteChainBuilder From<T>( string? alias )
+    public DeleteChainBuilder From<TValue>( string? alias )
     {
-        if ( string.IsNullOrWhiteSpace( alias ) ) { _builder.Add( FROM, typeof(T).GetTableName() ); }
+        if ( string.IsNullOrWhiteSpace( alias ) ) { __builder.Add( FROM, typeof(TValue).GetTableName() ); }
 
-        else { _builder.Add( FROM, typeof(T).GetName(), AS, alias ); }
+        else { __builder.Add( FROM, typeof(TValue).GetName(), AS, alias ); }
 
-        _builder.NewLine();
+        __builder.NewLine();
 
-        return new DeleteChainBuilder( this, ref _builder );
+        return new DeleteChainBuilder( this, ref __builder );
     }
 
 
-    public WhereClauseBuilder<DeleteClauseBuilder> Where() => _builder.Add( WHERE ).Begin().Where( in this );
+    public WhereClauseBuilder<DeleteClauseBuilder> Where() => __builder.Add( WHERE ).Begin().Where( in this );
 
     public EasySqlBuilder Done()
     {
-        _builder.VerifyParentheses();
-        return _builder;
+        __builder.VerifyParentheses();
+        return __builder;
     }
 
 
     public DeleteChainBuilder All()
     {
-        _builder.Add( DELETE );
-        return new DeleteChainBuilder( this, ref _builder );
+        __builder.Add( DELETE );
+        return new DeleteChainBuilder( this, ref __builder );
     }
 
     public EasySqlBuilder Column( string columnName )
     {
-        _builder.Add( DELETE, columnName );
-        return _builder;
+        __builder.Add( DELETE, columnName );
+        return __builder;
     }
 }

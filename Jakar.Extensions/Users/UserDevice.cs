@@ -8,20 +8,19 @@ public interface IDeviceID
 
 
 
-public interface IUserDevice<out TID> : IUniqueID<TID>, IDeviceID
-#if NET8_0_OR_GREATER
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
+public interface IDeviceName
 {
-    public string      DeviceName { get; }
-    public DeviceType  DeviceType { get; }
-    public DeviceIdiom Idiom      { get; }
+    public string DeviceName { get; }
+}
+
+
+
+public interface IUserDevice<out TID> : IUniqueID<TID>, IDeviceID
+    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+{
+    public string         DeviceName { get; }
+    public DeviceTypes    DeviceType { get; }
+    public DeviceCategory Idiom      { get; }
 
 
     /// <summary> Last known <see cref="IPAddress"/> </summary>
@@ -40,27 +39,19 @@ public interface IUserDevice<out TID> : IUniqueID<TID>, IDeviceID
 public record UserDevice<TID>( string         Model,
                                string         Manufacturer,
                                string         DeviceName,
-                               DeviceType     DeviceType,
-                               DeviceIdiom    Idiom,
+                               DeviceTypes    DeviceType,
+                               DeviceCategory Idiom,
                                DevicePlatform Platform,
                                AppVersion     OsVersion,
                                Guid           DeviceID,
                                TID            ID = default ) : ObservableRecord, IUserDevice<TID>
-#if NET8_0_OR_GREATER
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-#elif NET7_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>
-#elif NET6_0
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable
-#else
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable
-#endif
 {
-    private string?        _ip;
-    public  string?        IP        { get => _ip; set => SetProperty( ref _ip, value ); }
-    public  DateTimeOffset TimeStamp { get;        init; } = DateTimeOffset.UtcNow;
+    private string?        __ip;
+    public  string?        IP        { get => __ip; set => SetProperty(ref __ip, value); }
+    public  DateTimeOffset TimeStamp { get;         init; } = DateTimeOffset.UtcNow;
 
-    public UserDevice( IUserDevice<TID> device ) : this( device.Model, device.Manufacturer, device.DeviceName, device.DeviceType, device.Idiom, device.Platform, device.OsVersion, device.DeviceID, device.ID ) { }
+    public UserDevice( IUserDevice<TID> device ) : this(device.Model, device.Manufacturer, device.DeviceName, device.DeviceType, device.Idiom, device.Platform, device.OsVersion, device.DeviceID, device.ID) { }
 
-    // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.Name, DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.Version, deviceID);
+    // public static UserDevice<TID> Create( Guid? deviceID ) => new(DeviceInfo.Model, DeviceInfo.Manufacturer, DeviceInfo.AppName, DeviceInfo.DeviceType, DeviceInfo.Idiom, DeviceInfo.Platform, DeviceInfo.AppVersion, deviceID);
 }

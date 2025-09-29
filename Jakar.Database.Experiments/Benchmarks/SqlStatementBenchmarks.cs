@@ -29,7 +29,7 @@ AMD Ryzen 9 3900X, 1 CPU, 24 logical and 12 physical cores
 [SimpleJob( RuntimeMoniker.HostProcess ), Orderer( SummaryOrderPolicy.FastestToSlowest ), RankColumn, MemoryDiagnoser]
 public class SqlStatementBenchmarks
 {
-    public IEnumerable<long> ids
+    public IEnumerable<long> Ids
     {
         get
         {
@@ -43,32 +43,32 @@ public class SqlStatementBenchmarks
     [Benchmark]
     public void Test_ValueStringBuilder()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder();
+        using ValueStringBuilder sb = new();
     }
 
 
     [Benchmark]
     public void Test_Join()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder();
-        sb.AppendJoin( ", ", ids );
+        using ValueStringBuilder sb = new();
+        sb.AppendJoin( ", ", Ids );
     }
 
 
     [Benchmark]
     public void Test_GetEnumerator()
     {
-        using IEnumerator<long> sb = ids.GetEnumerator();
+        using IEnumerator<long> sb = Ids.GetEnumerator();
     }
 
 
     [Benchmark]
     public ReadOnlySpan<char> Test_VSB()
     {
-        using ValueStringBuilder sb = new ValueStringBuilder( "DELETE FROM " );
+        using ValueStringBuilder sb = new( "DELETE FROM " );
         sb.Append( TableName );
         sb.Append( "WHERE ID in ( " );
-        sb.AppendJoin( ", ", ids );
+        sb.AppendJoin( ", ", Ids );
         sb.Append( " )" );
         return sb.Result;
     }
@@ -77,14 +77,14 @@ public class SqlStatementBenchmarks
     [Benchmark] public string Test_Span() => Test_VSB().ToString();
 
 
-    [Benchmark] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', ids )} )";
+    [Benchmark] public string Test_Interpolated() => $"DELETE FROM {TableName} WHERE ID in ( {string.Join( ',', Ids )} )";
 
 
     [Benchmark]
     public string Test_StringBuilder()
     {
-        StringBuilder sb = new StringBuilder( $"DELETE FROM {TableName} WHERE ID in ( " );
-        sb.AppendJoin( ", ", ids );
+        StringBuilder sb = new( $"DELETE FROM {TableName} WHERE ID in ( " );
+        sb.AppendJoin( ", ", Ids );
         sb.Append( " )" );
         return sb.ToString();
     }

@@ -23,7 +23,7 @@ public class JsonizerGenerator : ISourceGenerator
 {
     public const            string FROM_JSON  = "FromJson";
     public const            string GENERATED  = $"[System.CodeDom.Compiler.GeneratedCode({nameof(JsonizerGenerator)})]";
-    private static readonly string _attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
+    private static readonly string __attribute = typeof(JsonizerAttribute).FullName ?? throw new InvalidOperationException();
 
 
     private static string ChooseName( ReadOnlySpan<char> fieldName, in TypedConstant overridenNameOpt )
@@ -45,24 +45,26 @@ public class JsonizerGenerator : ISourceGenerator
 
     private static string? ProcessClass( INamedTypeSymbol classSymbol, IEnumerable<IFieldSymbol> fields, in ISymbol? attributeSymbol, GeneratorExecutionContext context )
     {
-        ArgumentNullException.ThrowIfNull( attributeSymbol );
+        if ( attributeSymbol is null ) { throw new ArgumentNullException( nameof(attributeSymbol) ); }
 
         if ( !classSymbol.ContainingSymbol.Equals( classSymbol.ContainingNamespace, SymbolEqualityComparer.Default ) )
         {
-            return default; //TODO: issue a diagnostic that it must be top level
+            return null; //TODO: issue a diagnostic that it must be top level
         }
 
         string namespaceName = classSymbol.ContainingNamespace.ToDisplayString();
 
         // begin building the generated source
-        StringBuilder sb = new StringBuilder( $@"
-#nullable enable
-namespace {namespaceName};
+        StringBuilder sb = new( $$"""
+
+                                  #nullable enable
+                                  namespace {{namespaceName}};
 
 
-public partial class {classSymbol.Name} 
-{{
-" );
+                                  public partial class {{classSymbol.Name}} 
+                                  {
+
+                                  """ );
 
         // if the class doesn't implement INotifyPropertyChanged already, add it
         // if ( !classSymbol.Interfaces.Contains(notifySymbol, SymbolEqualityComparer.Default) ) { source.Append("public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;"); }
@@ -76,7 +78,7 @@ public partial class {classSymbol.Name}
     private static void Execute( in GeneratorExecutionContext context, in SyntaxReceiver receiver, in CancellationToken token )
     {
         // get the added attribute, and INotifyPropertyChanged
-        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName( _attribute ) ?? throw new InvalidOperationException();
+        INamedTypeSymbol attributeSymbol = context.Compilation.GetTypeByMetadataName( __attribute ) ?? throw new InvalidOperationException();
 
 
         // group the fields by class, and generate the source
@@ -106,20 +108,22 @@ public partial class {classSymbol.Name}
             return;
         }
 
-        sb.Append( $@"
-    public {fieldType} {propertyName} 
-    {{
-        get 
-        {{
-            return this.{fieldName};
-        }}
-        set
-        {{
-            this.{fieldName} = value;
-            this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({propertyName})));
-        }}
-    }}
-" );
+        sb.Append( $$"""
+                     
+                         public {{fieldType}} {{propertyName}} 
+                         {
+                             get 
+                             {
+                                 return this.{{fieldName}};
+                             }
+                             set
+                             {
+                                 this.{{fieldName}} = value;
+                                 this.PropertyChanged?.Invoke(this, new System.ComponentModel.PropertyChangedEventArgs(nameof({{propertyName}})));
+                             }
+                         }
+
+                     """ );
     }
 
 
@@ -194,7 +198,7 @@ public class JsonSerializationGenerator : ISourceGenerator
     {
         List<PropertyDeclarationSyntax> properties = members.OfType<PropertyDeclarationSyntax>().Where( p => p.Modifiers.Any( m => m.ValueText == "public" ) ).ToList();
 
-        StringBuilder builder = new StringBuilder();
+        StringBuilder builder = new();
         builder.AppendLine( $"namespace {namespaceName}" );
         builder.AppendLine( "{" );
         builder.AppendLine( $"    public static partial class {className}JsonSerializationExtensions" );

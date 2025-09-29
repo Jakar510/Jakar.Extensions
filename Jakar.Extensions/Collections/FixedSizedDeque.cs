@@ -4,48 +4,60 @@
 /// <summary>
 ///     <seealso href="https://stackoverflow.com/a/5852926/9530917"/>
 /// </summary>
-/// <typeparam name="T"> </typeparam>
-public class FixedSizedDeque<T>( int size, Locker? locker = null )
+/// <typeparam name="TValue"> </typeparam>
+public class FixedSizedDeque<TValue>( int size )
 {
-    protected readonly Deque<T> _q    = new(size);
-    protected readonly Locker   _lock = locker ?? Locker.Default;
+    public readonly    Deque<TValue> Values = new(size);
+    public readonly    int           Length  = size;
+    protected readonly Lock          _lock   = new();
 
-    public int Size { [MethodImpl( MethodImplOptions.AggressiveInlining )] get; } = size;
 
-
-    public bool Contains( T obj )
+    public int Count
     {
-        using ( _lock.Enter() ) { return _q.Contains( obj ); }
-    }
-    public async ValueTask<bool> ContainsAsync( T obj, CancellationToken token = default )
-    {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) ) { return _q.Contains( obj ); }
-    }
-
-    public T Dequeue()
-    {
-        using ( _lock.Enter() ) { return _q.RemoveFromFront(); }
-    }
-    public async ValueTask<T> DequeueAsync( CancellationToken token = default )
-    {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) ) { return _q.RemoveFromFront(); }
-    }
-
-
-    public void Enqueue( T obj )
-    {
-        using ( _lock.Enter() )
+        get
         {
-            _q.AddToFront( obj );
-            while ( _q.Count > Size ) { _q.RemoveFromBack(); }
+            lock (_lock) { return Values.Count; }
         }
     }
-    public async ValueTask EnqueueAsync( T obj, CancellationToken token = default )
+    public bool IsEmpty { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => Count == 0; }
+
+
+    public bool Contains( TValue value )
     {
-        using ( await _lock.EnterAsync( token ).ConfigureAwait( false ) )
+        lock (_lock) { return Values.Contains( value ); }
+    }
+    public ValueTask<bool> ContainsAsync( TValue value, CancellationToken token = default )
+    {
+        lock (_lock) { return ValueTask.FromResult( Values.Contains( value ) ); }
+    }
+
+
+    public TValue Dequeue()
+    {
+        lock (_lock) { return Values.RemoveFromFront(); }
+    }
+    public ValueTask<TValue> DequeueAsync( CancellationToken token = default )
+    {
+        lock (_lock) { return ValueTask.FromResult( Values.RemoveFromFront() ); }
+    }
+
+
+    public void Enqueue( TValue value )
+    {
+        lock (_lock)
         {
-            _q.AddToFront( obj );
-            while ( _q.Count > Size ) { _q.RemoveFromFront(); }
+            Values.AddToFront( value );
+            while ( Values.Count > Length ) { Values.RemoveFromBack(); }
         }
+    }
+    public ValueTask EnqueueAsync( TValue value, CancellationToken token = default )
+    {
+        lock (_lock)
+        {
+            Values.AddToFront( value );
+            while ( Values.Count > Length ) { Values.RemoveFromFront(); }
+        }
+
+        return ValueTask.CompletedTask;
     }
 }

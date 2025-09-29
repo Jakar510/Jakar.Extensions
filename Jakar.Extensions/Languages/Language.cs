@@ -1,26 +1,29 @@
-﻿namespace Jakar.Extensions;
+﻿using ZLinq;
+using ZLinq.Linq;
 
 
-[Serializable, DebuggerDisplay( nameof(DisplayName) )]
-public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Language>, IComparable
+
+namespace Jakar.Extensions;
+
+
+[Serializable, DebuggerDisplay(nameof(DisplayName))]
+public sealed class Language : BaseClass, IEqualComparable<Language>
 {
-    private readonly CultureInfo _culture;
+    private readonly CultureInfo __culture;
 
 
-    public static Equalizer<Language> Equalizer        => Equalizer<Language>.Default;
-    public static Sorter<Language>    Sorter           => Sorter<Language>.Default;
-    public        string              DisplayName      { get; init; }
-    public        string              EnglishName      { get; init; }
-    public        bool                IsNeutralCulture { get; init; }
-    public        string              Name             { get; init; }
-    public        string              ThreeLetterISO   { get; init; }
-    public        string              TwoLetterISO     { get; init; }
-    public        SupportedLanguage?  Version          { get; init; }
+    public string             DisplayName      { get; init; }
+    public string             EnglishName      { get; init; }
+    public bool               IsNeutralCulture { get; init; }
+    public string             Name             { get; init; }
+    public string             ThreeLetterISO   { get; init; }
+    public string             TwoLetterISO     { get; init; }
+    public SupportedLanguage? Version          { get; init; }
 
 
-    public Language( CultureInfo culture, SupportedLanguage? version = default )
+    public Language( CultureInfo culture, SupportedLanguage? version = null )
     {
-        _culture         = culture;
+        __culture        = culture;
         Name             = culture.Name;
         EnglishName      = culture.EnglishName;
         TwoLetterISO     = culture.TwoLetterISOLanguageName;
@@ -29,35 +32,36 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
         Version          = version ??= culture.GetSupportedLanguage();
         DisplayName      = version?.GetName() ?? culture.DisplayName;
     }
-    public Language( SupportedLanguage language ) : this( language.GetCultureInfo( CultureInfo.InvariantCulture ), language ) { }
+    public Language( SupportedLanguage language ) : this(language.GetCultureInfo(CultureInfo.InvariantCulture), language) { }
 
 
     public static implicit operator Language( CultureInfo       value ) => new(value);
     public static implicit operator Language( SupportedLanguage value ) => new(value);
-    public static implicit operator CultureInfo( Language       value ) => value._culture;
+    public static implicit operator CultureInfo( Language       value ) => value.__culture;
 
 
-    public          CultureInfo GetCulture() => _culture;
-    public override string      ToString()   => DisplayName;
+    public          CultureInfo GetCulture()                  => __culture;
+    public override string      ToString()                    => DisplayName;
+    private static  Language    Create( CultureInfo culture ) => new(culture);
 
 
     public int CompareTo( object? value ) => value switch
                                              {
                                                  null           => 1,
-                                                 Language other => CompareTo( other ),
-                                                 _              => throw new ExpectedValueTypeException( nameof(value), value, typeof(Language) )
+                                                 Language other => CompareTo(other),
+                                                 _              => throw new ExpectedValueTypeException(nameof(value), value, typeof(Language))
                                              };
     public int CompareTo( Language? other )
     {
         if ( other is null ) { return -1; }
 
-        int displayNameComparison = string.Compare( DisplayName, other.DisplayName, StringComparison.Ordinal );
+        int displayNameComparison = string.Compare(DisplayName, other.DisplayName, StringComparison.Ordinal);
         if ( displayNameComparison != 0 ) { return displayNameComparison; }
 
-        int shortNameComparison = string.Compare( Name, other.Name, StringComparison.Ordinal );
+        int shortNameComparison = string.Compare(Name, other.Name, StringComparison.Ordinal);
         if ( shortNameComparison != 0 ) { return shortNameComparison; }
 
-        return Nullable.Compare( Version, other.Version );
+        return Nullable.Compare(Version, other.Version);
     }
     public bool Equals( Language? other )
     {
@@ -65,24 +69,31 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
         return DisplayName == other.DisplayName && Name == other.Name && Version == other.Version;
     }
-    public override bool Equals( object? obj ) => obj is Language language && Equals( language );
-    public override int  GetHashCode()         => HashCode.Combine( DisplayName, Name, Version );
+    public override bool Equals( object? obj ) => obj is Language language && Equals(language);
+    public override int  GetHashCode()         => HashCode.Combine(DisplayName, Name, Version);
 
 
-    public static bool operator ==( Language? left, Language? right ) => Equalizer.Equals( left, right );
-    public static bool operator >( Language?  left, Language? right ) => Sorter.Compare( left, right ) > 0;
-    public static bool operator >=( Language? left, Language? right ) => Sorter.Compare( left, right ) >= 0;
-    public static bool operator !=( Language? left, Language? right ) => Equalizer.Equals( left, right );
-    public static bool operator <( Language?  left, Language? right ) => Sorter.Compare( left, right ) < 0;
-    public static bool operator <=( Language? left, Language? right ) => Sorter.Compare( left, right ) <= 0;
+    public static bool operator ==( Language? left, Language? right ) => EqualityComparer<Language>.Default.Equals(left, right);
+    public static bool operator !=( Language? left, Language? right ) => !EqualityComparer<Language>.Default.Equals(left, right);
+    public static bool operator >( Language   left, Language  right ) => Comparer<Language>.Default.Compare(left, right) > 0;
+    public static bool operator >=( Language  left, Language  right ) => Comparer<Language>.Default.Compare(left, right) >= 0;
+    public static bool operator <( Language   left, Language  right ) => Comparer<Language>.Default.Compare(left, right) < 0;
+    public static bool operator <=( Language  left, Language  right ) => Comparer<Language>.Default.Compare(left, right) <= 0;
 
 
 
     [Serializable]
     public class Collection : ObservableCollection<Language>
     {
-        public Collection() : base() { }
-        public Collection( IEnumerable<Language> items ) : base( items ) { }
+        public Collection() : base(Buffers.DEFAULT_CAPACITY) { }
+        public Collection( int                   capacity ) : base(capacity) { }
+        public Collection( IEnumerable<Language> items ) : base(items) { }
+        public Collection( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
+                                                                                                                    ? count
+                                                                                                                    : Buffers.DEFAULT_CAPACITY)
+        {
+            foreach ( Language language in enumerable ) { Add(language); }
+        }
     }
 
 
@@ -90,9 +101,15 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
     [Serializable]
     public class Items : List<Language>
     {
-        public Items() : base() { }
-        public Items( int                   capacity ) : base( capacity ) { }
-        public Items( IEnumerable<Language> items ) : base( items ) => Sort( Sorter );
+        public Items() : base(Buffers.DEFAULT_CAPACITY) { }
+        public Items( int                   capacity ) : base(capacity) { }
+        public Items( IEnumerable<Language> items ) : base(items) => Sort(Comparer<Language>.Default);
+        public Items( in ValueEnumerable<ArraySelect<CultureInfo, Language>, Language> enumerable ) : this(enumerable.TryGetNonEnumeratedCount(out int count)
+                                                                                                               ? count
+                                                                                                               : Buffers.DEFAULT_CAPACITY)
+        {
+            foreach ( Language language in enumerable ) { Add(language); }
+        }
     }
 
 
@@ -120,11 +137,9 @@ public sealed class Language : BaseClass, IComparable<Language>, IEquatable<Lang
 
     #region Lists
 
-    public static Items NeutralCultures => new(CultureInfo.GetCultures( CultureTypes.NeutralCultures ).Select( culture => new Language( culture ) ));
-
-    public static Items SpecificCultures => new(CultureInfo.GetCultures( CultureTypes.SpecificCultures ).Select( culture => new Language( culture ) ));
-
-    public static Items All => new(CultureInfo.GetCultures( CultureTypes.AllCultures ).Select( culture => new Language( culture ) ));
+    public static Items NeutralCultures  => new(CultureInfo.GetCultures(CultureTypes.NeutralCultures).AsValueEnumerable().Select(Create));
+    public static Items SpecificCultures => new(CultureInfo.GetCultures(CultureTypes.SpecificCultures).AsValueEnumerable().Select(Create));
+    public static Items All              => new(CultureInfo.GetCultures(CultureTypes.AllCultures).AsValueEnumerable().Select(Create));
 
     public static Collection Supported { get; } =
         [

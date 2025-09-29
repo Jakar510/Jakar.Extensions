@@ -2,45 +2,43 @@
 
 
 /// <summary>
-///     <see cref="SpanSplitEnumerator{T}"/> is a struct so there is no allocation here.
-///     <para> Must be a ref struct as it contains a <see cref="ReadOnlySpan{T}"/> </para>
+///     <see cref="SpanSplitEnumerator{TValue}"/> is a struct so there is no allocation here.
+///     <para> Must be a ref struct as it contains a <see cref="ReadOnlySpan{TValue}"/> </para>
 ///     <para>
 ///         <see href="https://www.meziantou.net/split-a-string-into-lines-without-allocation.htm"/>
 ///     </para>
 /// </summary>
-public ref struct SpanSplitEnumerator<T>
-    where T : unmanaged, IEquatable<T>
+public ref struct SpanSplitEnumerator<TValue>
+    where TValue : unmanaged, IEquatable<TValue>
 {
-    private readonly ReadOnlySpan<T> _separators;
-    private readonly ReadOnlySpan<T> _originalString;
-    private          ReadOnlySpan<T> _span;
+    private readonly ReadOnlySpan<TValue> __separators;
+    private readonly ReadOnlySpan<TValue> __originalString;
+    private          ReadOnlySpan<TValue> __span;
 
 
-    public LineSplitEntry<T> Current { get; private set; }
+    public LineSplitEntry<TValue> Current { get; private set; }
 
 
-    public SpanSplitEnumerator( scoped in ReadOnlySpan<T> span, scoped in ReadOnlySpan<T> separators )
+    public SpanSplitEnumerator( ReadOnlySpan<TValue> span, params TValue[] separators )
     {
-        if ( separators.IsEmpty ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
+        if ( separators.Length == 0 ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
 
-        _originalString = span;
-        _span           = span;
-        _separators     = separators;
+        __originalString = span;
+        __span           = span;
+        __separators     = separators;
         Current         = default;
     }
 
 
-    public readonly override string                 ToString()      => $"{nameof(LineSplitEntry<T>)}({nameof(Current)}: '{Current.ToString()}', {nameof(_originalString)}: '{_originalString.ToString()}')";
-    public readonly          SpanSplitEnumerator<T> GetEnumerator() => this;
-    public                   void                   Reset()         => _span = _originalString;
+    public readonly override string                      ToString()      => $"{nameof(LineSplitEntry<TValue>)}({nameof(Current)}: '{Current.ToString()}', {nameof(__originalString)}: '{__originalString.ToString()}')";
+    public readonly          SpanSplitEnumerator<TValue> GetEnumerator() => this;
+    public                   void                        Reset()         => __span = __originalString;
 
 
-#if NET6_0_OR_GREATER
     [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-#endif
     public bool MoveNext()
     {
-        ReadOnlySpan<T> span = _span;
+        ReadOnlySpan<TValue> span = __span;
 
         if ( span.IsEmpty )
         {
@@ -50,19 +48,19 @@ public ref struct SpanSplitEnumerator<T>
 
 
         int start;
-        int index = start = span.IndexOfAny( _separators );
+        int index = start = span.IndexOfAny( __separators );
 
         if ( index < 0 ) // The string doesn't contain the separators
         {
-            _span   = default; // The remaining string is an empty string
-            Current = new LineSplitEntry<T>( span, default );
+            __span   = default; // The remaining string is an empty string
+            Current = new LineSplitEntry<TValue>( span, default );
             return true;
         }
 
-        while ( index < span.Length - 1 && _separators.Contains( span[index + 1] ) ) { index++; }
+        while ( index < span.Length - 1 && __separators.Contains( span[index + 1] ) ) { index++; }
 
-        Current = new LineSplitEntry<T>( span[..start], span.Slice( start, Math.Max( index - start, 1 ) ) );
-        _span   = span[(index + 1)..];
+        Current = new LineSplitEntry<TValue>( span[..start], span.Slice( start, Math.Max( index - start, 1 ) ) );
+        __span   = span[(index + 1)..];
         return true;
     }
 }
