@@ -11,6 +11,12 @@ public interface ISize<TSelf> : IShape<TSelf>, IShapeSize
     public bool IsPortrait  { get; }
 
 
+    public static bool CheckIfEmpty( ref readonly     TSelf self ) => self.IsNaN               || self.Width <= 0 || self.Height <= 0;
+    public static bool CheckIfInvalid( ref readonly   TSelf self ) => double.IsNaN(self.Width) || double.IsNaN(self.Height);
+    public static bool CheckIfPortrait( ref readonly  TSelf self ) => self.Width > self.Height;
+    public static bool CheckIfLandscape( ref readonly TSelf self ) => self.Width > self.Height;
+
+
     [Pure] public abstract static TSelf Create( double width, double height );
 
     [Pure] public TSelf Reverse();

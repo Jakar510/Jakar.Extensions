@@ -13,8 +13,8 @@ public sealed class ReadOnlySizeFf_Tests : Assert
         ReadOnlySizeF point = ReadOnlySizeF.Zero;
         this.AreEqual( 0, point.Width );
         this.AreEqual( 0, point.Height );
-        this.IsTrue( point.IsEmpty );
         this.IsFalse( point.IsNaN );
+        this.IsTrue( point.IsEmpty );
         this.IsTrue( point.IsValid );
     }
 

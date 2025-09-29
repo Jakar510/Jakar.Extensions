@@ -21,14 +21,14 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     static ref readonly MutableSize IShape<MutableSize>.Zero        => ref Zero;
     static ref readonly MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
     static ref readonly MutableSize IShape<MutableSize>.One         => ref One;
-    public              bool                            IsLandscape => Width < Height;
-    public              bool                            IsPortrait  => Width > Height;
     public              double                          Width       { get; set; } = width;
     ReadOnlySize IShapeSize.                            Size        => this;
     public                       double                 Height      { get; set; } = height;
-    public readonly              bool                   IsNaN       => double.IsNaN(Width) || double.IsNaN(Height);
+    [JsonIgnore] public readonly bool                   IsEmpty     => ISize<MutableSize>.CheckIfEmpty(in this);
+    public readonly              bool                   IsLandscape => ISize<MutableSize>.CheckIfLandscape(in this);
+    public readonly              bool                   IsNaN       => ISize<MutableSize>.CheckIfInvalid(in this);
+    public readonly              bool                   IsPortrait  => ISize<MutableSize>.CheckIfPortrait(in this);
     public readonly              bool                   IsValid     => !IsNaN && !IsEmpty;
-    [JsonIgnore] public readonly bool                   IsEmpty     => IsNaN || Width < 0 || Height < 0;
 
 
     public static implicit operator ReadOnlySize( MutableSize  rect )  => new(rect.Width, rect.Height);

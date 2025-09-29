@@ -22,13 +22,13 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
 
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
     static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
-    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One; 
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
     ReadOnlySize IShapeSize.                                Size        => this;
     public              bool                                IsValid     => !IsNaN && !IsEmpty;
-    [JsonIgnore] public bool                                IsEmpty     => IsNaN || Width < 0 || Height < 0;
-    public              bool                                IsLandscape => Width < Height;
-    public              bool                                IsNaN       => float.IsNaN(Width) || float.IsNaN(Height);
-    public              bool                                IsPortrait  => Width > Height;
+    [JsonIgnore] public bool                                IsEmpty     => ISize<ReadOnlySizeF>.CheckIfEmpty(in this);
+    public              bool                                IsLandscape => ISize<ReadOnlySizeF>.CheckIfLandscape(in this);
+    public              bool                                IsNaN       => ISize<ReadOnlySizeF>.CheckIfInvalid(in this);
+    public              bool                                IsPortrait  => ISize<ReadOnlySizeF>.CheckIfPortrait(in this);
     double IShapeSize.                                      Width       => Width;
     double IShapeSize.                                      Height      => Height;
 

@@ -22,13 +22,13 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static       JsonTypeInfo<ReadOnlySize[]>      JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeArray;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Zero          => ref Zero;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid       => ref Invalid;
-    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One           => ref One; 
+    static ref readonly ReadOnlySize IShape<ReadOnlySize>.One           => ref One;
     ReadOnlySize IShapeSize.                              Size          => this;
     public              bool                              IsValid       => !IsNaN && !IsEmpty;
-    [JsonIgnore] public bool                              IsEmpty       => IsNaN || Width < 0 || Height < 0;
-    public              bool                              IsLandscape   => Width < Height;
-    public              bool                              IsNaN         => double.IsNaN(Width) || double.IsNaN(Height);
-    public              bool                              IsPortrait    => Width > Height;
+    [JsonIgnore] public bool                              IsEmpty       => ISize<ReadOnlySize>.CheckIfEmpty(in this);
+    public              bool                              IsLandscape   => ISize<ReadOnlySize>.CheckIfLandscape(in this);
+    public              bool                              IsNaN         => ISize<ReadOnlySize>.CheckIfInvalid(in this);
+    public              bool                              IsPortrait    => ISize<ReadOnlySize>.CheckIfPortrait(in this);
     double IShapeSize.                                    Width         => Width;
     double IShapeSize.                                    Height        => Height;
 
