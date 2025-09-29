@@ -20,17 +20,16 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public readonly        float         Width   = width;
 
 
-    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero        => ref Zero;
-    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid     => ref Invalid;
-    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One         => ref One;
-    ReadOnlySize IShapeSize.                                Size        => this;
-    public              bool                                IsValid     => ISize<ReadOnlySizeF>.CheckIfValid(in this);
-    [JsonIgnore] public bool                                IsEmpty     => ISize<ReadOnlySizeF>.CheckIfEmpty(in this);
-    public              bool                                IsLandscape => ISize<ReadOnlySizeF>.CheckIfLandscape(in this);
-    public              bool                                IsNaN       => ISize<ReadOnlySizeF>.CheckIfNan(in this);
-    public              bool                                IsPortrait  => ISize<ReadOnlySizeF>.CheckIfPortrait(in this);
-    double IShapeSize.                                      Width       => Width;
-    double IShapeSize.                                      Height      => Height;
+    public static       JsonSerializerContext               JsonContext   => JakarShapesContext.Default;
+    public static       JsonTypeInfo<ReadOnlySizeF>         JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySizeF;
+    public static       JsonTypeInfo<ReadOnlySizeF[]>       JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeFArray;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Zero          => ref Zero;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.Invalid       => ref Invalid;
+    static ref readonly ReadOnlySizeF IShape<ReadOnlySizeF>.One           => ref One;
+    ReadOnlySize IShapeSize.                                Size          => this;
+    bool IValidator.                                        IsValid       => this.IsValid();
+    double IShapeSize.                                      Width         => Width;
+    double IShapeSize.                                      Height        => Height;
 
 
     public static implicit operator Size( ReadOnlySizeF         rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
@@ -45,18 +44,27 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static implicit operator ReadOnlySizeF( double       value )     => new(value.AsFloat(), value.AsFloat());
 
 
-    [Pure] public static ReadOnlySizeF Create( float  x, float  y ) => new(x, y);
-    [Pure] public static ReadOnlySizeF Create( double x, double y ) => new((float)x, (float)y);
-    [Pure] public        ReadOnlySizeF Reverse() => new(Height, Width);
-    [Pure] public        ReadOnlySizeF Round()   => new(Width.Round(), Height.Round());
-    [Pure] public        ReadOnlySizeF Floor()   => new(Width.Floor(), Height.Floor());
-
-
-    public void Deconstruct( out double width, out double height )
+    public static bool TryFromJson( string? json, out ReadOnlySizeF result )
     {
-        width  = Width;
-        height = Height;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
     }
+    public static        ReadOnlySizeF FromJson( string json )        => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    [Pure] public static ReadOnlySizeF Create( float    x, float  y ) => new(x, y);
+    [Pure] public static ReadOnlySizeF Create( double   x, double y ) => new((float)x, (float)y);
 
 
     public int CompareTo( ReadOnlySizeF other )
@@ -78,7 +86,7 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public override bool   Equals( object?       obj )                                 => obj is ReadOnlySizeF other  && Equals(other);
     public override int    GetHashCode()                                               => HashCode.Combine(Height, Width);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySizeF>.ToString(in this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
     public static bool operator ==( ReadOnlySizeF?        left, ReadOnlySizeF?                   right ) => Nullable.Equals(left, right);
@@ -89,58 +97,44 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static bool operator >=( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) >= 0;
     public static bool operator <( ReadOnlySizeF          left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) < 0;
     public static bool operator <=( ReadOnlySizeF         left, ReadOnlySizeF                    right ) => Comparer<ReadOnlySizeF>.Default.Compare(left, right) <= 0;
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, Size                             value ) => new(size.Width + value.Width, size.Height             + value.Height);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, SizeF                            value ) => new(size.Width + value.Width, size.Height             + value.Height);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width + value.Width, size.Height             + value.Height);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, (int xOffset, int yOffset)       value ) => new(size.Width + value.xOffset, size.Height           + value.yOffset);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, (float xOffset, float yOffset)   value ) => new(size.Width + value.xOffset, size.Height           + value.yOffset);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF size, (double xOffset, double yOffset) value ) => new(size.Width + value.xOffset.AsFloat(), size.Height + value.yOffset.AsFloat());
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, Size                             value ) => new(size.Width - value.Width, size.Height             - value.Height);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, SizeF                            value ) => new(size.Width - value.Width, size.Height             - value.Height);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width - value.Width, size.Height             - value.Height);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, (int xOffset, int yOffset)       value ) => new(size.Width - value.xOffset, size.Height           - value.yOffset);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, (float xOffset, float yOffset)   value ) => new(size.Width - value.xOffset, size.Height           - value.yOffset);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF size, (double xOffset, double yOffset) value ) => new(size.Width - value.xOffset.AsFloat(), size.Height - value.yOffset.AsFloat());
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width * value.Width, size.Height             * value.Height);
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, int                              value ) => new(size.Width * value, size.Height                   * value);
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, float                            value ) => new(size.Width * value, size.Height                   * value);
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, double                           value ) => new(size.Width * value.AsFloat(), size.Height         * value.AsFloat());
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, (int xOffset, int yOffset)       value ) => new(size.Width * value.xOffset, size.Height           * value.yOffset);
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, (float xOffset, float yOffset)   value ) => new(size.Width * value.xOffset, size.Height           * value.yOffset);
-    public static ReadOnlySizeF operator *( ReadOnlySizeF size, (double xOffset, double yOffset) value ) => new(size.Width * value.xOffset.AsFloat(), size.Height * value.yOffset.AsFloat());
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, ReadOnlySizeF                    value ) => new(size.Width / value.Width, size.Height             / value.Height);
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, int                              value ) => new(size.Width / value, size.Height                   / value);
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, float                            value ) => new(size.Width / value, size.Height                   / value);
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, double                           value ) => new(size.Width / value.AsFloat(), size.Height         / value.AsFloat());
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, (int xOffset, int yOffset)       value ) => new(size.Width / value.xOffset, size.Height           / value.yOffset);
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, (float xOffset, float yOffset)   value ) => new(size.Width / value.xOffset, size.Height           / value.yOffset);
-    public static ReadOnlySizeF operator /( ReadOnlySizeF size, (double xOffset, double yOffset) value ) => new(size.Width / value.xOffset.AsFloat(), size.Height / value.yOffset.AsFloat());
-    public static ReadOnlySizeF operator +( ReadOnlySizeF left, double                           value ) => new(left.Width + value.AsFloat(), left.Height + value.AsFloat());
-    public static ReadOnlySizeF operator -( ReadOnlySizeF left, double                           value ) => new(left.Width - value.AsFloat(), left.Height - value.AsFloat());
-    public static ReadOnlySizeF operator +( ReadOnlySizeF left, float                            value ) => new(left.Width + value, left.Height           + value);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF left, float                            value ) => new(left.Width - value, left.Height           - value);
-    public static ReadOnlySizeF operator +( ReadOnlySizeF left, int                              value ) => new(left.Width + value, left.Height           + value);
-    public static ReadOnlySizeF operator -( ReadOnlySizeF left, int                              value ) => new(left.Width - value, left.Height           - value);
-    public static JsonSerializerContext         JsonContext   => JakarShapesContext.Default;
-    public static JsonTypeInfo<ReadOnlySizeF>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlySizeF;
-    public static JsonTypeInfo<ReadOnlySizeF[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlySizeFArray;
-    public static bool TryFromJson( string? json, out ReadOnlySizeF result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = Invalid;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = Invalid;
-        return false;
-    }
-    public static ReadOnlySizeF FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, ReadOnlySizeF                    value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, ReadOnlySizeF                    value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, ReadOnlySizeF                    value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, ReadOnlySizeF                    value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, ReadOnlySize                     value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, ReadOnlySize                     value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, ReadOnlySize                     value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, ReadOnlySize                     value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, Size                             value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, Size                             value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, Size                             value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, Size                             value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, SizeF                            value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, SizeF                            value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, SizeF                            value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, SizeF                            value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, double                           value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, double                           value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, double                           value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, double                           value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, float                            value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, float                            value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, float                            value ) => self.Divide(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, float                            value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator +( ReadOnlySizeF self, int                              value ) => self.Add(value);
+    public static ReadOnlySizeF operator -( ReadOnlySizeF self, int                              value ) => self.Subtract(value);
+    public static ReadOnlySizeF operator *( ReadOnlySizeF self, int                              value ) => self.Multiply(value);
+    public static ReadOnlySizeF operator /( ReadOnlySizeF self, int                              value ) => self.Divide(value);
 }

@@ -118,7 +118,7 @@ public readonly struct CalculatedLine( Func<double, double> func ) : IEqualityOp
 
     [Pure] public static CalculatedLine Create( ReadOnlyLine line )
     {
-        double m = line.Slope;
+        double m = line.Slope();
         double b = line.Start.Y - m * line.Start.X;
         return new CalculatedLine(func);
         double func( double y ) => m * y + b;

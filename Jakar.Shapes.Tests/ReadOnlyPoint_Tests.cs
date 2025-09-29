@@ -13,9 +13,9 @@ public sealed class ReadOnlyPoint_Tests : Assert
         ReadOnlyPoint point = ReadOnlyPoint.Zero;
         this.AreEqual(0, point.X);
         this.AreEqual(0, point.Y);
-        this.IsTrue(point.IsEmpty);
-        this.IsFalse(point.IsNaN);
-        this.IsTrue(point.IsValid);
+        this.IsTrue(point.IsZero());
+        this.IsFalse(point.IsNaN());
+        this.IsTrue(point.IsValid());
     }
 
     [Test]
@@ -24,8 +24,8 @@ public sealed class ReadOnlyPoint_Tests : Assert
         ReadOnlyPoint point = ReadOnlyPoint.Invalid;
         this.IsTrue(double.IsNaN(point.X));
         this.IsTrue(double.IsNaN(point.Y));
-        this.IsTrue(point.IsNaN);
-        this.IsFalse(point.IsValid);
+        this.IsTrue(point.IsNaN());
+        this.IsFalse(point.IsValid());
     }
 
     [Test]
@@ -41,10 +41,10 @@ public sealed class ReadOnlyPoint_Tests : Assert
     public void IsEmpty_WhenXOrYIsNotZero_ShouldBeFalse()
     {
         ReadOnlyPoint point = new(1, 0);
-        this.IsFalse(point.IsEmpty);
+        this.IsFalse(point.IsZero());
 
         point = new ReadOnlyPoint(0, 1);
-        this.IsFalse(point.IsEmpty);
+        this.IsFalse(point.IsZero());
     }
 
     //--------------------------------------------------------------------------------------
@@ -219,8 +219,8 @@ public sealed class ReadOnlyPoint_Tests : Assert
         ReadOnlyPoint a      = new(2, 3);
         ReadOnlyPoint b      = new PointF(2, 3);
         ReadOnlyPoint result = a * b;
-        this.AreEqual(8,  result.X);
-        this.AreEqual(15, result.Y);
+        this.AreEqual(4,  result.X);
+        this.AreEqual(9, result.Y);
     }
 
     [Test]

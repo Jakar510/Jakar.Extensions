@@ -5,16 +5,9 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
-    where TSelf : IPoint<TSelf>, IJsonModel<TSelf>
+    where TSelf : struct, IPoint<TSelf>, IJsonModel<TSelf>
 {
-    [Pure] public abstract static TSelf  Create( double x, double y );
-    [Pure] public                 TSelf  Reverse();
-    [Pure] public                 TSelf  Round();
-    [Pure] public                 TSelf  Floor();
-    [Pure] public                 double DistanceTo( in TSelf         other );
-    [Pure] public                 double Dot( in        ReadOnlyPoint other );
-    [Pure] public                 double Magnitude();
-    public                        double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 );
+    [Pure] public abstract static TSelf Create( double x, double y );
 
 
     public static string ToString( ref readonly TSelf self, string? format )

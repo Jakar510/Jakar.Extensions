@@ -18,17 +18,16 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static readonly MutableSize One     = 1;
 
 
-    static ref readonly MutableSize IShape<MutableSize>.Zero        => ref Zero;
-    static ref readonly MutableSize IShape<MutableSize>.Invalid     => ref Invalid;
-    static ref readonly MutableSize IShape<MutableSize>.One         => ref One;
-    public              double                          Width       { get; set; } = width;
-    ReadOnlySize IShapeSize.                            Size        => this;
-    public                       double                 Height      { get; set; } = height;
-    [JsonIgnore] public readonly bool                   IsEmpty     => ISize<MutableSize>.CheckIfEmpty(in this);
-    public readonly              bool                   IsLandscape => ISize<MutableSize>.CheckIfLandscape(in this);
-    public readonly              bool                   IsNaN       => ISize<MutableSize>.CheckIfNan(in this);
-    public readonly              bool                   IsPortrait  => ISize<MutableSize>.CheckIfPortrait(in this);
-    public                       bool                   IsValid     => ISize<MutableSize>.CheckIfValid(in this);
+    public static       JsonSerializerContext           JsonContext   => JakarShapesContext.Default;
+    public static       JsonTypeInfo<MutableSize>       JsonTypeInfo  => JakarShapesContext.Default.MutableSize;
+    public static       JsonTypeInfo<MutableSize[]>     JsonArrayInfo => JakarShapesContext.Default.MutableSizeArray;
+    static ref readonly MutableSize IShape<MutableSize>.Zero          => ref Zero;
+    static ref readonly MutableSize IShape<MutableSize>.Invalid       => ref Invalid;
+    static ref readonly MutableSize IShape<MutableSize>.One           => ref One;
+    bool IValidator.                                    IsValid       => this.IsValid();
+    public double                                       Width         { get; set; } = width;
+    ReadOnlySize IShapeSize.                            Size          => this;
+    public double                                       Height        { get; set; } = height;
 
 
     public static implicit operator ReadOnlySize( MutableSize  rect )  => new(rect.Width, rect.Height);
@@ -45,13 +44,13 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public static implicit operator MutableSize( double        value ) => new(value, value);
 
 
-    [Pure] public static MutableSize Min( params ReadOnlySpan<ReadOnlySize> points )
+    [Pure] public static MutableSize Min( params ReadOnlySpan<MutableSize> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
         MutableSize result = Zero;
 
-        foreach ( ref readonly ReadOnlySize size in points )
+        foreach ( ref readonly MutableSize size in points )
         {
             result.Width  = Math.Min(result.Width,  size.Width);
             result.Height = Math.Min(result.Height, size.Height);
@@ -75,13 +74,13 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     }
 
 
-    [Pure] public static MutableSize Max( params ReadOnlySpan<ReadOnlySize> points )
+    [Pure] public static MutableSize Max( params ReadOnlySpan<MutableSize> points )
     {
         if ( points.Length <= 0 ) { return Zero; }
 
         MutableSize result = Zero;
 
-        foreach ( ref readonly ReadOnlySize size in points )
+        foreach ( ref readonly MutableSize size in points )
         {
             result.Width  = Math.Max(result.Width,  size.Width);
             result.Height = Math.Max(result.Height, size.Height);
@@ -105,8 +104,27 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     }
 
 
+    public static bool TryFromJson( string? json, out MutableSize result )
+    {
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
+    }
+    public static        MutableSize FromJson( string             json )                 => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
     [Pure] public static MutableSize Create( double               width, double height ) => new(width, height);
-    [Pure] public static MutableSize Create( in ReadOnlySize      size )    => new(size.Width, size.Height);
+    [Pure] public static MutableSize Create( in MutableSize       size )    => new(size.Width, size.Height);
     [Pure] public static MutableSize Create( in ReadOnlySizeF     size )    => new(size.Width, size.Height);
     [Pure] public static MutableSize Create( in ReadOnlyThickness padding ) => new(padding.HorizontalThickness, padding.VerticalThickness);
 
@@ -130,10 +148,10 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     public override bool   Equals( object?     other )                                 => other is MutableSize x    && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(Width, Height);
     public override string ToString()                                                  => ToString(null, null);
-    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => ISize<MutableSize>.ToString(in this, format);
+    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
-    [Pure] public readonly bool IsAtLeast( in ReadOnlySize  other ) => other.Width <= Width && other.Height <= Height;
+    [Pure] public readonly bool IsAtLeast( in MutableSize   other ) => other.Width <= Width && other.Height <= Height;
     [Pure] public readonly bool IsAtLeast( in ReadOnlySizeF other ) => other.Width <= Width && other.Height <= Height;
 
 
@@ -166,80 +184,48 @@ public struct MutableSize( double width, double height ) : ISize<MutableSize>
     }
 
 
-    public static        bool operator ==( MutableSize?      left, MutableSize?                     right )  => Nullable.Equals(left, right);
-    public static        bool operator !=( MutableSize?      left, MutableSize?                     right )  => !Nullable.Equals(left, right);
-    public static        bool operator ==( MutableSize       left, MutableSize                      right )  => EqualityComparer<MutableSize>.Default.Equals(left, right);
-    public static        bool operator !=( MutableSize       left, MutableSize                      right )  => !EqualityComparer<MutableSize>.Default.Equals(left, right);
-    public static        bool operator >( MutableSize        left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) > 0;
-    public static        bool operator >=( MutableSize       left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) >= 0;
-    public static        bool operator <( MutableSize        left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) < 0;
-    public static        bool operator <=( MutableSize       left, MutableSize                      right )  => Comparer<MutableSize>.Default.Compare(left, right) <= 0;
-    public static        MutableSize operator +( MutableSize self, MutableSize                      other )  => new(self.Width + other.Width, self.Height + other.Height);
-    public static        MutableSize operator -( MutableSize self, MutableSize                      other )  => new(self.Width - other.Width, self.Height - other.Height);
-    public static        MutableSize operator *( MutableSize self, MutableSize                      other )  => new(self.Width * other.Width, self.Height * other.Height);
-    public static        MutableSize operator /( MutableSize self, MutableSize                      other )  => new(self.Width / other.Width, self.Height / other.Height);
-    public static        MutableSize operator +( MutableSize self, ReadOnlySize                     other )  => new(self.Width + other.Width, self.Height + other.Height);
-    public static        MutableSize operator -( MutableSize self, ReadOnlySize                     other )  => new(self.Width - other.Width, self.Height - other.Height);
-    public static        MutableSize operator *( MutableSize self, ReadOnlySize                     other )  => new(self.Width * other.Width, self.Height * other.Height);
-    public static        MutableSize operator /( MutableSize self, ReadOnlySize                     other )  => new(self.Width / other.Width, self.Height / other.Height);
-    public static        MutableSize operator +( MutableSize self, ReadOnlySizeF                    other )  => new(self.Width + other.Width, self.Height + other.Height);
-    public static        MutableSize operator -( MutableSize self, ReadOnlySizeF                    other )  => new(self.Width - other.Width, self.Height - other.Height);
-    public static        MutableSize operator *( MutableSize self, ReadOnlySizeF                    other )  => new(self.Width * other.Width, self.Height * other.Height);
-    public static        MutableSize operator /( MutableSize self, ReadOnlySizeF                    other )  => new(self.Width / other.Width, self.Height / other.Height);
-    public static        MutableSize operator +( MutableSize self, SizeF                            other )  => new(self.Width + other.Width, self.Height + other.Height);
-    public static        MutableSize operator -( MutableSize self, SizeF                            other )  => new(self.Width - other.Width, self.Height - other.Height);
-    public static        MutableSize operator *( MutableSize self, SizeF                            other )  => new(self.Width * other.Width, self.Height * other.Height);
-    public static        MutableSize operator /( MutableSize self, SizeF                            other )  => new(self.Width / other.Width, self.Height / other.Height);
-    public static        MutableSize operator +( MutableSize self, Size                             other )  => new(self.Width + other.Width, self.Height + other.Height);
-    public static        MutableSize operator -( MutableSize self, Size                             other )  => new(self.Width - other.Width, self.Height - other.Height);
-    public static        MutableSize operator *( MutableSize self, Size                             other )  => new(self.Width * other.Width, self.Height * other.Height);
-    public static        MutableSize operator /( MutableSize self, Size                             other )  => new(self.Width / other.Width, self.Height / other.Height);
-    [Pure] public static MutableSize operator +( MutableSize self, ReadOnlyThickness                margin ) => new(self.Width + margin.HorizontalThickness, self.Height + margin.VerticalThickness);
-    [Pure] public static MutableSize operator -( MutableSize self, ReadOnlyThickness                margin ) => new(self.Width - margin.HorizontalThickness, self.Height - margin.VerticalThickness);
-    public static        MutableSize operator +( MutableSize self, int                              value )  => new(self.Width + value, self.Height                      + value);
-    public static        MutableSize operator +( MutableSize self, float                            value )  => new(self.Width + value, self.Height                      + value);
-    public static        MutableSize operator +( MutableSize self, double                           value )  => new(self.Width + value, self.Height                      + value);
-    public static        MutableSize operator -( MutableSize self, int                              value )  => new(self.Width - value, self.Height                      - value);
-    public static        MutableSize operator -( MutableSize self, float                            value )  => new(self.Width - value, self.Height                      - value);
-    public static        MutableSize operator -( MutableSize self, double                           value )  => new(self.Width - value, self.Height                      - value);
-    public static        MutableSize operator *( MutableSize self, int                              value )  => new(self.Width * value, self.Height * value);
-    public static        MutableSize operator *( MutableSize self, float                            value )  => new(self.Width * value, self.Height * value);
-    public static        MutableSize operator *( MutableSize self, double                           value )  => new(self.Width * value, self.Height * value);
-    public static        MutableSize operator /( MutableSize self, int                              value )  => new(self.Width / value, self.Height / value);
-    public static        MutableSize operator /( MutableSize self, float                            value )  => new(self.Width / value, self.Height / value);
-    public static        MutableSize operator /( MutableSize self, double                           value )  => new(self.Width / value, self.Height / value);
-    public static        MutableSize operator +( MutableSize self, (int xOffset, int yOffset)       value )  => new(self.Width + value.xOffset, self.Height + value.yOffset);
-    public static        MutableSize operator +( MutableSize self, (float xOffset, float yOffset)   value )  => new(self.Width + value.xOffset, self.Height + value.yOffset);
-    public static        MutableSize operator +( MutableSize self, (double xOffset, double yOffset) value )  => new(self.Width + value.xOffset, self.Height + value.yOffset);
-    public static        MutableSize operator -( MutableSize self, (int xOffset, int yOffset)       value )  => new(self.Width - value.xOffset, self.Height - value.yOffset);
-    public static        MutableSize operator -( MutableSize self, (float xOffset, float yOffset)   value )  => new(self.Width - value.xOffset, self.Height - value.yOffset);
-    public static        MutableSize operator -( MutableSize self, (double xOffset, double yOffset) value )  => new(self.Width - value.xOffset, self.Height - value.yOffset);
-    public static        MutableSize operator *( MutableSize self, (int xOffset, int yOffset)       value )  => new(self.Width * value.xOffset, self.Height * value.yOffset);
-    public static        MutableSize operator *( MutableSize self, (float xOffset, float yOffset)   value )  => new(self.Width * value.xOffset, self.Height * value.yOffset);
-    public static        MutableSize operator *( MutableSize self, (double xOffset, double yOffset) value )  => new(self.Width * value.xOffset, self.Height * value.yOffset);
-    public static        MutableSize operator /( MutableSize self, (int xOffset, int yOffset)       value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
-    public static        MutableSize operator /( MutableSize self, (float xOffset, float yOffset)   value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
-    public static        MutableSize operator /( MutableSize self, (double xOffset, double yOffset) value )  => new(self.Width / value.xOffset, self.Height / value.yOffset);
-    public static        JsonSerializerContext       JsonContext   => JakarShapesContext.Default;
-    public static        JsonTypeInfo<MutableSize>   JsonTypeInfo  => JakarShapesContext.Default.MutableSize;
-    public static        JsonTypeInfo<MutableSize[]> JsonArrayInfo => JakarShapesContext.Default.MutableSizeArray;
-    public static bool TryFromJson( string? json, out MutableSize result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = Invalid;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = Invalid;
-        return false;
-    }
-    public static MutableSize FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static bool operator ==( MutableSize?      left, MutableSize?                     right ) => Nullable.Equals(left, right);
+    public static bool operator !=( MutableSize?      left, MutableSize?                     right ) => !Nullable.Equals(left, right);
+    public static bool operator ==( MutableSize       left, MutableSize                      right ) => EqualityComparer<MutableSize>.Default.Equals(left, right);
+    public static bool operator !=( MutableSize       left, MutableSize                      right ) => !EqualityComparer<MutableSize>.Default.Equals(left, right);
+    public static bool operator >( MutableSize        left, MutableSize                      right ) => Comparer<MutableSize>.Default.Compare(left, right) > 0;
+    public static bool operator >=( MutableSize       left, MutableSize                      right ) => Comparer<MutableSize>.Default.Compare(left, right) >= 0;
+    public static bool operator <( MutableSize        left, MutableSize                      right ) => Comparer<MutableSize>.Default.Compare(left, right) < 0;
+    public static bool operator <=( MutableSize       left, MutableSize                      right ) => Comparer<MutableSize>.Default.Compare(left, right) <= 0;
+    public static MutableSize operator +( MutableSize self, MutableSize                      value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, MutableSize                      value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, MutableSize                      value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, MutableSize                      value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, ReadOnlySize                     value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, ReadOnlySize                     value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, ReadOnlySize                     value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, ReadOnlySize                     value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, ReadOnlySizeF                    value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, ReadOnlySizeF                    value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, ReadOnlySizeF                    value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, ReadOnlySizeF                    value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static MutableSize operator *( MutableSize self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static MutableSize operator /( MutableSize self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static MutableSize operator +( MutableSize self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static MutableSize operator *( MutableSize self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static MutableSize operator /( MutableSize self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static MutableSize operator +( MutableSize self, double                           value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, double                           value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, double                           value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, double                           value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, float                            value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, float                            value ) => self.Subtract(value);
+    public static MutableSize operator /( MutableSize self, float                            value ) => self.Divide(value);
+    public static MutableSize operator *( MutableSize self, float                            value ) => self.Multiply(value);
+    public static MutableSize operator +( MutableSize self, int                              value ) => self.Add(value);
+    public static MutableSize operator -( MutableSize self, int                              value ) => self.Subtract(value);
+    public static MutableSize operator *( MutableSize self, int                              value ) => self.Multiply(value);
+    public static MutableSize operator /( MutableSize self, int                              value ) => self.Divide(value);
 }

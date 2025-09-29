@@ -28,9 +28,9 @@ public sealed class MutableRectangle_Tests : Assert
 
         MutableRectangle result = MutableRectangle.Create(points);
         this.AreEqual(0,  result.X);
-        this.AreEqual(10, result.TopRight.X);
-        this.AreEqual(0,  result.TopRight.Y);
-        this.AreEqual(10, result.BottomRight.Y);
+        this.AreEqual(10, result.MaxWidth());
+        this.AreEqual(0,  result.Y);
+        this.AreEqual(10, result.MaxHeight());
     }
 
 
@@ -155,40 +155,40 @@ public sealed class MutableRectangle_Tests : Assert
         MutableRectangle result = new(1, 1, 5, 5);
         result -= ( xOffset: 0.5, yOffset: 1.5 );
 
-        this.AreEqual(0.5,  result.X);
-        this.AreEqual(-0.5, result.Y);
-        this.AreEqual(5,    result.Width);
-        this.AreEqual(5,    result.Height);
+        this.AreEqual(1,  result.X);
+        this.AreEqual(1, result.Y);
+        this.AreEqual(4.5,    result.Width);
+        this.AreEqual(3.5,    result.Height);
     }
     [Test] public void Addition_With_TupleOffset_AdjustsPositionOnly()
     {
         MutableRectangle result = new(1, 1, 5, 5);
         result += ( xOffset: 0.5, yOffset: 1.5 );
 
-        this.AreEqual(1.5, result.X);
-        this.AreEqual(2.5, result.Y);
-        this.AreEqual(5,   result.Width);
-        this.AreEqual(5,   result.Height);
+        this.AreEqual(1, result.X);
+        this.AreEqual(1, result.Y);
+        this.AreEqual(5.5,   result.Width);
+        this.AreEqual(6.5,   result.Height);
     }
     [Test] public void Division_With_TupleOffset_AdjustsPositionOnly()
     {
         MutableRectangle result = new(1, 1, 5, 5);
         result /= ( xOffset: 0.5, yOffset: 1.5 );
 
-        this.AreEqual(2,       result.X);
-        this.AreEqual(1 / 1.5, result.Y);
-        this.AreEqual(5,       result.Width);
-        this.AreEqual(5,       result.Height);
+        this.AreEqual(1,       result.X);
+        this.AreEqual(1, result.Y);
+        this.AreEqual(10,       result.Width);
+        this.AreEqual(5/1.5,       result.Height);
     }
     [Test] public void Multiplication_With_TupleOffset_AdjustsPositionOnly()
     {
         MutableRectangle result = new(1, 1, 5, 5);
         result *= ( xOffset: 0.5, yOffset: 1.5 );
 
-        this.AreEqual(0.5, result.X);
-        this.AreEqual(1.5, result.Y);
-        this.AreEqual(5,   result.Width);
-        this.AreEqual(5,   result.Height);
+        this.AreEqual(1, result.X);
+        this.AreEqual(1, result.Y);
+        this.AreEqual(2.5,   result.Width);
+        this.AreEqual(7.5,   result.Height);
     }
 
     [Test] public void Addition_With_ReadOnlyPointF_AdjustsPositionOnly()
@@ -272,7 +272,7 @@ public sealed class MutableRectangle_Tests : Assert
         MutableRectangle  result = __fiveRect;
         ReadOnlyRectangle other  = ReadOnlyRectangle.Create(in __two, in ReadOnlySize.One);
         Console.WriteLine(result);
-        result = result + other;
+        result += other;
         Console.WriteLine(other);
         Console.WriteLine(result);
         this.AreEqual(7, result.X);

@@ -22,17 +22,17 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public readonly        bool          IsFinite = isFinite;
 
 
-    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Zero     => ref Zero;
-    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.One      => ref One;
-    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Invalid  => ref Invalid;
-    ReadOnlyPoint ILine<ReadOnlyLine>.                    Start    => Start;
-    ReadOnlyPoint ILine<ReadOnlyLine>.                    End      => End;
-    bool ILine<ReadOnlyLine>.                             IsFinite => IsFinite;
-    public bool                                           IsEmpty  => Start.IsEmpty || End.IsEmpty;
-    public bool                                           IsNaN    => Start.IsNaN   || End.IsNaN;
-    public bool                                           IsValid  => !IsNaN && Start != End;
-    public double                                         Length   => Start.DistanceTo(in End);
-    public double                                         Slope    => ( End.Y - Start.Y ) / ( End.X - Start.X );
+    public static       JsonSerializerContext             JsonContext   => JakarShapesContext.Default;
+    public static       JsonTypeInfo<ReadOnlyLine>        JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyLine;
+    public static       JsonTypeInfo<ReadOnlyLine[]>      JsonArrayInfo => JakarShapesContext.Default.ReadOnlyLineArray;
+    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Zero          => ref Zero;
+    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.One           => ref One;
+    static ref readonly ReadOnlyLine IShape<ReadOnlyLine>.Invalid       => ref Invalid;
+    bool IValidator.                                      IsValid       => this.IsValid();
+    ReadOnlyPoint ILine<ReadOnlyLine, ReadOnlyPoint>.     Start         => Start;
+    ReadOnlyPoint ILine<ReadOnlyLine, ReadOnlyPoint>.     End           => End;
+    bool ILine<ReadOnlyLine, ReadOnlyPoint>.              IsFinite      => IsFinite;
+    public double                                         Length        => Start.DistanceTo(End);
 
 
     public static implicit operator ReadOnlyLine( int    other ) => new(ReadOnlyPoint.Zero, other);
@@ -42,15 +42,26 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
 
 
     [Pure] public static ReadOnlyLine Create( in ReadOnlyPoint start, in ReadOnlyPoint end, bool isFinite = true ) => new(start, end, isFinite);
-    [Pure] public        ReadOnlyLine Round() => new(Start.Round(), End.Round(), IsFinite);
-    [Pure] public        ReadOnlyLine Floor() => new(Start.Floor(), End.Floor(), IsFinite);
-
-    public void Deconstruct( out ReadOnlyPoint start, out ReadOnlyPoint end, out bool isFinite )
+    public static bool TryFromJson( string? json, out ReadOnlyLine result )
     {
-        start    = Start;
-        end      = End;
-        isFinite = IsFinite;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
     }
+    public static ReadOnlyLine FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+
 
     public int CompareTo( ReadOnlyLine other )
     {
@@ -72,7 +83,7 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public override bool   Equals( object?      other )                                => other is ReadOnlyLine x   && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(Start, End, IsFinite);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ILine<ReadOnlyLine>.ToString(in this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
     public static bool operator ==( ReadOnlyLine?       left, ReadOnlyLine?                    right ) => Nullable.Equals(left, right);
@@ -83,62 +94,36 @@ public readonly struct ReadOnlyLine( ReadOnlyPoint start, ReadOnlyPoint end, boo
     public static bool operator >=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) >= 0;
     public static bool operator <( ReadOnlyLine         left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) < 0;
     public static bool operator <=( ReadOnlyLine        left, ReadOnlyLine                     right ) => Comparer<ReadOnlyLine>.Default.Compare(left, right) <= 0;
-    public static ReadOnlyLine operator *( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start * other.Start, self.End * other.End);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start + other.Start, self.End + other.End);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start - other.Start, self.End - other.End);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, ReadOnlyLine                     other ) => new(self.Start / other.Start, self.End / other.End);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, ReadOnlyPoint                    other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, ReadOnlyPointF                   other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, ReadOnlyPoint                    other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, ReadOnlyPointF                   other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator &( ReadOnlyLine self, ReadOnlyPoint                    other ) => new(other, self.End);
-    public static ReadOnlyLine operator &( ReadOnlyLine self, ReadOnlyPointF                   other ) => new(other, self.End);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, ReadOnlyLine                     value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, ReadOnlyLine                     value ) => self.Subtract(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, ReadOnlyLine                     value ) => self.Divide(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, ReadOnlyLine                     value ) => self.Multiply(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, double                           value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, double                           value ) => self.Subtract(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, double                           value ) => self.Divide(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, double                           value ) => self.Multiply(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, float                            value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, float                            value ) => self.Subtract(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, float                            value ) => self.Divide(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, float                            value ) => self.Multiply(value);
+    public static ReadOnlyLine operator +( ReadOnlyLine self, int                              value ) => self.Add(value);
+    public static ReadOnlyLine operator -( ReadOnlyLine self, int                              value ) => self.Subtract(value);
+    public static ReadOnlyLine operator *( ReadOnlyLine self, int                              value ) => self.Multiply(value);
+    public static ReadOnlyLine operator /( ReadOnlyLine self, int                              value ) => self.Divide(value);
+    public static ReadOnlyLine operator &( ReadOnlyLine self, ReadOnlyPoint                    other ) => new(self.Start, other);
+    public static ReadOnlyLine operator &( ReadOnlyLine self, ReadOnlyPointF                   other ) => new(self.Start, other);
     public static ReadOnlyLine operator ^( ReadOnlyLine self, ReadOnlyPoint                    other ) => new(self.Start, other);
     public static ReadOnlyLine operator ^( ReadOnlyLine self, ReadOnlyPointF                   other ) => new(self.Start, other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, (int xOffset, int yOffset)       other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, (float xOffset, float yOffset)   other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, (double xOffset, double yOffset) other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, (int xOffset, int yOffset)       other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, (float xOffset, float yOffset)   other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, (double xOffset, double yOffset) other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, (int xOffset, int yOffset)       other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, (float xOffset, float yOffset)   other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, (double xOffset, double yOffset) other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, (int xOffset, int yOffset)       other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, (float xOffset, float yOffset)   other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, (double xOffset, double yOffset) other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, int                              other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, float                            other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator *( ReadOnlyLine self, double                           other ) => new(self.Start * other, self.End * other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, int                              other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, float                            other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator /( ReadOnlyLine self, double                           other ) => new(self.Start / other, self.End / other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, int                              other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, float                            other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator +( ReadOnlyLine self, double                           other ) => new(self.Start + other, self.End + other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, int                              other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, float                            other ) => new(self.Start - other, self.End - other);
-    public static ReadOnlyLine operator -( ReadOnlyLine self, double                           other ) => new(self.Start - other, self.End - other);
-    public static JsonSerializerContext        JsonContext   => JakarShapesContext.Default;
-    public static JsonTypeInfo<ReadOnlyLine>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyLine;
-    public static JsonTypeInfo<ReadOnlyLine[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyLineArray;
-    public static bool TryFromJson( string? json, out ReadOnlyLine result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = Invalid;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = Invalid;
-        return false;
-    }
-    public static ReadOnlyLine FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 }

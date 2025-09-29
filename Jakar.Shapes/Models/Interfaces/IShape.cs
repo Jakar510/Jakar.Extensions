@@ -4,13 +4,12 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IShape<TSelf> : IFormattable, IValidator, IJsonModel<TSelf>
+public interface IShape<TSelf> : IValidator, IFormattable, IJsonModel<TSelf>
     where TSelf : IShape<TSelf>
 {
     public abstract static ref readonly TSelf Invalid { get; }
     public abstract static ref readonly TSelf One     { get; }
     public abstract static ref readonly TSelf Zero    { get; }
-    public                              bool  IsNaN   { get; }
 
 
     public abstract static TSelf operator +( TSelf self, int                              other );

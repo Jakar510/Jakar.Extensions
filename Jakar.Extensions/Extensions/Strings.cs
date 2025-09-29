@@ -96,8 +96,7 @@ public static class Strings
 
     public static                       byte[]       ToByteArray( this string value, Encoding? encoding = null ) => ( encoding ?? Encoding.Default ).GetBytes(value);
     [MustDisposeResource] public static Buffer<byte> AsSpanBytes( this string value, Encoding  encoding )        => AsSpanBytes(value.AsSpan(), encoding);
-    [MustDisposeResource]
-    public static Buffer<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
+    [MustDisposeResource] public static Buffer<byte> AsSpanBytes( this ReadOnlySpan<char> value, Encoding encoding )
     {
         Buffer<byte> span = new(encoding.GetByteCount(value));
         encoding.GetBytes(value, span.Span);
@@ -238,14 +237,17 @@ public static class Strings
     /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
     public static string ToSnakeCase( this string value ) => value.ToSnakeCase(CultureInfo.InvariantCulture);
 
+
     /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
     public static string ToSnakeCase( this string value, CultureInfo cultureInfo ) => ToSnakeCase(value.AsSpan(), cultureInfo);
-    public static string ToSnakeCase( scoped in ReadOnlySpan<char> span, CultureInfo cultureInfo )
+
+
+    public static string ToSnakeCase( this scoped in ReadOnlySpan<char> span, CultureInfo cultureInfo )
     {
         if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
 
-        using ValueStringBuilder builder          = new(span.Length + span.Count(' ') + span.Count(Randoms.UPPER_CASE));
-        UnicodeCategory?         previousCategory = null;
+        StringBuilder    builder          = new(span.Length + span.Count(' '));
+        UnicodeCategory? previousCategory = null;
 
         for ( int currentIndex = 0; currentIndex < span.Length; currentIndex++ )
         {

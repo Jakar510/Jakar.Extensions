@@ -4,32 +4,30 @@
 namespace Jakar.Shapes.Tests;
 
 
-[TestFixture][TestOf(typeof(ReadOnlyPointF))]
+[TestFixture]
+[TestOf(typeof(ReadOnlyPointF))]
 public sealed class ReadOnlyPointF_Tests : Assert
 {
-    [Test]
-    public void Zero_ShouldBeEmptyAndValid()
+    [Test] public void Zero_ShouldBeEmptyAndValid()
     {
         ReadOnlyPointF point = ReadOnlyPointF.Zero;
         this.AreEqual(0, point.X);
         this.AreEqual(0, point.Y);
-        this.IsTrue(point.IsEmpty);
-        this.IsFalse(point.IsNaN);
-        this.IsTrue(point.IsValid);
+        this.IsTrue(point.IsZero());
+        this.IsFalse(point.IsNaN());
+        this.IsTrue(point.IsValid());
     }
 
-    [Test]
-    public void Invalid_ShouldBeNaNAndInvalid()
+    [Test] public void Invalid_ShouldBeNaNAndInvalid()
     {
         ReadOnlyPointF point = ReadOnlyPointF.Invalid;
         this.IsTrue(double.IsNaN(point.X));
         this.IsTrue(double.IsNaN(point.Y));
-        this.IsTrue(point.IsNaN);
-        this.IsFalse(point.IsValid);
+        this.IsTrue(point.IsNaN());
+        this.IsFalse(point.IsValid());
     }
 
-    [Test]
-    public void ImplicitConversion_ToPoint_ShouldRoundValues()
+    [Test] public void ImplicitConversion_ToPoint_ShouldRoundValues()
     {
         ReadOnlyPointF point     = new(1.6f, 2.4f);
         Point          converted = point;
@@ -37,20 +35,18 @@ public sealed class ReadOnlyPointF_Tests : Assert
         this.AreEqual(2, converted.Y);
     }
 
-    [Test]
-    public void IsEmpty_WhenXOrYIsNotZero_ShouldBeFalse()
+    [Test] public void IsEmpty_WhenXOrYIsNotZero_ShouldBeFalse()
     {
         ReadOnlyPointF point = new(1, 0);
-        this.IsFalse(point.IsEmpty);
+        this.IsFalse(point.IsZero());
 
         point = new ReadOnlyPointF(0, 1);
-        this.IsFalse(point.IsEmpty);
+        this.IsFalse(point.IsZero());
     }
 
     //--------------------------------------------------------------------------------------
 
-    [Test]
-    public void Operator_Equality_ShouldReturnTrueForSameCoordinates()
+    [Test] public void Operator_Equality_ShouldReturnTrueForSameCoordinates()
     {
         ReadOnlyPointF a = new(1.5f, 2.5f);
         ReadOnlyPointF b = new(1.5f, 2.5f);
@@ -59,8 +55,7 @@ public sealed class ReadOnlyPointF_Tests : Assert
         this.IsTrue(a.Equals(b));
     }
 
-    [Test]
-    public void Operator_Equality_ShouldReturnFalseForDifferentCoordinates()
+    [Test] public void Operator_Equality_ShouldReturnFalseForDifferentCoordinates()
     {
         ReadOnlyPointF a = new(1.5f, 2.5f);
         ReadOnlyPointF b = new(2.5f, 3.5f);
@@ -69,24 +64,21 @@ public sealed class ReadOnlyPointF_Tests : Assert
         this.IsFalse(a.Equals(b));
     }
 
-    [Test]
-    public void Equals_ShouldReturnFalseWhenComparedWithNull()
+    [Test] public void Equals_ShouldReturnFalseWhenComparedWithNull()
     {
         ReadOnlyPointF a = new(1.5f, 2.5f);
         object?        b = null;
         this.IsFalse(a.Equals(b));
     }
 
-    [Test]
-    public void Equals_ShouldReturnFalseWhenComparedWithDifferentType()
+    [Test] public void Equals_ShouldReturnFalseWhenComparedWithDifferentType()
     {
         ReadOnlyPointF a = new(1.5f, 2.5f);
         string         b = "not a point";
         this.IsFalse(a.Equals(b));
     }
 
-    [Test]
-    public void GetHashCode_ShouldBeSameForEqualValues()
+    [Test] public void GetHashCode_ShouldBeSameForEqualValues()
     {
         ReadOnlyPointF a = new(1.5f, 2.5f);
         ReadOnlyPointF b = new(1.5f, 2.5f);
@@ -95,8 +87,7 @@ public sealed class ReadOnlyPointF_Tests : Assert
 
     //--------------------------------------------------------------------------------------
 
-    [Test]
-    public void Round_ShouldRoundValues()
+    [Test] public void Round_ShouldRoundValues()
     {
         ReadOnlyPointF point     = new(1.6f, 2.4f);
         Point          converted = point.Round();
@@ -104,8 +95,7 @@ public sealed class ReadOnlyPointF_Tests : Assert
         this.AreEqual(2, converted.Y);
     }
 
-    [Test]
-    public void Floor_ShouldDecreaseValues()
+    [Test] public void Floor_ShouldDecreaseValues()
     {
         ReadOnlyPointF point     = new(1.6f, 2.4f);
         Point          converted = point.Floor();

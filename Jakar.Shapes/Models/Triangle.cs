@@ -27,26 +27,15 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     static ref readonly Triangle IShape<Triangle>.Zero          => ref Zero;
     static ref readonly Triangle IShape<Triangle>.One           => ref One;
     static ref readonly Triangle IShape<Triangle>.Invalid       => ref Invalid;
-    ReadOnlyPoint IShapeLocation.                 Location      => Centroid;
-    public bool                                   IsEmpty       => A.IsOneOf(B, C) || B.IsOneOf(A, C) || C.IsOneOf(A, B);
-    public bool                                   IsNaN         => A.IsNaN         || B.IsNaN         || C.IsNaN;
+    ReadOnlyPoint IShapeLocation.                 Location      => this.Centroid();
+    bool IValidator.                              IsValid       => this.IsValid();
+    public bool                                   IsNaN         => A.IsNaN() || B.IsNaN() || C.IsNaN();
     public bool                                   IsValid       => !IsNaN;
     ReadOnlyPoint ITriangle<Triangle>.            A             => A;
     ReadOnlyPoint ITriangle<Triangle>.            B             => B;
     ReadOnlyPoint ITriangle<Triangle>.            C             => C;
-    public ReadOnlyLine                           Ab            => new(A, B);
-    public ReadOnlyLine                           Bc            => new(B, C);
-    public ReadOnlyLine                           Ca            => new(C, A);
-    public double                                 Area          => Math.Abs(0.5 * ( B.X - A.X ) * ( C.Y - A.Y ) - ( C.X - A.X ) * ( B.Y - A.Y ));
-    public ReadOnlyPoint                          Centroid      => new(( A.X + B.X + C.X ) / 3, ( A.Y + B.Y + C.Y ) / 3);
-    public Degrees                                Abc           => new(A.AngleBetween(in B, in C));
-    public Degrees                                Bac           => new(B.AngleBetween(in A, in C));
-    public Degrees                                Cab           => new(C.AngleBetween(in A, in B));
-    double IShapeLocation.                        X             => Centroid.X;
-    double IShapeLocation.                        Y             => Centroid.Y;
-
-
-    public void Deconstruct( out double x, out double y ) => Centroid.Deconstruct(out x, out y);
+    double IShapeLocation.                        X             => this.Centroid().X;
+    double IShapeLocation.                        Y             => this.Centroid().Y;
 
 
     public static bool TryFromJson( string? json, out Triangle result )
@@ -67,7 +56,8 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
         result = Invalid;
         return false;
     }
-    public static Triangle FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static Triangle FromJson( string      json )                                => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static Triangle Create( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint c ) => new(a, b, c);
 
 
     public int CompareTo( Triangle other )
@@ -92,7 +82,7 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public override bool   Equals( object?  other )                                    => other is Circle x && Equals(x);
     public override int    GetHashCode()                                               => HashCode.Combine(A, B, C);
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ITriangle<Triangle>.ToString(in this, format);
+    public          string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
     public static bool operator ==( Triangle?   left, Triangle?                        right ) => Nullable.Equals(left, right);
@@ -103,32 +93,32 @@ public readonly struct Triangle( ReadOnlyPoint a, ReadOnlyPoint b, ReadOnlyPoint
     public static bool operator >=( Triangle    left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) >= 0;
     public static bool operator <( Triangle     left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) < 0;
     public static bool operator <=( Triangle    left, Triangle                         right ) => Comparer<Triangle>.Default.Compare(left, right) <= 0;
-    public static Triangle operator *( Triangle self, Triangle                         other ) => new(self.A * other.A, self.B * other.B, self.C * other.B);
-    public static Triangle operator +( Triangle self, Triangle                         other ) => new(self.A + other.A, self.B + other.B, self.C + other.B);
-    public static Triangle operator -( Triangle self, Triangle                         other ) => new(self.A - other.A, self.B - other.B, self.C - other.B);
-    public static Triangle operator /( Triangle self, Triangle                         other ) => new(self.A / other.A, self.B / other.B, self.C / other.B);
-    public static Triangle operator *( Triangle self, int                              other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator *( Triangle self, float                            other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator *( Triangle self, double                           other ) => new(self.A * other, self.B   * other, self.C   * other);
-    public static Triangle operator /( Triangle self, int                              other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator /( Triangle self, float                            other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator /( Triangle self, double                           other ) => new(self.A / other, self.B   / other, self.C   / other);
-    public static Triangle operator +( Triangle self, int                              other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, float                            other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, double                           other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator -( Triangle self, int                              other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, float                            other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, double                           other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator +( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator +( Triangle self, (double xOffset, double yOffset) other ) => new(self.A + other, self.B + other, self.C + other);
-    public static Triangle operator -( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator -( Triangle self, (double xOffset, double yOffset) other ) => new(self.A - other, self.B - other, self.C - other);
-    public static Triangle operator *( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A * other, self.B * other, self.C * other);
-    public static Triangle operator *( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A * other, self.B * other, self.C * other);
-    public static Triangle operator *( Triangle self, (double xOffset, double yOffset) other ) => new(self.A * other, self.B * other, self.C * other);
-    public static Triangle operator /( Triangle self, (int xOffset, int yOffset)       other ) => new(self.A / other, self.B / other, self.C / other);
-    public static Triangle operator /( Triangle self, (float xOffset, float yOffset)   other ) => new(self.A / other, self.B / other, self.C / other);
-    public static Triangle operator /( Triangle self, (double xOffset, double yOffset) other ) => new(self.A / other, self.B / other, self.C / other);
+    public static Triangle operator +( Triangle self, Triangle                         value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, Triangle                         value ) => self.Subtract(value);
+    public static Triangle operator /( Triangle self, Triangle                         value ) => self.Divide(value);
+    public static Triangle operator *( Triangle self, Triangle                         value ) => self.Multiply(value);
+    public static Triangle operator +( Triangle self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static Triangle operator /( Triangle self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static Triangle operator *( Triangle self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static Triangle operator +( Triangle self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static Triangle operator *( Triangle self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static Triangle operator /( Triangle self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static Triangle operator +( Triangle self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static Triangle operator *( Triangle self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static Triangle operator /( Triangle self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static Triangle operator +( Triangle self, double                           value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, double                           value ) => self.Subtract(value);
+    public static Triangle operator /( Triangle self, double                           value ) => self.Divide(value);
+    public static Triangle operator *( Triangle self, double                           value ) => self.Multiply(value);
+    public static Triangle operator +( Triangle self, float                            value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, float                            value ) => self.Subtract(value);
+    public static Triangle operator /( Triangle self, float                            value ) => self.Divide(value);
+    public static Triangle operator *( Triangle self, float                            value ) => self.Multiply(value);
+    public static Triangle operator +( Triangle self, int                              value ) => self.Add(value);
+    public static Triangle operator -( Triangle self, int                              value ) => self.Subtract(value);
+    public static Triangle operator *( Triangle self, int                              value ) => self.Multiply(value);
+    public static Triangle operator /( Triangle self, int                              value ) => self.Divide(value);
 }

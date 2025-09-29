@@ -10,13 +10,14 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface ISpline<TSelf, TPoint> : IShape<TSelf>, IStructuralComparable<TSelf>, IValueEnumerable<FromArray<TPoint>, TPoint>
-    where TSelf : struct, ISpline<TSelf>, IJsonModel<TSelf>
-    where TPoint : IPoint<TPoint>
+    where TSelf : struct, ISpline<TSelf, TPoint>, IJsonModel<TSelf>
+    where TPoint : struct, IPoint<TPoint>
 {
     public ref readonly TPoint this[ int   index ] { get; }
     public ref readonly TPoint this[ Index index ] { get; }
     public Spline this[ Range              index ] { [Pure] get; }
-    public int Length { get; }
+    public             int                  Length { get; }
+    protected internal ReadOnlySpan<TPoint> Points { get; }
 
 
     [Pure] public abstract static TSelf Create( params TPoint[]? points );

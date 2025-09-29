@@ -30,18 +30,19 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
     public ref readonly ReadOnlyPoint this[ int   index ] => ref Points[index];
     public ref readonly ReadOnlyPoint this[ Index index ] => ref Points[index];
     public Spline this[ Range                     index ] { [Pure] get => new(Points[index]); }
-    static ref readonly Spline IShape<Spline>.      Zero    => ref Zero;
-    static ref readonly Spline IShape<Spline>.      One     => ref One;
-    static ref readonly Spline IShape<Spline>.      Invalid => ref Invalid;
-    [JsonIgnore] public ReadOnlySpan<ReadOnlyPoint> Span    => Points;
-    public              int                         Length  => Points.Length;
-    public              bool                        IsEmpty => Points.Length is 0 or 1;
+    static ref readonly Spline IShape<Spline>.                 Zero    => ref Zero;
+    static ref readonly Spline IShape<Spline>.                 One     => ref One;
+    static ref readonly Spline IShape<Spline>.                 Invalid => ref Invalid;
+    [JsonIgnore] public ReadOnlySpan<ReadOnlyPoint>            Span    => Points;
+    public              int                                    Length  => Points.Length;
+    ReadOnlySpan<ReadOnlyPoint> ISpline<Spline, ReadOnlyPoint>.Points  => Points;
+    public bool                                                IsEmpty => Points.Length is 0 or 1;
     public bool IsNaN
     {
         get
         {
             ReadOnlySpan<ReadOnlyPoint> span = Span;
-            return span.Any(static ( ref readonly ReadOnlyPoint x ) => x.IsNaN);
+            return span.Any(static ( ref readonly ReadOnlyPoint x ) => x.IsNaN());
         }
     }
     public bool IsValid => !IsEmpty && !IsNaN;
@@ -49,8 +50,8 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
 
     public static implicit operator Spline( ReadOnlyPoint[]?               points ) => Create(points);
     [Pure] public static            Spline Create( params ReadOnlyPoint[]? points ) => new(points);
-    [Pure] public                   Spline Round()                                  => new(Points.AsValueEnumerable().Select(static x => x.Round()).ToArray());
-    [Pure] public                   Spline Floor()                                  => new(Points.AsValueEnumerable().Select(static x => x.Floor()).ToArray());
+    [Pure] public                   Spline Round()                                  => new(AsValueEnumerable().Select(static x => x.Round<ReadOnlyPoint>()).ToArray());
+    [Pure] public                   Spline Floor()                                  => new(AsValueEnumerable().Select(static x => x.Floor<ReadOnlyPoint>()).ToArray());
 
 
     [Pure] public ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable() => new(new FromArray<ReadOnlyPoint>(Points));

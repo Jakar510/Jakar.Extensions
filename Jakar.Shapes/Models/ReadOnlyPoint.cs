@@ -36,15 +36,16 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public readonly        double        Y             = y;
 
 
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero     => ref Zero;
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid  => ref Invalid;
-    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One      => ref One;
-    ReadOnlyPoint IShapeLocation.                           Location => this;
-    public bool                                             IsEmpty  => IsNaN           || X <= 0 || Y <= 0;
-    public bool                                             IsNaN    => double.IsNaN(X) || double.IsNaN(Y);
-    public bool                                             IsValid  => !IsNaN;
-    double IShapeLocation.                                  X        => X;
-    double IShapeLocation.                                  Y        => Y;
+    public static       JsonSerializerContext               JsonContext   => JakarShapesContext.Default;
+    public static       JsonTypeInfo<ReadOnlyPoint>         JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPoint;
+    public static       JsonTypeInfo<ReadOnlyPoint[]>       JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointArray;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Zero          => ref Zero;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.Invalid       => ref Invalid;
+    static ref readonly ReadOnlyPoint IShape<ReadOnlyPoint>.One           => ref One;
+    ReadOnlyPoint IShapeLocation.                           Location      => this;
+    bool IValidator.                                        IsValid       => this.IsValid();
+    double IShapeLocation.                                  X             => X;
+    double IShapeLocation.                                  Y             => Y;
 
 
     public static implicit operator Point( ReadOnlyPoint          point ) => new((int)point.X.Round(), (int)point.Y.Round());
@@ -61,46 +62,25 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
 
     [Pure] public static ReadOnlyPoint Create( float  x, float  y ) => new(x, y);
     [Pure] public static ReadOnlyPoint Create( double x, double y ) => new(x, y);
-
-
-    [Pure] public ReadOnlyPoint Reverse() => new(Y, X);
-    [Pure] public ReadOnlyPoint Round()   => new(X.Round(), Y.Round());
-    [Pure] public ReadOnlyPoint Floor()   => new(X.Floor(), Y.Floor());
-
-
-    public double DistanceTo( in ReadOnlyPoint other )
+    public static bool TryFromJson( string? json, out ReadOnlyPoint result )
     {
-        double x      = X - other.X;
-        double y      = Y - other.Y;
-        double x2     = x * x;
-        double y2     = y * y;
-        double result = Math.Sqrt(x2 + y2);
-        return result;
+        try
+        {
+            if ( string.IsNullOrWhiteSpace(json) )
+            {
+                result = Invalid;
+                return false;
+            }
+
+            result = FromJson(json);
+            return true;
+        }
+        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
+
+        result = Invalid;
+        return false;
     }
-    public double Dot( in ReadOnlyPoint other ) => X * other.X + Y * other.Y;
-    public double Magnitude()                   => Math.Sqrt(X * X + Y * Y);
-    public double AngleBetween( ref readonly ReadOnlyPoint p1, ref readonly ReadOnlyPoint p2 )
-    {
-        ReadOnlyPoint v1 = this - p1;
-        ReadOnlyPoint v2 = this - p2;
-
-        double dot  = v1.Dot(in v2);
-        double mag1 = v1.Magnitude();
-        double mag2 = v2.Magnitude();
-        if ( mag1 == 0 || mag2 == 0 ) { return 0; }
-
-        double cosTheta = dot / ( mag1 * mag2 );
-        cosTheta = Math.Clamp(cosTheta, -1.0, 1.0); // Avoid NaN due to precision
-
-        return Math.Acos(cosTheta); // In radians
-    }
-
-
-    public void Deconstruct( out double x, out double y )
-    {
-        x = X;
-        y = Y;
-    }
+    public static ReadOnlyPoint FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 
 
     public int CompareTo( ReadOnlyPoint other )
@@ -126,66 +106,44 @@ public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoin
     public          string ToString( string? format, IFormatProvider? formatProvider ) => IPoint<ReadOnlyPoint>.ToString(in this, format);
 
 
-    public static bool operator ==( ReadOnlyPoint?        left, ReadOnlyPoint?                   right ) => Nullable.Equals(left, right);
-    public static bool operator !=( ReadOnlyPoint?        left, ReadOnlyPoint?                   right ) => !Nullable.Equals(left, right);
-    public static bool operator ==( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => EqualityComparer<ReadOnlyPoint>.Default.Equals(left, right);
-    public static bool operator !=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => !EqualityComparer<ReadOnlyPoint>.Default.Equals(left, right);
-    public static bool operator >( ReadOnlyPoint          left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) > 0;
-    public static bool operator >=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) >= 0;
-    public static bool operator <( ReadOnlyPoint          left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) < 0;
-    public static bool operator <=( ReadOnlyPoint         left, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(left, right) <= 0;
-    public static ReadOnlyPoint operator +( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X + value.X, size.Y + value.Y);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X - value.X, size.Y - value.Y);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X * value.X, size.Y * value.Y);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, ReadOnlyPoint                    value ) => new(size.X / value.X, size.Y / value.Y);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint size, ReadOnlyPointF                   value ) => new(size.X + value.X, size.Y + value.Y);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint size, ReadOnlyPointF                   value ) => new(size.X - value.X, size.Y - value.Y);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, ReadOnlyPointF                   value ) => new(size.X * value.X, size.Y * value.Y);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, ReadOnlyPointF                   value ) => new(size.X / value.X, size.Y / value.Y);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint size, (int xOffset, int yOffset)       value ) => new(size.X + value.xOffset, size.Y + value.yOffset);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint size, (int xOffset, int yOffset)       value ) => new(size.X - value.xOffset, size.Y - value.yOffset);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, (int xOffset, int yOffset)       value ) => new(size.X / value.xOffset, size.Y / value.yOffset);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, (int xOffset, int yOffset)       value ) => new(size.X * value.xOffset, size.Y * value.yOffset);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint size, (float xOffset, float yOffset)   value ) => new(size.X + value.xOffset, size.Y + value.yOffset);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, (float xOffset, float yOffset)   value ) => new(size.X * value.xOffset, size.Y * value.yOffset);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, (float xOffset, float yOffset)   value ) => new(size.X / value.xOffset, size.Y / value.yOffset);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint size, (float xOffset, float yOffset)   value ) => new(size.X - value.xOffset, size.Y - value.yOffset);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint size, (double xOffset, double yOffset) value ) => new(size.X + value.xOffset, size.Y + value.yOffset);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint size, (double xOffset, double yOffset) value ) => new(size.X - value.xOffset, size.Y - value.yOffset);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, (double xOffset, double yOffset) value ) => new(size.X / value.xOffset, size.Y / value.yOffset);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, (double xOffset, double yOffset) value ) => new(size.X * value.xOffset, size.Y * value.yOffset);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint left, double                           value ) => new(left.X + value, left.Y + value);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint left, double                           value ) => new(left.X - value, left.Y - value);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, double                           value ) => new(size.X * value, size.Y * value);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, double                           value ) => new(size.X / value, size.Y / value);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint left, float                            value ) => new(left.X + value, left.Y + value);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint left, float                            value ) => new(left.X - value, left.Y - value);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, float                            value ) => new(size.X / value, size.Y / value);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, float                            value ) => new(size.X * value, size.Y * value);
-    public static ReadOnlyPoint operator +( ReadOnlyPoint left, int                              value ) => new(left.X + value, left.Y + value);
-    public static ReadOnlyPoint operator -( ReadOnlyPoint left, int                              value ) => new(left.X - value, left.Y - value);
-    public static ReadOnlyPoint operator /( ReadOnlyPoint size, int                              value ) => new(size.X / value, size.Y / value);
-    public static ReadOnlyPoint operator *( ReadOnlyPoint size, int                              value ) => new(size.X * value, size.Y * value);
-    public static JsonSerializerContext         JsonContext   => JakarShapesContext.Default;
-    public static JsonTypeInfo<ReadOnlyPoint>   JsonTypeInfo  => JakarShapesContext.Default.ReadOnlyPoint;
-    public static JsonTypeInfo<ReadOnlyPoint[]> JsonArrayInfo => JakarShapesContext.Default.ReadOnlyPointArray;
-    public static bool TryFromJson( string? json, out ReadOnlyPoint result )
-    {
-        try
-        {
-            if ( string.IsNullOrWhiteSpace(json) )
-            {
-                result = Invalid;
-                return false;
-            }
-
-            result = FromJson(json);
-            return true;
-        }
-        catch ( Exception e ) { SelfLogger.WriteLine("{Exception}", e.ToString()); }
-
-        result = Invalid;
-        return false;
-    }
-    public static ReadOnlyPoint FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
+    public static bool operator ==( ReadOnlyPoint?        self, ReadOnlyPoint?                   right ) => Nullable.Equals(self, right);
+    public static bool operator !=( ReadOnlyPoint?        self, ReadOnlyPoint?                   right ) => !Nullable.Equals(self, right);
+    public static bool operator ==( ReadOnlyPoint         self, ReadOnlyPoint                    right ) => EqualityComparer<ReadOnlyPoint>.Default.Equals(self, right);
+    public static bool operator !=( ReadOnlyPoint         self, ReadOnlyPoint                    right ) => !EqualityComparer<ReadOnlyPoint>.Default.Equals(self, right);
+    public static bool operator >( ReadOnlyPoint          self, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(self, right) > 0;
+    public static bool operator >=( ReadOnlyPoint         self, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(self, right) >= 0;
+    public static bool operator <( ReadOnlyPoint          self, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(self, right) < 0;
+    public static bool operator <=( ReadOnlyPoint         self, ReadOnlyPoint                    right ) => Comparer<ReadOnlyPoint>.Default.Compare(self, right) <= 0;
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, ReadOnlyPoint                    value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, ReadOnlyPoint                    value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, ReadOnlyPoint                    value ) => self.Divide(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, ReadOnlyPoint                    value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, ReadOnlyPointF                   value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, ReadOnlyPointF                   value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, ReadOnlyPointF                   value ) => self.Divide(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, ReadOnlyPointF                   value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, double                           value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, double                           value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, double                           value ) => self.Divide(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, double                           value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, float                            value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, float                            value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, float                            value ) => self.Divide(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, float                            value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator +( ReadOnlyPoint self, int                              value ) => self.Add(value);
+    public static ReadOnlyPoint operator -( ReadOnlyPoint self, int                              value ) => self.Subtract(value);
+    public static ReadOnlyPoint operator *( ReadOnlyPoint self, int                              value ) => self.Multiply(value);
+    public static ReadOnlyPoint operator /( ReadOnlyPoint self, int                              value ) => self.Divide(value);
 }

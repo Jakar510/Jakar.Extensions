@@ -24,20 +24,13 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.Invalid       => ref Invalid;
     static ref readonly ReadOnlySize IShape<ReadOnlySize>.One           => ref One;
     ReadOnlySize IShapeSize.                              Size          => this;
-    public              bool                              IsValid       => ISize<ReadOnlySize>.CheckIfValid(in this);
-    [JsonIgnore] public bool                              IsEmpty       => ISize<ReadOnlySize>.CheckIfEmpty(in this);
-    public              bool                              IsLandscape   => ISize<ReadOnlySize>.CheckIfLandscape(in this);
-    public              bool                              IsNaN         => ISize<ReadOnlySize>.CheckIfNan(in this);
-    public              bool                              IsPortrait    => ISize<ReadOnlySize>.CheckIfPortrait(in this);
+    bool IValidator.                                      IsValid       => this.IsValid();
     double IShapeSize.                                    Width         => Width;
     double IShapeSize.                                    Height        => Height;
 
 
     [Pure] public static ReadOnlySize Create( float  width, float  height ) => new(width, height);
     [Pure] public static ReadOnlySize Create( double width, double height ) => new(width, height);
-    [Pure] public        ReadOnlySize Reverse() => new(Height, Width);
-    [Pure] public        ReadOnlySize Round()   => new(Width.Round(), Height.Round());
-    [Pure] public        ReadOnlySize Floor()   => new(Width.Floor(), Height.Floor());
 
 
     public static bool TryFromJson( string? json, out ReadOnlySize result )
@@ -61,13 +54,6 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static ReadOnlySize FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, JsonTypeInfo));
 
 
-    public void Deconstruct( out double width, out double height )
-    {
-        width  = Width;
-        height = Height;
-    }
-
-
     public int CompareTo( ReadOnlySize other )
     {
         int widthComparison = Width.CompareTo(other.Width);
@@ -87,7 +73,7 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public override bool   Equals( object?      obj )                                  => obj is ReadOnlySize other && Equals(other);
     public override int    GetHashCode()                                               => Height.GetHashCode();
     public override string ToString()                                                  => ToString(null, null);
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => ISize<ReadOnlySize>.ToString(in this, format);
+    public readonly string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
     public static implicit operator Size( ReadOnlySize   rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
@@ -108,36 +94,44 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public static bool operator >=( ReadOnlySize        left, ReadOnlySize                     right ) => Comparer<ReadOnlySize>.Default.Compare(left, right) >= 0;
     public static bool operator <( ReadOnlySize         left, ReadOnlySize                     right ) => Comparer<ReadOnlySize>.Default.Compare(left, right) < 0;
     public static bool operator <=( ReadOnlySize        left, ReadOnlySize                     right ) => Comparer<ReadOnlySize>.Default.Compare(left, right) <= 0;
-    public static ReadOnlySize operator +( ReadOnlySize size, Size                             value ) => new(size.Width + value.Width, size.Height   + value.Height);
-    public static ReadOnlySize operator +( ReadOnlySize size, SizeF                            value ) => new(size.Width + value.Width, size.Height   + value.Height);
-    public static ReadOnlySize operator +( ReadOnlySize size, ReadOnlySize                     value ) => new(size.Width + value.Width, size.Height   + value.Height);
-    public static ReadOnlySize operator +( ReadOnlySize size, (int xOffset, int yOffset)       value ) => new(size.Width + value.xOffset, size.Height + value.yOffset);
-    public static ReadOnlySize operator +( ReadOnlySize size, (float xOffset, float yOffset)   value ) => new(size.Width + value.xOffset, size.Height + value.yOffset);
-    public static ReadOnlySize operator +( ReadOnlySize size, (double xOffset, double yOffset) value ) => new(size.Width + value.xOffset, size.Height + value.yOffset);
-    public static ReadOnlySize operator -( ReadOnlySize size, Size                             value ) => new(size.Width - value.Width, size.Height   - value.Height);
-    public static ReadOnlySize operator -( ReadOnlySize size, SizeF                            value ) => new(size.Width - value.Width, size.Height   - value.Height);
-    public static ReadOnlySize operator -( ReadOnlySize size, ReadOnlySize                     value ) => new(size.Width - value.Width, size.Height   - value.Height);
-    public static ReadOnlySize operator -( ReadOnlySize size, (int xOffset, int yOffset)       value ) => new(size.Width - value.xOffset, size.Height - value.yOffset);
-    public static ReadOnlySize operator -( ReadOnlySize size, (float xOffset, float yOffset)   value ) => new(size.Width - value.xOffset, size.Height - value.yOffset);
-    public static ReadOnlySize operator -( ReadOnlySize size, (double xOffset, double yOffset) value ) => new(size.Width - value.xOffset, size.Height - value.yOffset);
-    public static ReadOnlySize operator *( ReadOnlySize size, ReadOnlySize                     value ) => new(size.Width * value.Width, size.Height   * value.Height);
-    public static ReadOnlySize operator *( ReadOnlySize size, int                              value ) => new(size.Width * value, size.Height         * value);
-    public static ReadOnlySize operator *( ReadOnlySize size, float                            value ) => new(size.Width * value, size.Height         * value);
-    public static ReadOnlySize operator *( ReadOnlySize size, double                           value ) => new(size.Width * value, size.Height         * value);
-    public static ReadOnlySize operator *( ReadOnlySize size, (int xOffset, int yOffset)       value ) => new(size.Width * value.xOffset, size.Height * value.yOffset);
-    public static ReadOnlySize operator *( ReadOnlySize size, (float xOffset, float yOffset)   value ) => new(size.Width * value.xOffset, size.Height * value.yOffset);
-    public static ReadOnlySize operator *( ReadOnlySize size, (double xOffset, double yOffset) value ) => new(size.Width * value.xOffset, size.Height * value.yOffset);
-    public static ReadOnlySize operator /( ReadOnlySize size, ReadOnlySize                     value ) => new(size.Width / value.Width, size.Height   / value.Height);
-    public static ReadOnlySize operator /( ReadOnlySize size, int                              value ) => new(size.Width / value, size.Height         / value);
-    public static ReadOnlySize operator /( ReadOnlySize size, float                            value ) => new(size.Width / value, size.Height         / value);
-    public static ReadOnlySize operator /( ReadOnlySize size, double                           value ) => new(size.Width / value, size.Height         / value);
-    public static ReadOnlySize operator /( ReadOnlySize size, (int xOffset, int yOffset)       value ) => new(size.Width / value.xOffset, size.Height / value.yOffset);
-    public static ReadOnlySize operator /( ReadOnlySize size, (float xOffset, float yOffset)   value ) => new(size.Width / value.xOffset, size.Height / value.yOffset);
-    public static ReadOnlySize operator /( ReadOnlySize size, (double xOffset, double yOffset) value ) => new(size.Width / value.xOffset, size.Height / value.yOffset);
-    public static ReadOnlySize operator +( ReadOnlySize left, double                           value ) => new(left.Width + value, left.Height + value);
-    public static ReadOnlySize operator -( ReadOnlySize left, double                           value ) => new(left.Width - value, left.Height - value);
-    public static ReadOnlySize operator +( ReadOnlySize left, float                            value ) => new(left.Width + value, left.Height + value);
-    public static ReadOnlySize operator -( ReadOnlySize left, float                            value ) => new(left.Width - value, left.Height - value);
-    public static ReadOnlySize operator +( ReadOnlySize left, int                              value ) => new(left.Width + value, left.Height + value);
-    public static ReadOnlySize operator -( ReadOnlySize left, int                              value ) => new(left.Width - value, left.Height - value);
+    public static ReadOnlySize operator +( ReadOnlySize self, ReadOnlySize                     value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, ReadOnlySize                     value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, ReadOnlySize                     value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, ReadOnlySize                     value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, ReadOnlySizeF                    value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, ReadOnlySizeF                    value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, ReadOnlySizeF                    value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, ReadOnlySizeF                    value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, Size                             value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, Size                             value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, Size                             value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, Size                             value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, SizeF                            value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, SizeF                            value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, SizeF                            value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, SizeF                            value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, (int xOffset, int yOffset)       value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, (int xOffset, int yOffset)       value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, (int xOffset, int yOffset)       value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, (int xOffset, int yOffset)       value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, (float xOffset, float yOffset)   value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, (float xOffset, float yOffset)   value ) => self.Subtract(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, (float xOffset, float yOffset)   value ) => self.Multiply(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, (float xOffset, float yOffset)   value ) => self.Divide(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, (double xOffset, double yOffset) value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, (double xOffset, double yOffset) value ) => self.Subtract(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, (double xOffset, double yOffset) value ) => self.Multiply(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, (double xOffset, double yOffset) value ) => self.Divide(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, double                           value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, double                           value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, double                           value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, double                           value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, float                            value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, float                            value ) => self.Subtract(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, float                            value ) => self.Divide(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, float                            value ) => self.Multiply(value);
+    public static ReadOnlySize operator +( ReadOnlySize self, int                              value ) => self.Add(value);
+    public static ReadOnlySize operator -( ReadOnlySize self, int                              value ) => self.Subtract(value);
+    public static ReadOnlySize operator *( ReadOnlySize self, int                              value ) => self.Multiply(value);
+    public static ReadOnlySize operator /( ReadOnlySize self, int                              value ) => self.Divide(value);
 }
