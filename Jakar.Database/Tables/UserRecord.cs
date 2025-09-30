@@ -64,6 +64,48 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     [ProtectedPersonalData] [StringLength(Constants.UNICODE_CAPACITY)] public string                                   Website                { get; set; }
 
 
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+                                                                                                              .WithColumn<string>(nameof(UserName),    ColumnOptions.Indexed, length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Gender),      length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Description), length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Company),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Department),  length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Title),       length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
+                                                                                                              .WithColumn<string>(nameof(Email), length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<bool>(nameof(IsEmailConfirmed))
+                                                                                                              .WithColumn<string>(nameof(PhoneNumber), length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Ext),         length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
+                                                                                                              .WithColumn<string>(nameof(AuthenticatorKey), length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<bool>(nameof(IsTwoFactorEnabled))
+                                                                                                              .WithColumn<bool>(nameof(IsActive))
+                                                                                                              .WithColumn<bool>(nameof(IsDisabled))
+                                                                                                              .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
+                                                                                                              .WithColumn<int?>(nameof(BadLogins))
+                                                                                                              .WithColumn<bool>(nameof(IsLocked))
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
+                                                                                                              .WithColumn<string>(nameof(RefreshToken),                    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
+                                                                                                              .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
+                                                                                                              .WithColumn<string>(nameof(SecurityStamp),                   length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp),                length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Rights),                          length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(PasswordHash),                    length: UNICODE_CAPACITY)
+                                                                                                              .WithForeignKey<UserRecord>(nameof(EscalateTo))
+                                                                                                              .WithForeignKey<FileRecord>(nameof(ImageID))
+                                                                                                              .With_AdditionalData()
+                                                                                                              .With_CreatedBy()
+                                                                                                              .Build();
+
+
     public UserRecord( string                UserName,
                        string                FirstName,
                        string                LastName,
@@ -294,7 +336,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         where TUser : class, IUserData<Guid>
     {
         ArgumentNullException.ThrowIfNull(request.Data);
-        return Create(request.UserName, rights, request.Data, caller).WithPassword(request.Password).Enable();
+
+        return Create(request.UserName, rights, request.Data, caller)
+              .WithPassword(request.Password)
+              .Enable();
     }
 
     public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = null )
@@ -978,21 +1023,59 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
         DynamicParameters parameters = new();
-        parameters.Add(nameof(ID), Guid.Parse(claims.Single(static ( ref readonly Claim x ) => x.IsUserID()).Value));
 
-        if ( types.HasFlag(ClaimType.UserName) ) { parameters.Add(nameof(UserName), claims.Single(static ( ref readonly Claim x ) => x.IsUserName()).Value); }
+        parameters.Add(nameof(ID),
+                       Guid.Parse(claims.Single(static ( ref readonly Claim x ) => x.IsUserID())
+                                        .Value));
 
-        if ( types.HasFlag(ClaimType.FirstName) ) { parameters.Add(nameof(FirstName), claims.Single(static ( ref readonly Claim x ) => x.IsFirstName()).Value); }
+        if ( types.HasFlag(ClaimType.UserName) )
+        {
+            parameters.Add(nameof(UserName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsUserName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.LastName) ) { parameters.Add(nameof(LastName), claims.Single(static ( ref readonly Claim x ) => x.IsLastName()).Value); }
+        if ( types.HasFlag(ClaimType.FirstName) )
+        {
+            parameters.Add(nameof(FirstName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsFirstName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.FullName) ) { parameters.Add(nameof(FullName), claims.Single(static ( ref readonly Claim x ) => x.IsFullName()).Value); }
+        if ( types.HasFlag(ClaimType.LastName) )
+        {
+            parameters.Add(nameof(LastName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsLastName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.Email) ) { parameters.Add(nameof(Email), claims.Single(static ( ref readonly Claim x ) => x.IsEmail()).Value); }
+        if ( types.HasFlag(ClaimType.FullName) )
+        {
+            parameters.Add(nameof(FullName),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsFullName())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.MobilePhone) ) { parameters.Add(nameof(PhoneNumber), claims.Single(static ( ref readonly Claim x ) => x.IsMobilePhone()).Value); }
+        if ( types.HasFlag(ClaimType.Email) )
+        {
+            parameters.Add(nameof(Email),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsEmail())
+                                 .Value);
+        }
 
-        if ( types.HasFlag(ClaimType.WebSite) ) { parameters.Add(nameof(Website), claims.Single(static ( ref readonly Claim x ) => x.IsWebSite()).Value); }
+        if ( types.HasFlag(ClaimType.MobilePhone) )
+        {
+            parameters.Add(nameof(PhoneNumber),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsMobilePhone())
+                                 .Value);
+        }
+
+        if ( types.HasFlag(ClaimType.WebSite) )
+        {
+            parameters.Add(nameof(Website),
+                           claims.Single(static ( ref readonly Claim x ) => x.IsWebSite())
+                                 .Value);
+        }
 
         return db.Users.Get(connection, transaction, true, parameters, token);
     }

@@ -25,6 +25,19 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
 
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Create()
+                                                                                                           .WithColumn<string>(nameof(Line1),           length: 256)
+                                                                                                           .WithColumn<string>(nameof(Line2),           length: 1024)
+                                                                                                           .WithColumn<string>(nameof(City),            length: 256)
+                                                                                                           .WithColumn<string>(nameof(StateOrProvince), length: 256)
+                                                                                                           .WithColumn<string>(nameof(Country),         length: 256)
+                                                                                                           .WithColumn<string>(nameof(PostalCode),      length: 256)
+                                                                                                           .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
+                                                                                                           .WithColumn<bool>(nameof(IsPrimary),         length: 256)
+                                                                                                           .With_AdditionalData()
+                                                                                                           .With_CreatedBy()
+                                                                                                           .Build();
+
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
                                                           address.Line2,
@@ -131,15 +144,41 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     {
         DynamicParameters   parameters = new();
         ReadOnlySpan<Claim> span       = claims;
-        if ( hasFlag(types, ClaimType.StreetAddressLine1) ) { parameters.Add(nameof(Line1), span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes()).Value); }
 
-        if ( hasFlag(types, ClaimType.StreetAddressLine2) ) { parameters.Add(nameof(Line2), span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes()).Value); }
+        if ( hasFlag(types, ClaimType.StreetAddressLine1) )
+        {
+            parameters.Add(nameof(Line1),
+                           span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine1.ToClaimTypes())
+                               .Value);
+        }
 
-        if ( hasFlag(types, ClaimType.StateOrProvince) ) { parameters.Add(nameof(StateOrProvince), span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StateOrProvince.ToClaimTypes()).Value); }
+        if ( hasFlag(types, ClaimType.StreetAddressLine2) )
+        {
+            parameters.Add(nameof(Line2),
+                           span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StreetAddressLine2.ToClaimTypes())
+                               .Value);
+        }
 
-        if ( hasFlag(types, ClaimType.Country) ) { parameters.Add(nameof(Country), span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.Country.ToClaimTypes()).Value); }
+        if ( hasFlag(types, ClaimType.StateOrProvince) )
+        {
+            parameters.Add(nameof(StateOrProvince),
+                           span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.StateOrProvince.ToClaimTypes())
+                               .Value);
+        }
 
-        if ( hasFlag(types, ClaimType.PostalCode) ) { parameters.Add(nameof(PostalCode), span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.PostalCode.ToClaimTypes()).Value); }
+        if ( hasFlag(types, ClaimType.Country) )
+        {
+            parameters.Add(nameof(Country),
+                           span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.Country.ToClaimTypes())
+                               .Value);
+        }
+
+        if ( hasFlag(types, ClaimType.PostalCode) )
+        {
+            parameters.Add(nameof(PostalCode),
+                           span.Single(static ( ref readonly Claim x ) => x.Type == ClaimType.PostalCode.ToClaimTypes())
+                               .Value);
+        }
 
         return await db.Addresses.Get(connection, transaction, true, parameters, token);
 

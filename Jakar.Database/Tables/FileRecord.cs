@@ -9,7 +9,8 @@ using TelemetrySpan = Jakar.Extensions.TelemetrySpan;
 namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record FileRecord( string?              FileName,
                                  string?              FileDescription,
                                  string?              FileType,
@@ -26,7 +27,17 @@ public sealed record FileRecord( string?              FileName,
     public static string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
     public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<FileRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;
-    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
+    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray; 
+
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create() 
+                                                                                                        .WithColumn<string?>(nameof(FileName),        ColumnOptions.Nullable, length: 256)
+                                                                                                        .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
+                                                                                                        .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
+                                                                                                        .WithColumn<long>(nameof(FileSize))
+                                                                                                        .WithColumn<string>(nameof(Hash),        length: UNICODE_CAPACITY)
+                                                                                                        .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
+                                                                                                        .WithColumn<string>(nameof(FullPath),    length: UNICODE_CAPACITY)
+                                                                                                        .Build();
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }
@@ -39,8 +50,7 @@ public sealed record FileRecord( string?              FileName,
         where TFileMetaData : class, IFileMetaData<TFileMetaData> => TFileData.Create(this, TFileMetaData.Create(this));
 
 
-    [Pure]
-    public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
+    [Pure] public async ValueTask<OneOf<byte[], string, FileData>> Read( CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         if ( string.IsNullOrWhiteSpace(FullPath) ) { return new FileData(this, FileMetaData.Create(this)); }
@@ -49,13 +59,14 @@ public sealed record FileRecord( string?              FileName,
         if ( MimeType != file.Mime ) { throw new InvalidOperationException($"{nameof(MimeType)} mismatch. Got {file.Mime} but expected {MimeType}"); }
 
         return file.Mime.IsText()
-                   ? await file.ReadAsync().AsString(token)
-                   : await file.ReadAsync().AsBytes(token);
+                   ? await file.ReadAsync()
+                               .AsString(token)
+                   : await file.ReadAsync()
+                               .AsBytes(token);
     }
 
 
-    [Pure]
-    public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
+    [Pure] public async ValueTask<ErrorOrResult<FileData>> ToFileData( CancellationToken token = default )
     {
         OneOf<byte[], string, FileData> data = await Read(token);
         if ( data.IsT2 ) { return data.AsT2; }
@@ -83,8 +94,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public async ValueTask<FileRecord> Update( LocalFile file, CancellationToken token = default )
+    [Pure] public async ValueTask<FileRecord> Update( LocalFile file, CancellationToken token = default )
     {
         if ( FullPath != file.FullPath ) { throw new InvalidOperationException($"{nameof(FullPath)} mismatch. Got {file.FullPath} but expected {FullPath}"); }
 
@@ -104,8 +114,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(FileName),        FileName);
@@ -123,8 +132,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure]
-    public static FileRecord Create( DbDataReader reader )
+    [Pure] public static FileRecord Create( DbDataReader reader )
     {
         string?              name         = reader.GetFieldValue<string?>(nameof(FileName));
         string?              description  = reader.GetFieldValue<string?>(nameof(FileDescription));

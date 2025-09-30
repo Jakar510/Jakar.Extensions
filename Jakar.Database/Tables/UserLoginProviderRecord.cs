@@ -4,15 +4,16 @@
 namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
-public sealed record UserLoginProviderRecord( [property: StringLength(                                 int.MaxValue)] string  LoginProvider,
-                                              [property: StringLength(                                 int.MaxValue)] string? ProviderDisplayName,
-                                              [property: ProtectedPersonalData][property: StringLength(int.MaxValue)] string  ProviderKey,
-                                              [property: ProtectedPersonalData]                                       string? Value,
-                                              RecordID<UserLoginProviderRecord>                                               ID,
-                                              RecordID<UserRecord>?                                                           CreatedBy,
-                                              DateTimeOffset                                                                  DateCreated,
-                                              DateTimeOffset?                                                                 LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
+[Serializable]
+[Table(TABLE_NAME)]
+public sealed record UserLoginProviderRecord( [property: StringLength(                                  UNICODE_CAPACITY)] string  LoginProvider,
+                                              [property: StringLength(                                  UNICODE_CAPACITY)] string? ProviderDisplayName,
+                                              [property: ProtectedPersonalData] [property: StringLength(UNICODE_CAPACITY)] string  ProviderKey,
+                                              [property: ProtectedPersonalData] [property: StringLength(UNICODE_CAPACITY)] string? Value,
+                                              RecordID<UserLoginProviderRecord>                                                    ID,
+                                              RecordID<UserRecord>?                                                                CreatedBy,
+                                              DateTimeOffset                                                                       DateCreated,
+                                              DateTimeOffset?                                                                      LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
     public const  string                                  TABLE_NAME = "user_login_providers";
     public static string                                  TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
@@ -21,10 +22,18 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+                                                                                                              .WithColumn<string>(nameof(LoginProvider),       length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(ProviderKey),         length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Value),               length: UNICODE_CAPACITY)
+                                                                                                              .With_CreatedBy()
+                                                                                                              .Build();
+
+
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
     public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(LoginProvider),       LoginProvider);
@@ -34,8 +43,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         return parameters;
     }
 
-    [Pure]
-    public static UserLoginProviderRecord Create( DbDataReader reader )
+    [Pure] public static UserLoginProviderRecord Create( DbDataReader reader )
     {
         string                            loginProvider       = reader.GetFieldValue<string>(nameof(LoginProvider));
         string                            providerDisplayName = reader.GetFieldValue<string>(nameof(ProviderDisplayName));
@@ -58,8 +66,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         return parameters;
     }
     [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters(user, info.LoginProvider, info.ProviderKey);
-    [Pure]
-    public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
+    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
         DynamicParameters parameters = GetDynamicParameters(user);
         parameters.Add(nameof(ProviderKey),   providerKey);

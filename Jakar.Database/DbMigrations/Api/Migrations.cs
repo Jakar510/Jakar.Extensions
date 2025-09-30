@@ -4,37 +4,37 @@
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static partial class Migrations
 {
-    public static DbPropertyType ToDbPropertyType( this DbType type ) => type switch
+    public static DbPropType ToDbPropertyType( this DbType type ) => type switch
                                                                          {
-                                                                             DbType.AnsiString            => DbPropertyType.String,
-                                                                             DbType.Binary                => DbPropertyType.Binary,
-                                                                             DbType.Byte                  => DbPropertyType.Byte,
-                                                                             DbType.Boolean               => DbPropertyType.Boolean,
-                                                                             DbType.Currency              => DbPropertyType.Decimal,
-                                                                             DbType.Date                  => DbPropertyType.Date,
-                                                                             DbType.Decimal               => DbPropertyType.Decimal,
-                                                                             DbType.Double                => DbPropertyType.Double,
-                                                                             DbType.Guid                  => DbPropertyType.Guid,
-                                                                             DbType.Int16                 => DbPropertyType.Int16,
-                                                                             DbType.Int32                 => DbPropertyType.Int32,
-                                                                             DbType.Int64                 => DbPropertyType.Int64,
-                                                                             DbType.SByte                 => DbPropertyType.SByte,
-                                                                             DbType.Single                => DbPropertyType.Double,
-                                                                             DbType.String                => DbPropertyType.String,
-                                                                             DbType.StringFixedLength     => DbPropertyType.String,
-                                                                             DbType.Time                  => DbPropertyType.Time,
-                                                                             DbType.UInt16                => DbPropertyType.UInt16,
-                                                                             DbType.UInt32                => DbPropertyType.UInt32,
-                                                                             DbType.UInt64                => DbPropertyType.UInt64,
-                                                                             DbType.VarNumeric            => DbPropertyType.Decimal,
-                                                                             DbType.Xml                   => DbPropertyType.Xml,
-                                                                             DbType.AnsiStringFixedLength => DbPropertyType.String,
-                                                                             DbType.DateTime              => DbPropertyType.DateTime,
-                                                                             DbType.DateTime2             => DbPropertyType.DateTime,
-                                                                             DbType.DateTimeOffset        => DbPropertyType.DateTimeOffset,
+                                                                             DbType.AnsiString            => DbPropType.String,
+                                                                             DbType.Binary                => DbPropType.Binary,
+                                                                             DbType.Byte                  => DbPropType.Byte,
+                                                                             DbType.Boolean               => DbPropType.Boolean,
+                                                                             DbType.Currency              => DbPropType.Decimal,
+                                                                             DbType.Date                  => DbPropType.Date,
+                                                                             DbType.Decimal               => DbPropType.Decimal,
+                                                                             DbType.Double                => DbPropType.Double,
+                                                                             DbType.Guid                  => DbPropType.Guid,
+                                                                             DbType.Int16                 => DbPropType.Int16,
+                                                                             DbType.Int32                 => DbPropType.Int32,
+                                                                             DbType.Int64                 => DbPropType.Int64,
+                                                                             DbType.SByte                 => DbPropType.SByte,
+                                                                             DbType.Single                => DbPropType.Double,
+                                                                             DbType.String                => DbPropType.String,
+                                                                             DbType.StringFixedLength     => DbPropType.String,
+                                                                             DbType.Time                  => DbPropType.Time,
+                                                                             DbType.UInt16                => DbPropType.UInt16,
+                                                                             DbType.UInt32                => DbPropType.UInt32,
+                                                                             DbType.UInt64                => DbPropType.UInt64,
+                                                                             DbType.VarNumeric            => DbPropType.Decimal,
+                                                                             DbType.Xml                   => DbPropType.Xml,
+                                                                             DbType.AnsiStringFixedLength => DbPropType.String,
+                                                                             DbType.DateTime              => DbPropType.DateTime,
+                                                                             DbType.DateTime2             => DbPropType.DateTime,
+                                                                             DbType.DateTimeOffset        => DbPropType.DateTimeOffset,
                                                                              _                            => throw new OutOfRangeException(type)
                                                                          };
-    public static DbPropertyType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+    public static DbPropType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
 
 
     /// <summary>
@@ -46,30 +46,30 @@ public static partial class Migrations
 
         ICreateTableColumnOptionOrWithColumnSyntax item;
 
-        DbPropertyType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type.ToDbPropertyType();
+        DbPropType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type.ToDbPropertyType();
 
         if ( type.HasValue )
         {
             // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
             switch ( type )
             {
-                case DbPropertyType.Byte:
+                case DbPropType.Byte:
                     item = col.AsByte();
                     return item.SetNullable(propertyInfo);
 
-                case DbPropertyType.Int16:
-                case DbPropertyType.SByte:
+                case DbPropType.Int16:
+                case DbPropType.SByte:
                     item = col.AsInt16();
                     return item.SetNullable(propertyInfo);
 
-                case DbPropertyType.UInt16:
-                case DbPropertyType.UInt32:
-                case DbPropertyType.Int32:
+                case DbPropType.UInt16:
+                case DbPropType.UInt32:
+                case DbPropType.Int32:
                     item = col.AsInt32();
                     return item.SetNullable(propertyInfo);
 
-                case DbPropertyType.UInt64:
-                case DbPropertyType.Int64:
+                case DbPropType.UInt64:
+                case DbPropType.Int64:
                     item = col.AsInt64();
                     return item.SetNullable(propertyInfo);
             }
@@ -148,7 +148,7 @@ public static partial class Migrations
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen(true)] out DbPropertyType? dbType )
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen(true)] out DbPropType? dbType )
     {
         if ( propertyType.TryGetUnderlyingEnumType(out Type? type) )
         {
@@ -181,58 +181,58 @@ public static partial class Migrations
     }
 
 
-    public static DbPropertyType GetDbType( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.GetDbType();
-    public static DbPropertyType GetDbType( this Type propertyType )
+    public static DbPropType GetDbType( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.GetDbType();
+    public static DbPropType GetDbType( this Type propertyType )
     {
-        if ( propertyType.TryGetUnderlyingEnumType(out DbPropertyType? type) ) { return type.Value; }
+        if ( propertyType.TryGetUnderlyingEnumType(out DbPropType? type) ) { return type.Value; }
 
 
-        if ( propertyType.IsEqualType(typeof(string)) ) { return DbPropertyType.String; }
+        if ( propertyType.IsEqualType(typeof(string)) ) { return DbPropType.String; }
 
 
-        if ( propertyType.IsOneOf(typeof(bool), typeof(bool?)) ) { return DbPropertyType.Boolean; }
+        if ( propertyType.IsOneOf(typeof(bool), typeof(bool?)) ) { return DbPropType.Boolean; }
 
 
-        if ( propertyType.IsOneOf(typeof(byte), typeof(byte?)) ) { return DbPropertyType.Byte; }
+        if ( propertyType.IsOneOf(typeof(byte), typeof(byte?)) ) { return DbPropType.Byte; }
 
 
-        if ( propertyType.IsOneOf(typeof(short), typeof(short?)) ) { return DbPropertyType.Int16; }
+        if ( propertyType.IsOneOf(typeof(short), typeof(short?)) ) { return DbPropType.Int16; }
 
 
-        if ( propertyType.IsOneOf(typeof(ushort), typeof(ushort?)) ) { return DbPropertyType.UInt16; }
+        if ( propertyType.IsOneOf(typeof(ushort), typeof(ushort?)) ) { return DbPropType.UInt16; }
 
 
-        if ( propertyType.IsOneOf(typeof(int), typeof(int?)) ) { return DbPropertyType.Int32; }
+        if ( propertyType.IsOneOf(typeof(int), typeof(int?)) ) { return DbPropType.Int32; }
 
 
-        if ( propertyType.IsOneOf(typeof(uint), typeof(uint?)) ) { return DbPropertyType.UInt32; }
+        if ( propertyType.IsOneOf(typeof(uint), typeof(uint?)) ) { return DbPropType.UInt32; }
 
 
-        if ( propertyType.IsOneOf(typeof(long), typeof(long?)) ) { return DbPropertyType.Int64; }
+        if ( propertyType.IsOneOf(typeof(long), typeof(long?)) ) { return DbPropType.Int64; }
 
 
-        if ( propertyType.IsOneOf(typeof(ulong), typeof(ulong?)) ) { return DbPropertyType.UInt64; }
+        if ( propertyType.IsOneOf(typeof(ulong), typeof(ulong?)) ) { return DbPropType.UInt64; }
 
 
-        if ( propertyType.IsOneOf(typeof(float), typeof(float?), typeof(double), typeof(double?)) ) { return DbPropertyType.Double; }
+        if ( propertyType.IsOneOf(typeof(float), typeof(float?), typeof(double), typeof(double?)) ) { return DbPropType.Double; }
 
 
-        if ( propertyType.IsOneOf(typeof(decimal), typeof(decimal?)) ) { return DbPropertyType.Decimal; }
+        if ( propertyType.IsOneOf(typeof(decimal), typeof(decimal?)) ) { return DbPropType.Decimal; }
 
 
-        if ( propertyType.IsOneOf(typeof(byte[]), typeof(ReadOnlySpan<byte>)) ) { return DbPropertyType.Binary; }
+        if ( propertyType.IsOneOf(typeof(byte[]), typeof(ReadOnlySpan<byte>)) ) { return DbPropType.Binary; }
 
 
-        if ( propertyType.IsOneOf(typeof(Guid), typeof(Guid?)) ) { return DbPropertyType.Guid; }
+        if ( propertyType.IsOneOf(typeof(Guid), typeof(Guid?)) ) { return DbPropType.Guid; }
 
 
-        if ( propertyType.IsOneOf(typeof(TimeSpan), typeof(TimeSpan?)) ) { return DbPropertyType.Time; }
+        if ( propertyType.IsOneOf(typeof(TimeSpan), typeof(TimeSpan?)) ) { return DbPropType.Time; }
 
 
-        if ( propertyType.IsOneOf(typeof(DateTime), typeof(DateTime?)) ) { return DbPropertyType.DateTime; }
+        if ( propertyType.IsOneOf(typeof(DateTime), typeof(DateTime?)) ) { return DbPropType.DateTime; }
 
 
-        if ( propertyType.IsOneOf(typeof(DateTimeOffset), typeof(DateTimeOffset?)) ) { return DbPropertyType.DateTimeOffset; }
+        if ( propertyType.IsOneOf(typeof(DateTimeOffset), typeof(DateTimeOffset?)) ) { return DbPropType.DateTimeOffset; }
 
 
         throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, "Can't discern DbType");

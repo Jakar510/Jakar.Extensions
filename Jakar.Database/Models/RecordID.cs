@@ -6,42 +6,42 @@ namespace Jakar.Database;
 
 
 [DefaultMember(nameof(Empty))]
-public readonly struct RecordID<TClass>( Guid id ) : IEquatable<RecordID<TClass>>, IComparable<RecordID<TClass>>, ISpanFormattable, ISpanParsable<RecordID<TClass>>, IRegisterDapperTypeHandlers
+public readonly struct RecordID<TClass> : IEquatable<RecordID<TClass>>, IComparable<RecordID<TClass>>, ISpanFormattable, ISpanParsable<RecordID<TClass>>, IRegisterDapperTypeHandlers
     where TClass : ITableRecord<TClass>
 {
     public static readonly RecordID<TClass> Empty = new(Guid.Empty);
-    public readonly        string           key   = $"{TClass.TableName}:{id}";
-    public readonly        Guid             Value = id;
+    public readonly        string           key;
+    public readonly        Guid             Value;
 
 
-    [Pure] public static RecordID<TClass>  New()                                                                     => New(DateTimeOffset.UtcNow);
-    [Pure] public static RecordID<TClass>  New( DateTimeOffset                           timeStamp )                 => Create(Guid.CreateVersion7(timeStamp));
-    [Pure] public static RecordID<TClass>  Parse( string                                 value )                     => Create(Guid.Parse(value));
-    [Pure] public static RecordID<TClass>  Parse( scoped ref readonly ReadOnlySpan<char> value )                     => Create(Guid.Parse(value));
-    [Pure] public static RecordID<TClass>  ID( DbDataReader                              reader )                    => Create(reader, nameof(IDateCreated.ID));
-    [Pure] public static RecordID<TClass>? CreatedBy( DbDataReader                       reader )                    => TryCreate(reader, nameof(ICreatedBy.CreatedBy));
-    [Pure] public static RecordID<TClass>? TryCreate( DbDataReader                       reader, string columnName ) => TryCreate(reader.GetFieldValue<Guid?>(columnName));
+    public RecordID( Guid id )
+    {
+        key   = $"{TClass.TableName}:{id}";
+        Value = id;
+    }
 
 
-    [Pure] public static RecordID<TClass> Create( DbDataReader reader, string columnName ) => Create(reader.GetFieldValue<Guid>(columnName));
-    [Pure] public static RecordID<TClass> Create( Guid         id ) => new(id);
-    [Pure]
-    public static RecordID<TClass> Create( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                            ? new RecordID<TClass>(id.Value)
-                                                                                            : New();
-    [Pure]
-    public static RecordID<TClass> Create<TValue>( TValue id )
+    [Pure] public static RecordID<TClass>  New()                                                        => New(DateTimeOffset.UtcNow);
+    [Pure] public static RecordID<TClass>  New( DateTimeOffset              timeStamp )                 => Create(Guid.CreateVersion7(timeStamp));
+    [Pure] public static RecordID<TClass>  Parse( string                    value )                     => Create(Guid.Parse(value));
+    [Pure] public static RecordID<TClass>  Parse( params ReadOnlySpan<char> value )                     => Create(Guid.Parse(value));
+    [Pure] public static RecordID<TClass>  ID( DbDataReader                 reader )                    => Create(reader, nameof(IDateCreated.ID));
+    [Pure] public static RecordID<TClass>? CreatedBy( DbDataReader          reader )                    => TryCreate(reader, nameof(ICreatedBy.CreatedBy));
+    [Pure] public static RecordID<TClass>? TryCreate( DbDataReader          reader, string columnName ) => TryCreate(reader.GetFieldValue<Guid?>(columnName));
+    [Pure] public static RecordID<TClass>  Create( DbDataReader             reader, string columnName ) => Create(reader.GetFieldValue<Guid>(columnName));
+    [Pure] public static RecordID<TClass>  Create( Guid                     id ) => new(id);
+    [Pure] public static RecordID<TClass> Create( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
+                                                                                                   ? new RecordID<TClass>(id.Value)
+                                                                                                   : New();
+    [Pure] public static RecordID<TClass> Create<TValue>( TValue id )
         where TValue : IUniqueID<Guid> => Create(id.ID);
-    [Pure]
-    public static IEnumerable<RecordID<TClass>> Create<TValue>( IEnumerable<TValue> ids )
+    [Pure] public static IEnumerable<RecordID<TClass>> Create<TValue>( IEnumerable<TValue> ids )
         where TValue : IUniqueID<Guid> => ids.Select(Create);
-    [Pure]
-    public static IAsyncEnumerable<RecordID<TClass>> Create<TValue>( IAsyncEnumerable<TValue> ids )
+    [Pure] public static IAsyncEnumerable<RecordID<TClass>> Create<TValue>( IAsyncEnumerable<TValue> ids )
         where TValue : IUniqueID<Guid> => ids.Select(Create);
-    [Pure]
-    public static RecordID<TClass>? TryCreate( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                                ? new RecordID<TClass>(id.Value)
-                                                                                                : default;
+    [Pure] public static RecordID<TClass>? TryCreate( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
+                                                                                                       ? new RecordID<TClass>(id.Value)
+                                                                                                       : default;
 
 
     public static RecordID<TClass> Parse( string                         value, IFormatProvider?     provider ) => new(Guid.Parse(value, provider));
@@ -77,8 +77,7 @@ public readonly struct RecordID<TClass>( Guid id ) : IEquatable<RecordID<TClass>
     public static implicit operator RecordID<TClass>( TClass record ) => new(record.ID.Value);
 
 
-    [Pure]
-    public DynamicParameters ToDynamicParameters()
+    [Pure] public DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = new();
         parameters.Add(nameof(IDateCreated.ID), Value);

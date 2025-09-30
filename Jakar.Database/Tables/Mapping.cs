@@ -22,6 +22,12 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     private WeakReference<TValue>? __value;
 
 
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<TSelf>.Create()
+                                                                                                         .WithForeignKey<TKey>(nameof(KeyID))
+                                                                                                         .WithForeignKey<TValue>(nameof(ValueID))
+                                                                                                         .Build();
+
+
     protected Mapping( RecordID<TKey> key, RecordID<TValue> value ) : this(key, value, RecordID<TSelf>.New(), DateTimeOffset.UtcNow) { }
     protected Mapping( TKey key, TValue value ) : this(key.ID, value.ID)
     {
@@ -188,8 +194,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     public static       IAsyncEnumerable<TSelf> Where( NpgsqlConnection  connection, DbTransaction? transaction, DbTable<TSelf> selfTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token ) => selfTable.Where(connection, transaction, true, GetDynamicParameters(value), token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public static IAsyncEnumerable<TValue> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TValue> valueTable, RecordID<TKey> key, [EnumeratorCancellation] CancellationToken token )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static IAsyncEnumerable<TValue> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TValue> valueTable, RecordID<TKey> key, [EnumeratorCancellation] CancellationToken token )
     {
         string sql = $"""
                       SELECT * FROM {TValue.TableName}
@@ -202,8 +207,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public static IAsyncEnumerable<TKey> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TKey> keyTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static IAsyncEnumerable<TKey> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TKey> keyTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token )
     {
         string sql = $"""
                       SELECT * FROM {TKey.TableName}
@@ -233,8 +237,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public static async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join(',', values.Select(static x => x.Value))} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
 

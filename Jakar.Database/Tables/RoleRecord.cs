@@ -1,7 +1,8 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRole,
                                  [property: StringLength(1024)] string NormalizedName,
                                  [property: StringLength(4096)] string ConcurrencyStamp,
@@ -17,6 +18,15 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
     public static                               JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
     public static                               JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
     [StringLength(IUserRights.MAX_SIZE)] public string                     Rights        { get; set; } = Rights;
+
+
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+                                                                                                              .WithColumn<string>(nameof(NameOfRole),       length: 1024)
+                                                                                                              .WithColumn<string>(nameof(NormalizedName),   length: 1024)
+                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp), length: 4096)
+                                                                                                              .WithColumn<string>(nameof(Rights),           length: UNICODE_CAPACITY)
+                                                                                                              .With_CreatedBy()
+                                                                                                              .Build();
 
 
     public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller) { }
@@ -36,8 +46,7 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
         return this;
     }
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(NameOfRole),       NameOfRole);
@@ -46,8 +55,7 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
         parameters.Add(nameof(Rights),           Rights);
         return parameters;
     }
-    [Pure]
-    public static RoleRecord Create( DbDataReader reader )
+    [Pure] public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>(nameof(Rights));
         string                name             = reader.GetFieldValue<string>(nameof(NameOfRole));
@@ -64,13 +72,12 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
     [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
 
 
-    [Pure]
-    public IdentityRole ToIdentityRole() => new()
-                                            {
-                                                Name             = NameOfRole,
-                                                NormalizedName   = NormalizedName,
-                                                ConcurrencyStamp = ConcurrencyStamp
-                                            };
+    [Pure] public IdentityRole ToIdentityRole() => new()
+                                                   {
+                                                       Name             = NameOfRole,
+                                                       NormalizedName   = NormalizedName,
+                                                       ConcurrencyStamp = ConcurrencyStamp
+                                                   };
 
 
     public override bool Equals( RoleRecord? other )

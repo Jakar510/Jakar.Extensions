@@ -15,7 +15,7 @@ namespace Jakar.Extensions;
 ///         <see href="https://github.com/RicoSuter/Namotion.Reflection"/>
 ///     </para>
 /// </summary>
-[SuppressMessage( "ReSharper", "NullableWarningSuppressionIsUsed" )]
+[SuppressMessage("ReSharper", "NullableWarningSuppressionIsUsed")]
 public static partial class Types
 {
     private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
@@ -23,16 +23,16 @@ public static partial class Types
     public static readonly Type   NullableType     = typeof(Nullable<>);
 
 
-    public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper( property.DeclaringType, property.CustomAttributes );
-    public static bool IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper( field.DeclaringType, field.CustomAttributes );
-    public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper( parameter.Member, parameter.CustomAttributes );
+    public static bool IsNullable( this PropertyInfo  property )  => property.PropertyType.IsNullableHelper(property.DeclaringType, property.CustomAttributes);
+    public static bool IsNullable( this FieldInfo     field )     => field.FieldType.IsNullableHelper(field.DeclaringType, field.CustomAttributes);
+    public static bool IsNullable( this ParameterInfo parameter ) => parameter.ParameterType.IsNullableHelper(parameter.Member, parameter.CustomAttributes);
 
 
     private static bool IsNullableHelper( this Type memberType, in MemberInfo? declaringType, IEnumerable<CustomAttributeData> customAttributes )
     {
-        if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType( memberType ) is not null; }
+        if ( memberType.IsValueType ) { return Nullable.GetUnderlyingType(memberType) is not null; }
 
-        CustomAttributeData? nullable = customAttributes.FirstOrDefault( static x => x.AttributeType.FullName == NULLABLE );
+        CustomAttributeData? nullable = customAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE);
 
         if ( nullable is not null && nullable.ConstructorArguments.Count == 1 )
         {
@@ -48,7 +48,7 @@ public static partial class Types
 
         for ( MemberInfo? type = declaringType; type != null; type = type.DeclaringType )
         {
-            CustomAttributeData? context = type.CustomAttributes.FirstOrDefault( static x => x.AttributeType.FullName == NULLABLE_CONTEXT );
+            CustomAttributeData? context = type.CustomAttributes.FirstOrDefault(static x => x.AttributeType.FullName == NULLABLE_CONTEXT);
             if ( context is not null && context.ConstructorArguments.Count == 1 && context.ConstructorArguments[0].ArgumentType == typeof(byte) ) { return (byte)context.ConstructorArguments[0].Value! == 2; }
         }
 
@@ -56,11 +56,25 @@ public static partial class Types
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type type, [NotNullWhen( true )] out Type? result )
+    public static bool TryGetUnderlyingType( this Type type, [NotNullWhen(true)] out Type? result )
+    {
+        if ( type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>) )
+        {
+            foreach ( Type argument in type.GenericTypeArguments.AsSpan() )
+            {
+                result = argument;
+                return true;
+            }
+        }
+
+        result = null;
+        return false;
+    }
+    public static bool TryGetUnderlyingEnumType( this Type type, [NotNullWhen(true)] out Type? result )
     {
         if ( type.IsEnum )
         {
-            result = Enum.GetUnderlyingType( type );
+            result = Enum.GetUnderlyingType(type);
             return true;
         }
 
@@ -68,7 +82,7 @@ public static partial class Types
         {
             foreach ( Type argument in type.GenericTypeArguments.AsSpan() )
             {
-                if ( argument.TryGetUnderlyingEnumType( out result ) ) { return true; }
+                if ( argument.TryGetUnderlyingEnumType(out result) ) { return true; }
             }
         }
 

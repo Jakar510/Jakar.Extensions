@@ -1,7 +1,7 @@
 ﻿using Jakar.Database;
 
 
-[assembly: Experimental( "SqlTableBuilder" )]
+[assembly: Experimental("SqlTableBuilder")]
 
 
 try
@@ -19,7 +19,7 @@ try
 
     // await Tests.Test_ConcurrentObservableCollection();
 
-    TestDatabase.TestAsync();
+    // TODO: TestDatabase.TestAsync();
 
     // JsonTest.Run();
 

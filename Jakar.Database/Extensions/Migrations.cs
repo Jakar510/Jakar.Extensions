@@ -4,8 +4,16 @@
 namespace Jakar.Database;
 
 
-public static class MigrationExtensions
+public static class Migrations
 {
+    public static bool HasFlagValue( this ref readonly ColumnOptions type, ColumnOptions flag ) => ( type & flag ) != 0;
+
+
+    public static string CreateTableSql<TClass>()
+        where TClass : class, ITableRecord<TClass> => SqlTableBuilder<TClass>.Create()
+                                                                             .Build();
+
+
     public static void MigrateUp( this WebApplication app )
     {
         using IServiceScope scope  = app.Services.CreateScope();

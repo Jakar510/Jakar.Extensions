@@ -2,7 +2,8 @@
 
 
 /// <see cref="LocalizableString"/>
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record ResxRowRecord( long                    KeyID,
                                     string                  Key,
                                     string                  Neutral,
@@ -29,6 +30,26 @@ public sealed record ResxRowRecord( long                    KeyID,
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<ResxRowRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.ResxRowRecord;
     public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
+
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+                                                                                                              .WithColumn<string>(nameof(KeyID),      length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Key),        length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Neutral),    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Arabic),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Chinese),    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Czech),      length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Dutch),      length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(English),    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(French),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(German),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Japanese),   length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Korean),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Polish),     length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Portuguese), length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Spanish),    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Swedish),    length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(Thai),       length: UNICODE_CAPACITY)
+                                                                                                              .Build();
 
 
     public ResxRowRecord( string key, long keyID ) : this(key, keyID, string.Empty) { }
@@ -86,8 +107,7 @@ public sealed record ResxRowRecord( long                    KeyID,
              RecordID<ResxRowRecord>.New(),
              DateTimeOffset.UtcNow) { }
 
-    [Pure]
-    public static ResxRowRecord Create( DbDataReader reader )
+    [Pure] public static ResxRowRecord Create( DbDataReader reader )
     {
         long                    keyID        = reader.GetFieldValue<long>(nameof(KeyID));
         string                  key          = reader.GetFieldValue<string>(nameof(Key));
@@ -132,8 +152,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                  lastModified);
     }
 
-    [Pure]
-    public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+    [Pure] public static async IAsyncEnumerable<ResxRowRecord> CreateAsync( DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
     {
         while ( await reader.ReadAsync(token) ) { yield return Create(reader); }
     }
@@ -170,21 +189,20 @@ public sealed record ResxRowRecord( long                    KeyID,
     }
 
 
-    [Pure]
-    public ResxRowRecord With( string english,
-                               string spanish,
-                               string french,
-                               string swedish,
-                               string german,
-                               string chinese,
-                               string polish,
-                               string thai,
-                               string japanese,
-                               string czech,
-                               string portuguese,
-                               string dutch,
-                               string korean,
-                               string arabic
+    [Pure] public ResxRowRecord With( string english,
+                                      string spanish,
+                                      string french,
+                                      string swedish,
+                                      string german,
+                                      string chinese,
+                                      string polish,
+                                      string thai,
+                                      string japanese,
+                                      string czech,
+                                      string portuguese,
+                                      string dutch,
+                                      string korean,
+                                      string arabic
     ) => this with
          {
              English = english,
@@ -204,22 +222,21 @@ public sealed record ResxRowRecord( long                    KeyID,
              LastModified = DateTimeOffset.UtcNow
          };
 
-    [Pure]
-    public ResxString ToResxString() => new(Neutral,
-                                            Arabic,
-                                            Chinese,
-                                            Czech,
-                                            Dutch,
-                                            English,
-                                            French,
-                                            German,
-                                            Japanese,
-                                            Korean,
-                                            Polish,
-                                            Portuguese,
-                                            Spanish,
-                                            Swedish,
-                                            Thai);
+    [Pure] public ResxString ToResxString() => new(Neutral,
+                                                   Arabic,
+                                                   Chinese,
+                                                   Czech,
+                                                   Dutch,
+                                                   English,
+                                                   French,
+                                                   German,
+                                                   Japanese,
+                                                   Korean,
+                                                   Polish,
+                                                   Portuguese,
+                                                   Spanish,
+                                                   Swedish,
+                                                   Thai);
 
     public string GetValue( in SupportedLanguage language ) => language switch
                                                                {

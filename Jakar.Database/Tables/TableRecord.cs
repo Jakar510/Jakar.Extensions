@@ -43,10 +43,15 @@ public interface IRecordPair<TClass> : ILastModified
 public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     where TClass : ITableRecord<TClass>
 {
-    public abstract static        ImmutableDictionary<string, ColumnMetaData> Properties { [Pure] get; }
-    public abstract static        string                                      TableName  { [Pure] get; }
-    [Pure] public abstract static TClass                                      Create( DbDataReader reader );
-    [Pure] public                 DynamicParameters                           ToDynamicParameters();
+    public abstract static ReadOnlyMemory<PropertyInfo>                Properties       { [Pure] get; }
+    public abstract static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
+    public abstract static string                                      TableName        { [Pure] get; }
+    public abstract static int                                         PropertyCount    { get; }
+
+
+    [Pure] public abstract static TClass            Create( DbDataReader reader );
+    [Pure] public                 DynamicParameters ToDynamicParameters();
+
 
     [Pure] public RecordPair<TClass> ToPair();
     public        TClass             NewID( RecordID<TClass> id );
@@ -58,14 +63,16 @@ public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
 public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TClass>
     where TClass : TableRecord<TClass>, ITableRecord<TClass>
 {
-    protected internal static readonly PropertyInfo[]   Properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    protected internal static readonly PropertyInfo[]   properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
     protected                          DateTimeOffset?  _lastModified;
     private                            RecordID<TClass> __id;
 
 
-    [Key] public RecordID<TClass> ID           { get => __id;          init => __id = value; }
-    public       DateTimeOffset?  LastModified { get => _lastModified; init => _lastModified = value; }
-    public       DateTimeOffset   DateCreated  { get;                  init; }
+    public static int                          PropertyCount => properties.Length;
+    public static ReadOnlyMemory<PropertyInfo> Properties    { [Pure] get => properties; }
+    [Key] public  RecordID<TClass>             ID            { get => __id;          init => __id = value; }
+    public        DateTimeOffset?              LastModified  { get => _lastModified; init => _lastModified = value; }
+    public        DateTimeOffset               DateCreated   { get;                  init; }
 
 
     protected TableRecord( ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
@@ -103,7 +110,12 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
         int               length     = parameters.ParameterNames.Count();
         if ( length == Properties.Length ) { return (TClass)this; }
 
-        HashSet<string> missing = [..Properties.Select(static x => x.Name)];
+        HashSet<string> missing =
+        [
+            ..Properties.AsValueEnumerable()
+                        .Select(static x => x.Name)
+        ];
+
         missing.ExceptWith(parameters.ParameterNames);
 
         string message = $"""

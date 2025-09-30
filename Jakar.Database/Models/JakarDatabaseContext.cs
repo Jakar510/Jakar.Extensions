@@ -40,12 +40,11 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(RecoveryCodeRecord[]))]
 [JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
 [JsonSerializable(typeof(FusionCacheEntryOptionsWrapper))]
+[JsonSerializable(typeof(ImmutableDictionary<string, ColumnMetaData>))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()
     {
-        Default.FusionCacheEntryOptionsWrapper.Register();
-
         Default.HashSetString.Register();
 
         Default.EmailSettings.Register();
@@ -80,6 +79,10 @@ public sealed partial class JakarDatabaseContext : JsonSerializerContext
 
         Default.RecoveryCodeRecord.Register();
         Default.RecoveryCodeRecordArray.Register();
+
+        Default.FusionCacheEntryOptionsWrapper.Register();
+
+        Default.ImmutableDictionaryStringColumnMetaData.Register();
     }
 }
 

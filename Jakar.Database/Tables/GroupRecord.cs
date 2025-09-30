@@ -1,20 +1,30 @@
 ﻿namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>
 {
-    public const  int                                  MAX_SIZE   = 1024;
-    public const  string                               TABLE_NAME = "Groups";
-    public static string                               TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    public static JsonSerializerContext                JsonContext   => JakarDatabaseContext.Default;
-    public static JsonTypeInfo<GroupRecord>            JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord;
-    public static JsonTypeInfo<GroupRecord[]>          JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
-    Guid? ICreatedByUser<Guid>.                        CreatedBy     => CreatedBy?.Value;
-    Guid? IGroupModel<Guid>.                           OwnerID       => CreatedBy?.Value;
-    [StringLength(IUserRights.MAX_SIZE)] public string Rights        { get; set; } = Rights;
+    public const  int                         MAX_SIZE   = 1024;
+    public const  string                      TABLE_NAME = "Groups";
+    public static JsonTypeInfo<GroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
+    public static JsonSerializerContext       JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord; 
+
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Create()
+                                                                                                         .With_CreatedBy()
+                                                                                                         .WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
+                                                                                                         .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")
+                                                                                                         .WithColumn<string>(nameof(Rights),      checks: $"{nameof(Rights)} > 0")
+                                                                                                         .Build();
+
+
+    public static string                               TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    Guid? ICreatedByUser<Guid>.                        CreatedBy => CreatedBy?.Value;
+    Guid? IGroupModel<Guid>.                           OwnerID   => CreatedBy?.Value;
+    [StringLength(IUserRights.MAX_SIZE)] public string Rights    { get; set; } = Rights;
 
 
     public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
@@ -22,14 +32,6 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public GroupModel ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid> => TGroupModel.Create(this);
-
-
-    public GroupRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : struct, Enum
-    {
-        Rights = rights.ToString();
-        return this;
-    }
 
 
     public override int CompareTo( GroupRecord? other )
@@ -63,8 +65,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), NameOfGroup, Rights, CustomerID);
 
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(CustomerID),  CustomerID);
@@ -75,8 +76,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     }
 
 
-    [Pure]
-    public static GroupRecord Create( DbDataReader reader )
+    [Pure] public static GroupRecord Create( DbDataReader reader )
     {
         string                customerID   = reader.GetFieldValue<string>(nameof(CustomerID));
         string                nameOfGroup  = reader.GetFieldValue<string>(nameof(NameOfGroup));

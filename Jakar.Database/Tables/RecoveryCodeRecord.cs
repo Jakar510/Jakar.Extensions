@@ -4,8 +4,9 @@
 namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
-public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RecoveryCodeRecord>
+[Serializable]
+[Table(TABLE_NAME)]
+public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string Code, RecordID<RecoveryCodeRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<RecoveryCodeRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RecoveryCodeRecord>
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
@@ -14,19 +15,22 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Create()
+                                                                                                                      .WithColumn<string>(nameof(Code), length: 1024)
+                                                                                                                      .With_CreatedBy()
+                                                                                                                      .Build();
+
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this(code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
 
 
-    [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    [Pure] public override DynamicParameters ToDynamicParameters()
     {
         DynamicParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Code), Code);
         return parameters;
     }
-    [Pure]
-    public static RecoveryCodeRecord Create( DbDataReader reader )
+    [Pure] public static RecoveryCodeRecord Create( DbDataReader reader )
     {
         string                       code         = reader.GetFieldValue<string>(nameof(Code));
         DateTimeOffset               dateCreated  = reader.GetFieldValue<DateTimeOffset>(nameof(DateCreated));
@@ -38,12 +42,11 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     }
 
 
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
+    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
 
-    [Pure]
-    public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
+    [Pure] public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
     {
         Codes codes = new(recoveryCodes.Length);
 
@@ -55,8 +58,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
         return codes;
     }
-    [Pure]
-    public static async ValueTask<Codes> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes, CancellationToken token = default )
+    [Pure] public static async ValueTask<Codes> Create( UserRecord user, IAsyncEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         Codes codes = new(10);
 
@@ -68,8 +70,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
         return codes;
     }
-    [Pure]
-    public static Codes Create( UserRecord user, int count )
+    [Pure] public static Codes Create( UserRecord user, int count )
     {
         Codes codes = new(count);
 
@@ -85,8 +86,7 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create(user, code.ToBase64());
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => ( code, new RecoveryCodeRecord(code, user) );
 
-    [Pure]
-    public static bool IsValid( string code, ref RecoveryCodeRecord record )
+    [Pure] public static bool IsValid( string code, ref RecoveryCodeRecord record )
     {
         switch ( __hasher.VerifyHashedPassword(record, record.Code, code) )
         {
@@ -141,7 +141,8 @@ public sealed record RecoveryCodeRecord( string Code, RecordID<RecoveryCodeRecor
 
 
 
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>, ICreateMapping<UserRecoveryCodeRecord, UserRecord, RecoveryCodeRecord>
 {
     public const  string                                 TABLE_NAME = "UserRecoveryCodes";
