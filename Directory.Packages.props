@@ -128,7 +128,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.264" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.268" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
@@ -157,7 +157,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.5" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.5" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.5" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.21" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.22" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
