@@ -43,9 +43,10 @@ public interface IRecordPair<TClass> : ILastModified
 public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     where TClass : ITableRecord<TClass>
 {
-    public abstract static        string            TableName { [Pure] get; }
-    [Pure] public abstract static TClass            Create( DbDataReader reader );
-    [Pure] public                 DynamicParameters ToDynamicParameters();
+    public abstract static        ImmutableDictionary<string, ColumnMetaData> Properties { [Pure] get; }
+    public abstract static        string                                      TableName  { [Pure] get; }
+    [Pure] public abstract static TClass                                      Create( DbDataReader reader );
+    [Pure] public                 DynamicParameters                           ToDynamicParameters();
 
     [Pure] public RecordPair<TClass> ToPair();
     public        TClass             NewID( RecordID<TClass> id );

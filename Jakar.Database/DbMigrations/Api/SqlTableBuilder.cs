@@ -52,7 +52,43 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-[Experimental("SqlTableBuilder")][Flags]
+public enum DbPropertyType
+{
+    Guid,
+    Boolean,
+    Byte,
+    SByte,
+    Int16,
+    Int32,
+    Int64,
+    Int128,
+    UInt16,
+    UInt32,
+    UInt64,
+    UInt128,
+    Single,
+    Double,
+    Decimal,
+    Currency,
+    Time,
+    Date,
+    DateTime,
+    DateTimeOffset,
+    Binary,
+    String,
+    Xml,
+    Json,
+    Object,
+    Enum,
+    Set,
+    Polygon,
+    Linestring,
+    Point
+}
+
+
+
+[Flags]
 public enum ColumnOptions
 {
     AlwaysIdentity  = 1 << 0,
@@ -64,141 +100,116 @@ public enum ColumnOptions
 
 
 
-[Experimental("SqlTableBuilder")] public readonly record struct ColumnPrecisionMetaData( ushort Scope, ushort Precision );
+public readonly record struct ColumnPrecisionMetaData( int Length, int Scope, int Precision )
+{
+    public readonly                 int Length    = Length;
+    public readonly                 int Precision = Precision;
+    public readonly                 int Scope     = Scope;
+    public static implicit operator ColumnPrecisionMetaData( int                        value ) => new(value, -1, -1);
+    public static implicit operator ColumnPrecisionMetaData( (int Precision, int Scope) value ) => new(-1, value.Precision, value.Scope);
+}
 
 
 
-[Experimental("SqlTableBuilder")]
 public readonly record struct ColumnCheckMetaData( bool And, params string[] Checks )
 {
+    public readonly                 bool     And    = And;
+    public readonly                 string[] Checks = Checks;
     public static implicit operator ColumnCheckMetaData( string   check )  => new(true, check);
     public static implicit operator ColumnCheckMetaData( string[] checks ) => new(true, checks);
 }
 
 
 
-[Experimental("SqlTableBuilder")]
-public readonly record struct ColumnMetaData( string Name, DbType DbType, bool IsNullable, OneOf<uint, ColumnPrecisionMetaData> Length = default, ColumnCheckMetaData? Check = null, ColumnOptions Options = 0 )
+public readonly record struct ColumnMetaData( string                   ColumnName,
+                                              DbPropertyType           DbType,
+                                              bool                     IsNullable,
+                                              bool                     IsPrimaryKey,
+                                              string?                  ForeignKeyName,
+                                              string?                  IndexColumnName = null,
+                                              ColumnPrecisionMetaData? Length          = null,
+                                              ColumnCheckMetaData?     Check           = null,
+                                              ColumnOptions            Options         = 0 )
 {
-    // public bool    IsForeignKey { get; init; }
-    // public bool   IsPrimaryKey   { get; init; }
-    // public string PrimaryKeyName { get; init; }
-
-    public string? IndexColumnName { get; init; }
-
-    public static ColumnMetaData Nullable( string    name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 ) => new(name, dbType, true, length, check, options);
-    public static ColumnMetaData NotNullable( string name, DbType dbType, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 ) => new(name, dbType, false, length, check, options);
-    public static ColumnMetaData Indexed( string     name, string indexName ) => new(name, DbType.Int64, false) { IndexColumnName = indexName };
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool IsInvalidScopedPrecision() => Length is { IsT1: true, AsT1: { Precision: > Constants.DECIMAL_MAX_PRECISION, Scope: > Constants.DECIMAL_MAX_SCALE } };
+    public readonly bool                     IsForeignKey    = !string.IsNullOrWhiteSpace(IndexColumnName);
+    public readonly bool                     IsNullable      = IsNullable;
+    public readonly bool                     IsPrimaryKey    = IsPrimaryKey;
+    public readonly ColumnCheckMetaData?     Check           = Check;
+    public readonly ColumnOptions            Options         = Options;
+    public readonly ColumnPrecisionMetaData? Length          = Length;
+    public readonly DbPropertyType           DbType          = DbType;
+    public readonly string                   ColumnName      = ColumnName;
+    public readonly string?                  ForeignKeyName  = ForeignKeyName;
+    public readonly string?                  IndexColumnName = IndexColumnName;
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static ColumnMetaData Nullable( string    columnName, DbPropertyType dbType, string? foreignKeyName = null, string? indexColumnName = null, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )                            => new(columnName, dbType, true, false, foreignKeyName, indexColumnName, length, check, options);
+    public static ColumnMetaData NotNullable( string columnName, DbPropertyType dbType, string? foreignKeyName = null, string? indexColumnName = null, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? check = null, ColumnOptions options = 0, bool isPrimaryKey = false ) => new(columnName, dbType, false, isPrimaryKey, foreignKeyName, indexColumnName, length, check, options);
+
+    // public static ColumnMetaData Indexed( string     columnName, string         indexColumnName ) => default;
+
+
+    public bool IsInvalidScopedPrecision() => Length is { Precision: > Constants.DECIMAL_MAX_PRECISION, Scope: > Constants.DECIMAL_MAX_SCALE };
+
     public bool IsValidLength() =>
-        Length.IsT0 &&
-        Length.AsT0 switch
+        Length?.Scope switch
         {
-            0                                                                                          => false,
-            > Constants.ANSI_CAPACITY when DbType is DbType.AnsiString or DbType.AnsiStringFixedLength => false,
-            > Constants.UNICODE_CAPACITY when DbType is DbType.String or DbType.StringFixedLength      => false,
-            _                                                                                          => true
+            0                                                                 => false,
+            > Constants.ANSI_CAPACITY when DbType is DbPropertyType.String    => false,
+            > Constants.UNICODE_CAPACITY when DbType is DbPropertyType.String => false,
+            _                                                                 => true
         };
 
 
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
-    public string GetDataTypeSqlServer() =>
-        DbType switch
-        {
-            DbType.String or DbType.StringFixedLength when Length is { IsT0        : true, AsT0: > Constants.UNICODE_CAPACITY } => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when Length is { IsT0: true, AsT0: > Constants.ANSI_CAPACITY }    => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
-            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()                                    => throw new OutOfRangeException(Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}"),
-            _ => DbType switch
-                 {
-                     DbType.Binary => Length.IsT0
-                                          ? $"VARBINARY({Length.AsT0})"
-                                          : "BLOB",
-                     DbType.SByte => "TINYINT",
-                     DbType.Byte  => "TINYINT",
-                     DbType.AnsiString => Length.IsT0
-                                              ? $"VARCHAR({Length.AsT0})"
-                                              : "NVARCHAR(MAX)",
-                     DbType.String => Length.IsT0
-                                          ? $"NVARCHAR({Length.AsT0})"
-                                          : "NVARCHAR(MAX)",
-                     DbType.AnsiStringFixedLength       => $"CHAR({Length})",
-                     DbType.StringFixedLength           => $"NCHAR({Length})",
-                     DbType.Guid                        => "GUID",
-                     DbType.Int16                       => "SMALLINT",
-                     DbType.Int32                       => "INT",
-                     DbType.Int64                       => "BIGINT",
-                     DbType.UInt16                      => "SMALLINT",
-                     DbType.UInt32                      => "INT",
-                     DbType.UInt64                      => "BIGINT",
-                     DbType.Single                      => "FLOAT(9)",
-                     DbType.Double                      => "DOUBLE PRECISION",
-                     DbType.Decimal                     => "DECIMAL(19, 5)",
-                     DbType.VarNumeric when Length.IsT1 => $"DECIMAL({Length.AsT1.Precision}, {Length.AsT1.Scope})",
-                     DbType.VarNumeric                  => $"DECIMAL({Constants.DECIMAL_MAX_PRECISION}, {Constants.DECIMAL_MAX_SCALE})",
-                     DbType.Boolean                     => "BOOLEAN",
-                     DbType.Date                        => "DATE",
-                     DbType.Time                        => "TIME",
-                     DbType.DateTime                    => "DATETIME2",
-                     DbType.DateTime2                   => "DATETIME2",
-                     DbType.DateTimeOffset              => "TIMESTAMP",
-                     DbType.Currency                    => "MONEY",
-                     DbType.Object                      => "JSON",
-                     DbType.Xml                         => "XML",
-                     _                                  => throw new OutOfRangeException(DbType)
-                 }
-        };
-
-
-    [SuppressMessage("ReSharper", "StringLiteralTypo")]
     public string GetDataTypePostgresSql() =>
         DbType switch
         {
-            DbType.String or DbType.StringFixedLength when !IsValidLength()                  => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
-            DbType.AnsiString or DbType.AnsiStringFixedLength when !IsValidLength()          => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
-            DbType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision() => throw new OutOfRangeException(Length, $"Max deciamal scale is {Constants.DECIMAL_MAX_SCALE}. Max deciamal precision is {Constants.DECIMAL_MAX_PRECISION}"),
+            DbPropertyType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
+            DbPropertyType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
+
+            // DbPropertyType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()
+            // => throw new OutOfRangeException(Length, $"Max decimal scale is {Constants.DECIMAL_MAX_SCALE}. Max decimal precision is {Constants.DECIMAL_MAX_PRECISION}"),
 
             _ => DbType switch
                  {
-                     DbType.Binary => Length.IsT0
-                                          ? $"VARBINARY({Length.AsT0})"
-                                          : "BLOB",
-                     DbType.SByte => "bytea",
-                     DbType.Byte  => "bytea",
-                     DbType.AnsiString => Length.IsT0
-                                              ? $"varchar({Length.AsT0})"
-                                              : "varchar(MAX)",
-                     DbType.String => Length.IsT0
-                                          ? $"varchar({Length.AsT0})"
-                                          : "text",
-                     DbType.AnsiStringFixedLength       => $"char({Length})",
-                     DbType.StringFixedLength           => $"char({Length})",
-                     DbType.Guid                        => "uuid",
-                     DbType.Int16                       => "smallint",
-                     DbType.Int32                       => "integer",
-                     DbType.Int64                       => "bigint",
-                     DbType.UInt16                      => "smallint",
-                     DbType.UInt32                      => "integer",
-                     DbType.UInt64                      => "bigint",
-                     DbType.Single                      => "float4",
-                     DbType.Double                      => "float8",
-                     DbType.Decimal                     => "decimal(19, 5)",
-                     DbType.VarNumeric when Length.IsT1 => $"decimal({Length.AsT1.Precision}, {Length.AsT1.Scope})",
-                     DbType.VarNumeric                  => $"decimal({Constants.DECIMAL_MAX_PRECISION}, {Constants.DECIMAL_MAX_SCALE})",
-                     DbType.Boolean                     => "bool",
-                     DbType.Date                        => "date",
-                     DbType.Time                        => "time",
-                     DbType.DateTime                    => "timestamp",
-                     DbType.DateTime2                   => "timestamp",
-                     DbType.DateTimeOffset              => "timestamptz",
-                     DbType.Currency                    => "money",
-                     DbType.Object                      => "json",
-                     DbType.Xml                         => "xml",
-                     _                                  => throw new OutOfRangeException(DbType)
+                     DbPropertyType.Binary => Length.HasValue
+                                                  ? $"VARBINARY({Length.Value.Scope})"
+                                                  : "BLOB",
+                     DbPropertyType.SByte => "bytea",
+                     DbPropertyType.Byte  => "bytea",
+                     DbPropertyType.String => Length.HasValue
+                                                  ? Length.Value.Scope > Constants.ANSI_CAPACITY
+                                                        ? "text"
+                                                        : $"varchar({Length.Value.Scope})"
+                                                  : "varchar(MAX)",
+                     DbPropertyType.Guid           => "uuid",
+                     DbPropertyType.Int16          => "smallint",
+                     DbPropertyType.Int32          => "integer",
+                     DbPropertyType.Int64          => "bigint",
+                     DbPropertyType.UInt16         => "smallint",
+                     DbPropertyType.UInt32         => "integer",
+                     DbPropertyType.UInt64         => "bigint",
+                     DbPropertyType.Single         => "float4",
+                     DbPropertyType.Double         => "float8",
+                     DbPropertyType.Decimal        => "decimal(19, 5)",
+                     DbPropertyType.Boolean        => "bool",
+                     DbPropertyType.Date           => "date",
+                     DbPropertyType.Time           => "time",
+                     DbPropertyType.DateTime       => "timestamp",
+                     DbPropertyType.DateTimeOffset => @"timestamptz",
+                     DbPropertyType.Currency       => "money",
+                     DbPropertyType.Object         => "json",
+                     DbPropertyType.Json           => "json",
+                     DbPropertyType.Xml            => "xml",
+                     DbPropertyType.Enum           => "enum",
+                     DbPropertyType.Set            => "set",
+                     DbPropertyType.Polygon        => "polygon",
+                     DbPropertyType.Linestring     => "linestring",
+                     DbPropertyType.Point          => "point",
+
+                     // DbPropertyType.VarNumeric when Length.IsT1 => $"decimal({Length.AsT1.Precision}, {Length.AsT1.Scope})",
+                     // DbPropertyType.VarNumeric                  => $"decimal({Constants.DECIMAL_MAX_PRECISION}, {Constants.DECIMAL_MAX_SCALE})",
+                     _ => throw new OutOfRangeException(DbType)
                  }
         };
 }
@@ -206,11 +217,10 @@ public readonly record struct ColumnMetaData( string Name, DbType DbType, bool I
 
 
 [Experimental("SqlTableBuilder")]
-public ref struct SqlTableBuilder<TClass>
+public ref struct SqlTableBuilder<TClass> : IDisposable
     where TClass : class, ITableRecord<TClass>
 {
-    private Buffer<ColumnMetaData> __columns = new();
-
+    private Buffer<ColumnMetaData> __columns = new(Buffers.DEFAULT_CAPACITY);
     public SqlTableBuilder() { }
     public static SqlTableBuilder<TClass> Create() => new();
     public void Dispose()
@@ -220,14 +230,26 @@ public ref struct SqlTableBuilder<TClass>
     }
 
 
-    public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public SqlTableBuilder<TClass> WithColumn<TValue>( string columnName, OneOf<uint, ColumnPrecisionMetaData> length = default, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
+    public static string FromTable()
     {
-        DbType         dbType = GetDataType<TValue>(out bool isNullable, ref length);
-        ColumnMetaData column = new(columnName, dbType, isNullable, length, check, options);
+        SqlTableBuilder<TClass> builder = new();
+        foreach ( ColumnMetaData column in TClass.Properties.Values ) { builder.WithColumn(column); }
+
+        return builder.Build();
+    }
+
+    // public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
+    public SqlTableBuilder<TClass> WithColumn<TValue>( string columnName, string? indexColumnName = null, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? check = null, ColumnOptions options = 0, bool isPrimaryKey = false )
+    {
+        DbPropertyType dbType = GetDataType<TValue>(out bool isNullable, ref length);
+        ColumnMetaData column = new(columnName, dbType, isNullable, isPrimaryKey, null, indexColumnName, length, check, options);
+        return WithColumn(column);
+    }
+    public SqlTableBuilder<TClass> WithColumn<TValue, TRecord>( string columnName, string? indexColumnName = null, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? check = null, ColumnOptions options = 0 )
+        where TRecord : ITableRecord<TRecord>
+    {
+        DbPropertyType dbType = GetDataType<TValue>(out bool isNullable, ref length);
+        ColumnMetaData column = new(columnName, dbType, isNullable, false, TRecord.TableName, indexColumnName, length, check, options);
         return WithColumn(column);
     }
     public SqlTableBuilder<TClass> WithColumn( ColumnMetaData column )
@@ -237,177 +259,174 @@ public ref struct SqlTableBuilder<TClass>
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    private static DbType GetDataType<TValue>( out bool isNullable, ref OneOf<uint, ColumnPrecisionMetaData> length )
+    private static DbPropertyType GetDataType<TValue>( out bool isNullable, ref ColumnPrecisionMetaData? length )
     {
         isNullable = typeof(TValue).IsNullableType() || typeof(TValue).IsBuiltInNullableType();
 
-        if ( typeof(TValue) == typeof(byte[]) ) { return DbType.Binary; }
+        if ( typeof(TValue) == typeof(byte[]) || typeof(TValue) == typeof(ReadOnlyMemory<byte>) || typeof(TValue) == typeof(ImmutableArray<byte>) ) { return DbPropertyType.Binary; }
 
-        if ( typeof(JsonNode).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
+        if ( typeof(JsonNode).IsAssignableFrom(typeof(TValue)) ) { return DbPropertyType.Object; }
 
-        if ( typeof(JsonObject).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
-
-        if ( typeof(JsonObject).IsAssignableFrom(typeof(TValue)) ) { return DbType.Object; }
 
         if ( typeof(TValue).IsEnum )
         {
-            length = Spans.Max<string, uint>(Enum.GetNames(typeof(TValue)), static x => (uint)x.Length, 0);
-            return DbType.StringFixedLength;
+            length = Enum.GetNames(typeof(TValue)).AsValueEnumerable().Max(static x => x.Length);
+            return DbPropertyType.String;
         }
 
-        if ( typeof(TValue) == typeof(string) ) { return DbType.String; }
+        if ( typeof(TValue) == typeof(string) ) { return DbPropertyType.String; }
 
-        if ( typeof(TValue) == typeof(Int128) ) { return DbType.String; }
+
+        if ( typeof(TValue) == typeof(Int128) ) { return DbPropertyType.String; }
 
         if ( typeof(TValue) == typeof(Int128?) )
         {
             isNullable = true;
-            return DbType.String;
+            return DbPropertyType.Int128;
         }
 
-        if ( typeof(TValue) == typeof(UInt128) ) { return DbType.String; }
+        if ( typeof(TValue) == typeof(UInt128) ) { return DbPropertyType.String; }
 
         if ( typeof(TValue) == typeof(UInt128?) )
         {
             isNullable = true;
-            return DbType.String;
+            return DbPropertyType.UInt128;
         }
 
-        if ( typeof(TValue) == typeof(Guid) || typeof(TValue) == typeof(RecordID<TClass>) ) { return DbType.Guid; }
+        if ( typeof(TValue) == typeof(Guid) || typeof(TValue) == typeof(RecordID<TClass>) ) { return DbPropertyType.Guid; }
 
         if ( typeof(TValue) == typeof(Guid?) || typeof(TValue) == typeof(RecordID<TClass>?) )
         {
             isNullable = true;
-            return DbType.Guid;
+            return DbPropertyType.Guid;
         }
 
-        if ( typeof(TValue) == typeof(byte) ) { return DbType.Byte; }
+        if ( typeof(TValue) == typeof(byte) ) { return DbPropertyType.Byte; }
 
         if ( typeof(TValue) == typeof(byte?) )
         {
             isNullable = true;
-            return DbType.Byte;
+            return DbPropertyType.Byte;
         }
 
-        if ( typeof(TValue) == typeof(short) ) { return DbType.Int16; }
+        if ( typeof(TValue) == typeof(short) ) { return DbPropertyType.Int16; }
 
         if ( typeof(TValue) == typeof(short?) )
         {
             isNullable = true;
-            return DbType.Int16;
+            return DbPropertyType.Int16;
         }
 
-        if ( typeof(TValue) == typeof(ushort) ) { return DbType.UInt16; }
+        if ( typeof(TValue) == typeof(ushort) ) { return DbPropertyType.UInt16; }
 
         if ( typeof(TValue) == typeof(ushort?) )
         {
             isNullable = true;
-            return DbType.UInt16;
+            return DbPropertyType.UInt16;
         }
 
-        if ( typeof(TValue) == typeof(int) ) { return DbType.Int32; }
+        if ( typeof(TValue) == typeof(int) ) { return DbPropertyType.Int32; }
 
         if ( typeof(TValue) == typeof(int?) )
         {
             isNullable = true;
-            return DbType.Int32;
+            return DbPropertyType.Int32;
         }
 
-        if ( typeof(TValue) == typeof(uint) ) { return DbType.UInt32; }
+        if ( typeof(TValue) == typeof(uint) ) { return DbPropertyType.UInt32; }
 
         if ( typeof(TValue) == typeof(uint?) )
         {
             isNullable = true;
-            return DbType.UInt32;
+            return DbPropertyType.UInt32;
         }
 
-        if ( typeof(TValue) == typeof(long) ) { return DbType.Int64; }
+        if ( typeof(TValue) == typeof(long) ) { return DbPropertyType.Int64; }
 
         if ( typeof(TValue) == typeof(long?) )
         {
             isNullable = true;
-            return DbType.Int64;
+            return DbPropertyType.Int64;
         }
 
-        if ( typeof(TValue) == typeof(ulong) ) { return DbType.UInt64; }
+        if ( typeof(TValue) == typeof(ulong) ) { return DbPropertyType.UInt64; }
 
         if ( typeof(TValue) == typeof(ulong?) )
         {
             isNullable = true;
-            return DbType.UInt64;
+            return DbPropertyType.UInt64;
         }
 
-        if ( typeof(TValue) == typeof(float) ) { return DbType.Single; }
+        if ( typeof(TValue) == typeof(float) ) { return DbPropertyType.Single; }
 
         if ( typeof(TValue) == typeof(float?) )
         {
             isNullable = true;
-            return DbType.Single;
+            return DbPropertyType.Single;
         }
 
-        if ( typeof(TValue) == typeof(double) ) { return DbType.Double; }
+        if ( typeof(TValue) == typeof(double) ) { return DbPropertyType.Double; }
 
         if ( typeof(TValue) == typeof(double?) )
         {
             isNullable = true;
-            return DbType.Double;
+            return DbPropertyType.Double;
         }
 
-        if ( typeof(TValue) == typeof(decimal) ) { return DbType.Decimal; }
+        if ( typeof(TValue) == typeof(decimal) ) { return DbPropertyType.Decimal; }
 
         if ( typeof(TValue) == typeof(decimal?) )
         {
             isNullable = true;
-            return DbType.Decimal;
+            return DbPropertyType.Decimal;
         }
 
-        if ( typeof(TValue) == typeof(bool) ) { return DbType.Boolean; }
+        if ( typeof(TValue) == typeof(bool) ) { return DbPropertyType.Boolean; }
 
         if ( typeof(TValue) == typeof(bool?) )
         {
             isNullable = true;
-            return DbType.Boolean;
+            return DbPropertyType.Boolean;
         }
 
-        if ( typeof(TValue) == typeof(DateOnly) ) { return DbType.Date; }
+        if ( typeof(TValue) == typeof(DateOnly) ) { return DbPropertyType.Date; }
 
         if ( typeof(TValue) == typeof(DateOnly?) )
         {
             isNullable = true;
-            return DbType.Date;
+            return DbPropertyType.Date;
         }
 
-        if ( typeof(TValue) == typeof(TimeOnly) ) { return DbType.Time; }
+        if ( typeof(TValue) == typeof(TimeOnly) ) { return DbPropertyType.Time; }
 
         if ( typeof(TValue) == typeof(TimeOnly?) )
         {
             isNullable = true;
-            return DbType.Time;
+            return DbPropertyType.Time;
         }
 
-        if ( typeof(TValue) == typeof(TimeSpan) ) { return DbType.Time; }
+        if ( typeof(TValue) == typeof(TimeSpan) ) { return DbPropertyType.Time; }
 
         if ( typeof(TValue) == typeof(TimeSpan?) )
         {
             isNullable = true;
-            return DbType.Time;
+            return DbPropertyType.Time;
         }
 
-        if ( typeof(TValue) == typeof(DateTime) ) { return DbType.DateTime2; }
+        if ( typeof(TValue) == typeof(DateTime) ) { return DbPropertyType.DateTime; }
 
         if ( typeof(TValue) == typeof(DateTime?) )
         {
             isNullable = true;
-            return DbType.DateTime2;
+            return DbPropertyType.DateTime;
         }
 
-        if ( typeof(TValue) == typeof(DateTimeOffset) ) { return DbType.DateTimeOffset; }
+        if ( typeof(TValue) == typeof(DateTimeOffset) ) { return DbPropertyType.DateTimeOffset; }
 
         if ( typeof(TValue) == typeof(DateTimeOffset?) )
         {
             isNullable = true;
-            return DbType.DateTimeOffset;
+            return DbPropertyType.DateTimeOffset;
         }
 
         throw new ArgumentException($"Unsupported typeof(TValue): {typeof(TValue).Name}");
@@ -423,15 +442,15 @@ public ref struct SqlTableBuilder<TClass>
         query.Append(TClass.TableName);
         query.Append(" (");
 
-        foreach ( ColumnMetaData column in columns )
+        foreach ( ref readonly ColumnMetaData column in columns )
         {
             if ( column.Options.HasFlag(ColumnOptions.Indexed) )
             {
-                query.Append(column.IndexColumnName ?? $"{column.Name}_index");
+                query.Append(column.IndexColumnName ?? $"{column.ColumnName}_index");
                 query.Append(" ON ");
                 query.Append(TClass.TableName);
                 query.Append(" (");
-                query.Append(column.Name);
+                query.Append(column.ColumnName);
                 query.Append(");");
                 continue;
             }
@@ -442,7 +461,7 @@ public ref struct SqlTableBuilder<TClass>
                              ? "\n    "
                              : ",\n    ");
 
-            query.Append(column.Name);
+            query.Append(column.ColumnName);
             query.Append(' ');
             query.Append(dataType);
 
@@ -471,12 +490,9 @@ public ref struct SqlTableBuilder<TClass>
             if ( HasFlag(column.Options, ColumnOptions.PrimaryKey) ) { query.Append(" PRIMARY KEY"); }
         }
 
-        // return query.Trim( ' ' ).TrimEnd( ',' ).TrimEnd( '(' ).Append( "\n );" ).ToString();
         return query.ToString();
     }
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool HasFlag( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
+    public static bool HasFlag( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
 
 
     public string Build()

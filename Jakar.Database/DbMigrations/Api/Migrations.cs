@@ -4,6 +4,39 @@
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static partial class Migrations
 {
+    public static DbPropertyType ToDbPropertyType( this DbType type ) => type switch
+                                                                         {
+                                                                             DbType.AnsiString            => DbPropertyType.String,
+                                                                             DbType.Binary                => DbPropertyType.Binary,
+                                                                             DbType.Byte                  => DbPropertyType.Byte,
+                                                                             DbType.Boolean               => DbPropertyType.Boolean,
+                                                                             DbType.Currency              => DbPropertyType.Decimal,
+                                                                             DbType.Date                  => DbPropertyType.Date,
+                                                                             DbType.Decimal               => DbPropertyType.Decimal,
+                                                                             DbType.Double                => DbPropertyType.Double,
+                                                                             DbType.Guid                  => DbPropertyType.Guid,
+                                                                             DbType.Int16                 => DbPropertyType.Int16,
+                                                                             DbType.Int32                 => DbPropertyType.Int32,
+                                                                             DbType.Int64                 => DbPropertyType.Int64,
+                                                                             DbType.SByte                 => DbPropertyType.SByte,
+                                                                             DbType.Single                => DbPropertyType.Double,
+                                                                             DbType.String                => DbPropertyType.String,
+                                                                             DbType.StringFixedLength     => DbPropertyType.String,
+                                                                             DbType.Time                  => DbPropertyType.Time,
+                                                                             DbType.UInt16                => DbPropertyType.UInt16,
+                                                                             DbType.UInt32                => DbPropertyType.UInt32,
+                                                                             DbType.UInt64                => DbPropertyType.UInt64,
+                                                                             DbType.VarNumeric            => DbPropertyType.Decimal,
+                                                                             DbType.Xml                   => DbPropertyType.Xml,
+                                                                             DbType.AnsiStringFixedLength => DbPropertyType.String,
+                                                                             DbType.DateTime              => DbPropertyType.DateTime,
+                                                                             DbType.DateTime2             => DbPropertyType.DateTime,
+                                                                             DbType.DateTimeOffset        => DbPropertyType.DateTimeOffset,
+                                                                             _                            => throw new OutOfRangeException(type)
+                                                                         };
+    public static DbPropertyType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+
+
     /// <summary>
     ///     <see href="https://github.com/fluentmigrator/fluentmigrator/issues/1038"/>
     /// </summary>
@@ -13,30 +46,30 @@ public static partial class Migrations
 
         ICreateTableColumnOptionOrWithColumnSyntax item;
 
-        DbType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type;
+        DbPropertyType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type.ToDbPropertyType();
 
         if ( type.HasValue )
         {
             // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
             switch ( type )
             {
-                case DbType.Byte:
+                case DbPropertyType.Byte:
                     item = col.AsByte();
                     return item.SetNullable(propertyInfo);
 
-                case DbType.Int16:
-                case DbType.SByte:
+                case DbPropertyType.Int16:
+                case DbPropertyType.SByte:
                     item = col.AsInt16();
                     return item.SetNullable(propertyInfo);
 
-                case DbType.UInt16:
-                case DbType.UInt32:
-                case DbType.Int32:
+                case DbPropertyType.UInt16:
+                case DbPropertyType.UInt32:
+                case DbPropertyType.Int32:
                     item = col.AsInt32();
                     return item.SetNullable(propertyInfo);
 
-                case DbType.UInt64:
-                case DbType.Int64:
+                case DbPropertyType.UInt64:
+                case DbPropertyType.Int64:
                     item = col.AsInt64();
                     return item.SetNullable(propertyInfo);
             }
@@ -115,7 +148,7 @@ public static partial class Migrations
     }
 
 
-    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen(true)] out DbType? dbType )
+    public static bool TryGetUnderlyingEnumType( this Type propertyType, [NotNullWhen(true)] out DbPropertyType? dbType )
     {
         if ( propertyType.TryGetUnderlyingEnumType(out Type? type) )
         {
@@ -148,58 +181,58 @@ public static partial class Migrations
     }
 
 
-    public static DbType GetDbType( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.GetDbType();
-    public static DbType GetDbType( this Type propertyType )
+    public static DbPropertyType GetDbType( this PropertyInfo propertyInfo ) => propertyInfo.PropertyType.GetDbType();
+    public static DbPropertyType GetDbType( this Type propertyType )
     {
-        if ( propertyType.TryGetUnderlyingEnumType(out DbType? type) ) { return type.Value; }
+        if ( propertyType.TryGetUnderlyingEnumType(out DbPropertyType? type) ) { return type.Value; }
 
 
-        if ( propertyType.IsEqualType(typeof(string)) ) { return DbType.String; }
+        if ( propertyType.IsEqualType(typeof(string)) ) { return DbPropertyType.String; }
 
 
-        if ( propertyType.IsOneOf(typeof(bool), typeof(bool?)) ) { return DbType.Boolean; }
+        if ( propertyType.IsOneOf(typeof(bool), typeof(bool?)) ) { return DbPropertyType.Boolean; }
 
 
-        if ( propertyType.IsOneOf(typeof(byte), typeof(byte?)) ) { return DbType.Byte; }
+        if ( propertyType.IsOneOf(typeof(byte), typeof(byte?)) ) { return DbPropertyType.Byte; }
 
 
-        if ( propertyType.IsOneOf(typeof(short), typeof(short?)) ) { return DbType.Int16; }
+        if ( propertyType.IsOneOf(typeof(short), typeof(short?)) ) { return DbPropertyType.Int16; }
 
 
-        if ( propertyType.IsOneOf(typeof(ushort), typeof(ushort?)) ) { return DbType.UInt16; }
+        if ( propertyType.IsOneOf(typeof(ushort), typeof(ushort?)) ) { return DbPropertyType.UInt16; }
 
 
-        if ( propertyType.IsOneOf(typeof(int), typeof(int?)) ) { return DbType.Int32; }
+        if ( propertyType.IsOneOf(typeof(int), typeof(int?)) ) { return DbPropertyType.Int32; }
 
 
-        if ( propertyType.IsOneOf(typeof(uint), typeof(uint?)) ) { return DbType.UInt32; }
+        if ( propertyType.IsOneOf(typeof(uint), typeof(uint?)) ) { return DbPropertyType.UInt32; }
 
 
-        if ( propertyType.IsOneOf(typeof(long), typeof(long?)) ) { return DbType.Int64; }
+        if ( propertyType.IsOneOf(typeof(long), typeof(long?)) ) { return DbPropertyType.Int64; }
 
 
-        if ( propertyType.IsOneOf(typeof(ulong), typeof(ulong?)) ) { return DbType.UInt64; }
+        if ( propertyType.IsOneOf(typeof(ulong), typeof(ulong?)) ) { return DbPropertyType.UInt64; }
 
 
-        if ( propertyType.IsOneOf(typeof(float), typeof(float?), typeof(double), typeof(double?)) ) { return DbType.Double; }
+        if ( propertyType.IsOneOf(typeof(float), typeof(float?), typeof(double), typeof(double?)) ) { return DbPropertyType.Double; }
 
 
-        if ( propertyType.IsOneOf(typeof(decimal), typeof(decimal?)) ) { return DbType.Decimal; }
+        if ( propertyType.IsOneOf(typeof(decimal), typeof(decimal?)) ) { return DbPropertyType.Decimal; }
 
 
-        if ( propertyType.IsOneOf(typeof(byte[]), typeof(ReadOnlySpan<byte>)) ) { return DbType.Binary; }
+        if ( propertyType.IsOneOf(typeof(byte[]), typeof(ReadOnlySpan<byte>)) ) { return DbPropertyType.Binary; }
 
 
-        if ( propertyType.IsOneOf(typeof(Guid), typeof(Guid?)) ) { return DbType.Guid; }
+        if ( propertyType.IsOneOf(typeof(Guid), typeof(Guid?)) ) { return DbPropertyType.Guid; }
 
 
-        if ( propertyType.IsOneOf(typeof(TimeSpan), typeof(TimeSpan?)) ) { return DbType.Time; }
+        if ( propertyType.IsOneOf(typeof(TimeSpan), typeof(TimeSpan?)) ) { return DbPropertyType.Time; }
 
 
-        if ( propertyType.IsOneOf(typeof(DateTime), typeof(DateTime?)) ) { return DbType.DateTime; }
+        if ( propertyType.IsOneOf(typeof(DateTime), typeof(DateTime?)) ) { return DbPropertyType.DateTime; }
 
 
-        if ( propertyType.IsOneOf(typeof(DateTimeOffset), typeof(DateTimeOffset?)) ) { return DbType.DateTimeOffset; }
+        if ( propertyType.IsOneOf(typeof(DateTimeOffset), typeof(DateTimeOffset?)) ) { return DbPropertyType.DateTimeOffset; }
 
 
         throw new ArgumentOutOfRangeException(nameof(propertyType), propertyType, "Can't discern DbType");
