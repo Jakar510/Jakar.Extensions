@@ -39,6 +39,7 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(UserLoginProviderRecord[]))]
 [JsonSerializable(typeof(RecoveryCodeRecord[]))]
 [JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
+[JsonSerializable(typeof(MigrationRecord[]))]
 [JsonSerializable(typeof(FusionCacheEntryOptionsWrapper))]
 [JsonSerializable(typeof(ImmutableDictionary<string, ColumnMetaData>))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext

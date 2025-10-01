@@ -23,7 +23,7 @@ public sealed record FileRecord( string?              FileName,
                                  DateTimeOffset       DateCreated,
                                  DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
 {
-    public const  string                     TABLE_NAME = "Files";
+    public const  string                     TABLE_NAME = "files";
     public static string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
     public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<FileRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;

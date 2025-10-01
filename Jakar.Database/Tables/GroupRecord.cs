@@ -8,7 +8,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>
 {
     public const  int                         MAX_SIZE   = 1024;
-    public const  string                      TABLE_NAME = "Groups";
+    public const  string                      TABLE_NAME = "groups";
     public static JsonTypeInfo<GroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
     public static JsonSerializerContext       JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord; 

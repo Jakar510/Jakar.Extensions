@@ -194,7 +194,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     public static       IAsyncEnumerable<TSelf> Where( NpgsqlConnection  connection, DbTransaction? transaction, DbTable<TSelf> selfTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token ) => selfTable.Where(connection, transaction, true, GetDynamicParameters(value), token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static IAsyncEnumerable<TValue> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TValue> valueTable, RecordID<TKey> key, [EnumeratorCancellation] CancellationToken token )
+    public static IAsyncEnumerable<TValue> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TValue> valueTable, RecordID<TKey> key, [EnumeratorCancellation] CancellationToken token )
     {
         string sql = $"""
                       SELECT * FROM {TValue.TableName}
@@ -207,7 +207,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static IAsyncEnumerable<TKey> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TKey> keyTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token )
+    public static IAsyncEnumerable<TKey> Where( NpgsqlConnection connection, DbTransaction? transaction, DbTable<TKey> keyTable, RecordID<TValue> value, [EnumeratorCancellation] CancellationToken token )
     {
         string sql = $"""
                       SELECT * FROM {TKey.TableName}
@@ -237,7 +237,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public static async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
+    public static async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
     {
         string sql = $"SELECT * FROM {TSelf.TableName} WHERE {nameof(ValueID)} IN ( {string.Join(',', values.Select(static x => x.Value))} ) AND {nameof(KeyID)} = @{nameof(KeyID)}";
 

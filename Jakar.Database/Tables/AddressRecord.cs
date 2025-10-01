@@ -19,7 +19,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     DateTimeOffset                            DateCreated,
                                     DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified, AdditionalData), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
-    public const  string                        TABLE_NAME = "Address";
+    public const  string                        TABLE_NAME = "addresses";
     public static string                        TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;

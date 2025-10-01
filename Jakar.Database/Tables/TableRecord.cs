@@ -106,13 +106,18 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
     {
         if ( !Debugger.IsAttached ) { return (TClass)this; }
 
+        if ( !string.Equals(TClass.TableName, TClass.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TClass).Name}: {nameof(TClass.TableName)} is not snake_case: '{TClass.TableName}'"); }
+
         DynamicParameters parameters = ToDynamicParameters();
         int               length     = parameters.ParameterNames.Count();
-        if ( length == Properties.Length ) { return (TClass)this; }
+
+
+        if ( length == properties.Length ) { return (TClass)this; }
+
 
         HashSet<string> missing =
         [
-            ..Properties.AsValueEnumerable()
+            ..properties.AsValueEnumerable()
                         .Select(static x => x.Name)
         ];
 
@@ -125,6 +130,7 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
 
         throw new InvalidOperationException(message);
     }
+
 
 
     public static DynamicParameters GetDynamicParameters( TClass record ) => GetDynamicParameters(in record.__id);
