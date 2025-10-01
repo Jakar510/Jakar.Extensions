@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Version>9.2.0</Version>
+		<Version>9.3.0</Version>
 		<Title>Jakar.Shapes</Title>
 		<PackageId>Jakar.Shapes</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
