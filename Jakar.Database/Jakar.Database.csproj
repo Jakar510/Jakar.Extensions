@@ -10,7 +10,7 @@
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
-		<Version>9.0.0.6-beta</Version>
+		<Version>9.0.0.7-beta</Version>
 		<PackageId>Jakar.Database</PackageId>
 		<Company></Company>
 		<Authors>Tyler Stegmaier</Authors>

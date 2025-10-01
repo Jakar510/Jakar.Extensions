@@ -6,7 +6,7 @@ namespace Jakar.Database;
 
 public static class Migrations
 {
-    public static bool HasFlagValue( this ref readonly ColumnOptions type, ColumnOptions flag ) => ( type & flag ) != 0;
+    public static bool HasFlagValue( this ColumnOptions type, ColumnOptions flag ) => ( type & flag ) != 0;
 
 
     public static string CreateTableSql<TClass>()

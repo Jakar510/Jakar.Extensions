@@ -19,6 +19,7 @@ public sealed record MigrationRecord( string Description, RecordID<MigrationReco
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Create()
                                                                                                                    .WithColumn<string?>(nameof(Description), length: UNICODE_CAPACITY)
+                                                                                                                   .With_AdditionalData()
                                                                                                                    .Build();
 
 
@@ -33,9 +34,14 @@ public sealed record MigrationRecord( string Description, RecordID<MigrationReco
     }
 
 
-    public override int CompareTo( MigrationRecord?   other )                       => Nullable.Compare(DateCreated, other?.DateCreated);
-    public static   bool operator >( MigrationRecord  left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) > 0;
-    public static   bool operator >=( MigrationRecord left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) >= 0;
-    public static   bool operator <( MigrationRecord  left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) < 0;
-    public static   bool operator <=( MigrationRecord left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) <= 0;
+    public override bool Equals( MigrationRecord?    other ) => ReferenceEquals(this, other) || string.Equals(Description, other?.Description);
+    public override int  CompareTo( MigrationRecord? other ) => Nullable.Compare(DateCreated, other?.DateCreated);
+    public override int  GetHashCode()                       => HashCode.Combine(Description, ID, DateCreated, LastModified, AdditionalData);
+
+
+    public static bool operator >( MigrationRecord  left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) > 0;
+    public static bool operator >=( MigrationRecord left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) >= 0;
+    public static bool operator <( MigrationRecord  left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) < 0;
+    public static bool operator <=( MigrationRecord left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) <= 0;
 }
+w
