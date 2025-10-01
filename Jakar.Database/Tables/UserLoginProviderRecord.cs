@@ -20,6 +20,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
+    public static IEnumerable<MigrationRecord>            Migrations    { get; }
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()

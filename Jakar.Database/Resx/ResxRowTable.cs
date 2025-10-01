@@ -30,6 +30,8 @@ public sealed record ResxRowRecord( long                    KeyID,
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<ResxRowRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.ResxRowRecord;
     public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
+    public static IEnumerable<MigrationRecord>  Migrations    { get; }
+
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
                                                                                                               .WithColumn<string>(nameof(KeyID),      length: UNICODE_CAPACITY)

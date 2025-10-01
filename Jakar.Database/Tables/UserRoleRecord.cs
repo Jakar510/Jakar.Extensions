@@ -12,6 +12,7 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     public static JsonTypeInfo<UserRoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRoleRecordArray;
     public static JsonSerializerContext          JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserRoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRoleRecord;
+    public static IEnumerable<MigrationRecord>   Migrations    { get; }
 
 
     public UserRoleRecord( UserRecord            key, RoleRecord           value ) : base(key, value) { }

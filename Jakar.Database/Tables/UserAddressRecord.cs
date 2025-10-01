@@ -12,6 +12,7 @@ public sealed record UserAddressRecord : Mapping<UserAddressRecord, UserRecord, 
     public static JsonSerializerContext             JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserAddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserAddressRecord;
     public static JsonTypeInfo<UserAddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserAddressRecordArray;
+    public static IEnumerable<MigrationRecord>      Migrations    { get; }
 
 
     public UserAddressRecord( UserRecord            key, AddressRecord           value ) : base(key, value) { }

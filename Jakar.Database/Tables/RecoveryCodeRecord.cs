@@ -14,6 +14,7 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     public static           JsonSerializerContext              JsonContext   => JakarDatabaseContext.Default;
     public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
+    public static           IEnumerable<MigrationRecord>       Migrations    { get; }
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Create()
                                                                                                                       .WithColumn<string>(nameof(Code), length: 1024)
@@ -150,6 +151,7 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     public static JsonSerializerContext                  JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserRecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecoveryCodeRecord;
     public static JsonTypeInfo<UserRecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRecoveryCodeRecordArray;
+    public static IEnumerable<MigrationRecord>           Migrations    { get; }
 
 
     public UserRecoveryCodeRecord( UserRecord                         key, RecoveryCodeRecord           value ) : base(key, value) { }

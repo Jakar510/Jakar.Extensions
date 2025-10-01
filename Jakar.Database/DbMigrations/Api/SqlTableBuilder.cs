@@ -143,7 +143,7 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
     public static readonly ColumnMetaData           CreatedBy       = new(nameof(ICreatedBy.CreatedBy), DbPropType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
     public static readonly ColumnMetaData           DateCreated     = new(nameof(ICreatedBy.DateCreated), DbPropType.DateTimeOffset, ColumnOptions.Indexed);
     public static readonly ColumnMetaData           ID              = new(nameof(ICreatedBy.ID), DbPropType.Guid, ColumnOptions.PrimaryKey                   | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
-    public static readonly ColumnMetaData           LastModified    = new(nameof(ICreatedBy.LastModified), DbPropType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
+    public static readonly ColumnMetaData           LastModified    = new(nameof(ILastModified.LastModified), DbPropType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
     public readonly        bool                     IsForeignKey    = !string.IsNullOrWhiteSpace(IndexColumnName);
     public readonly        bool                     IsNullable      = Options.HasFlagValue(ColumnOptions.Nullable);
     public readonly        bool                     IsPrimaryKey    = Options.HasFlagValue(ColumnOptions.PrimaryKey);
@@ -244,21 +244,19 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
 
 
 
-public ref struct SqlTable<TClass> : IDisposable
+public readonly ref struct SqlTable<TClass> : IDisposable
     where TClass : class, ITableRecord<TClass>
 {
-    internal SortedDictionary<string, ColumnMetaData> Columns = new(StringComparer.InvariantCultureIgnoreCase);
+    internal readonly SortedDictionary<string, ColumnMetaData> Columns = new(StringComparer.InvariantCultureIgnoreCase);
 
 
-    public SqlTable() => WithColumn(ColumnMetaData.ID)
-                        .WithColumn(ColumnMetaData.LastModified)
-                        .WithColumn(ColumnMetaData.DateCreated);
-    public static SqlTable<TClass> Create() => new();
-    public void Dispose()
-    {
-        Columns?.Clear();
-        this = default;
-    }
+    public SqlTable() { }
+    public static SqlTable<TClass> Empty() => new();
+    public static SqlTable<TClass> Create() => Empty()
+                                              .WithColumn(ColumnMetaData.ID)
+                                              .WithColumn(ColumnMetaData.LastModified)
+                                              .WithColumn(ColumnMetaData.DateCreated);
+    public void Dispose() => Columns?.Clear();
 
 
     // public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
@@ -515,13 +513,12 @@ public ref struct SqlTable<TClass> : IDisposable
 
 
 
-public readonly ref struct SqlTableBuilder<TClass>
+public readonly ref struct SqlTableBuilder<TClass>( ImmutableDictionary<string, ColumnMetaData> columns )
     where TClass : class, ITableRecord<TClass>
 {
-    private readonly ImmutableDictionary<string, ColumnMetaData> __columns;
-    public SqlTableBuilder( ImmutableDictionary<string, ColumnMetaData> columns ) => __columns = columns;
-    public static SqlTableBuilder<TClass> Create()                                              => new(TClass.PropertyMetaData);
-    public static bool                    HasValue( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
+    private readonly ImmutableDictionary<string, ColumnMetaData> __columns = columns;
+    public static    SqlTableBuilder<TClass>                     Create()                                              => new(TClass.PropertyMetaData);
+    public static    bool                                        HasValue( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
 
 
     public string Build()

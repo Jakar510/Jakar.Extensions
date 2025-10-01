@@ -22,14 +22,14 @@ public interface ILastModified : IDateCreated
 
 
 
-public interface ICreatedBy : ILastModified
+public interface ICreatedBy : IDateCreated
 {
     public RecordID<UserRecord>? CreatedBy { get; }
 }
 
 
 
-public interface IRecordPair<TClass> : ILastModified
+public interface IRecordPair<TClass> : IDateCreated
     where TClass : IRecordPair<TClass>, ITableRecord<TClass>
 {
     Guid IUniqueID<Guid>.       ID => ID.Value;
@@ -43,10 +43,11 @@ public interface IRecordPair<TClass> : ILastModified
 public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     where TClass : ITableRecord<TClass>
 {
-    public abstract static ReadOnlyMemory<PropertyInfo>                Properties       { [Pure] get; }
+    public abstract static ReadOnlyMemory<PropertyInfo>                ClassProperties  { [Pure] get; }
     public abstract static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
     public abstract static string                                      TableName        { [Pure] get; }
     public abstract static int                                         PropertyCount    { get; }
+    public abstract static IEnumerable<MigrationRecord>                Migrations       { [Pure] get; }
 
 
     [Pure] public abstract static TClass            Create( DbDataReader reader );
@@ -60,19 +61,19 @@ public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
 
 
 [Serializable]
-public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TClass>
+public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TClass>, ILastModified
     where TClass : TableRecord<TClass>, ITableRecord<TClass>
 {
-    protected internal static readonly PropertyInfo[]   properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    protected internal static readonly PropertyInfo[]   Properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
     protected                          DateTimeOffset?  _lastModified;
     private                            RecordID<TClass> __id;
 
 
-    public static int                          PropertyCount => properties.Length;
-    public static ReadOnlyMemory<PropertyInfo> Properties    { [Pure] get => properties; }
-    [Key] public  RecordID<TClass>             ID            { get => __id;          init => __id = value; }
-    public        DateTimeOffset?              LastModified  { get => _lastModified; init => _lastModified = value; }
-    public        DateTimeOffset               DateCreated   { get;                  init; }
+    public static int                          PropertyCount   => Properties.Length;
+    public static ReadOnlyMemory<PropertyInfo> ClassProperties { [Pure] get => Properties; }
+    [Key] public  RecordID<TClass>             ID              { get => __id;          init => __id = value; }
+    public        DateTimeOffset?              LastModified    { get => _lastModified; init => _lastModified = value; }
+    public        DateTimeOffset               DateCreated     { get;                  init; }
 
 
     protected TableRecord( ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
@@ -100,37 +101,6 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
         return (TClass)this;
     }
     [Pure] public RecordPair<TClass> ToPair() => new(ID, DateCreated);
-
-
-    [Pure] protected internal TClass Validate()
-    {
-        if ( !Debugger.IsAttached ) { return (TClass)this; }
-
-        if ( !string.Equals(TClass.TableName, TClass.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TClass).Name}: {nameof(TClass.TableName)} is not snake_case: '{TClass.TableName}'"); }
-
-        DynamicParameters parameters = ToDynamicParameters();
-        int               length     = parameters.ParameterNames.Count();
-
-
-        if ( length == properties.Length ) { return (TClass)this; }
-
-
-        HashSet<string> missing =
-        [
-            ..properties.AsValueEnumerable()
-                        .Select(static x => x.Name)
-        ];
-
-        missing.ExceptWith(parameters.ParameterNames);
-
-        string message = $"""
-                          {typeof(TClass).Name}: {nameof(ToDynamicParameters)}.Length ({length}) != {nameof(Properties)}.Length ({Properties.Length})
-                          {missing.ToJson(JakarDatabaseContext.Default.HashSetString)}
-                          """;
-
-        throw new InvalidOperationException(message);
-    }
-
 
 
     public static DynamicParameters GetDynamicParameters( TClass record ) => GetDynamicParameters(in record.__id);
