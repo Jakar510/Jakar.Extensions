@@ -22,9 +22,7 @@ public sealed record FileRecord( string?              FileName,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
                                  DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
-{ 
-
-
+{
     public const  string                     TABLE_NAME = "files";
     public static string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
     public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
@@ -223,4 +221,33 @@ public sealed record FileRecord( string?              FileName,
     public static bool operator >=( FileRecord left, FileRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( FileRecord  left, FileRecord right ) => left.CompareTo(right) < 0;
     public static bool operator <=( FileRecord left, FileRecord right ) => left.CompareTo(right) <= 0;
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<FileRecord>(5,
+                                                  $"create {tableID} table",
+                                                  $"""
+                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   (
+                                                   {nameof(FileName).SqlColumnName()}        varchar(256)                NULL UNIQUE,
+                                                   {nameof(FileDescription).SqlColumnName()} varchar({UNICODE_CAPACITY}) NULL,
+                                                   {nameof(FileType).SqlColumnName()}        varchar(256)                NULL,
+                                                   {nameof(FullPath).SqlColumnName()}        varchar({UNICODE_CAPACITY}) NULL UNIQUE,
+                                                   {nameof(FileSize).SqlColumnName()}        bigint                      NOT NULL,
+                                                   {nameof(Hash).SqlColumnName()}             varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                   {nameof(MimeType).SqlColumnName()}        varchar(256)                NULL,
+                                                   {nameof(Payload).SqlColumnName()}          text                        NOT NULL,
+                                                   {nameof(ID).SqlColumnName()}               uuid                        NOT NULL PRIMARY KEY,
+                                                   {nameof(DateCreated).SqlColumnName()}     timestamptz                 NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                   {nameof(LastModified).SqlColumnName()}    timestamptz                 NULL,
+                                                   FOREIGN KEY({nameof(MimeType).SqlColumnName()}) REFERENCES {nameof(MimeType).SqlColumnName()}(id) ON DELETE SET NULL
+                                                   );
+                                                   
+                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   FOR EACH ROW
+                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                   """);
+    }
 }

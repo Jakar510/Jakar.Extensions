@@ -1,4 +1,10 @@
-﻿namespace Jakar.Database;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Newtonsoft.Json.Linq;
+using ValueOf;
+
+
+
+namespace Jakar.Database;
 
 
 [Serializable]
@@ -78,6 +84,33 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                                        NormalizedName   = NormalizedName,
                                                        ConcurrencyStamp = ConcurrencyStamp
                                                    };
+
+
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<RoleRecord>(migrationID,
+                                                  $"create {tableID} table",
+                                                  $"""
+                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   (  
+                                                   {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
+                                                   {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
+                                                   {nameof(ConcurrencyStamp).SqlColumnName()} varchar(1024) NOT NULL, 
+                                                   {nameof(Rights).SqlColumnName()}           varchar(1024) NOT NULL, 
+                                                   {nameof(ID).SqlColumnName()}               uuid          PRIMARY KEY,
+                                                   {nameof(DateCreated).SqlColumnName()}      timestamptz   NOT NULL,
+                                                   {nameof(LastModified).SqlColumnName()}     timestamptz   NULL,
+                                                   {nameof(AdditionalData).SqlColumnName()}   json          NULL
+                                                   );
+                                                   
+                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   FOR EACH ROW
+                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                   """);
+    }
 
 
     public override bool Equals( RoleRecord? other )

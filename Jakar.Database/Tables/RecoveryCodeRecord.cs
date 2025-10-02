@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/29/2023  1:26 PM
 
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+
+
+
 namespace Jakar.Database;
 
 
@@ -40,6 +45,32 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
         RecordID<RecoveryCodeRecord> id           = RecordID<RecoveryCodeRecord>.ID(reader);
         RecoveryCodeRecord           record       = new(code, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
+    }
+
+
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<UserRecord>(migrationID,
+                                                  $"create {tableID} table",
+                                                  $"""
+                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   (  
+                                                   {nameof(Code).SqlColumnName()}           VARCHAR(1024)  NOT NULL, 
+                                                   {nameof(AdditionalData).SqlColumnName()} json           NULL,
+                                                   {nameof(ID).SqlColumnName()}             uuid           PRIMARY KEY,
+                                                   {nameof(CreatedBy).SqlColumnName()}      uuid           NULL,
+                                                   {nameof(DateCreated).SqlColumnName()}    timestamptz    NOT NULL,
+                                                   {nameof(LastModified).SqlColumnName()}   timestamptz    NULL,
+                                                   FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL 
+                                                   );
+                                                   
+                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   FOR EACH ROW
+                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                   """);
     }
 
 
@@ -151,7 +182,6 @@ public sealed record UserRecoveryCodeRecord : Mapping<UserRecoveryCodeRecord, Us
     public static JsonSerializerContext                  JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserRecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecoveryCodeRecord;
     public static JsonTypeInfo<UserRecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRecoveryCodeRecordArray;
-    public static List<MigrationRecord>                  Migrations    { get; }
 
 
     public UserRecoveryCodeRecord( UserRecord                         key, RecoveryCodeRecord           value ) : base(key, value) { }

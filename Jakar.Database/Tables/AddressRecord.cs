@@ -266,4 +266,37 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static bool operator >=( AddressRecord left, AddressRecord right ) => left.CompareTo(right) >= 0;
     public static bool operator <( AddressRecord  left, AddressRecord right ) => left.CompareTo(right) < 0;
     public static bool operator <=( AddressRecord left, AddressRecord right ) => left.CompareTo(right) <= 0;
+
+
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<AddressRecord>(migrationID,
+                                                     $"create {tableID} table",
+                                                     $"""
+                                                      CREATE TABLE IF NOT EXISTS {tableID}
+                                                      (
+                                                      {nameof(Line1).SqlColumnName()}           varchar(512)   NOT NULL,
+                                                      {nameof(Line2).SqlColumnName()}           varchar(512)   NOT NULL,
+                                                      {nameof(City).SqlColumnName()}            varchar(512)   NOT NULL,
+                                                      {nameof(StateOrProvince).SqlColumnName()} varchar(512)   NOT NULL,
+                                                      {nameof(Country).SqlColumnName()}         varchar(512)   NOT NULL,
+                                                      {nameof(PostalCode).SqlColumnName()}      varchar(64)    NOT NULL,
+                                                      {nameof(Address).SqlColumnName()}         varchar(3000)  NULL,
+                                                      {nameof(IsPrimary).SqlColumnName()}       boolean        NOT NULL DEFAULT FALSE,
+                                                      {nameof(CreatedBy).SqlColumnName()}       uuid           NULL,
+                                                      {nameof(ID).SqlColumnName()}              uuid           NOT NULL PRIMARY KEY,
+                                                      {nameof(DateCreated).SqlColumnName()}     timestamptz    NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                      {nameof(LastModified).SqlColumnName()}    timestamptz    NULL,
+                                                      {nameof(AdditionalData).SqlColumnName()}  json           NULL,
+                                                      FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
+                                                      );
+                                                      
+                                                      CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                      BEFORE INSERT OR UPDATE ON {tableID}
+                                                      FOR EACH ROW
+                                                      EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                      """);
+    }
 }

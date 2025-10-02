@@ -69,6 +69,33 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TSelf.TableName.SqlColumnName();
+
+        return MigrationRecord.Create<TSelf>(migrationID,
+                                             $"create {tableID} table",
+                                             $"""
+                                              CREATE TABLE IF NOT EXISTS {tableID}
+                                              (  
+                                              {nameof(KeyID).SqlColumnName()}          uuid        NOT NULL, 
+                                              {nameof(DateCreated).SqlColumnName()}    timestamptz NOT NULL,
+                                              {nameof(AdditionalData).SqlColumnName()} json        NULL,
+                                              {nameof(ID).SqlColumnName()}             uuid        PRIMARY KEY,
+                                              {nameof(ValueID).SqlColumnName()}        uuid        NULL,
+                                              {nameof(LastModified).SqlColumnName()}   timestamptz NULL,
+                                              FOREIGN KEY({nameof(KeyID).SqlColumnName()}) REFERENCES {TKey.TableName.SqlColumnName()}(id) ON DELETE SET NULL 
+                                              FOREIGN KEY({nameof(ValueID).SqlColumnName()}) REFERENCES {TValue.TableName.SqlColumnName()}(id) ON DELETE SET NULL 
+                                              );
+                                              
+                                              CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                              BEFORE INSERT OR UPDATE ON {tableID}
+                                              FOR EACH ROW
+                                              EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                              """);
+    }
+
+
     public async ValueTask<TKey?> Get( NpgsqlConnection connection, DbTransaction transaction, DbTable<TKey> selfTable, CancellationToken token )
     {
         if ( __owner is not null && __owner.TryGetTarget(out TKey? value) ) { return value; }

@@ -1,4 +1,9 @@
-﻿namespace Jakar.Database;
+﻿using Newtonsoft.Json.Linq;
+using ValueOf;
+
+
+
+namespace Jakar.Database;
 
 
 [Serializable]
@@ -11,15 +16,15 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public const  string                      TABLE_NAME = "groups";
     public static JsonTypeInfo<GroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
     public static JsonSerializerContext       JsonContext   => JakarDatabaseContext.Default;
-    public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord; 
+    public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord;
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Create()
-                                                                                                         .With_CreatedBy()
-                                                                                                         .WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
-                                                                                                         .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")
-                                                                                                         .WithColumn<string>(nameof(Rights),      checks: $"{nameof(Rights)} > 0")
-                                                                                                         .Build();
+                                                                                                               .With_CreatedBy()
+                                                                                                               .WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
+                                                                                                               .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")
+                                                                                                               .WithColumn<string>(nameof(Rights),      checks: $"{nameof(Rights)} > 0")
+                                                                                                               .Build();
 
 
     public static string                               TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
@@ -33,6 +38,32 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public GroupModel ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid> => TGroupModel.Create(this);
+
+
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<RoleRecord>(migrationID,
+                                                  $"create {tableID} table",
+                                                  $"""
+                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   (  
+                                                   {nameof(NameOfGroup).SqlColumnName()}    varchar(1024) NOT NULL, 
+                                                   {nameof(CustomerID).SqlColumnName()}     varchar(1024) NOT NULL,  
+                                                   {nameof(Rights).SqlColumnName()}         varchar(1024) NOT NULL, 
+                                                   {nameof(ID).SqlColumnName()}             uuid          PRIMARY KEY,
+                                                   {nameof(DateCreated).SqlColumnName()}    timestamptz   NOT NULL,
+                                                   {nameof(LastModified).SqlColumnName()}   timestamptz   NULL,
+                                                   {nameof(AdditionalData).SqlColumnName()} json          NULL
+                                                   );
+
+                                                   CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   FOR EACH ROW
+                                                   EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                   """);
+    }
 
 
     public override int CompareTo( GroupRecord? other )
