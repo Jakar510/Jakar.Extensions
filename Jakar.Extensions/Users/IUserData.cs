@@ -5,15 +5,10 @@
 namespace Jakar.Extensions;
 
 
-public interface IUserID<out TID>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+public interface IUserID
 {
-    public TID UserID { get; }
+    public Guid UserID { get; }
 }
-
-
-
-public interface IUserID : IUserID<Guid>;
 
 
 

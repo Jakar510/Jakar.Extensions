@@ -13,8 +13,60 @@ namespace Jakar.Extensions.UserGuid;
 
 
 
+public interface ISessionID : ISessionID<Guid>;
+
+
+
+public interface IAddress : IAddress<Guid>;
+
+
+
+public interface IGroupModel : IGroupModel<Guid>;
+
+
+
+public interface IRoleModel : IRoleModel<Guid>;
+
+
+
+public interface IUserDevice : IUserDevice<Guid>;
+
+
+
+public interface ICurrentLocation : ICurrentLocation<Guid>;
+
+
+
+public interface IFileData : IFileData<Guid>;
+
+
+
+public interface IImageID : IImageID<Guid>;
+
+
+
+public interface IUniqueID : IUniqueID<Guid>;
+
+
+
+public interface ICreatedByUser : ICreatedByUser<Guid>;
+
+
+
+public interface IEscalateToUser : IEscalateToUser<Guid>;
+
+
+
+public interface IUserData : IUserData<Guid>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
+
+
+
+public interface IUserDetailsModel : IUserData, IUserDetailsModel<Guid>;
+
+
+
 [Serializable]
-public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid> 
+public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserAddress, Guid>, IAddress
 {
     public static JsonSerializerContext       JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserAddress;
@@ -64,7 +116,7 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid> 
+public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IGroupModel
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.GroupModel;
@@ -87,7 +139,7 @@ public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>
+public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IRoleModel
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.RoleModel;
@@ -110,8 +162,9 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
 
 
 [Serializable]
-[method: SetsRequiredMembers][method: JsonConstructor]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData> 
+[method: SetsRequiredMembers]
+[method: JsonConstructor]
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IFileData
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
@@ -137,7 +190,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<Guid>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation, IJsonModel<CurrentLocation>
 {
     public static JsonSerializerContext           JsonContext             => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsGuidContext.Default.CurrentLocation;
@@ -297,7 +350,7 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>
+public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserData
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
@@ -309,9 +362,15 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static UserModel Create( IUserData<Guid> model )                                                                                                                                    => new(model);
-    public static UserModel Create( IUserData<Guid> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
-    public static UserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static UserModel Create( IUserData<Guid> model ) => new(model);
+    public static UserModel Create( IUserData<Guid> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
+                                                                                                                                                                .With(addresses)
+                                                                                                                                                                .With(groups)
+                                                                                                                                                                .With(roles);
+    public static UserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
+                                                                                                                                                                                                 .With(addresses)
+                                                                                                                                                                                                 .With(groups)
+                                                                                                                                                                                                 .With(roles);
     public static async ValueTask<UserModel> CreateAsync( IUserData<Guid> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         UserModel user = Create(model);
@@ -345,9 +404,15 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, Use
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static CreateUserModel Create( IUserData<Guid> model )                                                                                                                                    => new(model);
-    public static CreateUserModel Create( IUserData<Guid> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
-    public static CreateUserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static CreateUserModel Create( IUserData<Guid> model ) => new(model);
+    public static CreateUserModel Create( IUserData<Guid> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
+                                                                                                                                                                      .With(addresses)
+                                                                                                                                                                      .With(groups)
+                                                                                                                                                                      .With(roles);
+    public static CreateUserModel Create( IUserData<Guid> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
+                                                                                                                                                                                                       .With(addresses)
+                                                                                                                                                                                                       .With(groups)
+                                                                                                                                                                                                       .With(roles);
     public static async ValueTask<CreateUserModel> CreateAsync( IUserData<Guid> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         CreateUserModel user = Create(model);
@@ -408,7 +473,7 @@ public sealed partial class JakarModelsGuidContext : JsonSerializerContext
 
 
 [Serializable]
-public class UserDevice : DeviceInformation, IUserDevice<Guid>
+public class UserDevice : DeviceInformation, IUserDevice
 {
     private Guid    __id;
     private string? __ip;

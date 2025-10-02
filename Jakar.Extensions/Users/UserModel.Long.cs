@@ -9,8 +9,60 @@ namespace Jakar.Extensions.UserLong;
 
 
 
+public interface ISessionID : ISessionID<long>;
+
+
+
+public interface IAddress : IAddress<long>;
+
+
+
+public interface IGroupModel : IGroupModel<long>;
+
+
+
+public interface IRoleModel : IRoleModel<long>;
+
+
+
+public interface IUserDevice : IUserDevice<long>;
+
+
+
+public interface ICurrentLocation : ICurrentLocation<long>;
+
+
+
+public interface IFileData : IFileData<long>;
+
+
+
+public interface IImageID : IImageID<long>;
+
+
+
+public interface IUniqueID : IUniqueID<long>;
+
+
+
+public interface ICreatedByUser : ICreatedByUser<long>;
+
+
+
+public interface IEscalateToUser : IEscalateToUser<long>;
+
+
+
+public interface IUserData : IUserData<long>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
+
+
+
+public interface IUserDetailsModel : IUserData, IUserDetailsModel<long>;
+
+
+
 [Serializable]
-public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>
+public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserAddress, long>, IAddress
 {
     public static JsonSerializerContext       JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserAddress>   JsonTypeInfo  => JakarModelsLongContext.Default.UserAddress;
@@ -60,7 +112,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>
+public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IGroupModel
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
@@ -83,7 +135,7 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>
+public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IRoleModel
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsLongContext.Default.RoleModel;
@@ -107,7 +159,7 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
 
 [Serializable]
 [method: SetsRequiredMembers]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IFileData
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsLongContext.Default.FileData;
@@ -133,7 +185,7 @@ public sealed class FileData( long fileSize, string hash, string payload, FileMe
 
 
 [Serializable]
-public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation<long>, IJsonModel<CurrentLocation>
+public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocation, IJsonModel<CurrentLocation>
 {
     public static JsonSerializerContext           JsonContext             => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CurrentLocation>   JsonTypeInfo            => JakarModelsLongContext.Default.CurrentLocation;
@@ -292,7 +344,7 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel> 
+public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, long, UserAddress, GroupModel, RoleModel>, IUserData
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.UserModel;
@@ -304,9 +356,15 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
     public UserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static UserModel Create( IUserData<long> model )                                                                                                                                    => new(model);
-    public static UserModel Create( IUserData<long> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
-    public static UserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static UserModel Create( IUserData<long> model ) => new(model);
+    public static UserModel Create( IUserData<long> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
+                                                                                                                                                                .With(addresses)
+                                                                                                                                                                .With(groups)
+                                                                                                                                                                .With(roles);
+    public static UserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
+                                                                                                                                                                                                 .With(addresses)
+                                                                                                                                                                                                 .With(groups)
+                                                                                                                                                                                                 .With(roles);
     public static async ValueTask<UserModel> CreateAsync( IUserData<long> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         UserModel user = Create(model);
@@ -328,7 +386,7 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>
+public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IUserData
 {
     public static JsonSerializerContext           JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.CreateUserModel;
@@ -340,9 +398,15 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, Use
     public CreateUserModel( string          firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static CreateUserModel Create( IUserData<long> model )                                                                                                                                    => new(model);
-    public static CreateUserModel Create( IUserData<long> model, IEnumerable<UserAddress>            addresses, IEnumerable<GroupModel>            groups, IEnumerable<RoleModel>            roles ) => Create(model).With(addresses).With(groups).With(roles);
-    public static CreateUserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model).With(addresses).With(groups).With(roles);
+    public static CreateUserModel Create( IUserData<long> model ) => new(model);
+    public static CreateUserModel Create( IUserData<long> model, IEnumerable<UserAddress> addresses, IEnumerable<GroupModel> groups, IEnumerable<RoleModel> roles ) => Create(model)
+                                                                                                                                                                      .With(addresses)
+                                                                                                                                                                      .With(groups)
+                                                                                                                                                                      .With(roles);
+    public static CreateUserModel Create( IUserData<long> model, scoped in ReadOnlySpan<UserAddress> addresses, scoped in ReadOnlySpan<GroupModel> groups, scoped in ReadOnlySpan<RoleModel> roles ) => Create(model)
+                                                                                                                                                                                                       .With(addresses)
+                                                                                                                                                                                                       .With(groups)
+                                                                                                                                                                                                       .With(roles);
     public static async ValueTask<CreateUserModel> CreateAsync( IUserData<long> model, IAsyncEnumerable<UserAddress> addresses, IAsyncEnumerable<GroupModel> groups, IAsyncEnumerable<RoleModel> roles, CancellationToken token = default )
     {
         CreateUserModel user = Create(model);
@@ -403,7 +467,7 @@ public sealed partial class JakarModelsLongContext : JsonSerializerContext
 
 
 [Serializable]
-public class UserDevice : DeviceInformation, IUserDevice<long>
+public class UserDevice : DeviceInformation, IUserDevice
 {
     private long    __id;
     private string? __ip;
