@@ -7,12 +7,12 @@
 public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>
 {
-    public const  int                          MAX_SIZE   = 1024;
-    public const  string                       TABLE_NAME = "groups";
-    public static JsonTypeInfo<GroupRecord[]>  JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
-    public static JsonSerializerContext        JsonContext   => JakarDatabaseContext.Default;
-    public static JsonTypeInfo<GroupRecord>    JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord; 
-    public static IEnumerable<MigrationRecord> Migrations    { get; }
+    public const  int                         MAX_SIZE   = 1024;
+    public const  string                      TABLE_NAME = "groups";
+    public static JsonTypeInfo<GroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.GroupRecordArray;
+    public static JsonSerializerContext       JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord; 
+
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Create()
                                                                                                          .With_CreatedBy()
@@ -66,9 +66,9 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), NameOfGroup, Rights, CustomerID);
 
 
-    [Pure] public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(CustomerID),  CustomerID);
         parameters.Add(nameof(NameOfGroup), NameOfGroup);
         parameters.Add(nameof(CreatedBy),   CreatedBy);

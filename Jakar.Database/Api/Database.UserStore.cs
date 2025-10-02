@@ -61,7 +61,7 @@ public partial class Database
     public ValueTask<UserRecord?> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token ) => this.TryCall(FindByLoginAsync, loginProvider, providerKey, token);
     public virtual async ValueTask<UserRecord?> FindByLoginAsync( NpgsqlConnection connection, DbTransaction transaction, string loginProvider, string providerKey, CancellationToken token )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(UserLoginProviderRecord.LoginProvider), loginProvider);
         parameters.Add(nameof(UserLoginProviderRecord.ProviderKey),   providerKey);
         return await Users.Get(connection, transaction, true, parameters, token);
@@ -71,7 +71,7 @@ public partial class Database
     public ValueTask RemoveLoginAsync( UserRecord user, string loginProvider, string providerKey, CancellationToken token ) => this.TryCall(RemoveLoginAsync, user, loginProvider, providerKey, token);
     public virtual async ValueTask RemoveLoginAsync( NpgsqlConnection connection, DbTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
-        DynamicParameters                         parameters = UserLoginProviderRecord.GetDynamicParameters(user, loginProvider, providerKey);
+        PostgresParameters                        parameters = UserLoginProviderRecord.GetDynamicParameters(user, loginProvider, providerKey);
         IAsyncEnumerable<UserLoginProviderRecord> records    = UserLogins.Where(connection, transaction, true, parameters, token);
         await foreach ( UserLoginProviderRecord record in records ) { await UserLogins.Delete(connection, transaction, record, token); }
     }

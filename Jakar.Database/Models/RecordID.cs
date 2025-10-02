@@ -77,9 +77,9 @@ public readonly struct RecordID<TClass> : IEquatable<RecordID<TClass>>, ICompara
     public static implicit operator RecordID<TClass>( TClass record ) => new(record.ID.Value);
 
 
-    [Pure] public DynamicParameters ToDynamicParameters()
+    [Pure] public PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(IDateCreated.ID), Value);
         return parameters;
     }

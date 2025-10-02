@@ -142,7 +142,7 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
     public static readonly ColumnMetaData           AdditionalData  = new(nameof(IJsonModel.AdditionalData), DbPropType.Json, ColumnOptions.Nullable);
     public static readonly ColumnMetaData           CreatedBy       = new(nameof(ICreatedBy.CreatedBy), DbPropType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
     public static readonly ColumnMetaData           DateCreated     = new(nameof(ICreatedBy.DateCreated), DbPropType.DateTimeOffset, ColumnOptions.Indexed);
-    public static readonly ColumnMetaData           ID              = new(nameof(ICreatedBy.ID), DbPropType.Guid, ColumnOptions.PrimaryKey                   | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
+    public static readonly ColumnMetaData           ID              = new(nameof(ICreatedBy.ID), DbPropType.Guid, ColumnOptions.PrimaryKey                      | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
     public static readonly ColumnMetaData           LastModified    = new(nameof(ILastModified.LastModified), DbPropType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
     public readonly        bool                     IsForeignKey    = !string.IsNullOrWhiteSpace(IndexColumnName);
     public readonly        bool                     IsNullable      = Options.HasFlagValue(ColumnOptions.Nullable);
@@ -151,9 +151,9 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
     public readonly        ColumnOptions            Options         = Options;
     public readonly        ColumnPrecisionMetaData? Length          = Length;
     public readonly        DbPropType               DbType          = DbType;
-    public readonly        string                   ColumnName      = ColumnName.ToSnakeCase();
-    public readonly        string?                  ForeignKeyName  = ForeignKeyName?.ToSnakeCase();
-    public readonly        string?                  IndexColumnName = IndexColumnName?.ToSnakeCase();
+    public readonly        string                   ColumnName      = ColumnName.SqlColumnName();
+    public readonly        string?                  ForeignKeyName  = ForeignKeyName?.SqlColumnName();
+    public readonly        string?                  IndexColumnName = IndexColumnName?.SqlColumnName();
 
 
     public bool IsValidLength() =>

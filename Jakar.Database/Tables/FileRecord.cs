@@ -22,23 +22,25 @@ public sealed record FileRecord( string?              FileName,
                                  RecordID<FileRecord> ID,
                                  DateTimeOffset       DateCreated,
                                  DateTimeOffset?      LastModified = null ) : TableRecord<FileRecord>(in ID, in DateCreated, in LastModified), ITableRecord<FileRecord>, IFileData<Guid>, IFileMetaData
-{
-    public const  string                       TABLE_NAME = "files";
-    public static string                       TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
-    public static JsonSerializerContext        JsonContext   => JakarDatabaseContext.Default;
-    public static JsonTypeInfo<FileRecord>     JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;
-    public static JsonTypeInfo<FileRecord[]>   JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray; 
-    public static IEnumerable<MigrationRecord> Migrations    { get; }
+{ 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create() 
-                                                                                                        .WithColumn<string?>(nameof(FileName),        ColumnOptions.Nullable, length: 256)
-                                                                                                        .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
-                                                                                                        .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
-                                                                                                        .WithColumn<long>(nameof(FileSize))
-                                                                                                        .WithColumn<string>(nameof(Hash),        length: UNICODE_CAPACITY)
-                                                                                                        .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
-                                                                                                        .WithColumn<string>(nameof(FullPath),    length: UNICODE_CAPACITY)
-                                                                                                        .Build();
+
+    public const  string                     TABLE_NAME = "files";
+    public static string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<FileRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.FileRecord;
+    public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
+
+
+    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create()
+                                                                                                              .WithColumn<string?>(nameof(FileName),        ColumnOptions.Nullable, length: 256)
+                                                                                                              .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
+                                                                                                              .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
+                                                                                                              .WithColumn<long>(nameof(FileSize))
+                                                                                                              .WithColumn<string>(nameof(Hash),        length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
+                                                                                                              .WithColumn<string>(nameof(FullPath),    length: UNICODE_CAPACITY)
+                                                                                                              .Build();
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }
@@ -115,9 +117,9 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure] public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(FileName),        FileName);
         parameters.Add(nameof(FileDescription), FileDescription);
         parameters.Add(nameof(FileType),        FileType);

@@ -4,7 +4,8 @@
 namespace Jakar.Database;
 
 
-[Serializable][Table(TABLE_NAME)]
+[Serializable]
+[Table(TABLE_NAME)]
 public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRecord>, ICreateMapping<UserRoleRecord, UserRecord, RoleRecord>
 {
     public const  string                         TABLE_NAME = "user_roles";
@@ -12,7 +13,6 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
     public static JsonTypeInfo<UserRoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRoleRecordArray;
     public static JsonSerializerContext          JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserRoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRoleRecord;
-    public static IEnumerable<MigrationRecord>   Migrations    { get; }
 
 
     public UserRoleRecord( UserRecord            key, RoleRecord           value ) : base(key, value) { }
@@ -22,8 +22,7 @@ public sealed record UserRoleRecord : Mapping<UserRoleRecord, UserRecord, RoleRe
 
     [Pure] public static UserRoleRecord Create( UserRecord           key, RoleRecord           value ) => new(key, value);
     public static        UserRoleRecord Create( RecordID<UserRecord> key, RecordID<RoleRecord> value ) => new(key, value);
-    [Pure]
-    public static UserRoleRecord Create( DbDataReader reader )
+    [Pure] public static UserRoleRecord Create( DbDataReader reader )
     {
         RecordID<UserRecord>     key          = new(reader.GetFieldValue<Guid>(nameof(KeyID)));
         RecordID<RoleRecord>     value        = new(reader.GetFieldValue<Guid>(nameof(ValueID)));

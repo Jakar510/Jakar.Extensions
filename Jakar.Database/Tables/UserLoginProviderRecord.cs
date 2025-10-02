@@ -20,7 +20,6 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
-    public static IEnumerable<MigrationRecord>            Migrations    { get; }
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
@@ -34,9 +33,9 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
     public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
-    [Pure] public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(LoginProvider),       LoginProvider);
         parameters.Add(nameof(ProviderDisplayName), ProviderDisplayName);
         parameters.Add(nameof(ProviderKey),         ProviderKey);
@@ -59,17 +58,17 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     }
 
 
-    public static DynamicParameters GetDynamicParameters( UserRecord user, string value )
+    public static PostgresParameters GetDynamicParameters( UserRecord user, string value )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(CreatedBy), user.ID.Value);
         parameters.Add(nameof(Value),     value);
         return parameters;
     }
-    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters(user, info.LoginProvider, info.ProviderKey);
-    [Pure] public static DynamicParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
+    [Pure] public static PostgresParameters GetDynamicParameters( UserRecord user, UserLoginInfo info ) => GetDynamicParameters(user, info.LoginProvider, info.ProviderKey);
+    [Pure] public static PostgresParameters GetDynamicParameters( UserRecord user, string loginProvider, string providerKey )
     {
-        DynamicParameters parameters = GetDynamicParameters(user);
+        PostgresParameters parameters = GetDynamicParameters(user);
         parameters.Add(nameof(ProviderKey),   providerKey);
         parameters.Add(nameof(LoginProvider), loginProvider);
         return parameters;

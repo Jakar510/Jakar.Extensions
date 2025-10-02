@@ -49,9 +49,9 @@ public readonly struct RecordPair<TClass>( RecordID<TClass> id, DateTimeOffset d
 
 
     [Pure]
-    public DynamicParameters ToDynamicParameters()
+    public PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(ID),          ID);
         parameters.Add(nameof(DateCreated), DateCreated);
         return parameters;

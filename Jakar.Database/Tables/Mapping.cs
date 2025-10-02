@@ -36,33 +36,33 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    public override DynamicParameters ToDynamicParameters()
+    public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(KeyID),   KeyID);
         parameters.Add(nameof(ValueID), ValueID);
         return parameters;
     }
 
 
-    public static DynamicParameters GetDynamicParameters( TValue record ) => GetDynamicParameters(record.ID);
-    public static DynamicParameters GetDynamicParameters( in RecordID<TValue> value )
+    public static PostgresParameters GetDynamicParameters( TValue record ) => GetDynamicParameters(record.ID);
+    public static PostgresParameters GetDynamicParameters( RecordID<TValue> value )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(ValueID), value);
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( TKey key ) => GetDynamicParameters(key.ID);
-    public static DynamicParameters GetDynamicParameters( in RecordID<TKey> key )
+    public static PostgresParameters GetDynamicParameters( TKey key ) => GetDynamicParameters(key.ID);
+    public static PostgresParameters GetDynamicParameters( RecordID<TKey> key )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(KeyID), key);
         return parameters;
     }
-    public static DynamicParameters GetDynamicParameters( TKey key, TValue value ) => GetDynamicParameters(key.ID, value.ID);
-    public static DynamicParameters GetDynamicParameters( in RecordID<TKey> key, RecordID<TValue> value )
+    public static PostgresParameters GetDynamicParameters( TKey key, TValue value ) => GetDynamicParameters(key.ID, value.ID);
+    public static PostgresParameters GetDynamicParameters( RecordID<TKey> key, RecordID<TValue> value )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(KeyID),   key);
         parameters.Add(nameof(ValueID), value);
         return parameters;
@@ -114,8 +114,8 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
     public static async ValueTask TryAdd( NpgsqlConnection connection, DbTransaction transaction, DbTable<TSelf> selfTable, DbTable<TValue> valueTable, RecordID<TKey> key, IEnumerable<RecordID<TValue>> values, CancellationToken token )
     {
-        DynamicParameters parameters = GetDynamicParameters(key);
-        string            ids        = string.Join(", ", values.Select(static x => x.Value));
+        PostgresParameters parameters = GetDynamicParameters(key);
+        string             ids        = string.Join(", ", values.Select(static x => x.Value));
 
         string sql = $"""
                       SELECT * FROM {TValue.TableName}

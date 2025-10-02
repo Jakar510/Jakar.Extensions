@@ -4,36 +4,65 @@
 [SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static partial class Migrations
 {
+    internal static readonly ConcurrentDictionary<string, ConcurrentDictionary<ulong, MigrationRecord>> migrations = new();
+    public static void AddMigrations<TClass>()
+        where TClass : ITableRecord<TClass>
+    {
+        ConcurrentDictionary<ulong, MigrationRecord> list = migrations.GetOrAdd(TClass.TableName, static _ => new ConcurrentDictionary<ulong, MigrationRecord>());
+
+        foreach ( MigrationRecord record in MigrationRecord.Migrations )
+        {
+            if ( list.TryGetValue(record.MigrationID, out _) ) { throw new InvalidOperationException($"Duplicate migration version {record.MigrationID} for {typeof(TClass).Name}"); }
+
+            list[record.MigrationID] = record;
+        }
+    }
+    public static async ValueTask ApplyMigrations( this WebApplication app )
+    {
+        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+        Database                      db    = scope.ServiceProvider.GetRequiredService<Database>();
+
+        await foreach ( MigrationRecord record in db.Migrations.All() )
+        {
+            if ( !migrations.TryGetValue(record.TableID, out var list) ) { continue; }
+
+            if ( !list.TryGetValue(record.MigrationID, out _) ) { continue; }
+
+
+        }
+    }
+
+
     public static DbPropType ToDbPropertyType( this DbType type ) => type switch
-                                                                         {
-                                                                             DbType.AnsiString            => DbPropType.String,
-                                                                             DbType.Binary                => DbPropType.Binary,
-                                                                             DbType.Byte                  => DbPropType.Byte,
-                                                                             DbType.Boolean               => DbPropType.Boolean,
-                                                                             DbType.Currency              => DbPropType.Decimal,
-                                                                             DbType.Date                  => DbPropType.Date,
-                                                                             DbType.Decimal               => DbPropType.Decimal,
-                                                                             DbType.Double                => DbPropType.Double,
-                                                                             DbType.Guid                  => DbPropType.Guid,
-                                                                             DbType.Int16                 => DbPropType.Int16,
-                                                                             DbType.Int32                 => DbPropType.Int32,
-                                                                             DbType.Int64                 => DbPropType.Int64,
-                                                                             DbType.SByte                 => DbPropType.SByte,
-                                                                             DbType.Single                => DbPropType.Double,
-                                                                             DbType.String                => DbPropType.String,
-                                                                             DbType.StringFixedLength     => DbPropType.String,
-                                                                             DbType.Time                  => DbPropType.Time,
-                                                                             DbType.UInt16                => DbPropType.UInt16,
-                                                                             DbType.UInt32                => DbPropType.UInt32,
-                                                                             DbType.UInt64                => DbPropType.UInt64,
-                                                                             DbType.VarNumeric            => DbPropType.Decimal,
-                                                                             DbType.Xml                   => DbPropType.Xml,
-                                                                             DbType.AnsiStringFixedLength => DbPropType.String,
-                                                                             DbType.DateTime              => DbPropType.DateTime,
-                                                                             DbType.DateTime2             => DbPropType.DateTime,
-                                                                             DbType.DateTimeOffset        => DbPropType.DateTimeOffset,
-                                                                             _                            => throw new OutOfRangeException(type)
-                                                                         };
+                                                                     {
+                                                                         DbType.AnsiString            => DbPropType.String,
+                                                                         DbType.Binary                => DbPropType.Binary,
+                                                                         DbType.Byte                  => DbPropType.Byte,
+                                                                         DbType.Boolean               => DbPropType.Boolean,
+                                                                         DbType.Currency              => DbPropType.Decimal,
+                                                                         DbType.Date                  => DbPropType.Date,
+                                                                         DbType.Decimal               => DbPropType.Decimal,
+                                                                         DbType.Double                => DbPropType.Double,
+                                                                         DbType.Guid                  => DbPropType.Guid,
+                                                                         DbType.Int16                 => DbPropType.Int16,
+                                                                         DbType.Int32                 => DbPropType.Int32,
+                                                                         DbType.Int64                 => DbPropType.Int64,
+                                                                         DbType.SByte                 => DbPropType.SByte,
+                                                                         DbType.Single                => DbPropType.Double,
+                                                                         DbType.String                => DbPropType.String,
+                                                                         DbType.StringFixedLength     => DbPropType.String,
+                                                                         DbType.Time                  => DbPropType.Time,
+                                                                         DbType.UInt16                => DbPropType.UInt16,
+                                                                         DbType.UInt32                => DbPropType.UInt32,
+                                                                         DbType.UInt64                => DbPropType.UInt64,
+                                                                         DbType.VarNumeric            => DbPropType.Decimal,
+                                                                         DbType.Xml                   => DbPropType.Xml,
+                                                                         DbType.AnsiStringFixedLength => DbPropType.String,
+                                                                         DbType.DateTime              => DbPropType.DateTime,
+                                                                         DbType.DateTime2             => DbPropType.DateTime,
+                                                                         DbType.DateTimeOffset        => DbPropType.DateTimeOffset,
+                                                                         _                            => throw new OutOfRangeException(type)
+                                                                     };
     public static DbPropType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
 
 
@@ -46,7 +75,8 @@ public static partial class Migrations
 
         ICreateTableColumnOptionOrWithColumnSyntax item;
 
-        DbPropType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type.ToDbPropertyType();
+        DbPropType? type = propertyInfo.GetCustomAttribute<DataBaseTypeAttribute>()
+                                      ?.Type.ToDbPropertyType();
 
         if ( type.HasValue )
         {
@@ -120,7 +150,9 @@ public static partial class Migrations
 
         Type isExternalInitType = typeof(IsExternalInit);
 
-        return setMethod.ReturnParameter.GetRequiredCustomModifiers().ToList().Contains(isExternalInitType);
+        return setMethod.ReturnParameter.GetRequiredCustomModifiers()
+                        .ToList()
+                        .Contains(isExternalInitType);
     }
 
 
@@ -165,11 +197,24 @@ public static partial class Migrations
     {
         if ( col.CreateColumn_Enum(propInfo, propertyType) ) { return true; }
 
-        if ( propertyType == typeof(JsonObject) || propertyType == typeof(JsonNode) || propertyType == typeof(List<JsonObject>) || propertyType == typeof(List<JsonObject?>) || propertyType == typeof(JsonObject[]) || propertyType == typeof(JsonObject) ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
+        if ( propertyType == typeof(JsonObject) || propertyType == typeof(JsonNode) || propertyType == typeof(List<JsonObject>) || propertyType == typeof(List<JsonObject?>) || propertyType == typeof(JsonObject[]) || propertyType == typeof(JsonObject) )
+        {
+            return col.AsXml(int.MaxValue)
+                      .SetNullable(propInfo);
+        }
 
-        if ( ( propertyType.IsGenericType && propertyType.IsList() ) || propertyType.IsSet() || propertyType.IsCollection() ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
+        if ( ( propertyType.IsGenericType && propertyType.IsList() ) || propertyType.IsSet() || propertyType.IsCollection() )
+        {
+            return col.AsXml(int.MaxValue)
+                      .SetNullable(propInfo);
+        }
 
-        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()?.Type is DbType.Xml ) { return col.AsXml(int.MaxValue).SetNullable(propInfo); }
+        if ( propInfo.GetCustomAttribute<DataBaseTypeAttribute>()
+                    ?.Type is DbType.Xml )
+        {
+            return col.AsXml(int.MaxValue)
+                      .SetNullable(propInfo);
+        }
 
         if ( propertyType.HasInterface<IUniqueID<int>>() ) { return col.CreateColumn_Reference(propertyType); }
 
@@ -261,7 +306,9 @@ public static partial class Migrations
     }
 
 
-    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()?.Name ?? prop.Name;
+    public static string ColumnName( this PropertyInfo prop ) => prop.GetCustomAttribute<ColumnAttribute>()
+                                                                    ?.Name ??
+                                                                 prop.Name;
 
 
     public static string GetMappingTableName( this Type parent, PropertyInfo propertyInfo )
@@ -288,7 +335,12 @@ public static partial class Migrations
         }
 
 
-        if ( propertyType.IsEqualType(typeof(string)) ) { return col.AsString(propInfo.GetCustomAttribute<StringLengthAttribute>()?.MaximumLength ?? throw new InvalidOperationException($"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}")); }
+        if ( propertyType.IsEqualType(typeof(string)) )
+        {
+            return col.AsString(propInfo.GetCustomAttribute<StringLengthAttribute>()
+                                       ?.MaximumLength ??
+                                throw new InvalidOperationException($"{propertyType.DeclaringType?.Name}.{propertyType.Name}.{propInfo.Name}"));
+        }
 
 
         if ( propertyType.IsOneOf(typeof(bool), typeof(bool?)) ) { return col.AsBoolean(); }
@@ -350,13 +402,25 @@ public static partial class Migrations
 
 
     public static void AsGuidKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsGuid().NotNullable().PrimaryKey().Identity();
+        col.AsGuid()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
     public static void AsIntKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt32().NotNullable().PrimaryKey().Identity();
+        col.AsInt32()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
     public static void AsLongKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsInt64().NotNullable().PrimaryKey().Identity();
+        col.AsInt64()
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
     public static void AsStringKey( this ICreateTableColumnAsTypeSyntax col ) =>
-        col.AsString(int.MaxValue).NotNullable().PrimaryKey().Identity();
+        col.AsString(int.MaxValue)
+           .NotNullable()
+           .PrimaryKey()
+           .Identity();
 
 
     public static void Throw( this Type classType, PropertyInfo prop )
@@ -409,12 +473,15 @@ public static partial class Migrations
 
         return builder;
     }
-    public static string GetConnectionString( IServiceProvider provider )              => GetConnectionString(provider, "DEFAULT");
-    public static string GetConnectionString( IServiceProvider provider, string name ) => provider.GetRequiredService<IConfiguration>().GetConnectionString(name) ?? throw new KeyNotFoundException(name);
+    public static string GetConnectionString( IServiceProvider provider ) => GetConnectionString(provider, "DEFAULT");
+    public static string GetConnectionString( IServiceProvider provider, string name ) => provider.GetRequiredService<IConfiguration>()
+                                                                                                  .GetConnectionString(name) ??
+                                                                                          throw new KeyNotFoundException(name);
 
 
     public static IMigrationRunnerBuilder ConfigureScanIn( IMigrationRunnerBuilder runner ) =>
-        runner.ScanIn(Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly).For.All();
+        runner.ScanIn(Assembly.GetEntryAssembly(), typeof(UserRecord).Assembly)
+              .For.All();
 
 
     //

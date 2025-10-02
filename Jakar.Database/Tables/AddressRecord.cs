@@ -24,20 +24,20 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
-    public static IEnumerable<MigrationRecord>  Migrations    { get; }
+
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Create()
-                                                                                                           .WithColumn<string>(nameof(Line1),           length: 256)
-                                                                                                           .WithColumn<string>(nameof(Line2),           length: 1024)
-                                                                                                           .WithColumn<string>(nameof(City),            length: 256)
-                                                                                                           .WithColumn<string>(nameof(StateOrProvince), length: 256)
-                                                                                                           .WithColumn<string>(nameof(Country),         length: 256)
-                                                                                                           .WithColumn<string>(nameof(PostalCode),      length: 256)
-                                                                                                           .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
-                                                                                                           .WithColumn<bool>(nameof(IsPrimary),         length: 256)
-                                                                                                           .With_AdditionalData()
-                                                                                                           .With_CreatedBy()
-                                                                                                           .Build();
+                                                                                                                 .WithColumn<string>(nameof(Line1),           length: 256)
+                                                                                                                 .WithColumn<string>(nameof(Line2),           length: 1024)
+                                                                                                                 .WithColumn<string>(nameof(City),            length: 256)
+                                                                                                                 .WithColumn<string>(nameof(StateOrProvince), length: 256)
+                                                                                                                 .WithColumn<string>(nameof(Country),         length: 256)
+                                                                                                                 .WithColumn<string>(nameof(PostalCode),      length: 256)
+                                                                                                                 .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
+                                                                                                                 .WithColumn<bool>(nameof(IsPrimary),         length: 256)
+                                                                                                                 .With_AdditionalData()
+                                                                                                                 .With_CreatedBy()
+                                                                                                                 .Build();
 
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
@@ -67,9 +67,9 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                                                                        DateTimeOffset.UtcNow) { }
 
 
-    [Pure] public override DynamicParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Line1),           Line1);
         parameters.Add(nameof(Line2),           Line2);
         parameters.Add(nameof(City),            City);
@@ -143,7 +143,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
     [Pure] public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
-        DynamicParameters   parameters = new();
+        PostgresParameters  parameters = new();
         ReadOnlySpan<Claim> span       = claims;
 
         if ( hasFlag(types, ClaimType.StreetAddressLine1) )
@@ -188,7 +188,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
     [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
-        DynamicParameters parameters = new();
+        PostgresParameters parameters = new();
 
         switch ( claim.Type )
         {

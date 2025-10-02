@@ -12,33 +12,38 @@ namespace Jakar.Database;
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthCheck, IUserTwoFactorTokenProvider<UserRecord>
 {
-    public const       ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
-    protected readonly ConcurrentBag<IDbTable>          _tables             = [];
-    public readonly    DbOptions                        Options;
-    public readonly    DbTable<AddressRecord>           Addresses;
-    public readonly    DbTable<FileRecord>              Files;
-    public readonly    DbTable<GroupRecord>             Groups;
-    public readonly    DbTable<RecoveryCodeRecord>      RecoveryCodes;
-    public readonly    DbTable<RoleRecord>              Roles;
-    public readonly    DbTable<UserAddressRecord>       UserAddresses;
-    public readonly    DbTable<UserGroupRecord>         UserGroups;
-    public readonly    DbTable<UserLoginProviderRecord> UserLogins;
-    public readonly    DbTable<UserRecord>              Users;
-    public readonly    DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
-    public readonly    DbTable<UserRoleRecord>          UserRoles;
-    protected readonly FusionCache                      _cache;
-    public readonly    IConfiguration                   Configuration;
-    protected          ActivitySource?                  _activitySource;
-    protected          Meter?                           _meter;
-    protected          string?                          _className;
+    public const                ClaimType                        DEFAULT_CLAIM_TYPES = ClaimType.UserID | ClaimType.UserName | ClaimType.Group | ClaimType.Role;
+    protected readonly          ConcurrentBag<IDbTable>          _tables             = [];
+    public readonly             DbOptions                        Options;
+    public readonly             DbTable<AddressRecord>           Addresses;
+    public readonly             DbTable<FileRecord>              Files;
+    public readonly             DbTable<GroupRecord>             Groups;
+    public readonly             DbTable<RecoveryCodeRecord>      RecoveryCodes;
+    public readonly             DbTable<RoleRecord>              Roles;
+    public readonly             DbTable<UserAddressRecord>       UserAddresses;
+    public readonly             DbTable<UserGroupRecord>         UserGroups;
+    public readonly             DbTable<UserLoginProviderRecord> UserLogins;
+    public readonly             DbTable<UserRecord>              Users;
+    public readonly             DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
+    public readonly             DbTable<UserRoleRecord>          UserRoles;
+    protected internal readonly DbTable<MigrationRecord>         Migrations;
+    protected readonly          FusionCache                      _cache;
+    public readonly             IConfiguration                   Configuration;
+    protected                   ActivitySource?                  _activitySource;
+    protected                   Meter?                           _meter;
+    protected                   string?                          _className;
 
 
-    public static      Database?                    Current                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public static      DataProtector                DataProtector             { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
-    public             string                       ClassName                 { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType().GetFullName(); }
+    public static Database?     Current       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    public static DataProtector DataProtector { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public string ClassName
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType()
+                                                                     .GetFullName();
+    }
     protected internal SecuredString?               ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
     ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
-    public             PasswordValidator            PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => DbOptions.PasswordRequirements.GetValidator(); }
+    public virtual     PasswordValidator            PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => DbOptions.PasswordRequirements.GetValidator(); }
     public             IsolationLevel               TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
     public             AppVersion                   Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Options.AppInformation.Version; }
 
@@ -81,6 +86,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         Addresses         = Create<AddressRecord>();
         UserAddresses     = Create<UserAddressRecord>();
         Files             = Create<FileRecord>();
+        Migrations        = Create<MigrationRecord>();
         Current           = this;
         Task.Run(InitDataProtector);
     }
@@ -216,10 +222,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public static DynamicParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
+    public static PostgresParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
     {
         ArgumentNullException.ThrowIfNull(variableName);
-        DynamicParameters parameters = new(template);
+        PostgresParameters parameters = new(template);
         parameters.Add(variableName, value);
         return parameters;
     }

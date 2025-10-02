@@ -19,9 +19,9 @@ public abstract record UserSubscription<TClass>( DateTimeOffset? SubscriptionExp
     where TClass : UserSubscription<TClass>, ITableRecord<TClass>
 {
     [Pure]
-    public override DynamicParameters ToDynamicParameters()
+    public override PostgresParameters ToDynamicParameters()
     {
-        DynamicParameters parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(SubscriptionExpires), SubscriptionExpires);
         return parameters;
     }

@@ -10,9 +10,9 @@ public static class TableExtensions
 
         if ( !string.Equals(TClass.TableName, TClass.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TClass).Name}: {nameof(TClass.TableName)} is not snake_case: '{TClass.TableName}'"); }
 
-        DynamicParameters parameters     = self.ToDynamicParameters();
-        string[]          parameterNames = parameters.ParameterNames.ToArray();
-        int               length         = parameterNames.Length;
+        PostgresParameters parameters     = self.ToDynamicParameters();
+        string[]           parameterNames = parameters.ParameterNames;
+        int                length         = parameterNames.Length;
 
 
         if ( length == TClass.ClassProperties.Length ) { return self; }

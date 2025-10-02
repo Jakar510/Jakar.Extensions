@@ -12,7 +12,6 @@ public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, Grou
     public static JsonSerializerContext           JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserGroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserGroupRecord;
     public static JsonTypeInfo<UserGroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserGroupRecordArray;
-    public static IEnumerable<MigrationRecord>    Migrations    { get; }
 
 
     public UserGroupRecord( UserRecord            key, GroupRecord           value ) : base(key, value) { }

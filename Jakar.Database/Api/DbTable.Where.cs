@@ -13,7 +13,14 @@ public partial class DbTable<TClass>
     public IAsyncEnumerable<TClass> Where<TValue>( string columnName, TValue?            value,      [EnumeratorCancellation] CancellationToken token = default ) => this.Call(Where, columnName, value,      token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
+    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    {
+        SqlCommand               command = new(sql, parameters);
+        await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
+        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+    }
+
+
     public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               command = SQLCache.Get(matchAll, parameters);
@@ -34,7 +41,6 @@ public partial class DbTable<TClass>
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual IAsyncEnumerable<TClass> Where<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
         DynamicParameters parameters = new();
