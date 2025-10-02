@@ -1,7 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/19/2023  11:06 AM
 
-namespace Jakar.Database.Resx;
+using Microsoft.CodeAnalysis;
+
+
+
+namespace Jakar.Extensions;
 
 
 [Serializable]

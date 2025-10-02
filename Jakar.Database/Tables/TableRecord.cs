@@ -52,6 +52,7 @@ public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     static ITableRecord() => DbMigrations.Migrations.AddMigrations<TClass>();
 
 
+    [Pure] public abstract static MigrationRecord    CreateTable( ulong   migrationID );
     [Pure] public abstract static TClass             Create( DbDataReader reader );
     [Pure] public                 PostgresParameters ToDynamicParameters();
 

@@ -44,6 +44,100 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     }
 
 
+    public static async ValueTask<MigrationRecord[]> All( Database db, CancellationToken token )
+    {
+        await using NpgsqlConnection connection = await db.ConnectAsync(token);
+        CommandDefinition            command    = new($"SELECT * FROM {TABLE_NAME} ORDER BY id", null, null, null, null, CommandFlags.Buffered, token);
+        await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
+        List<MigrationRecord>        records    = new(Migrations.Count);
+        await foreach ( MigrationRecord record in reader.CreateAsync<MigrationRecord>(token) ) { records.Add(record); }
+
+        return records.ToArray();
+    }
+    public async ValueTask Apply( Database db, CancellationToken token )
+    {
+        await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
+        await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
+
+        PostgresParameters parameters = new();
+        parameters.Add(nameof(MigrationID),    MigrationID);
+        parameters.Add(nameof(Description),    Description);
+        parameters.Add(nameof(TableID),        TableID);
+        parameters.Add(nameof(AppliedOn),      AppliedOn);
+        parameters.Add(nameof(AdditionalData), AdditionalData);
+
+        CommandDefinition command = new($"""
+                                         INSERT INTO {TABLE_NAME} 
+                                         (
+                                         {nameof(MigrationID).SqlColumnName()},
+                                         {nameof(TableID).SqlColumnName()},
+                                         {nameof(Description).SqlColumnName()},
+                                         {nameof(AppliedOn).SqlColumnName()},
+                                         {nameof(AdditionalData).SqlColumnName()}
+                                         ) 
+                                         VALUES 
+                                         (
+                                         @{nameof(MigrationID).SqlColumnName()},
+                                         @{nameof(TableID).SqlColumnName()},
+                                         @{nameof(Description).SqlColumnName()},
+                                         @{nameof(AppliedOn).SqlColumnName()},
+                                         @{nameof(AdditionalData).SqlColumnName()}
+                                         )
+                                         """,
+                                        parameters,
+                                        transaction,
+                                        null,
+                                        null,
+                                        CommandFlags.Buffered,
+                                        token);
+
+        try
+        {
+            await connection.ExecuteAsync(command);
+            await transaction.CommitAsync(token);
+        }
+        catch ( Exception e )
+        {
+            await transaction.RollbackAsync(token);
+            throw new SqlException(command.CommandText, e);
+        }
+    }
+    public async ValueTask Apply( NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken token )
+    {
+        PostgresParameters parameters = new();
+        parameters.Add(nameof(MigrationID),    MigrationID);
+        parameters.Add(nameof(Description),    Description);
+        parameters.Add(nameof(TableID),        TableID);
+        parameters.Add(nameof(AppliedOn),      AppliedOn);
+        parameters.Add(nameof(AdditionalData), AdditionalData);
+
+        CommandDefinition command = new($"""
+                                         INSERT INTO {TABLE_NAME} 
+                                         (
+                                         {nameof(MigrationID).SqlColumnName()},
+                                         {nameof(TableID).SqlColumnName()},
+                                         {nameof(Description).SqlColumnName()},
+                                         {nameof(AppliedOn).SqlColumnName()},
+                                         {nameof(AdditionalData).SqlColumnName()}
+                                         ) 
+                                         VALUES 
+                                         (
+                                         @{nameof(MigrationID).SqlColumnName()},
+                                         @{nameof(TableID).SqlColumnName()},
+                                         @{nameof(Description).SqlColumnName()},
+                                         @{nameof(AppliedOn).SqlColumnName()},
+                                         @{nameof(AdditionalData).SqlColumnName()}
+                                         )
+                                         """,
+                                        parameters,
+                                        transaction,
+                                        null,
+                                        null,
+                                        CommandFlags.Buffered,
+                                        token);
+
+        await connection.ExecuteAsync(command);
+    }
     public static MigrationRecord CreateTable( ulong migrationID )
     {
         string tableID = TABLE_NAME.SqlColumnName();
@@ -53,14 +147,13 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
                                        $"""
                                         CREATE TABLE IF NOT EXISTS {tableID}
                                         (
-                                        {nameof(MigrationID).SqlColumnName()}    bigint        NOT NULL,
+                                        {nameof(MigrationID).SqlColumnName()}    bigint        PRIMARY KEY,
                                         {nameof(TableID).SqlColumnName()}        varchar(256)  NOT NULL,
-                                        {nameof(Description).SqlColumnName()}    varchar(4096) NOT NULL,
+                                        {nameof(Description).SqlColumnName()}    varchar(4096) UNIQUE NOT NULL,
                                         {nameof(AppliedOn).SqlColumnName()}      timestamptz   NOT NULL DEFAULT SYSUTCDATETIME(),
                                         {nameof(AdditionalData).SqlColumnName()} json          NULL
-                                        PRIMARY KEY({nameof(TableID).SqlColumnName()}, {nameof(MigrationID).SqlColumnName()})
                                         );
-                                        
+
                                         CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
                                         BEFORE INSERT OR UPDATE ON {tableID}
                                         FOR EACH ROW
@@ -99,7 +192,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
                                             id    bigint        PRIMARY KEY,
                                             name  varchar(256)  UNIQUE NOT NULL,
                                             );
-                                            
+
                                             CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
                                             BEFORE INSERT OR UPDATE ON {tableID}
                                             FOR EACH ROW
@@ -170,7 +263,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 
     public override bool Equals( MigrationRecord?    other ) => ReferenceEquals(this, other) || string.Equals(Description, other?.Description);
     public override int  CompareTo( MigrationRecord? other ) => Nullable.Compare(AppliedOn, other?.AppliedOn);
-    public override int  GetHashCode()                       => HashCode.Combine(Description, MigrationID, AppliedOn, AdditionalData);
+    public override int  GetHashCode()                       => HashCode.Combine(MigrationID, Description);
 
 
     public static bool operator >( MigrationRecord  left, MigrationRecord right ) => Comparer<MigrationRecord>.Default.Compare(left, right) > 0;

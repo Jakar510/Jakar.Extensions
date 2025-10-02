@@ -25,12 +25,11 @@ public sealed record ResxRowRecord( long                    KeyID,
                                     DateTimeOffset          DateCreated,
                                     DateTimeOffset?         LastModified = null ) : TableRecord<ResxRowRecord>(in ID, in DateCreated, in LastModified), ITableRecord<ResxRowRecord>
 {
-    public const  string                        TABLE_NAME = "Resx";
+    public const  string                        TABLE_NAME = "resx";
     public static string                        TableName     => TABLE_NAME;
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<ResxRowRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.ResxRowRecord;
     public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
-    public static List<MigrationRecord>         Migrations    { get; }
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
@@ -109,6 +108,43 @@ public sealed record ResxRowRecord( long                    KeyID,
              RecordID<ResxRowRecord>.New(),
              DateTimeOffset.UtcNow) { }
 
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<ResxRowRecord>(migrationID,
+                                                     $"create {tableID} table",
+                                                     $"""
+                                                      CREATE TABLE {tableID}
+                                                      (
+                                                      {nameof(ID).SqlColumnName()}           uuid                        PRIMARY KEY,
+                                                      {nameof(KeyID).SqlColumnName()}        bigint                      NOT NULL,
+                                                      {nameof(Key).SqlColumnName()}          varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Neutral).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(English).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Spanish).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(French).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Swedish).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(German).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Chinese).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Polish).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Thai).SqlColumnName()}         varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Japanese).SqlColumnName()}     varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Czech).SqlColumnName()}        varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Portuguese).SqlColumnName()}   varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Dutch).SqlColumnName()}        varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Korean).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(Arabic).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                      {nameof(DateCreated).SqlColumnName()}  timestamptz                 NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                      {nameof(LastModified).SqlColumnName()} timestamptz                 
+                                                      );
+
+                                                      CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                      BEFORE INSERT OR UPDATE ON {tableID}
+                                                      FOR EACH ROW
+                                                      EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                      """);
+    }
     [Pure] public static ResxRowRecord Create( DbDataReader reader )
     {
         long                    keyID        = reader.GetFieldValue<long>(nameof(KeyID));
@@ -239,6 +275,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                                    Spanish,
                                                    Swedish,
                                                    Thai);
+
 
     public string GetValue( in SupportedLanguage language ) => language switch
                                                                {

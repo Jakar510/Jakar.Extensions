@@ -1,69 +1,82 @@
-﻿namespace Jakar.Database.DbMigrations;
+﻿// Jakar.Extensions :: Jakar.Database
+// 10/02/2025  11:38
+
+namespace Jakar.Database.DbMigrations;
 
 
-[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
-public static partial class Migrations
+/// <summary>
+///     Add DB implementation support to FluentMigrator, Set the connection string, and Define the assembly containing the migrations
+///     <para>
+///         <see href="https://fluentmigrator.github.io/articles/migration-runners.html?tabs=vs-pkg-manager-console"/>
+///     </para>
+///     <para>
+///         <see cref="PostgresRunnerBuilderExtensions.AddPostgres"/>
+///     </para>
+///     <para>
+///         <see cref="SQLiteRunnerBuilderExtensions.AddSQLite"/>
+///     </para>
+///     <para>
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2008"/>
+///     </para>
+///     <para>
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2012"/>
+///     </para>
+///     <para>
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2014"/>
+///     </para>
+///     <para>
+///         <see cref="SqlServerRunnerBuilderExtensions.AddSqlServer2016"/>
+///     </para>
+///     <para>
+///         <see cref="Db2RunnerBuilderExtensions.AddDb2"/>
+///     </para>
+/// </summary>
+public static class FluentMigrationExtensions
 {
-    internal static readonly ConcurrentDictionary<string, ConcurrentDictionary<ulong, MigrationRecord>> migrations = new();
-    public static void AddMigrations<TClass>()
-        where TClass : ITableRecord<TClass>
+    public static IServiceCollection AddFluentMigrator( this IServiceCollection collection, Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
     {
-        ConcurrentDictionary<ulong, MigrationRecord> list = migrations.GetOrAdd(TClass.TableName, static _ => new ConcurrentDictionary<ulong, MigrationRecord>());
+        Guard.HasSizeGreaterThan(assemblies, 0, nameof(assemblies));
 
-        foreach ( MigrationRecord record in MigrationRecord.Migrations )
-        {
-            if ( list.TryGetValue(record.MigrationID, out _) ) { throw new InvalidOperationException($"Duplicate migration version {record.MigrationID} for {typeof(TClass).Name}"); }
-
-            list[record.MigrationID] = record;
-        }
-    }
-    public static async ValueTask ApplyMigrations( this WebApplication app )
-    {
-        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-        Database                      db    = scope.ServiceProvider.GetRequiredService<Database>();
-
-        await foreach ( MigrationRecord record in db.Migrations.All() )
-        {
-            if ( !migrations.TryGetValue(record.TableID, out var list) ) { continue; }
-
-            if ( !list.TryGetValue(record.MigrationID, out _) ) { continue; }
-
-
-        }
+        return collection.AddFluentMigratorCore()
+                         .ConfigureRunner(configure => addDbType(configure)
+                                                      .WithGlobalConnectionString(connectionString)
+                                                      .ScanIn(assemblies)
+                                                      .For.All())
+                         .AddLogging(builder => builder.AddFluentMigratorConsole());
     }
 
 
-    public static DbPropType ToDbPropertyType( this DbType type ) => type switch
-                                                                     {
-                                                                         DbType.AnsiString            => DbPropType.String,
-                                                                         DbType.Binary                => DbPropType.Binary,
-                                                                         DbType.Byte                  => DbPropType.Byte,
-                                                                         DbType.Boolean               => DbPropType.Boolean,
-                                                                         DbType.Currency              => DbPropType.Decimal,
-                                                                         DbType.Date                  => DbPropType.Date,
-                                                                         DbType.Decimal               => DbPropType.Decimal,
-                                                                         DbType.Double                => DbPropType.Double,
-                                                                         DbType.Guid                  => DbPropType.Guid,
-                                                                         DbType.Int16                 => DbPropType.Int16,
-                                                                         DbType.Int32                 => DbPropType.Int32,
-                                                                         DbType.Int64                 => DbPropType.Int64,
-                                                                         DbType.SByte                 => DbPropType.SByte,
-                                                                         DbType.Single                => DbPropType.Double,
-                                                                         DbType.String                => DbPropType.String,
-                                                                         DbType.StringFixedLength     => DbPropType.String,
-                                                                         DbType.Time                  => DbPropType.Time,
-                                                                         DbType.UInt16                => DbPropType.UInt16,
-                                                                         DbType.UInt32                => DbPropType.UInt32,
-                                                                         DbType.UInt64                => DbPropType.UInt64,
-                                                                         DbType.VarNumeric            => DbPropType.Decimal,
-                                                                         DbType.Xml                   => DbPropType.Xml,
-                                                                         DbType.AnsiStringFixedLength => DbPropType.String,
-                                                                         DbType.DateTime              => DbPropType.DateTime,
-                                                                         DbType.DateTime2             => DbPropType.DateTime,
-                                                                         DbType.DateTimeOffset        => DbPropType.DateTimeOffset,
-                                                                         _                            => throw new OutOfRangeException(type)
-                                                                     };
-    public static DbPropType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+    public static void UpdateDatabase( Func<IMigrationRunnerBuilder, IMigrationRunnerBuilder> addDbType, string connectionString, params Assembly[] assemblies )
+    {
+        using ServiceProvider serviceProvider = new ServiceCollection().AddFluentMigrator(addDbType, connectionString, assemblies)
+                                                                       .BuildServiceProvider(true);
+
+        serviceProvider.UpdateDatabase();
+    }
+
+
+    /// <summary>
+    ///     <para> Put the database update into a scope to ensure that all resources will be disposed. </para>
+    ///     <para> Update the database </para>
+    /// </summary>
+    public static void UpdateDatabase( this IServiceProvider provider )
+    {
+        using IServiceScope scope = provider.CreateScope();
+
+        scope.ServiceProvider.GetRequiredService<IMigrationRunner>()
+             .UpdateDatabase();
+    }
+
+
+    public static void UpdateDatabase( this IMigrationRunner runner ) =>
+
+        // #if DEBUG
+        //
+        //     if ( Debugger.IsAttached ) { runner.MigrateDown(0); }
+        //
+        // #endif
+        // Execute the migrations
+        runner.MigrateUp();
 
 
     /// <summary>

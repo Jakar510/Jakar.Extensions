@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 01/30/2023  2:41 PM
 
+
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+
+
+
 namespace Jakar.Database;
 
 
@@ -43,6 +48,31 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
         return parameters;
     }
 
+
+    public static MigrationRecord CreateTable( ulong migrationID )
+    {
+        string tableID = TABLE_NAME.SqlColumnName();
+
+        return MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
+                                                               $"create {tableID} table",
+                                                               $"""
+                                                                CREATE TABLE {tableID}
+                                                                (
+                                                                {nameof(LoginProvider).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                                {nameof(ProviderDisplayName).SqlColumnName()} varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                                {nameof(ProviderKey).SqlColumnName()}         varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                                {nameof(Value).SqlColumnName()}               varchar({UNICODE_CAPACITY}) NOT NULL,
+                                                                {nameof(ID).SqlColumnName()}                  uuid                        PRIMARY KEY,
+                                                                {nameof(DateCreated).SqlColumnName()}         timestamptz                 NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                                {nameof(LastModified).SqlColumnName()}        timestamptz                 
+                                                                );
+
+                                                                CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
+                                                                BEFORE INSERT OR UPDATE ON {tableID}
+                                                                FOR EACH ROW
+                                                                EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                                                """);
+    }
     [Pure] public static UserLoginProviderRecord Create( DbDataReader reader )
     {
         string                            loginProvider       = reader.GetFieldValue<string>(nameof(LoginProvider));
