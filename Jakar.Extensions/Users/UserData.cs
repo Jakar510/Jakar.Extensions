@@ -15,8 +15,7 @@ public static class UserData
     public const ClaimType CLAIM_TYPES = ClaimType.UserID             | ClaimType.UserName           | ClaimType.Group           | ClaimType.Role;
 
 
-    public static Claim[] GetClaims<TID>( this IUserData<TID> model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
+    public static Claim[] GetClaims( this IUserData model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
     {
         using IMemoryOwner<Claim> claims = MemoryPool<Claim>.Shared.Rent(20);
         int                       size   = 0;
@@ -47,7 +46,6 @@ public static class UserData
 
         return [.. span];
     }
-
     public static Claim[] GetClaims<TID, TAddress, TGroupModel, TRoleModel>( this IUserData<TID, TAddress, TGroupModel, TRoleModel> model, in ClaimType types = CLAIM_TYPES, in string? issuer = null )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
         where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>

@@ -8,5 +8,5 @@ public interface IEmailTokenService
 {
     public ValueTask<string>                CreateContent( string      header, UserRecord user,  ClaimType         types, CancellationToken token = default );
     public ValueTask<string>                CreateHTMLContent( string  header, UserRecord user,  ClaimType         types, CancellationToken token = default );
-    public ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest users,  ClaimType  types, CancellationToken token = default );
+    public ValueTask<ErrorOrResult<SessionToken>> Authenticate( LoginRequest users,  ClaimType  types, CancellationToken token = default );
 }

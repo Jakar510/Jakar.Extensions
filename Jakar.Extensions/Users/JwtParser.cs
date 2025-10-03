@@ -45,42 +45,33 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     }
 
 
-    public Tokens<Guid> CreateToken<TRequest>( UserModel user, TRequest request, string authenticationType )
-        where TRequest : ISessionID<Guid> => CreateToken<TRequest, UserModel, UserAddress, GroupModel, RoleModel, Guid>(user, request, authenticationType);
-    public Tokens<long> CreateToken<TRequest>( UserLong.UserModel user, TRequest request, string authenticationType )
-        where TRequest : ISessionID<long> => CreateToken<TRequest, UserLong.UserModel, UserLong.UserAddress, UserLong.GroupModel, UserLong.RoleModel, long>(user, request, authenticationType);
+    public SessionToken CreateToken<TRequest>( UserModel user, TRequest request, string authenticationType )
+        where TRequest : ISessionID<Guid> => CreateToken<TRequest, UserModel, Guid>(user, request, authenticationType);
+    public SessionToken CreateToken<TRequest>( UserLong.UserModel user, TRequest request, string authenticationType )
+        where TRequest : ISessionID<long> => CreateToken<TRequest, UserLong.UserModel, long>(user, request, authenticationType);
 
 
-    public Tokens<TID> CreateToken<TRequest, TUser, TAddress, TGroupModel, TRoleModel, TID>( TUser user, TRequest request, string authenticationType )
+    public SessionToken CreateToken<TRequest, TUser, TID>( TUser user, TRequest request, string authenticationType )
         where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID, TAddress, TGroupModel, TRoleModel>
-        where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
-        where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
-        where TAddress : IAddress<TID>, IEquatable<TAddress>
         where TRequest : ISessionID<TID>
+        where TUser : IUserData
     {
         ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
-        return CreateToken<TRequest, TUser, TID>(user, request, identity);
+
+        return request switch
+               {
+                   ISessionID<long> idLong => CreateToken(in user, in idLong,       in identity),
+                   ISessionID<Guid> idGuid => CreateToken(in user, idGuid.DeviceID, idGuid.SessionID, in identity),
+                   _                       => throw new ExpectedValueTypeException(request, typeof(ISessionID<Guid>), typeof(ISessionID<long>))
+               };
     }
 
 
-    public Tokens<TID> CreateToken<TRequest, TUser, TID>( TUser user, TRequest request, string authenticationType )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID>
-        where TRequest : ISessionID<TID>
-    {
-        ClaimsIdentity identity = new(user.GetClaims(), authenticationType);
-        return CreateToken<TRequest, TUser, TID>(user, request, identity);
-    }
-
-
-    public Tokens<TID> CreateToken<TRequest, TUser, TID>( in TUser user, in TRequest request, in ClaimsIdentity identity )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TRequest : ISessionID<TID>
-        where TUser : IUserData<TID> => CreateToken(user, request.DeviceID, request.SessionID, identity);
-    public Tokens<TID> CreateToken<TUser, TID>( in TUser user, in Guid deviceID, in TID sessionID, in ClaimsIdentity identity )
-        where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-        where TUser : IUserData<TID>
+    public SessionToken CreateToken<TRequest, TUser>( in TUser user, in TRequest request, in ClaimsIdentity identity )
+        where TRequest : ISessionID<long>
+        where TUser : IUserData => CreateToken(user, request.DeviceID, request.SessionID.AsGuid(), identity);
+    public SessionToken CreateToken<TUser>( in TUser user, in Guid deviceID, in Guid sessionID, in ClaimsIdentity identity )
+        where TUser : IUserData
     {
         DateTimeOffset now            = DateTimeOffset.UtcNow;
         DateTimeOffset notBefore      = now - TimeSpan.FromMinutes(2);
@@ -88,7 +79,17 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
         DateTimeOffset refreshExpires = user.GetExpires(now, TimeSpan.FromDays(90));
         string         accessToken    = CreateToken(in expires,        in notBefore, identity);
         string         refreshToken   = CreateToken(in refreshExpires, in notBefore, identity);
-        return new Tokens<TID>(user.UserID, user.FullName, __version, accessToken, refreshToken, deviceID, sessionID);
+
+        return new SessionToken
+               {
+                   UserID       = user.UserID,
+                   AccessToken  = accessToken,
+                   RefreshToken = refreshToken,
+                   DeviceID     = deviceID,
+                   SessionID    = sessionID,
+                   FullName     = user.FullName,
+                   Version      = __version
+               };
     }
     public string CreateToken( ref readonly DateTimeOffset expires, ref readonly DateTimeOffset notBefore, in ClaimsIdentity identity ) =>
         __handler.CreateToken(new SecurityTokenDescriptor
@@ -126,7 +127,8 @@ public static class JwtParserExtensions
             LocalFile file = value;
 
             return file.Exists
-                       ? await file.ReadAsync().AsBytes(token)
+                       ? await file.ReadAsync()
+                                   .AsBytes(token)
                        : throw new FileNotFoundException(file.FullPath);
         }
 

@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using MailKit.Net.Smtp;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -12,10 +13,10 @@ public interface IEmailer : IEmailTokenService
     ValueTask         SendAsync( string?                      email,   string            subject, string body );
     ValueTask         SendAsync( MailboxAddress               target,  string            subject, string body, CancellationToken token, params ReadOnlySpan<Attachment> attachments );
     ValueTask         SendAsync( EmailBuilder                 builder, CancellationToken token );
-    string            GetUrl( Tokens                          result );
+    string            GetUrl( SessionToken                          result );
     ValueTask<string> GenerateAccessToken( IEnumerable<Claim> claims, CancellationToken token );
-    string            CreateContent( Tokens                   result, in string         header );
-    string            CreateHTMLContent( Tokens               result, in string         header );
+    string            CreateContent( SessionToken                   result, in string         header );
+    string            CreateHTMLContent( SessionToken               result, in string         header );
     Task              VerifyEmail( UserRecord                 user,   ClaimType         types, CancellationToken token );
     Task              VerifyHTMLEmail( UserRecord             user,   ClaimType         types, CancellationToken token );
 }
@@ -78,7 +79,7 @@ public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configura
     }
 
 
-    public virtual string GetUrl( Tokens result ) => $"{Domain.OriginalString}/Token/{result.AccessToken}";
+    public virtual string GetUrl( SessionToken result ) => $"{Domain.OriginalString}/Token/{result.AccessToken}";
 
 
     public virtual async ValueTask<string> GenerateAccessToken( IEnumerable<Claim> claims, CancellationToken token )
@@ -89,13 +90,13 @@ public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configura
     }
 
 
-    public virtual string CreateContent( Tokens result, in string header ) =>
+    public virtual string CreateContent( SessionToken result, in string header ) =>
         $"""
          {header}
 
          {GetUrl(result)}
          """;
-    public virtual string CreateHTMLContent( Tokens result, in string header ) =>
+    public virtual string CreateHTMLContent( SessionToken result, in string header ) =>
         $"""
          <h1> {header} </h1>
          <p>
@@ -104,17 +105,17 @@ public class Emailer( EmailTokenProvider tokenProvider, IConfiguration configura
          """;
 
 
-    public virtual ValueTask<ErrorOrResult<Tokens>> Authenticate( LoginRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate(request, types, token);
+    public virtual ValueTask<ErrorOrResult<SessionToken>> Authenticate( LoginRequest request, ClaimType types, CancellationToken token = default ) => _dataBase.Authenticate(request, types, token);
 
 
     public virtual async ValueTask<string> CreateContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _dataBase.GetToken(user, types, token);
+        SessionToken result = await _dataBase.GetToken(user, types, token);
         return CreateContent(result, header);
     }
     public virtual async ValueTask<string> CreateHTMLContent( string header, UserRecord user, ClaimType types, CancellationToken token = default )
     {
-        Tokens result = await _dataBase.GetToken(user, types, token);
+        SessionToken result = await _dataBase.GetToken(user, types, token);
         return CreateHTMLContent(result, header);
     }
     public async Task VerifyEmail( UserRecord user, ClaimType types, CancellationToken token )

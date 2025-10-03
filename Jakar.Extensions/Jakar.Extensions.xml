@@ -4786,16 +4786,16 @@
 			</summary>
 			<typeparam name="TValue"> The value type. </typeparam>
 		</member>
-		<member name="TValue:Jakar.Extensions.Tokens">
+		<member name="TValue:Jakar.Extensions.SessionToken">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="M:Jakar.Extensions.Tokens.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String)">
+		<member name="M:Jakar.Extensions.SessionToken.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="TValue:Jakar.Extensions.Tokens`1">
+		<member name="TValue:Jakar.Extensions.SessionToken`1">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
-		<member name="M:Jakar.Extensions.Tokens`1.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String,System.Guid,`0)">
+		<member name="M:Jakar.Extensions.SessionToken`1.#ctor(System.Guid,System.String,Jakar.Extensions.AppVersion,System.String,System.String,System.Guid,`0)">
 			<summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
 		</member>
 		<member name="TValue:Jakar.Extensions.ValidValueOf`2">

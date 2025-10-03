@@ -4,7 +4,7 @@
 [Serializable]
 [Table(TABLE_NAME)]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord
+public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord, IUserID
 {
     public const           int      DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
     public const           int      ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
@@ -102,9 +102,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public                                                                     DateTimeOffset?          SubscriptionExpires    { get;                  set; }
     public                                                                     Guid?                    SubscriptionID         { get;                  set; }
     [ProtectedPersonalData] [StringLength(Constants.UNICODE_CAPACITY)] public  string                   Title                  { get;                  set; }
-    Guid IUserID<Guid>.                                                                                 UserID                 => ID.Value;
-    public                                                                    string                    UserName               { get; init; }
-    [ProtectedPersonalData] [StringLength(Constants.UNICODE_CAPACITY)] public string                    Website                { get; set; }
+    public                                                                     string                   UserName               { get;                  init; }
+    [ProtectedPersonalData] [StringLength(Constants.UNICODE_CAPACITY)] public  string                   Website                { get;                  set; }
+    public                                                                     Guid                     UserID                 => ID.Value;
 
 
     public UserRecord( string                UserName,
@@ -797,7 +797,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                    FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES {tableID}(id) ON DELETE SET NULL
                                                    FOREIGN KEY({nameof(ImageID).SqlColumnName()}) REFERENCES {FileRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
                                                    );
-                                                   
+
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
                                                    BEFORE INSERT OR UPDATE ON {tableID}
                                                    FOR EACH ROW
@@ -1000,9 +1000,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
 
-    #region Tokens
+    #region SessionToken
 
-    public static bool CheckRefreshToken( ref UserRecord record, Tokens token, bool hashed = true ) => CheckRefreshToken(ref record, token.RefreshToken, hashed);
+    public static bool CheckRefreshToken( ref UserRecord record, SessionToken token, bool hashed = true ) => CheckRefreshToken(ref record, token.RefreshToken, hashed);
     public static bool CheckRefreshToken( ref UserRecord record, string? refreshToken, bool hashed = true )
     {
         // ReSharper disable once InvertIf
@@ -1018,8 +1018,8 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
 
 
-    public UserRecord WithNoRefreshToken()                                                                 => WithRefreshToken(string.Empty);
-    public UserRecord WithRefreshToken( Tokens token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken(token.RefreshToken, date, securityStamp);
+    public UserRecord WithNoRefreshToken()                                                                       => WithRefreshToken(string.Empty);
+    public UserRecord WithRefreshToken( SessionToken token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken(token.RefreshToken, date, securityStamp);
     public UserRecord WithRefreshToken( string? refreshToken, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
     {
         if ( string.IsNullOrEmpty(refreshToken) )

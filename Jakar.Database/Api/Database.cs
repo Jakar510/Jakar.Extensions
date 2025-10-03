@@ -208,8 +208,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Register( LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default ) => this.TryCall(Register, request, rights, types, token);
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Register( NpgsqlConnection connection, DbTransaction transaction, LoginRequest<UserModel> request, string rights, ClaimType types = default, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
+        where TRequest : ILoginRequest<UserModel> => this.TryCall(Register, request, rights, types, token);
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( NpgsqlConnection connection, DbTransaction transaction, TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
+        where TRequest : ILoginRequest<UserModel>
     {
         UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
         if ( record is not null ) { return Error.NotFound(request.UserName); }

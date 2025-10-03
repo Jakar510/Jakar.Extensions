@@ -1,6 +1,11 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 03/12/2023  1:56 PM
 
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+
+
+
 namespace Jakar.Database;
 
 
@@ -33,8 +38,8 @@ public abstract partial class Database
 
     /// <summary> Only to be used for <see cref="IEmailTokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
-    public ValueTask<ErrorOrResult<Tokens>> Authenticate( ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Authenticate, request, types, token);
-    protected virtual async ValueTask<ErrorOrResult<Tokens>> Authenticate( NpgsqlConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<SessionToken>> Authenticate( ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Authenticate, request, types, token);
+    protected virtual async ValueTask<ErrorOrResult<SessionToken>> Authenticate( NpgsqlConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get(connection, transaction, nameof(UserRecord.UserName), request.UserName, token);
         if ( record is null ) { return Error.Unauthorized(request.UserName); }
@@ -118,8 +123,7 @@ public abstract partial class Database
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    protected static DateTime GetExpiration( in DateTimeOffset? recordExpiration, in TimeSpan offset )
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)] protected static DateTime GetExpiration( in DateTimeOffset? recordExpiration, in TimeSpan offset )
     {
         DateTime expires = DateTime.UtcNow + offset;
         if ( recordExpiration is null ) { return expires; }
@@ -131,8 +135,8 @@ public abstract partial class Database
     }
 
 
-    public ValueTask<Tokens> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall(GetToken, user, types, token);
-    public virtual async ValueTask<Tokens> GetToken( NpgsqlConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<SessionToken> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall(GetToken, user, types, token);
+    public virtual async ValueTask<SessionToken> GetToken( NpgsqlConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         Claim[]            claims         = await record.GetUserClaims(connection, transaction, this, types, token);
         DateTimeOffset?    expires        = await GetSubscriptionExpiration(connection, transaction, record, token);
@@ -161,12 +165,20 @@ public abstract partial class Database
 
         record = record.WithRefreshToken(refresh, refreshExpires);
         await Users.Update(connection, transaction, record, token);
-        return new Tokens(record.ID.Value, record.FullName, Version, accessToken, refresh);
+
+        return new SessionToken
+               {
+                   UserID       = record.ID.Value,
+                   FullName     = record.FullName,
+                   Version      = Version,
+                   AccessToken  = accessToken,
+                   RefreshToken = refresh
+               };
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Refresh, refreshToken, types, token);
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Refresh( NpgsqlConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<SessionToken>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Refresh, refreshToken, types, token);
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Refresh( NpgsqlConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin(connection, transaction, refreshToken, types, token);
         if ( !result.TryGetValue(out UserRecord? record, out Errors? error) ) { return error; }
@@ -195,12 +207,20 @@ public abstract partial class Database
 
 
         string accessToken = DbTokenHandler.Instance.CreateToken(descriptor);
-        return new Tokens(record.ID.Value, record.FullName, Version, accessToken, refreshToken);
+
+        return new SessionToken
+               {
+                   UserID       = record.ID.Value,
+                   FullName     = record.FullName,
+                   Version      = Version,
+                   AccessToken  = accessToken,
+                   RefreshToken = refreshToken
+               };
     }
 
 
-    public ValueTask<ErrorOrResult<Tokens>> Verify( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Verify, jsonToken, types, token);
-    public virtual async ValueTask<ErrorOrResult<Tokens>> Verify( NpgsqlConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public ValueTask<ErrorOrResult<SessionToken>> Verify( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Verify, jsonToken, types, token);
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Verify( NpgsqlConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin(connection, transaction, jsonToken, types, token);
 
@@ -220,7 +240,13 @@ public abstract partial class Database
         if ( validationResult.Exception is not null )
         {
             Exception e = validationResult.Exception;
-            return Error.Create(Status.InternalServerError, e.GetType().Name, e.Message, e.Source, e.MethodName());
+
+            return Error.Create(Status.InternalServerError,
+                                e.GetType()
+                                 .Name,
+                                e.Message,
+                                e.Source,
+                                e.MethodName());
         }
 
         Claim[]                   claims = validationResult.ClaimsIdentity.Claims.ToArray();
@@ -235,7 +261,9 @@ public abstract partial class Database
 
     public async ValueTask<UserLoginProviderRecord[]> GetUserLoginInfoRecords( string purpose, UserRecord user, CancellationToken token )
     {
-        HashSet<UserLoginProviderRecord> list = await UserLogins.Where(true, UserLoginProviderRecord.GetDynamicParameters(user, purpose), token).ToHashSet(token);
+        HashSet<UserLoginProviderRecord> list = await UserLogins.Where(true, UserLoginProviderRecord.GetDynamicParameters(user, purpose), token)
+                                                                .ToHashSet(token);
+
         return [..list];
     }
 
@@ -243,7 +271,7 @@ public abstract partial class Database
     public Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) => GenerateAsync(purpose, manager, user, CancellationToken.None);
     public virtual async Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user, CancellationToken token )
     {
-        Tokens tokens = await GetToken(user, token: token);
+        SessionToken tokens = await GetToken(user, token: token);
         return tokens.AccessToken;
     }
 
@@ -256,7 +284,11 @@ public abstract partial class Database
 
         if ( !string.IsNullOrWhiteSpace(key) )
         {
-            if ( long.TryParse(token, out _) ) { return OneTimePassword.Create(key, Options.TokenIssuer).ValidateToken(token); }
+            if ( long.TryParse(token, out _) )
+            {
+                return OneTimePassword.Create(key, Options.TokenIssuer)
+                                      .ValidateToken(token);
+            }
 
             JwtSecurityTokenHandler   handler    = new();
             TokenValidationParameters parameters = await GetTokenValidationParameters(cancellationToken);
@@ -265,7 +297,7 @@ public abstract partial class Database
         }
         else
         {
-            ErrorOrResult<Tokens> result = await Verify(token, token: cancellationToken);
+            ErrorOrResult<SessionToken> result = await Verify(token, token: cancellationToken);
             return result.HasValue;
         }
     }
@@ -276,6 +308,7 @@ public abstract partial class Database
     {
         if ( !user.IsValidID() || string.IsNullOrWhiteSpace(user.UserName) ) { return false; }
 
-        return await UserLogins.Where(true, UserLoginProviderRecord.GetDynamicParameters(user), token).Any(token);
+        return await UserLogins.Where(true, UserLoginProviderRecord.GetDynamicParameters(user), token)
+                               .Any(token);
     }
 }

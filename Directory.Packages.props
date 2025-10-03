@@ -91,7 +91,7 @@
     <PackageVersion Include="Microsoft.Identity.Web" Version="3.14.1" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
-    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
+    <PackageVersion Include="Microsoft.IdentityModel.SessionToken" Version="8.14.0" />
     <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.110" />
     <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.110" />
     <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.110" />

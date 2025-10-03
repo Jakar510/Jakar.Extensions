@@ -6,6 +6,7 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
+		<WarningsAsErrors>Nullable;CS0114</WarningsAsErrors>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
 		<EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
@@ -82,7 +83,7 @@
 		<PackageReference Include="Microsoft.Identity.Web" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
 		<PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" />
-		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
+		<PackageReference Include="Microsoft.IdentityModel.SessionToken" />
 		<PackageReference Include="Npgsql" />
 		<PackageReference Include="Npgsql.Json.NET" />
 		<PackageReference Include="Npgsql.OpenTelemetry" />

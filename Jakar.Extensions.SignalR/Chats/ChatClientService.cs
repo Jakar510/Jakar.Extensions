@@ -27,7 +27,7 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     protected          bool             __isDisposed;
     protected          ChatUser         _user = ChatUser.Empty;
     protected          HubConnection?   _connection; // SignalR.Client
-    protected          Tokens?          _tokens;
+    protected          SessionToken?          _tokens;
 
 
     public abstract Uri       HostInfo { get; }

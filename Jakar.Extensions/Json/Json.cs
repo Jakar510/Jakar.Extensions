@@ -11,8 +11,8 @@ namespace Jakar.Extensions;
 
 public static class Json
 {
-    public const            string                                   SerializationRequiresDynamicCode = "SerializationRequiresDynamicCode";
-    public const            string                                   SerializationUnreferencedCode    = "SerializationUnreferencedCode";
+    public const            string                                   SERIALIZATION_REQUIRES_DYNAMIC_CODE = "SerializationRequiresDynamicCode";
+    public const            string                                   SERIALIZATION_UNREFERENCED_CODE     = "SerializationUnreferencedCode";
     private static          JsonDocumentOptions                      __documentOptions;
     private static          JsonNodeOptions                          __jsonNodeOptions = new() { PropertyNameCaseInsensitive = true };
     private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos   = new();
@@ -56,8 +56,10 @@ public static class Json
     public static JsonTypeInfo<TValue> GetTypeInfo<TValue>()                              => (JsonTypeInfo<TValue>)__jsonTypeInfos[typeof(TValue)];
 
 
-    public static bool   GetJsonIsRequired( this PropertyInfo propInfo ) => propInfo.GetCustomAttribute<JsonRequiredAttribute>() is not null;
-    public static string GetJsonKey( this        PropertyInfo propInfo ) => propInfo.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? propInfo.Name;
+    public static bool GetJsonIsRequired( this PropertyInfo propInfo ) => propInfo.GetCustomAttribute<JsonRequiredAttribute>() is not null;
+    public static string GetJsonKey( this PropertyInfo propInfo ) => propInfo.GetCustomAttribute<JsonPropertyNameAttribute>()
+                                                                            ?.Name ??
+                                                                     propInfo.Name;
 
 
     public static JsonNode FromJson( this         string value )                            => Validate.ThrowIfNull(JsonNode.Parse(value));
@@ -66,8 +68,10 @@ public static class Json
         where TValue : IJsonModel<TValue> => value.FromJson<TValue>(TValue.JsonTypeInfo);
 
 
-    public static bool Contains( this IJsonModel       self, string key ) => self.AdditionalData?.ContainsKey(key)      ?? false;
-    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()?.ContainsKey(key) ?? false;
+    public static bool Contains( this IJsonModel self, string key ) => self.AdditionalData?.ContainsKey(key) ?? false;
+    public static bool Contains( this IJsonStringModel self, string key ) => self.GetAdditionalData()
+                                                                                ?.ContainsKey(key) ??
+                                                                             false;
 
 
     public static bool Remove( this IJsonModel self, string key )
@@ -149,14 +153,14 @@ public static class Json
     public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue> options ) => document.RootElement.ToObject(options);
 
 
-    public static JsonNode? ToJsonNode<TValue>( this TValue value, JsonNodeOptions? nodeOptions = null )
+    public static JsonNode ToJsonNode<TValue>( this TValue value, JsonNodeOptions? nodeOptions = null )
         where TValue : IJsonModel<TValue> => value.ToJsonNode(TValue.JsonTypeInfo, nodeOptions);
-    public static JsonNode? ToJsonNode<TValue>( this TValue value, JsonTypeInfo<TValue> options, JsonNodeOptions? nodeOptions = null )
+    public static JsonNode ToJsonNode<TValue>( this TValue value, JsonTypeInfo<TValue> options, JsonNodeOptions? nodeOptions = null )
     {
         string             json   = JsonSerializer.Serialize(value, options);
         using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
         Utf8JsonReader     reader = new(buffer.Values);
-        return JsonNode.Parse(ref reader, nodeOptions);
+        return Validate.ThrowIfNull(JsonNode.Parse(ref reader, nodeOptions));
     }
 
 

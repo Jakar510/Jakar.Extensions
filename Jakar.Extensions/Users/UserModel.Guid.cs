@@ -57,11 +57,67 @@ public interface IEscalateToUser : IEscalateToUser<Guid>;
 
 
 
-public interface IUserData : IUserData<Guid>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
+public interface IUserModel : IUserData<Guid>, IEscalateToUser, ICreatedByUser, IUniqueID, IImageID;
 
 
 
-public interface IUserDetailsModel : IUserData, IUserDetailsModel<Guid>;
+public interface IUserDetailsModel : IUserModel, IUserDetailsModel<Guid>;
+
+
+
+[JsonSourceGenerationOptions(MaxDepth = 128,
+                             IndentSize = 4,
+                             NewLine = "\n",
+                             IndentCharacter = ' ',
+                             WriteIndented = true,
+                             RespectNullableAnnotations = true,
+                             AllowTrailingCommas = true,
+                             AllowOutOfOrderMetadataProperties = true,
+                             IgnoreReadOnlyProperties = true,
+                             IncludeFields = true,
+                             IgnoreReadOnlyFields = false,
+                             PropertyNameCaseInsensitive = false,
+                             ReadCommentHandling = JsonCommentHandling.Skip,
+                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
+                             RespectRequiredConstructorParameters = true)]
+[JsonSerializable(typeof(UserModel[]))]
+[JsonSerializable(typeof(CreateUserModel[]))]
+[JsonSerializable(typeof(FileData[]))]
+[JsonSerializable(typeof(GroupModel[]))]
+[JsonSerializable(typeof(RoleModel[]))]
+[JsonSerializable(typeof(CurrentLocation[]))]
+[JsonSerializable(typeof(UserAddress[]))]
+[JsonSerializable(typeof(SessionToken[]))]
+[JsonSerializable(typeof(UserLoginRequest[]))]
+public sealed partial class JakarModelsGuidContext : JsonSerializerContext
+{
+    static JakarModelsGuidContext()
+    {
+        Default.UserModel.Register();
+        Default.UserModelArray.Register();
+
+        Default.CreateUserModel.Register();
+        Default.CreateUserModelArray.Register();
+
+        Default.FileData.Register();
+        Default.FileDataArray.Register();
+
+        Default.GroupModel.Register();
+        Default.GroupModelArray.Register();
+
+        Default.RoleModel.Register();
+        Default.RoleModelArray.Register();
+
+        Default.CurrentLocation.Register();
+        Default.CurrentLocationArray.Register();
+
+        Default.SessionToken.Register();
+        Default.SessionTokenArray.Register();
+
+        Default.UserLoginRequest.Register();
+        Default.UserLoginRequestArray.Register();
+    }
+}
 
 
 
@@ -350,7 +406,7 @@ public sealed class CurrentLocation : BaseClass<CurrentLocation>, ICurrentLocati
 
 
 [Serializable]
-public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserData
+public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<UserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<UserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserModel;
@@ -392,7 +448,7 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>
+public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
 {
     public static JsonSerializerContext           JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.CreateUserModel;
@@ -435,43 +491,6 @@ public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, Use
 
 
 
-[JsonSourceGenerationOptions(MaxDepth = 128,
-                             IndentSize = 4,
-                             NewLine = "\n",
-                             IndentCharacter = ' ',
-                             WriteIndented = true,
-                             RespectNullableAnnotations = true,
-                             AllowTrailingCommas = true,
-                             AllowOutOfOrderMetadataProperties = true,
-                             IgnoreReadOnlyProperties = true,
-                             IncludeFields = true,
-                             IgnoreReadOnlyFields = false,
-                             PropertyNameCaseInsensitive = false,
-                             ReadCommentHandling = JsonCommentHandling.Skip,
-                             UnknownTypeHandling = JsonUnknownTypeHandling.JsonNode,
-                             RespectRequiredConstructorParameters = true)]
-[JsonSerializable(typeof(UserModel[]))]
-[JsonSerializable(typeof(CreateUserModel[]))]
-[JsonSerializable(typeof(FileData[]))]
-[JsonSerializable(typeof(GroupModel[]))]
-[JsonSerializable(typeof(RoleModel[]))]
-[JsonSerializable(typeof(CurrentLocation[]))]
-[JsonSerializable(typeof(UserAddress[]))]
-public sealed partial class JakarModelsGuidContext : JsonSerializerContext
-{
-    static JakarModelsGuidContext()
-    {
-        Default.UserModel.Register();
-        Default.CreateUserModel.Register();
-        Default.FileData.Register();
-        Default.GroupModel.Register();
-        Default.RoleModel.Register();
-        Default.CurrentLocation.Register();
-    }
-}
-
-
-
 [Serializable]
 public class UserDevice : DeviceInformation, IUserDevice
 {
@@ -492,4 +511,59 @@ public class UserDevice : DeviceInformation, IUserDevice
         TimeStamp = device.TimeStamp;
     }
     public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, Guid deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
+}
+
+
+
+/// <summary> The SecurityToken created by JwtSecurityTokenHandler.CreateToken </summary>
+[Serializable]
+public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISessionID, IJsonModel<SessionToken>
+{
+    public static JsonSerializerContext        JsonContext   => JakarModelsGuidContext.Default;
+    public static JsonTypeInfo<SessionToken>   JsonTypeInfo  => JakarModelsGuidContext.Default.SessionToken;
+    public static JsonTypeInfo<SessionToken[]> JsonArrayInfo => JakarModelsGuidContext.Default.SessionTokenArray;
+    public        Guid                         UserID        { get; set; }
+    public        string?                      FullName      { get; set; }
+    public        AppVersion                   Version       { get; set; } = AppVersion.Default;
+    public        string                       AccessToken   { get; set; } = string.Empty;
+    public        string?                      RefreshToken  { get; set; }
+    public        Guid                         SessionID     { get; set; }
+    public        string                       DeviceName    { get; set; } = string.Empty;
+    public        bool                         IsValid       => SessionID.IsValidID();
+    public        Guid                         DeviceID      { get; set; }
+
+
+    public override bool Equals( SessionToken?      other )                     => ReferenceEquals(this, other) || other is not null && UserID == other.UserID && DeviceID == other.DeviceID;
+    public override int  CompareTo( SessionToken?   other )                     => Nullable.Compare(SessionID, other?.SessionID);
+    public static   bool operator ==( SessionToken? left, SessionToken? right ) => EqualityComparer<SessionToken>.Default.Equals(left, right);
+    public static   bool operator !=( SessionToken? left, SessionToken? right ) => !EqualityComparer<SessionToken>.Default.Equals(left, right);
+    public static   bool operator >( SessionToken   left, SessionToken  right ) => Comparer<SessionToken>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( SessionToken  left, SessionToken  right ) => Comparer<SessionToken>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( SessionToken   left, SessionToken  right ) => Comparer<SessionToken>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( SessionToken  left, SessionToken  right ) => Comparer<SessionToken>.Default.Compare(left, right) <= 0;
+}
+
+
+
+[Serializable]
+[method: JsonConstructor]
+public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>
+{
+    public static                JsonSerializerContext            JsonContext   => JakarModelsGuidContext.Default;
+    public static                JsonTypeInfo<UserLoginRequest>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserLoginRequest;
+    public static                JsonTypeInfo<UserLoginRequest[]> JsonArrayInfo => JakarModelsGuidContext.Default.UserLoginRequestArray;
+    [JsonIgnore] public override bool                             IsValid       => this.IsValid();
+
+
+    public UserLoginRequest( ILoginRequest            request, UserModel data ) : this(request.UserName, request.Password, data) { }
+    public UserLoginRequest( ILoginRequest<UserModel> request ) : this(request.UserName, request.Password, request.Data) { }
+    public override bool Equals( UserLoginRequest?    other )                           => ReferenceEquals(this, other) || other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture);
+    public override int  CompareTo( UserLoginRequest? other )                           => string.Compare(UserName, other?.Password, StringComparison.CurrentCultureIgnoreCase);
+    public override int  GetHashCode()                                                  => HashCode.Combine(UserName, Password);
+    public static   bool operator ==( UserLoginRequest? left, UserLoginRequest? right ) => EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
+    public static   bool operator !=( UserLoginRequest? left, UserLoginRequest? right ) => !EqualityComparer<UserLoginRequest>.Default.Equals(left, right);
+    public static   bool operator >( UserLoginRequest   left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( UserLoginRequest  left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( UserLoginRequest   left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( UserLoginRequest  left, UserLoginRequest  right ) => Comparer<UserLoginRequest>.Default.Compare(left, right) <= 0;
 }
