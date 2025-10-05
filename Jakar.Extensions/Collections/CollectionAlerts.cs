@@ -17,7 +17,7 @@ public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValue
 
 
 public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IJsonModel<TSelf>
-    where TSelf : ICollectionAlerts<TSelf, TValue>
+    where TSelf : ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
 {
     public abstract static implicit operator TSelf( List<TValue>           values );
     public abstract static implicit operator TSelf( HashSet<TValue>        values );
@@ -56,15 +56,14 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     protected                                                    void Moved( ref readonly    TValue  value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
     protected                                                    void Replaced( ref readonly TValue? old,   ref readonly TValue value, int              index )    => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old,   index));
     [MethodImpl(MethodImplOptions.AggressiveInlining)] protected void OnCountChanged() => OnPropertyChanged(nameof(Count));
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
         CollectionChanged?.Invoke(this, e);
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }
     }
-    protected virtual                                       bool                                          Filter( int index, ref readonly TValue? value ) => true;
-    [Pure][MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
-    [Pure][MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
+    protected virtual                                        bool                                          Filter( int index, ref readonly TValue? value ) => true;
+    [Pure] [MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
+    [Pure] [MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
     public virtual IEnumerator<TValue> GetEnumerator()
     {
         using FilterBuffer<TValue> owner = FilteredValues();
