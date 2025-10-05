@@ -221,12 +221,12 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
 
 
     /*
-    public static ImmutableDictionary<string, ColumnMetaData> FromType<TClass>()
-        where TClass : class
+    public static ImmutableDictionary<string, ColumnMetaData> FromType<TSelf>()
+        where TSelf : class
     {
         ImmutableDictionary<string, ColumnMetaData>.Builder builder = ImmutableDictionary.CreateBuilder<string, ColumnMetaData>();
 
-        foreach ( PropertyInfo info in typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public).AsValueEnumerable() )
+        foreach ( PropertyInfo info in typeof(TSelf).GetProperties(BindingFlags.Instance | BindingFlags.Public).AsValueEnumerable() )
         {
             Type   type       = info.PropertyType;
             string columnName = info.Name;
@@ -244,34 +244,34 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
 
 
 
-public readonly ref struct SqlTable<TClass> : IDisposable
-    where TClass : class, ITableRecord<TClass>
+public readonly ref struct SqlTable<TSelf> : IDisposable
+    where TSelf : class, ITableRecord<TSelf>
 {
     internal readonly SortedDictionary<string, ColumnMetaData> Columns = new(StringComparer.InvariantCultureIgnoreCase);
 
 
     public SqlTable() { }
-    public static SqlTable<TClass> Empty() => new();
-    public static SqlTable<TClass> Create() => Empty()
+    public static SqlTable<TSelf> Empty() => new();
+    public static SqlTable<TSelf> Create() => Empty()
                                               .WithColumn(ColumnMetaData.ID)
                                               .WithColumn(ColumnMetaData.LastModified)
                                               .WithColumn(ColumnMetaData.DateCreated);
     public void Dispose() => Columns?.Clear();
 
 
-    // public SqlTableBuilder<TClass> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
+    // public SqlTableBuilder<TSelf> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
 
 
-    public SqlTable<TClass> With_CreatedBy()      => WithColumn(ColumnMetaData.CreatedBy);
-    public SqlTable<TClass> With_AdditionalData() => WithColumn(ColumnMetaData.AdditionalData);
+    public SqlTable<TSelf> With_CreatedBy()      => WithColumn(ColumnMetaData.CreatedBy);
+    public SqlTable<TSelf> With_AdditionalData() => WithColumn(ColumnMetaData.AdditionalData);
 
 
-    public SqlTable<TClass> WithColumn<TValue>( string columnName, ColumnOptions options = 0, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? checks = null, string? indexColumnName = null )
+    public SqlTable<TSelf> WithColumn<TValue>( string columnName, ColumnOptions options = 0, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? checks = null, string? indexColumnName = null )
     {
         bool       isEnum = false;
         DbPropType dbType;
 
-        if ( ( typeof(TValue) ) == typeof(RecordID<TClass>) || ( typeof(TValue) ) == typeof(RecordID<TClass>?) )
+        if ( ( typeof(TValue) ) == typeof(RecordID<TSelf>) || ( typeof(TValue) ) == typeof(RecordID<TSelf>?) )
         {
             dbType  =  DbPropType.Guid;
             options |= ColumnOptions.PrimaryKey;
@@ -290,13 +290,13 @@ public readonly ref struct SqlTable<TClass> : IDisposable
         ColumnMetaData column = new(columnName, dbType, options, foreignKeyName, indexColumnName, length, checks);
         return WithColumn(column);
     }
-    public SqlTable<TClass> WithForeignKey<TRecord>( string columnName, ColumnOptions options = 0, ColumnCheckMetaData? checks = null )
+    public SqlTable<TSelf> WithForeignKey<TRecord>( string columnName, ColumnOptions options = 0, ColumnCheckMetaData? checks = null )
         where TRecord : ITableRecord<TRecord>
     {
         ColumnMetaData column = new(columnName, DbPropType.Guid, options, TRecord.TableName, Checks: checks);
         return WithColumn(column);
     }
-    public SqlTable<TClass> WithColumn( ColumnMetaData column )
+    public SqlTable<TSelf> WithColumn( ColumnMetaData column )
     {
         Columns.Add(column.ColumnName, column);
         return this;
@@ -503,9 +503,9 @@ public readonly ref struct SqlTable<TClass> : IDisposable
     public ImmutableDictionary<string, ColumnMetaData> Build()
     {
         int check = Columns.Values.Count(static x => x.IsPrimaryKey);
-        if ( check != 1 ) { throw new InvalidOperationException($"Must be exactly one primary key defined for {typeof(TClass).Name}"); }
+        if ( check != 1 ) { throw new InvalidOperationException($"Must be exactly one primary key defined for {typeof(TSelf).Name}"); }
 
-        if ( TClass.PropertyCount != Columns.Count ) { throw new InvalidOperationException("Column count mismatch"); }
+        if ( TSelf.PropertyCount != Columns.Count ) { throw new InvalidOperationException("Column count mismatch"); }
 
         return Columns.ToImmutableDictionary(StringComparer.InvariantCultureIgnoreCase);
     }
@@ -513,18 +513,18 @@ public readonly ref struct SqlTable<TClass> : IDisposable
 
 
 
-public readonly ref struct SqlTableBuilder<TClass>( ImmutableDictionary<string, ColumnMetaData> columns )
-    where TClass : class, ITableRecord<TClass>
+public readonly ref struct SqlTableBuilder<TSelf>( ImmutableDictionary<string, ColumnMetaData> columns )
+    where TSelf : class, ITableRecord<TSelf>
 {
     private readonly ImmutableDictionary<string, ColumnMetaData> __columns = columns;
-    public static    SqlTableBuilder<TClass>                     Create()                                              => new(TClass.PropertyMetaData);
+    public static    SqlTableBuilder<TSelf>                     Create()                                              => new(TSelf.PropertyMetaData);
     public static    bool                                        HasValue( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
 
 
     public string Build()
     {
         StringBuilder query     = new(10240);
-        string        tableName = TClass.TableName.ToSnakeCase();
+        string        tableName = TSelf.TableName.ToSnakeCase();
 
         query.Append("CREATE TABLE ");
         query.Append(tableName);

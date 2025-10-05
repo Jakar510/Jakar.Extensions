@@ -3,31 +3,31 @@
 
 public static class TableExtensions
 {
-    [Pure] public static TClass Validate<TClass>( this TClass self )
-        where TClass : ITableRecord<TClass>
+    [Pure] public static TSelf Validate<TSelf>( this TSelf self )
+        where TSelf : ITableRecord<TSelf>
     {
         if ( !Debugger.IsAttached ) { return self; }
 
-        if ( !string.Equals(TClass.TableName, TClass.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TClass).Name}: {nameof(TClass.TableName)} is not snake_case: '{TClass.TableName}'"); }
+        if ( !string.Equals(TSelf.TableName, TSelf.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TSelf).Name}: {nameof(TSelf.TableName)} is not snake_case: '{TSelf.TableName}'"); }
 
         PostgresParameters parameters     = self.ToDynamicParameters();
         string[]           parameterNames = parameters.ParameterNames;
         int                length         = parameterNames.Length;
 
 
-        if ( length == TClass.ClassProperties.Length ) { return self; }
+        if ( length == TSelf.ClassProperties.Length ) { return self; }
 
 
         HashSet<string> missing =
         [
-            .. TClass.ClassProperties.AsValueEnumerable()
+            .. TSelf.ClassProperties.AsValueEnumerable()
                      .Select(static x => x.Name)
         ];
 
         missing.ExceptWith(parameterNames);
 
         string message = $"""
-                          {typeof(TClass).Name}: {nameof(self.ToDynamicParameters)}.Length ({length}) != {nameof(TClass.ClassProperties)}.Length ({TClass.ClassProperties.Length})
+                          {typeof(TSelf).Name}: {nameof(self.ToDynamicParameters)}.Length ({length}) != {nameof(TSelf.ClassProperties)}.Length ({TSelf.ClassProperties.Length})
                           {missing.ToJson(JakarDatabaseContext.Default.HashSetString)}
                           """;
 

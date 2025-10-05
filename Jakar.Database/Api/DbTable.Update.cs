@@ -5,32 +5,32 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask Update( TClass                   record,  CancellationToken token = default ) => this.TryCall(Update, record,  token);
-    public ValueTask Update( IEnumerable<TClass>      records, CancellationToken token = default ) => this.TryCall(Update, records, token);
-    public ValueTask Update( ImmutableArray<TClass>   records, CancellationToken token = default ) => this.TryCall(Update, records, token);
-    public ValueTask Update( IAsyncEnumerable<TClass> records, CancellationToken token = default ) => this.TryCall(Update, records, token);
+    public ValueTask Update( TSelf                   record,  CancellationToken token = default ) => this.TryCall(Update, record,  token);
+    public ValueTask Update( IEnumerable<TSelf>      records, CancellationToken token = default ) => this.TryCall(Update, records, token);
+    public ValueTask Update( ImmutableArray<TSelf>   records, CancellationToken token = default ) => this.TryCall(Update, records, token);
+    public ValueTask Update( IAsyncEnumerable<TSelf> records, CancellationToken token = default ) => this.TryCall(Update, records, token);
 
 
-    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, ImmutableArray<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, ImmutableArray<TSelf> records, CancellationToken token = default )
     {
-        foreach ( TClass record in records ) { await Update(connection, transaction, record, token); }
+        foreach ( TSelf record in records ) { await Update(connection, transaction, record, token); }
     }
-    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IEnumerable<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IEnumerable<TSelf> records, CancellationToken token = default )
     {
-        foreach ( TClass record in records ) { await Update(connection, transaction, record, token); }
+        foreach ( TSelf record in records ) { await Update(connection, transaction, record, token); }
     }
 
 
-    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, IAsyncEnumerable<TSelf> records, CancellationToken token = default )
     {
-        await foreach ( TClass record in records.WithCancellation(token) ) { await Update(connection, transaction, record, token); }
+        await foreach ( TSelf record in records.WithCancellation(token) ) { await Update(connection, transaction, record, token); }
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, TClass record, CancellationToken token = default )
+    public virtual async ValueTask Update( NpgsqlConnection connection, DbTransaction? transaction, TSelf record, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetUpdate(record);
 

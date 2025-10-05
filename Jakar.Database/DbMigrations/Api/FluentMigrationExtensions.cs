@@ -185,9 +185,10 @@ public static class FluentMigrationExtensions
         return true;
     }
 
+
     public static bool ShouldIgnore( this PropertyInfo propInfo )
     {
-        if ( propInfo.HasAttribute<DataBaseIgnoreAttribute>() || propInfo.IsDefined(typeof(JsonIgnoreAttribute)) ) { return true; }
+        if ( propInfo.HasAttribute<DbIgnoreAttribute>() || propInfo.IsDefined(typeof(JsonIgnoreAttribute)) ) { return true; }
 
         return false;
     }

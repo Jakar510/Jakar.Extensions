@@ -7,19 +7,19 @@ namespace Jakar.Database;
 /// <summary>
 ///     <see href="https://stackoverflow.com/a/15992856/9530917"/>
 /// </summary>
-public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnumerable<TClass>, IAsyncEnumerator<TClass>
-    where TClass : class, ITableRecord<TClass>
+public sealed class RecordGenerator<TSelf>( DbTable<TSelf> table ) : IAsyncEnumerable<TSelf>, IAsyncEnumerator<TSelf>
+    where TSelf : class, ITableRecord<TSelf>
 {
-    private readonly AsyncKeyGenerator<TClass> __generator = new(table);
-    private readonly DbTable<TClass>           __table     = table;
+    private readonly AsyncKeyGenerator<TSelf> __generator = new(table);
+    private readonly DbTable<TSelf>           __table     = table;
     private          CancellationToken         __token;
-    private          TClass?                   __current;
+    private          TSelf?                   __current;
 
 
-    public TClass Current { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __current ?? throw new NullReferenceException(nameof(__current)); }
+    public TSelf Current { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __current ?? throw new NullReferenceException(nameof(__current)); }
 
 
-    public RecordGenerator( DbTable<TClass> table, CancellationToken token ) : this(table) => __token = token;
+    public RecordGenerator( DbTable<TSelf> table, CancellationToken token ) : this(table) => __token = token;
     public async ValueTask DisposeAsync()
     {
         __current = null;
@@ -47,8 +47,8 @@ public sealed class RecordGenerator<TClass>( DbTable<TClass> table ) : IAsyncEnu
     }
 
 
-    IAsyncEnumerator<TClass> IAsyncEnumerable<TClass>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation(token);
-    public RecordGenerator<TClass> WithCancellation( CancellationToken token )
+    IAsyncEnumerator<TSelf> IAsyncEnumerable<TSelf>.GetAsyncEnumerator( CancellationToken token ) => WithCancellation(token);
+    public RecordGenerator<TSelf> WithCancellation( CancellationToken token )
     {
         __token = token;
         __generator.WithCancellation(token);

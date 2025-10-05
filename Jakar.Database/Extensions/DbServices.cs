@@ -14,14 +14,14 @@ public static class DbServices
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsValid<TClass>( this TClass value )
-        where TClass : class, ITableRecord<TClass> =>
+    public static bool IsValid<TSelf>( this TSelf value )
+        where TSelf : class, ITableRecord<TSelf> =>
         value.ID.IsValid();
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsNotValid<TClass>( this TClass value )
-        where TClass : class, ITableRecord<TClass> =>
+    public static bool IsNotValid<TSelf>( this TSelf value )
+        where TSelf : class, ITableRecord<TSelf> =>
         !value.IsValid();
 
 

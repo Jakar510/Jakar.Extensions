@@ -5,30 +5,30 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask Delete( TClass                             record,   CancellationToken token                               = default ) => this.TryCall(Delete, record,   token);
-    public ValueTask Delete( IEnumerable<TClass>                records,  CancellationToken token                               = default ) => this.TryCall(Delete, records,  token);
-    public ValueTask Delete( IAsyncEnumerable<TClass>           records,  CancellationToken token                               = default ) => this.TryCall(Delete, records,  token);
-    public ValueTask Delete( RecordID<TClass>                   id,       CancellationToken token                               = default ) => this.TryCall(Delete, id,       token);
-    public ValueTask Delete( IEnumerable<RecordID<TClass>>      ids,      CancellationToken token                               = default ) => this.TryCall(Delete, ids,      token);
-    public ValueTask Delete( IAsyncEnumerable<RecordID<TClass>> ids,      CancellationToken token                               = default ) => this.TryCall(Delete, ids,      token);
+    public ValueTask Delete( TSelf                             record,   CancellationToken token                               = default ) => this.TryCall(Delete, record,   token);
+    public ValueTask Delete( IEnumerable<TSelf>                records,  CancellationToken token                               = default ) => this.TryCall(Delete, records,  token);
+    public ValueTask Delete( IAsyncEnumerable<TSelf>           records,  CancellationToken token                               = default ) => this.TryCall(Delete, records,  token);
+    public ValueTask Delete( RecordID<TSelf>                   id,       CancellationToken token                               = default ) => this.TryCall(Delete, id,       token);
+    public ValueTask Delete( IEnumerable<RecordID<TSelf>>      ids,      CancellationToken token                               = default ) => this.TryCall(Delete, ids,      token);
+    public ValueTask Delete( IAsyncEnumerable<RecordID<TSelf>> ids,      CancellationToken token                               = default ) => this.TryCall(Delete, ids,      token);
     public ValueTask Delete( bool                               matchAll, DynamicParameters parameters, CancellationToken token = default ) => this.TryCall(Delete, matchAll, parameters, token);
 
 
-    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, TClass              record,  CancellationToken token = default ) => Delete(connection, transaction, record.ID,                        token);
-    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<TClass> records, CancellationToken token = default ) => Delete(connection, transaction, records.Select(static x => x.ID), token);
-    public async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<TClass> records, CancellationToken token = default )
+    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, TSelf              record,  CancellationToken token = default ) => Delete(connection, transaction, record.ID,                        token);
+    public virtual ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<TSelf> records, CancellationToken token = default ) => Delete(connection, transaction, records.Select(static x => x.ID), token);
+    public async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<TSelf> records, CancellationToken token = default )
     {
-        HashSet<TClass> ids = await records.ToHashSet(token);
+        HashSet<TSelf> ids = await records.ToHashSet(token);
         await Delete(connection, transaction, ids, token);
     }
-    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IAsyncEnumerable<RecordID<TSelf>> ids, CancellationToken token = default )
     {
-        HashSet<RecordID<TClass>> records = await ids.ToHashSet(token);
+        HashSet<RecordID<TSelf>> records = await ids.ToHashSet(token);
         await Delete(connection, transaction, records, token);
     }
-    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, RecordID<TClass> id, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, RecordID<TSelf> id, CancellationToken token = default )
     {
         SqlCommand        sql     = SQLCache.GetDeleteID(in id);
         CommandDefinition command = _database.GetCommand(in sql, transaction, token);
@@ -37,7 +37,7 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<RecordID<TClass>> ids, CancellationToken token = default )
+    public virtual async ValueTask Delete( NpgsqlConnection connection, DbTransaction transaction, IEnumerable<RecordID<TSelf>> ids, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetDelete(ids);
 

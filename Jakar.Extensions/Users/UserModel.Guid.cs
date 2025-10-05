@@ -172,7 +172,7 @@ public sealed class UserAddress : UserAddress<UserAddress, Guid>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IGroupModel
+public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<GroupModel, Guid>, IGroupModel, IEqualComparable<GroupModel>
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.GroupModel;
@@ -195,7 +195,7 @@ public sealed class GroupModel : GroupModel<GroupModel, Guid>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IRoleModel
+public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel, Guid>, IRoleModel, IEqualComparable<RoleModel>
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.RoleModel;
@@ -220,7 +220,7 @@ public sealed class RoleModel : RoleModel<RoleModel, Guid>, IRoleModel<RoleModel
 [Serializable]
 [method: SetsRequiredMembers]
 [method: JsonConstructor]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IFileData
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, Guid id = default ) : FileData<FileData, Guid, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, Guid, FileMetaData>, IFileData, IEqualComparable<FileData>
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsGuidContext.Default.FileData;
@@ -448,7 +448,7 @@ public sealed class UserModel : UserModel<UserModel, Guid, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel
+public sealed class CreateUserModel : CreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, Guid, UserAddress, GroupModel, RoleModel>, IUserModel, IEqualComparable<CreateUserModel>
 {
     public static JsonSerializerContext           JsonContext   => JakarModelsGuidContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsGuidContext.Default.CreateUserModel;
@@ -533,8 +533,9 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
     public        Guid                         DeviceID      { get; set; }
 
 
-    public override bool Equals( SessionToken?      other )                     => ReferenceEquals(this, other) || other is not null && UserID == other.UserID && DeviceID == other.DeviceID;
-    public override int  CompareTo( SessionToken?   other )                     => Nullable.Compare(SessionID, other?.SessionID);
+    public override bool Equals( SessionToken?    other )                       => ReferenceEquals(this, other) || other is not null && UserID == other.UserID && DeviceID == other.DeviceID;
+    public override int  CompareTo( SessionToken? other )                       => Nullable.Compare(SessionID, other?.SessionID);
+    public override int  GetHashCode()                                          => HashCode.Combine(UserID, DeviceID, SessionID);
     public static   bool operator ==( SessionToken? left, SessionToken? right ) => EqualityComparer<SessionToken>.Default.Equals(left, right);
     public static   bool operator !=( SessionToken? left, SessionToken? right ) => !EqualityComparer<SessionToken>.Default.Equals(left, right);
     public static   bool operator >( SessionToken   left, SessionToken  right ) => Comparer<SessionToken>.Default.Compare(left, right) > 0;
@@ -547,7 +548,7 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>
+public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>, IEqualComparable<UserLoginRequest>
 {
     public static                JsonSerializerContext            JsonContext   => JakarModelsGuidContext.Default;
     public static                JsonTypeInfo<UserLoginRequest>   JsonTypeInfo  => JakarModelsGuidContext.Default.UserLoginRequest;

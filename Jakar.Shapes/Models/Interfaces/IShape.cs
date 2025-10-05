@@ -4,7 +4,7 @@
 namespace Jakar.Shapes.Interfaces;
 
 
-public interface IShape<TSelf> : IValidator, IFormattable, IJsonModel<TSelf>
+public interface IShape<TSelf> : IValidator, IFormattable, IJsonModel<TSelf>, IEqualComparable<TSelf>
     where TSelf : IShape<TSelf>
 {
     public abstract static ref readonly TSelf Invalid { get; }

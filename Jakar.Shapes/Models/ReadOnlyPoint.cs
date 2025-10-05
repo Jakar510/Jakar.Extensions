@@ -8,7 +8,7 @@ namespace Jakar.Shapes;
 
 [DefaultValue(nameof(Zero))]
 [method: JsonConstructor]
-public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>
+public readonly struct ReadOnlyPoint( double x, double y ) : IPoint<ReadOnlyPoint>, IMathOperators<ReadOnlyPoint>, IEqualComparable<ReadOnlyPoint>
 {
     public static readonly ReadOnlyPoint Invalid       = new(double.NaN, double.NaN);
     public static readonly ReadOnlyPoint Zero          = 0;

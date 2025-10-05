@@ -19,21 +19,21 @@ public interface IAddress<out TID> : IUniqueID<TID>, IJsonModel
 
 
 
-public interface IAddress<TClass, TID> : IAddress<TID>, IParsable<TClass>, IJsonModel<TClass>
+public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : class, IAddress<TClass, TID>
+    where TSelf : class, IAddress<TSelf, TID>
 {
-    public abstract static TClass Create( Match         match );
-    public abstract static TClass Create( IAddress<TID> address );
-    public abstract static TClass Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default );
+    public abstract static TSelf Create( Match         match );
+    public abstract static TSelf Create( IAddress<TID> address );
+    public abstract static TSelf Create( string        line1, string line2, string city, string stateOrProvince, string postalCode, string country, TID id = default );
 }
 
 
 
 [Serializable]
-public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID>
+public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : UserAddress<TClass, TID>, IAddress<TClass, TID>, IJsonModel<TClass>
+    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>
 {
     private bool    __isPrimary;
     private string  __city            = string.Empty;
@@ -169,7 +169,7 @@ public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID
                                              : $"{Line1} {Line2}. {City}, {StateOrProvince}. {Country}. {PostalCode}";
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -195,7 +195,7 @@ public abstract class UserAddress<TClass, TID> : BaseClass<TClass>, IAddress<TID
 
         return 0;
     }
-    public override bool Equals( TClass? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 

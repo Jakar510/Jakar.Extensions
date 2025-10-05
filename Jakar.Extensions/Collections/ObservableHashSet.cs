@@ -39,8 +39,8 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
 
 
 
-public abstract class ObservableHashSet<TClass, TValue>( HashSet<TValue> values ) : CollectionAlerts<TClass, TValue>, ISet<TValue>, IReadOnlySet<TValue>
-    where TClass : ObservableHashSet<TClass, TValue>, ICollectionAlerts<TClass, TValue>
+public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values ) : CollectionAlerts<TSelf, TValue>, ISet<TValue>, IReadOnlySet<TValue>
+    where TSelf : ObservableHashSet<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly HashSet<TValue> buffer = values;
     public sealed override      int             Count      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }

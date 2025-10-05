@@ -9,8 +9,8 @@ public static class Migrations
     public static bool HasFlagValue( this ColumnOptions type, ColumnOptions flag ) => ( type & flag ) != 0;
 
 
-    public static string CreateTableSql<TClass>()
-        where TClass : class, ITableRecord<TClass> => SqlTableBuilder<TClass>.Create()
+    public static string CreateTableSql<TSelf>()
+        where TSelf : class, ITableRecord<TSelf> => SqlTableBuilder<TSelf>.Create()
                                                                              .Build();
 
 

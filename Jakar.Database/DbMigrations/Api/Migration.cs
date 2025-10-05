@@ -13,10 +13,10 @@ namespace Jakar.Database.DbMigrations;
 ///         <see href="https://fluentmigrator.github.io/articles/fluent-interface.html"/>
 ///     </para>
 /// </summary>
-public abstract class Migration<TClass> : Migration
-    where TClass : class, ITableRecord<TClass>
+public abstract class Migration<TSelf> : Migration
+    where TSelf : class, ITableRecord<TSelf>
 {
-    public string TableName { get; } = typeof(TClass).GetTableName();
+    public string TableName { get; } = typeof(TSelf).GetTableName();
 
 
     protected Migration() : base() { }
@@ -42,7 +42,7 @@ public abstract class Migration<TClass> : Migration
              .NotNullable()
              .WithDefaultValue(SystemMethods.CurrentUTCDateTime);
 
-        if ( typeof(ILastModified).IsAssignableFrom(typeof(TClass)) )
+        if ( typeof(ILastModified).IsAssignableFrom(typeof(TSelf)) )
         {
             table.WithColumn(nameof(ILastModified.LastModified))
                  .AsDateTimeOffset()
@@ -84,13 +84,13 @@ public abstract class Migration<TClass> : Migration
 
 
 [SuppressMessage("ReSharper", "StaticMemberInGenericType")]
-public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
-    where TClass : Mapping<TClass, TKey, TValue>, ITableRecord<TClass>, ICreateMapping<TClass, TKey, TValue>
+public abstract class Migration<TSelf, TKey, TValue> : Migration<TSelf>
+    where TSelf : Mapping<TSelf, TKey, TValue>, ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>
     where TKey : class, ITableRecord<TKey>
     where TValue : class, ITableRecord<TValue>
 {
-    public static readonly string KeyForeignKeyName   = $"{TClass.TableName}-{TKey.TableName}.{nameof(IDateCreated.ID)}";
-    public static readonly string ValueForeignKeyName = $"{TClass.TableName}-{TValue.TableName}.{nameof(IDateCreated.ID)}";
+    public static readonly string KeyForeignKeyName   = $"{TSelf.TableName}-{TKey.TableName}.{nameof(IDateCreated.ID)}";
+    public static readonly string ValueForeignKeyName = $"{TSelf.TableName}-{TValue.TableName}.{nameof(IDateCreated.ID)}";
     protected Migration() : base() { }
 
 
@@ -98,12 +98,12 @@ public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
     {
         ICreateTableWithColumnSyntax table = base.CreateTable();
 
-        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.KeyID))
+        table.WithColumn(nameof(Mapping<TSelf, TKey, TValue>.KeyID))
              .AsGuid()
              .ForeignKey(KeyForeignKeyName, TKey.TableName, nameof(IDateCreated.ID))
              .NotNullable();
 
-        table.WithColumn(nameof(Mapping<TClass, TKey, TValue>.ValueID))
+        table.WithColumn(nameof(Mapping<TSelf, TKey, TValue>.ValueID))
              .AsGuid()
              .ForeignKey(ValueForeignKeyName, TValue.TableName, nameof(IDateCreated.ID))
              .NotNullable();
@@ -114,8 +114,8 @@ public abstract class Migration<TClass, TKey, TValue> : Migration<TClass>
 
 
 
-public abstract class OwnedMigration<TClass> : Migration<TClass>
-    where TClass : class, ITableRecord<TClass>, ICreatedBy
+public abstract class OwnedMigration<TSelf> : Migration<TSelf>
+    where TSelf : class, ITableRecord<TSelf>, ICreatedBy
 {
     protected override ICreateTableWithColumnSyntax CreateTable()
     {

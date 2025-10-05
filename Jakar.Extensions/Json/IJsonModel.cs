@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public interface IJsonModel<TSelf> : IEqualComparable<TSelf>
+public interface IJsonModel<TSelf> 
     where TSelf : IJsonModel<TSelf>
 {
     public abstract static JsonSerializerContext JsonContext   { get; }

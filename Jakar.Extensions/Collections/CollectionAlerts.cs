@@ -16,23 +16,23 @@ public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValue
 
 
 
-public interface ICollectionAlerts<TClass, TValue> : ICollectionAlerts<TValue>, IJsonModel<TClass>
-    where TClass : ICollectionAlerts<TClass, TValue>
+public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IJsonModel<TSelf>
+    where TSelf : ICollectionAlerts<TSelf, TValue>
 {
-    public abstract static implicit operator TClass( List<TValue>           values );
-    public abstract static implicit operator TClass( HashSet<TValue>        values );
-    public abstract static implicit operator TClass( ConcurrentBag<TValue>  values );
-    public abstract static implicit operator TClass( Collection<TValue>     values );
-    public abstract static implicit operator TClass( TValue[]               values );
-    public abstract static implicit operator TClass( ImmutableArray<TValue> values );
-    public abstract static implicit operator TClass( ReadOnlyMemory<TValue> values );
-    public abstract static implicit operator TClass( ReadOnlySpan<TValue>   values );
+    public abstract static implicit operator TSelf( List<TValue>           values );
+    public abstract static implicit operator TSelf( HashSet<TValue>        values );
+    public abstract static implicit operator TSelf( ConcurrentBag<TValue>  values );
+    public abstract static implicit operator TSelf( Collection<TValue>     values );
+    public abstract static implicit operator TSelf( TValue[]               values );
+    public abstract static implicit operator TSelf( ImmutableArray<TValue> values );
+    public abstract static implicit operator TSelf( ReadOnlyMemory<TValue> values );
+    public abstract static implicit operator TSelf( ReadOnlySpan<TValue>   values );
 }
 
 
 
-public abstract class CollectionAlerts<TClass, TValue> : BaseClass<TClass>, ICollectionAlerts<TValue>
-    where TClass : CollectionAlerts<TClass, TValue>, ICollectionAlerts<TClass, TValue>
+public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, ICollectionAlerts<TValue>
+    where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
 // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
@@ -41,8 +41,8 @@ public abstract class CollectionAlerts<TClass, TValue> : BaseClass<TClass>, ICol
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
-    public override bool Equals( TClass?    other ) => ReferenceEquals(this, other);
-    public override int  CompareTo( TClass? other ) => Nullable.Compare(Count, other?.Count);
+    public override bool Equals( TSelf?    other ) => ReferenceEquals(this, other);
+    public override int  CompareTo( TSelf? other ) => Nullable.Compare(Count, other?.Count);
 
 
     public virtual                                               void Refresh()                                         => Reset();

@@ -43,9 +43,9 @@ public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<Ob
 
 
 
-public abstract class ObservableDictionary<TClass, TKey, TValue>( Dictionary<TKey, TValue> dictionary ) : CollectionAlerts<TClass, KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey, TValue> dictionary ) : CollectionAlerts<TSelf, KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
-    where TClass : ObservableDictionary<TClass, TKey, TValue>, ICollectionAlerts<TClass, KeyValuePair<TKey, TValue>>
+    where TSelf : ObservableDictionary<TSelf, TKey, TValue>, ICollectionAlerts<TSelf, KeyValuePair<TKey, TValue>>
 {
     protected internal readonly Dictionary<TKey, TValue> buffer = dictionary;
 

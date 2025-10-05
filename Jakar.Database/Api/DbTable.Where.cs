@@ -6,47 +6,36 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public IAsyncEnumerable<TClass> Where( bool           matchAll,   DynamicParameters  parameters, [EnumeratorCancellation] CancellationToken token = default ) => this.Call(Where, matchAll,   parameters, token);
-    public IAsyncEnumerable<TClass> Where( string         sql,        DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default ) => this.Call(Where, sql,        parameters, token);
-    public IAsyncEnumerable<TClass> Where<TValue>( string columnName, TValue?            value,      [EnumeratorCancellation] CancellationToken token = default ) => this.Call(Where, columnName, value,      token);
+    public IAsyncEnumerable<TSelf> Where( bool           matchAll,   DynamicParameters  parameters, [EnumeratorCancellation] CancellationToken token = default ) => this.TryCall(Where, matchAll,                        parameters, token);
+    public IAsyncEnumerable<TSelf> Where( string         sql,        DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default ) => this.TryCall(Where, new SqlCommand(sql, parameters), token);
+    public IAsyncEnumerable<TSelf> Where<TValue>( string columnName, TValue?            value,      [EnumeratorCancellation] CancellationToken token = default ) => this.TryCall(Where, columnName,                      value, token);
 
 
-    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
-    {
-        SqlCommand               command = new(sql, parameters);
-        await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
-    }
-
-
-    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TSelf> Where( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default ) => Where(connection, transaction, new SqlCommand(sql, parameters), token);
+    public virtual async IAsyncEnumerable<TSelf> Where( NpgsqlConnection connection, DbTransaction? transaction, bool matchAll, DynamicParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               command = SQLCache.Get(matchAll, parameters);
         await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-
-
-    public virtual async IAsyncEnumerable<TClass> Where( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TSelf> Where( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbDataReader reader = await _database.ExecuteReaderAsync(connection, transaction, sql, token);
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<TClass> Where( SqlCommand.Definition definition, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TSelf> Where( SqlCommand.Definition definition, [EnumeratorCancellation] CancellationToken token = default )
     {
         await using DbDataReader reader = await _database.ExecuteReaderAsync(definition);
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-
-
-    public virtual IAsyncEnumerable<TClass> Where<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TSelf> Where<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string columnName, TValue? value, [EnumeratorCancellation] CancellationToken token = default )
     {
         DynamicParameters parameters = new();
         parameters.Add(nameof(value), value);
 
-        SqlCommand sql = new($"SELECT * FROM {TClass.TableName} WHERE {columnName} = @{nameof(value)};", parameters);
+        SqlCommand sql = new($"SELECT * FROM {TSelf.TableName} WHERE {columnName} = @{nameof(value)};", parameters);
         return Where(connection, transaction, sql, token);
     }
 }

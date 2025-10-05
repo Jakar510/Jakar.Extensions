@@ -5,37 +5,37 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask<ErrorOrResult<TClass>> Last( CancellationToken token = default ) => this.Call(Last, token);
+    public ValueTask<ErrorOrResult<TSelf>> Last( CancellationToken token = default ) => this.Call(Last, token);
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Last( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Last( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetLast();
 
         try
         {
             CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QueryFirstAsync<TClass>(command);
+            return await connection.QueryFirstAsync<TSelf>(command);
         }
         catch ( Exception e ) { throw new SqlException(sql, e); }
     }
 
 
-    public ValueTask<ErrorOrResult<TClass>> LastOrDefault( CancellationToken token = default ) => this.Call(LastOrDefault, token);
+    public ValueTask<ErrorOrResult<TSelf>> LastOrDefault( CancellationToken token = default ) => this.Call(LastOrDefault, token);
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> LastOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> LastOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetLast();
 
         try
         {
             CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TClass?           record  = await connection.QueryFirstOrDefaultAsync<TClass>(command);
+            TSelf?           record  = await connection.QueryFirstOrDefaultAsync<TSelf>(command);
 
             return record is null
                        ? Error.NotFound()

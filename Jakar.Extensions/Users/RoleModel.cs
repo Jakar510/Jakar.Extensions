@@ -12,20 +12,20 @@ public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, IJsonModel
 
 
 
-public interface IRoleModel<TClass, TID> : IRoleModel<TID>, IJsonModel<TClass>
+public interface IRoleModel<TSelf, TID> : IRoleModel<TID>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : class, IRoleModel<TClass, TID>
+    where TSelf : class, IRoleModel<TSelf, TID>
 {
-    public abstract static TClass Create( IRoleModel<TID> model );
+    public abstract static TSelf Create( IRoleModel<TID> model );
 }
 
 
 
 [Serializable]
 [method: JsonConstructor]
-public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TClass, TID>(id), IRoleModel<TID>
+public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TSelf, TID>(id), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : RoleModel<TClass, TID>, IRoleModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
+    where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
     private string __name   = nameOfRole;
     private string __rights = rights;
@@ -38,7 +38,7 @@ public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) 
     public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -49,7 +49,7 @@ public class RoleModel<TClass, TID>( string nameOfRole, string rights, TID id ) 
 
         return ID.CompareTo(other.ID);
     }
-    public override bool Equals( TClass? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 

@@ -5,7 +5,7 @@ namespace Jakar.Shapes.Interfaces;
 
 
 public interface IPoint<TSelf> : IShape<TSelf>, IShapeLocation
-    where TSelf : struct, IPoint<TSelf>, IJsonModel<TSelf>
+    where TSelf : struct, IPoint<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     [Pure] public abstract static TSelf Create( double x, double y );
 

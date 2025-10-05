@@ -25,14 +25,14 @@ public interface IChatRoom : IEquatable<IChatRoom>, IComparable<IChatRoom>, INot
 
 
 
-public interface IChatRoom<TSelf> : IChatRoom, IJsonModel<TSelf>
+public interface IChatRoom<TSelf> : IChatRoom, IJsonModel<TSelf>, IEqualComparable<TSelf>
     where TSelf : IChatRoom<TSelf>;
 
 
 
-public abstract class ChatRooms<TClass, TRoom> : ConcurrentObservableCollection<TClass, TRoom>
+public abstract class ChatRooms<TSelf, TRoom> : ConcurrentObservableCollection<TSelf, TRoom>
     where TRoom : IChatRoom<TRoom>
-    where TClass : ChatRooms<TClass, TRoom>, ICollectionAlerts<TClass, TRoom>
+    where TSelf : ChatRooms<TSelf, TRoom>, ICollectionAlerts<TSelf, TRoom>
 {
     private bool __showAll;
     public  bool ShowAll { get => __showAll; set => SetProperty(ref __showAll, value); }

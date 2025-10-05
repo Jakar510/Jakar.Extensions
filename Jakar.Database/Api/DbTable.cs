@@ -6,19 +6,19 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass> : IConnectableDb
-    where TClass : class, ITableRecord<TClass> 
+public partial class DbTable<TSelf> : IConnectableDb
+    where TSelf : class, ITableRecord<TSelf> 
 {
     protected readonly     FusionCache        _cache;
     protected readonly     IConnectableDbRoot _database;
-    public static readonly SqlCache<TClass>   SQLCache = new();
+    public static readonly SqlCache<TSelf>   SQLCache = new();
 
 
-    public static TClass[]                 Empty                     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
-    public static ImmutableArray<TClass>   EmptyArray                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
-    public static FrozenSet<TClass>        Set                       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FrozenSet<TClass>.Empty; }
+    public static TSelf[]                 Empty                     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
+    public static ImmutableArray<TSelf>   EmptyArray                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
+    public static FrozenSet<TSelf>        Set                       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FrozenSet<TSelf>.Empty; }
     public        FusionCacheEntryOptions? Options                   { get; set; }
-    public        RecordGenerator<TClass>  Records                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
+    public        RecordGenerator<TSelf>  Records                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
     public        IsolationLevel           TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _database.TransactionIsolationLevel; }
 
 
@@ -26,7 +26,7 @@ public partial class DbTable<TClass> : IConnectableDb
     {
         _database = database;
         _cache    = cache;
-        if ( TClass.TableName != typeof(TClass).GetTableName() ) { throw new InvalidOperationException($"{TClass.TableName} != {typeof(TClass).GetTableName()}"); }
+        if ( TSelf.TableName != typeof(TSelf).GetTableName() ) { throw new InvalidOperationException($"{TSelf.TableName} != {typeof(TSelf).GetTableName()}"); }
     }
     public virtual ValueTask DisposeAsync()
     {
@@ -38,12 +38,12 @@ public partial class DbTable<TClass> : IConnectableDb
     public ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync(token);
 
 
-    public IAsyncEnumerable<TClass> All( CancellationToken token = default ) => this.Call(All, token);
-    public virtual async IAsyncEnumerable<TClass> All( NpgsqlConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<TSelf> All( CancellationToken token = default ) => this.Call(All, token);
+    public virtual async IAsyncEnumerable<TSelf> All( NpgsqlConnection connection, DbTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand               command = SQLCache.GetAll();
         await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, transaction, command, token);
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
 
 

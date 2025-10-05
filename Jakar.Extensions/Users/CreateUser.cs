@@ -6,12 +6,12 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
+public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IChangePassword, ILoginRequestProvider
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TClass>, IJsonModel<TClass>, new()
+    where TSelf : CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TSelf>, IJsonModel<TSelf>, new()
 {
     private string __confirmPassword = string.Empty;
     private string __userPassword    = string.Empty;
@@ -60,9 +60,9 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
     protected CreateUserModel( string         firstName, string lastName ) : base(firstName, lastName) { }
 
 
-    public static TClass Register( string email, string password )
+    public static TSelf Register( string email, string password )
     {
-        TClass user = new()
+        TSelf user = new()
                       {
                           Password        = password,
                           ConfirmPassword = password,
@@ -73,9 +73,9 @@ public abstract class CreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleM
         Debug.Assert(user.IsValid);
         return user;
     }
-    public static TClass Register( string userName, string password, string email )
+    public static TSelf Register( string userName, string password, string email )
     {
-        TClass user = new()
+        TSelf user = new()
                       {
                           Password        = password,
                           ConfirmPassword = password,

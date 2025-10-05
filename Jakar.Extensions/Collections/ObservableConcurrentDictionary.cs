@@ -47,9 +47,9 @@ public sealed class ObservableConcurrentDictionary<TKey, TValue> : ObservableCon
 
 
 
-public abstract class ObservableConcurrentDictionary<TClass, TKey, TValue>( ConcurrentDictionary<TKey, TValue> dictionary ) : CollectionAlerts<TClass, KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
+public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( ConcurrentDictionary<TKey, TValue> dictionary ) : CollectionAlerts<TSelf, KeyValuePair<TKey, TValue>>, IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>
     where TKey : notnull
-    where TClass : ObservableConcurrentDictionary<TClass, TKey, TValue>, ICollectionAlerts<TClass, KeyValuePair<TKey, TValue>>
+    where TSelf : ObservableConcurrentDictionary<TSelf, TKey, TValue>, ICollectionAlerts<TSelf, KeyValuePair<TKey, TValue>>
 {
     protected internal readonly ConcurrentDictionary<TKey, TValue> buffer = dictionary;
 

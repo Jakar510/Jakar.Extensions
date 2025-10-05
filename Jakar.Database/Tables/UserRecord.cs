@@ -107,88 +107,88 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public                                                                     Guid                     UserID                 => ID.Value;
 
 
-    public UserRecord( string                UserName,
-                       string                FirstName,
-                       string                LastName,
-                       string                FullName,
-                       string                Gender,
-                       string                Description,
-                       string                Company,
-                       string                Department,
-                       string                Title,
-                       string                Website,
-                       SupportedLanguage     PreferredLanguage,
-                       string                Email,
-                       bool                  IsEmailConfirmed,
-                       string                PhoneNumber,
-                       string                Ext,
-                       bool                  IsPhoneNumberConfirmed,
-                       string                AuthenticatorKey,
-                       bool                  IsTwoFactorEnabled,
-                       bool                  IsActive,
-                       bool                  IsDisabled,
-                       Guid?                 SubscriptionID,
-                       DateTimeOffset?       SubscriptionExpires,
-                       DateTimeOffset?       LastBadAttempt,
-                       DateTimeOffset?       LastLogin,
-                       int?                  BadLogins,
-                       bool                  IsLocked,
-                       DateTimeOffset?       LockDate,
-                       DateTimeOffset?       LockoutEnd,
-                       string                RefreshToken,
-                       DateTimeOffset?       RefreshTokenExpiryTime,
-                       Guid?                 SessionID,
-                       string                SecurityStamp,
-                       string                ConcurrencyStamp,
-                       string                Rights,
-                       RecordID<UserRecord>? EscalateTo,
-                       JsonObject?           AdditionalData,
-                       string                PasswordHash,
-                       RecordID<FileRecord>? ImageID,
-                       RecordID<UserRecord>  ID,
-                       RecordID<UserRecord>? CreatedBy,
-                       DateTimeOffset        DateCreated,
-                       DateTimeOffset?       LastModified = null
+    [JsonConstructor] public UserRecord( string                UserName,
+                                         string                FirstName,
+                                         string                LastName,
+                                         string                FullName,
+                                         string                Gender,
+                                         string                Description,
+                                         string                Company,
+                                         string                Department,
+                                         string                Title,
+                                         string                Website,
+                                         SupportedLanguage     PreferredLanguage,
+                                         string                Email,
+                                         bool                  IsEmailConfirmed,
+                                         string                PhoneNumber,
+                                         string                Ext,
+                                         bool                  IsPhoneNumberConfirmed,
+                                         string                AuthenticatorKey,
+                                         bool                  IsTwoFactorEnabled,
+                                         bool                  IsActive,
+                                         bool                  IsDisabled,
+                                         Guid?                 SubscriptionID,
+                                         DateTimeOffset?       SubscriptionExpires,
+                                         DateTimeOffset?       LastBadAttempt,
+                                         DateTimeOffset?       LastLogin,
+                                         int?                  BadLogins,
+                                         bool                  IsLocked,
+                                         DateTimeOffset?       LockDate,
+                                         DateTimeOffset?       LockoutEnd,
+                                         string                RefreshToken,
+                                         DateTimeOffset?       RefreshTokenExpiryTime,
+                                         Guid?                 SessionID,
+                                         string                SecurityStamp,
+                                         string                ConcurrencyStamp,
+                                         string                Rights,
+                                         RecordID<UserRecord>? EscalateTo,
+                                         JsonObject?           AdditionalData,
+                                         string                PasswordHash,
+                                         RecordID<FileRecord>? ImageID,
+                                         RecordID<UserRecord>  ID,
+                                         RecordID<UserRecord>? CreatedBy,
+                                         DateTimeOffset        DateCreated,
+                                         DateTimeOffset?       LastModified = null
     ) : base(in CreatedBy, in ID, in DateCreated, in LastModified)
     {
-        UserName               = UserName;
-        AdditionalData         = AdditionalData;
-        AuthenticatorKey       = AuthenticatorKey;
-        BadLogins              = BadLogins;
-        Company                = Company;
-        ConcurrencyStamp       = ConcurrencyStamp;
-        Department             = Department;
-        Description            = Description;
-        Email                  = Email;
-        EscalateTo             = EscalateTo;
-        Ext                    = Ext;
-        FirstName              = FirstName;
-        FullName               = FullName;
-        Gender                 = Gender;
-        ImageID                = ImageID;
-        IsActive               = IsActive;
-        IsDisabled             = IsDisabled;
-        IsEmailConfirmed       = IsEmailConfirmed;
-        IsLocked               = IsLocked;
-        IsPhoneNumberConfirmed = IsPhoneNumberConfirmed;
-        IsTwoFactorEnabled     = IsTwoFactorEnabled;
-        LastBadAttempt         = LastBadAttempt;
-        LastLogin              = LastLogin;
-        LastName               = LastName;
-        LockDate               = LockDate;
-        LockoutEnd             = LockoutEnd;
-        PasswordHash           = PasswordHash;
-        PhoneNumber            = PhoneNumber;
-        PreferredLanguage      = PreferredLanguage;
-        RefreshToken           = RefreshToken;
-        RefreshTokenExpiryTime = RefreshTokenExpiryTime;
-        Rights                 = Rights;
-        SecurityStamp          = SecurityStamp;
-        SessionID              = SessionID;
-        SubscriptionExpires    = SubscriptionExpires;
-        SubscriptionID         = SubscriptionID;
-        Title                  = Title;
-        Website                = Website;
+        this.UserName               = UserName;
+        this.AdditionalData         = AdditionalData;
+        this.AuthenticatorKey       = AuthenticatorKey;
+        this.BadLogins              = BadLogins;
+        this.Company                = Company;
+        this.ConcurrencyStamp       = ConcurrencyStamp;
+        this.Department             = Department;
+        this.Description            = Description;
+        this.Email                  = Email;
+        this.EscalateTo             = EscalateTo;
+        this.Ext                    = Ext;
+        this.FirstName              = FirstName;
+        this.FullName               = FullName;
+        this.Gender                 = Gender;
+        this.ImageID                = ImageID;
+        this.IsActive               = IsActive;
+        this.IsDisabled             = IsDisabled;
+        this.IsEmailConfirmed       = IsEmailConfirmed;
+        this.IsLocked               = IsLocked;
+        this.IsPhoneNumberConfirmed = IsPhoneNumberConfirmed;
+        this.IsTwoFactorEnabled     = IsTwoFactorEnabled;
+        this.LastBadAttempt         = LastBadAttempt;
+        this.LastLogin              = LastLogin;
+        this.LastName               = LastName;
+        this.LockDate               = LockDate;
+        this.LockoutEnd             = LockoutEnd;
+        this.PasswordHash           = PasswordHash;
+        this.PhoneNumber            = PhoneNumber;
+        this.PreferredLanguage      = PreferredLanguage;
+        this.RefreshToken           = RefreshToken;
+        this.RefreshTokenExpiryTime = RefreshTokenExpiryTime;
+        this.Rights                 = Rights;
+        this.SecurityStamp          = SecurityStamp;
+        this.SessionID              = SessionID;
+        this.SubscriptionExpires    = SubscriptionExpires;
+        this.SubscriptionID         = SubscriptionID;
+        this.Title                  = Title;
+        this.Website                = Website;
     }
 
 
@@ -625,25 +625,25 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public UserModel ToUserModel() => ToUserModel<UserModel>();
-    public TClass ToUserModel<TClass>()
-        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TClass>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>();
-    public TClass ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>()
-        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+    public TSelf ToUserModel<TSelf>()
+        where TSelf : UserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TSelf>, new() => ToUserModel<TSelf, UserAddress, GroupModel, RoleModel>();
+    public TSelf ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>()
+        where TSelf : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
         where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
-        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TClass.Create(this);
+        where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TSelf.Create(this);
 
 
     public ValueTask<UserModel> ToUserModel( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>(connection, transaction, db, token);
-    public ValueTask<TClass> ToUserModel<TClass>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : UserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TClass, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TClass>, new() => ToUserModel<TClass, UserAddress, GroupModel, RoleModel>(connection, transaction, db, token);
-    public async ValueTask<TClass> ToUserModel<TClass, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
-        where TClass : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, Guid, TAddress, TGroupModel, TRoleModel>, new()
+    public ValueTask<TSelf> ToUserModel<TSelf>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where TSelf : UserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TSelf>, new() => ToUserModel<TSelf, UserAddress, GroupModel, RoleModel>(connection, transaction, db, token);
+    public async ValueTask<TSelf> ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+        where TSelf : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
         where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
         where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress>
     {
-        TClass model = TClass.Create(this);
+        TSelf model = TSelf.Create(this);
 
         await foreach ( AddressRecord record in GetAddresses(connection, transaction, db, token) ) { model.Addresses.Add(record.ToAddressModel<TAddress>()); }
 
@@ -858,10 +858,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
             : Error.Create(Status.Gone, StringTags.Empty);
 
 
-    public bool DoesNotOwn<TClass>( TClass record )
-        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => record.CreatedBy != ID;
-    public bool Owns<TClass>( TClass record )
-        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => record.CreatedBy == ID;
+    public bool DoesNotOwn<TSelf>( TSelf record )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => record.CreatedBy != ID;
+    public bool Owns<TSelf>( TSelf record )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => record.CreatedBy == ID;
 
     #endregion
 

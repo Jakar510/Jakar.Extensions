@@ -4,12 +4,12 @@
 public static class Migrations
 {
     internal static readonly ConcurrentDictionary<ulong, MigrationRecord> migrations = new();
-    public static void AddMigrations<TClass>()
-        where TClass : ITableRecord<TClass>
+    public static void AddMigrations<TSelf>()
+        where TSelf : ITableRecord<TSelf>
     {
         foreach ( MigrationRecord record in MigrationRecord.Migrations )
         {
-            if ( migrations.TryGetValue(record.MigrationID, out _) ) { throw new InvalidOperationException($"Duplicate migration version {record.MigrationID} for {typeof(TClass).Name}"); }
+            if ( migrations.TryGetValue(record.MigrationID, out _) ) { throw new InvalidOperationException($"Duplicate migration version {record.MigrationID} for {typeof(TSelf).Name}"); }
 
             migrations[record.MigrationID] = record;
         }

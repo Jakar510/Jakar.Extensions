@@ -61,9 +61,9 @@ public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservabl
 
 
 [Serializable]
-public abstract class ConcurrentObservableCollection<TClass, TValue> : ObservableCollection<TClass, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
+public abstract class ConcurrentObservableCollection<TSelf, TValue> : ObservableCollection<TSelf, TValue>, IList, ILockedCollection<TValue, LockCloser, AsyncLockerEnumerator<TValue, LockCloser>, LockerEnumerator<TValue, LockCloser>>
     where TValue : IEquatable<TValue>
-    where TClass : ConcurrentObservableCollection<TClass, TValue>, ICollectionAlerts<TClass, TValue>
+    where TSelf : ConcurrentObservableCollection<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly Lock locker = new();
 

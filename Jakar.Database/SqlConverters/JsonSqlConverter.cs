@@ -1,8 +1,8 @@
 ﻿namespace Jakar.Database;
 
 
-public abstract class JsonSqlHandler<TClass, TValue> : SqlConverter<TClass, TValue>
-    where TClass : JsonSqlHandler<TClass, TValue>, new()
+public abstract class JsonSqlHandler<TSelf, TValue> : SqlConverter<TSelf, TValue>
+    where TSelf : JsonSqlHandler<TSelf, TValue>, new()
 {
     public abstract JsonTypeInfo<TValue> TypeInfo { get; }
     public override TValue Parse( object? value )

@@ -1,4 +1,4 @@
 ﻿namespace Jakar.Extensions;
 
 
-[AttributeUsage( AttributeTargets.Property | AttributeTargets.Class )] public sealed class DataBaseIgnoreAttribute : Attribute;
+[AttributeUsage( AttributeTargets.Property | AttributeTargets.Class )] public sealed class DbIgnoreAttribute : Attribute;

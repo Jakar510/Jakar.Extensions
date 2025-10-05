@@ -4,11 +4,11 @@
 namespace Jakar.Extensions;
 
 
-public abstract class SerializeAsStringJsonConverter<TClass, T> : JsonConverter<T>
+public abstract class SerializeAsStringJsonConverter<TSelf, T> : JsonConverter<T>
     where T : IParsable<T>
-    where TClass : SerializeAsStringJsonConverter<TClass, T>, new()
+    where TSelf : SerializeAsStringJsonConverter<TSelf, T>, new()
 {
-    public static readonly TClass Instance = new();
+    public static readonly TSelf Instance = new();
 
 
     public override T? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )

@@ -22,24 +22,24 @@ public record BaseRecord
 
 
 
-public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, IComparable<TClass>, IComparable
-    where TClass : BaseRecord<TClass>, IJsonModel<TClass>
+public abstract record BaseRecord<TSelf> : BaseRecord, IEquatable<TSelf>, IComparable<TSelf>, IComparable
+    where TSelf : BaseRecord<TSelf>, IJsonModel<TSelf>
 {
-    public abstract bool Equals( TClass?    other );
-    public abstract int  CompareTo( TClass? other );
+    public abstract bool Equals( TSelf?    other );
+    public abstract int  CompareTo( TSelf? other );
     public int CompareTo( object? other )
     {
         if ( other is null ) { return 1; }
 
         if ( ReferenceEquals(this, other) ) { return 0; }
 
-        return other is TClass t
+        return other is TSelf t
                    ? CompareTo(t)
-                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TClass));
+                   : throw new ExpectedValueTypeException(nameof(other), other, typeof(TSelf));
     }
 
 
-    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TClass? result )
+    public static bool TryFromJson( string? json, [NotNullWhen(true)] out TSelf? result )
     {
         try
         {
@@ -57,25 +57,25 @@ public abstract record BaseRecord<TClass> : BaseRecord, IEquatable<TClass>, ICom
         result = null;
         return false;
     }
-    public static TClass FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TClass.JsonTypeInfo));
+    public static TSelf FromJson( string json ) => Validate.ThrowIfNull(JsonSerializer.Deserialize(json, TSelf.JsonTypeInfo));
 
 
-    public TClass WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
-    public virtual TClass WithAdditionalData( JsonObject? additionalData )
+    public TSelf WithAdditionalData( IJsonModel value ) => WithAdditionalData(value.AdditionalData);
+    public virtual TSelf WithAdditionalData( JsonObject? additionalData )
     {
-        if ( additionalData is null ) { return (TClass)this; }
+        if ( additionalData is null ) { return (TSelf)this; }
 
         JsonObject json = _additionalData ??= new JsonObject();
         foreach ( ( string key, JsonNode? jToken ) in additionalData ) { json[key] = jToken; }
 
-        return (TClass)this;
+        return (TSelf)this;
     }
 }
 
 
 
-public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<TID>
-    where TClass : BaseRecord<TClass, TID>, IJsonModel<TClass>
+public abstract record BaseRecord<TSelf, TID> : BaseRecord<TSelf>, IUniqueID<TID>
+    where TSelf : BaseRecord<TSelf, TID>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
     private TID __id;
@@ -88,7 +88,7 @@ public abstract record BaseRecord<TClass, TID> : BaseRecord<TClass>, IUniqueID<T
     protected BaseRecord( TID id ) => ID = id;
 
 
-    protected bool SetID( TClass record ) => SetID(record.ID);
+    protected bool SetID( TSelf record ) => SetID(record.ID);
     protected bool SetID( TID id )
     {
         __id = id;

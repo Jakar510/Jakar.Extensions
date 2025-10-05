@@ -4,11 +4,11 @@
 namespace Jakar.Extensions;
 
 
-public abstract class EnumToStringConverter<TClass, TEnum>() : JsonConverter<TEnum>()
+public abstract class EnumToStringConverter<TSelf, TEnum>() : JsonConverter<TEnum>()
     where TEnum : struct, Enum
-    where TClass : EnumToStringConverter<TClass, TEnum>, new()
+    where TSelf : EnumToStringConverter<TSelf, TEnum>, new()
 {
-    public static readonly    TClass                          Instance      = new();
+    public static readonly    TSelf                          Instance      = new();
     protected static readonly FrozenDictionary<TEnum, string> _enumToString = Enum.GetValues<TEnum>().ToFrozenDictionary(Self,     ToString);
     protected static readonly FrozenDictionary<string, TEnum> _stringToEnum = Enum.GetValues<TEnum>().ToFrozenDictionary(ToString, Self);
     protected static readonly FrozenDictionary<long, TEnum>   _intToEnum    = Enum.GetValues<TEnum>().ToFrozenDictionary(ToNumber, Self);

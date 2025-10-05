@@ -19,11 +19,14 @@ public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IJs
     public        int                           Port          { get; init; }
     public        string                        Site          { get; init; } = string.Empty;
     public        string                        UserName      { get; init; } = string.Empty;
+    public        AppVersion                    Version       { get; init; } = AppVersion.Default;
     public        bool                          IsValid       => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(Site) && Port.IsValidPort();
     public EmailSettings() { }
-    public static EmailSettings     Create( IConfiguration configuration )    => configuration.GetSection(nameof(EmailSettings)).Get<EmailSettings>() ?? throw new InvalidOperationException($"Section '{nameof(EmailSettings)}' is invalid");
-    public        MailboxAddress    Address()                                 => MailboxAddress.Parse(UserName);
-    public        NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password, Site);
+    public static EmailSettings Create( IConfiguration configuration ) => configuration.GetSection(nameof(EmailSettings))
+                                                                                       .Get<EmailSettings>() ??
+                                                                          throw new InvalidOperationException($"Section '{nameof(EmailSettings)}' is invalid");
+    public MailboxAddress    Address()                                 => MailboxAddress.Parse(UserName);
+    public NetworkCredential GetCredential( Uri uri, string authType ) => new(UserName, Password, Site);
 
 
     public override bool Equals( EmailSettings? other ) => ReferenceEquals(this, other) || other is not null && string.Equals(UserName, other.UserName, StringComparison.InvariantCulture) && string.Equals(Password, other.Password, StringComparison.InvariantCulture) && string.Equals(Site, other.Site, StringComparison.InvariantCulture) && Port == other.Port;

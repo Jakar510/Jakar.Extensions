@@ -29,19 +29,19 @@ public interface ICreatedBy : IDateCreated
 
 
 
-public interface IRecordPair<TClass> : IDateCreated
-    where TClass : IRecordPair<TClass>, ITableRecord<TClass>
+public interface IRecordPair<TSelf> : IDateCreated
+    where TSelf : IRecordPair<TSelf>, ITableRecord<TSelf>
 {
     Guid IUniqueID<Guid>.       ID => ID.Value;
-    public new RecordID<TClass> ID { get; }
+    public new RecordID<TSelf> ID { get; }
 
     [Pure] public UInt128 GetHash();
 }
 
 
 
-public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
-    where TClass : ITableRecord<TClass>
+public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
+    where TSelf : ITableRecord<TSelf>
 {
     public abstract static ReadOnlyMemory<PropertyInfo>                ClassProperties  { [Pure] get; }
     public abstract static int                                         PropertyCount    { get; }
@@ -49,37 +49,37 @@ public interface ITableRecord<TClass> : IRecordPair<TClass>, IJsonModel<TClass>
     public abstract static string                                      TableName        { [Pure] get; }
 
 
-    static ITableRecord() => DbMigrations.Migrations.AddMigrations<TClass>();
+    static ITableRecord() => DbMigrations.Migrations.AddMigrations<TSelf>();
 
 
     [Pure] public abstract static MigrationRecord    CreateTable( ulong   migrationID );
-    [Pure] public abstract static TClass             Create( DbDataReader reader );
+    [Pure] public abstract static TSelf             Create( DbDataReader reader );
     [Pure] public                 PostgresParameters ToDynamicParameters();
 
 
-    [Pure] public RecordPair<TClass> ToPair();
-    public        TClass             NewID( RecordID<TClass> id );
+    [Pure] public RecordPair<TSelf> ToPair();
+    public        TSelf             NewID( RecordID<TSelf> id );
 }
 
 
 
 [Serializable]
-public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TClass>, ILastModified
-    where TClass : TableRecord<TClass>, ITableRecord<TClass>
+public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf>, ILastModified
+    where TSelf : TableRecord<TSelf>, ITableRecord<TSelf>
 {
-    protected internal static readonly PropertyInfo[]   Properties = typeof(TClass).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    protected internal static readonly PropertyInfo[]   Properties = typeof(TSelf).GetProperties(BindingFlags.Instance | BindingFlags.Public);
     protected                          DateTimeOffset?  _lastModified;
-    private                            RecordID<TClass> __id;
+    private                            RecordID<TSelf> __id;
 
 
     public static ReadOnlyMemory<PropertyInfo> ClassProperties { [Pure] get => Properties; }
     public static int                          PropertyCount   => Properties.Length;
     public        DateTimeOffset               DateCreated     { get;                  init; }
-    [Key] public  RecordID<TClass>             ID              { get => __id;          init => __id = value; }
+    [Key] public  RecordID<TSelf>             ID              { get => __id;          init => __id = value; }
     public        DateTimeOffset?              LastModified    { get => _lastModified; init => _lastModified = value; }
 
 
-    protected TableRecord( ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
+    protected TableRecord( ref readonly RecordID<TSelf> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null )
     {
         this.DateCreated    = dateCreated;
         _lastModified       = lastModified;
@@ -90,24 +90,24 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
 
     [Pure] public UInt128 GetHash()
     {
-        ReadOnlySpan<char> json = ( (TClass)this ).ToJson();
+        ReadOnlySpan<char> json = ( (TSelf)this ).ToJson();
         return json.Hash128();
     }
-    public TClass Modified()
+    public TSelf Modified()
     {
         _lastModified = DateTimeOffset.UtcNow;
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass NewID( RecordID<TClass> id )
+    public TSelf NewID( RecordID<TSelf> id )
     {
         __id = id;
-        return (TClass)this;
+        return (TSelf)this;
     }
-    [Pure] public RecordPair<TClass> ToPair() => new(ID, DateCreated);
+    [Pure] public RecordPair<TSelf> ToPair() => new(ID, DateCreated);
 
 
-    public static PostgresParameters GetDynamicParameters( TClass record ) => GetDynamicParameters(in record.__id);
-    public static PostgresParameters GetDynamicParameters( ref readonly RecordID<TClass> id )
+    public static PostgresParameters GetDynamicParameters( TSelf record ) => GetDynamicParameters(in record.__id);
+    public static PostgresParameters GetDynamicParameters( ref readonly RecordID<TSelf> id )
     {
         PostgresParameters parameters = new();
         parameters.Add(nameof(ID), id.Value);
@@ -131,7 +131,7 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
     }
 
 
-    public void Deconstruct( out RecordID<TClass> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
+    public void Deconstruct( out RecordID<TSelf> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
     {
         additionalData = this.AdditionalData;
         id             = this.ID;
@@ -142,23 +142,23 @@ public abstract record TableRecord<TClass> : BaseRecord<TClass>, IRecordPair<TCl
 
 
     [Serializable]
-    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TClass>(capacity)
+    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TSelf>(capacity)
     {
-        public RecordCollection( params ReadOnlySpan<TClass> values ) : this() => Add(values);
-        public RecordCollection( IEnumerable<TClass>         values ) : this() => Add(values);
+        public RecordCollection( params ReadOnlySpan<TSelf> values ) : this() => Add(values);
+        public RecordCollection( IEnumerable<TSelf>         values ) : this() => Add(values);
     }
 }
 
 
 
 [Serializable]
-public abstract record OwnedTableRecord<TClass> : TableRecord<TClass>, ICreatedBy
-    where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass>
+public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
+    where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf>
 {
     public RecordID<UserRecord>? CreatedBy { get; set; }
 
 
-    protected OwnedTableRecord( ref readonly RecordID<UserRecord>? createdBy, ref readonly RecordID<TClass> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null ) : base(in id, in dateCreated, in lastModified, additionalData) { this.CreatedBy = createdBy; }
+    protected OwnedTableRecord( ref readonly RecordID<UserRecord>? createdBy, ref readonly RecordID<TSelf> id, ref readonly DateTimeOffset dateCreated, ref readonly DateTimeOffset? lastModified, JsonObject? additionalData = null ) : base(in id, in dateCreated, in lastModified, additionalData) { this.CreatedBy = createdBy; }
 
 
     public static PostgresParameters GetDynamicParameters( UserRecord user )
@@ -167,7 +167,7 @@ public abstract record OwnedTableRecord<TClass> : TableRecord<TClass>, ICreatedB
         parameters.Add(nameof(CreatedBy), user.ID.Value);
         return parameters;
     }
-    protected static PostgresParameters GetDynamicParameters( OwnedTableRecord<TClass> record )
+    protected static PostgresParameters GetDynamicParameters( OwnedTableRecord<TSelf> record )
     {
         PostgresParameters parameters = new();
         parameters.Add(nameof(CreatedBy), record.CreatedBy);
@@ -187,12 +187,12 @@ public abstract record OwnedTableRecord<TClass> : TableRecord<TClass>, ICreatedB
     public async ValueTask<UserRecord?> GetUserWhoCreated( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TClass WithOwner( UserRecord  user )   => (TClass)( this with { CreatedBy = user.ID } );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TSelf WithOwner( UserRecord  user )   => (TSelf)( this with { CreatedBy = user.ID } );
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool   Owns( UserRecord       record ) => CreatedBy == record.ID;
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool   DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -200,7 +200,7 @@ public abstract record OwnedTableRecord<TClass> : TableRecord<TClass>, ICreatedB
 
         return Nullable.Compare(CreatedBy, other.CreatedBy);
     }
-    public void Deconstruct( out RecordID<UserRecord>? createdBy, out RecordID<TClass> ID, out DateTimeOffset DateCreated, out DateTimeOffset? LastModified, out JsonObject? AdditionalData )
+    public void Deconstruct( out RecordID<UserRecord>? createdBy, out RecordID<TSelf> ID, out DateTimeOffset DateCreated, out DateTimeOffset? LastModified, out JsonObject? AdditionalData )
     {
         createdBy      = this.CreatedBy;
         ID             = this.ID;

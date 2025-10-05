@@ -13,33 +13,33 @@ public interface ICascadingValueName
 
 public static class CascadingValueNameExtensions
 {
-    public static IServiceCollection TryAddCascadingValueScoped<TClass>( this IServiceCollection services )
-        where TClass : class, INotifyPropertyChanged
+    public static IServiceCollection TryAddCascadingValueScoped<TSelf>( this IServiceCollection services )
+        where TSelf : class, INotifyPropertyChanged
     {
-        services.TryAddScoped<TClass>();
+        services.TryAddScoped<TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
 
         return services;
     }
-    public static IServiceCollection TryAddCascadingValueScoped<TInterface, TClass>( this IServiceCollection services )
+    public static IServiceCollection TryAddCascadingValueScoped<TInterface, TSelf>( this IServiceCollection services )
         where TInterface : class, INotifyPropertyChanged
-        where TClass : class, TInterface
+        where TSelf : class, TInterface
     {
-        services.TryAddScoped<TInterface, TClass>();
+        services.TryAddScoped<TInterface, TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
@@ -48,33 +48,33 @@ public static class CascadingValueNameExtensions
     }
 
 
-    public static IServiceCollection TryAddCascadingValueScopedNamed<TClass>( this IServiceCollection services )
-        where TClass : class, INotifyPropertyChanged, ICascadingValueName
+    public static IServiceCollection TryAddCascadingValueScopedNamed<TSelf>( this IServiceCollection services )
+        where TSelf : class, INotifyPropertyChanged, ICascadingValueName
     {
-        services.TryAddScoped<TClass>();
+        services.TryAddScoped<TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(TSelf.CascadingName, value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
 
         return services;
     }
-    public static IServiceCollection TryAddCascadingValueScopedNamed<TInterface, TClass>( this IServiceCollection services )
+    public static IServiceCollection TryAddCascadingValueScopedNamed<TInterface, TSelf>( this IServiceCollection services )
         where TInterface : class, INotifyPropertyChanged
-        where TClass : class, TInterface, ICascadingValueName
+        where TSelf : class, TInterface, ICascadingValueName
     {
-        services.TryAddScoped<TInterface, TClass>();
+        services.TryAddScoped<TInterface, TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(TSelf.CascadingName, value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
@@ -83,32 +83,32 @@ public static class CascadingValueNameExtensions
     }
 
 
-    public static IServiceCollection TryAddCascadingValueSingleton<TClass>( this IServiceCollection services )
-        where TClass : class, INotifyPropertyChanged
+    public static IServiceCollection TryAddCascadingValueSingleton<TSelf>( this IServiceCollection services )
+        where TSelf : class, INotifyPropertyChanged
     {
-        services.TryAddSingleton<TClass>();
+        services.TryAddSingleton<TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
 
         return services;
     }
-    public static IServiceCollection TryAddCascadingValueSingleton<TClass>( this IServiceCollection services, TClass instance )
-        where TClass : class, INotifyPropertyChanged
+    public static IServiceCollection TryAddCascadingValueSingleton<TSelf>( this IServiceCollection services, TSelf instance )
+        where TSelf : class, INotifyPropertyChanged
     {
         services.TryAddSingleton(instance);
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
@@ -117,34 +117,34 @@ public static class CascadingValueNameExtensions
     }
 
 
-    public static IServiceCollection TryAddCascadingValueSingleton<TInterface, TClass>( this IServiceCollection services )
+    public static IServiceCollection TryAddCascadingValueSingleton<TInterface, TSelf>( this IServiceCollection services )
         where TInterface : class, INotifyPropertyChanged
-        where TClass : class, TInterface
+        where TSelf : class, TInterface
     {
-        services.TryAddSingleton<TInterface, TClass>();
+        services.TryAddSingleton<TInterface, TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
 
         return services;
     }
-    public static IServiceCollection TryAddCascadingValueSingleton<TInterface, TClass>( this IServiceCollection services, TClass instance )
+    public static IServiceCollection TryAddCascadingValueSingleton<TInterface, TSelf>( this IServiceCollection services, TSelf instance )
         where TInterface : class, INotifyPropertyChanged
-        where TClass : class, TInterface
+        where TSelf : class, TInterface
     {
         services.TryAddSingleton<TInterface>(instance);
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
@@ -153,32 +153,32 @@ public static class CascadingValueNameExtensions
     }
 
 
-    public static IServiceCollection TryAddCascadingValueSingletonNamed<TClass>( this IServiceCollection services )
-        where TClass : class, INotifyPropertyChanged, ICascadingValueName
+    public static IServiceCollection TryAddCascadingValueSingletonNamed<TSelf>( this IServiceCollection services )
+        where TSelf : class, INotifyPropertyChanged, ICascadingValueName
     {
-        services.TryAddSingleton<TClass>();
+        services.TryAddSingleton<TSelf>();
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(TSelf.CascadingName, value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });
 
         return services;
     }
-    public static IServiceCollection TryAddCascadingValueSingletonNamed<TClass>( this IServiceCollection services, TClass instance )
-        where TClass : class, INotifyPropertyChanged, ICascadingValueName
+    public static IServiceCollection TryAddCascadingValueSingletonNamed<TSelf>( this IServiceCollection services, TSelf instance )
+        where TSelf : class, INotifyPropertyChanged, ICascadingValueName
     {
         services.TryAddSingleton(instance);
 
         services.TryAddCascadingValue(static provider =>
                                       {
-                                          ILogger<TClass>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TClass>();
-                                          TClass                       value  = provider.GetRequiredService<TClass>();
-                                          CascadingValueSource<TClass> source = new(TClass.CascadingName, value, false);
+                                          ILogger<TSelf>              logger = provider.GetRequiredService<ILoggerFactory>().CreateLogger<TSelf>();
+                                          TSelf                       value  = provider.GetRequiredService<TSelf>();
+                                          CascadingValueSource<TSelf> source = new(TSelf.CascadingName, value, false);
                                           value.PropertyChanged += ( _, _ ) => source.NotifyChangedAsync().SafeFireAndForget(logger);
                                           return source;
                                       });

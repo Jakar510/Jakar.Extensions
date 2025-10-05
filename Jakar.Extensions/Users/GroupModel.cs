@@ -13,20 +13,20 @@ public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRi
 
 
 
-public interface IGroupModel<TClass, TID> : IGroupModel<TID>, IJsonModel<TClass>
+public interface IGroupModel<TSelf, TID> : IGroupModel<TID>, IJsonModel<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : class, IGroupModel<TClass, TID>
+    where TSelf : class, IGroupModel<TSelf, TID>
 {
-    public abstract static TClass Create( IGroupModel<TID> model );
+    public abstract static TSelf Create( IGroupModel<TID> model );
 }
 
 
 
 [Serializable]
 [method: JsonConstructor]
-public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : BaseClass<TClass, TID>(id), IGroupModel<TID>
+public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : BaseClass<TSelf, TID>(id), IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TClass : GroupModel<TClass, TID>, IGroupModel<TClass, TID>, IEqualComparable<TClass>, IJsonModel<TClass>
+    where TSelf : GroupModel<TSelf, TID>, IGroupModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 
 {
     private string __nameOfGroup = nameOfGroup;
@@ -44,7 +44,7 @@ public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? cre
     public GroupModel( IGroupModel<TID> model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -55,7 +55,7 @@ public class GroupModel<TClass, TID>( string nameOfGroup, TID? ownerID, TID? cre
 
         return ID.CompareTo(other.ID);
     }
-    public override bool Equals( TClass? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 

@@ -213,12 +213,12 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 
         return record.Validate();
     }
-    public static MigrationRecord Create<TClass>( ulong migrationID, string description, string sql )
-        where TClass : ITableRecord<TClass>
+    public static MigrationRecord Create<TSelf>( ulong migrationID, string description, string sql )
+        where TSelf : ITableRecord<TSelf>
     {
         MigrationRecord record = new MigrationRecord(migrationID, description)
                                  {
-                                     TableID = TClass.TableName,
+                                     TableID = TSelf.TableName,
                                      SQL     = sql
                                  };
 

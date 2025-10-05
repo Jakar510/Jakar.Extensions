@@ -127,10 +127,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual DbTable<TClass> Create<TClass>()
-        where TClass : class, ITableRecord<TClass>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual DbTable<TSelf> Create<TSelf>()
+        where TSelf : class, ITableRecord<TSelf>
     {
-        DbTable<TClass> table = new(this, _cache);
+        DbTable<TSelf> table = new(this, _cache);
         return AddDisposable(table);
     }
 
@@ -233,8 +233,8 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public virtual async IAsyncEnumerable<TClass> Where<TClass>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TClass : class, ITableRecord<TClass>, IDateCreated
+    public virtual async IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : class, ITableRecord<TSelf>, IDateCreated
     {
         DbDataReader reader;
 
@@ -246,7 +246,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         }
         catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
 
-        await foreach ( TClass record in reader.CreateAsync<TClass>(token) ) { yield return record; }
+        await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
     public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct

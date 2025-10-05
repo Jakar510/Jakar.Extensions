@@ -5,22 +5,22 @@ namespace Jakar.Database;
 
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
-public partial class DbTable<TClass>
+public partial class DbTable<TSelf>
 {
-    public ValueTask<ErrorOrResult<TClass>>           Next( RecordPair<TClass>     pair, CancellationToken token = default ) => this.Call(Next,   pair, token);
-    public ValueTask<Guid?>                           NextID( RecordPair<TClass>   pair, CancellationToken token = default ) => this.Call(NextID, pair, token);
-    public ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( CancellationToken token = default ) => this.Call(SortedIDs, token);
+    public ValueTask<ErrorOrResult<TSelf>>           Next( RecordPair<TSelf>     pair, CancellationToken token = default ) => this.Call(Next,   pair, token);
+    public ValueTask<Guid?>                           NextID( RecordPair<TSelf>   pair, CancellationToken token = default ) => this.Call(NextID, pair, token);
+    public ValueTask<IEnumerable<RecordPair<TSelf>>> SortedIDs( CancellationToken token = default ) => this.Call(SortedIDs, token);
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TClass>> Next( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Next( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TSelf> pair, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetNext(in pair);
 
         try
         {
             CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TClass?           record  = await connection.ExecuteScalarAsync<TClass>(command);
+            TSelf?           record  = await connection.ExecuteScalarAsync<TSelf>(command);
 
             return record is null
                        ? Error.NotFound()
@@ -31,14 +31,14 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<IEnumerable<RecordPair<TClass>>> SortedIDs( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<IEnumerable<RecordPair<TSelf>>> SortedIDs( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetSortedID();
 
         try
         {
             CommandDefinition               command = _database.GetCommand(in sql, transaction, token);
-            IEnumerable<RecordPair<TClass>> pairs   = await connection.QueryAsync<RecordPair<TClass>>(command);
+            IEnumerable<RecordPair<TSelf>> pairs   = await connection.QueryAsync<RecordPair<TSelf>>(command);
             return pairs;
         }
         catch ( Exception e ) { throw new SqlException(sql, e); }
@@ -46,7 +46,7 @@ public partial class DbTable<TClass>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TClass> pair, CancellationToken token = default )
+    public virtual async ValueTask<Guid?> NextID( NpgsqlConnection connection, DbTransaction? transaction, RecordPair<TSelf> pair, CancellationToken token = default )
     {
         SqlCommand sql = SQLCache.GetNextID(in pair);
 

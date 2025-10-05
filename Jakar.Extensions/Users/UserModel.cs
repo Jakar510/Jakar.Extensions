@@ -5,12 +5,12 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> : BaseClass<TClass, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
+public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : BaseClass<TSelf, TID>, IUserData<TID, TAddress, TGroupModel, TRoleModel>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>
     where TAddress : IAddress<TID>, IEquatable<TAddress>
-    where TClass : UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TClass, TID, TAddress, TGroupModel, TRoleModel>, new()
+    where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
     public const string            EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      string            __company          = string.Empty;
@@ -160,40 +160,40 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         where TEnum : struct, Enum => UserRights<TEnum>.Create(this).With(Groups);
 
 
-    public TClass With( IEnumerable<TAddress> addresses )
+    public TSelf With( IEnumerable<TAddress> addresses )
     {
         Addresses.Add(addresses);
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass With( params ReadOnlySpan<TAddress> addresses )
+    public TSelf With( params ReadOnlySpan<TAddress> addresses )
     {
         Addresses.Add(addresses);
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass With( IEnumerable<TGroupModel> values )
+    public TSelf With( IEnumerable<TGroupModel> values )
     {
         Groups.Add(values);
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass With( params ReadOnlySpan<TGroupModel> values )
+    public TSelf With( params ReadOnlySpan<TGroupModel> values )
     {
         Groups.Add(values);
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass With( IEnumerable<TRoleModel> values )
+    public TSelf With( IEnumerable<TRoleModel> values )
     {
         Roles.Add(values);
-        return (TClass)this;
+        return (TSelf)this;
     }
-    public TClass With( params ReadOnlySpan<TRoleModel> values )
+    public TSelf With( params ReadOnlySpan<TRoleModel> values )
     {
         Roles.Add(values);
-        return (TClass)this;
+        return (TSelf)this;
     }
 
 
     void IUserData<TID>.With( IUserData<TID> value ) => With(value);
-    public TClass With<TValue>( TValue value )
+    public TSelf With<TValue>( TValue value )
         where TValue : IUserData<TID>
     {
         CreatedBy         = value.CreatedBy;
@@ -213,18 +213,18 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
         Rights            = value.Rights;
         return With(value.AdditionalData);
     }
-    public TClass With( JsonObject? data )
+    public TSelf With( JsonObject? data )
     {
-        if ( data?.Count is null or 0 ) { return (TClass)this; }
+        if ( data?.Count is null or 0 ) { return (TSelf)this; }
 
         JsonObject dict = AdditionalData ??= new JsonObject();
         foreach ( ( string key, JsonNode? jToken ) in data ) { dict[key] = jToken; }
 
-        return (TClass)this;
+        return (TSelf)this;
     }
 
 
-    public override int CompareTo( TClass? other )
+    public override int CompareTo( TSelf? other )
     {
         if ( other is null ) { return 1; }
 
@@ -268,7 +268,7 @@ public abstract class UserModel<TClass, TID, TAddress, TGroupModel, TRoleModel> 
 
         return ( (int)PreferredLanguage ).CompareTo((int)other.PreferredLanguage);
     }
-    public override bool Equals( TClass? other )
+    public override bool Equals( TSelf? other )
     {
         if ( other is null ) { return false; }
 

@@ -31,10 +31,10 @@ public partial class Database
 
     #region User Auth Providers
 
-    public IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TClass>( TClass record, [EnumeratorCancellation] CancellationToken token )
-        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => this.TryCall(GetLoginsAsync, record, token);
-    public virtual IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TClass>( NpgsqlConnection connection, DbTransaction transaction, TClass record, [EnumeratorCancellation] CancellationToken token )
-        where TClass : OwnedTableRecord<TClass>, ITableRecord<TClass> => UserLogins.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
+    public IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TSelf>( TSelf record, [EnumeratorCancellation] CancellationToken token )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => this.TryCall(GetLoginsAsync, record, token);
+    public virtual IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TSelf>( NpgsqlConnection connection, DbTransaction transaction, TSelf record, [EnumeratorCancellation] CancellationToken token )
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => UserLogins.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
 
 
     public ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall(AddLoginAsync, user, login, token);

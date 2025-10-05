@@ -172,7 +172,7 @@ public sealed class UserAddress : UserAddress<UserAddress, long>, IAddress<UserA
 
 
 [Serializable]
-public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IGroupModel
+public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<GroupModel, long>, IGroupModel, IEqualComparable<GroupModel>
 {
     public static JsonSerializerContext      JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<GroupModel>   JsonTypeInfo  => JakarModelsLongContext.Default.GroupModel;
@@ -195,7 +195,7 @@ public sealed class GroupModel : GroupModel<GroupModel, long>, IGroupModel<Group
 
 
 [Serializable]
-public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IRoleModel
+public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel, long>, IRoleModel, IEqualComparable<RoleModel>
 {
     public static JsonSerializerContext     JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<RoleModel>   JsonTypeInfo  => JakarModelsLongContext.Default.RoleModel;
@@ -219,7 +219,7 @@ public sealed class RoleModel : RoleModel<RoleModel, long>, IRoleModel<RoleModel
 
 [Serializable]
 [method: SetsRequiredMembers]
-public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IFileData
+public sealed class FileData( long fileSize, string hash, string payload, FileMetaData metaData, long id = 0 ) : FileData<FileData, long, FileMetaData>(fileSize, hash, payload, id, metaData), IFileData<FileData, long, FileMetaData>, IFileData, IEqualComparable<FileData>
 {
     public static JsonSerializerContext    JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<FileData>   JsonTypeInfo  => JakarModelsLongContext.Default.FileData;
@@ -446,7 +446,7 @@ public sealed class UserModel : UserModel<UserModel, long, UserAddress, GroupMod
 
 
 [Serializable]
-public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel
+public sealed class CreateUserModel : CreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, ICreateUserModel<CreateUserModel, long, UserAddress, GroupModel, RoleModel>, IUserModel, IEqualComparable<CreateUserModel>
 {
     public static JsonSerializerContext           JsonContext   => JakarModelsLongContext.Default;
     public static JsonTypeInfo<CreateUserModel>   JsonTypeInfo  => JakarModelsLongContext.Default.CreateUserModel;
@@ -545,7 +545,7 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
 
 [Serializable]
 [method: JsonConstructor]
-public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>
+public sealed class UserLoginRequest( string userName, string password, UserModel data ) : LoginRequest<UserLoginRequest, UserModel>(userName, password, data), IJsonModel<UserLoginRequest>, IEqualComparable<UserLoginRequest>
 {
     public static                JsonSerializerContext            JsonContext   => JakarModelsLongContext.Default;
     public static                JsonTypeInfo<UserLoginRequest>   JsonTypeInfo  => JakarModelsLongContext.Default.UserLoginRequest;
