@@ -29,7 +29,7 @@ public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) :
 {
     private   string __name   = nameOfRole;
     private   string __rights = rights;
-    protected TID    _id;
+    protected TID    _id      = id;
 
 
     public                                      TID    ID         { get => _id;      init => _id = value; }

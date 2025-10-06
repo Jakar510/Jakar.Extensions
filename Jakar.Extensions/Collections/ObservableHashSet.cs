@@ -13,6 +13,7 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
     public static  JsonTypeInfo<ObservableHashSet<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
     public static  JsonTypeInfo<ObservableHashSet<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
 
+
     public ObservableHashSet() : this(DEFAULT_CAPACITY) { }
     public ObservableHashSet( int                         capacity ) : this(new HashSet<TValue>(capacity)) { }
     public ObservableHashSet( IEnumerable<TValue>         enumerable ) : this(new HashSet<TValue>(enumerable)) { }

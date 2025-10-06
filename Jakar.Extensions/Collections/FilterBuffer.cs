@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 
 [DefaultValue(nameof(Empty))]
-public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, IValueEnumerable<FilterBuffer<TValue>, TValue>
+public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
 {
     public static readonly FilterBuffer<TValue> Empty = new(0);
     private readonly IMemoryOwner<TValue>? __owner = capacity > 0
@@ -28,6 +28,8 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
 
     public FilterBuffer() : this(0) { }
     public readonly void Dispose() => __owner?.Dispose();
+
+
     public void Add( ref readonly TValue value )
     {
         if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
@@ -36,7 +38,6 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     }
 
 
-    [Pure] public ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(this);
     public bool TryGetNext( out TValue current )
     {
         if ( __index < length )

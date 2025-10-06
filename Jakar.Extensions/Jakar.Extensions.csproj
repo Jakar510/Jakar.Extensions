@@ -5,9 +5,9 @@
 		<LangVersion>latest</LangVersion>
 		<Nullable>enable</Nullable>
 		<NoWarn>$(NoWarn);1591;IDE0079;CS8424;IDE0046;CS1658;CS1591</NoWarn>
-		<WarningsAsErrors>Nullable;CS0114</WarningsAsErrors>
+		<WarningsAsErrors>Nullable;CS0114;CS9113</WarningsAsErrors>
 		<ImplicitUsings>disable</ImplicitUsings>
-		<Version>9.18.6</Version>
+		<Version>9.18.7</Version>
 		<Title>Jakar.Extensions</Title>
 		<PackageId>Jakar.Extensions</PackageId>
 		<Authors>Tyler Stegmaier</Authors>
@@ -95,17 +95,18 @@
 		<PackageReference Include="CommunityToolkit.Diagnostics" />
 		<PackageReference Include="JetBrains.Annotations" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
- 		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Http" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" />
+		<PackageReference Include="Microsoft.IdentityModel.Tokens" />
 		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" />
 		<PackageReference Include="Nito.Collections.Deque" />
- 		<PackageReference Include="Otp.NET" />
+		<PackageReference Include="Otp.NET" />
 		<PackageReference Include="Portable.BouncyCastle" />
 		<PackageReference Include="Serilog" />
 		<PackageReference Include="Serilog.Formatting.Compact" />
@@ -133,8 +134,8 @@
 		<PackageReference Include="ValueOf" />
 		<PackageReference Include="ZLinq" />
 		<PackageReference Include="ZLinq.DropInGenerator">
-		  <PrivateAssets>all</PrivateAssets>
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="ZLinq.FileSystem" />
 		<PackageReference Include="ZXing.Net" />

@@ -249,20 +249,80 @@ public static class Json
     public static void SetAdditionalData( this IJsonStringModel model, JsonObject? data ) => model.AdditionalData = data?.ToJson();
 
 
+    public static string ToJson( this string[]                value ) => value.ToJson(JakarExtensionsContext.Default.StringArray);
+    public static string ToJson( this Int128[]                value ) => value.ToJson(JakarExtensionsContext.Default.Int128Array);
+    public static string ToJson( this UInt128[]               value ) => value.ToJson(JakarExtensionsContext.Default.UInt128Array);
+    public static string ToJson( this Int128?[]               value ) => value.ToJson(JakarExtensionsContext.Default.NullableInt128Array);
+    public static string ToJson( this UInt128?[]              value ) => value.ToJson(JakarExtensionsContext.Default.NullableUInt128Array);
+    public static string ToJson( this decimal[]               value ) => value.ToJson(JakarExtensionsContext.Default.DecimalArray);
+    public static string ToJson( this double[]                value ) => value.ToJson(JakarExtensionsContext.Default.DoubleArray);
+    public static string ToJson( this float[]                 value ) => value.ToJson(JakarExtensionsContext.Default.SingleArray);
+    public static string ToJson( this long[]                  value ) => value.ToJson(JakarExtensionsContext.Default.Int64Array);
+    public static string ToJson( this int[]                   value ) => value.ToJson(JakarExtensionsContext.Default.Int32Array);
+    public static string ToJson( this short[]                 value ) => value.ToJson(JakarExtensionsContext.Default.Int16Array);
+    public static string ToJson( this ulong[]                 value ) => value.ToJson(JakarExtensionsContext.Default.UInt64Array);
+    public static string ToJson( this uint[]                  value ) => value.ToJson(JakarExtensionsContext.Default.UInt32Array);
+    public static string ToJson( this ushort[]                value ) => value.ToJson(JakarExtensionsContext.Default.UInt16Array);
+    public static string ToJson( this DateTime[]              value ) => value.ToJson(JakarExtensionsContext.Default.DateTimeArray);
+    public static string ToJson( this DateTimeOffset[]        value ) => value.ToJson(JakarExtensionsContext.Default.DateTimeOffsetArray);
+    public static string ToJson( this DateOnly[]              value ) => value.ToJson(JakarExtensionsContext.Default.DateOnlyArray);
+    public static string ToJson( this TimeOnly[]              value ) => value.ToJson(JakarExtensionsContext.Default.TimeOnlyArray);
+    public static string ToJson( this TimeSpan[]              value ) => value.ToJson(JakarExtensionsContext.Default.TimeSpanArray);
+    public static string ToJson( this decimal?[]              value ) => value.ToJson(JakarExtensionsContext.Default.NullableDecimalArray);
+    public static string ToJson( this double?[]               value ) => value.ToJson(JakarExtensionsContext.Default.NullableDoubleArray);
+    public static string ToJson( this float?[]                value ) => value.ToJson(JakarExtensionsContext.Default.NullableSingleArray);
+    public static string ToJson( this long?[]                 value ) => value.ToJson(JakarExtensionsContext.Default.NullableInt64Array);
+    public static string ToJson( this int?[]                  value ) => value.ToJson(JakarExtensionsContext.Default.NullableInt32Array);
+    public static string ToJson( this short?[]                value ) => value.ToJson(JakarExtensionsContext.Default.NullableInt16Array);
+    public static string ToJson( this ulong?[]                value ) => value.ToJson(JakarExtensionsContext.Default.NullableUInt64Array);
+    public static string ToJson( this uint?[]                 value ) => value.ToJson(JakarExtensionsContext.Default.NullableUInt32Array);
+    public static string ToJson( this ushort?[]               value ) => value.ToJson(JakarExtensionsContext.Default.NullableUInt16Array);
+    public static string ToJson( this DateTime?[]             value ) => value.ToJson(JakarExtensionsContext.Default.NullableDateTimeArray);
+    public static string ToJson( this DateTimeOffset?[]       value ) => value.ToJson(JakarExtensionsContext.Default.NullableDateTimeOffsetArray);
+    public static string ToJson( this DateOnly?[]             value ) => value.ToJson(JakarExtensionsContext.Default.NullableDateOnlyArray);
+    public static string ToJson( this TimeOnly?[]             value ) => value.ToJson(JakarExtensionsContext.Default.NullableTimeOnlyArray);
+    public static string ToJson( this TimeSpan?[]             value ) => value.ToJson(JakarExtensionsContext.Default.NullableTimeSpanArray);
+    public static string ToJson( this Uri[]                   value ) => value.ToJson(JakarExtensionsContext.Default.UriArray);
+    public static string ToJson( this byte[]                  value ) => value.ToJson(JakarExtensionsContext.Default.ByteArray);
+    public static string ToJson( this Memory<byte>[]          value ) => value.ToJson(JakarExtensionsContext.Default.MemoryByteArray);
+    public static string ToJson( this ReadOnlyMemory<byte>[]  value ) => value.ToJson(JakarExtensionsContext.Default.ReadOnlyMemoryByteArray);
+    public static string ToJson( this ReadOnlyMemory<byte>    value ) => value.ToJson(JakarExtensionsContext.Default.ReadOnlyMemoryByte);
+    public static string ToJson( this Memory<byte>            value ) => value.ToJson(JakarExtensionsContext.Default.MemoryByte);
+    public static string ToJson( this HashSet<string>         value ) => value.ToJson(JakarExtensionsContext.Default.HashSetString);
+    public static string ToJson( this HashSet<double>         value ) => value.ToJson(JakarExtensionsContext.Default.HashSetDouble);
+    public static string ToJson( this HashSet<float>          value ) => value.ToJson(JakarExtensionsContext.Default.HashSetSingle);
+    public static string ToJson( this HashSet<long>           value ) => value.ToJson(JakarExtensionsContext.Default.HashSetInt64);
+    public static string ToJson( this HashSet<int>            value ) => value.ToJson(JakarExtensionsContext.Default.HashSetInt32);
+    public static string ToJson( this HashSet<short>          value ) => value.ToJson(JakarExtensionsContext.Default.HashSetInt16);
+    public static string ToJson( this HashSet<ulong>          value ) => value.ToJson(JakarExtensionsContext.Default.HashSetUInt64);
+    public static string ToJson( this HashSet<uint>           value ) => value.ToJson(JakarExtensionsContext.Default.HashSetUInt32);
+    public static string ToJson( this HashSet<ushort>         value ) => value.ToJson(JakarExtensionsContext.Default.HashSetUInt16);
+    public static string ToJson( this HashSet<Int128>         value ) => value.ToJson(JakarExtensionsContext.Default.HashSetInt128);
+    public static string ToJson( this HashSet<UInt128>        value ) => value.ToJson(JakarExtensionsContext.Default.HashSetUInt128);
+    public static string ToJson( this HashSet<Guid>           value ) => value.ToJson(JakarExtensionsContext.Default.HashSetGuid);
+    public static string ToJson( this HashSet<DateTimeOffset> value ) => value.ToJson(JakarExtensionsContext.Default.HashSetDateTimeOffset);
+    public static string ToJson( this HashSet<DateTime>       value ) => value.ToJson(JakarExtensionsContext.Default.HashSetDateTime);
+    public static string ToJson( this HashSet<DateOnly>       value ) => value.ToJson(JakarExtensionsContext.Default.HashSetDateOnly);
+    public static string ToJson( this HashSet<TimeOnly>       value ) => value.ToJson(JakarExtensionsContext.Default.HashSetTimeOnly);
+    public static string ToJson( this HashSet<TimeSpan>       value ) => value.ToJson(JakarExtensionsContext.Default.HashSetTimeSpan);
+
+
     public static string ToJson( this JsonNode value ) => value.ToJsonString(Options);
+    public static string ToJson<TValue>( this TValue[] value )
+        where TValue : IJsonModel<TValue> => value.ToJson(TValue.JsonArrayInfo);
     public static string ToJson<TValue>( this TValue value )
         where TValue : IJsonModel<TValue> => value.ToJson(TValue.JsonTypeInfo);
     public static string ToJson<TValue>( this TValue value, JsonTypeInfo<TValue> info ) => JsonSerializer.Serialize(value, info);
 
 
-    public static JsonDocumentOptions GetJsonDocumentOptions( this JsonSerializerOptions options ) => new()
-                                                                                                      {
-                                                                                                          AllowTrailingCommas = options.AllowTrailingCommas,
-                                                                                                          CommentHandling     = options.ReadCommentHandling,
-                                                                                                          MaxDepth            = options.MaxDepth
-                                                                                                      };
+    [Pure] public static JsonDocumentOptions GetJsonDocumentOptions( this JsonSerializerOptions options ) => new()
+                                                                                                             {
+                                                                                                                 AllowTrailingCommas = options.AllowTrailingCommas,
+                                                                                                                 CommentHandling     = options.ReadCommentHandling,
+                                                                                                                 MaxDepth            = options.MaxDepth
+                                                                                                             };
     public static       ValueTask<JsonNode?> FromJson( this Stream stream, CancellationToken     token )                            => stream.FromJson(Options, token);
-    public static async ValueTask<JsonNode?> FromJson( this Stream stream, JsonSerializerOptions options, CancellationToken token ) { return await JsonNode.ParseAsync(stream, JsonNodeOptions, options.GetJsonDocumentOptions(), token); }
+    public static async ValueTask<JsonNode?> FromJson( this Stream stream, JsonSerializerOptions options, CancellationToken token ) => await JsonNode.ParseAsync(stream, JsonNodeOptions, options.GetJsonDocumentOptions(), token);
 
 
     public static ValueTask<TValue?> FromJson<TValue>( this Stream stream, CancellationToken token )

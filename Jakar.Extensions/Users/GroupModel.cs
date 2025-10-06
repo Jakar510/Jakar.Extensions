@@ -32,7 +32,7 @@ public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? crea
     private   string __permissions = rights;
     private   TID?   __createdBy   = createdBy;
     private   TID?   __ownerID     = ownerID;
-    protected TID    _id;
+    protected TID    _id           = id;
 
 
     public                                      TID    ID          { get => _id;           init => _id = value; }

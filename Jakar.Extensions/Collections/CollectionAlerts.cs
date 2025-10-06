@@ -31,15 +31,21 @@ public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, I
 
 
 
+public delegate bool FilterDelegate<TValue>( int index, ref readonly TValue? value );
+
+
+
 public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, ICollectionAlerts<TValue>
     where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
 {
 // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
-    public abstract           int                              Count { get; }
+    public abstract           int                              Count          { get; }
+    public                    FilterDelegate<TValue>?          OverrideFilter { get; set; }
 
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
+
 
     public override bool Equals( TSelf?    other ) => ReferenceEquals(this, other);
     public override int  CompareTo( TSelf? other ) => Nullable.Compare(Count, other?.Count);
@@ -61,7 +67,17 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
         CollectionChanged?.Invoke(this, e);
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }
     }
-    protected virtual                                        bool                                          Filter( int index, ref readonly TValue? value ) => true;
+
+
+    protected virtual bool Filter( int index, ref readonly TValue? value )
+    {
+        FilterDelegate<TValue>? filter = OverrideFilter;
+        if ( filter is null ) { return true; }
+
+        return filter(index, in value);
+    }
+
+
     [Pure] [MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();
     [Pure] [MustDisposeResource] public                      ValueEnumerable<FilterBuffer<TValue>, TValue> AsValueEnumerable() => new(FilteredValues());
     public virtual IEnumerator<TValue> GetEnumerator()

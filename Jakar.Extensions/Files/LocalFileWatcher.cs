@@ -18,9 +18,6 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     private readonly WeakEventManager<FileSystemEventArgs> __eventManager       = new();
     private readonly WeakEventManager<RenamedEventArgs>    __renameEventManager = new();
     private          LocalDirectory?                       __directory;
-    public static    JsonSerializerContext                 JsonContext   => JakarExtensionsContext.Default;
-    public static    JsonTypeInfo<LocalFileWatcher>        JsonTypeInfo  => JakarExtensionsContext.Default.LocalFileWatcher;
-    public static    JsonTypeInfo<LocalFileWatcher[]>      JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
 
 
     public event ErrorEventHandler?      Error   { add => __errorEventManager.AddEventHandler(x => value?.Invoke(this,  x)); remove => __errorEventManager.RemoveEventHandler(x => value?.Invoke(this,  x)); }
@@ -30,8 +27,11 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     public event RenamedEventHandler?    Renamed { add => __renameEventManager.AddEventHandler(x => value?.Invoke(this, x)); remove => __renameEventManager.RemoveEventHandler(x => value?.Invoke(this, x)); }
 
 
-    public NotifyFilters Filters      { get; set; } = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
-    public string        SearchFilter { get; set; } = "*";
+    public static JsonSerializerContext            JsonContext   => JakarExtensionsContext.Default;
+    public static JsonTypeInfo<LocalFileWatcher>   JsonTypeInfo  => JakarExtensionsContext.Default.LocalFileWatcher;
+    public static JsonTypeInfo<LocalFileWatcher[]> JsonArrayInfo => JakarExtensionsContext.Default.LocalFileWatcherArray;
+    public        NotifyFilters                    Filters       { get; set; } = NotifyFilters.FileName | NotifyFilters.Size | NotifyFilters.LastWrite | NotifyFilters.CreationTime;
+    public        string                           SearchFilter  { get; set; } = "*";
 
     public bool EnableRaisingEvents
     {
