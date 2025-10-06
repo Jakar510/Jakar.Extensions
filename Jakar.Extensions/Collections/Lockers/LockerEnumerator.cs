@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection ) : IEnumerator<TValue>, IEnumerable<TValue>
     where TCloser : IDisposable
 {
-    private const    int                                START_INDEX = 0;
+    private const    int                                START_INDEX  = 0;
     private readonly ILockedCollection<TValue, TCloser> __collection = collection;
     private          bool                               __isDisposed;
     private          FilterBuffer<TValue>?              __owner;
@@ -15,9 +15,9 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
 
 
     private             ReadOnlyMemory<TValue> __Memory => __owner?.Memory ?? ReadOnlyMemory<TValue>.Empty;
-    public ref readonly TValue                 Current { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
-    TValue IEnumerator<TValue>.                Current => Current;
-    object? IEnumerator.                       Current => Current;
+    public ref readonly TValue                 Current  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref __Memory.Span[__index]; }
+    TValue IEnumerator<TValue>.                Current  => Current;
+    object? IEnumerator.                       Current  => Current;
 
 
     public void Dispose()
@@ -25,7 +25,7 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
         __isDisposed = true;
         __owner?.Dispose();
         __owner = null;
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
     }
     IEnumerator<TValue> IEnumerable<TValue>.GetEnumerator() => this;
     IEnumerator IEnumerable.                GetEnumerator() => this;
@@ -47,5 +47,5 @@ public class LockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TClose
     }
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(__isDisposed, this);
 }

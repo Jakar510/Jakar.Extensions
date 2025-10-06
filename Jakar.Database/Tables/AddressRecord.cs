@@ -20,7 +20,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified, AdditionalData), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "addresses";
-    public static string                        TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static string                        TableName     {  get => TABLE_NAME; }
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
@@ -183,7 +183,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         return await db.Addresses.Get(connection, transaction, true, parameters, token);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
     [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
@@ -231,7 +231,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         yield break;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
 

@@ -6,11 +6,11 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 {
     #region ctor
 
-    public MultiDict() : this( 0 ) { }
-    public MultiDict( EqualityComparer<TKey>?                 comparer ) : base( 0, comparer ) { }
-    public MultiDict( int                                      capacity,   EqualityComparer<TKey>? comparer = null ) : base( capacity, comparer ) { }
-    public MultiDict( IDictionary<TKey, object?>               dictionary, EqualityComparer<TKey>? comparer = null ) : base( dictionary, comparer ) { }
-    public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, EqualityComparer<TKey>? comparer = null ) : base( collection, comparer ) { }
+    public MultiDict() : this(0) { }
+    public MultiDict( EqualityComparer<TKey>?                  comparer ) : base(0, comparer) { }
+    public MultiDict( int                                      capacity,   EqualityComparer<TKey>? comparer = null ) : base(capacity, comparer) { }
+    public MultiDict( IDictionary<TKey, object?>               dictionary, EqualityComparer<TKey>? comparer = null ) : base(dictionary, comparer) { }
+    public MultiDict( IEnumerable<KeyValuePair<TKey, object?>> collection, EqualityComparer<TKey>? comparer = null ) : base(collection, comparer) { }
 
     #endregion
 
@@ -18,36 +18,36 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 
     #region Gets
 
-    public bool ValueAs( TKey key, out                       double      value ) => ValueAs<double>( key, out value );
-    public bool ValueAs( TKey key, out                       double?     value ) => ValueAs<double?>( key, out value );
-    public bool ValueAs( TKey key, out                       float       value ) => ValueAs<float>( key, out value );
-    public bool ValueAs( TKey key, out                       float?      value ) => ValueAs<float?>( key, out value );
-    public bool ValueAs( TKey key, out                       long        value ) => ValueAs<long>( key, out value );
-    public bool ValueAs( TKey key, out                       long?       value ) => ValueAs<long?>( key, out value );
-    public bool ValueAs( TKey key, out                       ulong       value ) => ValueAs<ulong>( key, out value );
-    public bool ValueAs( TKey key, out                       ulong?      value ) => ValueAs<ulong?>( key, out value );
-    public bool ValueAs( TKey key, out                       int         value ) => ValueAs<int>( key, out value );
-    public bool ValueAs( TKey key, out                       int?        value ) => ValueAs<int?>( key, out value );
-    public bool ValueAs( TKey key, out                       uint        value ) => ValueAs<uint>( key, out value );
-    public bool ValueAs( TKey key, out                       uint?       value ) => ValueAs<uint?>( key, out value );
-    public bool ValueAs( TKey key, out                       short       value ) => ValueAs<short>( key, out value );
-    public bool ValueAs( TKey key, out                       short?      value ) => ValueAs<short?>( key, out value );
-    public bool ValueAs( TKey key, out                       ushort      value ) => ValueAs<ushort>( key, out value );
-    public bool ValueAs( TKey key, out                       ushort?     value ) => ValueAs<ushort?>( key, out value );
-    public bool ValueAs( TKey key, out                       Guid        value ) => ValueAs<Guid>( key, out value );
-    public bool ValueAs( TKey key, out                       Guid?       value ) => ValueAs<Guid?>( key, out value );
-    public bool ValueAs( TKey key, out                       DateTime    value ) => ValueAs<DateTime>( key, out value );
-    public bool ValueAs( TKey key, out                       DateTime?   value ) => ValueAs<DateTime?>( key, out value );
-    public bool ValueAs( TKey key, out                       TimeSpan    value ) => ValueAs<TimeSpan>( key, out value );
-    public bool ValueAs( TKey key, out                       TimeSpan?   value ) => ValueAs<TimeSpan?>( key, out value );
-    public bool ValueAs( TKey key, out                       bool        value ) => ValueAs<bool>( key, out value );
-    public bool ValueAs( TKey key, out                       bool?       value ) => ValueAs<bool?>( key, out value );
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out IPAddress?  value ) => ValueAs<IPAddress>( key, out value );
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out AppVersion? value ) => ValueAs<AppVersion?>( key, out value );
-    public bool ValueAs( TKey key, [NotNullWhen( true )] out Version?    value ) => ValueAs<Version>( key, out value );
+    public bool ValueAs( TKey key, out                     double      value ) => ValueAs<double>(key, out value);
+    public bool ValueAs( TKey key, out                     double?     value ) => ValueAs<double?>(key, out value);
+    public bool ValueAs( TKey key, out                     float       value ) => ValueAs<float>(key, out value);
+    public bool ValueAs( TKey key, out                     float?      value ) => ValueAs<float?>(key, out value);
+    public bool ValueAs( TKey key, out                     long        value ) => ValueAs<long>(key, out value);
+    public bool ValueAs( TKey key, out                     long?       value ) => ValueAs<long?>(key, out value);
+    public bool ValueAs( TKey key, out                     ulong       value ) => ValueAs<ulong>(key, out value);
+    public bool ValueAs( TKey key, out                     ulong?      value ) => ValueAs<ulong?>(key, out value);
+    public bool ValueAs( TKey key, out                     int         value ) => ValueAs<int>(key, out value);
+    public bool ValueAs( TKey key, out                     int?        value ) => ValueAs<int?>(key, out value);
+    public bool ValueAs( TKey key, out                     uint        value ) => ValueAs<uint>(key, out value);
+    public bool ValueAs( TKey key, out                     uint?       value ) => ValueAs<uint?>(key, out value);
+    public bool ValueAs( TKey key, out                     short       value ) => ValueAs<short>(key, out value);
+    public bool ValueAs( TKey key, out                     short?      value ) => ValueAs<short?>(key, out value);
+    public bool ValueAs( TKey key, out                     ushort      value ) => ValueAs<ushort>(key, out value);
+    public bool ValueAs( TKey key, out                     ushort?     value ) => ValueAs<ushort?>(key, out value);
+    public bool ValueAs( TKey key, out                     Guid        value ) => ValueAs<Guid>(key, out value);
+    public bool ValueAs( TKey key, out                     Guid?       value ) => ValueAs<Guid?>(key, out value);
+    public bool ValueAs( TKey key, out                     DateTime    value ) => ValueAs<DateTime>(key, out value);
+    public bool ValueAs( TKey key, out                     DateTime?   value ) => ValueAs<DateTime?>(key, out value);
+    public bool ValueAs( TKey key, out                     TimeSpan    value ) => ValueAs<TimeSpan>(key, out value);
+    public bool ValueAs( TKey key, out                     TimeSpan?   value ) => ValueAs<TimeSpan?>(key, out value);
+    public bool ValueAs( TKey key, out                     bool        value ) => ValueAs<bool>(key, out value);
+    public bool ValueAs( TKey key, out                     bool?       value ) => ValueAs<bool?>(key, out value);
+    public bool ValueAs( TKey key, [NotNullWhen(true)] out IPAddress?  value ) => ValueAs<IPAddress>(key, out value);
+    public bool ValueAs( TKey key, [NotNullWhen(true)] out AppVersion? value ) => ValueAs<AppVersion?>(key, out value);
+    public bool ValueAs( TKey key, [NotNullWhen(true)] out Version?    value ) => ValueAs<Version>(key, out value);
 
 
-    public bool ValueAs<TValue>( TKey key, [NotNullWhen( true )] out TValue? value )
+    public bool ValueAs<TValue>( TKey key, [NotNullWhen(true)] out TValue? value )
     {
         object? s = this[key];
 
@@ -64,9 +64,9 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 
     public TValue ValueAs<TValue>( TKey key )
     {
-        if ( !ContainsKey( key ) ) { throw new KeyNotFoundException( key.ToString() ); }
+        if ( !ContainsKey(key) ) { throw new KeyNotFoundException(key.ToString()); }
 
-        return ExpectedValueTypeException<TKey>.Verify<TValue>( this[key], key );
+        return ExpectedValueTypeException<TKey>.Verify<TValue>(this[key], key);
     }
 
     #endregion
@@ -109,9 +109,9 @@ public class MultiDict<TKey> : Dictionary<TKey, object?>
 
 public class MultiDict : MultiDict<string>
 {
-    public MultiDict() : this( 0 ) { }
-    public MultiDict( EqualityComparer<string>?                 comparer ) : base( 0, comparer ) { }
-    public MultiDict( int                                        capacity,   EqualityComparer<string>? comparer = null ) : base( capacity, comparer ) { }
-    public MultiDict( IDictionary<string, object?>               dictionary, EqualityComparer<string>? comparer = null ) : base( dictionary, comparer ) { }
-    public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, EqualityComparer<string>? comparer = null ) : base( collection, comparer ) { }
+    public MultiDict() : this(0) { }
+    public MultiDict( EqualityComparer<string>?                  comparer ) : base(0, comparer) { }
+    public MultiDict( int                                        capacity,   EqualityComparer<string>? comparer = null ) : base(capacity, comparer) { }
+    public MultiDict( IDictionary<string, object?>               dictionary, EqualityComparer<string>? comparer = null ) : base(dictionary, comparer) { }
+    public MultiDict( IEnumerable<KeyValuePair<string, object?>> collection, EqualityComparer<string>? comparer = null ) : base(collection, comparer) { }
 }

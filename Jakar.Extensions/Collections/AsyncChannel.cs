@@ -16,8 +16,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
     private readonly TaskCompletionSource<bool> __completion = new();
 
 
-    public int  Count   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Reader.Count; }
-    public bool IsEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Reader.Count == 0; }
+    public int  Count   { get => Reader.Count; }
+    public bool IsEmpty { get => Reader.Count == 0; }
 
 
     public AsyncChannel()
@@ -44,9 +44,9 @@ public sealed class AsyncChannel<TValue> : IDisposable
         private readonly AsyncChannel<TValue> __parent = parent;
         public override  bool                 CanCount   => true;
         public override  bool                 CanPeek    => true;
-        public override  Task                 Completion { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __parent.__completion.Task; }
-        public override  int                  Count      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __parent.__values.Count; }
-        public           bool                 IsEmpty    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __parent.__values.IsEmpty; }
+        public override  Task                 Completion { get => __parent.__completion.Task; }
+        public override  int                  Count      { get => __parent.__values.Count; }
+        public           bool                 IsEmpty    { get => __parent.__values.IsEmpty; }
 
 
         public TValue? Read() => __parent.__values.TryDequeue(out TValue? first)
@@ -70,7 +70,8 @@ public sealed class AsyncChannel<TValue> : IDisposable
                     while ( TryRead(out TValue? value) ) { yield return value; }
                 }
 
-                await telemetrySpan.Delay(5, token).ConfigureAwait(false);
+                await telemetrySpan.Delay(5, token)
+                                   .ConfigureAwait(false);
             }
         }
         public override ValueTask<bool> WaitToReadAsync( CancellationToken token = default ) => new(!__parent.__values.IsEmpty);

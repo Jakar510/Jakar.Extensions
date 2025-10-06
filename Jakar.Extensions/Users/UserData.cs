@@ -112,7 +112,7 @@ public static class UserData
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static DateTimeOffset GetExpires( this IUserData user, scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
+    public static DateTimeOffset GetExpires( this IUserData user, scoped in TimeSpan offset ) => user.GetExpires(DateTimeOffset.UtcNow, offset);
     public static DateTimeOffset GetExpires( this IUserData user, scoped in DateTimeOffset now, scoped in TimeSpan offset )
     {
         DateTimeOffset date = now + offset;

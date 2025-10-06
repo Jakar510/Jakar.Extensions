@@ -11,7 +11,7 @@ public static partial class AsyncLinq
         {
             checked { index++; }
 
-            yield return (index, element);
+            yield return ( index, element );
         }
     }
     public static async IAsyncEnumerable<(long Index, TElement Value)> Enumerate<TElement>( this IAsyncEnumerable<TElement> source, long start = 0 )
@@ -22,7 +22,7 @@ public static partial class AsyncLinq
         {
             checked { index++; }
 
-            yield return (index, element);
+            yield return ( index, element );
         }
     }
     public static IEnumerable<(int index, KeyValuePair<TKey, TElement> pair)> EnumeratePairs<TKey, TElement>( this IDictionary<TKey, TElement> element, int start = 0 )
@@ -31,7 +31,7 @@ public static partial class AsyncLinq
 
         foreach ( KeyValuePair<TKey, TElement> pair in element )
         {
-            yield return (index, pair);
+            yield return ( index, pair );
             index++;
         }
     }
@@ -43,7 +43,7 @@ public static partial class AsyncLinq
 
         foreach ( DictionaryEntry pair in element )
         {
-            yield return (index, pair.Key, pair.Value);
+            yield return ( index, pair.Key, pair.Value );
             index++;
         }
     }
@@ -55,7 +55,7 @@ public static partial class AsyncLinq
 
         foreach ( object? item in element )
         {
-            yield return (index, item);
+            yield return ( index, item );
             index++;
         }
     }
@@ -65,7 +65,7 @@ public static partial class AsyncLinq
 
         foreach ( TElement item in element )
         {
-            yield return (index, item);
+            yield return ( index, item );
             index++;
         }
     }
@@ -73,9 +73,9 @@ public static partial class AsyncLinq
     {
         int index = start;
 
-        foreach ( (TKey key, TElement value) in element )
+        foreach ( ( TKey key, TElement value ) in element )
         {
-            yield return (index, key, value);
+            yield return ( index, key, value );
             index++;
         }
     }
@@ -85,7 +85,7 @@ public static partial class AsyncLinq
 
         foreach ( KeyValuePair<TKey, TElement> pair in element )
         {
-            yield return (index, pair);
+            yield return ( index, pair );
             index++;
         }
     }
@@ -97,7 +97,7 @@ public static partial class AsyncLinq
 
         foreach ( DictionaryEntry pair in element )
         {
-            yield return (index, pair.Key, pair.Value);
+            yield return ( index, pair.Key, pair.Value );
             index++;
         }
     }
@@ -109,7 +109,7 @@ public static partial class AsyncLinq
 
         foreach ( object? item in element )
         {
-            yield return (index, item);
+            yield return ( index, item );
             index++;
         }
     }
@@ -119,7 +119,7 @@ public static partial class AsyncLinq
 
         foreach ( TElement item in element )
         {
-            yield return (index, item);
+            yield return ( index, item );
             index++;
         }
     }
@@ -127,9 +127,9 @@ public static partial class AsyncLinq
     {
         long index = start;
 
-        foreach ( (TKey key, TElement value) in element )
+        foreach ( ( TKey key, TElement value ) in element )
         {
-            yield return (index, key, value);
+            yield return ( index, key, value );
             index++;
         }
     }

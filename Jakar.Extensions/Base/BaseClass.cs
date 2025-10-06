@@ -19,7 +19,7 @@ public class BaseClass : IJsonModel, IObservableObject
     protected              JsonObject?    _additionalData;
 
 
-    [StringLength(UNICODE_TEXT_CAPACITY)][JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
+    [StringLength(UNICODE_TEXT_CAPACITY)] [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;
@@ -135,20 +135,4 @@ public abstract class BaseClass<TSelf> : BaseClass, IEquatable<TSelf>, IComparab
 
         return (TSelf)this;
     }
-}
-
-
-
-public abstract class BaseClass<TSelf, TID> : BaseClass<TSelf>, IUniqueID<TID>
-    where TSelf : BaseClass<TSelf, TID>, IJsonModel<TSelf>
-    where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-{
-    protected TID _id;
-
-
-    public virtual TID ID { get => _id; init => _id = value; }
-
-
-    protected BaseClass() : base() { }
-    protected BaseClass( TID id ) => ID = id;
 }

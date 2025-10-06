@@ -1,4 +1,4 @@
 ﻿namespace Jakar.Extensions;
 
 
-[AttributeUsage( AttributeTargets.All )] public class IsJsonSerializableAttribute : Attribute;
+[AttributeUsage(AttributeTargets.All)] public class IsJsonSerializableAttribute : Attribute;

@@ -56,12 +56,14 @@ public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int
     public static implicit operator ObservableCollection<TValue>( ReadOnlySpan<TValue>                                        values ) => new(values);
 
 
-    public static bool operator ==( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
-    public static bool operator !=( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => !EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
-    public static bool operator >( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) > 0;
-    public static bool operator >=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) >= 0;
-    public static bool operator <( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) < 0;
-    public static bool operator <=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                                          => RuntimeHelpers.GetHashCode(this);
+    public override bool Equals( object?                            other )                                     => ReferenceEquals(this, other) || other is ObservableCollection<TValue> x && Equals(x);
+    public static   bool operator ==( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
+    public static   bool operator !=( ObservableCollection<TValue>? left, ObservableCollection<TValue>? right ) => !EqualityComparer<ObservableCollection<TValue>>.Default.Equals(left, right);
+    public static   bool operator >( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( ObservableCollection<TValue>   left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( ObservableCollection<TValue>  left, ObservableCollection<TValue>  right ) => Comparer<ObservableCollection<TValue>>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -75,17 +77,17 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal readonly List<TValue>     buffer   = new(capacity);
 
 
-    public          int  Capacity       { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
-    public override int  Count          { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    public          bool IsEmpty        { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count == 0; }
-    bool IList.          IsFixedSize    { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
-    public bool          IsNotEmpty     { [Pure][MethodImpl(     MethodImplOptions.AggressiveInlining)] get => Count > 0; }
-    public bool          IsReadOnly     { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get; init; }
-    bool ICollection.    IsSynchronized { [MethodImpl(           MethodImplOptions.AggressiveInlining)] get => false; }
-    object? IList.this[ int                index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); [MethodImpl(MethodImplOptions.AggressiveInlining)] set => Set(index, (TValue)value!); }
-    public TValue this[ int                index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); [MethodImpl(MethodImplOptions.AggressiveInlining)] set => Set(index, value); }
-    TValue IReadOnlyList<TValue>.this[ int index ] { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Get(index); }
-    object ICollection.SyncRoot { [MethodImpl(                   MethodImplOptions.AggressiveInlining)] get => buffer; }
+    public          int  Capacity       { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Capacity; }
+    public override int  Count          { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
+    public          bool IsEmpty        { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count == 0; }
+    bool IList.          IsFixedSize    { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => ( (IList)buffer ).IsFixedSize; }
+    public bool          IsNotEmpty     { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Count > 0; }
+    public bool          IsReadOnly     { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get; init; }
+    bool ICollection.    IsSynchronized { [MethodImpl(       MethodImplOptions.AggressiveInlining)] get => false; }
+    object? IList.this[ int                index ] { get => Get(index); set => Set(index, (TValue)value!); }
+    public TValue this[ int                index ] { get => Get(index); set => Set(index, value); }
+    TValue IReadOnlyList<TValue>.this[ int index ] { get => Get(index); }
+    object ICollection.SyncRoot { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer; }
 
 
     protected ObservableCollection() : this(Comparer<TValue>.Default) { }
@@ -270,19 +272,29 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     protected internal virtual void InternalSort( Comparer<TValue> compare )
     {
         ThrowIfReadOnly();
-        CollectionsMarshal.AsSpan(buffer).Sort(compare);
+
+        CollectionsMarshal.AsSpan(buffer)
+                          .Sort(compare);
+
         Reset();
     }
     protected internal virtual void InternalSort( Comparison<TValue> compare )
     {
         ThrowIfReadOnly();
-        CollectionsMarshal.AsSpan(buffer).Sort(compare);
+
+        CollectionsMarshal.AsSpan(buffer)
+                          .Sort(compare);
+
         Reset();
     }
     protected internal virtual void InternalSort( int start, int length, Comparer<TValue> compare )
     {
         ThrowIfReadOnly();
-        CollectionsMarshal.AsSpan(buffer).Slice(start, length).Sort(compare);
+
+        CollectionsMarshal.AsSpan(buffer)
+                          .Slice(start, length)
+                          .Sort(compare);
+
         Reset();
     }
 
@@ -335,14 +347,12 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new NotSupportedException("Collection is read-only."); }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     protected internal virtual TValue InternalGet( int index )
     {
         Guard.IsInRangeFor(index, buffer, nameof(index));
@@ -662,8 +672,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     }
 
 
-    [Pure][MustDisposeResource]
-    protected internal override FilterBuffer<TValue> FilteredValues()
+    [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
     {
         ReadOnlySpan<TValue> span   = AsSpan();
         FilterBuffer<TValue> values = new(span.Length);
@@ -681,7 +690,8 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
     public virtual ReadOnlySpan<TValue> AsSpan() => CollectionsMarshal.AsSpan(buffer);
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
-    public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => AsSpan().Slice(start, length);
+    public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => AsSpan()
+       .Slice(start, length);
 
 
     public virtual void EnsureCapacity( int capacity ) => buffer.EnsureCapacity(buffer.Count + capacity);

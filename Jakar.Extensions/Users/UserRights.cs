@@ -23,16 +23,16 @@ public interface IUserRights<out TValue, TEnum> : IUserRights
 
 public static class RightsExtensions
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static UserRights<TEnum> GetRights<TEnum>( this IUserRights rights )
+    public static UserRights<TEnum> GetRights<TEnum>( this IUserRights rights )
         where TEnum : struct, Enum => UserRights<TEnum>.Create(rights);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void SetRights<TEnum>( this IUserRights user, params ReadOnlySpan<TEnum> indexes )
+    public static void SetRights<TEnum>( this IUserRights user, params ReadOnlySpan<TEnum> indexes )
         where TEnum : struct, Enum => user.SetRights(user.GetRights<TEnum>()
                                                          .Add(indexes));
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void SetRights<TEnum>( this IUserRights user, scoped in UserRights<TEnum> value )
+    public static void SetRights<TEnum>( this IUserRights user, scoped in UserRights<TEnum> value )
         where TEnum : struct, Enum => user.Rights = value.ToString();
 }
 

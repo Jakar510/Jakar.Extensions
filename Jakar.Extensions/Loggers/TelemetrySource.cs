@@ -15,8 +15,8 @@ public interface ITelemetrySource
     public ref readonly ActivitySource Source { get; }
 
 
-    public Activity?          StartActivity( string name, Activity?          parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
-    public Activity?          StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
+    public Activity? StartActivity( string name, Activity?          parent = null, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
+    public Activity? StartActivity( string name, in ActivityContext parentContext, ActivityTagsCollection? tags = null, ActivityLink[]? links = null, ActivityKind kind = ActivityKind.Internal, ActivityIdFormat idFormat = ActivityIdFormat.Hierarchical, ActivityTraceFlags traceFlags = ActivityTraceFlags.Recorded );
 
 
     public DeviceInformation? GetDeviceInformation();
@@ -44,7 +44,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public readonly        AppInformation                  Info;
     public readonly        Meter                           Meter;
     public static          TelemetrySource?                Current        { get; set; }
-    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<TelemetrySource>.Default; } 
+    public static          FuzzyEqualizer<TelemetrySource> FuzzyEqualizer { get => FuzzyEqualizer<TelemetrySource>.Default; }
 
 
     ref readonly AppInformation ITelemetrySource.Info   => ref Info;
@@ -130,7 +130,7 @@ public class TelemetrySource : ITelemetrySource, IDisposable, IFuzzyEquals<Telem
     public          bool Equals( AppVersion?          other ) => Info.Version.Equals(other);
     public          bool FuzzyEquals( AppVersion      other ) => Info.Version.FuzzyEquals(other);
 
-    
+
     public static bool operator ==( TelemetrySource? left, TelemetrySource? right ) => EqualityComparer<TelemetrySource>.Default.Equals(left, right);
     public static bool operator !=( TelemetrySource? left, TelemetrySource? right ) => !EqualityComparer<TelemetrySource>.Default.Equals(left, right);
     public static bool operator >( TelemetrySource   left, TelemetrySource  right ) => Comparer<TelemetrySource>.Default.Compare(left, right) > 0;

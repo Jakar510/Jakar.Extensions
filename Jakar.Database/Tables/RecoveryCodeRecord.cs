@@ -15,7 +15,7 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
-    public static           string                             TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static           string                             TableName     {  get => TABLE_NAME; }
     public static           JsonSerializerContext              JsonContext   => JakarDatabaseContext.Default;
     public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
@@ -74,9 +74,9 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     }
 
 
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
+    [Pure]  public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
+    [Pure]  public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
+    [Pure]  public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
 
     [Pure] public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
     {
@@ -114,9 +114,9 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 
         return codes;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create(user, Guid.CreateVersion7());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create(user, code.ToBase64());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => ( code, new RecoveryCodeRecord(code, user) );
+     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create(user, Guid.CreateVersion7());
+     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create(user, code.ToBase64());
+     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => ( code, new RecoveryCodeRecord(code, user) );
 
     [Pure] public static bool IsValid( string code, ref RecoveryCodeRecord record )
     {

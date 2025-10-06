@@ -1,3 +1,1 @@
 ﻿namespace Jakar.Extensions;
-
- 

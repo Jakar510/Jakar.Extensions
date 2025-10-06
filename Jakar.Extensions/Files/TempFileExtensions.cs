@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "UnusedMethodReturnValue.Global" )]
+[SuppressMessage("ReSharper", "UnusedMethodReturnValue.Global")]
 public static class TempFile
 {
     public static bool IsTempFile( this ITempFile file ) => file.IsTemporary;

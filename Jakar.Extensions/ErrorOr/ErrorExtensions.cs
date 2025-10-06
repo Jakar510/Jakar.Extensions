@@ -48,7 +48,8 @@ public static class ErrorExtensions
         Span<string?>               span  = owner.Memory.Span;
         int                         count = 0;
 
-        foreach ( string error in errors.AsValueEnumerable().Select(GetMessage) ) { span[count++] = error; }
+        foreach ( string error in errors.AsValueEnumerable()
+                                        .Select(GetMessage) ) { span[count++] = error; }
 
         StringBuilder sb = new(4096);
         sb.AppendJoin('\n', span);
@@ -64,9 +65,15 @@ public static class ErrorExtensions
         if ( values.Values.Length == 0 || values.Tags.Length == 0 ) { return title ?? string.Empty; }
 
         using ValueStringBuilder builder = new(4096);
-        builder.Append(BULLET).Append(title ?? string.Empty);
 
-        foreach ( string value in values.Values.AsSpan() ) { builder.Append(SPACER).Append(value); }
+        builder.Append(BULLET)
+               .Append(title ?? string.Empty);
+
+        foreach ( string value in values.Values.AsSpan() )
+        {
+            builder.Append(SPACER)
+                   .Append(value);
+        }
 
         return builder.ToString();
     }

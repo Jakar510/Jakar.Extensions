@@ -34,7 +34,8 @@ public sealed class ScreenShot( ReadOnlyMemory<byte> data ) : ILogEventEnricher
     }
 
 
-    public static string CreateID( params ReadOnlySpan<byte> data ) => data.Hash().ToString();
+    public static string CreateID( params ReadOnlySpan<byte> data ) => data.Hash()
+                                                                           .ToString();
     public static string CreateID()
     {
         Span<byte> span = stackalloc byte[16];

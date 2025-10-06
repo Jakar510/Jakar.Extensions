@@ -34,7 +34,12 @@ public partial class IniConfig
         public string ToString( string? format, IFormatProvider? formatProvider )
         {
             Span<char> span = stackalloc char[Length + 1];
-            if ( TryFormat(span, out int charsWritten, format, formatProvider) ) { return span[..charsWritten].ToString(); }
+
+            if ( TryFormat(span, out int charsWritten, format, formatProvider) )
+            {
+                return span[..charsWritten]
+                   .ToString();
+            }
 
             throw new InvalidOperationException("Cannot convert to string");
         }
@@ -49,8 +54,7 @@ public partial class IniConfig
         }
 
 
-        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-        public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
         {
             int length = GetLength(out int longest);
             Debug.Assert(destination.Length > length);
@@ -111,7 +115,9 @@ public partial class IniConfig
         }
         public bool ValueAs<TValue>( string key, JsonTypeInfo<TValue[]> info, [NotNullWhen(true)] out TValue[]? value )
         {
-            value = this[key]?.FromJson(info);
+            value = this[key]
+              ?.FromJson(info);
+
             return value is not null;
         }
 
@@ -122,7 +128,8 @@ public partial class IniConfig
 
         public bool ValueAs( string key, [NotNullWhen(true)] out string[]? value )
         {
-            value = this[key]?.FromJson<string[]>(JakarExtensionsContext.Default.StringArray);
+            value = this[key]
+              ?.FromJson<string[]>(JakarExtensionsContext.Default.StringArray);
 
             return value is not null;
         }

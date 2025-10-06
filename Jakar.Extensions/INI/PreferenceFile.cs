@@ -2,7 +2,7 @@
 
 
 public abstract class PreferenceFile<TSelf> : BaseClass<TSelf>, IAsyncDisposable
-    where TSelf : PreferenceFile<TSelf>, IJsonModel<TSelf>, new()
+    where TSelf : PreferenceFile<TSelf>, IJsonModel<TSelf>, IEqualComparable<TSelf>, new()
 {
     private readonly Lock              __lock = new();
     protected        DateTime          _lastWriteTimeUtc;

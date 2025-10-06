@@ -24,7 +24,7 @@ public static class Constants // TODO: move to Jakar.Extensions.Sizes
     public const int    UNICODE_TEXT_CAPACITY = BaseRecord.UNICODE_TEXT_CAPACITY;
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static string GetAndOr( this bool matchAll ) => matchAll
+     public static string GetAndOr( this bool matchAll ) => matchAll
                                                                                                                   ? AND
                                                                                                                   : OR;
 }

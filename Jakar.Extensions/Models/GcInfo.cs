@@ -232,7 +232,10 @@ public readonly struct GcMemoryInformation( bool                      compacted,
                                                               data.TotalAvailableMemoryBytes,
                                                               data.TotalCommittedBytes,
                                                               data.PauseDurations.ToArray(),
-                                                              [.. data.GenerationInfo.AsValueEnumerable().Select(static x => new GcGenerationInformation(x))]) { }
+                                                              [
+                                                                  .. data.GenerationInfo.AsValueEnumerable()
+                                                                         .Select(static x => new GcGenerationInformation(x))
+                                                              ]) { }
 
 
     public static implicit operator GcMemoryInformation( GCMemoryInfo info ) => new(in info);

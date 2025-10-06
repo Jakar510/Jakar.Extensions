@@ -21,12 +21,12 @@ public ref struct SpanSplitEnumerator<TValue>
 
     public SpanSplitEnumerator( ReadOnlySpan<TValue> span, params TValue[] separators )
     {
-        if ( separators.Length == 0 ) { throw new ArgumentException( $"{nameof(separators)} cannot be empty" ); }
+        if ( separators.Length == 0 ) { throw new ArgumentException($"{nameof(separators)} cannot be empty"); }
 
         __originalString = span;
         __span           = span;
         __separators     = separators;
-        Current         = default;
+        Current          = default;
     }
 
 
@@ -35,8 +35,7 @@ public ref struct SpanSplitEnumerator<TValue>
     public                   void                        Reset()         => __span = __originalString;
 
 
-    [MethodImpl( MethodImplOptions.AggressiveOptimization )]
-    public bool MoveNext()
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool MoveNext()
     {
         ReadOnlySpan<TValue> span = __span;
 
@@ -48,19 +47,19 @@ public ref struct SpanSplitEnumerator<TValue>
 
 
         int start;
-        int index = start = span.IndexOfAny( __separators );
+        int index = start = span.IndexOfAny(__separators);
 
         if ( index < 0 ) // The string doesn't contain the separators
         {
-            __span   = default; // The remaining string is an empty string
-            Current = new LineSplitEntry<TValue>( span, default );
+            __span  = default; // The remaining string is an empty string
+            Current = new LineSplitEntry<TValue>(span, default);
             return true;
         }
 
-        while ( index < span.Length - 1 && __separators.Contains( span[index + 1] ) ) { index++; }
+        while ( index < span.Length - 1 && __separators.Contains(span[index + 1]) ) { index++; }
 
-        Current = new LineSplitEntry<TValue>( span[..start], span.Slice( start, Math.Max( index - start, 1 ) ) );
-        __span   = span[(index + 1)..];
+        Current = new LineSplitEntry<TValue>(span[..start], span.Slice(start, Math.Max(index - start, 1)));
+        __span  = span[( index + 1 )..];
         return true;
     }
 }

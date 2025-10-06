@@ -11,11 +11,11 @@ public struct HashCodeU64()
 
     public void Add<T>( params ReadOnlySpan<T> values )
     {
-        foreach ( T value in values ) { Add( value ); }
+        foreach ( T value in values ) { Add(value); }
     }
     public void Add<T>( T value )
     {
-        ulong valHash = (ulong)(value?.GetHashCode() ?? 0);
+        ulong valHash = (ulong)( value?.GetHashCode() ?? 0 );
         __hash ^= valHash;
         __hash *= 1099511628211UL; // FNV prime
     }
@@ -24,8 +24,8 @@ public struct HashCodeU64()
     {
         ulong      hash  = __hash;
         Span<byte> bytes = stackalloc byte[20];
-        hash.TryFormat( bytes, out int bytesWritten );
-        return Convert.ToBase64String( bytes[..bytesWritten] );
+        hash.TryFormat(bytes, out int bytesWritten);
+        return Convert.ToBase64String(bytes[..bytesWritten]);
     }
 }
 
@@ -38,22 +38,22 @@ public struct HashCodeU128()
 
     public void Add<T>( params ReadOnlySpan<T> values )
     {
-        foreach ( T value in values ) { Add( value ); }
+        foreach ( T value in values ) { Add(value); }
     }
     public void Add<T>( T value )
     {
-        ulong valHash = (ulong)(value?.GetHashCode() ?? 0);
+        ulong valHash = (ulong)( value?.GetHashCode() ?? 0 );
 
         __hash += valHash;
         __hash ^= __hash >> 32;
-        __hash *= new UInt128( 0x94d049bb133111eb, 0x2545f4914f6cdd1d ); // mix constant
+        __hash *= new UInt128(0x94d049bb133111eb, 0x2545f4914f6cdd1d); // mix constant
     }
     public UInt128 ToHashCode() => __hash;
     public string ToBase64()
     {
         UInt128    hash  = __hash;
         Span<byte> bytes = stackalloc byte[40];
-        hash.TryFormat( bytes, out int bytesWritten );
-        return Convert.ToHexString( bytes[..bytesWritten] );
+        hash.TryFormat(bytes, out int bytesWritten);
+        return Convert.ToHexString(bytes[..bytesWritten]);
     }
 }

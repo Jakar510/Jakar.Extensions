@@ -5,7 +5,8 @@ namespace Jakar.Extensions;
 
 
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
-[Serializable][DefaultValue(nameof(Empty))]
+[Serializable]
+[DefaultValue(nameof(Empty))]
 public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 {
     public const           string      ACCEPTED_TYPE                        = "Server.Accepted";
@@ -97,18 +98,17 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
     internal readonly      StringTags? errors;
 
 
-    public static                  IErrorTitles Titles     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IErrorTitles.Defaults.Instance;
-    [JsonRequired] public required string?      Detail     { get;                                                    init; }
-    [JsonRequired] public required StringTags?  Errors     { get => errors;                                          init => errors = value; }
-    [JsonRequired] public required string?      Instance   { get;                                                    init; }
-    [JsonRequired] public required Status?      StatusCode { get => statusCode;                                      init => statusCode = value; }
-    [JsonRequired] public required string?      Title      { get;                                                    init; }
-    [JsonRequired] public required string?      Type       { get;                                                    init; }
+    public static                  IErrorTitles Titles     { get;               set; } = IErrorTitles.Defaults.Instance;
+    [JsonRequired] public required string?      Detail     { get;               init; }
+    [JsonRequired] public required StringTags?  Errors     { get => errors;     init => errors = value; }
+    [JsonRequired] public required string?      Instance   { get;               init; }
+    [JsonRequired] public required Status?      StatusCode { get => statusCode; init => statusCode = value; }
+    [JsonRequired] public required string?      Title      { get;               init; }
+    [JsonRequired] public required string?      Type       { get;               init; }
 
 
     public Error() : base() { }
-    [SetsRequiredMembers]
-    public Error( Status? statusCode, string? type, string? title, string? detail, string? instance, in StringTags? errors ) : base()
+    [SetsRequiredMembers] public Error( Status? statusCode, string? type, string? title, string? detail, string? instance, in StringTags? errors ) : base()
     {
         this.statusCode = statusCode;
         this.errors     = errors;
@@ -131,17 +131,23 @@ public sealed class Error : BaseClass, IErrorDetails, IEqualComparable<Error>
 
     public static Error Create<TValue>( TValue details )
         where TValue : IErrorDetails => new(details.StatusCode, details.Type, details.Title, details.Detail, details.Instance, details.Errors);
-    public static Error Create( Status     status, in StringTags? errors = null, [CallerMemberName] string      type = EMPTY )                                                                     => new(status, type, null, null, null, in errors);
-    public static Error Create( Status     status, string         type,          in                 StringTags? errors )                                                                           => new(status, type, null, null, null, in errors);
-    public static Error Create( Status     status, string         type,          params             string[]    errors )                                                                           => Create(status, type, null, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          params             Pair[]      errors )                                                                           => Create(status, type, null, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          string?                        title,    in     StringTags? errors )                                              => new(status, type, title, null, null, in errors);
-    public static Error Create( Status     status, string         type,          string?                        title,    params string[]    errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          string?                        title,    params Pair[]      errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
-    public static Error Create( Status     status, string         type,          string?                        title,    string?            detail, string? instance, in     StringTags? errors ) => new(status, type, title, detail, instance, in errors);
-    public static Error Create( Status     status, string         type,          string?                        title,    string?            detail, string? instance, params Pair[]      errors ) => Create(status, type, title, detail, instance, new StringTags(errors));
-    public static Error Create( Exception? e,      string?        detail,        in StringTags?                 errors,   Status             status = Status.InternalServerError )                       => Create(e, detail, e?.Source, in errors, status);
-    public static Error Create( Exception? e,      string?        detail,        string?                        instance, in StringTags?     errors = null, Status status = Status.InternalServerError ) => new(status, e?.GetType().Name, e?.Message, detail, instance, in errors);
+    public static Error Create( Status     status, in StringTags? errors = null, [CallerMemberName] string      type = EMPTY )                                                                   => new(status, type, null, null, null, in errors);
+    public static Error Create( Status     status, string         type,          in                 StringTags? errors )                                                                         => new(status, type, null, null, null, in errors);
+    public static Error Create( Status     status, string         type,          params             string[]    errors )                                                                         => Create(status, type, null, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          params             Pair[]      errors )                                                                         => Create(status, type, null, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          string?                        title,  in     StringTags? errors )                                              => new(status, type, title, null, null, in errors);
+    public static Error Create( Status     status, string         type,          string?                        title,  params string[]    errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          string?                        title,  params Pair[]      errors )                                              => Create(status, type, title, null, null, new StringTags(errors));
+    public static Error Create( Status     status, string         type,          string?                        title,  string?            detail, string? instance, in     StringTags? errors ) => new(status, type, title, detail, instance, in errors);
+    public static Error Create( Status     status, string         type,          string?                        title,  string?            detail, string? instance, params Pair[]      errors ) => Create(status, type, title, detail, instance, new StringTags(errors));
+    public static Error Create( Exception? e,      string?        detail,        in StringTags?                 errors, Status             status = Status.InternalServerError ) => Create(e, detail, e?.Source, in errors, status);
+    public static Error Create( Exception? e, string? detail, string? instance, in StringTags? errors = null, Status status = Status.InternalServerError ) => new(status,
+                                                                                                                                                                  e?.GetType()
+                                                                                                                                                                    .Name,
+                                                                                                                                                                  e?.Message,
+                                                                                                                                                                  detail,
+                                                                                                                                                                  instance,
+                                                                                                                                                                  in errors);
 
 
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static Error Create( Exception e, in StringTags? errors = null, Status status = Status.InternalServerError ) => Create(e, e.MethodSignature(), e.Source, in errors, status);

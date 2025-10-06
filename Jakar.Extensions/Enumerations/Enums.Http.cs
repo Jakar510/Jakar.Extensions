@@ -91,6 +91,6 @@ public static partial class Enums
                                                                               HttpRequestHeader.UserAgent          => nameof(HttpRequestHeader.UserAgent),
                                                                               HttpRequestHeader.Via                => nameof(HttpRequestHeader.Via),
                                                                               HttpRequestHeader.Warning            => nameof(HttpRequestHeader.Warning),
-                                                                              _                                    => throw new ArgumentOutOfRangeException( nameof(header), header, null )
+                                                                              _                                    => throw new ArgumentOutOfRangeException(nameof(header), header, null)
                                                                           };
 }

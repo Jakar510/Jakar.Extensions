@@ -10,7 +10,7 @@ public static class ConsoleExtensions
     public static string Header   { get; set; } = '='.Repeat(100);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
         where TValue : Exception
     {
@@ -65,26 +65,34 @@ public static class ConsoleExtensions
     public static void Print( this Span<char>         self ) => Console.Write(self.ToString());
     public static void Print( this ReadOnlySpan<char> self ) => Console.Write(self.ToString());
     public static void Print( this string             self ) => Console.Write(self);
-    public static void Print( this ValueStringBuilder self ) => self.ToString().Print();
-    public static void Print( this StringBuilder      self ) => self.ToString().Print();
-    public static void Print( this object             self ) => Console.Write(self);
+    public static void Print( this ValueStringBuilder self ) => self.ToString()
+                                                                    .Print();
+    public static void Print( this StringBuilder self ) => self.ToString()
+                                                               .Print();
+    public static void Print( this object self ) => Console.Write(self);
 
 
     public static void PrintLine( this Span<char>         self ) => Console.WriteLine(self.ToString());
     public static void PrintLine( this ReadOnlySpan<char> self ) => Console.WriteLine(self.ToString());
     public static void PrintLine( this string             self ) => Console.WriteLine(self);
-    public static void PrintLine( this ValueStringBuilder self ) => self.ToString().PrintLine();
-    public static void PrintLine( this StringBuilder      self ) => self.ToString().PrintLine();
-    public static void PrintLine( this object             self ) => Console.WriteLine(self);
+    public static void PrintLine( this ValueStringBuilder self ) => self.ToString()
+                                                                        .PrintLine();
+    public static void PrintLine( this StringBuilder self ) => self.ToString()
+                                                                   .PrintLine();
+    public static void PrintLine( this object self ) => Console.WriteLine(self);
 
 
-    public static void WriteToConsole( this Span<char>         self ) => self.ToString().WriteToConsole();
-    public static void WriteToConsole( this ReadOnlySpan<char> self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this Span<char> self ) => self.ToString()
+                                                                     .WriteToConsole();
+    public static void WriteToConsole( this ReadOnlySpan<char> self ) => self.ToString()
+                                                                             .WriteToConsole();
     public static void WriteToConsole( this ValueStringBuilder self ) => self.Span.WriteToConsole();
     public static void WriteToConsole( this Buffer<char>       self ) => self.Span.WriteToConsole();
-    public static void WriteToConsole( this StringBuilder      self ) => self.ToString().WriteToConsole();
+    public static void WriteToConsole( this StringBuilder self ) => self.ToString()
+                                                                        .WriteToConsole();
     public static void WriteToConsole<TValue>( this TValue self )
-        where TValue : notnull => self.ToString()?.WriteToConsole();
+        where TValue : notnull => self.ToString()
+                                     ?.WriteToConsole();
     public static void WriteToConsole( this string self )
     {
         Console.WriteLine();
@@ -96,7 +104,8 @@ public static class ConsoleExtensions
     public static void WriteToDebug( this Span<char>         self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
     public static void WriteToDebug( this ReadOnlySpan<char> self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
     public static void WriteToDebug( this string             self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");
-    public static void WriteToDebug( this StringBuilder      self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString().WriteToDebug(variable, caller);
+    public static void WriteToDebug( this StringBuilder self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => self.ToString()
+                                                                                                                                                                            .WriteToDebug(variable, caller);
     public static void WriteToDebug( this Buffer<char>       self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
     public static void WriteToDebug( this ValueStringBuilder self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self.Span}'");
     public static void WriteToDebug( this object             self, [CallerArgumentExpression("self")] string? variable = null, [CallerMemberName] string? caller = null ) => Debug.WriteLine($"{caller} -> {variable} '{self}'");

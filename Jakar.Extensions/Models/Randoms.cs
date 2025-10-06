@@ -27,8 +27,8 @@ public class Randoms : BaseClass
     public static readonly char[] UpperCase     = [.. UPPER_CASE];
 
 
-    public static Random                Random { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(69420);
-    public static RandomNumberGenerator Rng    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = RandomNumberGenerator.Create();
+    public static Random                Random { get; set; } = new(69420);
+    public static RandomNumberGenerator Rng    { get; set; } = RandomNumberGenerator.Create();
 
 
     public static string Hex( int length )

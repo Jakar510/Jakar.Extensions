@@ -2,15 +2,15 @@
 
 
 public sealed class NullableIntConverter() : JsonConverter<int?>()
-{ 
+{
     public override int? Read( ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options )
     {
         return reader.TokenType switch
                {
                    JsonTokenType.Null => null,
 
-                   JsonTokenType.Number when reader.TryGetInt16(out short s)  => s,
-                   JsonTokenType.Number when reader.TryGetInt32(out int i)    => i, 
+                   JsonTokenType.Number when reader.TryGetInt16(out short s) => s,
+                   JsonTokenType.Number when reader.TryGetInt32(out int i)   => i,
 
                    JsonTokenType.String => int.TryParse(reader.GetString(), out int n)
                                                ? n

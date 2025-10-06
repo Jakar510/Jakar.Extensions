@@ -105,7 +105,7 @@ public interface IErrorTitles
 
 
 
-    [SuppressMessage( "ReSharper", "ClassWithVirtualMembersNeverInherited.Global" )]
+    [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
     public sealed class Defaults : IErrorTitles
     {
         public static readonly IErrorTitles Instance = new Defaults();

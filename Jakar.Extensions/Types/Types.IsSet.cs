@@ -3,12 +3,12 @@
 
 public static partial class Types
 {
-    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type type ) => type.HasInterface( typeof(ISet<>) );
+    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type ) => type.HasInterface(typeof(ISet<>));
 
 
-    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out Type? itemType, [NotNullWhen( true )] out bool? isBuiltInType )
+    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type classType, [NotNullWhen(true)] out Type? itemType, [NotNullWhen(true)] out bool? isBuiltInType )
     {
-        if ( classType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
+        if ( classType.IsSet(out IReadOnlyList<Type>? itemTypes) )
         {
             itemType      = itemTypes[0];
             isBuiltInType = itemType.IsBuiltInType();
@@ -21,9 +21,9 @@ public static partial class Types
     }
 
 
-    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type propertyType, [NotNullWhen( true )] out Type? itemType )
+    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type propertyType, [NotNullWhen(true)] out Type? itemType )
     {
-        if ( propertyType.IsSet( out IReadOnlyList<Type>? itemTypes ) )
+        if ( propertyType.IsSet(out IReadOnlyList<Type>? itemTypes) )
         {
             itemType = itemTypes[0];
             return true;
@@ -33,7 +33,7 @@ public static partial class Types
         return false;
     }
 
-    public static bool IsSet( [DynamicallyAccessedMembers( DynamicallyAccessedMemberTypes.Interfaces )] this Type classType, [NotNullWhen( true )] out IReadOnlyList<Type>? itemTypes )
+    public static bool IsSet( [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type classType, [NotNullWhen(true)] out IReadOnlyList<Type>? itemTypes )
     {
         if ( classType.IsGenericType && classType.IsSet() )
         {

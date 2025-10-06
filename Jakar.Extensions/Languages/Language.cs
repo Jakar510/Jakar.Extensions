@@ -6,7 +6,8 @@ using ZLinq.Linq;
 namespace Jakar.Extensions;
 
 
-[Serializable][DebuggerDisplay(nameof(DisplayName))]
+[Serializable]
+[DebuggerDisplay(nameof(DisplayName))]
 public sealed class Language : BaseClass, IEqualComparable<Language>
 {
     private readonly CultureInfo __culture;
@@ -121,9 +122,17 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
     #region Lists
 
-    public static Items NeutralCultures  => new(CultureInfo.GetCultures(CultureTypes.NeutralCultures).AsValueEnumerable().Select(Create));
-    public static Items SpecificCultures => new(CultureInfo.GetCultures(CultureTypes.SpecificCultures).AsValueEnumerable().Select(Create));
-    public static Items All              => new(CultureInfo.GetCultures(CultureTypes.AllCultures).AsValueEnumerable().Select(Create));
+    public static Items NeutralCultures => new(CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+                                                          .AsValueEnumerable()
+                                                          .Select(Create));
+
+    public static Items SpecificCultures => new(CultureInfo.GetCultures(CultureTypes.SpecificCultures)
+                                                           .AsValueEnumerable()
+                                                           .Select(Create));
+
+    public static Items All => new(CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                              .AsValueEnumerable()
+                                              .Select(Create));
 
     public static LanguageCollection Supported { get; } =
         [
@@ -149,7 +158,7 @@ public sealed class Language : BaseClass, IEqualComparable<Language>
 
 
 [Serializable]
-public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>
+public class LanguageCollection : ObservableCollection<LanguageCollection, Language>, ICollectionAlerts<LanguageCollection, Language>, IEqualComparable<LanguageCollection>
 {
     public static JsonSerializerContext              JsonContext   => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LanguageCollection>   JsonTypeInfo  => JakarExtensionsContext.Default.LanguageCollection;
@@ -175,11 +184,13 @@ public class LanguageCollection : ObservableCollection<LanguageCollection, Langu
     public static implicit operator LanguageCollection( ReadOnlyMemory<Language> values ) => new(values.Span);
     public static implicit operator LanguageCollection( ReadOnlySpan<Language>   values ) => new(values);
 
-    
-    public static bool operator ==( LanguageCollection? left, LanguageCollection? right ) => EqualityComparer<LanguageCollection>.Default.Equals(left, right);
-    public static bool operator !=( LanguageCollection? left, LanguageCollection? right ) => !EqualityComparer<LanguageCollection>.Default.Equals(left, right);
-    public static bool operator >( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) > 0;
-    public static bool operator >=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) >= 0;
-    public static bool operator <( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) < 0;
-    public static bool operator <=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) <= 0;
+
+    public override int  GetHashCode()                                                      => RuntimeHelpers.GetHashCode(this);
+    public override bool Equals( object?                  other )                           => ReferenceEquals(this, other) || other is LanguageCollection x && Equals(x);
+    public static   bool operator ==( LanguageCollection? left, LanguageCollection? right ) => EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static   bool operator !=( LanguageCollection? left, LanguageCollection? right ) => !EqualityComparer<LanguageCollection>.Default.Equals(left, right);
+    public static   bool operator >( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LanguageCollection   left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LanguageCollection  left, LanguageCollection  right ) => Comparer<LanguageCollection>.Default.Compare(left, right) <= 0;
 }

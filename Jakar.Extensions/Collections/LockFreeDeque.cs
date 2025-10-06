@@ -10,7 +10,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
     private int  __count;
     private Node __head = Node.Empty;
     private Node __tail = Node.Empty;
-    public  int  Count => Interlocked.CompareExchange( ref __count, 0, 0 );
+    public  int  Count => Interlocked.CompareExchange(ref __count, 0, 0);
 
 
     public void Enqueue( TValue value )
@@ -24,26 +24,26 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
 
             if ( next is null )
             {
-                if ( Interlocked.CompareExchange( ref tail.next, newNode, null ) is null )
+                if ( Interlocked.CompareExchange(ref tail.next, newNode, null) is null )
                 {
-                    Interlocked.CompareExchange( ref __tail, newNode, tail );
-                    Interlocked.Increment( ref __count );
+                    Interlocked.CompareExchange(ref __tail, newNode, tail);
+                    Interlocked.Increment(ref __count);
                     return;
                 }
             }
-            else { Interlocked.CompareExchange( ref __tail, next, tail ); }
+            else { Interlocked.CompareExchange(ref __tail, next, tail); }
         }
     }
 
 
-    public TValue? TryDequeue() => TryDequeue( out TValue? result )
+    public TValue? TryDequeue() => TryDequeue(out TValue? result)
                                        ? result
                                        : null;
     public bool TryDequeue( out TValue? result )
     {
         while ( true )
         {
-            Interlocked.Decrement( ref __count );
+            Interlocked.Decrement(ref __count);
             Node  head = __head;
             Node  tail = __tail;
             Node? next = head.next;
@@ -56,13 +56,13 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
                     return false;
                 }
 
-                Interlocked.CompareExchange( ref __tail, next, tail );
+                Interlocked.CompareExchange(ref __tail, next, tail);
             }
             else
             {
-                Debug.Assert( next is not null, "next should not be null when head != tail" );
+                Debug.Assert(next is not null, "next should not be null when head != tail");
                 result = next.Value;
-                if ( Interlocked.CompareExchange( ref __head, next, head ) == head ) { return true; }
+                if ( Interlocked.CompareExchange(ref __head, next, head) == head ) { return true; }
             }
         }
     }
@@ -89,10 +89,10 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
         public                 Node?  next;
 
 
-        public          bool Equals( Node?   other )                => ReferenceEquals( this, other );
-        public override bool Equals( object? obj )                  => ReferenceEquals( this, obj ) || Equals( obj as Node );
-        public override int  GetHashCode()                          => HashCode.Combine( Value );
-        public static   bool operator ==( Node? left, Node? right ) => left?.Equals( right ) is true;
-        public static   bool operator !=( Node? left, Node? right ) => left?.Equals( right ) is not true;
+        public          bool Equals( Node?   other )                => ReferenceEquals(this, other);
+        public override bool Equals( object? obj )                  => ReferenceEquals(this, obj) || Equals(obj as Node);
+        public override int  GetHashCode()                          => HashCode.Combine(Value);
+        public static   bool operator ==( Node? left, Node? right ) => left?.Equals(right) is true;
+        public static   bool operator !=( Node? left, Node? right ) => left?.Equals(right) is not true;
     }
 }

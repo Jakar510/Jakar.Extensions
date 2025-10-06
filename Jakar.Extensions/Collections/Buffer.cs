@@ -28,17 +28,17 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
             Interlocked.Exchange(ref _length, value);
         }
     }
-    public bool IsEmpty    { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length == 0; }
-    public bool IsNotEmpty { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get => Length > 0; }
-    public bool IsReadOnly { [Pure] [MethodImpl(                 MethodImplOptions.AggressiveInlining)] get; init; } = false;
-    public ref TValue this[ int     index ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
-    public ref TValue this[ Index   index ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref Values[index]; }
-    public Span<TValue> this[ Range range ] { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Values[range]; }
+    public bool IsEmpty    { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length == 0; }
+    public bool IsNotEmpty { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length > 0; }
+    public bool IsReadOnly { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; } = false;
+    public ref TValue this[ int     index ] { [Pure] get => ref Values[index]; }
+    public ref TValue this[ Index   index ] { [Pure] get => ref Values[index]; }
+    public Span<TValue> this[ Range range ] { [Pure] get => Values[range]; }
     public Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
-    public Memory<TValue> Memory { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _array.Memory; }
-    public Span<TValue>   Next   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[Length..]; }
-    public Span<TValue>   Span   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Memory.Span; }
-    public Span<TValue>   Values { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Span[..Length]; }
+    public Memory<TValue> Memory { [Pure] get => _array.Memory; }
+    public Span<TValue>   Next   { [Pure] get => Span[Length..]; }
+    public Span<TValue>   Span   { [Pure] get => Memory.Span; }
+    public Span<TValue>   Values { [Pure] get => Span[..Length]; }
     [MustDisposeResource] public Buffer() : this(DEFAULT_CAPACITY) { }
     [MustDisposeResource] public Buffer( params ReadOnlySpan<TValue> span ) : this(span.Length) => span.CopyTo(Span);
     public void                                     Dispose()           => _array.Dispose();
@@ -67,7 +67,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         length = 0;
         return false;
     }
-    public void Reverse( int start, int length ) => Values.Slice(start, length).Reverse();
+    public void Reverse( int start, int length ) => Values.Slice(start, length)
+                                                          .Reverse();
     public void Reverse() => Values.Reverse();
     public ReadOnlySpan<TValue> AsSpan( TValue? terminate )
     {
@@ -75,10 +76,10 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return Values;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public Span<TValue> Slice( int      start )             => Slice(start, Capacity - start);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public Span<TValue> Slice( int      start, int length ) => Span.Slice(start, length);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int          IndexOf( TValue value )            => IndexOf(value, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int          IndexOf( TValue value, int start ) => IndexOf(value, start, Length - 1);
+    public Span<TValue> Slice( int      start )             => Slice(start, Capacity - start);
+    public Span<TValue> Slice( int      start, int length ) => Span.Slice(start, length);
+    public int          IndexOf( TValue value )            => IndexOf(value, 0);
+    public int          IndexOf( TValue value, int start ) => IndexOf(value, start, Length - 1);
     public int IndexOf( TValue value, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -93,8 +94,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int FindIndex( Func<TValue, bool> match )            => FindIndex(match, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int FindIndex( Func<TValue, bool> match, int start ) => FindIndex(match, start, Length - 1);
+    public int FindIndex( Func<TValue, bool> match )            => FindIndex(match, 0);
+    public int FindIndex( Func<TValue, bool> match, int start ) => FindIndex(match, start, Length - 1);
     public int FindIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -109,8 +110,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int LastIndexOf( TValue value )                   => LastIndexOf(value, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf(value, Length - 1, endInclusive);
+    public int LastIndexOf( TValue value )                   => LastIndexOf(value, 0);
+    public int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf(value, Length - 1, endInclusive);
     public int LastIndexOf( TValue value, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -125,8 +126,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int FindLastIndex( Func<TValue, bool> match )                   => FindLastIndex(match, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex(match, Length - 1, endInclusive);
+    public int FindLastIndex( Func<TValue, bool> match )                   => FindLastIndex(match, 0);
+    public int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex(match, Length - 1, endInclusive);
     public int FindLastIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -142,8 +143,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue? FindLast( Func<TValue, bool> match )                   => FindLast(match, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast(match, Length - 1, endInclusive);
+    public TValue? FindLast( Func<TValue, bool> match )                   => FindLast(match, 0);
+    public TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast(match, Length - 1, endInclusive);
     public TValue? FindLast( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -159,8 +160,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return default;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue? Find( Func<TValue, bool> match )            => Find(match, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue? Find( Func<TValue, bool> match, int start ) => Find(match, start, Length - 1);
+    public TValue? Find( Func<TValue, bool> match )            => Find(match, 0);
+    public TValue? Find( Func<TValue, bool> match, int start ) => Find(match, start, Length - 1);
     public TValue? Find( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -176,8 +177,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return default;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue[] FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, Length - 1);
+    public TValue[] FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
+    public TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, Length - 1);
     public TValue[] FindAll( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
@@ -209,7 +210,10 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         int start  = index    - 1;
         int length = Capacity - start;
-        Span.Slice(start, length).CopyTo(Span[index..]);
+
+        Span.Slice(start, length)
+            .CopyTo(Span[index..]);
+
         Length--;
         return true;
     }
@@ -220,7 +224,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         Guard.IsGreaterThanOrEqualTo(count, 0);
         Guard.IsInRange(start + count, 0, Capacity);
 
-        Values.Slice(start, count).Fill(value);
+        Values.Slice(start, count)
+              .Fill(value);
     }
     public void Replace( int start, params ReadOnlySpan<TValue> values )
     {
@@ -246,7 +251,10 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         int index  = start    - values.Length;
         int length = Capacity - index;
-        Span.Slice(start, length).CopyTo(Span[index..]);
+
+        Span.Slice(start, length)
+            .CopyTo(Span[index..]);
+
         values.CopyTo(Span.Slice(start, values.Length));
         Length += values.Length;
     }
@@ -336,7 +344,10 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
                 if ( count <= 0 ) { return; }
 
                 Guard.IsInRange(list.Count + Length, 0, Capacity);
-                CollectionsMarshal.AsSpan(list).CopyTo(Next);
+
+                CollectionsMarshal.AsSpan(list)
+                                  .CopyTo(Next);
+
                 Length += count;
                 return;
             }
@@ -410,10 +421,11 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         Length = span.Length;
         span.CopyTo(values);
     }
-    public void Sort()                                                                   => Sort(Comparer<TValue>.Default);
-    public void Sort( IComparer<TValue>  comparer )                                      => Span.Sort(comparer);
-    public void Sort( Comparison<TValue> comparer )                                      => Span.Sort(comparer);
-    public void Sort( int                start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length).Sort(comparer);
+    public void Sort()                              => Sort(Comparer<TValue>.Default);
+    public void Sort( IComparer<TValue>  comparer ) => Span.Sort(comparer);
+    public void Sort( Comparison<TValue> comparer ) => Span.Sort(comparer);
+    public void Sort( int start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length)
+                                                                                 .Sort(comparer);
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
     [Pure] [MustDisposeResource] public Buffer<TValue> Grow( uint additionalRequestedCapacity )
@@ -425,7 +437,7 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         Dispose();
         return buffer;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void ThrowIfReadOnly()
+    public void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException($"Buffer<{typeof(TValue).Name}> is read only"); }
     }

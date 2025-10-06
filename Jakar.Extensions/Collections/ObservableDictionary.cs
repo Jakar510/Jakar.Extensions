@@ -33,12 +33,14 @@ public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<Ob
     public static implicit operator ObservableDictionary<TKey, TValue>( ReadOnlySpan<KeyValuePair<TKey, TValue>>   values ) => new(values);
 
 
-    public static bool operator ==( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
-    public static bool operator !=( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => !EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
-    public static bool operator >( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) > 0;
-    public static bool operator >=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) >= 0;
-    public static bool operator <( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) < 0;
-    public static bool operator <=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                                                      => base.GetHashCode();
+    public override bool Equals( object?                                  other )                                           => ReferenceEquals(this, other) || other is ObservableDictionary<TKey, TValue> x && Equals(x);
+    public static   bool operator ==( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static   bool operator !=( ObservableDictionary<TKey, TValue>? left, ObservableDictionary<TKey, TValue>? right ) => !EqualityComparer<ObservableDictionary<TKey, TValue>>.Default.Equals(left, right);
+    public static   bool operator >( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( ObservableDictionary<TKey, TValue>   left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( ObservableDictionary<TKey, TValue>  left, ObservableDictionary<TKey, TValue>  right ) => Comparer<ObservableDictionary<TKey, TValue>>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -50,12 +52,12 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
     protected internal readonly Dictionary<TKey, TValue> buffer = dictionary;
 
 
-    public sealed override int  Count      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    public                 bool IsReadOnly { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ( (IDictionary)buffer ).IsReadOnly; }
+    public sealed override int  Count      { get => buffer.Count; }
+    public                 bool IsReadOnly { get => ( (IDictionary)buffer ).IsReadOnly; }
 
     public TValue this[ TKey key ]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer[key];
+        get => buffer[key];
         set
         {
             bool exists = ContainsKey(key);
@@ -76,10 +78,10 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
         }
     }
 
-    public ICollection<TKey>                              Keys   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Keys; }
-    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Keys; }
-    public ICollection<TValue>                            Values { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Values; }
-    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Values; }
+    public ICollection<TKey>                              Keys   { get => buffer.Keys; }
+    IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.  Keys   { get => buffer.Keys; }
+    public ICollection<TValue>                            Values { get => buffer.Values; }
+    IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values { get => buffer.Values; }
 
 
     protected ObservableDictionary() : this(DEFAULT_CAPACITY) { }
@@ -147,7 +149,7 @@ public abstract class ObservableDictionary<TSelf, TKey, TValue>( Dictionary<TKey
     }
 
 
-    [Pure][MustDisposeResource][SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
+    [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
         int                                      count  = buffer.Count;

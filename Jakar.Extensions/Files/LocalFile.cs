@@ -12,7 +12,7 @@ namespace Jakar.Extensions;
 
 
 [Serializable]
-public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IJsonModel<LocalFile>
+public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<LocalFile>, TempFile.ITempFile, LocalFile.IReadHandler, LocalFile.IAsyncReadHandler, IEqualComparable<LocalFile>, IJsonModel<LocalFile>
 {
     public readonly              Encoding FileEncoding = encoding ?? Encoding.Default;
     public readonly              string   FullPath     = info.FullName;
@@ -23,19 +23,18 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
     public static JsonSerializerContext     JsonContext     => JakarExtensionsContext.Default;
     public static JsonTypeInfo<LocalFile>   JsonTypeInfo    => JakarExtensionsContext.Default.LocalFile;
     public static JsonTypeInfo<LocalFile[]> JsonArrayInfo   => JakarExtensionsContext.Default.LocalFileArray;
-    public        string                    ContentType     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Mime.ToContentType(); }
-    public        DateTimeOffset            CreationTimeUtc { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.CreationTimeUtc; }
-    public        string?                   DirectoryName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.DirectoryName; }
-    public        bool                      DoesNotExist    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !Exists; }
-    public        bool                      Exists          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Exists; }
-    public        string                    Extension       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Extension; }
-    bool TempFile.ITempFile.                IsTemporary     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTemporary; set => __isTemporary = value; }
-    public DateTimeOffset                   LastAccess      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.LastAccessTime; }
-    public MimeType                         Mime            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Extension.FromExtension(); }
-    public string                           Name            { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Info.Name; }
+    public        string                    ContentType     { get => Mime.ToContentType(); }
+    public        DateTimeOffset            CreationTimeUtc { get => Info.CreationTimeUtc; }
+    public        string?                   DirectoryName   { get => Info.DirectoryName; }
+    public        bool                      DoesNotExist    { get => !Exists; }
+    public        bool                      Exists          { get => Info.Exists; }
+    public        string                    Extension       { get => Info.Extension; }
+    bool TempFile.ITempFile.                IsTemporary     { get => __isTemporary; set => __isTemporary = value; }
+    public DateTimeOffset                   LastAccess      { get => Info.LastAccessTime; }
+    public MimeType                         Mime            { get => Extension.FromExtension(); }
+    public string                           Name            { get => Info.Name; }
 
-    [JsonIgnore]
-    public LocalDirectory? Parent
+    [JsonIgnore] public LocalDirectory? Parent
     {
         get
         {
@@ -46,7 +45,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
                        : new LocalDirectory(parent);
         }
     }
-    public string Root { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Directory.GetDirectoryRoot(FullPath); }
+    public string Root { get => Directory.GetDirectoryRoot(FullPath); }
 
 
     public LocalFile( Uri            path, Encoding?                   encoding = null ) : this(FromUri(path), encoding) { }
@@ -508,10 +507,12 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         for ( int i = 0; i < files.Length; i++ )
         {
-            LocalFile            file   = files[i];
-            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
-            await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
+            LocalFile          file   = files[i];
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
 
             await stream.WriteAsync(data, token);
         }
@@ -527,9 +528,11 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
 
         foreach ( LocalFile file in files )
         {
-            ZipArchiveEntry      entry  = archive.CreateEntry(file.FullPath);
-            await using Stream   stream = entry.Open();
-            ReadOnlyMemory<byte> data   = await file.ReadAsync().AsMemory(token);
+            ZipArchiveEntry    entry  = archive.CreateEntry(file.FullPath);
+            await using Stream stream = entry.Open();
+
+            ReadOnlyMemory<byte> data = await file.ReadAsync()
+                                                  .AsMemory(token);
 
             await stream.WriteAsync(data, token);
         }
@@ -755,7 +758,10 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using StreamWriter writer        = new(stream, FileEncoding);
 
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(payload.Length);
-        payload.AsSpan().CopyTo(owner.Memory.Span);
+
+        payload.AsSpan()
+               .CopyTo(owner.Memory.Span);
+
         await writer.WriteAsync(owner.Memory, token);
     }
 
@@ -923,8 +929,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         IReadHandler        handler       = this;
         return handler.AsMemory();
     }
-    [Pure][MustDisposeResource]
-    Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
+    [Pure] [MustDisposeResource] Buffer<byte> IReadHandler.AsSpan( in TelemetrySpan parent = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         using FileStream    file          = OpenRead();
@@ -1063,8 +1068,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         /// <returns>
         ///     <see cref="ReadOnlySpan{byte}"/>
         /// </returns>
-        [MustDisposeResource]
-        Buffer<byte> AsSpan( in TelemetrySpan parent = default );
+        [MustDisposeResource] Buffer<byte> AsSpan( in TelemetrySpan parent = default );
 
         /// <summary> Reads the contents of the file as a <see cref="string"/> . </summary>
         /// <exception cref="NullReferenceException"> if FullPath is null or empty </exception>

@@ -3,6 +3,7 @@
 
 namespace Jakar.Extensions;
 
+
 [method: JsonConstructor]
 public readonly struct Pair( string key, string? value ) : IEquatable<Pair>, IComparable<Pair>, IComparable
 {
@@ -81,7 +82,7 @@ public readonly struct Pair<TValue>( string key, TValue value ) : IEquatable<Pai
     public override bool Equals( object?      obj )   => obj is Pair<TValue> other                               && Equals(other);
     public override int  GetHashCode()                => HashCode.Combine(Key, Value);
 
-    
+
     public static bool operator ==( Pair<TValue>? left, Pair<TValue>? right ) => Nullable.Equals(left, right);
     public static bool operator !=( Pair<TValue>? left, Pair<TValue>? right ) => !Nullable.Equals(left, right);
     public static bool operator ==( Pair<TValue>  left, Pair<TValue>  right ) => left.Equals(right);

@@ -18,8 +18,8 @@ public interface ILockedCollection<TValue, TCloser> : IReadOnlyCollection<TValue
     ValueTask<TCloser> AcquireLockAsync( CancellationToken token );
 
 
-    [Pure][MustDisposeResource] FilterBuffer<TValue>                               Copy();
-    [Pure][MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
+    [Pure] [MustDisposeResource] FilterBuffer<TValue>                               Copy();
+    [Pure] [MustDisposeResource] ConfiguredValueTaskAwaitable<FilterBuffer<TValue>> CopyAsync( CancellationToken token );
 }
 
 
@@ -50,13 +50,12 @@ public interface ILocker
 public readonly struct LockCloser( Lock? locker ) : IDisposable
 {
     private static readonly TimeSpan __timeOut = TimeSpan.FromMicroseconds(100);
-    public static readonly  Closer   Empty    = new(null);
+    public static readonly  Closer   Empty     = new(null);
     private readonly        Lock?    __locker  = locker;
     public                  void     Dispose() => __locker?.Exit();
 
 
-    [Pure][MustDisposeResource]
-    public static LockCloser Enter( Lock locker, CancellationToken token = default )
+    [Pure] [MustDisposeResource] public static LockCloser Enter( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         locker.Enter();
@@ -64,8 +63,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
 
         return new LockCloser(locker);
     }
-    [Pure][MustDisposeResource]
-    public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
+    [Pure] [MustDisposeResource] public static async ValueTask<LockCloser> EnterAsync( Lock locker, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         while ( token.ShouldContinue() && !locker.TryEnter(__timeOut) ) { await Task.Delay(1, token); }
@@ -79,7 +77,7 @@ public readonly struct LockCloser( Lock? locker ) : IDisposable
 [DefaultValue(nameof(Empty))]
 public readonly struct Closer( ILocker? locker ) : IDisposable
 {
-    public static readonly Closer   Empty   = new(null);
+    public static readonly Closer   Empty    = new(null);
     private readonly       ILocker? __locker = locker;
     public                 void     Dispose() => __locker?.Exit();
 }
@@ -106,9 +104,9 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
     private readonly Type                  __index;
     private          bool                  __isTaken;
 
-    public static Locker    Default { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => new SemaphoreSlim(1, 1); }
-    public        bool      IsTaken { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get => __isTaken; }
-    public        TimeSpan? TimeOut { [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public static Locker    Default { [Pure] get => new SemaphoreSlim(1, 1); }
+    public        bool      IsTaken { [Pure] get => __isTaken; }
+    public        TimeSpan? TimeOut { [Pure] get; init; }
 
 
     public Locker() : this(Type.Object) { }
@@ -195,8 +193,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__semaphoreSlim is not null, $"{nameof(__semaphoreSlim)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __semaphoreSlim.Wait(TimeOut.Value,    token)
-                               : __semaphoreSlim.Wait(Timeout.Infinite, token);
+                                ? __semaphoreSlim.Wait(TimeOut.Value,    token)
+                                : __semaphoreSlim.Wait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -206,8 +204,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__semaphore is not null, $"{nameof(__semaphore)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __semaphore.WaitOne(TimeOut.Value)
-                               : __semaphore.WaitOne(Timeout.Infinite);
+                                ? __semaphore.WaitOne(TimeOut.Value)
+                                : __semaphore.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -225,8 +223,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__mutex is not null, $"{nameof(__mutex)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __mutex.WaitOne(TimeOut.Value)
-                               : __mutex.WaitOne(Timeout.Infinite);
+                                ? __mutex.WaitOne(TimeOut.Value)
+                                : __mutex.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -243,8 +241,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__eventWaitHandle is not null, $"{nameof(__eventWaitHandle)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __eventWaitHandle.WaitOne(TimeOut.Value)
-                               : __eventWaitHandle.WaitOne(Timeout.Infinite);
+                                ? __eventWaitHandle.WaitOne(TimeOut.Value)
+                                : __eventWaitHandle.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -254,8 +252,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__autoResetEvent is not null, $"{nameof(__autoResetEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __autoResetEvent.WaitOne(TimeOut.Value)
-                               : __autoResetEvent.WaitOne(Timeout.Infinite);
+                                ? __autoResetEvent.WaitOne(TimeOut.Value)
+                                : __autoResetEvent.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -265,8 +263,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__manualResetEvent is not null, $"{nameof(__manualResetEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __manualResetEvent.WaitOne(TimeOut.Value)
-                               : __manualResetEvent.WaitOne(Timeout.Infinite);
+                                ? __manualResetEvent.WaitOne(TimeOut.Value)
+                                : __manualResetEvent.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -276,8 +274,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__manualResetEventSlim is not null, $"{nameof(__manualResetEventSlim)}  null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __manualResetEventSlim.Wait(TimeOut.Value,    token)
-                               : __manualResetEventSlim.Wait(Timeout.Infinite, token);
+                                ? __manualResetEventSlim.Wait(TimeOut.Value,    token)
+                                : __manualResetEventSlim.Wait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -287,8 +285,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__barrier is not null, $"{nameof(__barrier)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __barrier.SignalAndWait(TimeOut.Value,    token)
-                               : __barrier.SignalAndWait(Timeout.Infinite, token);
+                                ? __barrier.SignalAndWait(TimeOut.Value,    token)
+                                : __barrier.SignalAndWait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -298,8 +296,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__countdownEvent is not null, $"{nameof(__countdownEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __countdownEvent.Wait(TimeOut.Value,    token)
-                               : __countdownEvent.Wait(Timeout.Infinite, token);
+                                ? __countdownEvent.Wait(TimeOut.Value,    token)
+                                : __countdownEvent.Wait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -323,8 +321,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__semaphoreSlim is not null, $"{nameof(__semaphoreSlim)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? await __semaphoreSlim.WaitAsync(TimeOut.Value,    token)
-                               : await __semaphoreSlim.WaitAsync(Timeout.Infinite, token);
+                                ? await __semaphoreSlim.WaitAsync(TimeOut.Value,    token)
+                                : await __semaphoreSlim.WaitAsync(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -334,8 +332,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__semaphore is not null, $"{nameof(__semaphore)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __semaphore.WaitOne(TimeOut.Value)
-                               : __semaphore.WaitOne(Timeout.Infinite);
+                                ? __semaphore.WaitOne(TimeOut.Value)
+                                : __semaphore.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -353,8 +351,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__mutex is not null, $"{nameof(__mutex)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __mutex.WaitOne(TimeOut.Value)
-                               : __mutex.WaitOne(Timeout.Infinite);
+                                ? __mutex.WaitOne(TimeOut.Value)
+                                : __mutex.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -371,8 +369,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__eventWaitHandle is not null, $"{nameof(__eventWaitHandle)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __eventWaitHandle.WaitOne(TimeOut.Value)
-                               : __eventWaitHandle.WaitOne(Timeout.Infinite);
+                                ? __eventWaitHandle.WaitOne(TimeOut.Value)
+                                : __eventWaitHandle.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -382,8 +380,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__autoResetEvent is not null, $"{nameof(__autoResetEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __autoResetEvent.WaitOne(TimeOut.Value)
-                               : __autoResetEvent.WaitOne(Timeout.Infinite);
+                                ? __autoResetEvent.WaitOne(TimeOut.Value)
+                                : __autoResetEvent.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -393,8 +391,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__manualResetEvent is not null, $"{nameof(__manualResetEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __manualResetEvent.WaitOne(TimeOut.Value)
-                               : __manualResetEvent.WaitOne(Timeout.Infinite);
+                                ? __manualResetEvent.WaitOne(TimeOut.Value)
+                                : __manualResetEvent.WaitOne(Timeout.Infinite);
 
                 return new Closer(this);
             }
@@ -404,8 +402,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__manualResetEventSlim is not null, $"{nameof(__manualResetEventSlim)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __manualResetEventSlim.Wait(TimeOut.Value,    token)
-                               : __manualResetEventSlim.Wait(Timeout.Infinite, token);
+                                ? __manualResetEventSlim.Wait(TimeOut.Value,    token)
+                                : __manualResetEventSlim.Wait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -415,8 +413,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__barrier is not null, $"{nameof(__barrier)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __barrier.SignalAndWait(TimeOut.Value,    token)
-                               : __barrier.SignalAndWait(Timeout.Infinite, token);
+                                ? __barrier.SignalAndWait(TimeOut.Value,    token)
+                                : __barrier.SignalAndWait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -426,8 +424,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__countdownEvent is not null, $"{nameof(__countdownEvent)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __countdownEvent.Wait(TimeOut.Value,    token)
-                               : __countdownEvent.Wait(Timeout.Infinite, token);
+                                ? __countdownEvent.Wait(TimeOut.Value,    token)
+                                : __countdownEvent.Wait(Timeout.Infinite, token);
 
                 return new Closer(this);
             }
@@ -438,8 +436,8 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
                 Debug.Assert(__lock is not null, $"{nameof(__lock)} is not null");
 
                 __isTaken = TimeOut.HasValue
-                               ? __lock.TryEnter(TimeOut.Value)
-                               : __lock.TryEnter(Timeout.Infinite);
+                                ? __lock.TryEnter(TimeOut.Value)
+                                : __lock.TryEnter(Timeout.Infinite);
 
                 return new Closer(this);
             }

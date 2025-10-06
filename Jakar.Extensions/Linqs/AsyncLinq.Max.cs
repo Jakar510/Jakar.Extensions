@@ -9,7 +9,7 @@ public static partial class AsyncLinq
 
         await foreach ( decimal? item in source )
         {
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -20,8 +20,8 @@ public static partial class AsyncLinq
 
         await foreach ( TSource element in source )
         {
-            decimal? item = selector( element );
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            decimal? item = selector(element);
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -32,7 +32,7 @@ public static partial class AsyncLinq
     {
         decimal value = decimal.MinValue;
 
-        await foreach ( decimal item in source ) { value = Math.Max( value, item ); }
+        await foreach ( decimal item in source ) { value = Math.Max(value, item); }
 
         return value;
     }
@@ -40,7 +40,7 @@ public static partial class AsyncLinq
     {
         decimal value = 0;
 
-        await foreach ( TSource item in source ) { value = Math.Max( value, selector( item ) ); }
+        await foreach ( TSource item in source ) { value = Math.Max(value, selector(item)); }
 
         return value;
     }
@@ -52,7 +52,7 @@ public static partial class AsyncLinq
 
         await foreach ( int? item in source )
         {
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -63,8 +63,8 @@ public static partial class AsyncLinq
 
         await foreach ( TSource element in source )
         {
-            int? item = selector( element );
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            int? item = selector(element);
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -77,7 +77,7 @@ public static partial class AsyncLinq
 
         await foreach ( long? item in source )
         {
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -88,8 +88,8 @@ public static partial class AsyncLinq
 
         await foreach ( TSource element in source )
         {
-            long? item = selector( element );
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            long? item = selector(element);
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -102,7 +102,7 @@ public static partial class AsyncLinq
 
         await foreach ( double? item in source )
         {
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -113,8 +113,8 @@ public static partial class AsyncLinq
 
         await foreach ( TSource element in source )
         {
-            double? item = selector( element );
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            double? item = selector(element);
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return value;
@@ -123,7 +123,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( int item in source ) { value = Math.Max( value, item ); }
+        await foreach ( int item in source ) { value = Math.Max(value, item); }
 
         return value;
     }
@@ -131,7 +131,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( TSource item in source ) { value = Math.Max( value, selector( item ) ); }
+        await foreach ( TSource item in source ) { value = Math.Max(value, selector(item)); }
 
         return value;
     }
@@ -141,7 +141,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( long item in source ) { value = Math.Max( value, item ); }
+        await foreach ( long item in source ) { value = Math.Max(value, item); }
 
         return value;
     }
@@ -149,7 +149,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( TSource item in source ) { value = Math.Max( value, selector( item ) ); }
+        await foreach ( TSource item in source ) { value = Math.Max(value, selector(item)); }
 
         return value;
     }
@@ -159,7 +159,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( double item in source ) { value = Math.Max( value, item ); }
+        await foreach ( double item in source ) { value = Math.Max(value, item); }
 
         return value;
     }
@@ -167,7 +167,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( TSource item in source ) { value = Math.Max( value, selector( item ) ); }
+        await foreach ( TSource item in source ) { value = Math.Max(value, selector(item)); }
 
         return value;
     }
@@ -179,7 +179,7 @@ public static partial class AsyncLinq
 
         await foreach ( float? item in source )
         {
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return (float?)value;
@@ -190,8 +190,8 @@ public static partial class AsyncLinq
 
         await foreach ( TSource element in source )
         {
-            float? item = selector( element );
-            if ( item.HasValue ) { value = Math.Max( value, item.Value ); }
+            float? item = selector(element);
+            if ( item.HasValue ) { value = Math.Max(value, item.Value); }
         }
 
         return (float?)value;
@@ -202,7 +202,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( float item in source ) { value = Math.Max( value, item ); }
+        await foreach ( float item in source ) { value = Math.Max(value, item); }
 
         return (float)value;
     }
@@ -210,7 +210,7 @@ public static partial class AsyncLinq
     {
         double value = double.MinValue;
 
-        await foreach ( TSource item in source ) { value = Math.Max( value, selector( item ) ); }
+        await foreach ( TSource item in source ) { value = Math.Max(value, selector(item)); }
 
         return (float)value;
     }

@@ -44,7 +44,8 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token)
+                                                    .ConfigureAwait(false);
 
             try
             {
@@ -67,7 +68,8 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token)
+                                                    .ConfigureAwait(false);
 
             try
             {
@@ -89,7 +91,8 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         using ( this )
         {
-            using HttpResponseMessage response = await SendAsync(token).ConfigureAwait(false);
+            using HttpResponseMessage response = await SendAsync(token)
+                                                    .ConfigureAwait(false);
 
             try
             {
@@ -107,11 +110,11 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
     }
 
 
-    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken              token )                            => CreateResponse(AsBool,  token);
-    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken             token )                            => CreateResponse(AsBytes, token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken              token )                            => AsJson(Json.Options, token);
-    public ValueTask<WebResponse<JsonNode>> AsJson( JsonSerializerOptions          options, CancellationToken token ) => CreateResponse(AsJson, options, token);
-    public ValueTask<WebResponse<TValue>>  AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
+    public ValueTask<WebResponse<bool>>     AsBool( CancellationToken            token )                            => CreateResponse(AsBool,  token);
+    public ValueTask<WebResponse<byte[]>>   AsBytes( CancellationToken           token )                            => CreateResponse(AsBytes, token);
+    public ValueTask<WebResponse<JsonNode>> AsJson( CancellationToken            token )                            => AsJson(Json.Options, token);
+    public ValueTask<WebResponse<JsonNode>> AsJson( JsonSerializerOptions        options, CancellationToken token ) => CreateResponse(AsJson, options, token);
+    public ValueTask<WebResponse<TValue>>   AsJson<TValue>( JsonTypeInfo<TValue> info,    CancellationToken token ) => CreateResponse(AsJson, info,    token);
     public ValueTask<WebResponse<TValue>> AsJson<TValue>( CancellationToken token )
         where TValue : IJsonModel<TValue> => CreateResponse(AsJson<TValue>, token);
 
@@ -155,7 +158,7 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
         response.EnsureSuccessStatusCode();
         HttpContent        content = response.Content;
         await using Stream stream  = await content.ReadAsStreamAsync(token);
-        TValue?           result  = await stream.FromJson(info, token);
+        TValue?            result  = await stream.FromJson(info, token);
         return Validate.ThrowIfNull(result);
     }
     public static async ValueTask<bool> AsBool( HttpResponseMessage response, CancellationToken token )
@@ -194,7 +197,9 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         if ( response.Headers.Contains(fileNameHeader) )
         {
-            MimeType mimeType = response.Headers.GetValues(fileNameHeader).First().ToMimeType();
+            MimeType mimeType = response.Headers.GetValues(fileNameHeader)
+                                        .First()
+                                        .ToMimeType();
 
             return await AsFile(response, mimeType, token);
         }
@@ -202,7 +207,9 @@ public readonly struct WebHandler( WebRequester requester, HttpRequestMessage re
 
         if ( response.Content.Headers.Contains(fileNameHeader) )
         {
-            MimeType mimeType = response.Content.Headers.GetValues(fileNameHeader).First().ToMimeType();
+            MimeType mimeType = response.Content.Headers.GetValues(fileNameHeader)
+                                        .First()
+                                        .ToMimeType();
 
             return await AsFile(response, mimeType, token);
         }

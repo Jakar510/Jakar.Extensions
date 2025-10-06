@@ -11,7 +11,7 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     private readonly long        __start  = Stopwatch.GetTimestamp();
 
 
-    public TimeSpan Elapsed { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp()); }
+    public TimeSpan Elapsed { get => Stopwatch.GetElapsedTime(__start, Stopwatch.GetTimestamp()); }
 
 
     public void Dispose()
@@ -69,7 +69,8 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
     }
 
 
-    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span).ToString(format);
+    public static string ToString( in TimeSpan span, string? format = null ) => Create(in span)
+       .ToString(format);
     public static SpanDuration Create( in TimeSpan span )
     {
         if ( span.Days != 0 ) { return new SpanDuration(span.TotalDays, Range.Days); }

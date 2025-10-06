@@ -14,7 +14,7 @@ public readonly struct RecordPair<TSelf>( RecordID<TSelf> id, DateTimeOffset dat
     private readonly int              _hash       = HashCode.Combine(id, dateCreated);
 
 
-    public static string       TableName   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TSelf.TableName; }
+    public static string       TableName   {  get => TSelf.TableName; }
     Guid IUniqueID<Guid>.      ID          => ID.Value;
     DateTimeOffset IDateCreated.DateCreated => DateCreated;
 

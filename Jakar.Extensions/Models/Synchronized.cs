@@ -17,7 +17,7 @@ public sealed class Synchronized<TValue>( TValue value )
 {
     private volatile TValue __value = value;
 
-    public TValue Value { get => Interlocked.CompareExchange( ref __value!, null, null ); set => Interlocked.Exchange( ref __value, value ); }
+    public TValue Value { get => Interlocked.CompareExchange(ref __value!, null, null); set => Interlocked.Exchange(ref __value, value); }
 
 
     public static implicit operator TValue( Synchronized<TValue> value ) => value.Value;
@@ -34,11 +34,11 @@ public sealed class SynchronizedValue<TValue>( TValue value )
     {
         get
         {
-            lock (__lock) { return __value; }
+            lock ( __lock ) { return __value; }
         }
         set
         {
-            lock (__lock) { __value = value; }
+            lock ( __lock ) { __value = value; }
         }
     }
 

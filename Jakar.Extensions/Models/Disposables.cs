@@ -24,14 +24,13 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
     IEnumerator IEnumerable.        GetEnumerator()                                     => GetEnumerator();
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void ClearAndDispose<TValue>( ref TValue? resource )
         where TValue : IDisposable
     {
         resource?.Dispose();
         resource = default;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static ValueTask ClearAndDisposeAsync<TValue>( ref TValue? resource )
         where TValue : IDisposable
     {
@@ -39,7 +38,7 @@ public sealed class Disposables : IEnumerable<IDisposable>, IDisposable
         resource = default;
         return task;
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static async ValueTask CastAndDisposeAsync<TValue>( TValue? resource )
         where TValue : IDisposable
     {
@@ -69,7 +68,11 @@ public sealed class AsyncDisposables : IEnumerable<IAsyncDisposable>, IAsyncDisp
     public AsyncDisposables( params ReadOnlySpan<IAsyncDisposable> enumerable ) => __disposables = [..enumerable];
     public async ValueTask DisposeAsync()
     {
-        foreach ( IAsyncDisposable disposable in __disposables ) { await disposable.DisposeAsync().ConfigureAwait(false); }
+        foreach ( IAsyncDisposable disposable in __disposables )
+        {
+            await disposable.DisposeAsync()
+                            .ConfigureAwait(false);
+        }
 
         __disposables.Clear();
     }

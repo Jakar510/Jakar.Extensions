@@ -35,13 +35,19 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     public static IniConfig ReadFromFile( LocalFile file, IFormatProvider? provider = null )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = file.Read().AsString();
+
+        string content = file.Read()
+                             .AsString();
+
         return Parse(content, provider);
     }
     public static async ValueTask<IniConfig> ReadFromFileAsync( LocalFile file, IFormatProvider? provider = null, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        string              content       = await file.ReadAsync().AsString(token);
+
+        string content = await file.ReadAsync()
+                                   .AsString(token);
+
         return Parse(content, provider);
     }
 
@@ -94,7 +100,9 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
             if ( separator < 0 ) { continue; }
 
             ReadOnlySpan<char> keySpan = line[..separator];
-            string             key     = keySpan.Trim().ToString();
+
+            string key = keySpan.Trim()
+                                .ToString();
 
             ReadOnlySpan<char> valueSpan = line[( separator + 1 )..];
             valueSpan = valueSpan.Trim();
@@ -104,7 +112,8 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
 
             Debug.Assert(!string.IsNullOrEmpty(section));
 
-            if ( config[section].ContainsKey(key) ) { throw new FormatException($"Duplicate key '{key}':  '{section}'"); }
+            if ( config[section]
+               .ContainsKey(key) ) { throw new FormatException($"Duplicate key '{key}':  '{section}'"); }
 
             config[section][key] = value;
         }
@@ -205,8 +214,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider )
     {
         Debug.Assert(destination.Length >= Length);
         charsWritten = 0;

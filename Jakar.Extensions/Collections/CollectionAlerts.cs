@@ -16,8 +16,8 @@ public interface ICollectionAlerts<TValue> : IReadOnlyCollection<TValue>, IValue
 
 
 
-public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IJsonModel<TSelf>
-    where TSelf : ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
+public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, IJsonModel<TSelf>, IEqualComparable<TSelf>
+    where TSelf : ICollectionAlerts<TSelf, TValue>
 {
     public abstract static implicit operator TSelf( List<TValue>           values );
     public abstract static implicit operator TSelf( HashSet<TValue>        values );
@@ -32,7 +32,7 @@ public interface ICollectionAlerts<TSelf, TValue> : ICollectionAlerts<TValue>, I
 
 
 public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, ICollectionAlerts<TValue>
-    where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
+    where TSelf : CollectionAlerts<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>, IEqualComparable<TSelf>
 {
 // ReSharper disable once StaticMemberInGenericType
     protected static readonly NotifyCollectionChangedEventArgs _resetArgs = new(NotifyCollectionChangedAction.Reset);
@@ -45,18 +45,18 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     public override int  CompareTo( TSelf? other ) => Nullable.Compare(Count, other?.Count);
 
 
-    public virtual                                               void Refresh()                                         => Reset();
-    protected                                                    void Reset()                                           => OnChanged(_resetArgs);
-    protected                                                    void Added( TValue[]                value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
-    protected                                                    void Added( ref readonly TValue     value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
-    protected                                                    void Removed( TValue[]              value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
-    protected                                                    void Removed( ref readonly TValue   value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
-    protected                                                    void Removed( int                   index )                                                       => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove,  index));
-    protected                                                    void Moved( TValue[]                value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
-    protected                                                    void Moved( ref readonly    TValue  value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
-    protected                                                    void Replaced( ref readonly TValue? old,   ref readonly TValue value, int              index )    => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old,   index));
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected void OnCountChanged() => OnPropertyChanged(nameof(Count));
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
+    public virtual void Refresh()                                         => Reset();
+    protected      void Reset()                                           => OnChanged(_resetArgs);
+    protected      void Added( TValue[]                value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
+    protected      void Added( ref readonly TValue     value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
+    protected      void Removed( TValue[]              value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
+    protected      void Removed( ref readonly TValue   value, int index ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, value, index));
+    protected      void Removed( int                   index )                                                       => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove,  index));
+    protected      void Moved( TValue[]                value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
+    protected      void Moved( ref readonly    TValue  value, ref readonly int    index, ref readonly int oldIndex ) => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Move,    value, index, oldIndex));
+    protected      void Replaced( ref readonly TValue? old,   ref readonly TValue value, int              index )    => OnChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, value, old,   index));
+    protected      void OnCountChanged() => OnPropertyChanged(nameof(Count));
+    protected virtual void OnChanged( NotifyCollectionChangedEventArgs e )
     {
         CollectionChanged?.Invoke(this, e);
         if ( e.Action is NotifyCollectionChangedAction.Add or NotifyCollectionChangedAction.Remove or NotifyCollectionChangedAction.Reset ) { OnCountChanged(); }

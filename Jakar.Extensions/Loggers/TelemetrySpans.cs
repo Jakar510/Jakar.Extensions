@@ -78,8 +78,7 @@ public static class TelemetrySpans
      */
 
 
-    [Pure][MustDisposeResource]
-    public static OpenTelemetry.Trace.TelemetrySpan StartSpan( this Activity activity, [CallerMemberName] string caller = BaseClass.EMPTY ) =>
+    [Pure] [MustDisposeResource] public static OpenTelemetry.Trace.TelemetrySpan StartSpan( this Activity activity, [CallerMemberName] string caller = BaseClass.EMPTY ) =>
         ReferenceEquals(activity, Activity.Current)
             ? Tracer.CurrentSpan
             : throw new InvalidOperationException("Activity.Current is not the same as the activity.");
@@ -99,9 +98,9 @@ public static class TelemetrySpans
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void            SetAttribute( this Activity activity, string                  key, object? value ) => activity.SetTag(key, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void            AddAttribute( this Activity activity, string                  key, object? value ) => activity.AddTag(key, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivityEvent   GetEvent( this     string   name,     ActivityTagsCollection? tags = null ) => new(name, DateTimeOffset.UtcNow, tags);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivityContext RandomContext()                    => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static string          GetClassName<T>( this T instance ) => ( instance?.GetType() ?? typeof(T) ).Name;
+    public static void            SetAttribute( this Activity activity, string                  key, object? value ) => activity.SetTag(key, value);
+    public static void            AddAttribute( this Activity activity, string                  key, object? value ) => activity.AddTag(key, value);
+    public static ActivityEvent   GetEvent( this     string   name,     ActivityTagsCollection? tags = null ) => new(name, DateTimeOffset.UtcNow, tags);
+    public static ActivityContext RandomContext()                    => new(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(), ActivityTraceFlags.Recorded);
+    public static string          GetClassName<T>( this T instance ) => ( instance?.GetType() ?? typeof(T) ).Name;
 }

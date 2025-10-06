@@ -211,13 +211,13 @@ public static class Controllers
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ControllerBase controller, string              error, string? title = null, string key = ERROR ) { controller.ModelState.AddError(error, title, key); }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ControllerBase controller, params string[]     errors ) { controller.ModelState.AddError(errors.AsSpan()); }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) { controller.ModelState.AddError(errors); }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddError( this ControllerBase controller, Exception           e )      { controller.ModelState.AddError(e); }
+     public static void AddError( this ControllerBase controller, string              error, string? title = null, string key = ERROR ) { controller.ModelState.AddError(error, title, key); }
+     public static void AddError( this ControllerBase controller, params string[]     errors ) { controller.ModelState.AddError(errors.AsSpan()); }
+     public static void AddError( this ControllerBase controller, IEnumerable<string> errors ) { controller.ModelState.AddError(errors); }
+     public static void AddError( this ControllerBase controller, Exception           e )      { controller.ModelState.AddError(e); }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static void AddError( this ModelStateDictionary controller, Exception e )
     {
         controller.AddError(e.Message);
@@ -225,7 +225,7 @@ public static class Controllers
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static void AddError( this ModelStateDictionary state, string error, string? title = null, string key = ERROR )
     {
         state.AddError(key,
@@ -235,7 +235,7 @@ public static class Controllers
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static void AddError( this ModelStateDictionary state, scoped in ReadOnlySpan<string> errors )
     {
         if ( errors.IsEmpty ) { return; }
@@ -244,7 +244,7 @@ public static class Controllers
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    
     public static void AddError( this ModelStateDictionary state, IEnumerable<string> errors )
     {
         foreach ( string error in errors ) { state.AddError(error); }

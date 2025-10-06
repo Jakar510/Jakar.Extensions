@@ -4,7 +4,5 @@
 namespace Jakar.Extensions;
 
 
-
-
 public interface IOperators<TValue> : IBinaryOperators<TValue>, IMathOperators<TValue>
     where TValue : IOperators<TValue>;

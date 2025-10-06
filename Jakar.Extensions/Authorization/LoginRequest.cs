@@ -147,12 +147,14 @@ public sealed class LoginRequestVersion( string userName, string password, AppVe
     public LoginRequestVersion( ILoginRequest<AppVersion> request ) : this(request.UserName, request.UserName, request.Data) { }
 
 
-    public static bool operator ==( LoginRequestVersion? left, LoginRequestVersion? right ) => EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
-    public static bool operator !=( LoginRequestVersion? left, LoginRequestVersion? right ) => !EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
-    public static bool operator >( LoginRequestVersion   left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) > 0;
-    public static bool operator >=( LoginRequestVersion  left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) >= 0;
-    public static bool operator <( LoginRequestVersion   left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) < 0;
-    public static bool operator <=( LoginRequestVersion  left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                        => HashCode.Combine(UserName, Password, Data);
+    public override bool Equals( object?                   other )                            => ReferenceEquals(this, other) || other is LoginRequestValue x && Equals(x);
+    public static   bool operator ==( LoginRequestVersion? left, LoginRequestVersion? right ) => EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
+    public static   bool operator !=( LoginRequestVersion? left, LoginRequestVersion? right ) => !EqualityComparer<LoginRequestVersion>.Default.Equals(left, right);
+    public static   bool operator >( LoginRequestVersion   left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LoginRequestVersion  left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LoginRequestVersion   left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LoginRequestVersion  left, LoginRequestVersion  right ) => Comparer<LoginRequestVersion>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -171,12 +173,14 @@ public sealed class LoginRequestValue( string userName, string password, JsonVal
     public static LoginRequestValue Create( ILoginRequest request, JsonValue data ) => new(request.UserName, request.Password, data);
 
 
-    public static bool operator ==( LoginRequestValue? left, LoginRequestValue? right ) => EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
-    public static bool operator !=( LoginRequestValue? left, LoginRequestValue? right ) => !EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
-    public static bool operator >( LoginRequestValue   left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) > 0;
-    public static bool operator >=( LoginRequestValue  left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) >= 0;
-    public static bool operator <( LoginRequestValue   left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) < 0;
-    public static bool operator <=( LoginRequestValue  left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                    => HashCode.Combine(UserName, Password, Data);
+    public override bool Equals( object?                 other )                          => ReferenceEquals(this, other) || other is LoginRequestValue x && Equals(x);
+    public static   bool operator ==( LoginRequestValue? left, LoginRequestValue? right ) => EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
+    public static   bool operator !=( LoginRequestValue? left, LoginRequestValue? right ) => !EqualityComparer<LoginRequestValue>.Default.Equals(left, right);
+    public static   bool operator >( LoginRequestValue   left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LoginRequestValue  left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LoginRequestValue   left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LoginRequestValue  left, LoginRequestValue  right ) => Comparer<LoginRequestValue>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -193,10 +197,12 @@ public sealed class LoginRequest( string userName, string password ) : LoginRequ
     public LoginRequest( ILoginRequest request ) : this(request.UserName, request.Password) { }
 
 
-    public static bool operator ==( LoginRequest? left, LoginRequest? right ) => EqualityComparer<LoginRequest>.Default.Equals(left, right);
-    public static bool operator !=( LoginRequest? left, LoginRequest? right ) => !EqualityComparer<LoginRequest>.Default.Equals(left, right);
-    public static bool operator >( LoginRequest   left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) > 0;
-    public static bool operator >=( LoginRequest  left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) >= 0;
-    public static bool operator <( LoginRequest   left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) < 0;
-    public static bool operator <=( LoginRequest  left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                          => HashCode.Combine(UserName, Password);
+    public override bool Equals( object?            other )                     => ReferenceEquals(this, other) || other is LoginRequest x && Equals(x);
+    public static   bool operator ==( LoginRequest? left, LoginRequest? right ) => EqualityComparer<LoginRequest>.Default.Equals(left, right);
+    public static   bool operator !=( LoginRequest? left, LoginRequest? right ) => !EqualityComparer<LoginRequest>.Default.Equals(left, right);
+    public static   bool operator >( LoginRequest   left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LoginRequest  left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LoginRequest   left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LoginRequest  left, LoginRequest  right ) => Comparer<LoginRequest>.Default.Compare(left, right) <= 0;
 }

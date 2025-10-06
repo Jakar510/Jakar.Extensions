@@ -16,7 +16,7 @@ public sealed class RecordGenerator<TSelf>( DbTable<TSelf> table ) : IAsyncEnume
     private          TSelf?                   __current;
 
 
-    public TSelf Current { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __current ?? throw new NullReferenceException(nameof(__current)); }
+    public TSelf Current {  get => __current ?? throw new NullReferenceException(nameof(__current)); }
 
 
     public RecordGenerator( DbTable<TSelf> table, CancellationToken token ) : this(table) => __token = token;

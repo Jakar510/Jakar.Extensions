@@ -48,7 +48,7 @@ public static partial class AsyncLinq
 
     public static async IAsyncEnumerable<TElement> Cast<TSource, TElement>( this IAsyncEnumerable<TSource> source, Func<TSource, TElement> func )
     {
-        await foreach ( TSource element in source ) { yield return func( element ); }
+        await foreach ( TSource element in source ) { yield return func(element); }
     }
     public static async IAsyncEnumerable<TElement> Cast<TElement>( this IAsyncEnumerable<object> source )
     {
@@ -63,23 +63,23 @@ public static partial class AsyncLinq
     }
 
 
-    public static IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source ) => source.Distinct( EqualityComparer<TElement>.Default );
+    public static IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source ) => source.Distinct(EqualityComparer<TElement>.Default);
     public static async IAsyncEnumerable<TElement> Distinct<TElement>( this IAsyncEnumerable<TElement> source, EqualityComparer<TElement> comparer )
     {
-        HashSet<TElement> set = await source.ToHashSet( comparer );
+        HashSet<TElement> set = await source.ToHashSet(comparer);
         foreach ( TElement element in set ) { yield return element; }
     }
     public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector ) =>
-        source.DistinctBy( keySelector, EqualityComparer<TKey>.Default );
+        source.DistinctBy(keySelector, EqualityComparer<TKey>.Default);
     public static IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector ) =>
-        source.DistinctBy( keySelector, EqualityComparer<TKey>.Default );
+        source.DistinctBy(keySelector, EqualityComparer<TKey>.Default);
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, TKey> keySelector, EqualityComparer<TKey> comparer )
     {
         HashSet<TKey> set = new(comparer);
 
         await foreach ( TElement element in source )
         {
-            if ( set.Add( keySelector( element ) ) ) { yield return element; }
+            if ( set.Add(keySelector(element)) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> DistinctBy<TElement, TKey>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TKey>> keySelector, EqualityComparer<TKey> comparer )
@@ -88,21 +88,22 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( set.Add( await keySelector( element ).ConfigureAwait( false ) ) ) { yield return element; }
+            if ( set.Add(await keySelector(element)
+                            .ConfigureAwait(false)) ) { yield return element; }
         }
     }
 
 
     public static async IAsyncEnumerable<TElement> Skip<TElement>( this IAsyncEnumerable<TElement> source, int count, int start = 0 )
     {
-        await foreach ( (int index, TElement? value) in source.Enumerate( start ) )
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(start) )
         {
             if ( index >= count ) { yield return value; }
         }
     }
     public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int index = 0; index < list.Count; index++ )
         {
@@ -119,28 +120,28 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( predicate( element ) ) { yield return element; }
+            if ( predicate(element) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> predicate )
     {
         await foreach ( TElement element in source )
         {
-            if ( await predicate( element ) ) { yield return element; }
+            if ( await predicate(element) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, bool> predicate, int start = 0 )
     {
-        await foreach ( (int index, TElement? value) in source.Enumerate( start ) )
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(start) )
         {
-            if ( predicate( value, index ) ) { yield return value; }
+            if ( predicate(value, index) ) { yield return value; }
         }
     }
     public static async IAsyncEnumerable<TElement> SkipWhile<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<bool>> predicate, int start = 0 )
     {
-        await foreach ( (int index, TElement? value) in source.Enumerate( start ) )
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(start) )
         {
-            if ( await predicate( value, index ) ) { yield return value; }
+            if ( await predicate(value, index) ) { yield return value; }
         }
     }
 
@@ -149,14 +150,14 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( predicate( element ) ) { yield return element; }
+            if ( predicate(element) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> predicate )
     {
         await foreach ( TElement element in source )
         {
-            if ( await predicate( element ) ) { yield return element; }
+            if ( await predicate(element) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, bool> predicate )
@@ -167,7 +168,7 @@ public static partial class AsyncLinq
         {
             checked { index++; }
 
-            if ( predicate( element, index ) ) { yield return element; }
+            if ( predicate(element, index) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<TElement> Where<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<bool>> predicate )
@@ -178,89 +179,89 @@ public static partial class AsyncLinq
         {
             checked { index++; }
 
-            if ( await predicate( element, index ) ) { yield return element; }
+            if ( await predicate(element, index) ) { yield return element; }
         }
     }
 
 
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TResult> selector )
     {
-        await foreach ( TElement element in source ) { yield return selector( element ); }
+        await foreach ( TElement element in source ) { yield return selector(element); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TResult> selector, TArg1 arg1 )
     {
-        await foreach ( TElement element in source ) { yield return selector( element, arg1 ); }
+        await foreach ( TElement element in source ) { yield return selector(element, arg1); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, TResult> selector, TArg1 arg1, TArg2 arg2 )
     {
-        await foreach ( TElement element in source ) { yield return selector( element, arg1, arg2 ); }
+        await foreach ( TElement element in source ) { yield return selector(element, arg1, arg2); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TArg3, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, TArg3, TResult> selector, TArg1 arg1, TArg2 arg2, TArg3 arg3 )
     {
-        await foreach ( TElement element in source ) { yield return selector( element, arg1, arg2, arg3 ); }
+        await foreach ( TElement element in source ) { yield return selector(element, arg1, arg2, arg3); }
     }
 
 
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<TResult>> selector )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element ); }
+        await foreach ( TElement element in source ) { yield return await selector(element); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, ValueTask<TResult>> selector, TArg1 arg1 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, ValueTask<TResult>> selector, TArg1 arg1, TArg2 arg2 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1, arg2 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1, arg2); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TArg3, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, TArg3, ValueTask<TResult>> selector, TArg1 arg1, TArg2 arg2, TArg3 arg3 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1, arg2, arg3 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1, arg2, arg3); }
     }
 
 
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<TResult>> selector )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element ); }
+        await foreach ( TElement element in source ) { yield return await selector(element); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, Task<TResult>> selector, TArg1 arg1 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, Task<TResult>> selector, TArg1 arg1, TArg2 arg2 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1, arg2 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1, arg2); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TArg1, TArg2, TArg3, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, TArg1, TArg2, TArg3, Task<TResult>> selector, TArg1 arg1, TArg2 arg2, TArg3 arg3 )
     {
-        await foreach ( TElement element in source ) { yield return await selector( element, arg1, arg2, arg3 ); }
+        await foreach ( TElement element in source ) { yield return await selector(element, arg1, arg2, arg3); }
     }
 
 
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, int, TResult> selector, int start = 0 )
     {
-        await foreach ( (int index, TElement? value) in source.Enumerate( start ) ) { yield return selector( value, index ); }
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(start) ) { yield return selector(value, index); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, int, ValueTask<TResult>> selector, int start = 0 )
     {
-        await foreach ( (int index, TElement? value) in source.Enumerate( start ) ) { yield return await selector( value, index ); }
+        await foreach ( ( int index, TElement? value ) in source.Enumerate(start) ) { yield return await selector(value, index); }
     }
 
 
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, long, TResult> selector, long start = 0 )
     {
-        await foreach ( (long index, TElement? value) in source.Enumerate( start ) ) { yield return selector( value, index ); }
+        await foreach ( ( long index, TElement? value ) in source.Enumerate(start) ) { yield return selector(value, index); }
     }
     public static async IAsyncEnumerable<TResult> Select<TElement, TResult>( this IAsyncEnumerable<TElement> source, Func<TElement, long, ValueTask<TResult>> selector, long start = 0 )
     {
-        await foreach ( (long index, TElement? value) in source.Enumerate( start ) ) { yield return await selector( value, index ); }
+        await foreach ( ( long index, TElement? value ) in source.Enumerate(start) ) { yield return await selector(value, index); }
     }
 
 
     public static IEnumerable<TElement> Consolidate<TElement>( this IEnumerable<IEnumerable<TElement>> values )
     {
         List<TElement> results = new();
-        foreach ( IEnumerable<TElement> element in values ) { results.AddRange( element ); }
+        foreach ( IEnumerable<TElement> element in values ) { results.AddRange(element); }
 
         return results;
     }
@@ -270,7 +271,7 @@ public static partial class AsyncLinq
 
         foreach ( IEnumerable<TElement> element in values )
         {
-            foreach ( TElement item in element ) { results.Add( item ); }
+            foreach ( TElement item in element ) { results.Add(item); }
         }
 
         return results;
@@ -287,7 +288,8 @@ public static partial class AsyncLinq
     {
         HashSet<TElement> results = new();
 
-        await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
+        await foreach ( TElement element in values.Consolidate()
+                                                  .WithCancellation(token) ) { results.Add(element); }
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TElement element in results )
@@ -309,7 +311,8 @@ public static partial class AsyncLinq
     {
         HashSet<TElement> results = new();
 
-        await foreach ( TElement element in values.Consolidate().WithCancellation( token ) ) { results.Add( element ); }
+        await foreach ( TElement element in values.Consolidate()
+                                                  .WithCancellation(token) ) { results.Add(element); }
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TElement element in results )
@@ -326,7 +329,7 @@ public static partial class AsyncLinq
         // ReSharper disable once LoopCanBeConvertedToQuery
         foreach ( string? element in values )
         {
-            if ( !string.IsNullOrEmpty( element ) ) { yield return element; }
+            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
         }
     }
     public static async IAsyncEnumerable<string> WhereNotNull( this IAsyncEnumerable<string?> values )
@@ -334,7 +337,7 @@ public static partial class AsyncLinq
         // ReSharper disable once LoopCanBeConvertedToQuery
         await foreach ( string? element in values )
         {
-            if ( !string.IsNullOrEmpty( element ) ) { yield return element; }
+            if ( !string.IsNullOrEmpty(element) ) { yield return element; }
         }
     }
 
@@ -421,27 +424,27 @@ public static partial class AsyncLinq
 
     public static async ValueTask<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( !selector( element ) ) { return false; }
+            if ( !selector(element) ) { return false; }
         }
 
         return true;
     }
     public static async ValueTask<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( !await selector( element ) ) { return false; }
+            if ( !await selector(element) ) { return false; }
         }
 
         return true;
     }
     public static async ValueTask<bool> All<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( !await selector( element ) ) { return false; }
+            if ( !await selector(element) ) { return false; }
         }
 
         return true;
@@ -450,33 +453,33 @@ public static partial class AsyncLinq
 
     public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        await foreach ( TElement _ in source.WithCancellation( token ) ) { return true; }
+        await foreach ( TElement _ in source.WithCancellation(token) ) { return true; }
 
         return false;
     }
     public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( selector( element ) ) { return true; }
+            if ( selector(element) ) { return true; }
         }
 
         return false;
     }
     public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( await selector( element ) ) { return true; }
+            if ( await selector(element) ) { return true; }
         }
 
         return false;
     }
     public static async ValueTask<bool> Any<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, Task<bool>> selector, CancellationToken token = default )
     {
-        await foreach ( TElement element in source.WithCancellation( token ) )
+        await foreach ( TElement element in source.WithCancellation(token) )
         {
-            if ( await selector( element ) ) { return true; }
+            if ( await selector(element) ) { return true; }
         }
 
         return false;

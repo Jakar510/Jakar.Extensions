@@ -9,12 +9,13 @@ using System.Formats.Asn1;
 namespace Jakar.Extensions;
 
 
-[DefaultValue(nameof(Default))][SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
+[DefaultValue(nameof(Default))]
+[SuppressMessage("ReSharper", "OutParameterValueIsAlwaysDiscarded.Global")]
 public readonly ref struct PasswordValidator
 {
     private readonly Requirements __requirements;
 
-    public static PasswordRequirements Requirements { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => PasswordRequirements.Current; [MethodImpl(MethodImplOptions.AggressiveInlining)] set => PasswordRequirements.Current = value; }
+    public static PasswordRequirements Requirements { get => PasswordRequirements.Current; set => PasswordRequirements.Current = value; }
     public static PasswordValidator    Default      => new(Requirements);
     public PasswordValidator() => throw new InvalidOperationException("Use the constructor with Requirements");
     public PasswordValidator( scoped in Requirements requirements ) => __requirements = requirements;
@@ -103,7 +104,8 @@ public readonly ref struct PasswordValidator
 
 
 
-[DefaultValue(nameof(Default))][SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor")]
+[DefaultValue(nameof(Default))]
+[SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor")]
 public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
                                          int                  minLength,
                                          int                  maxLength,
@@ -135,7 +137,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
     public readonly ReadOnlySpan<char>   specialChars             = specialChars;
 
 
-    public static Requirements Default { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => PasswordRequirements.Current; }
+    public static Requirements Default { get => PasswordRequirements.Current; }
 
 
     public static implicit operator Requirements( PasswordRequirements data ) => new(data.BlockedPasswords,
@@ -222,6 +224,8 @@ public sealed record PasswordRequirements : IOptions<PasswordRequirements>
     public async ValueTask SetBlockedPasswords( LocalFile file, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
-        SetBlockedPasswords(await file.ReadAsync().AsString(token));
+
+        SetBlockedPasswords(await file.ReadAsync()
+                                      .AsString(token));
     }
 }

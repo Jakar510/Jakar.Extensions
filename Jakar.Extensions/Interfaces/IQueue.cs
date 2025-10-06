@@ -9,8 +9,8 @@ public interface IQueue<TValue> : IEnumerable<TValue>
 
     public bool Contains( TValue value );
 
-    public bool Remove( [NotNullWhen( true )] out TValue? value );
-    public void Add( TValue                               value );
+    public bool Remove( [NotNullWhen(true)] out TValue? value );
+    public void Add( TValue                             value );
 
     public void Clear();
 }

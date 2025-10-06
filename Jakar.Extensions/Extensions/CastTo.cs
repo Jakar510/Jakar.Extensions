@@ -12,7 +12,7 @@ public static class CastTo<TEnum, TResult>
     where TEnum : struct, Enum
 {
     /// <summary> Casts <typeparamref name="TEnum"/> to <typeparamref name="TResult"/>. This does not cause boxing for value types. Useful in generic methods. </summary>
-    public static TResult From( TEnum s ) => Cache.Caster( s );
+    public static TResult From( TEnum s ) => Cache.Caster(s);
 
 
 
@@ -22,10 +22,11 @@ public static class CastTo<TEnum, TResult>
 
         private static Func<TEnum, TResult> Get()
         {
-            ParameterExpression p = Expression.Parameter( typeof(TEnum) );
-            UnaryExpression     c = Expression.ConvertChecked( p, typeof(TResult) );
+            ParameterExpression p = Expression.Parameter(typeof(TEnum));
+            UnaryExpression     c = Expression.ConvertChecked(p, typeof(TResult));
 
-            return Expression.Lambda<Func<TEnum, TResult>>( c, p ).Compile();
+            return Expression.Lambda<Func<TEnum, TResult>>(c, p)
+                             .Compile();
         }
     }
 }

@@ -3,7 +3,7 @@
 
 public static class ExceptionExtensions
 {
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static Dictionary<string, object?> GetInnerExceptions( this Exception e, ref Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         if ( e is null ) { throw new NullReferenceException(nameof(e)); }
@@ -17,8 +17,8 @@ public static class ExceptionExtensions
         return dict;
     }
 
-    
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static Dictionary<string, object?> GetProperties( this Exception e )
     {
         Dictionary<string, object?> dictionary = new();
@@ -29,16 +29,15 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static ExceptionDetails Details( this Exception e ) => new(e, false);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static ExceptionDetails FullDetails( this Exception e ) => new(e);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static IEnumerable<string> Frames( StackTrace trace )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static IEnumerable<string> Frames( StackTrace trace )
     {
         foreach ( StackFrame frame in trace.GetFrames() )
         {
@@ -67,8 +66,7 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string         CallStack( StackTrace trace )  => string.Join("->", Frames(trace));
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")]
-    public static string Frame( StackFrame frame )
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string Frame( StackFrame frame )
     {
         MethodBase method    = frame.GetMethod()    ?? throw new NullReferenceException(nameof(frame.GetMethod));
         string     className = method.MethodClass() ?? throw new NullReferenceException(nameof(Types.MethodClass));
@@ -82,11 +80,11 @@ public static class ExceptionExtensions
     [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed")] public static string? MethodSignature( this Exception e ) => e.TargetSite?.MethodSignature();
 
 
-    [RequiresUnreferencedCode(Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode(Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static JsonNode? GetData( this Exception e ) => JsonSerializer.SerializeToNode(e.Data, Json.Options);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details( this Exception e, out Dictionary<string, string?> dict )
     {
         dict = new Dictionary<string, string?>(10);
@@ -94,11 +92,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details<TValue>( this Exception e, in TValue dict )
         where TValue : class, IDictionary<string, string?>
     {
-        dict[nameof(Type)]               = e.GetType().FullName;
+        dict[nameof(Type)] = e.GetType()
+                              .FullName;
+
         dict[nameof(e.Source)]           = e.Source;
         dict[nameof(e.Message)]          = e.Message;
         dict[nameof(e.StackTrace)]       = e.StackTrace;
@@ -108,12 +108,13 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details( this Exception e, out Dictionary<string, object?> dict, bool includeFullMethodInfo )
     {
         dict = new Dictionary<string, object?>
                {
-                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Type)] = e.GetType()
+                                     .FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,
@@ -144,7 +145,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode(Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode(Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void GetProperties<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)] TValue>( this TValue e, ref JsonObject dictionary )
         where TValue : Exception
     {
@@ -159,7 +160,7 @@ public static class ExceptionExtensions
     }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static void Details( this Exception e, out JsonObject dict, bool includeFullMethodInfo )
     {
         JsonArray            array = new();
@@ -173,7 +174,8 @@ public static class ExceptionExtensions
 
         dict = new JsonObject
                {
-                   [nameof(Type)]                 = e.GetType().FullName,
+                   [nameof(Type)] = e.GetType()
+                                     .FullName,
                    [nameof(Exception.HResult)]    = e.HResult,
                    [nameof(Exception.HelpLink)]   = e.HelpLink,
                    [nameof(Exception.Source)]     = e.Source,

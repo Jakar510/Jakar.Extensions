@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<ExceptionDetails>
+public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualComparable<ExceptionDetails>, IJsonModel<ExceptionDetails>
 {
     [JsonIgnore] public readonly Exception?                       Value;
     public static                JsonTypeInfo<ExceptionDetails[]> JsonArrayInfo   => JakarExtensionsContext.Default.ExceptionDetailsArray;
@@ -23,16 +23,22 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<E
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public ExceptionDetails( Exception exception, bool includeMethodInfo = true )
     {
-        Value           = exception ?? throw new ArgumentNullException(nameof(exception));
-        Message         = exception.Message;
-        HResult         = exception.HResult;
-        Type            = exception.GetType().FullName;
-        HelpLink        = exception.HelpLink;
-        Source          = exception.Source;
-        StackTrace      = exception.StackTrace?.SplitAndTrimLines().ToArray() ?? [];
+        Value   = exception ?? throw new ArgumentNullException(nameof(exception));
+        Message = exception.Message;
+        HResult = exception.HResult;
+
+        Type = exception.GetType()
+                        .FullName;
+
+        HelpLink = exception.HelpLink;
+        Source   = exception.Source;
+
+        StackTrace = exception.StackTrace?.SplitAndTrimLines()
+                              .ToArray() ?? [];
+
         MethodSignature = $"{exception.MethodClass()}::{exception.MethodSignature()}";
         Data            = exception.GetData();
         Str             = exception.ToString();
@@ -43,16 +49,16 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IJsonModel<E
                     ? null
                     : new ExceptionDetails(exception.InnerException);
     }
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
     public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     private static ExceptionDetails Create( Exception exception ) => new(exception);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)][RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     private static ExceptionDetails? TryCreate( [NotNullIfNotNull(nameof(exception))] Exception? exception ) => exception is not null
                                                                                                                     ? Create(exception)
                                                                                                                     : null;

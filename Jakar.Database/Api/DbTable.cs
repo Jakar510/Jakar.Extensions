@@ -14,12 +14,12 @@ public partial class DbTable<TSelf> : IConnectableDb
     public static readonly SqlCache<TSelf>   SQLCache = new();
 
 
-    public static TSelf[]                 Empty                     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
-    public static ImmutableArray<TSelf>   EmptyArray                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => []; }
-    public static FrozenSet<TSelf>        Set                       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FrozenSet<TSelf>.Empty; }
+    public static TSelf[]                 Empty                     {  get => []; }
+    public static ImmutableArray<TSelf>   EmptyArray                {  get => []; }
+    public static FrozenSet<TSelf>        Set                       {  get => FrozenSet<TSelf>.Empty; }
     public        FusionCacheEntryOptions? Options                   { get; set; }
-    public        RecordGenerator<TSelf>  Records                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => new(this); }
-    public        IsolationLevel           TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _database.TransactionIsolationLevel; }
+    public        RecordGenerator<TSelf>  Records                   {  get => new(this); }
+    public        IsolationLevel           TransactionIsolationLevel {  get => _database.TransactionIsolationLevel; }
 
 
     public DbTable( IConnectableDbRoot database, FusionCache cache )

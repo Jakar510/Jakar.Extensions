@@ -59,7 +59,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                                                                               .With_CreatedBy()
                                                                                                               .Build();
 
-    public static                                                                           string      TableName              { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static                                                                           string      TableName              {  get => TABLE_NAME; }
     [ProtectedPersonalData] [StringLength(Constants.UNICODE_TEXT_CAPACITY)] public override JsonObject? AdditionalData         { get => _additionalData; set => _additionalData = value; }
     [StringLength(                        Constants.ANSI_CAPACITY)]         public          string      AuthenticatorKey       { get;                    set; }
     public                                                                                  int?        BadLogins              { get;                    set; }
@@ -83,7 +83,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public   bool                                                                                       IsLocked               { get; set; }
     public   bool                                                                                       IsPhoneNumberConfirmed { get; set; }
     public   bool                                                                                       IsTwoFactorEnabled     { get; set; }
-    internal bool                                                                                       IsValid                { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
+    internal bool                                                                                       IsValid                {  get => !string.IsNullOrWhiteSpace(UserName) && ID.IsValid(); }
     bool IValidator.                                                                                    IsValid                => IsValid;
     public DateTimeOffset?                                                                              LastBadAttempt         { get;                  set; }
     public DateTimeOffset?                                                                              LastLogin              { get;                  set; }
@@ -809,7 +809,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Passwords
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public bool HasPassword() => !string.IsNullOrWhiteSpace(PasswordHash);
+     public bool HasPassword() => !string.IsNullOrWhiteSpace(PasswordHash);
 
 
     public UserRecord WithPassword( string password )
@@ -831,7 +831,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword(ref record, request.Password);
+     public static bool VerifyPassword( scoped ref UserRecord record, ILoginRequest request ) => VerifyPassword(ref record, request.Password);
     public static bool VerifyPassword( scoped ref UserRecord record, in string password )
     {
         string value = Database.DataProtector.Decrypt(record.PasswordHash);

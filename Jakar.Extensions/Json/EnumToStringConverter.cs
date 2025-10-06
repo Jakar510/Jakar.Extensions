@@ -8,10 +8,13 @@ public abstract class EnumToStringConverter<TSelf, TEnum>() : JsonConverter<TEnu
     where TEnum : struct, Enum
     where TSelf : EnumToStringConverter<TSelf, TEnum>, new()
 {
-    public static readonly    TSelf                          Instance      = new();
-    protected static readonly FrozenDictionary<TEnum, string> _enumToString = Enum.GetValues<TEnum>().ToFrozenDictionary(Self,     ToString);
-    protected static readonly FrozenDictionary<string, TEnum> _stringToEnum = Enum.GetValues<TEnum>().ToFrozenDictionary(ToString, Self);
-    protected static readonly FrozenDictionary<long, TEnum>   _intToEnum    = Enum.GetValues<TEnum>().ToFrozenDictionary(ToNumber, Self);
+    public static readonly TSelf Instance = new();
+    protected static readonly FrozenDictionary<TEnum, string> _enumToString = Enum.GetValues<TEnum>()
+                                                                                  .ToFrozenDictionary(Self, ToString);
+    protected static readonly FrozenDictionary<string, TEnum> _stringToEnum = Enum.GetValues<TEnum>()
+                                                                                  .ToFrozenDictionary(ToString, Self);
+    protected static readonly FrozenDictionary<long, TEnum> _intToEnum = Enum.GetValues<TEnum>()
+                                                                             .ToFrozenDictionary(ToNumber, Self);
 
 
     private static TEnum  Self( TEnum     x ) => x;

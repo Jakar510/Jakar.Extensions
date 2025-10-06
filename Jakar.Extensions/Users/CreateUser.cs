@@ -27,8 +27,8 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    [JsonIgnore]                                                                      public override bool IsValid         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.IsValid                         && IsValidPassword; }
-    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
+    [JsonIgnore]                                                                      public override bool IsValid         { get => base.IsValid                         && IsValidPassword; }
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
 
 
     [Required] [StringLength(UNICODE_CAPACITY)] public virtual string Password
@@ -43,7 +43,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
 
     [Required] [StringLength(UNICODE_CAPACITY)] public override string UserName
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => base.UserName;
+        get => base.UserName;
         set
         {
             base.UserName = value;
@@ -63,12 +63,12 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     public static TSelf Register( string email, string password )
     {
         TSelf user = new()
-                      {
-                          Password        = password,
-                          ConfirmPassword = password,
-                          UserName        = email,
-                          Email           = email
-                      };
+                     {
+                         Password        = password,
+                         ConfirmPassword = password,
+                         UserName        = email,
+                         Email           = email
+                     };
 
         Debug.Assert(user.IsValid);
         return user;
@@ -76,12 +76,12 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     public static TSelf Register( string userName, string password, string email )
     {
         TSelf user = new()
-                      {
-                          Password        = password,
-                          ConfirmPassword = password,
-                          UserName        = userName,
-                          Email           = email
-                      };
+                     {
+                         Password        = password,
+                         ConfirmPassword = password,
+                         UserName        = userName,
+                         Email           = email
+                     };
 
         Debug.Assert(user.IsValid);
         return user;

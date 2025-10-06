@@ -29,8 +29,8 @@ public static class Telemetry
     public static readonly ConcurrentDictionary<string, Meter>      Meters      = [];
 
 
-    public static Meter          Meter  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = DbMeter;
-    public static ActivitySource Source { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = DbSource;
+    public static Meter          Meter  {  get; set; } = DbMeter;
+    public static ActivitySource Source {  get; set; } = DbSource;
 
 
     public static void ConfigureExporter( this OtlpExporterOptions exporter, Uri endpoint, ExportProcessorType type, OtlpExportProtocol protocol, string? headers = null, int timeout = 10000 )
@@ -138,28 +138,28 @@ public static class Telemetry
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource()                                           => CreateSource(GetAssembly());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( Assembly     assembly )                    => CreateSource(assembly.GetName());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( AssemblyName assembly )                    => CreateSource(assembly.Name ?? nameof(Database), assembly);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( string       name )                        => CreateSource(name,                              GetAssembly());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( string       name, Assembly     assembly ) => CreateSource(name,                              assembly.GetName());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( string       name, AssemblyName assembly ) => CreateSource(name,                              assembly.GetVersion());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( string       name, AppVersion   version )  => CreateSource(name,                              version.ToString());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter()                                                                                                                         => CreateMeter(GetAssembly());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter(assembly.GetName());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter(assembly.Name ?? nameof(Database), assembly);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter(name,                              GetAssembly());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter(name,                              assembly.GetName());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter(name,                              assembly.GetVersion());
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter(name,                              version.ToString(), tags, scope);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Assembly       GetAssembly()                            => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static AppVersion     GetVersion( this Assembly     assembly ) => assembly.GetName().GetVersion();
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
+     public static ActivitySource CreateSource()                                           => CreateSource(GetAssembly());
+     public static ActivitySource CreateSource( Assembly     assembly )                    => CreateSource(assembly.GetName());
+     public static ActivitySource CreateSource( AssemblyName assembly )                    => CreateSource(assembly.Name ?? nameof(Database), assembly);
+     public static ActivitySource CreateSource( string       name )                        => CreateSource(name,                              GetAssembly());
+     public static ActivitySource CreateSource( string       name, Assembly     assembly ) => CreateSource(name,                              assembly.GetName());
+     public static ActivitySource CreateSource( string       name, AssemblyName assembly ) => CreateSource(name,                              assembly.GetVersion());
+     public static ActivitySource CreateSource( string       name, AppVersion   version )  => CreateSource(name,                              version.ToString());
+     public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
+     public static Meter          CreateMeter()                                                                                                                         => CreateMeter(GetAssembly());
+     public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter(assembly.GetName());
+     public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter(assembly.Name ?? nameof(Database), assembly);
+     public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter(name,                              GetAssembly());
+     public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter(name,                              assembly.GetName());
+     public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter(name,                              assembly.GetVersion());
+     public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter(name,                              version.ToString(), tags, scope);
+     public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
+     public static Assembly       GetAssembly()                            => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+     public static AppVersion     GetVersion( this Assembly     assembly ) => assembly.GetName().GetVersion();
+     public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Meter GetOrAddMeter( [CallerMemberName] string meterName = EMPTY ) => Meters.GetOrAdd(meterName, CreateMeter);
+     public static Meter GetOrAddMeter( [CallerMemberName] string meterName = EMPTY ) => Meters.GetOrAdd(meterName, CreateMeter);
 
 
     public static Histogram<TValue> GetOrAdd<TValue>( string unit, string description, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -242,76 +242,76 @@ public static class Telemetry
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserID( this              Activity activity, UserRecord  record )       => activity.AddTag(nameof(IUserID.UserID),      record.ID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddSessionID( this           Activity activity, UserRecord  record )       => activity.AddTag(Tags.SessionID,              record.SessionID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddRoleID( this              Activity activity, RoleRecord  record )       => activity.AddTag(Tags.RoleID,                 record.ID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddGroupID( this             Activity activity, GroupRecord record )       => activity.AddTag(Tags.GroupID,                record.ID);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddGroup( this               Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddGroup( this               Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddGroupRights( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddGroupRights( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddRole( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRole,                value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddRole( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRole,                value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddRoleRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddRoleRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUser( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUser,                value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUser( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUser,                value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserAddress( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserAddress( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserLoginInfo( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserLoginInfo( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserRecoveryCode( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserRecoveryCode( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserSubscription( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserSubscription( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserToGroup( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserToGroup( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserToRole( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void AddUserToRole( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void ConnectDatabase( this        Activity activity, string?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void ConnectDatabase( this        Activity activity, object?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void LoginUser( this              Activity activity, string?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void LoginUser( this              Activity activity, object?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveGroupRights( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveGroupRights( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveRoleRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveRoleRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserFromGroup( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserFromGroup( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserFromRole( this     Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserFromRole( this     Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserRecoveryCode( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserRecoveryCode( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void RemoveUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void UpdateUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void VerifyLogin( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static void VerifyLogin( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
+     public static void AddUserID( this              Activity activity, UserRecord  record )       => activity.AddTag(nameof(IUserID.UserID),      record.ID);
+     public static void AddSessionID( this           Activity activity, UserRecord  record )       => activity.AddTag(Tags.SessionID,              record.SessionID);
+     public static void AddRoleID( this              Activity activity, RoleRecord  record )       => activity.AddTag(Tags.RoleID,                 record.ID);
+     public static void AddGroupID( this             Activity activity, GroupRecord record )       => activity.AddTag(Tags.GroupID,                record.ID);
+     public static void AddGroup( this               Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
+     public static void AddGroup( this               Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
+     public static void AddGroupRights( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
+     public static void AddGroupRights( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
+     public static void AddRole( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRole,                value);
+     public static void AddRole( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRole,                value);
+     public static void AddRoleRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
+     public static void AddRoleRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
+     public static void AddUser( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUser,                value);
+     public static void AddUser( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUser,                value);
+     public static void AddUserAddress( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
+     public static void AddUserAddress( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
+     public static void AddUserLoginInfo( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
+     public static void AddUserLoginInfo( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
+     public static void AddUserRecoveryCode( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
+     public static void AddUserRecoveryCode( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
+     public static void AddUserRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
+     public static void AddUserRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
+     public static void AddUserSubscription( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
+     public static void AddUserSubscription( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
+     public static void AddUserToGroup( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
+     public static void AddUserToGroup( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
+     public static void AddUserToRole( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
+     public static void AddUserToRole( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
+     public static void ConnectDatabase( this        Activity activity, string?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
+     public static void ConnectDatabase( this        Activity activity, object?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
+     public static void LoginUser( this              Activity activity, string?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
+     public static void LoginUser( this              Activity activity, object?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
+     public static void RemoveGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
+     public static void RemoveGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
+     public static void RemoveGroupRights( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
+     public static void RemoveGroupRights( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
+     public static void RemoveRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
+     public static void RemoveRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
+     public static void RemoveRoleRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
+     public static void RemoveRoleRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
+     public static void RemoveUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
+     public static void RemoveUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
+     public static void RemoveUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
+     public static void RemoveUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
+     public static void RemoveUserFromGroup( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
+     public static void RemoveUserFromGroup( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
+     public static void RemoveUserFromRole( this     Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
+     public static void RemoveUserFromRole( this     Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
+     public static void RemoveUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
+     public static void RemoveUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
+     public static void RemoveUserRecoveryCode( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
+     public static void RemoveUserRecoveryCode( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
+     public static void RemoveUserRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
+     public static void RemoveUserRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
+     public static void RemoveUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
+     public static void RemoveUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
+     public static void UpdateGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
+     public static void UpdateGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
+     public static void UpdateRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
+     public static void UpdateRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
+     public static void UpdateUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
+     public static void UpdateUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
+     public static void UpdateUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
+     public static void UpdateUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
+     public static void UpdateUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
+     public static void UpdateUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
+     public static void UpdateUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
+     public static void UpdateUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
+     public static void VerifyLogin( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
+     public static void VerifyLogin( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
 
 
 

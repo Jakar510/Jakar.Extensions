@@ -5,7 +5,7 @@
 namespace Jakar.Extensions;
 
 
-public sealed class MethodDetails : BaseClass<MethodDetails>, IJsonModel<MethodDetails>
+public sealed class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<MethodDetails>, IJsonModel<MethodDetails>
 {
     public static JsonTypeInfo<MethodDetails[]> JsonArrayInfo       => JakarExtensionsContext.Default.MethodDetailsArray;
     public static JsonSerializerContext         JsonContext         => JakarExtensionsContext.Default;

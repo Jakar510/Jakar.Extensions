@@ -6,27 +6,26 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool ContainsAny<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.ContainsAny(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static bool ContainsAnyExcept<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.ContainsAnyExcept(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static int IndexOfAnyExcept<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.IndexOfAnyExcept(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static int IndexOfAny<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.IndexOfAny(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static int LastIndexOfAny<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.LastIndexOfAny(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+
     public static int LastIndexOfAnyExcept<TValue>( scoped in ReadOnlySpan<TValue> span, SearchValues<TValue> value )
         where TValue : IEquatable<TValue> => span.LastIndexOfAnyExcept(value);
 
@@ -100,7 +99,8 @@ public static partial class Spans
 
         for ( int i = 0; i < span.Length || i + value.Length < span.Length; i++ )
         {
-            if ( span.Slice(i, value.Length).SequenceEqual(value) ) { return true; }
+            if ( span.Slice(i, value.Length)
+                     .SequenceEqual(value) ) { return true; }
         }
 
         return false;
@@ -188,8 +188,7 @@ public static partial class Spans
     }
 
 
-    [Pure][MustDisposeResource]
-    public static ReadOnlySpan<Vector<TValue>> GetVectors<TValue>( this scoped in ReadOnlySpan<TValue> values )
+    [Pure] [MustDisposeResource] public static ReadOnlySpan<Vector<TValue>> GetVectors<TValue>( this scoped in ReadOnlySpan<TValue> values )
         where TValue : IEquatable<TValue>
     {
         Span<Vector<TValue>> vectors = GC.AllocateUninitializedArray<Vector<TValue>>(values.Length);
@@ -200,9 +199,13 @@ public static partial class Spans
 
 
     public static bool EndsWith<TValue>( scoped in Span<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => !span.IsEmpty && span[^1].Equals(value);
+        where TValue : IEquatable<TValue> => !span.IsEmpty &&
+                                             span[^1]
+                                                .Equals(value);
     public static bool EndsWith<TValue>( scoped in ReadOnlySpan<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => !span.IsEmpty && span[^1].Equals(value);
+        where TValue : IEquatable<TValue> => !span.IsEmpty &&
+                                             span[^1]
+                                                .Equals(value);
     public static bool EndsWith<TValue>( scoped in Span<TValue> span, params ReadOnlySpan<TValue> value )
         where TValue : IEquatable<TValue>
     {
@@ -220,7 +223,8 @@ public static partial class Spans
 
         for ( int i = 0; i < value.Length; i++ )
         {
-            if ( !temp[i].Equals(value[i]) ) { return false; }
+            if ( !temp[i]
+                    .Equals(value[i]) ) { return false; }
         }
 
         return true;
@@ -228,9 +232,13 @@ public static partial class Spans
 
 
     public static bool StartsWith<TValue>( scoped in Span<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => !span.IsEmpty && span[0].Equals(value);
+        where TValue : IEquatable<TValue> => !span.IsEmpty &&
+                                             span[0]
+                                                .Equals(value);
     public static bool StartsWith<TValue>( scoped in ReadOnlySpan<TValue> span, TValue value )
-        where TValue : IEquatable<TValue> => !span.IsEmpty && span[0].Equals(value);
+        where TValue : IEquatable<TValue> => !span.IsEmpty &&
+                                             span[0]
+                                                .Equals(value);
     public static bool StartsWith<TValue>( scoped in Span<TValue> span, params ReadOnlySpan<TValue> value )
         where TValue : IEquatable<TValue>
     {
@@ -248,7 +256,8 @@ public static partial class Spans
 
         for ( int i = 0; i < value.Length; i++ )
         {
-            if ( !temp[i].Equals(value[i]) ) { return false; }
+            if ( !temp[i]
+                    .Equals(value[i]) ) { return false; }
         }
 
         return true;

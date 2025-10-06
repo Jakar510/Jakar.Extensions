@@ -180,7 +180,9 @@ public class FilePaths : BaseClass, IDisposable
         yield return AppDataZipFile.FullPath;
         yield return AppCacheZipFile.FullPath;
         yield return CrashFile.FullPath;
-        yield return GetScreenshotFile().FullPath;
+
+        yield return GetScreenshotFile()
+           .FullPath;
     }
     public virtual IEnumerable<LocalFile> GetFiles()
     {

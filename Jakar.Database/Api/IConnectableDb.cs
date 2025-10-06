@@ -27,11 +27,11 @@ public interface IConnectableDbRoot : IConnectableDb
         where TValue : struct;
 
 
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)]
+    [Pure]
     public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
         where TValue : class, IDapperSqlCommand;
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public CommandDefinition     GetCommand( ref readonly SqlCommand sql, DbTransaction?   transaction, CancellationToken token );
-    [Pure][MethodImpl(MethodImplOptions.AggressiveInlining)] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection,  DbTransaction?    transaction, CancellationToken token );
+    [Pure] public CommandDefinition     GetCommand( ref readonly SqlCommand sql, DbTransaction?   transaction, CancellationToken token );
+    [Pure] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection,  DbTransaction?    transaction, CancellationToken token );
 
 
     public ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( NpgsqlConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )

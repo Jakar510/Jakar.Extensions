@@ -23,7 +23,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -51,7 +51,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -79,7 +79,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -107,7 +107,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -135,7 +135,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -161,7 +161,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -189,7 +189,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -217,7 +217,7 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
@@ -236,7 +236,7 @@ public static partial class AsyncLinq
             count++;
         }
 
-        return (float?)(value / count);
+        return (float?)( value / count );
     }
     public static async ValueTask<float?> Average<TSource>( this IAsyncEnumerable<TSource> source, Func<TSource, float?> selector )
     {
@@ -245,11 +245,11 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
-        return (float?)(value / count);
+        return (float?)( value / count );
     }
 
 
@@ -264,7 +264,7 @@ public static partial class AsyncLinq
             count++;
         }
 
-        return (float)(value / count);
+        return (float)( value / count );
     }
     public static async ValueTask<float> Average<TSource>( this IAsyncEnumerable<TSource> source, Func<TSource, float> selector )
     {
@@ -273,10 +273,10 @@ public static partial class AsyncLinq
 
         await foreach ( TSource item in source )
         {
-            value += selector( item );
+            value += selector(item);
             count++;
         }
 
-        return (float)(value / count);
+        return (float)( value / count );
     }
 }

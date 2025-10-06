@@ -29,12 +29,14 @@ public class ObservableHashSet<TValue>( HashSet<TValue> values ) : ObservableHas
     public static implicit operator ObservableHashSet<TValue>( ReadOnlySpan<TValue>   values ) => new(values);
 
 
-    public static bool operator ==( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
-    public static bool operator !=( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => !EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
-    public static bool operator >( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) > 0;
-    public static bool operator >=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) >= 0;
-    public static bool operator <( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) < 0;
-    public static bool operator <=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                                    => buffer.GetHashCode();
+    public override bool Equals( object?                         other )                                  => ReferenceEquals(this, other) || other is ObservableHashSet<TValue> x && Equals(x);
+    public static   bool operator ==( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
+    public static   bool operator !=( ObservableHashSet<TValue>? left, ObservableHashSet<TValue>? right ) => !EqualityComparer<ObservableHashSet<TValue>>.Default.Equals(left, right);
+    public static   bool operator >( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( ObservableHashSet<TValue>   left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( ObservableHashSet<TValue>  left, ObservableHashSet<TValue>  right ) => Comparer<ObservableHashSet<TValue>>.Default.Compare(left, right) <= 0;
 }
 
 
@@ -43,8 +45,8 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     where TSelf : ObservableHashSet<TSelf, TValue>, ICollectionAlerts<TSelf, TValue>
 {
     protected internal readonly HashSet<TValue> buffer = values;
-    public sealed override      int             Count      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => buffer.Count; }
-    bool ICollection<TValue>.                   IsReadOnly { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ( (ICollection<TValue>)buffer ).IsReadOnly; }
+    public sealed override      int             Count      { get => buffer.Count; }
+    bool ICollection<TValue>.                   IsReadOnly { get => ( (ICollection<TValue>)buffer ).IsReadOnly; }
 
 
     protected ObservableHashSet() : this(DEFAULT_CAPACITY) { }
@@ -115,8 +117,7 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
     public         void CopyTo( TValue[] array, int arrayIndex ) => buffer.CopyTo(array, arrayIndex);
 
 
-    [Pure][MustDisposeResource]
-    protected internal override FilterBuffer<TValue> FilteredValues()
+    [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
     {
         int                  count  = buffer.Count;
         FilterBuffer<TValue> values = new(count);

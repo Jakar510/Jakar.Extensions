@@ -18,38 +18,40 @@ public static class Json
     private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos   = new();
 
 
-    public static DefaultJsonTypeInfoResolver DefaultJsonTypeInfoResolver { [Pure] get => new(); }
-
-
     // [RequiresUnreferencedCode(Json.SerializationUnreferencedCode), RequiresDynamicCode(Json.SerializationRequiresDynamicCodeM)]
     public static ref JsonDocumentOptions DocumentOptions => ref __documentOptions;
     public static ref JsonNodeOptions     JsonNodeOptions => ref __jsonNodeOptions;
 
-    public static JsonSerializerOptions Options { get; set; } = new()
-                                                                {
-                                                                    MaxDepth                             = 128,
-                                                                    IndentSize                           = 4,
-                                                                    NewLine                              = "\n",
-                                                                    IndentCharacter                      = ' ',
-                                                                    WriteIndented                        = true,
-                                                                    RespectNullableAnnotations           = true,
-                                                                    AllowTrailingCommas                  = true,
-                                                                    AllowOutOfOrderMetadataProperties    = true,
-                                                                    IgnoreReadOnlyProperties             = true,
-                                                                    IncludeFields                        = true,
-                                                                    IgnoreReadOnlyFields                 = false,
-                                                                    PropertyNameCaseInsensitive          = false,
-                                                                    ReadCommentHandling                  = JsonCommentHandling.Skip,
-                                                                    UnknownTypeHandling                  = JsonUnknownTypeHandling.JsonNode,
-                                                                    RespectRequiredConstructorParameters = true,
-                                                                    TypeInfoResolver                     = JsonTypeInfoResolver.Combine(DefaultJsonTypeInfoResolver, JakarExtensionsContext.Default, JakarModelsGuidContext.Default, JakarModelsLongContext.Default),
-                                                                    Converters =
-                                                                    {
-                                                                        EncodingConverter.Instance,
-                                                                        AppVersionJsonConverter.Instance,
-                                                                        VersionConverter.Instance
-                                                                    }
-                                                                };
+
+    public static JsonSerializerOptions Options { get; set; } = CreateOptions();
+
+
+    public static JsonSerializerOptions CreateOptions( params ReadOnlySpan<IJsonTypeInfoResolver?> resolvers ) => new()
+                                                                                                                  {
+                                                                                                                      MaxDepth                             = 128,
+                                                                                                                      IndentSize                           = 4,
+                                                                                                                      NewLine                              = "\n",
+                                                                                                                      IndentCharacter                      = ' ',
+                                                                                                                      WriteIndented                        = true,
+                                                                                                                      RespectNullableAnnotations           = true,
+                                                                                                                      AllowTrailingCommas                  = true,
+                                                                                                                      AllowOutOfOrderMetadataProperties    = true,
+                                                                                                                      IgnoreReadOnlyProperties             = true,
+                                                                                                                      IncludeFields                        = true,
+                                                                                                                      IgnoreReadOnlyFields                 = false,
+                                                                                                                      PropertyNameCaseInsensitive          = false,
+                                                                                                                      ReadCommentHandling                  = JsonCommentHandling.Skip,
+                                                                                                                      UnknownTypeHandling                  = JsonUnknownTypeHandling.JsonNode,
+                                                                                                                      RespectRequiredConstructorParameters = true,
+                                                                                                                      TypeInfoResolver                     = CombineResolver(resolvers),
+                                                                                                                      Converters =
+                                                                                                                      {
+                                                                                                                          EncodingConverter.Instance,
+                                                                                                                          AppVersionJsonConverter.Instance,
+                                                                                                                          VersionConverter.Instance
+                                                                                                                      }
+                                                                                                                  };
+    public static IJsonTypeInfoResolver CombineResolver( params ReadOnlySpan<IJsonTypeInfoResolver?> resolvers ) => JsonTypeInfoResolver.Combine([JakarExtensionsContext.Default, JakarModelsGuidContext.Default, JakarModelsLongContext.Default, ..resolvers]);
 
 
     public static void                 Register<TValue>( this JsonTypeInfo<TValue> info ) => __jsonTypeInfos[typeof(TValue)] = info;
@@ -343,10 +345,10 @@ public static class Json
     [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this long? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                               ? JsonValue.Create(value.Value, options)
                                                                                                                                               : null;
-    [CLSCompliant(                                          false)] public static JsonValue CreateNode( this sbyte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] [CLSCompliant(false)] public static JsonValue? CreateNode( this sbyte? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                                     ? JsonValue.Create(value.Value, options)
-                                                                                                                                                                     : null;
+    public static JsonValue CreateNode( this sbyte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this sbyte? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                               : null;
     public static JsonValue CreateNode( this float value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
     [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this float? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                                ? JsonValue.Create(value.Value, options)
@@ -354,18 +356,18 @@ public static class Json
     [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this string? value, JsonNodeOptions? options = null ) => value != null
                                                                                                                                                 ? JsonValue.Create(value, options)
                                                                                                                                                 : null;
-    [CLSCompliant(                                          false)] public static JsonValue CreateNode( this ushort value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] [CLSCompliant(false)] public static JsonValue? CreateNode( this ushort? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                                      ? JsonValue.Create(value.Value, options)
-                                                                                                                                                                      : null;
-    [CLSCompliant(                                          false)] public static JsonValue CreateNode( this uint value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] [CLSCompliant(false)] public static JsonValue? CreateNode( this uint? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                                    ? JsonValue.Create(value.Value, options)
-                                                                                                                                                                    : null;
-    [CLSCompliant(                                          false)] public static JsonValue CreateNode( this ulong value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] [CLSCompliant(false)] public static JsonValue? CreateNode( this ulong? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                                     ? JsonValue.Create(value.Value, options)
-                                                                                                                                                                     : null;
+    public static JsonValue CreateNode( this ushort value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ushort? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                ? JsonValue.Create(value.Value, options)
+                                                                                                                                                : null;
+    public static JsonValue CreateNode( this uint value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this uint? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                              ? JsonValue.Create(value.Value, options)
+                                                                                                                                              : null;
+    public static JsonValue CreateNode( this ulong value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ulong? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                               : null;
     public static JsonValue? CreateNode( this ref readonly JsonElement value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
     [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ref readonly JsonElement? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                                                   ? JsonValue.Create(value.Value, options)

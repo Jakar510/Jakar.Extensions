@@ -14,7 +14,7 @@ public interface IFileMetaData : IJsonModel
 
 
 
-public interface IFileMetaData<TFileMetaData> : IFileMetaData, IJsonModel<TFileMetaData>
+public interface IFileMetaData<TFileMetaData> : IFileMetaData, IJsonModel<TFileMetaData>, IEqualComparable<TFileMetaData>
     where TFileMetaData : class, IFileMetaData<TFileMetaData>
 {
     public abstract static TFileMetaData  Create( IFileMetaData                                      data );
@@ -79,7 +79,9 @@ public interface IFileData<TSelf, TID, TFileMetaData> : IFileData<TID, TFileMeta
 
 
 
-[Serializable][SuppressMessage("ReSharper", "InconsistentNaming")][SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
+[Serializable]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
+[SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: SetsRequiredMembers]
 public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string hash, string payload, TID id, TFileMetaData metaData ) : BaseClass<TSelf>, IFileData<TID, TFileMetaData>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
@@ -101,11 +103,14 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         string fileName  = $"{name}.{extension}";
         return directory.Join(fileName);
     }
-    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token).ConfigureAwait(false);
+    public async Task WriteToAsync( LocalDirectory directory, CancellationToken token ) => await WriteToAsync(GetFile(directory), token)
+                                                                                              .ConfigureAwait(false);
     public async Task WriteToAsync( LocalFile file, CancellationToken token )
     {
         await using FileStream stream = file.OpenWrite(FileMode.OpenOrCreate);
-        await WriteToAsync(stream, token).ConfigureAwait(false);
+
+        await WriteToAsync(stream, token)
+           .ConfigureAwait(false);
     }
     public async Task WriteToAsync( Stream stream, CancellationToken token )
     {
@@ -119,12 +124,17 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
         if ( data.IsT1 )
         {
             await using StreamWriter writer = new(stream);
-            await writer.WriteAsync(data.AsT1).ConfigureAwait(false);
+
+            await writer.WriteAsync(data.AsT1)
+                        .ConfigureAwait(false);
+
             return;
         }
 
         ReadOnlyMemory<byte> payload = data.AsT0;
-        await stream.WriteAsync(payload, token).ConfigureAwait(false);
+
+        await stream.WriteAsync(payload, token)
+                    .ConfigureAwait(false);
     }
     public void WriteTo( Stream stream )
     {
@@ -155,12 +165,14 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
                                                   : Payload.TryGetData();
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID, TFileMetaData> data )                                                                           => Create(data, data.MetaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( IFileData<TID>                data,     TFileMetaData                     metaData )                           => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, MemoryStream                      stream )                             => Create(metaData, stream.AsReadOnlyMemory().Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TSelf Create( TFileMetaData                 metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
+    public static TSelf Create( IFileData<TID, TFileMetaData> data )                         => Create(data, data.MetaData);
+    public static TSelf Create( IFileData<TID>                data, TFileMetaData metaData ) => TSelf.Create(data.FileSize, data.Hash, data.Payload, data.ID, metaData);
+    public static TSelf Create( TFileMetaData metaData, MemoryStream stream ) => Create(metaData,
+                                                                                        stream.AsReadOnlyMemory()
+                                                                                              .Span);
+    public static TSelf Create( TFileMetaData metaData, ref readonly ReadOnlyMemory<byte> content )                            => Create(metaData, content.Span);
+    public static TSelf Create( TFileMetaData metaData, params       ReadOnlySpan<byte>   content )                            => TSelf.Create(content.Length, content.Hash_SHA512(),                             Convert.ToBase64String(content), default, metaData);
+    public static TSelf Create( TFileMetaData metaData, string                            content, Encoding? encoding = null ) => TSelf.Create(content.Length, content.Hash_SHA512(encoding ?? Encoding.Default), content,                         default, metaData);
 
 
     public static TSelf? TryCreate( [NotNullIfNotNull(nameof(content))] IFileData<TID, TFileMetaData>? content ) => content is not null
@@ -171,8 +183,11 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
                                                                                                                                  : null;
     public static async ValueTask<TSelf> Create( LocalFile file, CancellationToken token = default )
     {
-        using TelemetrySpan  telemetrySpan = TelemetrySpan.Create();
-        ReadOnlyMemory<byte> content       = await file.ReadAsync().AsMemory(token);
+        using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
+
+        ReadOnlyMemory<byte> content = await file.ReadAsync()
+                                                 .AsMemory(token);
+
         return Create(TFileMetaData.Create(file), content.Span);
     }
     public static async ValueTask<TSelf> Create( TFileMetaData metaData, Stream stream, CancellationToken token = default )
@@ -222,7 +237,8 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
 
 
 
-[Serializable][SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
+[Serializable]
+[SuppressMessage("ReSharper", "RedundantExplicitPositionalPropertyDeclaration")]
 [method: JsonConstructor]
 public sealed class FileMetaData( string? fileName, string? fileType, MimeType? mimeType, string? fileDescription = null ) : BaseClass<FileMetaData>, IFileMetaData<FileMetaData>
 {

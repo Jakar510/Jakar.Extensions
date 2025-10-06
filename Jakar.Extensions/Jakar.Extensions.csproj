@@ -44,8 +44,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<Compile Remove="SorterEqualizer\**" />
 		<Compile Remove="WeakEventManagers\**" />
+		<EmbeddedResource Remove="SorterEqualizer\**" />
 		<EmbeddedResource Remove="WeakEventManagers\**" />
+		<None Remove="SorterEqualizer\**" />
 		<None Remove="WeakEventManagers\**" />
 	</ItemGroup>
 
@@ -135,9 +138,5 @@
 		</PackageReference>
 		<PackageReference Include="ZLinq.FileSystem" />
 		<PackageReference Include="ZXing.Net" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="SorterEqualizer\" />
 	</ItemGroup>
 </Project>

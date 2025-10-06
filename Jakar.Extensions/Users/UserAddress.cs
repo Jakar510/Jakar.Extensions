@@ -33,7 +33,7 @@ public interface IAddress<TSelf, TID> : IAddress<TID>, IParsable<TSelf>, IJsonMo
 [Serializable]
 public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
-    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>
+    where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     private bool    __isPrimary;
     private string  __city            = string.Empty;
@@ -48,8 +48,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
 
     [StringLength(UNICODE_CAPACITY)] public string? Address { get => __address ??= ToString(); set => SetProperty(ref __address, value); }
 
-    [StringLength(UNICODE_CAPACITY)]
-    public string City
+    [StringLength(UNICODE_CAPACITY)] public string City
     {
         get => __city;
         set
@@ -59,8 +58,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     }
 
 
-    [StringLength(UNICODE_CAPACITY)]
-    public string Country
+    [StringLength(UNICODE_CAPACITY)] public string Country
     {
         get => __country;
         set
@@ -74,8 +72,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     public bool IsPrimary { get => __isPrimary; set => SetProperty(ref __isPrimary, value); }
 
 
-    [JsonIgnore]
-    public bool IsValidAddress
+    [JsonIgnore] public bool IsValidAddress
     {
         get
         {
@@ -95,8 +92,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     }
 
 
-    [StringLength(UNICODE_CAPACITY)]
-    public string Line1
+    [StringLength(UNICODE_CAPACITY)] public string Line1
     {
         get => __line1;
         set
@@ -106,8 +102,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     }
 
 
-    [StringLength(UNICODE_CAPACITY)]
-    public string Line2
+    [StringLength(UNICODE_CAPACITY)] public string Line2
     {
         get => __line2;
         set
@@ -117,8 +112,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     }
 
 
-    [Required][StringLength(UNICODE_CAPACITY)]
-    public string PostalCode
+    [Required] [StringLength(UNICODE_CAPACITY)] public string PostalCode
     {
         get => __postalCode;
         set
@@ -128,8 +122,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     }
 
 
-    [StringLength(UNICODE_CAPACITY)]
-    public string StateOrProvince
+    [StringLength(UNICODE_CAPACITY)] public string StateOrProvince
     {
         get => __stateOrProvince;
         set

@@ -34,18 +34,18 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected                   string?                          _className;
 
 
-    public static Database?     Current       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
-    public static DataProtector DataProtector { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public static Database?     Current       {  get; set; }
+    public static DataProtector DataProtector {  get; set; } = new(RSAEncryptionPadding.OaepSHA1);
     public string ClassName
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _className ??= GetType()
+         get => _className ??= GetType()
                                                                      .GetFullName();
     }
-    protected internal SecuredString?               ConnectionString          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; }
+    protected internal SecuredString?               ConnectionString          {  get; set; }
     ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
-    public virtual     PasswordValidator            PasswordValidator         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => DbOptions.PasswordRequirements.GetValidator(); }
-    public             IsolationLevel               TransactionIsolationLevel { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion                   Version                   { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Options.AppInformation.Version; }
+    public virtual     PasswordValidator            PasswordValidator         {  get => DbOptions.PasswordRequirements.GetValidator(); }
+    public             IsolationLevel               TransactionIsolationLevel {  get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion                   Version                   {  get => Options.AppInformation.Version; }
 
 
     static Database()
@@ -127,7 +127,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected virtual DbTable<TSelf> Create<TSelf>()
+     protected virtual DbTable<TSelf> Create<TSelf>()
         where TSelf : class, ITableRecord<TSelf>
     {
         DbTable<TSelf> table = new(this, _cache);
@@ -135,7 +135,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] protected TValue AddDisposable<TValue>( TValue value )
+     protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
     {
         _tables.Add(value);
@@ -143,18 +143,18 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+    [Pure]  public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
         where TValue : class, IDapperSqlCommand
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, Options.CommandTimeout, commandType, CommandFlags.Buffered, token);
     }
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
+    [Pure]  public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return sql.ToCommandDefinition(transaction, token, Options.CommandTimeout);
     }
-    [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
+    [Pure]  public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return sql.ToCommandDefinition(connection, transaction, token, Options.CommandTimeout);

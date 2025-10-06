@@ -3,10 +3,10 @@
 
 public partial class WebRequester
 {
-    [DefaultValue( nameof(Default) )]
+    [DefaultValue(nameof(Default))]
     public readonly struct RetryPolicy( TimeSpan delay, TimeSpan scale, ushort maxRetires )
     {
-        public static readonly TimeSpan    Time         = TimeSpan.FromSeconds( 2 );
+        public static readonly TimeSpan    Time         = TimeSpan.FromSeconds(2);
         public static readonly RetryPolicy Default      = new(Time, Time, 3);
         public static readonly RetryPolicy None         = new(TimeSpan.Zero, TimeSpan.Zero, 0);
         public static readonly RetryPolicy Single       = new(TimeSpan.Zero, TimeSpan.Zero, 1);
@@ -16,8 +16,8 @@ public partial class WebRequester
         public readonly        TimeSpan    Scale        = scale;
 
 
-        public static RetryPolicy Create( ushort   maxRetries )                               => Create( Time,  maxRetries );
-        public static RetryPolicy Create( TimeSpan delay, ushort   maxRetries )               => Create( delay, delay, maxRetries );
+        public static RetryPolicy Create( ushort   maxRetries )                               => Create(Time,  maxRetries);
+        public static RetryPolicy Create( TimeSpan delay, ushort   maxRetries )               => Create(delay, delay, maxRetries);
         public static RetryPolicy Create( TimeSpan delay, TimeSpan scale, ushort maxRetries ) => new(delay, scale, maxRetries);
 
 
@@ -28,7 +28,7 @@ public partial class WebRequester
             count++;
             TimeSpan scale = Scale * count;
             TimeSpan time  = Delay + scale;
-            return Task.Delay( time, token );
+            return Task.Delay(time, token);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace Jakar.Extensions;
 #pragma warning disable CS1066, CS1584
 /// <summary> A collection of files that are  the <see cref="LocalDirectory"/> </summary>
 [NotSerializable]
-public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>
+public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, LocalFile>, ICollectionAlerts<LocalFileWatcher, LocalFile>, IEqualComparable<LocalFileWatcher>
 {
     private          FileSystemWatcher?                    __watcher;
     private readonly WeakEventManager<ErrorEventArgs>      __errorEventManager  = new();
@@ -70,7 +70,9 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
             __watcher.Error               += OnError;
             __watcher.EnableRaisingEvents =  true;
             Clear();
-            Add(value.GetFiles().AsSpan());
+
+            Add(value.GetFiles()
+                     .AsSpan());
         }
     }
 
@@ -125,10 +127,12 @@ public sealed class LocalFileWatcher : ObservableCollection<LocalFileWatcher, Lo
     public static implicit operator LocalFileWatcher( ReadOnlySpan<LocalFile>   values ) => new(values);
 
 
-    public static bool operator ==( LocalFileWatcher? left, LocalFileWatcher? right ) => EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
-    public static bool operator !=( LocalFileWatcher? left, LocalFileWatcher? right ) => !EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
-    public static bool operator >( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) > 0;
-    public static bool operator >=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) >= 0;
-    public static bool operator <( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) < 0;
-    public static bool operator <=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) <= 0;
+    public override int  GetHashCode()                                                  => RuntimeHelpers.GetHashCode(this);
+    public override bool Equals( object?                other )                         => ReferenceEquals(this, other) || other is LocalFileWatcher x && Equals(x);
+    public static   bool operator ==( LocalFileWatcher? left, LocalFileWatcher? right ) => EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
+    public static   bool operator !=( LocalFileWatcher? left, LocalFileWatcher? right ) => !EqualityComparer<LocalFileWatcher>.Default.Equals(left, right);
+    public static   bool operator >( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) > 0;
+    public static   bool operator >=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) >= 0;
+    public static   bool operator <( LocalFileWatcher   left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) < 0;
+    public static   bool operator <=( LocalFileWatcher  left, LocalFileWatcher  right ) => Comparer<LocalFileWatcher>.Default.Compare(left, right) <= 0;
 }

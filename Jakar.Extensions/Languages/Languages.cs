@@ -4,7 +4,8 @@
 [SuppressMessage("ReSharper", "StringLiteralTypo")]
 public static class Languages
 {
-    public static readonly FrozenSet<SupportedLanguage>                All               = Enum.GetValues<SupportedLanguage>().ToFrozenSet();
+    public static readonly FrozenSet<SupportedLanguage> All = Enum.GetValues<SupportedLanguage>()
+                                                                  .ToFrozenSet();
     public static readonly FrozenDictionary<string, SupportedLanguage> Values            = All.ToFrozenDictionary(ToStringFast, SelectSelf);
     public static readonly FrozenDictionary<SupportedLanguage, string> ReverseShortNames = All.ToFrozenDictionary(SelectSelf,   GetShortName);
     public static readonly FrozenDictionary<string, SupportedLanguage> ShortNames        = All.ToFrozenDictionary(GetShortName, SelectSelf);

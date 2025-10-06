@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, TCloser> collection, CancellationToken token = default ) : IAsyncEnumerable<TValue>, IAsyncEnumerator<TValue>
     where TCloser : IDisposable
 {
-    private const    int                                START_INDEX = 0;
+    private const    int                                START_INDEX  = 0;
     private readonly ILockedCollection<TValue, TCloser> __collection = collection;
     private          bool                               __isDisposed;
     private          CancellationToken                  __token = token;
@@ -15,15 +15,15 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     private          int                                __index = START_INDEX;
 
 
-    private ReadOnlyMemory<TValue>  __Memory        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
+    private ReadOnlyMemory<TValue>  __Memory       { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __buffer?.Memory ?? ReadOnlyMemory<TValue>.Empty; }
     TValue IAsyncEnumerator<TValue>.Current        => Current;
-    public ref readonly TValue      Current        { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref __Memory.Span[__index]; }
-    internal            bool        ShouldContinue { [MethodImpl( MethodImplOptions.AggressiveInlining )] get => __token.ShouldContinue() && (uint)__index < (uint)__Memory.Length; }
+    public ref readonly TValue      Current        { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => ref __Memory.Span[__index]; }
+    internal            bool        ShouldContinue { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __token.ShouldContinue() && (uint)__index < (uint)__Memory.Length; }
 
 
     public ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize( this );
+        GC.SuppressFinalize(this);
         __isDisposed = true;
         __buffer?.Dispose();
         __buffer = null;
@@ -38,7 +38,7 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
         if ( __Memory.IsEmpty )
         {
             __buffer?.Dispose();
-            __buffer = await __collection.CopyAsync( __token );
+            __buffer = await __collection.CopyAsync(__token);
             __index  = START_INDEX;
         }
 
@@ -49,7 +49,7 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     }
 
 
-    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator( token );
+    IAsyncEnumerator<TValue> IAsyncEnumerable<TValue>.GetAsyncEnumerator( CancellationToken token ) => GetAsyncEnumerator(token);
     public AsyncLockerEnumerator<TValue, TCloser> GetAsyncEnumerator( CancellationToken token = default )
     {
         ThrowIfDisposed();
@@ -62,5 +62,5 @@ public class AsyncLockerEnumerator<TValue, TCloser>( ILockedCollection<TValue, T
     public override string ToString() => $"AsyncEnumerator<{typeof(TValue).Name}>( {nameof(__index)} : {__index}, {nameof(ShouldContinue)} : {ShouldContinue} )";
 
 
-    [MethodImpl( MethodImplOptions.AggressiveInlining )] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf( __isDisposed, this );
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(__isDisposed, this);
 }

@@ -81,13 +81,14 @@ public sealed partial class WebRequester( HttpClient client, IHostInfo host, ILo
     public void Dispose() => Client.Dispose();
 
 
-    public static  IServiceCollection AddSingleton( IServiceCollection       collection )                                                                 => collection.AddSingleton(Create);
-    public static  IServiceCollection AddScoped( IServiceCollection          collection )                                                                 => collection.AddScoped(Create);
-    public static  WebRequester       Get( IServiceProvider                  provider )                                                                   => provider.GetRequiredService<WebRequester>();
-    public static  WebRequester       Create( IServiceProvider               provider )                                                                   => Create(GetHttpClientFactory(provider), IHostInfo.Get(provider), GetLogger(provider));
-    public static  WebRequester       Create( IHttpClientFactory             factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(),         host,                    logger, encoding);
-    public static  WebRequester       Create( HttpClient                     client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
-    private static ILogger            GetLogger( IServiceProvider            provider ) => provider.GetRequiredService<ILoggerFactory>().CreateLogger(nameof(WebRequester));
+    public static IServiceCollection AddSingleton( IServiceCollection collection )                                                                 => collection.AddSingleton(Create);
+    public static IServiceCollection AddScoped( IServiceCollection    collection )                                                                 => collection.AddScoped(Create);
+    public static WebRequester       Get( IServiceProvider            provider )                                                                   => provider.GetRequiredService<WebRequester>();
+    public static WebRequester       Create( IServiceProvider         provider )                                                                   => Create(GetHttpClientFactory(provider), IHostInfo.Get(provider), GetLogger(provider));
+    public static WebRequester       Create( IHttpClientFactory       factory, IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => Create(factory.CreateClient(),         host,                    logger, encoding);
+    public static WebRequester       Create( HttpClient               client,  IHostInfo host, ILogger? logger = null, Encoding? encoding = null ) => new(client, host, logger, encoding);
+    private static ILogger GetLogger( IServiceProvider provider ) => provider.GetRequiredService<ILoggerFactory>()
+                                                                             .CreateLogger(nameof(WebRequester));
     private static IHttpClientFactory GetHttpClientFactory( IServiceProvider provider ) => provider.GetRequiredService<IHttpClientFactory>();
 
 

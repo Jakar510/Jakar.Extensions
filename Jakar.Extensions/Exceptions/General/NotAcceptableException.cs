@@ -7,6 +7,6 @@ namespace Jakar.Extensions;
 public sealed class NotAcceptableException : Exception
 {
     public NotAcceptableException() { }
-    public NotAcceptableException( string message ) : base( message ) { }
-    public NotAcceptableException( string message, Exception inner ) : base( message, inner ) { }
+    public NotAcceptableException( string message ) : base(message) { }
+    public NotAcceptableException( string message, Exception inner ) : base(message, inner) { }
 }

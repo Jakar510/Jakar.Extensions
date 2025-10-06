@@ -102,7 +102,7 @@ public interface IUserData<TID, TAddress, TGroupModel, TRoleModel> : IUserData<T
 
 
 
-public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID>
+public interface ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> : IUserData<TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID>, IEqualComparable<TSelf>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TGroupModel : IGroupModel<TID>, IEquatable<TGroupModel>
     where TRoleModel : IRoleModel<TID>, IEquatable<TRoleModel>

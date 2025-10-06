@@ -1,7 +1,7 @@
 ﻿namespace Jakar.Extensions;
 
 
-[SuppressMessage( "ReSharper", "InconsistentNaming" )]
+[SuppressMessage("ReSharper", "InconsistentNaming")]
 [Flags]
 public enum DevicePlatform : ulong
 {

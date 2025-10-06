@@ -4,7 +4,8 @@
 namespace Jakar.Extensions;
 
 
-[NotSerializable][SuppressMessage("ReSharper", "NotAccessedField.Global")]
+[NotSerializable]
+[SuppressMessage("ReSharper", "NotAccessedField.Global")]
 public sealed class WebResponse<TValue>
 {
     public readonly DateTimeOffset?   Expires;
@@ -25,8 +26,8 @@ public sealed class WebResponse<TValue>
     public readonly Uri?              URL;
 
 
-    [JsonIgnore][MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
-    public                                                        bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
+    [JsonIgnore] [MemberNotNullWhen(true, nameof(Payload))] public bool HasPayload          => Payload is not null;
+    public                                                         bool IsSuccessStatusCode => StatusCode < Status.BadRequest;
 
 
     public WebResponse( HttpResponseMessage response, string    error ) : this(response, default, null, error) { }

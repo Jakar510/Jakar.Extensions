@@ -19,7 +19,7 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                  DateTimeOffset?                       LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
 {
     public const                                string                     TABLE_NAME = "roles";
-    public static                               string                     TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static                               string                     TableName     {  get => TABLE_NAME; }
     public static                               JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
     public static                               JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
     public static                               JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;

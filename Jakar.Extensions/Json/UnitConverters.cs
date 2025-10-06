@@ -31,35 +31,35 @@ public static class UnitConverters
     public static double CelsiusToKelvin( double      celsius ) => celsius       + CELSIUS_TO_KELVIN;
     public static double CoordinatesToKilometers( double latStart, double longitudeStart, double latEnd, double longitudeEnd )
     {
-        if ( latStart.Equals( latEnd ) && longitudeStart.Equals( longitudeEnd ) ) { return 0; }
+        if ( latStart.Equals(latEnd) && longitudeStart.Equals(longitudeEnd) ) { return 0; }
 
-        double dLat = DegreesToRadians( latEnd       - latStart );
-        double dLon = DegreesToRadians( longitudeEnd - longitudeStart );
+        double dLat = DegreesToRadians(latEnd       - latStart);
+        double dLon = DegreesToRadians(longitudeEnd - longitudeStart);
 
-        latStart = DegreesToRadians( latStart );
-        latEnd   = DegreesToRadians( latEnd );
+        latStart = DegreesToRadians(latStart);
+        latEnd   = DegreesToRadians(latEnd);
 
-        double dLat2 = Math.Sin( dLat / 2 ) * Math.Sin( dLat / 2 );
-        double dLon2 = Math.Sin( dLon / 2 ) * Math.Sin( dLon / 2 );
+        double dLat2 = Math.Sin(dLat / 2) * Math.Sin(dLat / 2);
+        double dLon2 = Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
 
-        double a = dLat2 + dLon2 * Math.Cos( latStart ) * Math.Cos( latEnd );
-        double c = 2 * Math.Asin( Math.Sqrt( a ) );
+        double a = dLat2 + dLon2 * Math.Cos(latStart) * Math.Cos(latEnd);
+        double c = 2 * Math.Asin(Math.Sqrt(a));
 
         return MEAN_EARTH_RADIUS_IN_KILOMETERS * c;
     }
 
 
-    public static double CoordinatesToMiles( double                 latStart, double longitudeStart, double latEnd, double longitudeEnd ) => KilometersToMiles( CoordinatesToKilometers( latStart, longitudeStart, latEnd, longitudeEnd ) );
+    public static double CoordinatesToMiles( double                 latStart, double longitudeStart, double latEnd, double longitudeEnd ) => KilometersToMiles(CoordinatesToKilometers(latStart, longitudeStart, latEnd, longitudeEnd));
     public static double DegreesPerSecondToHertz( double            degrees ) => degrees / TOTAL_DEGREES;
-    public static double DegreesPerSecondToRadiansPerSecond( double degrees ) => HertzToRadiansPerSecond( DegreesPerSecondToHertz( degrees ) );
+    public static double DegreesPerSecondToRadiansPerSecond( double degrees ) => HertzToRadiansPerSecond(DegreesPerSecondToHertz(degrees));
     public static double DegreesToRadians( double                   degrees ) => degrees * DEGREES_TO_RADIANS;
 
 
-    public static double FahrenheitToCelsius( double       fahrenheit ) => (fahrenheit - 32.0) / 1.8;
-    public static double HectopascalsToKilopascals( double hpa )        => hpa                 / 10.0;
-    public static double HectopascalsToPascals( double     hpa )        => hpa                 * 100.0;
-    public static double HertzToDegreesPerSecond( double   hertz )      => hertz               * TOTAL_DEGREES;
-    public static double HertzToRadiansPerSecond( double   hertz )      => hertz               * TWO_PI;
+    public static double FahrenheitToCelsius( double       fahrenheit ) => ( fahrenheit - 32.0 ) / 1.8;
+    public static double HectopascalsToKilopascals( double hpa )        => hpa                   / 10.0;
+    public static double HectopascalsToPascals( double     hpa )        => hpa                   * 100.0;
+    public static double HertzToDegreesPerSecond( double   hertz )      => hertz                 * TOTAL_DEGREES;
+    public static double HertzToRadiansPerSecond( double   hertz )      => hertz                 * TWO_PI;
 
     /// <summary> International survey foot defined as exactly 0.3048 meters by convention in 1959. This is the most common modern foot measure. </summary>
     public static double InternationalFeetToMeters( double internationalFeet ) => internationalFeet * INTERNATIONAL_FOOT_DEFINITION;
@@ -80,7 +80,7 @@ public static class UnitConverters
     public static double PascalsToAtmospheres( double               pascals ) => pascals / ATMOSPHERE_PASCALS;
     public static double PoundsToKilograms( double                  pounds )  => pounds  * POUNDS_TO_KG;
     public static double PoundsToStones( double                     pounds )  => pounds  * POUNDS_TO_STONES;
-    public static double RadiansPerSecondToDegreesPerSecond( double radians ) => HertzToDegreesPerSecond( RadiansPerSecondToHertz( radians ) );
+    public static double RadiansPerSecondToDegreesPerSecond( double radians ) => HertzToDegreesPerSecond(RadiansPerSecondToHertz(radians));
     public static double RadiansPerSecondToHertz( double            radians ) => radians / TWO_PI;
     public static double RadiansToDegrees( double                   radians ) => radians / DEGREES_TO_RADIANS;
     public static double StonesToPounds( double                     stones )  => stones  * STONES_TO_POUNDS;

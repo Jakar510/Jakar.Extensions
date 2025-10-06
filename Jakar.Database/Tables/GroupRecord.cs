@@ -27,7 +27,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
                                                                                                                .Build();
 
 
-    public static string                               TableName { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static string                               TableName {  get => TABLE_NAME; }
     Guid? ICreatedByUser<Guid>.                        CreatedBy => CreatedBy?.Value;
     Guid? IGroupModel<Guid>.                           OwnerID   => CreatedBy?.Value;
     [StringLength(IUserRights.MAX_SIZE)] public string Rights    { get; set; } = Rights;

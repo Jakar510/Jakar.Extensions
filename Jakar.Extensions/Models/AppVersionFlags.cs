@@ -17,13 +17,15 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     public readonly        uint            Iteration      = iteration;
 
 
-    public bool IsEmpty    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => string.IsNullOrWhiteSpace(Flag); }
-    public bool IsNotEmpty { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => !IsEmpty; }
-    public int  Length     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Flag.Length + 15; }
+    public bool IsEmpty    { get => string.IsNullOrWhiteSpace(Flag); }
+    public bool IsNotEmpty { get => !IsEmpty; }
+    public int  Length     { get => Flag.Length + 15; }
 
 
-    public override string ToString()                                                  => AsSpan().ToString();
-    public          string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan(format, formatProvider).ToString();
+    public override string ToString() => AsSpan()
+       .ToString();
+    public string ToString( string? format, IFormatProvider? formatProvider ) => AsSpan(format, formatProvider)
+       .ToString();
 
 
     public ReadOnlySpan<char> AsSpan()                            => AsSpan(default, CultureInfo.CurrentCulture);
@@ -37,8 +39,7 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public bool TryFormat( Span<char> buffer, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public bool TryFormat( Span<char> buffer, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
     {
         Debug.Assert(buffer.Length > Length);
 
@@ -135,8 +136,10 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
         int end = flag.IndexOfAny(Randoms.Numeric);
 
         return end < 0
-                   ? new AppVersionFlags(flag.ToString(),        0)
-                   : new AppVersionFlags(flag[..end].ToString(), uint.Parse(flag[end..]));
+                   ? new AppVersionFlags(flag.ToString(), 0)
+                   : new AppVersionFlags(flag[..end]
+                                            .ToString(),
+                                         uint.Parse(flag[end..]));
     }
     public static AppVersionFlags Parse( string flag, IFormatProvider? provider )
     {

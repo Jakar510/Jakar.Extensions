@@ -9,16 +9,16 @@ using ZLinq.Internal;
 namespace Jakar.Extensions;
 
 
-[DefaultValue( nameof(Empty) )]
+[DefaultValue(nameof(Empty))]
 public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, IValueEnumerable<FilterBuffer<TValue>, TValue>
 {
     public static readonly FilterBuffer<TValue> Empty = new(0);
     private readonly IMemoryOwner<TValue>? __owner = capacity > 0
-                                                        ? MemoryPool<TValue>.Shared.Rent( capacity )
-                                                        : null;
+                                                         ? MemoryPool<TValue>.Shared.Rent(capacity)
+                                                         : null;
     public readonly int Capacity = capacity;
     internal        int length   = 0;
-    private         int __index   = 0;
+    private         int __index  = 0;
 
 
     public readonly int                    Length => length;
@@ -26,13 +26,13 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     public readonly ReadOnlySpan<TValue>   Values => Memory.Span;
 
 
-    public FilterBuffer() : this( 0 ) { }
+    public FilterBuffer() : this(0) { }
     public readonly void Dispose() => __owner?.Dispose();
     public void Add( ref readonly TValue value )
     {
         if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
 
-        if ( length > Capacity ) { throw new InvalidOperationException( "Cannot add more items than the capacity of the buffer." ); }
+        if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
     }
 
 
@@ -45,7 +45,7 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
             return true;
         }
 
-        Unsafe.SkipInit( out current );
+        Unsafe.SkipInit(out current);
         return false;
     }
     public bool TryGetNonEnumeratedCount( out int count )
@@ -62,7 +62,7 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>, I
     {
         if ( !EnumeratorHelper.TryGetSlice(Values, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
 
-        slice.CopyTo( destination );
+        slice.CopyTo(destination);
         return true;
     }
 }

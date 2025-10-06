@@ -10,43 +10,43 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source ) { return element; }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector )
     {
         await foreach ( TElement element in source )
         {
-            if ( selector( element ) ) { return element; }
+            if ( selector(element) ) { return element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> First<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector )
     {
         await foreach ( TElement element in source )
         {
-            if ( await selector( element ) ) { return element; }
+            if ( await selector(element) ) { return element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> First<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
-            if ( selector( element, value ) ) { return element; }
+            if ( selector(element, value) ) { return element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> First<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
         await foreach ( TElement element in source )
         {
-            if ( await selector( element, value ) ) { return element; }
+            if ( await selector(element, value) ) { return element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
 
 
@@ -60,7 +60,7 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( selector( element ) ) { return element; }
+            if ( selector(element) ) { return element; }
         }
 
         return default;
@@ -69,7 +69,7 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( await selector( element ) ) { return element; }
+            if ( await selector(element) ) { return element; }
         }
 
         return default;
@@ -78,7 +78,7 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( selector( element, value ) ) { return element; }
+            if ( selector(element, value) ) { return element; }
         }
 
         return default;
@@ -87,7 +87,7 @@ public static partial class AsyncLinq
     {
         await foreach ( TElement element in source )
         {
-            if ( await selector( element, value ) ) { return element; }
+            if ( await selector(element, value) ) { return element; }
         }
 
         return default;
@@ -96,88 +96,88 @@ public static partial class AsyncLinq
 
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
         return list.Last();
     }
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
-        return list.Last( selector );
+        List<TElement> list = await source.ToList(token);
+        return list.Last(selector);
     }
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( await selector( list[i] ) ) { return list[i]; }
+            if ( await selector(list[i]) ) { return list[i]; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( selector( list[i], value ) ) { return list[i]; }
+            if ( selector(list[i], value) ) { return list[i]; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( await selector( list[i], value ) ) { return list[i]; }
+            if ( await selector(list[i], value) ) { return list[i]; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
 
 
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
         return list.LastOrDefault();
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
-        return list.LastOrDefault( selector );
+        List<TElement> list = await source.ToList(token);
+        return list.LastOrDefault(selector);
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( await selector( list[i] ) ) { return list[i]; }
+            if ( await selector(list[i]) ) { return list[i]; }
         }
 
         return default;
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( selector( list[i], value ) ) { return list[i]; }
+            if ( selector(list[i], value) ) { return list[i]; }
         }
 
         return default;
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList( token );
+        List<TElement> list = await source.ToList(token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
-            if ( await selector( list[i], value ) ) { return list[i]; }
+            if ( await selector(list[i], value) ) { return list[i]; }
         }
 
         return default;
@@ -190,12 +190,12 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( result is not null ) { throw new InvalidOperationException( $"Multiple records in {nameof(source)}" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
             result = element;
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector )
     {
@@ -203,12 +203,12 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( result is not null ) { throw new InvalidOperationException( $"Multiple records in {nameof(source)}" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-            if ( selector( element ) ) { result = element; }
+            if ( selector(element) ) { result = element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Single<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector )
     {
@@ -216,12 +216,12 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( result is not null ) { throw new InvalidOperationException( $"Multiple records in {nameof(source)}" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-            if ( await selector( element ) ) { result = element; }
+            if ( await selector(element) ) { result = element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Single<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value )
     {
@@ -229,12 +229,12 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( result is not null ) { throw new InvalidOperationException( $"Multiple records in {nameof(source)}" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-            if ( selector( element, value ) ) { result = element; }
+            if ( selector(element, value) ) { result = element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
     public static async ValueTask<TElement> Single<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value )
     {
@@ -242,12 +242,12 @@ public static partial class AsyncLinq
 
         await foreach ( TElement element in source )
         {
-            if ( result is not null ) { throw new InvalidOperationException( $"Multiple records in {nameof(source)}" ); }
+            if ( result is not null ) { throw new InvalidOperationException($"Multiple records in {nameof(source)}"); }
 
-            if ( await selector( element, value ) ) { result = element; }
+            if ( await selector(element, value) ) { result = element; }
         }
 
-        throw new InvalidOperationException( $"No records in {nameof(source)}" );
+        throw new InvalidOperationException($"No records in {nameof(source)}");
     }
 
 
@@ -272,7 +272,7 @@ public static partial class AsyncLinq
         {
             if ( result is not null ) { return default; }
 
-            if ( selector( element ) ) { result = element; }
+            if ( selector(element) ) { result = element; }
         }
 
         return default;
@@ -285,7 +285,7 @@ public static partial class AsyncLinq
         {
             if ( result is not null ) { return default; }
 
-            if ( await selector( element ) ) { result = element; }
+            if ( await selector(element) ) { result = element; }
         }
 
         return default;
@@ -298,7 +298,7 @@ public static partial class AsyncLinq
         {
             if ( result is not null ) { return default; }
 
-            if ( selector( element, value ) ) { result = element; }
+            if ( selector(element, value) ) { result = element; }
         }
 
         return default;
@@ -311,7 +311,7 @@ public static partial class AsyncLinq
         {
             if ( result is not null ) { return default; }
 
-            if ( await selector( element, value ) ) { result = element; }
+            if ( await selector(element, value) ) { result = element; }
         }
 
         return result;

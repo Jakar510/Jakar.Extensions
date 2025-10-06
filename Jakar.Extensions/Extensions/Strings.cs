@@ -34,7 +34,8 @@ public static class Strings
     ///     <para> Provide your own <c> IDictionary{char, char} </c> to <paramref name="bracketPairs"/> to customize the mapping. </para>
     /// </summary>
     /// <returns> <see langword="true"/> if balanced; otherwise <see langword="false"/> </returns>
-    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = null ) => input.AsSpan().IsBalanced(bracketPairs); // TODO: ReadOnlySpan<char>
+    public static bool IsBalanced( this string input, IReadOnlyDictionary<char, char>? bracketPairs = null ) => input.AsSpan()
+                                                                                                                     .IsBalanced(bracketPairs); // TODO: ReadOnlySpan<char>
 
 
     /// <summary>
@@ -108,7 +109,11 @@ public static class Strings
     {
         string[] array = value.Split(separator);
 
-        for ( int i = 0; i < array.Length; i++ ) { array[i] = array[i].Trim(); }
+        for ( int i = 0; i < array.Length; i++ )
+        {
+            array[i] = array[i]
+               .Trim();
+        }
 
         return array;
     }
@@ -116,20 +121,27 @@ public static class Strings
     {
         string[] array = value.Split(separator);
 
-        for ( int i = 0; i < array.Length; i++ ) { array[i] = array[i].Trim(); }
+        for ( int i = 0; i < array.Length; i++ )
+        {
+            array[i] = array[i]
+               .Trim();
+        }
 
         return array;
     }
 
 
-    public static string[]             SplitLines( this       string value, char      separator = '\n' ) => value.Split(separator);
-    public static string[]             SplitLines( this       string value, string    separator )        => value.Split(separator);
-    public static Memory<byte>         ToMemory( this         string value, Encoding? encoding = null )  => value.ToByteArray(encoding ?? Encoding.Default).AsMemory();
-    public static object               ConvertTo( this        string value, Type      target )           => Convert.ChangeType(value, target);
-    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = null )  => value.ToMemory(encoding ?? Encoding.Default);
+    public static string[] SplitLines( this string value, char   separator = '\n' ) => value.Split(separator);
+    public static string[] SplitLines( this string value, string separator )        => value.Split(separator);
+    public static Memory<byte> ToMemory( this string value, Encoding? encoding = null ) => value.ToByteArray(encoding ?? Encoding.Default)
+                                                                                                .AsMemory();
+    public static object               ConvertTo( this        string value, Type      target )          => Convert.ChangeType(value, target);
+    public static ReadOnlyMemory<byte> ToReadOnlyMemory( this string value, Encoding? encoding = null ) => value.ToMemory(encoding ?? Encoding.Default);
 
 
-    public static SecureString ToSecureString( this ReadOnlySpan<byte>   value, bool makeReadonly = true ) => Convert.ToBase64String(value).AsSpan().ToSecureString(makeReadonly);
+    public static SecureString ToSecureString( this ReadOnlySpan<byte> value, bool makeReadonly = true ) => Convert.ToBase64String(value)
+                                                                                                                   .AsSpan()
+                                                                                                                   .ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this string               value, bool makeReadonly = true ) => ToSecureString(value.AsSpan(), makeReadonly);
     public static SecureString ToSecureString( this Memory<char>         value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
     public static SecureString ToSecureString( this ReadOnlyMemory<char> value, bool makeReadonly = true ) => value.Span.ToSecureString(makeReadonly);
@@ -164,7 +176,8 @@ public static class Strings
     /// </summary>
     /// <param name="str"> </param>
     /// <param name="separator"> the <see cref="char"/> to split on </param>
-    public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan().SplitOn(separator);
+    public static SpanSplitEnumerator<char> SplitOn( this string str, char separator ) => str.AsSpan()
+                                                                                             .SplitOn(separator);
 
     /// <summary>
     ///     <para>
@@ -173,7 +186,8 @@ public static class Strings
     ///     Default chars <see cref="char"/> to '\n' and '\r'
     /// </summary>
     /// <param name="str"> </param>
-    public static SpanSplitEnumerator<char> SplitOn( this string str ) => str.AsSpan().SplitOn();
+    public static SpanSplitEnumerator<char> SplitOn( this string str ) => str.AsSpan()
+                                                                             .SplitOn();
 
 
     /// <summary>
@@ -227,11 +241,14 @@ public static class Strings
     /// <returns>
     ///     <see cref="string"/>
     /// </returns>
-    public static string Repeat( this string value, int count ) => new StringBuilder(value.Length * count).Insert(0, value, count).ToString();
+    public static string Repeat( this string value, int count ) => new StringBuilder(value.Length * count).Insert(0, value, count)
+                                                                                                          .ToString();
 
-    public static string ReplaceAll( this      string source, string old, string newString ) => source.Replace(old, newString, StringComparison.Ordinal);
-    public static string ReplaceAll( this      string source, char   old, char   newString ) => source.Replace(old, newString);
-    public static string ToScreamingCase( this string value ) => value.ToSnakeCase().ToUpper().Replace("__", "_");
+    public static string ReplaceAll( this string source, string old, string newString ) => source.Replace(old, newString, StringComparison.Ordinal);
+    public static string ReplaceAll( this string source, char   old, char   newString ) => source.Replace(old, newString);
+    public static string ToScreamingCase( this string value ) => value.ToSnakeCase()
+                                                                      .ToUpper()
+                                                                      .Replace("__", "_");
 
 
     /// <summary> inspired from <seealso href="https://stackoverflow.com/a/67332992/9530917"/> </summary>
@@ -311,7 +328,8 @@ public static class Strings
     /// <param name="c"> </param>
     /// <param name="padding"> </param>
     /// <returns> </returns>
-    public static string Wrapper( this string self, char c, int padding ) => self.PadLeft(padding, c).PadRight(padding, c);
+    public static string Wrapper( this string self, char c, int padding ) => self.PadLeft(padding, c)
+                                                                                 .PadRight(padding, c);
 
 
     public static TResult ConvertTo<TResult>( this string value )

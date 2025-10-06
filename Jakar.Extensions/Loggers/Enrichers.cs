@@ -99,8 +99,16 @@ public static class Enricher
         where TEnum : struct, Enum => new(name, new ScalarValue(value.ToString()));
 
 
-    public static LogEventProperty GetProperty( in ReadOnlySpan<GcGenerationInformation> value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(static v => v.GetProperty())]));
-    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan>                value, string name ) => new(name, new SequenceValue([..value.AsValueEnumerable().Select(v => new ScalarValue(v))]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<GcGenerationInformation> value, string name ) => new(name,
+                                                                                                                     new SequenceValue([
+                                                                                                                                           ..value.AsValueEnumerable()
+                                                                                                                                                  .Select(static v => v.GetProperty())
+                                                                                                                                       ]));
+    public static LogEventProperty GetProperty( in ReadOnlySpan<TimeSpan> value, string name ) => new(name,
+                                                                                                      new SequenceValue([
+                                                                                                                            ..value.AsValueEnumerable()
+                                                                                                                                   .Select(v => new ScalarValue(v))
+                                                                                                                        ]));
 
 
     public static LogEventProperty GetProperty( string?                                    description, ActivityStatusCode code ) => new(nameof(Activity.Status), new StructureValue([GetProperty(description, "Description"), GetProperty(code, "Code")]));

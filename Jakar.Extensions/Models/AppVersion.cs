@@ -2,7 +2,8 @@
 
 
 /// <summary> See <see cref="AppVersionFormat"/> for formatting details. </summary>
-[Serializable][JsonConverter(typeof(AppVersionJsonConverter))]
+[Serializable]
+[JsonConverter(typeof(AppVersionJsonConverter))]
 public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJsonModel<AppVersion>, ICloneable, IFuzzyEquals<AppVersion>, ISpanParsable<AppVersion>
 {
     private const          char       SEPARATOR = '.';
@@ -10,21 +11,21 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
     private                string?    __string;
 
 
-    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => FuzzyEqualizer<AppVersion>.Default; }
+    public static FuzzyEqualizer<AppVersion> FuzzyEqualizer { get => FuzzyEqualizer<AppVersion>.Default; }
     public static JsonSerializerContext      JsonContext    => JakarExtensionsContext.Default;
     public static JsonTypeInfo<AppVersion>   JsonTypeInfo   => JakarExtensionsContext.Default.AppVersion;
     public static JsonTypeInfo<AppVersion[]> JsonArrayInfo  => JakarExtensionsContext.Default.AppVersionArray;
-    public        int?                       Build          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public        int?                       Build          { get; init; }
     int IReadOnlyCollection<int>.            Count          => (int)Scheme;
-    public              AppVersionFlags      Flags          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    public              AppVersionFlags      Flags          { get; init; }
     public              bool                 IsValid        => !ReferenceEquals(this, Default) && this != Default;
-    [JsonIgnore] public int                  Length         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Flags.Length + 65; }
-    public              int?                 Maintenance    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int                  Major          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                 MajorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                 Minor          { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              int?                 MinorRevision  { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
-    public              AppVersionFormat     Scheme         { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; }
+    [JsonIgnore] public int                  Length         { get => Flags.Length + 65; }
+    public              int?                 Maintenance    { get; init; }
+    public              int                  Major          { get; init; }
+    public              int?                 MajorRevision  { get; init; }
+    public              int?                 Minor          { get; init; }
+    public              int?                 MinorRevision  { get; init; }
+    public              AppVersionFormat     Scheme         { get; init; }
 
 
     public AppVersion() : this(0, null, null, null, null, null, AppVersionFlags.Stable) { }

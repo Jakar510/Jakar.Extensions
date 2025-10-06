@@ -4,7 +4,8 @@
 namespace Jakar.Extensions;
 
 
-[Serializable][JsonConverter(typeof(EmailJsonConverter))]
+[Serializable]
+[JsonConverter(typeof(EmailJsonConverter))]
 public readonly record struct Email( string Value ) : IParsable<Email>
 {
     public static readonly          Email Empty = new(string.Empty);
@@ -23,7 +24,6 @@ public readonly record struct Email( string Value ) : IParsable<Email>
         return result == Empty;
     }
 }
-
 
 
 

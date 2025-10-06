@@ -23,14 +23,16 @@ public interface IRoleModel<TSelf, TID> : IRoleModel<TID>, IJsonModel<TSelf>
 
 [Serializable]
 [method: JsonConstructor]
-public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TSelf, TID>(id), IRoleModel<TID>
+public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TSelf>(), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
-    private string __name   = nameOfRole;
-    private string __rights = rights;
+    private   string __name   = nameOfRole;
+    private   string __rights = rights;
+    protected TID    _id;
 
 
+    public                                      TID    ID         { get => _id;      init => _id = value; }
     [StringLength(UNICODE_CAPACITY)]     public string NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
     [StringLength(IUserRights.MAX_SIZE)] public string Rights     { get => __rights; set => SetProperty(ref __rights, value); }
 

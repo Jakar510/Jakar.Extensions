@@ -248,7 +248,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
                                         ? ref Unsafe.NullRef<T>()
                                         : ref __currentNode.value;
 
-        
+
         T IEnumerator<T>.   Current => Current;
         object? IEnumerator.Current => Current;
 
@@ -268,7 +268,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             return true;
         }
 
-        
+
         public void Reset()
         {
             ObjectDisposedException.ThrowIf(__isDisposed, this);

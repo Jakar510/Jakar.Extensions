@@ -39,7 +39,7 @@ public readonly struct StringTags( Pair[] tags, string[] values ) : IValueEnumer
 
 
     public ValueEnumerable<FromArray<string>, string>                                      EnumerateValues()   => new(new FromArray<string>(Values ?? []));
-    public ValueEnumerable<FromArray<Pair>, Pair>                                          EnumeratePairs()     => new(new FromArray<Pair>(Tags     ?? []));
+    public ValueEnumerable<FromArray<Pair>, Pair>                                          EnumeratePairs()    => new(new FromArray<Pair>(Tags     ?? []));
     ValueEnumerable<FromArray<string>, string> IValueEnumerable<FromArray<string>, string>.AsValueEnumerable() => EnumerateValues();
     ValueEnumerable<FromArray<Pair>, Pair> IValueEnumerable<FromArray<Pair>, Pair>.        AsValueEnumerable() => EnumeratePairs();
 

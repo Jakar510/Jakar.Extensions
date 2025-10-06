@@ -8,6 +8,6 @@ public static partial class Types
 
 
     public static string  MethodName( this      MethodBase method ) => method.Name;
-    public static string  MethodSignature( this MethodBase method ) => $"{method.Name}( {string.Join( ", ", method.GetParameters().Select( static x => x.ParameterType.FullName ) )} )";
+    public static string  MethodSignature( this MethodBase method ) => $"{method.Name}( {string.Join(", ", method.GetParameters().Select(static x => x.ParameterType.FullName))} )";
     public static string? MethodClass( this     MethodBase method ) => method.DeclaringType?.FullName;
 }

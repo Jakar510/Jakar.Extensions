@@ -6,8 +6,7 @@ namespace Jakar.Extensions;
 
 public static partial class Spans
 {
-    [Pure]
-    public static TValue Sum<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value )
+    [Pure] public static TValue Sum<TValue>( this scoped ref readonly ReadOnlySpan<TValue> value )
         where TValue : INumber<TValue>
     {
         TValue result = TValue.Zero;
@@ -17,12 +16,11 @@ public static partial class Spans
     }
 
 
-    [Pure]
-    public static TNumber Sum<TValue, TNumber>( this scoped ref readonly ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector )
+    [Pure] public static TNumber Sum<TValue, TNumber>( this scoped ref readonly ReadOnlySpan<TValue> value, Func<TValue, TNumber> selector )
         where TNumber : INumber<TNumber>
     {
         TNumber result = TNumber.Zero;
-        foreach ( TValue x in value ) { result += selector( x ); }
+        foreach ( TValue x in value ) { result += selector(x); }
 
         return result;
     }

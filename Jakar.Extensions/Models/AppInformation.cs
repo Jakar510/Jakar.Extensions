@@ -8,7 +8,9 @@ using Serilog.Events;
 namespace Jakar.Extensions;
 
 
-[StructLayout(LayoutKind.Auto)][Serializable][DefaultValue(nameof(Invalid))]
+[StructLayout(LayoutKind.Auto)]
+[Serializable]
+[DefaultValue(nameof(Invalid))]
 [method: JsonConstructor]
 public readonly struct AppInformation( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IJsonModel<AppInformation>
 {

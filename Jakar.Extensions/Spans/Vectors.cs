@@ -9,7 +9,7 @@ namespace Jakar.Extensions;
 ///         <see href="https://devblogs.microsoft.com/dotnet/performance_improvements_in_net_7/#vectorization"/>
 ///     </para>
 /// </summary>
-[Experimental( nameof(Vectors) )]
+[Experimental(nameof(Vectors))]
 public static class Vectors
 {
     public static bool Contains( scoped ref readonly ReadOnlySpan<nuint> source, nuint value )
@@ -18,10 +18,10 @@ public static class Vectors
         {
             Vector<nuint> target = new(value);
             Vector<nuint> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<uint> source, uint value )
     {
@@ -29,10 +29,10 @@ public static class Vectors
         {
             Vector<uint> target = new(value);
             Vector<uint> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<byte> source, byte value )
     {
@@ -40,10 +40,10 @@ public static class Vectors
         {
             Vector<byte> target = new(value);
             Vector<byte> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<byte> source, sbyte value )
     {
@@ -51,7 +51,7 @@ public static class Vectors
         {
             Vector<sbyte> target = new(value);
             Vector<sbyte> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
         foreach ( byte x in source )
@@ -67,10 +67,10 @@ public static class Vectors
         {
             Vector<short> target = new(value);
             Vector<short> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<int> source, int value )
     {
@@ -78,10 +78,10 @@ public static class Vectors
         {
             Vector<int> target = new(value);
             Vector<int> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<long> source, long value )
     {
@@ -89,10 +89,10 @@ public static class Vectors
         {
             Vector<long> target = new(value);
             Vector<long> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<ushort> source, ushort value )
     {
@@ -100,10 +100,10 @@ public static class Vectors
         {
             Vector<ushort> target = new(value);
             Vector<ushort> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<nint> source, nint value )
     {
@@ -111,10 +111,10 @@ public static class Vectors
         {
             Vector<nint> target = new(value);
             Vector<nint> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<ulong> source, ulong value )
     {
@@ -122,10 +122,10 @@ public static class Vectors
         {
             Vector<ulong> target = new(value);
             Vector<ulong> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<float> source, float value )
     {
@@ -133,10 +133,10 @@ public static class Vectors
         {
             Vector<float> target = new(value);
             Vector<float> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
     public static bool Contains( scoped ref readonly ReadOnlySpan<double> source, double value )
     {
@@ -144,9 +144,9 @@ public static class Vectors
         {
             Vector<double> target = new(value);
             Vector<double> values = new(source);
-            return Vector.EqualsAny( values, target );
+            return Vector.EqualsAny(values, target);
         }
 
-        return MemoryExtensions.Contains( source, value );
+        return MemoryExtensions.Contains(source, value);
     }
 }

@@ -8,7 +8,7 @@ namespace Jakar.Database;
 public sealed record UserGroupRecord : Mapping<UserGroupRecord, UserRecord, GroupRecord>, ICreateMapping<UserGroupRecord, UserRecord, GroupRecord>
 {
     public const  string                          TABLE_NAME = "user_groups";
-    public static string                          TableName     { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => TABLE_NAME; }
+    public static string                          TableName     {  get => TABLE_NAME; }
     public static JsonSerializerContext           JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserGroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserGroupRecord;
     public static JsonTypeInfo<UserGroupRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserGroupRecordArray;
