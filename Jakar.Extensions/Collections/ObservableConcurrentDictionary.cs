@@ -166,13 +166,14 @@ public abstract class ObservableConcurrentDictionary<TSelf, TKey, TValue>( Concu
     [Pure] [MustDisposeResource] [SuppressMessage("ReSharper", "ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator")]
     protected internal override FilterBuffer<KeyValuePair<TKey, TValue>> FilteredValues()
     {
-        int                                      count  = buffer.Count;
-        FilterBuffer<KeyValuePair<TKey, TValue>> values = new(count);
-        int                                      index  = 0;
+        int                                        count  = buffer.Count;
+        FilterBuffer<KeyValuePair<TKey, TValue>>   values = new(count);
+        FilterDelegate<KeyValuePair<TKey, TValue>> filter = GetFilter();
+        int                                        index  = 0;
 
         foreach ( KeyValuePair<TKey, TValue> pair in buffer )
         {
-            if ( Filter(index++, in pair) ) { values.Add(in pair); }
+            if ( filter(index++, in pair) ) { values.Add(in pair); }
         }
 
         return values;

@@ -42,22 +42,22 @@ public static class RightsExtensions
 public ref struct UserRights<TEnum>
     where TEnum : struct, Enum
 {
-    public const            char               VALID        = '+';
-    public const            char               INVALID      = '-';
-    private static readonly TEnum[]            __enumValues = Enum.GetValues<TEnum>();
-    private readonly        IMemoryOwner<char> __rights     = MemoryPool<char>.Shared.Rent(__enumValues.Length);
-    internal                Span<char>         span;
+    public const           char                  VALID      = '+';
+    public const           char                  INVALID    = '-';
+    public static readonly ImmutableArray<TEnum> EnumValues = [..Enum.GetValues<TEnum>()];
+    private readonly       IMemoryOwner<char>    __rights   = MemoryPool<char>.Shared.Rent(EnumValues.Length);
+    internal               Span<char>            span;
 
 
     public static UserRights<TEnum> Default => new();
-    public static UserRights<TEnum> SA      => Create(__enumValues);
+    public static UserRights<TEnum> SA      => Create(EnumValues.AsSpan());
     public        int               Length  => span.Length;
     public readonly Right[] Rights
     {
         [Pure] get
         {
-            Right[] indexes = AsyncLinq.GetArray<Right>(__enumValues.Length);
-            for ( int i = 0; i < indexes.Length; i++ ) { indexes[i] = new Right(__enumValues[i], Has(i)); }
+            Right[] indexes = AsyncLinq.GetArray<Right>(EnumValues.Length);
+            for ( int i = 0; i < indexes.Length; i++ ) { indexes[i] = new Right(EnumValues[i], Has(i)); }
 
             return indexes;
         }
@@ -66,8 +66,8 @@ public ref struct UserRights<TEnum>
 
     public UserRights()
     {
-        span = __rights.Memory.Span[..__enumValues.Length];
-        if ( __enumValues.Length > IUserRights.MAX_SIZE ) { throw OutOfRangeException.Create(typeof(TEnum).Name, $"Max permission count is {IUserRights.MAX_SIZE}"); }
+        span = __rights.Memory.Span[..EnumValues.Length];
+        if ( EnumValues.Length > IUserRights.MAX_SIZE ) { throw OutOfRangeException.Create(typeof(TEnum).Name, $"Max permission count is {IUserRights.MAX_SIZE}"); }
 
         span.Fill(INVALID);
     }
@@ -168,7 +168,7 @@ public ref struct UserRights<TEnum>
 
     private readonly UserRights<TEnum> Set( int index, char value )
     {
-        Guard.IsInRange(index, 0, __enumValues.Length);
+        Guard.IsInRange(index, 0, EnumValues.Length);
         Guard.IsTrue(value is VALID or INVALID);
 
         span[index] = value;

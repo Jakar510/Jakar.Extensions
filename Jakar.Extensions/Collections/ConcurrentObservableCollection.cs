@@ -784,6 +784,22 @@ public abstract class ConcurrentObservableCollection<TSelf, TValue> : Observable
     IEnumerator IEnumerable.                             GetEnumerator()                               => GetEnumerator();
 
 
+    [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
+    {
+        using ( AcquireLock() )
+        {
+            ReadOnlySpan<TValue>   span   = AsSpan();
+            FilterBuffer<TValue>   values = new(span.Length);
+            FilterDelegate<TValue> filter = GetFilter();
+
+            for ( int i = 0; i < span.Length; i++ )
+            {
+                if ( filter(i, in span[i]) ) { values.Add(in span[i]); }
+            }
+
+            return values;
+        }
+    }
     [MustDisposeResource] public Lock.Scope AcquireLock()
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

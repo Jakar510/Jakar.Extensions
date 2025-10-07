@@ -120,14 +120,16 @@ public abstract class ObservableHashSet<TSelf, TValue>( HashSet<TValue> values )
 
     [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
     {
-        int                  count  = buffer.Count;
-        FilterBuffer<TValue> values = new(count);
-        int                  index  = 0;
+        int                    count  = buffer.Count;
+        FilterBuffer<TValue>   values = new(count);
+        FilterDelegate<TValue> filter = GetFilter();
+        int                    index  = 0;
+
 
         // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
         foreach ( TValue value in buffer )
         {
-            if ( Filter(index++, in value) ) { values.Add(in value); }
+            if ( filter(index++, in value) ) { values.Add(in value); }
         }
 
         return values;

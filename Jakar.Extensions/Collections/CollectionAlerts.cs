@@ -69,13 +69,8 @@ public abstract class CollectionAlerts<TSelf, TValue> : BaseClass<TSelf>, IColle
     }
 
 
-    protected virtual bool Filter( int index, ref readonly TValue? value )
-    {
-        FilterDelegate<TValue>? filter = OverrideFilter;
-        if ( filter is null ) { return true; }
-
-        return filter(index, in value);
-    }
+    protected         FilterDelegate<TValue> GetFilter()                                     => OverrideFilter ?? Filter;
+    protected virtual bool                   Filter( int index, ref readonly TValue? value ) => true;
 
 
     [Pure] [MustDisposeResource] protected internal abstract FilterBuffer<TValue>                          FilteredValues();

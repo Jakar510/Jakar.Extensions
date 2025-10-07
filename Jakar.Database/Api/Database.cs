@@ -34,18 +34,19 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     protected                   string?                          _className;
 
 
-    public static Database?     Current       {  get; set; }
-    public static DataProtector DataProtector {  get; set; } = new(RSAEncryptionPadding.OaepSHA1);
+    public static Database?     Current       { get; set; }
+    public static DataProtector DataProtector { get; set; } = new(RSAEncryptionPadding.OaepSHA1);
     public string ClassName
     {
-         get => _className ??= GetType()
-                                                                     .GetFullName();
+        get => _className ??= GetType()
+                  .GetFullName();
     }
-    protected internal SecuredString?               ConnectionString          {  get; set; }
+    protected internal SecuredString?               ConnectionString          { get; set; }
     ref readonly       DbOptions IConnectableDbRoot.Options                   => ref Options;
-    public virtual     PasswordValidator            PasswordValidator         {  get => DbOptions.PasswordRequirements.GetValidator(); }
-    public             IsolationLevel               TransactionIsolationLevel {  get; set; } = IsolationLevel.RepeatableRead;
-    public             AppVersion                   Version                   {  get => Options.AppInformation.Version; }
+    public virtual     PasswordValidator            PasswordValidator         { get => DbOptions.PasswordRequirements.GetValidator(); }
+    public             IsolationLevel               TransactionIsolationLevel { get; set; } = IsolationLevel.RepeatableRead;
+    public             AppVersion                   Version                   { get => Options.AppInformation.Version; }
+    public readonly    ThreadLocal<UserRecord?>     LoggedInUser = new();
 
 
     static Database()
@@ -106,6 +107,49 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     // Task IHostedService.StopAsync( CancellationToken  cancellationToken ) => _tableCache.StopAsync( cancellationToken );
 
 
+    public async ValueTask<bool> HasAccess<TRight>( CancellationToken token, params TRight[] rights )
+        where TRight : struct, Enum
+    {
+        await using NpgsqlConnection connection   = await ConnectAsync(token);
+        UserRecord?                  loggedInUser = LoggedInUser.Value;
+        if ( loggedInUser is null ) { return false; }
+
+        bool result = await HasPermission(connection, null, loggedInUser, token, rights);
+        return result;
+    }
+    public async ValueTask<bool> HasPermission<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token, params TRight[] rights )
+        where TRight : struct, Enum
+    {
+        HashSet<TRight> permissions = await CurrentPermissions<TRight>(connection, transaction, user, token);
+
+        foreach ( TRight right in rights.AsSpan() )
+        {
+            if ( permissions.Contains(right) ) { return false; }
+        }
+
+        return true;
+    }
+    public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
+        where TRight : struct, Enum
+    {
+        HashSet<IUserRights> models = new(UserRights<TRight>.EnumValues.Length) { user };
+        HashSet<TRight>      rights = new(UserRights<TRight>.EnumValues.Length);
+
+        await foreach ( GroupRecord record in user.GetGroups(connection, transaction, this, token) ) { models.Add(record); }
+
+        await foreach ( RoleRecord record in user.GetRoles(connection, transaction, this, token) ) { models.Add(record); }
+
+        using UserRights<TRight> results = UserRights<TRight>.Create(models);
+
+        foreach ( ( TRight permission, bool value ) in results.Rights )
+        {
+            if ( value ) { rights.Add(permission); }
+        }
+
+        return rights;
+    }
+
+
     protected async Task InitDataProtector()
     {
         if ( Options.DataProtectorKey.HasValue )
@@ -127,7 +171,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-     protected virtual DbTable<TSelf> Create<TSelf>()
+    protected virtual DbTable<TSelf> Create<TSelf>()
         where TSelf : class, ITableRecord<TSelf>
     {
         DbTable<TSelf> table = new(this, _cache);
@@ -135,7 +179,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-     protected TValue AddDisposable<TValue>( TValue value )
+    protected TValue AddDisposable<TValue>( TValue value )
         where TValue : IDbTable
     {
         _tables.Add(value);
@@ -143,18 +187,18 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [Pure]  public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
+    [Pure] public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
         where TValue : class, IDapperSqlCommand
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, Options.CommandTimeout, commandType, CommandFlags.Buffered, token);
     }
-    [Pure]  public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
+    [Pure] public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return sql.ToCommandDefinition(transaction, token, Options.CommandTimeout);
     }
-    [Pure]  public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
+    [Pure] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
     {
         Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
         return sql.ToCommandDefinition(connection, transaction, token, Options.CommandTimeout);

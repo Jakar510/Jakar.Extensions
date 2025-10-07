@@ -674,12 +674,13 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     [Pure] [MustDisposeResource] protected internal override FilterBuffer<TValue> FilteredValues()
     {
-        ReadOnlySpan<TValue> span   = AsSpan();
-        FilterBuffer<TValue> values = new(span.Length);
+        ReadOnlySpan<TValue>   span   = AsSpan();
+        FilterBuffer<TValue>   values = new(span.Length);
+        FilterDelegate<TValue> filter = GetFilter(); 
 
         for ( int i = 0; i < span.Length; i++ )
         {
-            if ( Filter(i, in span[i]) ) { values.Add(in span[i]); }
+            if ( filter(i, in span[i]) ) { values.Add(in span[i]); }
         }
 
         return values;
@@ -688,6 +689,7 @@ public abstract class ObservableCollection<TSelf, TValue>( Comparer<TValue> comp
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
     public virtual ReadOnlySpan<TValue> AsSpan() => CollectionsMarshal.AsSpan(buffer);
+
 
     /// <summary> Use With Caution -- Do not modify the <see cref="buffer"/> while the span is being used. </summary>
     public virtual ReadOnlySpan<TValue> AsSpan( int start, int length ) => AsSpan()
