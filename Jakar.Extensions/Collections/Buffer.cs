@@ -17,12 +17,12 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>
     where TValue : IEquatable<TValue>
 {
     private static readonly TValue[] _empty = [];
-    private readonly        TValue[] _array = ArrayPool<TValue>.Shared.Rent(Math.Max(capacity, DEFAULT_CAPACITY));
+    private readonly        TValue[] _array = ArrayPool<TValue>.Shared.Rent(capacity);
     private                 int      _length;
 
 
     public readonly int  Capacity     => _array.Length;
-    public readonly int  FreeCapacity => Capacity - (int)Length;
+    public readonly int  FreeCapacity => Capacity - _length;
     public          int  Length       { [Pure] readonly get => _length; set => _length = Math.Clamp(value, 0, Capacity); }
     public readonly bool IsEmpty      { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length == 0; }
     public readonly bool IsNotEmpty   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length > 0; }
