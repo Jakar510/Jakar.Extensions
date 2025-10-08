@@ -510,7 +510,7 @@ public class UserDevice : DeviceInformation, IUserDevice
         IP        = device.IP;
         TimeStamp = device.TimeStamp;
     }
-    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, Guid deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
+    public UserDevice( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory idiom, DevicePlatform platform, AppVersion? osVersion, string deviceID, Guid id = default ) : base(model, manufacturer, deviceName, deviceType, idiom, platform, osVersion, deviceID) => __id = id;
 }
 
 
@@ -530,7 +530,7 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
     public        Guid                         SessionID     { get; set; }
     public        string                       DeviceName    { get; set; } = string.Empty;
     public        bool                         IsValid       => SessionID.IsValidID();
-    public        Guid                         DeviceID      { get; set; }
+    public        string                       DeviceID      { get; set; } = EMPTY;
 
 
     public override bool Equals( SessionToken?    other )                       => ReferenceEquals(this, other) || other is not null && UserID == other.UserID && DeviceID == other.DeviceID;

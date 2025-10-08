@@ -4,6 +4,7 @@
 
 using ZLinq;
 using ZLinq.Internal;
+using ZLinq.Linq;
 
 
 
@@ -12,37 +13,35 @@ namespace Jakar.Extensions;
 
 [StructLayout(LayoutKind.Auto)]
 [method: MustDisposeResource]
-public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueEnumerable<Buffer<TValue>.ValueEnumerator, TValue>
+public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>
     where TValue : IEquatable<TValue>
 {
-    private static readonly TValue[]             _empty = [];
-    private readonly        IMemoryOwner<TValue> _array = MemoryPool<TValue>.Shared.Rent(Math.Max(capacity, DEFAULT_CAPACITY));
-    private                 long                 _length;
-    public                  int                  Capacity { [Pure] get => Memory.Length; }
-    public int Length
-    {
-        [Pure] get => (int)Interlocked.Read(ref _length);
-        set
-        {
-            Guard.IsInRange(value, 0, Capacity);
-            Interlocked.Exchange(ref _length, value);
-        }
-    }
-    public bool IsEmpty    { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length == 0; }
-    public bool IsNotEmpty { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length > 0; }
-    public bool IsReadOnly { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; } = false;
-    public ref TValue this[ int     index ] { [Pure] get => ref Values[index]; }
-    public ref TValue this[ Index   index ] { [Pure] get => ref Values[index]; }
-    public Span<TValue> this[ Range range ] { [Pure] get => Values[range]; }
-    public Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
-    public Memory<TValue> Memory { [Pure] get => _array.Memory; }
-    public Span<TValue>   Next   { [Pure] get => Span[Length..]; }
-    public Span<TValue>   Span   { [Pure] get => Memory.Span; }
-    public Span<TValue>   Values { [Pure] get => Span[..Length]; }
+    private static readonly TValue[] _empty = [];
+    private readonly        TValue[] _array = ArrayPool<TValue>.Shared.Rent(Math.Max(capacity, DEFAULT_CAPACITY));
+    private                 int      _length;
+
+
+    public readonly int  Capacity     => _array.Length;
+    public readonly int  FreeCapacity => Capacity - (int)Length;
+    public          int  Length       { [Pure] readonly get => _length; set => _length = Math.Clamp(value, 0, Capacity); }
+    public readonly bool IsEmpty      { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length == 0; }
+    public readonly bool IsNotEmpty   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get => Length > 0; }
+    public          bool IsReadOnly   { [Pure] [MethodImpl(MethodImplOptions.AggressiveInlining)] get; init; } = false;
+    public readonly ref TValue this[ int     index ] { [Pure] get => ref Values[index]; }
+    public readonly ref TValue this[ Index   index ] { [Pure] get => ref Values[index]; }
+    public readonly Span<TValue> this[ Range range ] { [Pure] get => Values[range]; }
+    public readonly Span<TValue> this[ int   start, int length ] { [Pure] get => Values.Slice(start, length); }
+    public readonly Memory<TValue> Memory { [Pure] get => _array; }
+    public readonly Span<TValue>   Next   { [Pure] get => Span[Length..]; }
+    public readonly Span<TValue>   Span   { [Pure] get => _array; }
+    public readonly Span<TValue>   Values { [Pure] get => new(_array, 0, Length); }
+
+
     [MustDisposeResource] public Buffer() : this(DEFAULT_CAPACITY) { }
     [MustDisposeResource] public Buffer( params ReadOnlySpan<TValue> span ) : this(span.Length) => span.CopyTo(Span);
-    public void                                     Dispose()           => _array.Dispose();
-    public ValueEnumerable<ValueEnumerator, TValue> AsValueEnumerable() => new(new ValueEnumerator(Memory[..Length]));
+    public void Dispose() { ArrayPool<TValue>.Shared.Return(_array, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<TValue>()); }
+
+
     public TValue[] ToArray()
     {
         TValue[] array = Values.ToArray();
@@ -54,7 +53,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         Span.Clear();
         Length = 0;
     }
-    public void Fill( TValue         value ) => Span.Fill(value);
+    public void Fill( TValue value ) => Span.Fill(value);
+
+
     public void CopyTo( Span<TValue> array ) => Values.CopyTo(array);
     public bool TryCopyTo( Span<TValue> destination, out int length )
     {
@@ -67,20 +68,26 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         length = 0;
         return false;
     }
+
+
     public void Reverse( int start, int length ) => Values.Slice(start, length)
                                                           .Reverse();
     public void Reverse() => Values.Reverse();
+
+
     public ReadOnlySpan<TValue> AsSpan( TValue? terminate )
     {
         if ( terminate is not null ) { Add(terminate); }
 
         return Values;
     }
-    public Span<TValue> Slice( int      start )             => Slice(start, Capacity - start);
-    public Span<TValue> Slice( int      start, int length ) => Span.Slice(start, length);
-    public int          IndexOf( TValue value )            => IndexOf(value, 0);
-    public int          IndexOf( TValue value, int start ) => IndexOf(value, start, Length - 1);
-    public int IndexOf( TValue value, int start, int endInclusive )
+    public readonly Span<TValue> Slice( int start )             => Slice(start, Capacity - start);
+    public readonly Span<TValue> Slice( int start, int length ) => Span.Slice(start, length);
+
+
+    public readonly int IndexOf( TValue value )            => IndexOf(value, 0);
+    public readonly int IndexOf( TValue value, int start ) => IndexOf(value, start, Length - 1);
+    public readonly int IndexOf( TValue value, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -94,9 +101,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    public int FindIndex( Func<TValue, bool> match )            => FindIndex(match, 0);
-    public int FindIndex( Func<TValue, bool> match, int start ) => FindIndex(match, start, Length - 1);
-    public int FindIndex( Func<TValue, bool> match, int start, int endInclusive )
+    public readonly int FindIndex( Func<TValue, bool> match )            => FindIndex(match, 0);
+    public readonly int FindIndex( Func<TValue, bool> match, int start ) => FindIndex(match, start, Length - 1);
+    public readonly int FindIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -110,9 +117,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    public int LastIndexOf( TValue value )                   => LastIndexOf(value, 0);
-    public int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf(value, Length - 1, endInclusive);
-    public int LastIndexOf( TValue value, int start, int endInclusive )
+    public readonly int LastIndexOf( TValue value )                   => LastIndexOf(value, 0);
+    public readonly int LastIndexOf( TValue value, int endInclusive ) => LastIndexOf(value, Length - 1, endInclusive);
+    public readonly int LastIndexOf( TValue value, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -126,9 +133,11 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    public int FindLastIndex( Func<TValue, bool> match )                   => FindLastIndex(match, 0);
-    public int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex(match, Length - 1, endInclusive);
-    public int FindLastIndex( Func<TValue, bool> match, int start, int endInclusive )
+
+
+    public readonly int FindLastIndex( Func<TValue, bool> match )                   => FindLastIndex(match, 0);
+    public readonly int FindLastIndex( Func<TValue, bool> match, int endInclusive ) => FindLastIndex(match, Length - 1, endInclusive);
+    public readonly int FindLastIndex( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -143,9 +152,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return NOT_FOUND;
     }
-    public TValue? FindLast( Func<TValue, bool> match )                   => FindLast(match, 0);
-    public TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast(match, Length - 1, endInclusive);
-    public TValue? FindLast( Func<TValue, bool> match, int start, int endInclusive )
+    public readonly TValue? FindLast( Func<TValue, bool> match )                   => FindLast(match, 0);
+    public readonly TValue? FindLast( Func<TValue, bool> match, int endInclusive ) => FindLast(match, Length - 1, endInclusive);
+    public readonly TValue? FindLast( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -160,9 +169,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return default;
     }
-    public TValue? Find( Func<TValue, bool> match )            => Find(match, 0);
-    public TValue? Find( Func<TValue, bool> match, int start ) => Find(match, start, Length - 1);
-    public TValue? Find( Func<TValue, bool> match, int start, int endInclusive )
+    public readonly TValue? Find( Func<TValue, bool> match )            => Find(match, 0);
+    public readonly TValue? Find( Func<TValue, bool> match, int start ) => Find(match, start, Length - 1);
+    public readonly TValue? Find( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
@@ -177,47 +186,54 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         return default;
     }
-    public TValue[] FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
-    public TValue[] FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, Length - 1);
-    public TValue[] FindAll( Func<TValue, bool> match, int start, int endInclusive )
+    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match )            => FindAll(match, 0);
+    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start ) => FindAll(match, start, Length - 1);
+    [Pure] [MustDisposeResource] public readonly FilterBuffer<TValue> FindAll( Func<TValue, bool> match, int start, int endInclusive )
     {
         Guard.IsInRange(start,        0, Length);
         Guard.IsInRange(endInclusive, 0, Length);
         Guard.IsGreaterThanOrEqualTo(endInclusive, start);
-        using Buffer<TValue> buffer = new(Length);
+        FilterBuffer<TValue> buffer = new(Length);
         ReadOnlySpan<TValue> span   = Span;
 
         for ( int i = start; i <= endInclusive; i++ )
         {
-            if ( match(span[i]) ) { buffer.Add(span[i]); }
+            if ( match(span[i]) ) { buffer.Add(in span[i]); }
         }
 
-        return buffer.ToArray();
+        return buffer;
     }
-    public bool Contains( TValue value )
+
+
+    public readonly bool Contains( TValue value )
     {
         ReadOnlySpan<TValue> values = Values;
         return values.Contains(value);
     }
-    public bool Contains( params ReadOnlySpan<TValue> value )
+    public readonly bool Contains( params ReadOnlySpan<TValue> value )
     {
         ReadOnlySpan<TValue> values = Values;
         return values.Contains(in value, EqualityComparer<TValue>.Default);
     }
+
+
     public bool RemoveAt( int index )
     {
         if ( index < 0 || index >= Length ) { return false; }
 
-        int start  = index    - 1;
-        int length = Capacity - start;
+        Span<TValue> span      = Span;
+        int          moveCount = _length - index - 1;
+        if ( moveCount <= 0 ) { return false; }
 
-        Span.Slice(start, length)
-            .CopyTo(Span[index..]);
+        span.Slice(index + 1, moveCount)
+            .CopyTo(span.Slice(index));
 
         Length--;
         return true;
     }
     public bool Remove( TValue value ) => RemoveAt(IndexOf(value, 0));
+
+
     public void Replace( int start, TValue value, int count = 1 )
     {
         ThrowIfReadOnly();
@@ -235,6 +251,8 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
 
         values.CopyTo(Span.Slice(start, values.Length));
     }
+
+
     public void Insert( int start, TValue value, int count = 1 )
     {
         Guard.IsGreaterThanOrEqualTo(count, 0);
@@ -258,7 +276,9 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
         values.CopyTo(Span.Slice(start, values.Length));
         Length += values.Length;
     }
-    public void Add( TValue value ) => Span[Length++] = value;
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public void Add( TValue value ) => Span[Length++] = value;
     public void Add( TValue value, int count )
     {
         ThrowIfReadOnly();
@@ -273,48 +293,22 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
     public void Add( params ReadOnlySpan<TValue> values )
     {
         ThrowIfReadOnly();
-        Span<TValue> span = Next;
+        Span<TValue> next = Next;
 
         switch ( values.Length )
         {
-            case 0:
-                return;
+            case 0: { return; }
 
-            // very common case, e.g. appending strings from NumberFormatInfo like separators, percent symbols, etc.
-            case 1 when span.Length > 1:
+            case > 0 when next.Length >= values.Length:
             {
-                span[0] =  values[0];
-                Length  += 1;
-                return;
-            }
-
-            case 2 when span.Length > 2:
-            {
-                span[0] =  values[0];
-                span[1] =  values[1];
-                Length  += 2;
-                return;
-            }
-
-            case 3 when span.Length > 3:
-            {
-                span[0] =  values[0];
-                span[1] =  values[1];
-                span[2] =  values[2];
-                Length  += 3;
-                return;
-            }
-
-            case > 0 when span.Length > values.Length:
-            {
-                values.CopyTo(span);
+                values.CopyTo(next);
                 Length += values.Length;
                 return;
             }
 
             default:
             {
-                Guard.IsInRange(values.Length + Length, 0, Capacity);
+                EnsureCapacity(values.Length + Length);
                 values.CopyTo(Next);
                 Length += values.Length;
                 return;
@@ -379,194 +373,111 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IValueE
             }
         }
     }
+
+
     public void Trim( TValue value )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.Trim(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        TrimEnd(value);
+        TrimStart(value);
     }
     public void Trim( params ReadOnlySpan<TValue> value )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.Trim(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        TrimEnd(value);
+        TrimStart(value);
     }
+
+
     public void TrimStart( TValue value )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.TrimStart(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        Span<TValue> span  = Span;
+        int          start = 0;
+
+        // Skip matching values at the beginning
+        while ( start < _length && EqualityComparer<TValue>.Default.Equals(span[start], value) ) { start++; }
+
+        if ( start <= 0 ) { return; }
+
+        span[start.._length]
+           .CopyTo(span);
+
+        Length = _length - start;
     }
-    public void TrimStart( params ReadOnlySpan<TValue> value )
+    public void TrimStart( params ReadOnlySpan<TValue> values )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.TrimStart(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        Span<TValue> span  = Span;
+        int          start = 0;
+
+        while ( start < _length && values.Contains(span[start], EqualityComparer<TValue>.Default) ) { start++; }
+
+        if ( start <= 0 ) { return; }
+
+        span[start.._length]
+           .CopyTo(span);
+
+        Length = _length - start;
     }
+
+
     public void TrimEnd( TValue value )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.TrimEnd(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        Span<TValue> span   = Span;
+        int          length = _length - 1;
+
+        while ( length >= 0 && EqualityComparer<TValue>.Default.Equals(span[length], value) ) { length--; }
+
+        Length = length;
     }
-    public void TrimEnd( params ReadOnlySpan<TValue> value )
+    public void TrimEnd( params ReadOnlySpan<TValue> values )
     {
-        Span<TValue>         values = Span;
-        ReadOnlySpan<TValue> span   = values.TrimEnd(value);
-        Length = span.Length;
-        span.CopyTo(values);
+        Span<TValue> span   = Span;
+        int          length = _length - 1;
+
+        while ( length >= 0 && values.Contains(span[length]) ) { length--; }
+
+        Length = length;
     }
-    public void Sort()                              => Sort(Comparer<TValue>.Default);
-    public void Sort( IComparer<TValue>  comparer ) => Span.Sort(comparer);
-    public void Sort( Comparison<TValue> comparer ) => Span.Sort(comparer);
-    public void Sort( int start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length)
-                                                                                 .Sort(comparer);
+
+
+    public readonly void Sort()                              => Sort(Comparer<TValue>.Default);
+    public readonly void Sort( Comparer<TValue>   comparer ) => Span.Sort(comparer);
+    public readonly void Sort( Comparison<TValue> comparer ) => Span.Sort(comparer);
+    public readonly void Sort( int start, int length, IComparer<TValue> comparer ) => Span.Slice(start, length)
+                                                                                          .Sort(comparer);
+
+
     /// <summary> Resize the internal buffer either by doubling current buffer size or by adding <paramref name="additionalRequestedCapacity"/> to <see cref="Length"/> whichever is greater. </summary>
     /// <param name="additionalRequestedCapacity"> the requested new size of the buffer. </param>
-    [Pure] [MustDisposeResource] public Buffer<TValue> Grow( uint additionalRequestedCapacity )
+    public Buffer<TValue> Grow( uint additionalRequestedCapacity )
     {
         ThrowIfReadOnly();
         Guard.IsInRange(additionalRequestedCapacity, 1, int.MaxValue);
-        Buffer<TValue> buffer = new(GetLength((uint)Capacity, additionalRequestedCapacity));
+        int capacity = GetLength((uint)Capacity, additionalRequestedCapacity);
+
+        // ReSharper disable once NotDisposedResource
+        Buffer<TValue> buffer = new(capacity);
         Values.CopyTo(buffer.Span);
         Dispose();
-        return buffer;
+        this = buffer;
+        return this;
     }
-    public void ThrowIfReadOnly()
+    public void EnsureCapacity( int min )
+    {
+        if ( min <= Capacity ) { return; }
+
+        Grow((uint)( min - Capacity ));
+    }
+
+
+    public readonly void ThrowIfReadOnly()
     {
         if ( IsReadOnly ) { throw new InvalidOperationException($"Buffer<{typeof(TValue).Name}> is read only"); }
     }
-    public ReadOnlySpan<TValue>.Enumerator GetEnumerator()
+
+
+    public ValueEnumerable<FromSpan<TValue>, TValue> AsValueEnumerable() => new(new FromSpan<TValue>(Values));
+    public readonly ReadOnlySpan<TValue>.Enumerator GetEnumerator()
     {
         ReadOnlySpan<TValue> span = Values;
         return span.GetEnumerator();
-    }
-/*
-[method: MethodImpl( MethodImplOptions.AggressiveInlining )]
-public ref struct Enumerator( Buffer<TValue> buffer )
-{
-    private readonly    Buffer<TValue> _buffer = buffer;
-    private             int            _index  = NOT_FOUND;
-    public ref readonly TValue         Current { [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] get => ref _buffer[_index]; }
-
-    public                                                            void Dispose()  { }
-    [MethodImpl(       MethodImplOptions.AggressiveInlining )] public void Reset()    => _index = 0;
-    [Pure, MethodImpl( MethodImplOptions.AggressiveInlining )] public bool MoveNext() => (uint)++_index < (uint)_buffer.Length;
-}
-*/
-
-
-
-    [StructLayout(LayoutKind.Auto)]
-    public struct ValueEnumerator( in ReadOnlyMemory<TValue> source ) : IValueEnumerator<TValue>
-    {
-        private readonly ReadOnlyMemory<TValue> _source = source;
-        private          int                    _index;
-        private          bool                   _isDisposed;
-
-
-        public bool TryGetNonEnumeratedCount( out int count )
-        {
-            ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator));
-            count = _source.Length;
-            return true;
-        }
-
-        public bool TryCopyTo( Span<TValue> destination, Index offset )
-        {
-            ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator));
-            if ( !EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
-
-            slice.CopyTo(destination);
-            return true;
-        }
-
-        public bool TryGetSpan( out ReadOnlySpan<TValue> span )
-        {
-            ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator));
-            span = _source.Span;
-            return true;
-        }
-
-        public bool TryGetNext( out TValue current )
-        {
-            ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator));
-
-            if ( _index < _source.Length )
-            {
-                current = _source.Span[_index];
-                _index++;
-                return true;
-            }
-
-            Unsafe.SkipInit(out current);
-            return false;
-        }
-
-        public void Dispose()
-        {
-            _isDisposed = true;
-            _index      = 0;
-        }
-    }
-}
-
-
-
-[StructLayout(LayoutKind.Auto)]
-public struct ValueEnumerator<TValue>( in ReadOnlyMemory<TValue> source ) : IValueEnumerator<TValue>
-{
-    private readonly ReadOnlyMemory<TValue> _source = source;
-    private          int                    _index;
-    private          bool                   _isDisposed;
-
-
-    public bool TryGetNonEnumeratedCount( out int count )
-    {
-        ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator<TValue>));
-        count = _source.Length;
-        return true;
-    }
-
-    public bool TryCopyTo( Span<TValue> destination, Index offset )
-    {
-        ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator<TValue>));
-        if ( !EnumeratorHelper.TryGetSlice(_source.Span, offset, destination.Length, out ReadOnlySpan<TValue> slice) ) { return false; }
-
-        slice.CopyTo(destination);
-        return true;
-    }
-
-    public bool TryGetSpan( out ReadOnlySpan<TValue> span )
-    {
-        ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator<TValue>));
-        span = _source.Span;
-        return true;
-    }
-
-    public bool TryGetNext( out TValue current )
-    {
-        ObjectDisposedException.ThrowIf(_isDisposed, typeof(ValueEnumerator<TValue>));
-
-        if ( _index < _source.Length )
-        {
-            current = _source.Span[_index];
-            _index++;
-            return true;
-        }
-
-        Unsafe.SkipInit(out current);
-        return false;
-    }
-
-    public void Dispose()
-    {
-        _isDisposed = true;
-        _index      = 0;
     }
 }

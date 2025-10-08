@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 
 public interface IDeviceID
 {
-    public Guid DeviceID { get; }
+    public string DeviceID { get; }
 }
 
 
@@ -43,7 +43,7 @@ public interface IDeviceInformation : IEquatable<IDeviceInformation>, IDeviceID
     public DeviceTypes    Type         { get; }
     string?               Version      { get; set; }
 
-    public void SetDeviceID( Guid id );
+    public void SetDeviceID( string id );
 }
 
 
@@ -71,14 +71,14 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
     protected string?           _manufacturer;
     protected string?           _model;
     protected string?           _osVersion;
-    protected Guid              _deviceID;
+    protected string            _deviceID = EMPTY;
     protected string?           _ip;
     protected string?           _packageName;
     protected string?           _version;
 
 
     public virtual DeviceCategory Category     { get => _category;     set => SetProperty(ref _category,     value); }
-    public virtual Guid           DeviceID     { get => _deviceID;     set => SetProperty(ref _deviceID,     value); }
+    public virtual string         DeviceID     { get => _deviceID;     set => SetProperty(ref _deviceID,     value); }
     public virtual string?        DeviceName   { get => _deviceName;   set => SetProperty(ref _deviceName,   value); }
     public virtual string?        Ip           { get => _ip;           set => SetProperty(ref _ip,           value); }
     public virtual string?        Manufacturer { get => _manufacturer; set => SetProperty(ref _manufacturer, value); }
@@ -91,7 +91,7 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
 
 
     public DeviceInformation() { }
-    public DeviceInformation( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory category, DevicePlatform platform, AppVersion? osVersion, Guid deviceID )
+    public DeviceInformation( string? model, string? manufacturer, string? deviceName, DeviceTypes deviceType, DeviceCategory category, DevicePlatform platform, AppVersion? osVersion, string deviceID )
     {
         Model        = model;
         Manufacturer = manufacturer;
@@ -116,7 +116,7 @@ public class DeviceInformation : BaseClass, IDeviceInformation, ILogEventEnriche
         Ip           = device.Ip;
         PackageName  = device.PackageName;
     }
-    public void SetDeviceID( Guid id ) => DeviceID = id;
+    public void SetDeviceID( string id ) => DeviceID = id;
 
 
     public virtual LogEventProperty ToProperty() =>

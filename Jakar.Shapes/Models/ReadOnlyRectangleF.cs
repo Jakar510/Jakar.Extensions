@@ -37,7 +37,7 @@ public readonly struct ReadOnlyRectangleF( float x, float y, float width, float 
     double IShapeSize.                                                Width         => Width;
     double IShapeSize.                                                Height        => Height;
     public ReadOnlyPoint                                              Location      => new(X, Y);
-    public ReadOnlySize                                         Size          => new(Width, Height);
+    public ReadOnlySize                                               Size          => new(Width, Height);
 
 
     public static implicit operator Rectangle( ReadOnlyRectangleF  self )  => new((int)self.X.Round(), (int)self.Y.Round(), (int)self.Width.Round(), (int)self.Height.Round());

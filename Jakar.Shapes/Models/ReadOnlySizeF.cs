@@ -35,7 +35,6 @@ public readonly struct ReadOnlySizeF( float width, float height ) : ISize<ReadOn
     public static implicit operator Size( ReadOnlySizeF         rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
     public static implicit operator SizeF( ReadOnlySizeF        rectangle ) => new(rectangle.Width, rectangle.Height);
     public static implicit operator ReadOnlySize( ReadOnlySizeF rectangle ) => new(rectangle.Width, rectangle.Height);
-    public static implicit operator ReadOnlySizeF( ReadOnlySize size )      => new((float)size.Width, (float)size.Height);
     public static implicit operator ReadOnlySizeF( Size         size )      => new(size.Width, size.Height);
     public static implicit operator ReadOnlySizeF( SizeF        size )      => new(size.Width, size.Height);
     public static implicit operator ReadOnlySizeF( int          value )     => new(value, value);

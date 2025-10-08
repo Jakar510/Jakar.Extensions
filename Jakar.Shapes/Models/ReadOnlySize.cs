@@ -76,14 +76,15 @@ public readonly struct ReadOnlySize( double width, double height ) : ISize<ReadO
     public readonly string ToString( string? format, IFormatProvider? formatProvider ) => this.ToString(format);
 
 
-    public static implicit operator Size( ReadOnlySize   rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
-    public static implicit operator SizeF( ReadOnlySize  rectangle ) => new((float)rectangle.Width, (float)rectangle.Height);
-    public static implicit operator ReadOnlySize( Size   size )      => new(size.Width, size.Height);
-    public static implicit operator ReadOnlySize( SizeF  size )      => new(size.Width, size.Height);
-    public static implicit operator ReadOnlySize( int    value )     => new(value, value);
-    public static implicit operator ReadOnlySize( long   value )     => new(value, value);
-    public static implicit operator ReadOnlySize( float  value )     => new(value, value);
-    public static implicit operator ReadOnlySize( double value )     => new(value, value);
+    public static implicit operator Size( ReadOnlySize          rectangle ) => new((int)rectangle.Width, (int)rectangle.Height);
+    public static implicit operator SizeF( ReadOnlySize         rectangle ) => new((float)rectangle.Width, (float)rectangle.Height);
+    public static implicit operator ReadOnlySizeF( ReadOnlySize rectangle ) => new((float)rectangle.Width, (float)rectangle.Height);
+    public static implicit operator ReadOnlySize( Size          size )      => new(size.Width, size.Height);
+    public static implicit operator ReadOnlySize( SizeF         size )      => new(size.Width, size.Height);
+    public static implicit operator ReadOnlySize( int           value )     => new(value, value);
+    public static implicit operator ReadOnlySize( long          value )     => new(value, value);
+    public static implicit operator ReadOnlySize( float         value )     => new(value, value);
+    public static implicit operator ReadOnlySize( double        value )     => new(value, value);
 
 
     public static bool operator ==( ReadOnlySize?       left, ReadOnlySize?                    right ) => Nullable.Equals(left, right);

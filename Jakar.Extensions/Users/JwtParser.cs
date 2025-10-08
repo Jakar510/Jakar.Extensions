@@ -70,7 +70,7 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
     public SessionToken CreateToken<TRequest, TUser>( in TUser user, in TRequest request, in ClaimsIdentity identity )
         where TRequest : ISessionID<long>
         where TUser : IUserData => CreateToken(user, request.DeviceID, request.SessionID.AsGuid(), identity);
-    public SessionToken CreateToken<TUser>( in TUser user, in Guid deviceID, in Guid sessionID, in ClaimsIdentity identity )
+    public SessionToken CreateToken<TUser>( in TUser user, in string deviceID, in Guid sessionID, in ClaimsIdentity identity )
         where TUser : IUserData
     {
         DateTimeOffset now            = DateTimeOffset.UtcNow;

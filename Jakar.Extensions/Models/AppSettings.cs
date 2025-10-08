@@ -15,7 +15,7 @@ public interface IAppSettings : IDeviceID
     public string     DeviceVersion { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; }
 
 
-    public void SetDeviceID( Guid id );
+    public void SetDeviceID( string id );
 }
 
 
@@ -30,13 +30,13 @@ public interface IAppSettings<TViewPage> : IAppSettings, IScreenshot
 [Serializable]
 public class AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo, Uri defaultHostInfo ) : BaseHostViewModel(hostInfo, defaultHostInfo), IAppSettings, IScreenshot
 {
-    private Guid       __deviceID;
+    private string     __deviceID = EMPTY;
     private LocalFile? __screenshot;
 
 
     public string     AppName    { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = appName;
     public AppVersion AppVersion { [MethodImpl(MethodImplOptions.AggressiveInlining)] get; } = version;
-    public Guid DeviceID
+    public string DeviceID
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)] get => __deviceID;
         set
@@ -51,8 +51,8 @@ public class AppSettings( string appName, AppVersion version, string deviceVersi
     public AppSettings( string appName, AppVersion version, string deviceVersion, Uri hostInfo ) : this(appName, version, deviceVersion, hostInfo, hostInfo) { }
 
 
-    public            void SetDeviceID( Guid      id )       => DeviceID = id;
-    protected virtual void OnSetDeviceID( in Guid deviceID ) { }
+    public            void SetDeviceID( string      id )       => DeviceID = id;
+    protected virtual void OnSetDeviceID( in string deviceID ) { }
 }
 
 

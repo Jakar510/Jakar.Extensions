@@ -139,43 +139,6 @@ public static class Json
     }
 
 
-    public static TValue? ToObject<TValue>( this JsonNode? element, JsonTypeInfo<TValue> options ) => element is not null
-                                                                                                          ? element.Deserialize(options)
-                                                                                                          : default;
-
-
-    public static TValue? ToObject<TValue>( this JsonElement element, JsonTypeInfo<TValue> options )
-    {
-        ArrayBufferWriter<byte> bufferWriter = new();
-        using ( Utf8JsonWriter writer = new(bufferWriter) ) { element.WriteTo(writer); }
-
-        return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, options);
-    }
-    public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue> options ) => document.RootElement.ToObject(options);
-
-
-    public static JsonNode ToJsonNode<TValue>( this TValue value, JsonNodeOptions? nodeOptions = null )
-        where TValue : IJsonModel<TValue> => value.ToJsonNode(TValue.JsonTypeInfo, nodeOptions);
-    public static JsonNode ToJsonNode<TValue>( this TValue value, JsonTypeInfo<TValue> options, JsonNodeOptions? nodeOptions = null )
-    {
-        string             json   = JsonSerializer.Serialize(value, options);
-        using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
-        Utf8JsonReader     reader = new(buffer.Values);
-        return Validate.ThrowIfNull(JsonNode.Parse(ref reader, nodeOptions));
-    }
-
-
-    public static JsonElement ToJsonElement<TValue>( this TValue value )
-        where TValue : IJsonModel<TValue> => value.ToJsonElement(TValue.JsonTypeInfo);
-    public static JsonElement ToJsonElement<TValue>( this TValue value, JsonTypeInfo<TValue> options )
-    {
-        string             json   = JsonSerializer.Serialize(value, options);
-        using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
-        Utf8JsonReader     reader = new(buffer.Values);
-        return JsonElement.ParseValue(ref reader);
-    }
-
-
     public static void Add( this IJsonModel self, string key, bool value )
     {
         JsonNode element = value;
@@ -361,75 +324,160 @@ public static class Json
     }
 
 
-    public static JsonValue CreateNode( this bool value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this bool? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                              ? JsonValue.Create(value.Value, options)
-                                                                                                                                              : null;
-    public static JsonValue CreateNode( this byte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this byte? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                              ? JsonValue.Create(value.Value, options)
-                                                                                                                                              : null;
-    public static JsonValue CreateNode( this char value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this char? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                              ? JsonValue.Create(value.Value, options)
-                                                                                                                                              : null;
-    public static JsonValue CreateNode( this ref readonly DateTime value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ref readonly DateTime? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                               ? JsonValue.Create(value.Value, options)
-                                                                                                                                                               : null;
-    public static JsonValue CreateNode( this ref readonly DateTimeOffset value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ref readonly DateTimeOffset? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                                     ? JsonValue.Create(value.Value, options)
-                                                                                                                                                                     : null;
-    public static JsonValue CreateNode( this decimal value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this decimal? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                 ? JsonValue.Create(value.Value, options)
-                                                                                                                                                 : null;
-    public static JsonValue CreateNode( this double value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this double? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                ? JsonValue.Create(value.Value, options)
-                                                                                                                                                : null;
-    public static JsonValue CreateNode( this ref readonly Guid value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ref readonly Guid? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                           ? JsonValue.Create(value.Value, options)
-                                                                                                                                                           : null;
-    public static JsonValue CreateNode( this short value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this short? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                               ? JsonValue.Create(value.Value, options)
-                                                                                                                                               : null;
-    public static JsonValue CreateNode( this int value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this int? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                             ? JsonValue.Create(value.Value, options)
-                                                                                                                                             : null;
-    public static JsonValue CreateNode( this long value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this long? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                              ? JsonValue.Create(value.Value, options)
-                                                                                                                                              : null;
-    public static JsonValue CreateNode( this sbyte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this sbyte? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                               ? JsonValue.Create(value.Value, options)
-                                                                                                                                               : null;
-    public static JsonValue CreateNode( this float value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this float? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                               ? JsonValue.Create(value.Value, options)
-                                                                                                                                               : null;
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this string? value, JsonNodeOptions? options = null ) => value != null
+    public static TValue? ToObject<TValue>( this JsonNode? element, JsonTypeInfo<TValue> options ) => element is not null
+                                                                                                          ? element.Deserialize(options)
+                                                                                                          : default;
+
+
+    public static TValue? ToObject<TValue>( this JsonElement element, JsonTypeInfo<TValue> options )
+    {
+        ArrayBufferWriter<byte> bufferWriter = new(); 
+        using ( Utf8JsonWriter writer = new(bufferWriter) ) { element.WriteTo(writer); }
+
+        Buffer<char> buffer = default;
+
+        return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, options);
+    }
+    public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue> options ) => document.RootElement.ToObject(options);
+
+
+    public static JsonValue ToJsonNode<TValue>( this TValue value )
+        where TValue : IJsonModel<TValue> => value.ToJsonNode(TValue.JsonTypeInfo);
+    public static JsonValue ToJsonNode<TValue>( this TValue value, JsonTypeInfo<TValue> options ) => Validate.ThrowIfNull(JsonValue.Create(value, options));
+
+
+    public static JsonElement ToJsonElement<TValue>( this TValue value )
+        where TValue : IJsonModel<TValue> => value.ToJsonElement(TValue.JsonTypeInfo);
+    public static JsonElement ToJsonElement<TValue>( this TValue value, JsonTypeInfo<TValue> options )
+    {
+        string             json   = JsonSerializer.Serialize(value, options);
+        using Buffer<byte> buffer = json.AsSpanBytes(Encoding.Default);
+        Utf8JsonReader     reader = new(buffer.Values);
+        return JsonElement.ParseValue(ref reader);
+    }
+
+
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this string? value, JsonNodeOptions? options = null ) => !string.IsNullOrEmpty(value)
                                                                                                                                                 ? JsonValue.Create(value, options)
                                                                                                                                                 : null;
-    public static JsonValue CreateNode( this ushort value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ushort? value, JsonNodeOptions? options = null ) => value.HasValue
-                                                                                                                                                ? JsonValue.Create(value.Value, options)
-                                                                                                                                                : null;
-    public static JsonValue CreateNode( this uint value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this uint? value, JsonNodeOptions? options = null ) => value.HasValue
+
+
+    public static JsonValue ToJsonNode( this bool value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this bool? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                               ? JsonValue.Create(value.Value, options)
                                                                                                                                               : null;
-    public static JsonValue CreateNode( this ulong value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ulong? value, JsonNodeOptions? options = null ) => value.HasValue
+
+
+    public static JsonValue ToJsonNode( this byte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this byte? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                              ? JsonValue.Create(value.Value, options)
+                                                                                                                                              : null;
+
+
+    public static JsonValue ToJsonNode( this char value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this char? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                              ? JsonValue.Create(value.Value, options)
+                                                                                                                                              : null;
+
+
+    public static JsonValue ToJsonNode( this ref readonly DateTime value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly DateTime? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                                               : null;
+
+
+    public static JsonValue ToJsonNode( this ref readonly DateTimeOffset value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly DateTimeOffset? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                                     ? JsonValue.Create(value.Value, options)
+                                                                                                                                                                     : null;
+
+
+    public static JsonValue ToJsonNode( this ref readonly DateOnly value, JsonNodeOptions? options = null ) => Validate.ThrowIfNull(JsonValue.Create(value, JakarExtensionsContext.Default.DateOnly, options));
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly DateOnly? value, JsonNodeOptions? options = null )
+    {
+        if ( value is null ) { return null; }
+
+        var x = value.Value;
+        return x.ToJsonNode(options);
+    }
+
+
+    public static JsonValue ToJsonNode( this ref readonly TimeOnly value, JsonNodeOptions? options = null ) => Validate.ThrowIfNull(JsonValue.Create(value, JakarExtensionsContext.Default.TimeOnly, options));
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly TimeOnly? value, JsonNodeOptions? options = null )
+    {
+        if ( value is null ) { return null; }
+
+        var x = value.Value;
+        return x.ToJsonNode(options);
+    }
+    public static JsonValue ToJsonNode( this decimal value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this decimal? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                 ? JsonValue.Create(value.Value, options)
+                                                                                                                                                 : null;
+
+
+    public static JsonValue ToJsonNode( this double value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this double? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                ? JsonValue.Create(value.Value, options)
+                                                                                                                                                : null;
+
+
+    public static JsonValue ToJsonNode( this float value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this float? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                                ? JsonValue.Create(value.Value, options)
                                                                                                                                                : null;
-    public static JsonValue? CreateNode( this ref readonly JsonElement value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
-    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? CreateNode( this ref readonly JsonElement? value, JsonNodeOptions? options = null ) => value.HasValue
+
+
+    public static JsonValue ToJsonNode( this ref readonly Guid value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly Guid? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                           ? JsonValue.Create(value.Value, options)
+                                                                                                                                                           : null;
+
+
+    public static JsonValue ToJsonNode( this short value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this short? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                               : null;
+
+
+    public static JsonValue ToJsonNode( this int value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this int? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                             ? JsonValue.Create(value.Value, options)
+                                                                                                                                             : null;
+
+
+    public static JsonValue ToJsonNode( this long value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this long? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                              ? JsonValue.Create(value.Value, options)
+                                                                                                                                              : null;
+
+
+    public static JsonValue ToJsonNode( this sbyte value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this sbyte? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                               : null;
+
+
+    public static JsonValue ToJsonNode( this ushort value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ushort? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                                ? JsonValue.Create(value.Value, options)
+                                                                                                                                                : null;
+
+
+    public static JsonValue ToJsonNode( this uint value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this uint? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                              ? JsonValue.Create(value.Value, options)
+                                                                                                                                              : null;
+
+
+    public static JsonValue ToJsonNode( this ulong value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ulong? value, JsonNodeOptions? options = null ) => value.HasValue
+                                                                                                                                               ? JsonValue.Create(value.Value, options)
+                                                                                                                                               : null;
+
+
+    public static JsonValue? ToJsonNode( this ref readonly JsonElement value, JsonNodeOptions? options = null ) => JsonValue.Create(value, options);
+    [return: NotNullIfNotNull(nameof(value))] public static JsonValue? ToJsonNode( this ref readonly JsonElement? value, JsonNodeOptions? options = null ) => value.HasValue
                                                                                                                                                                   ? JsonValue.Create(value.Value, options)
                                                                                                                                                                   : null;
 }
