@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 /// <summary>
 ///     <para> Based on System.Text.ValueStringBuilder </para>
 /// </summary>
-public ref struct ValueStringBuilder
+public ref struct ValueStringBuilder : IDisposable
 {
     private Buffer<char> __chars;
 
@@ -28,16 +28,14 @@ public ref struct ValueStringBuilder
     public ValueStringBuilder() : this(DEFAULT_CAPACITY) { }
     public ValueStringBuilder( int                       initialCapacity ) => __chars = new Buffer<char>(initialCapacity);
     public ValueStringBuilder( params ReadOnlySpan<char> span ) => __chars = new Buffer<char>(span);
-
-
-    // public ValueStringBuilder(  ReadOnlySpan<char> span ) : this(span, false) { }
-    // public ValueStringBuilder(  ReadOnlySpan<char> span,  bool isReadOnly ) : this(Buffer<char>.Create(span, isReadOnly)) { }
-    // public ValueStringBuilder(  Buffer<char>       buffer ) => _chars = buffer;
-
-
     public void Dispose() => __chars.Dispose();
 
 
+    public ValueStringBuilder Reset()
+    {
+        __chars.Span.Fill('\0');
+        return this;
+    }
     public void EnsureCapacity<TValue>( ref readonly ReadOnlySpan<char> format )   => EnsureCapacity(Math.Max(format.Length, Sizes.GetBufferSize<TValue>()));
     public void EnsureCapacity( int                                     capacity ) => __chars.EnsureCapacity(capacity);
 
@@ -79,11 +77,7 @@ public ref struct ValueStringBuilder
     [Pure] public readonly ReadOnlySpan<char> AsSpan()                       => __chars.Span;
     [Pure] public readonly ReadOnlySpan<char> Slice( int start )             => __chars[start..];
     [Pure] public readonly ReadOnlySpan<char> Slice( int start, int length ) => __chars.Span.Slice(start, length);
-    public ValueStringBuilder Reset()
-    {
-        __chars.Span.Fill('\0');
-        return this;
-    }
+    
 
 
     public bool TryCopyTo( scoped ref Span<char> destination, out int charsWritten )
@@ -191,7 +185,7 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-    public ValueStringBuilder Append( params ReadOnlySpan<char> value )
+    public ValueStringBuilder Append( ReadOnlySpan<char> value )
     {
         __chars.Add(value);
         return this;
@@ -303,7 +297,6 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-
     [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, ReadOnlySpan<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
@@ -321,8 +314,6 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-
-
     [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( char separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {
@@ -339,8 +330,6 @@ public ref struct ValueStringBuilder
 
         return this;
     }
-
-
     [MethodImpl(MethodImplOptions.AggressiveOptimization)] public ValueStringBuilder AppendJoin<TValue>( ReadOnlySpan<char> separator, IEnumerable<TValue> enumerable, ReadOnlySpan<char> format = default, IFormatProvider? provider = null )
         where TValue : ISpanFormattable
     {

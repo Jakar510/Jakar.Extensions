@@ -29,7 +29,7 @@ public static class AppPreference
                                                             NULL  => null,
                                                             TRUE  => true,
                                                             FALSE => false,
-                                                            _     => string.Equals(TRUE, value, StringComparison.OrdinalIgnoreCase)
+                                                            _     => string.Equals(TRUE, value, StringComparison.InvariantCultureIgnoreCase)
                                                         };
 
 
@@ -43,11 +43,11 @@ public static class AppPreference
                                                               : NULL;
 
 
-    public static string GetPreference( this string sharedName, string key, string? alternateKey = null, string defaultValue = EMPTY ) => Source.Get(key, sharedName, alternateKey, defaultValue);
+    public static string GetPreference( this string sharedName, string key, string defaultValue = EMPTY, string? alternateKey = null ) => Source.Get(key, sharedName, defaultValue, alternateKey);
     public static TValue GetPreference<TValue>( this string sharedName, string key, TValue defaultValue, in string? alternateKey = null )
         where TValue : IParsable<TValue>, IFormattable
     {
-        string value = Source.Get(key, sharedName, alternateKey, defaultValue.ToString(null, CultureInfo.CurrentCulture));
+        string value = Source.Get(key, sharedName, defaultValue.ToString(null, CultureInfo.CurrentCulture), alternateKey);
 
         return TValue.TryParse(value, CultureInfo.CurrentCulture, out TValue? result)
                    ? result
@@ -57,17 +57,17 @@ public static class AppPreference
 
     public static bool GetPreference( this string sharedName, string key, bool defaultValue, string? alternateKey = null )
     {
-        string result = sharedName.GetPreference(key, alternateKey, defaultValue.GetString());
+        string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
         return result.GetBool() is true;
     }
     public static bool? GetPreference( this string sharedName, string key, bool? defaultValue, string? alternateKey = null )
     {
-        string result = sharedName.GetPreference(key, alternateKey, defaultValue.GetString());
+        string result = sharedName.GetPreference(key, defaultValue.GetString(), alternateKey);
         return result.GetBool();
     }
     public static Uri GetPreference( this string sharedName, string key, in Uri defaultValue, string? alternateKey = null )
     {
-        string value = sharedName.GetPreference(key, alternateKey, defaultValue.OriginalString);
+        string value = sharedName.GetPreference(key, defaultValue.OriginalString, alternateKey);
 
         try
         {
@@ -160,7 +160,7 @@ public static class AppPreference
         public TValue Get<TValue>( string key, TValue defaultValue, string sharedName, string? alternateKey = null )
             where TValue : IParsable<TValue>, IFormattable
         {
-            string? value = Get(key, sharedName, alternateKey, defaultValue.ToString(null, CultureInfo.CurrentCulture));
+            string value = Get(key, sharedName, defaultValue.ToString(null, CultureInfo.CurrentCulture), alternateKey);
 
             return TValue.TryParse(value, CultureInfo.CurrentCulture, out TValue? result)
                        ? result
@@ -169,11 +169,17 @@ public static class AppPreference
         public Uri Get( string key, Uri defaultValue, string sharedName, string? alternateKey = null ) => Uri.TryCreate(Get(key, sharedName), UriKind.RelativeOrAbsolute, out Uri? result)
                                                                                                               ? result
                                                                                                               : defaultValue;
-        public bool Get( string key, bool defaultValue, string sharedName, string? alternateKey = null ) => Get(key, sharedName, alternateKey)
-                                                                                                               .GetBool() is true;
-        public bool? Get( string key, bool? defaultValue, string sharedName, string? alternateKey = null ) => Get(key, sharedName, alternateKey)
-           .GetBool();
-        public string Get( string key, string sharedName, string? alternateKey = null, string defaultValue = EMPTY )
+        public bool Get( string key, bool defaultValue, string sharedName, string? alternateKey = null )
+        {
+            string result = Get(key, sharedName, EMPTY, alternateKey);
+            return result.GetBool() ?? defaultValue;
+        }
+        public bool? Get( string key, bool? defaultValue, string sharedName, string? alternateKey = null )
+        {
+            string result = Get(key, sharedName, EMPTY, alternateKey);
+            return result.GetBool() ?? defaultValue;
+        }
+        public string Get( string key, string sharedName, string defaultValue = EMPTY, string? alternateKey = null )
         {
             IniConfig.Section section = __config[sharedName];
 

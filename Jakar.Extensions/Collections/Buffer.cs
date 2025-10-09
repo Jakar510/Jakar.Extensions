@@ -470,12 +470,15 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IBuffer
         Guard.IsInRange(additionalRequestedCapacity, 1, int.MaxValue);
         int capacity = GetLength((uint)Capacity, additionalRequestedCapacity);
 
-        // ReSharper disable once NotDisposedResource
-        Buffer<TValue> buffer = new(capacity);
-        Values.CopyTo(buffer.Span);
-        Dispose();
-        this = buffer;
-        return this;
+        using ( Buffer<TValue> old = this )
+        {
+            // ReSharper disable once NotDisposedResource
+            Buffer<TValue> buffer = new(capacity);
+            Values.CopyTo(buffer.Span);
+            old. Dispose();
+            this = buffer;
+            return this;
+        }
     }
     public void EnsureCapacity( int min )
     {
