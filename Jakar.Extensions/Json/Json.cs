@@ -334,8 +334,6 @@ public static class Json
         ArrayBufferWriter<byte> bufferWriter = new(); 
         using ( Utf8JsonWriter writer = new(bufferWriter) ) { element.WriteTo(writer); }
 
-        Buffer<char> buffer = default;
-
         return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, options);
     }
     public static TValue? ToObject<TValue>( this JsonDocument document, JsonTypeInfo<TValue> options ) => document.RootElement.ToObject(options);

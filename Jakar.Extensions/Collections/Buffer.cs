@@ -13,7 +13,7 @@ namespace Jakar.Extensions;
 
 [StructLayout(LayoutKind.Auto)]
 [method: MustDisposeResource]
-public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>
+public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IBufferWriter<TValue>
     where TValue : IEquatable<TValue>
 {
     private static readonly TValue[] _empty = [];
@@ -40,6 +40,23 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>
     [MustDisposeResource] public Buffer() : this(DEFAULT_CAPACITY) { }
     [MustDisposeResource] public Buffer( params ReadOnlySpan<TValue> span ) : this(span.Length) => span.CopyTo(Span);
     public void Dispose() { ArrayPool<TValue>.Shared.Return(_array, clearArray: RuntimeHelpers.IsReferenceOrContainsReferences<TValue>()); }
+
+
+    public void Advance( int count )
+    {
+        EnsureCapacity(Length + count);
+        Length += count;
+    }
+    public Memory<TValue> GetMemory( int sizeHint = 0 )
+    {
+        EnsureCapacity(Length + sizeHint);
+        return Memory;
+    }
+    public Span<TValue> GetSpan( int sizeHint = 0 )
+    {
+        EnsureCapacity(Length + sizeHint);
+        return Next;
+    }
 
 
     public TValue[] ToArray()
