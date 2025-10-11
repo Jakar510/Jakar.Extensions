@@ -22,7 +22,7 @@ public readonly struct StopWatch( string caller, TextWriter? writer = null ) : I
     public override string ToString() => SpanDuration.ToString(Elapsed, $"[{__caller}] ");
 
 
-    public static StopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => new(caller);
+    public static StopWatch Start( [CallerMemberName] string caller                                   = EMPTY ) => new(Console.Out, caller);
     public static StopWatch Start( TextWriter                writer, [CallerMemberName] string caller = EMPTY ) => new(caller, writer);
 }
 
