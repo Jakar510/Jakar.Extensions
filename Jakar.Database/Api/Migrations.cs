@@ -14,6 +14,11 @@ public static class Migrations
             migrations[record.MigrationID] = record;
         }
     }
+    public static void UseMigrationsEndPoint( this WebApplication app )
+    {
+        // if ( app.Environment.IsDevelopment() ) { app.UseMigrationsEndPoint(); }
+
+    }
     public static async ValueTask ApplyMigrations( this WebApplication app, CancellationToken token = default )
     {
         await using AsyncServiceScope scope   = app.Services.CreateAsyncScope();

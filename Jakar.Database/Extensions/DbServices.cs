@@ -191,7 +191,7 @@ public static class DbServices
 
         return services.AddIdentity<UserRecord, RoleRecord>()
                        .AddUserStore<UserStore>()
-                       .AddUserManager<UserRecordManager>()
+                       .AddUserManager<UserManager>()
                        .AddRoleStore<RoleStore>()
                        .AddRoleManager<RoleManager>()
                        .AddSignInManager<SignInManager>()

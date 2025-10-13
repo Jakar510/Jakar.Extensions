@@ -4,5 +4,5 @@
 namespace Jakar.Database;
 
 
-public sealed class SignInManager( UserRecordManager userManager, IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory<UserRecord> claimsFactory, IOptions<IdentityOptions> optionsAccessor, ILogger<SignInManager> logger, IAuthenticationSchemeProvider schemes, IUserConfirmation<UserRecord> confirmation )
+public class SignInManager( UserManager userManager, IHttpContextAccessor contextAccessor, IUserClaimsPrincipalFactory<UserRecord> claimsFactory, IOptions<IdentityOptions> optionsAccessor, ILogger<SignInManager> logger, IAuthenticationSchemeProvider schemes, IUserConfirmation<UserRecord> confirmation )
     : SignInManager<UserRecord>(userManager, contextAccessor, claimsFactory, optionsAccessor, logger, schemes, confirmation);
