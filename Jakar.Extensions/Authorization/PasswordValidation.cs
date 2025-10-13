@@ -158,7 +158,7 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
 
 
 
-public sealed record PasswordRequirements : IOptions<PasswordRequirements>
+public sealed class PasswordRequirements : IOptions<PasswordRequirements>
 {
     public const   int                   MAX_LENGTH = 255;
     public const   int                   MIN_LENGTH = 10;

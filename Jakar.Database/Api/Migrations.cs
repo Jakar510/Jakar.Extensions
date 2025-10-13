@@ -1,9 +1,16 @@
-﻿namespace Jakar.Database.DbMigrations;
+﻿using ZXing;
+
+
+
+namespace Jakar.Database.DbMigrations;
 
 
 public static class Migrations
 {
+    private const            string                                       MIGRATIONS = "/_migrations";
     internal static readonly ConcurrentDictionary<ulong, MigrationRecord> migrations = new();
+
+
     public static void AddMigrations<TSelf>()
         where TSelf : ITableRecord<TSelf>
     {
@@ -14,11 +21,7 @@ public static class Migrations
             migrations[record.MigrationID] = record;
         }
     }
-    public static void UseMigrationsEndPoint( this WebApplication app )
-    {
-        // if ( app.Environment.IsDevelopment() ) { app.UseMigrationsEndPoint(); }
 
-    }
     public static async ValueTask ApplyMigrations( this WebApplication app, CancellationToken token = default )
     {
         await using AsyncServiceScope scope   = app.Services.CreateAsyncScope();
@@ -34,7 +37,7 @@ public static class Migrations
 
         try
         {
-            foreach ( MigrationRecord record in pending ) { await record.Apply(db, token); }
+            foreach ( MigrationRecord record in pending.OrderBy(static x => x.MigrationID) ) { await record.Apply(db, token); }
 
             await transaction.CommitAsync(token);
         }
@@ -77,4 +80,103 @@ public static class Migrations
                                                                          _                            => throw new OutOfRangeException(type)
                                                                      };
     public static DbPropType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+
+
+    public static void TryUseMigrationsEndPoint( this WebApplication app, string endpoint = MIGRATIONS )
+    {
+        if ( app.Environment.IsDevelopment() ) { app.UseMigrationsEndPoint(endpoint); }
+    }
+    public static void UseMigrationsEndPoint( this WebApplication app, string endpoint = MIGRATIONS ) => app.MapGet(endpoint, GetMigrationsAndRenderHtml);
+    private static async Task<ContentHttpResult> GetMigrationsAndRenderHtml( [FromServices] Database db, CancellationToken token )
+    {
+        ReadOnlySpan<MigrationRecord> records = await MigrationRecord.All(db, token);
+        string                        html    = records.CreateHtml();
+        return TypedResults.Content(html, "text/html", Encoding.UTF8);
+    }
+
+
+    public static string CreateHtml( this ReadOnlySpan<MigrationRecord> records )
+    {
+        StringWriter writer = new();
+        writer.CreateHtml(records);
+        return writer.ToString();
+    }
+    public static void CreateHtml( this TextWriter writer, ReadOnlySpan<MigrationRecord> records )
+    {
+        writer.WriteLine("<!DOCTYPE html>");
+        writer.WriteLine("<html lang=\"en\">");
+        writer.WriteLine("  <head>");
+        writer.WriteLine("    <meta charset=\"UTF-8\"/>");
+        writer.WriteLine("    <title>Migration Records</title>");
+        writer.WriteLine("    <style>");
+        writer.WriteLine("      body { font-family: system-ui, sans-serif; background: #fafafa; color: #222; margin: 2em; }");
+        writer.WriteLine("      h2 { border-bottom: 2px solid #ccc; padding-bottom: 0.25em; }");
+        writer.WriteLine("      table { border-collapse: collapse; width: 100%; margin-top: 1em; }");
+        writer.WriteLine("      th, td { border: 1px solid #ddd; padding: 6px 10px; }");
+        writer.WriteLine("      th { background-color: #f4f4f4; text-align: left; }");
+        writer.WriteLine("      tr:nth-child(even) { background-color: #f9f9f9; }");
+        writer.WriteLine("      tr:hover { background-color: #f1f1f1; }");
+        writer.WriteLine("    </style>");
+        writer.WriteLine("  </head>");
+        writer.WriteLine("  <body>");
+        writer.WriteLine("    <h2>Migration Records</h2>");
+        writer.WriteLine("    <table>");
+        writer.WriteLine("      <thead>");
+        writer.WriteLine("        <tr>");
+        writer.WriteLine("          <th>ID</th>");
+        writer.WriteLine("          <th>Table</th>");
+        writer.WriteLine("          <th>Description</th>");
+        writer.WriteLine("          <th>Applied On</th>");
+        writer.WriteLine("        </tr>");
+        writer.WriteLine("      </thead>");
+        writer.WriteLine("      <tbody>");
+
+        foreach ( ref readonly MigrationRecord migration in records )
+        {
+            writer.Write("        <tr>");
+            writer.Write("<td>");
+            writer.Write(migration.MigrationID);
+            writer.Write("</td><td>");
+            writer.HtmlEncode(migration.TableID);
+            writer.Write("</td><td>");
+            writer.HtmlEncode(migration.Description);
+            writer.Write("</td><td>");
+            writer.Write(migration.AppliedOn.ToString("u"));
+            writer.WriteLine("</td></tr>");
+        }
+
+        writer.WriteLine("      </tbody>");
+        writer.WriteLine("    </table>");
+        writer.WriteLine("  </body>");
+        writer.WriteLine("</html>");
+    }
+    private static void HtmlEncode( this TextWriter writer, string? value )
+    {
+        if ( string.IsNullOrEmpty(value) ) return;
+
+        ReadOnlySpan<char> span  = value.AsSpan();
+        int                start = 0;
+
+        for ( int i = 0; i < span.Length; i++ )
+        {
+            string? entity = span[i] switch
+                             {
+                                 '&'  => "&amp;",
+                                 '<'  => "&lt;",
+                                 '>'  => "&gt;",
+                                 '"'  => "&quot;",
+                                 '\'' => "&#39;",
+                                 _    => null
+                             };
+
+            if ( entity is not null )
+            {
+                if ( i > start ) writer.Write(span.Slice(start, i - start));
+                writer.Write(entity);
+                start = i + 1;
+            }
+        }
+
+        if ( start < span.Length ) writer.Write(span.Slice(start));
+    }
 }

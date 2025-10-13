@@ -4,6 +4,10 @@
 namespace Jakar.Database;
 
 
+public sealed record MigrationRecord_( ulong MigrationID, string? TableID, string Description, DateTimeOffset AppliedOn );
+
+
+
 [Serializable]
 public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord<MigrationRecord>
 {
@@ -47,59 +51,47 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     public static async ValueTask<MigrationRecord[]> All( Database db, CancellationToken token )
     {
         await using NpgsqlConnection connection = await db.ConnectAsync(token);
-        CommandDefinition            command    = new($"SELECT * FROM {TABLE_NAME} ORDER BY id", null, null, null, null, CommandFlags.Buffered, token);
+        CommandDefinition            command    = new($"SELECT * FROM {TABLE_NAME} ORDER BY {nameof(TableID).SqlColumnName()}", null, null, null, null, CommandFlags.Buffered, token);
         await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
         List<MigrationRecord>        records    = new(Migrations.Count);
         await foreach ( MigrationRecord record in reader.CreateAsync<MigrationRecord>(token) ) { records.Add(record); }
 
         return records.ToArray();
     }
+
+
+    private static readonly string ApplySql = $"""
+                                               INSERT INTO {TABLE_NAME} 
+                                               (
+                                               {nameof(MigrationID).SqlColumnName()},
+                                               {nameof(TableID).SqlColumnName()},
+                                               {nameof(Description).SqlColumnName()},
+                                               {nameof(AppliedOn).SqlColumnName()},
+                                               {nameof(AdditionalData).SqlColumnName()}
+                                               ) 
+                                               VALUES 
+                                               (
+                                               @{nameof(MigrationID).SqlColumnName()},
+                                               @{nameof(TableID).SqlColumnName()},
+                                               @{nameof(Description).SqlColumnName()},
+                                               @{nameof(AppliedOn).SqlColumnName()},
+                                               @{nameof(AdditionalData).SqlColumnName()}
+                                               )
+                                               """;
     public async ValueTask Apply( Database db, CancellationToken token )
     {
         await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
 
-        PostgresParameters parameters = new();
-        parameters.Add(nameof(MigrationID),    MigrationID);
-        parameters.Add(nameof(Description),    Description);
-        parameters.Add(nameof(TableID),        TableID);
-        parameters.Add(nameof(AppliedOn),      AppliedOn);
-        parameters.Add(nameof(AdditionalData), AdditionalData);
-
-        CommandDefinition command = new($"""
-                                         INSERT INTO {TABLE_NAME} 
-                                         (
-                                         {nameof(MigrationID).SqlColumnName()},
-                                         {nameof(TableID).SqlColumnName()},
-                                         {nameof(Description).SqlColumnName()},
-                                         {nameof(AppliedOn).SqlColumnName()},
-                                         {nameof(AdditionalData).SqlColumnName()}
-                                         ) 
-                                         VALUES 
-                                         (
-                                         @{nameof(MigrationID).SqlColumnName()},
-                                         @{nameof(TableID).SqlColumnName()},
-                                         @{nameof(Description).SqlColumnName()},
-                                         @{nameof(AppliedOn).SqlColumnName()},
-                                         @{nameof(AdditionalData).SqlColumnName()}
-                                         )
-                                         """,
-                                        parameters,
-                                        transaction,
-                                        null,
-                                        null,
-                                        CommandFlags.Buffered,
-                                        token);
-
         try
         {
-            await connection.ExecuteAsync(command);
+            await Apply(connection, transaction, token);
             await transaction.CommitAsync(token);
         }
         catch ( Exception e )
         {
             await transaction.RollbackAsync(token);
-            throw new SqlException(command.CommandText, e);
+            throw new SqlException(ApplySql, e);
         }
     }
     public async ValueTask Apply( NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken token )
@@ -111,31 +103,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
         parameters.Add(nameof(AppliedOn),      AppliedOn);
         parameters.Add(nameof(AdditionalData), AdditionalData);
 
-        CommandDefinition command = new($"""
-                                         INSERT INTO {TABLE_NAME} 
-                                         (
-                                         {nameof(MigrationID).SqlColumnName()},
-                                         {nameof(TableID).SqlColumnName()},
-                                         {nameof(Description).SqlColumnName()},
-                                         {nameof(AppliedOn).SqlColumnName()},
-                                         {nameof(AdditionalData).SqlColumnName()}
-                                         ) 
-                                         VALUES 
-                                         (
-                                         @{nameof(MigrationID).SqlColumnName()},
-                                         @{nameof(TableID).SqlColumnName()},
-                                         @{nameof(Description).SqlColumnName()},
-                                         @{nameof(AppliedOn).SqlColumnName()},
-                                         @{nameof(AdditionalData).SqlColumnName()}
-                                         )
-                                         """,
-                                        parameters,
-                                        transaction,
-                                        null,
-                                        null,
-                                        CommandFlags.Buffered,
-                                        token);
-
+        CommandDefinition command = new(ApplySql, parameters, transaction, null, null, CommandFlags.Buffered, token);
         await connection.ExecuteAsync(command);
     }
     public static MigrationRecord CreateTable( ulong migrationID )

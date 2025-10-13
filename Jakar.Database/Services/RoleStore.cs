@@ -1,19 +1,13 @@
 ﻿namespace Jakar.Database;
 
 
-public sealed class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
+public class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
 {
     public static readonly StringValues RoleNames   = new([nameof(RoleRecord.NormalizedName), nameof(RoleRecord.NameOfRole)]);
     private readonly       Database     __dbContext = dbContext;
 
 
     public void Dispose() { }
-
-    public static void Register( IServiceCollection builder )
-    {
-        builder.AddSingleton<RoleStore>();
-        builder.AddTransient<IRoleStore<RoleRecord>>(static provider => provider.GetRequiredService<RoleStore>());
-    }
 
 
     public async Task<IdentityResult> CreateAsync( RoleRecord role, CancellationToken token )

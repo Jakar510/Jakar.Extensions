@@ -4,20 +4,20 @@
 namespace Jakar.Database;
 
 
-public sealed class TokenProvider( Database database ) : IUserTwoFactorTokenProvider<UserRecord>
+public class TokenProvider( Database database ) : IUserTwoFactorTokenProvider<UserRecord>
 {
-    private readonly Database __database = database;
+    protected readonly Database __database = database;
 
 
-    public Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) =>
+    public virtual Task<string> GenerateAsync( string purpose, UserManager<UserRecord> manager, UserRecord user ) =>
         __database.GenerateAsync(purpose, manager, user);
 
 
-    public Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user ) =>
+    public virtual Task<bool> ValidateAsync( string purpose, string token, UserManager<UserRecord> manager, UserRecord user ) =>
         __database.ValidateAsync(purpose, token, manager, user);
 
 
-    public Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) =>
+    public virtual Task<bool> CanGenerateTwoFactorTokenAsync( UserManager<UserRecord> manager, UserRecord user ) =>
         __database.CanGenerateTwoFactorTokenAsync(manager, user);
 }
 

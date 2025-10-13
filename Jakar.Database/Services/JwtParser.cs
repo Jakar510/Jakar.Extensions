@@ -23,7 +23,7 @@ public static class JwtParser
         List<Claim> claims        = [];
         string      payload       = jwt.Split('.')[1];
         string      json          = ParseBase64WithoutPadding(payload).ConvertToString(Encoding.Default);
-        JsonObject  keyValuePairs = Json.GetAdditionalData(json) ?? new JsonObject();
+        JsonObject  keyValuePairs = json.GetAdditionalData() ?? new JsonObject();
 
         ExtractRolesFromJwt(claims, keyValuePairs);
         claims.AddRange(keyValuePairs.Select(static kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? string.Empty)));

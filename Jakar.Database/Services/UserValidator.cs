@@ -6,12 +6,7 @@ namespace Jakar.Database;
 
 public class UserValidator : IUserValidator<UserRecord>
 {
-    public static void Register( WebApplicationBuilder builder ) => builder.Services.AddScoped<IUserValidator<UserRecord>, UserValidator>();
-    public static void Register<TValue>( WebApplicationBuilder builder )
-        where TValue : UserValidator => builder.Services.AddScoped<IUserValidator<UserRecord>, TValue>();
-
-
-    protected IdentityError[] Check( UserRecord user )
+    protected virtual IdentityError[] Check( UserRecord user )
     {
         List<IdentityError> errors = new(5);
         Check(errors, user);
@@ -34,7 +29,7 @@ public class UserValidator : IUserValidator<UserRecord>
     }
 
 
-    public Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user )
+    public virtual Task<IdentityResult> ValidateAsync( UserManager<UserRecord> manager, UserRecord user )
     {
         IdentityError[] errors = Check(user);
 
