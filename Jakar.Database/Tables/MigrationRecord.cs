@@ -49,19 +49,19 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Empty()
                                                                                                                    .WithColumn<ulong>(nameof(MigrationID))
                                                                                                                    .WithColumn<string>(nameof(TableID),     length: 256)
-                                                                                                                   .WithColumn<string>(nameof(Description), length: UNICODE_CAPACITY)
+                                                                                                                   .WithColumn<string>(nameof(Description), length: MAX_FIXED)
                                                                                                                    .WithColumn(ColumnMetaData.DateCreated)
                                                                                                                    .With_AdditionalData()
                                                                                                                    .Build();
 
-    public static string                                    TableName   => TABLE_NAME;
-    public        DateTimeOffset                            AppliedOn   { get; init; } = DateTimeOffset.UtcNow;
-    DateTimeOffset IDateCreated.                            DateCreated => AppliedOn;
-    [StringLength(UNICODE_CAPACITY)] public required string Description { get; init; }
-    RecordID<MigrationRecord> IRecordPair<MigrationRecord>. ID          => RecordID<MigrationRecord>.Create(MigrationID.AsGuid());
-    [Key] public required      ulong                        MigrationID { get; init; }
-    internal                   string                       SQL         { get; init; } = string.Empty;
-    [StringLength(256)] public string?                      TableID     { get; init; }
+    public static string                                   TableName   => TABLE_NAME;
+    public        DateTimeOffset                           AppliedOn   { get; init; } = DateTimeOffset.UtcNow;
+    DateTimeOffset IDateCreated.                           DateCreated => AppliedOn;
+    [StringLength(MAX_FIXED)] public required string       Description { get; init; }
+    RecordID<MigrationRecord> IRecordPair<MigrationRecord>.ID          => RecordID<MigrationRecord>.Create(MigrationID.AsGuid());
+    [Key] public required      ulong                       MigrationID { get; init; }
+    internal                   string                      SQL         { get; init; } = string.Empty;
+    [StringLength(256)] public string?                     TableID     { get; init; }
 
 
     [SetsRequiredMembers] public MigrationRecord( ulong migrationID, string description, string? TABLE_NAME = null ) : base()

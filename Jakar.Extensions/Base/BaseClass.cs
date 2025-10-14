@@ -4,22 +4,9 @@
 [Serializable]
 public class BaseClass : IJsonModel, IObservableObject
 {
-    public const           int            ANSI_CAPACITY         = BaseRecord.ANSI_CAPACITY;
-    public const           int            BINARY_CAPACITY       = BaseRecord.BINARY_CAPACITY;
-    public const           string         EMPTY                 = BaseRecord.EMPTY;
-    public const           int            MAX_STRING_SIZE       = BaseRecord.MAX_STRING_SIZE; // 1GB
-    public const           string         NULL                  = BaseRecord.NULL;
-    public const           int            UNICODE_CAPACITY      = BaseRecord.UNICODE_CAPACITY;
-    public const           int            ANSI_TEXT_CAPACITY    = BaseRecord.ANSI_TEXT_CAPACITY;
-    public const           int            DECIMAL_MAX_PRECISION = BaseRecord.DECIMAL_MAX_PRECISION;
-    public const           int            DECIMAL_MAX_SCALE     = BaseRecord.DECIMAL_MAX_SCALE;
-    public const           int            UNICODE_TEXT_CAPACITY = BaseRecord.UNICODE_TEXT_CAPACITY;
-    public static readonly DateTimeOffset SQLMinDate            = new(1753, 1, 1, 0, 0, 0, 0, TimeSpan.Zero);
-    public static readonly DateOnly       SQLMinDateOnly        = new(1753, 1, 1);
-    protected              JsonObject?    _additionalData;
+    protected JsonObject? _additionalData;
 
-
-    [StringLength(UNICODE_TEXT_CAPACITY)] [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => SetProperty(ref _additionalData, value); }
+    [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 
 
     public event PropertyChangedEventHandler?  PropertyChanged;

@@ -30,6 +30,12 @@ public struct FilterBuffer<TValue>( int capacity ) : IValueEnumerator<TValue>
     public readonly void Dispose() => __owner?.Dispose();
 
 
+    public void Add( TValue value )
+    {
+        if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }
+
+        if ( length > Capacity ) { throw new InvalidOperationException("Cannot add more items than the capacity of the buffer."); }
+    }
     public void Add( ref readonly TValue value )
     {
         if ( __owner is not null ) { __owner.Memory.Span[length++] = value; }

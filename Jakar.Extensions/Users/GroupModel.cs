@@ -7,8 +7,8 @@ namespace Jakar.Extensions;
 public interface IGroupModel<TID> : IUniqueID<TID>, ICreatedByUser<TID>, IUserRights, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    [StringLength(UNICODE_CAPACITY)] string NameOfGroup { get; }
-    TID?                                    OwnerID     { get; }
+    [StringLength(NAME)] string NameOfGroup { get; }
+    TID?                        OwnerID     { get; }
 }
 
 
@@ -35,11 +35,11 @@ public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? crea
     protected TID    _id           = id;
 
 
-    public                                      TID    ID          { get => _id;           init => _id = value; }
-    public                                      TID?   CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
-    [StringLength(UNICODE_CAPACITY)] public     string NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
-    public                                      TID?   OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string Rights      { get => __permissions; set => SetProperty(ref __permissions, value); }
+    public                        TID    ID          { get => _id;           init => _id = value; }
+    public                        TID?   CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
+    [StringLength(NAME)] public   string NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
+    public                        TID?   OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
+    [StringLength(RIGHTS)] public string Rights      { get => __permissions; set => SetProperty(ref __permissions, value); }
 
 
     public GroupModel( IGroupModel<TID> model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }

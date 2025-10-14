@@ -2,7 +2,7 @@
 
 
 [Serializable]
-public class RecordCollection<TSelf>( int capacity = Buffers.DEFAULT_CAPACITY ) : IReadOnlyList<TSelf>
+public class RecordCollection<TSelf>( int capacity = DEFAULT_CAPACITY ) : IReadOnlyList<TSelf>
     where TSelf : ITableRecord<TSelf>
 {
     private readonly List<TSelf> __records = new(capacity);

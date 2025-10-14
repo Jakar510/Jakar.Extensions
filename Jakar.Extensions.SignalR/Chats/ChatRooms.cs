@@ -38,7 +38,7 @@ public abstract class ChatRooms<TSelf, TRoom> : ConcurrentObservableCollection<T
     public  bool ShowAll { get => __showAll; set => SetProperty(ref __showAll, value); }
 
 
-    protected ChatRooms() : this(DEFAULT_CAPACITY) { }
+    protected ChatRooms() : this(Constants.DEFAULT_CAPACITY) { }
     protected ChatRooms( int                        capacity ) : base(capacity) { }
     protected ChatRooms( IEnumerable<TRoom>         enumerable ) : base(enumerable) { }
     protected ChatRooms( params ReadOnlySpan<TRoom> enumerable ) : base(enumerable) { }

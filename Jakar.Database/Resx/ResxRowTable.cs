@@ -33,23 +33,23 @@ public sealed record ResxRowRecord( long                    KeyID,
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(KeyID),      length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Key),        length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Neutral),    length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Arabic),     length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Chinese),    length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Czech),      length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Dutch),      length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(English),    length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(French),     length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(German),     length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Japanese),   length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Korean),     length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Polish),     length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Portuguese), length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Spanish),    length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Swedish),    length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Thai),       length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(KeyID),      length: NAME)
+                                                                                                              .WithColumn<string>(nameof(Key),        length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Neutral),    length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Arabic),     length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Chinese),    length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Czech),      length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Dutch),      length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(English),    length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(French),     length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(German),     length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Japanese),   length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Korean),     length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Polish),     length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Portuguese), length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Spanish),    length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Swedish),    length: MAX_SIZE)
+                                                                                                              .WithColumn<string>(nameof(Thai),       length: MAX_SIZE)
                                                                                                               .Build();
 
 
@@ -110,37 +110,35 @@ public sealed record ResxRowRecord( long                    KeyID,
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<ResxRowRecord>(migrationID,
-                                                     $"create { TABLE_NAME} table",
+                                                     $"create {TABLE_NAME} table",
                                                      $"""
-                                                      CREATE TABLE { TABLE_NAME}
+                                                      CREATE TABLE {TABLE_NAME}
                                                       (
-                                                      {nameof(ID).SqlColumnName()}           uuid                        PRIMARY KEY,
-                                                      {nameof(KeyID).SqlColumnName()}        bigint                      NOT NULL,
-                                                      {nameof(Key).SqlColumnName()}          varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Neutral).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(English).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Spanish).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(French).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Swedish).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(German).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Chinese).SqlColumnName()}      varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Polish).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Thai).SqlColumnName()}         varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Japanese).SqlColumnName()}     varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Czech).SqlColumnName()}        varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Portuguese).SqlColumnName()}   varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Dutch).SqlColumnName()}        varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Korean).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(Arabic).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                      {nameof(DateCreated).SqlColumnName()}  timestamptz                 NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                      {nameof(ID).SqlColumnName()}           uuid            PRIMARY KEY,
+                                                      {nameof(KeyID).SqlColumnName()}        bigint          NOT NULL,
+                                                      {nameof(Key).SqlColumnName()}          varchar({NAME}) NOT NULL,
+                                                      {nameof(Neutral).SqlColumnName()}      text            NOT NULL,
+                                                      {nameof(English).SqlColumnName()}      text            NOT NULL,
+                                                      {nameof(Spanish).SqlColumnName()}      text            NOT NULL,
+                                                      {nameof(French).SqlColumnName()}       text            NOT NULL,
+                                                      {nameof(Swedish).SqlColumnName()}      text            NOT NULL,
+                                                      {nameof(German).SqlColumnName()}       text            NOT NULL,
+                                                      {nameof(Chinese).SqlColumnName()}      text            NOT NULL,
+                                                      {nameof(Polish).SqlColumnName()}       text            NOT NULL,
+                                                      {nameof(Thai).SqlColumnName()}         text            NOT NULL,
+                                                      {nameof(Japanese).SqlColumnName()}     text            NOT NULL,
+                                                      {nameof(Czech).SqlColumnName()}        text            NOT NULL,
+                                                      {nameof(Portuguese).SqlColumnName()}   text            NOT NULL,
+                                                      {nameof(Dutch).SqlColumnName()}        text            NOT NULL,
+                                                      {nameof(Korean).SqlColumnName()}       text            NOT NULL,
+                                                      {nameof(Arabic).SqlColumnName()}       text            NOT NULL,
+                                                      {nameof(DateCreated).SqlColumnName()}  timestamptz     NOT NULL DEFAULT SYSUTCDATETIME(),
                                                       {nameof(LastModified).SqlColumnName()} timestamptz                 
                                                       );
 
                                                       CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                      BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                       FOR EACH ROW
                                                       EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                       """);

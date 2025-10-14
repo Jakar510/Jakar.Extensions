@@ -10,3 +10,4 @@ global using Microsoft.AspNetCore.SignalR.Client;
 global using Microsoft.Extensions.Hosting;
 global using static Jakar.Extensions.BaseRecord;
 global using static Jakar.Extensions.Buffers;
+global using static Jakar.Extensions.Constants;

@@ -30,7 +30,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public static string                               TableName {  get => TABLE_NAME; }
     Guid? ICreatedByUser<Guid>.                        CreatedBy => CreatedBy?.Value;
     Guid? IGroupModel<Guid>.                           OwnerID   => CreatedBy?.Value;
-    [StringLength(IUserRights.MAX_SIZE)] public string Rights    { get; set; } = Rights;
+    [StringLength(RIGHTS)] public string Rights    { get; set; } = Rights;
 
 
     public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }

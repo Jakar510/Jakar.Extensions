@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public enum MimeType
+public enum MimeType : ulong
 {
     NotSet,
     Unknown,

@@ -14,10 +14,10 @@ namespace Jakar.Extensions.SignalR.Chats;
 
 public interface IInstantMessage
 {
-    [StringLength(UNICODE_CAPACITY)] public string         GroupName   { get; }
-    public                                  bool           HasBeenRead { get; }
-    [StringLength(UNICODE_CAPACITY)] public string         Message     { get; }
-    public                                  DateTimeOffset TimeStamp   { get; }
+    [StringLength(NAME)] public      string         GroupName   { get; }
+    public                           bool           HasBeenRead { get; }
+    [StringLength(MAX_FIXED)] public string         Message     { get; }
+    public                           DateTimeOffset TimeStamp   { get; }
 }
 
 
@@ -32,14 +32,14 @@ public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage,
     private                string           __message   = string.Empty;
 
 
-    public static                                    JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;
-    public static                                    JsonTypeInfo<InstantMessage>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessage;
-    public static                                    JsonTypeInfo<InstantMessage[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageArray;
-    public                                           FileData[]?                    Data          { get => __data;        set => SetProperty(ref __data,        value); }
-    [StringLength(UNICODE_CAPACITY)] public required string                         GroupName     { get => __groupName;   set => SetProperty(ref __groupName,   value); }
-    public                                           bool                           HasBeenRead   { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
-    [StringLength(UNICODE_CAPACITY)] public required string                         Message       { get => __message;     set => SetProperty(ref __message,     value); }
-    public                                           DateTimeOffset                 TimeStamp     { get;                  init; }
+    public static                             JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;
+    public static                             JsonTypeInfo<InstantMessage>   JsonTypeInfo  => JakarSignalRContext.Default.InstantMessage;
+    public static                             JsonTypeInfo<InstantMessage[]> JsonArrayInfo => JakarSignalRContext.Default.InstantMessageArray;
+    public                                    FileData[]?                    Data          { get => __data;        set => SetProperty(ref __data,        value); }
+    [StringLength(NAME)] public required      string                         GroupName     { get => __groupName;   set => SetProperty(ref __groupName,   value); }
+    public                                    bool                           HasBeenRead   { get => __hasBeenRead; set => SetProperty(ref __hasBeenRead, value); }
+    [StringLength(MAX_FIXED)] public required string                         Message       { get => __message;     set => SetProperty(ref __message,     value); }
+    public                                    DateTimeOffset                 TimeStamp     { get;                  init; }
 
 
     public InstantMessage() { }

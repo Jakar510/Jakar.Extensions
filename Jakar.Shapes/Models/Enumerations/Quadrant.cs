@@ -5,7 +5,7 @@ namespace Jakar.Shapes;
 
 
 [Flags]
-public enum Quadrant
+public enum Quadrant : ulong
 {
     None        = 0,
     Bottom      = 1,

@@ -6,8 +6,8 @@
 /// </summary>
 public sealed class EmailBuilder
 {
-    private readonly List<Attachment>     __attachments = new(Buffers.DEFAULT_CAPACITY);
-    private readonly List<MailboxAddress> __recipients  = new(Buffers.DEFAULT_CAPACITY);
+    private readonly List<Attachment>     __attachments = new(DEFAULT_CAPACITY);
+    private readonly List<MailboxAddress> __recipients  = new(DEFAULT_CAPACITY);
     private readonly MailboxAddress[]     __senders;
     private          string               __subject = string.Empty;
     private          string?              __body;

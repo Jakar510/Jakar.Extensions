@@ -78,7 +78,7 @@ public static class TelemetrySpans
      */
 
 
-    [Pure] [MustDisposeResource] public static OpenTelemetry.Trace.TelemetrySpan StartSpan( this Activity activity, [CallerMemberName] string caller = BaseClass.EMPTY ) =>
+    [Pure] [MustDisposeResource] public static OpenTelemetry.Trace.TelemetrySpan StartSpan( this Activity activity, [CallerMemberName] string caller = EMPTY ) =>
         ReferenceEquals(activity, Activity.Current)
             ? Tracer.CurrentSpan
             : throw new InvalidOperationException("Activity.Current is not the same as the activity.");
@@ -89,8 +89,8 @@ public static class TelemetrySpans
     public static ActivityLink              Link( this Activity                   activity, in ActivityTagsCollection? tags = null ) => new(activity.Context, tags);
 
 
-    public static void TrackEvent( this Activity activity, in ActivityTagsCollection? tags = null, [CallerMemberName] string caller = BaseClass.EMPTY ) => activity.AddEvent(caller.GetEvent(tags));
-    public static void TrackEvent<T>( this Activity activity, T value, ActivityTagsCollection? tags = null, [CallerMemberName] string caller = BaseClass.EMPTY )
+    public static void TrackEvent( this Activity activity, in ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY ) => activity.AddEvent(caller.GetEvent(tags));
+    public static void TrackEvent<T>( this Activity activity, T value, ActivityTagsCollection? tags = null, [CallerMemberName] string caller = EMPTY )
     {
         tags                ??= new ActivityTagsCollection();
         tags[nameof(value)] =   value;

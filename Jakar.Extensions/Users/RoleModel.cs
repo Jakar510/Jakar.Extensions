@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public interface IRoleModel<out TID> : IUniqueID<TID>, IUserRights, IJsonModel
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
 {
-    [StringLength(UNICODE_CAPACITY)] public string NameOfRole { get; }
+    [StringLength(NAME)] public string NameOfRole { get; }
 }
 
 
@@ -32,9 +32,9 @@ public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) :
     protected TID    _id      = id;
 
 
-    public                                      TID    ID         { get => _id;      init => _id = value; }
-    [StringLength(UNICODE_CAPACITY)]     public string NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
-    [StringLength(IUserRights.MAX_SIZE)] public string Rights     { get => __rights; set => SetProperty(ref __rights, value); }
+    public                        TID    ID         { get => _id;      init => _id = value; }
+    [StringLength(NAME)]   public string NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
+    [StringLength(RIGHTS)] public string Rights     { get => __rights; set => SetProperty(ref __rights, value); }
 
 
     public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }

@@ -3,3 +3,4 @@
 
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
+global using static Jakar.Extensions.Constants;

@@ -5,7 +5,7 @@
 ///     <summary> Various types of devices. </summary>
 ///     <remarks/>
 /// </Docs>
-public enum DeviceTypes
+public enum DeviceTypes : ulong
 {
     /// <Docs>
     ///     <summary> An unknown device type. </summary>

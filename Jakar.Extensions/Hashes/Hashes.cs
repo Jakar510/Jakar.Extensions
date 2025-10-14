@@ -623,22 +623,11 @@ public static class Hashes
     public static string Hash( this HashAlgorithm hasher, Encoding? encoding, params ReadOnlySpan<char> data ) => hasher.Hash(data.ToBytes(encoding));
     public static string Hash( this HashAlgorithm hasher, params ReadOnlySpan<byte> data )
     {
-        using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(UNICODE_CAPACITY);
+        using IMemoryOwner<byte> buffer = MemoryPool<byte>.Shared.Rent(HASH);
         Span<byte>               span   = buffer.Memory.Span;
-        if ( !hasher.TryComputeHash(data, span, out int bytesWritten) ) { throw new InvalidOperationException(nameof(span)); }
+        if ( !hasher.TryComputeHash(data, span, out int bytesWritten) ) { throw new InvalidOperationException($"{hasher.GetType().Name}.{nameof(hasher.TryComputeHash)} failed"); }
 
-        span = span[..bytesWritten];
-        Span<char>   hexChars     = stackalloc char[span.Length * 2];
-        const string HEX_ALPHABET = "0123456789ABCDEF";
-
-        for ( int i = 0; i < span.Length; i++ )
-        {
-            byte b = span[i];
-            hexChars[i * 2]     = HEX_ALPHABET[b >> 4];
-            hexChars[i * 2 + 1] = HEX_ALPHABET[b & 0x0F];
-        }
-
-        return hexChars.ToString();
+        return Convert.ToHexString(span[..bytesWritten]);
     }
 
 

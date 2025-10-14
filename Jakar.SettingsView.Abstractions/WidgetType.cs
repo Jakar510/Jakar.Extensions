@@ -1,7 +1,7 @@
 ﻿namespace Jakar.SettingsView.Abstractions;
 
 
-public enum WidgetType
+public enum WidgetType : ulong
 {
     NotSet,
     Label,

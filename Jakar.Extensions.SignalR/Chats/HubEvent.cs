@@ -9,7 +9,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions.SignalR.Chats;
 
 
-public enum HubEventType
+public enum HubEventType : ulong
 {
     Login,
     Logout,
@@ -25,14 +25,14 @@ public enum HubEventType
 
 public sealed class HubEvent : BaseClass<HubEvent>, IJsonModel<HubEvent>
 {
-    public static                                    JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
-    public static                                    JsonTypeInfo<HubEvent>   JsonTypeInfo  => JakarSignalRContext.Default.HubEvent;
-    public static                                    JsonTypeInfo<HubEvent[]> JsonArrayInfo => JakarSignalRContext.Default.HubEventArray;
-    [StringLength(UNICODE_CAPACITY)] public required string                   ConnectionID  { get; init; }
-    [StringLength(UNICODE_CAPACITY)] public required string                   Group         { get; init; }
-    public required                                  HubEventType             Type          { get; init; }
-    public required                                  ChatUser                 User          { get; init; }
-    public                                           InstantMessage?          Message       { get; init; }
+    public static                                 JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
+    public static                                 JsonTypeInfo<HubEvent>   JsonTypeInfo  => JakarSignalRContext.Default.HubEvent;
+    public static                                 JsonTypeInfo<HubEvent[]> JsonArrayInfo => JakarSignalRContext.Default.HubEventArray;
+    [StringLength(CONNECTION_ID)] public required string                   ConnectionID  { get; init; }
+    [StringLength(NAME)]          public required string                   Group         { get; init; }
+    public required                               HubEventType             Type          { get; init; }
+    public required                               ChatUser                 User          { get; init; }
+    public                                        InstantMessage?          Message       { get; init; }
 
 
     public HubEvent() { }

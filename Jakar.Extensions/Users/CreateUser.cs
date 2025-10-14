@@ -17,7 +17,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     private string __userPassword    = string.Empty;
 
 
-    [Required] [StringLength(UNICODE_CAPACITY)] public virtual string ConfirmPassword
+    [Required] [StringLength(PASSWORD)] public virtual string ConfirmPassword
     {
         get => __confirmPassword;
         set
@@ -31,7 +31,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     [JsonIgnore] [MemberNotNullWhen(true, nameof(Password), nameof(ConfirmPassword))] public virtual  bool IsValidPassword { get => !string.IsNullOrWhiteSpace(Password) && string.Equals(Password, ConfirmPassword, StringComparison.Ordinal) && PasswordValidator.Check(Password); }
 
 
-    [Required] [StringLength(UNICODE_CAPACITY)] public virtual string Password
+    [Required] [StringLength(PASSWORD)] public virtual string Password
     {
         get => __userPassword;
         set
@@ -41,7 +41,7 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     }
 
 
-    [Required] [StringLength(UNICODE_CAPACITY)] public override string UserName
+    [Required] [StringLength(USER_NAME)] public override string UserName
     {
         get => base.UserName;
         set

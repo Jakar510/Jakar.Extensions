@@ -155,8 +155,7 @@ public sealed class DbOptions : IOptions<DbOptions>
     }
 
 
-    public static SecuredString GetConnectionString( IConfiguration          configuration ) => SecuredStringResolverOptions.GetSecuredString(configuration);
-    public static void          GetConnectionString( IMigrationRunnerBuilder provider )      => provider.WithGlobalConnectionString(GetConnectionString);
+    public static SecuredString GetConnectionString( IConfiguration configuration ) => SecuredStringResolverOptions.GetSecuredString(configuration);
     public static string GetConnectionString( IServiceProvider provider )
     {
         ValueTask<SecuredString> task    = GetConnectionStringAsync(provider);

@@ -14,21 +14,21 @@ namespace Jakar.Extensions.SignalR.Chats;
 
 public interface IChatUser : IUserID
 {
-    [StringLength(UNICODE_CAPACITY)] public string FullName { get; }
-    [StringLength(UNICODE_CAPACITY)] public string UserName { get; }
+    [StringLength(FULL_NAME)] public string FullName { get; }
+    [StringLength(USER_NAME)] public string UserName { get; }
 }
 
 
 
 public sealed class ChatUser( string fullName, string userName, Guid userID ) : BaseClass<ChatUser>, IChatUser, IJsonModel<ChatUser>
 {
-    public static readonly                            ChatUser                 Empty = new(string.Empty, string.Empty, Guid.Empty);
-    public static                                     JsonTypeInfo<ChatUser[]> JsonArrayInfo => JakarSignalRContext.Default.ChatUserArray;
-    public static                                     JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
-    public static                                     JsonTypeInfo<ChatUser>   JsonTypeInfo  => JakarSignalRContext.Default.ChatUser;
-    [property: StringLength(UNICODE_CAPACITY)] public string                   FullName      { get; init; } = fullName;
-    public                                            Guid                     UserID        { get; init; } = userID;
-    [property: StringLength(UNICODE_CAPACITY)] public string                   UserName      { get; init; } = userName;
+    public static readonly           ChatUser                 Empty = new(string.Empty, string.Empty, Guid.Empty);
+    public static                    JsonTypeInfo<ChatUser[]> JsonArrayInfo => JakarSignalRContext.Default.ChatUserArray;
+    public static                    JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
+    public static                    JsonTypeInfo<ChatUser>   JsonTypeInfo  => JakarSignalRContext.Default.ChatUser;
+    [StringLength(FULL_NAME)] public string                   FullName      { get; init; } = fullName;
+    public                           Guid                     UserID        { get; init; } = userID;
+    [StringLength(USER_NAME)] public string                   UserName      { get; init; } = userName;
 
 
     public ChatUser( IChatUser               data ) : this(data.FullName, data.UserName, data.UserID) { }

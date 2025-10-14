@@ -123,3 +123,4 @@ global using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 global using Status = Jakar.Extensions.Status;
 global using TableAttribute = Dapper.Contrib.Extensions.TableAttribute;
 global using Version = System.Version;
+global using static Jakar.Extensions.Constants;

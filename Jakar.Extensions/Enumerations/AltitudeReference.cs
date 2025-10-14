@@ -7,7 +7,7 @@
 ///         <para> This enum is a copy of Windows.Devices.Geolocation.AltitudeReferenceSystem. </para>
 ///     </remarks>
 /// </Docs>
-public enum AltitudeReference
+public enum AltitudeReference : ulong
 {
     /// <Docs>
     ///     <summary> The altitude reference system was not specified. </summary>

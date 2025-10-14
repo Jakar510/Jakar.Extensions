@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public enum DeviceCategory
+public enum DeviceCategory : ulong
 {
     Unknown = 0,
     Phone   = 1,

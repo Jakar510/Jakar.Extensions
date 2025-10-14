@@ -141,7 +141,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         using UserRights<TRight> results = UserRights<TRight>.Create(models);
 
-        foreach ( ( TRight permission, bool value ) in results.Rights )
+        foreach ( ( TRight permission, bool value ) in results.Permissions )
         {
             if ( value ) { rights.Add(permission); }
         }

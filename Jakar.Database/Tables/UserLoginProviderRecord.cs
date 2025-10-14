@@ -11,27 +11,27 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table(TABLE_NAME)]
-public sealed record UserLoginProviderRecord( [property: StringLength(                                  UNICODE_CAPACITY)] string  LoginProvider,
-                                              [property: StringLength(                                  UNICODE_CAPACITY)] string? ProviderDisplayName,
-                                              [property: ProtectedPersonalData] [property: StringLength(UNICODE_CAPACITY)] string  ProviderKey,
-                                              [property: ProtectedPersonalData] [property: StringLength(UNICODE_CAPACITY)] string? Value,
-                                              RecordID<UserLoginProviderRecord>                                                    ID,
-                                              RecordID<UserRecord>?                                                                CreatedBy,
-                                              DateTimeOffset                                                                       DateCreated,
-                                              DateTimeOffset?                                                                      LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
+public sealed record UserLoginProviderRecord( [property: StringLength(                                  MAX_FIXED)] string  LoginProvider,
+                                              [property: StringLength(                                  MAX_FIXED)] string? ProviderDisplayName,
+                                              [property: ProtectedPersonalData] [property: StringLength(MAX_FIXED)] string  ProviderKey,
+                                              [property: ProtectedPersonalData] [property: StringLength(MAX_FIXED)] string? Value,
+                                              RecordID<UserLoginProviderRecord>                                             ID,
+                                              RecordID<UserRecord>?                                                         CreatedBy,
+                                              DateTimeOffset                                                                DateCreated,
+                                              DateTimeOffset?                                                               LastModified = null ) : OwnedTableRecord<UserLoginProviderRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<UserLoginProviderRecord>
 {
     public const  string                                  TABLE_NAME = "user_login_providers";
-    public static string                                  TableName     {  get => TABLE_NAME; }
+    public static string                                  TableName     { get => TABLE_NAME; }
     public static JsonSerializerContext                   JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<UserLoginProviderRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserLoginProviderRecord;
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(LoginProvider),       length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(ProviderKey),         length: UNICODE_CAPACITY)
-                                                                                                              .WithColumn<string>(nameof(Value),               length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(LoginProvider),       length: MAX_FIXED)
+                                                                                                              .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: MAX_FIXED)
+                                                                                                              .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)
+                                                                                                              .WithColumn<string>(nameof(Value),               length: MAX_FIXED)
                                                                                                               .With_CreatedBy()
                                                                                                               .Build();
 
@@ -51,24 +51,22 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
-                                                               $"create { TABLE_NAME} table",
+                                                               $"create {TABLE_NAME} table",
                                                                $"""
-                                                                CREATE TABLE { TABLE_NAME}
+                                                                CREATE TABLE {TABLE_NAME}
                                                                 (
-                                                                {nameof(LoginProvider).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                                {nameof(ProviderDisplayName).SqlColumnName()} varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                                {nameof(ProviderKey).SqlColumnName()}         varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                                {nameof(Value).SqlColumnName()}               varchar({UNICODE_CAPACITY}) NOT NULL,
-                                                                {nameof(ID).SqlColumnName()}                  uuid                        PRIMARY KEY,
-                                                                {nameof(DateCreated).SqlColumnName()}         timestamptz                 NOT NULL DEFAULT SYSUTCDATETIME(),
+                                                                {nameof(LoginProvider).SqlColumnName()}       char({MAX_FIXED}) NOT NULL,
+                                                                {nameof(ProviderDisplayName).SqlColumnName()} char({MAX_FIXED}) NOT NULL,
+                                                                {nameof(ProviderKey).SqlColumnName()}         char({MAX_FIXED}) NOT NULL,
+                                                                {nameof(Value).SqlColumnName()}               char({MAX_FIXED}) NOT NULL,
+                                                                {nameof(ID).SqlColumnName()}                  uuid              PRIMARY KEY,
+                                                                {nameof(DateCreated).SqlColumnName()}         timestamptz       NOT NULL DEFAULT SYSUTCDATETIME(),
                                                                 {nameof(LastModified).SqlColumnName()}        timestamptz                 
                                                                 );
 
                                                                 CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                                BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                                BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                                 FOR EACH ROW
                                                                 EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                                 """);

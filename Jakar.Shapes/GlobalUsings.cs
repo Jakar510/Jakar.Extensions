@@ -12,4 +12,4 @@ global using System.Text.Json.Serialization;
 global using Jakar.Extensions;
 global using Jakar.Shapes.Interfaces;
 global using JetBrains.Annotations;
-global using static Jakar.Extensions.BaseRecord;
+global using static Jakar.Extensions.Constants;

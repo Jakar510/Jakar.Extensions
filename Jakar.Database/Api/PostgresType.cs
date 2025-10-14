@@ -9,39 +9,34 @@ using Jakar.Shapes;
 namespace Jakar.Database.DbMigrations;
 
 
-public enum PostgresType
+public enum PostgresType : ulong
 {
-    Guid,
-    Byte,
-    SByte,
-    Int128,
-    UInt128,
-    Single,
-    Decimal,
-    Currency,
-    Binary,
-    String,
-    Object,
+    NotSet,
+
     Enum,
-    Linestring,
 
     /// <summary>
-    /// Corresponds to the PostgreSQL "bigint" type.
-    /// <para> <see cref="long"/> </para>
+    /// Corresponds to the PostgreSQL "boolean" type.
+    /// <para> <see cref="bool"/> </para>
     /// </summary>
     /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-boolean.html"/>
     /// </remarks>
-    Bigint = 1,
+    Boolean,
 
     /// <summary>
-    /// Corresponds to the PostgreSQL "double" type.
-    /// <para> <see cref="double"/> </para>
+    /// Corresponds to the PostgreSQL 2-byte "smallint" type.
+    /// <para> <see cref="short"/> </para>
+    /// <para> <see href="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/> </para>
     /// </summary>
-    /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
-    /// </remarks>
-    Double = 8,
+    Short,
+    
+    /// <summary>
+    /// Corresponds to the PostgreSQL 2-byte "smallint" type.
+    /// <para> <see cref="short"/> </para>
+    /// <para> <see href="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/> </para>
+    /// </summary>
+    UShort,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "integer" type.
@@ -50,13 +45,76 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
     /// </remarks>
-    Integer = 9,
+    Int,
+    
+    /// <summary>
+    /// Corresponds to the PostgreSQL "integer" type.
+    /// <para> <see cref="int"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    UInt,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bigint" type.
+    /// <para> <see cref="long"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    Long,
+    
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bigint" type.
+    /// <para> <see cref="long"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    ULong,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bigint" type.
+    /// <para> <see cref="long"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    Int128,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bigint" type.
+    /// <para> <see cref="long"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    UInt128,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "float" type.
+    /// <para> <see cref="double"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    Single,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "double" type.
+    /// <para> <see cref="double"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>
+    /// </remarks>
+    Double,
 
     /// <summary>
     /// Represents the PostgreSQL arbitrary-precision "numeric" type.
     /// </summary>
     /// <remarks> For more information, see the PostgreSQL documentation at <see href="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/> </remarks>
-    Numeric = 13,
+    Numeric,
 
     /// <summary>
     /// Represents the PostgreSQL floating-point "real" data type.
@@ -66,14 +124,7 @@ public enum PostgresType
     /// The "real" type in PostgreSQL is a single-precision, 4-byte floating-point number.
     /// For more information, see the PostgreSQL documentation at <see href="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/>.
     /// </remarks>
-    Real = 17,
-
-    /// <summary>
-    /// Corresponds to the PostgreSQL 2-byte "smallint" type.
-    /// <para> <see cref="short"/> </para>
-    /// <para> <see href="https://www.postgresql.org/docs/current/static/datatype-numeric.html"/> </para>
-    /// </summary>
-    Smallint = 18,
+    Decimal,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "money" type.
@@ -82,16 +133,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-money.html"/>
     /// </remarks>
-    Money = 12,
-
-    /// <summary>
-    /// Corresponds to the PostgreSQL "boolean" type.
-    /// <para> <see cref="bool"/> </para>
-    /// </summary>
-    /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-boolean.html"/>
-    /// </remarks>
-    Boolean = 2,
+    Money,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "box" type.
@@ -102,7 +144,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Box = 3,
+    Box,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "circle" type.
@@ -111,7 +153,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Circle = 5,
+    Circle,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "line" type.
@@ -121,7 +163,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Line = 10,
+    Line,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "lseg" type.
@@ -130,7 +172,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    LineSegment = 11,
+    LineSegment,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "path" type.
@@ -140,7 +182,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Path = 14,
+    Path,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "point" type.
@@ -150,7 +192,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Point = 15,
+    Point,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "polygon" type.
@@ -159,7 +201,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-geometric.html"/>
     /// </remarks>
-    Polygon = 16,
+    Polygon,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "char" type.
@@ -168,7 +210,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-character.html"/>
     /// </remarks>
-    Char = 6,
+    Char,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "text" type.
@@ -177,25 +219,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-character.html"/>
     /// </remarks>
-    Text = 19,
-
-    /// <summary>
-    /// Corresponds to the PostgreSQL "varchar" type.
-    /// <para> <see cref="string"/> </para>
-    /// </summary>
-    /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-character.html"/>
-    /// </remarks>
-    Varchar = 22,
-
-    /// <summary>
-    /// Corresponds to the PostgreSQL "name" type.
-    /// <para> <see cref="string"/> </para>
-    /// </summary>
-    /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-character.html"/>
-    /// </remarks>
-    Name = 32,
+    String,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "citext" type.
@@ -204,7 +228,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/citext.html"/>
     /// </remarks>
-    CiText = 51,
+    CiText,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "bytea" type, holding a raw byte string.
@@ -215,7 +239,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-binary.html"/>
     /// </remarks>
-    Bytea = 4,
+    Binary,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "date" type.
@@ -224,7 +248,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    Date = 7,
+    Date,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "time" type.
@@ -233,7 +257,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    Time = 20,
+    Time,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "timestamp" type.
@@ -242,7 +266,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    DateTime = 21,
+    DateTime,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "timestampz" type.
@@ -251,16 +275,16 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    DateTimeOffset = 26,
+    DateTimeOffset,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "interval" type.
-    /// <para> <see cref="TimeSpan"/> </para>
+    /// <para> <see cref="System.TimeSpan"/> </para>
     /// </summary>
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    Interval = 30,
+    TimeSpan,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "time with time zone" type.
@@ -269,7 +293,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-datetime.html"/>
     /// </remarks>
-    TimeTz = 31,
+    TimeTz,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "inet" type.
@@ -278,7 +302,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-net-types.html"/>
     /// </remarks>
-    Inet = 24,
+    Inet,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "cidr" type, a field storing an IPv4 or IPv6 network.
@@ -288,7 +312,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-net-types.html"/>
     /// </remarks>
-    Cidr = 44,
+    Cidr,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "macaddr" type, a field storing a 6-byte physical address.
@@ -297,7 +321,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-net-types.html"/>
     /// </remarks>
-    MacAddr = 34,
+    MacAddr,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "macaddr8" type, a field storing a 6-byte or 8-byte physical address.
@@ -306,7 +330,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-net-types.html"/>
     /// </remarks>
-    MacAddr8 = 54,
+    MacAddr8,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "bit" type.
@@ -315,7 +339,25 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-bit.html"/>
     /// </remarks>
-    Bit = 25,
+    Bit,
+    
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bit" type.
+    /// <para> <see cref="byte"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-bit.html"/>
+    /// </remarks>
+    Byte,
+    
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bit" type.
+    /// <para> <see cref="byte"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-bit.html"/>
+    /// </remarks>
+    SByte,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "varbit" type.
@@ -324,7 +366,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-bit.html"/>
     /// </remarks>
-    VarBit = 39,
+    VarBit,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "tsvector" type.
@@ -333,7 +375,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-textsearch.html"/>
     /// </remarks>
-    TsVector = 45,
+    TsVector,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "tsquery" type.
@@ -342,7 +384,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-textsearch.html"/>
     /// </remarks>
-    TsQuery = 46,
+    TsQuery,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "regconfig" type.
@@ -351,7 +393,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-textsearch.html"/>
     /// </remarks>
-    RegConfig = 56,
+    RegConfig,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "uuid" type.
@@ -360,7 +402,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-uuid.html"/>
     /// </remarks>
-    Uuid = 27,
+    Guid,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "xml" type.
@@ -369,7 +411,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-xml.html"/>
     /// </remarks>
-    Xml = 28,
+    Xml,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "json" type.
@@ -381,7 +423,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-json.html"/>
     /// </remarks>
-    Json = 35,
+    Json,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "jsonb" type.
@@ -393,7 +435,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-json.html"/>
     /// </remarks>
-    Jsonb = 36,
+    Jsonb,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "jsonpath" type.
@@ -405,7 +447,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-json.html#DATATYPE-JSONPATH"/>
     /// </remarks>
-    JsonPath = 57,
+    JsonPath,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "hstore" type, a dictionary of string key-value
@@ -414,7 +456,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/hstore.html"/>
     /// </remarks>
-    Hstore = 37,
+    Hstore,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "refcursor" type.
@@ -423,7 +465,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-refcursor.html"/>
     /// </remarks>
-    RefCursor = 23,
+    RefCursor,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "oidvector" type.
@@ -432,16 +474,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    OidVector = 29,
-
-    /// <summary>
-    /// Corresponds to the PostgreSQL "int2vector" type.
-    /// <para> <see cref="object"/> </para>
-    /// </summary>
-    /// <remarks>
-    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-int2vector.html"/>
-    /// </remarks>
-    Int2Vector = 52,
+    OidVector,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "oid" type.
@@ -450,7 +483,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    Oid = 41,
+    Oid,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "xid" type, an internal transaction identifier.
@@ -459,7 +492,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    Xid = 42,
+    Xid,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "xid8" type, an internal transaction identifier.
@@ -468,7 +501,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    Xid8 = 64,
+    Xid8,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "cid" type, an internal transaction identifier.
@@ -477,7 +510,7 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    Cid = 43,
+    Cid,
 
     /// <summary>
     /// Corresponds to the PostgreSQL "regtype" type, a numeric (OID) ID of a type in the pg_type table.
@@ -486,12 +519,12 @@ public enum PostgresType
     /// <remarks>
     ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-oid.html"/>
     /// </remarks>
-    RegType = 49,
+    RegType,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "tid" type, a tuple id identifying the physical location of a row within its table.
     /// </summary>
-    Tid = 53,
+    Tid,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "pg_lsn" type, which can be used to store LSN (Log Sequence Number) data which is a pointer to a location in the WAL.
@@ -499,51 +532,82 @@ public enum PostgresType
     /// <remarks>
     /// <see cref="https://www.postgresql.org/docs/current/datatype-pg-lsn.html"/> and <see cref="https://git.postgresql.org/gitweb/?p=postgresql.git;a=commit;h=7d03a83f4d0736ba869fa6f93973f7623a27038a"/>
     /// </remarks>
-    PgLsn = 59,
-
-    /// <summary>
-    ///     A special value that can be used to send parameter values to the database without specifying their type, allowing the database to cast them to another value based on context. The value will be converted to a string and send as text.
-    /// </summary>
-    /// <remarks> This value shouldn't ordinarily be used, and makes sense only when sending a data type unsupported by Npgsql. </remarks>
-    Unknown = 40,
+    PgLsn,
 
     /// <summary>
     ///     The geometry type for PostgreSQL spatial extension PostGIS.
     /// </summary>
-    Geometry = 50,
+    Geometry,
 
     /// <summary>
     ///     The geography (geodetic) type for PostgreSQL spatial extension PostGIS.
     /// </summary>
-    Geography = 55,
-    
+    Geography,
+
     /// <summary>
     ///     The PostgreSQL ltree type, each value is a label path "a.label.tree.value", forming a tree in a set.
     /// </summary> 
     ///  <remarks> See https://www.postgresql.org/docs/current/static/ltree.html </remarks>
-    LTree = 60,
+    LTree,
 
     /// <summary>
     ///     The PostgreSQL lquery type for PostgreSQL extension ltree
     /// </summary>
     ///  <remarks>  See https://www.postgresql.org/docs/current/static/ltree.html </remarks>
-    LQuery = 61,
+    LQuery,
 
     /// <summary>
     ///     The PostgreSQL ltxtquery type for PostgreSQL extension ltree
     /// </summary>
     ///  <remarks>    See https://www.postgresql.org/docs/current/static/ltree.html </remarks>
-    LTxtQuery = 62,
+    LTxtQuery,
+
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "integer[]" type.
+    /// <para> <see cref="int[]"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-array.html"/>
+    /// </remarks>
+    IntVector,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "bigint[]" type.
+    /// <para> <see cref="long[]"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-array.html"/>
+    /// </remarks>
+    LongVector,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "float[]" type.
+    /// <para> <see cref="float[]"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-array.html"/>
+    /// </remarks>
+    FloatVector,
+
+    /// <summary>
+    /// Corresponds to the PostgreSQL "double[]" type.
+    /// <para> <see cref="double[]"/> </para>
+    /// </summary>
+    /// <remarks>
+    ///  For more information, see the PostgreSQL documentation at <see cref="https://www.postgresql.org/docs/current/static/datatype-array.html"/>
+    /// </remarks>
+    DoubleVector,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "int4range" type.
     /// </summary>
-    IntegerRange = 1073741833,
+    IntegerRange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "int8range" type.
     /// </summary>
-    BigIntRange = 1073741825,
+    BigIntRange,
 
     /// <summary>
     /// Represents the PostgreSQL "numrange" type, which is a range of numeric values.    Corresponds to the PostgreSQL "numrange" type.
@@ -551,68 +615,50 @@ public enum PostgresType
     /// <remarks>The "numrange" type in PostgreSQL is used to define a range of numeric values,  such as
     /// integers or decimals. This can be useful for representing intervals or  ranges in database queries and
     /// operations.</remarks>
-    NumericRange = 1073741837,
+    NumericRange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "tsrange" type.
     /// </summary>
-    TimestampRange = 1073741845,
+    TimestampRange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "tstzrange" type.
     /// </summary>
-    DateTimeOffsetRange = 1073741850,
+    DateTimeOffsetRange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "daterange" type.
     /// </summary>
-    DateRange = 1073741831,
+    DateRange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "int4multirange" type.
     /// </summary>
-    IntegerMultirange = 536870921,
+    IntegerMultirange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "int8multirange" type.
     /// </summary>
-    BigIntMultirange = 536870913,
+    BigIntMultirange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "nummultirange" type.
     /// </summary>
-    NumericMultirange = 536870925,
-    
+    NumericMultirange,
+
     /// <summary>
     ///     Corresponds to the PostgreSQL "tsmultirange" type.
     /// </summary>
-    TimestampMultirange = 536870933,
+    TimestampMultirange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "tstzmultirange" type.
     /// </summary>
-    DateTimeOffsetMultirange = 536870938,
+    DateTimeOffsetMultirange,
 
     /// <summary>
     ///     Corresponds to the PostgreSQL "datemultirange" type.
     /// </summary>
-    DateMultirange = 536870919,
-
-    /// <summary>
-    ///     Corresponds to the PostgreSQL "array" type, a variable-length multidimensional array of another type. This value must be combined with another value from NpgsqlTypes.NpgsqlDbType via a bit OR (e.g. NpgsqlDbType.Array | NpgsqlDbType.Integer)
-    /// </summary>
-    /// <remarks><see cref="https://www.postgresql.org/docs/current/static/arrays.html"/></remarks>
-    Array = int.MinValue,
-
-    /// <summary>
-    ///  Corresponds to the PostgreSQL "range" type, continuous range of values of specific type. This value must be combined with another value from NpgsqlTypes.NpgsqlDbType via a bit OR (e.g. NpgsqlDbType.Range | NpgsqlDbType.Integer)
-    /// </summary>
-    /// <remarks>Supported since PostgreSQL 9.2. See <see cref="https://www.postgresql.org/docs/current/static/rangetypes.html"/></remarks>
-    Range = 1073741824,
-
-    /// <summary>
-    ///     Corresponds to the PostgreSQL "multirange" type, continuous range of values of specific type. This value must be combined with another value from NpgsqlTypes.NpgsqlDbType via a bit OR (e.g. NpgsqlDbType.Multirange | NpgsqlDbType.Integer)
-    /// </summary>
-    /// <remarks>Supported since PostgreSQL 14. See <see cref="https://www.postgresql.org/docs/current/static/rangetypes.html"/></remarks>
-    Multirange = 536870912
+    DateMultirange
 }

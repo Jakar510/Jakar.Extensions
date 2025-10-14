@@ -4,20 +4,9 @@
 [Serializable]
 public record BaseRecord
 {
-    public const int         ANSI_CAPACITY         = 8000;
-    public const int         ANSI_TEXT_CAPACITY    = 2_147_483_647;
-    public const int         BINARY_CAPACITY       = ANSI_TEXT_CAPACITY;
-    public const int         DECIMAL_MAX_PRECISION = 38;
-    public const int         DECIMAL_MAX_SCALE     = 29;
-    public const string      EMPTY                 = "";
-    public const int         MAX_STRING_SIZE       = int.MaxValue;
-    public const string      NULL                  = "null";
-    public const int         UNICODE_CAPACITY      = 4000;
-    public const int         UNICODE_TEXT_CAPACITY = 1_073_741_823;
-    protected    JsonObject? _additionalData;
+    protected JsonObject? _additionalData;
 
-
-    [StringLength(UNICODE_TEXT_CAPACITY)] [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
+    [JsonExtensionData] public virtual JsonObject? AdditionalData { get => _additionalData; set => _additionalData = value; }
 }
 
 

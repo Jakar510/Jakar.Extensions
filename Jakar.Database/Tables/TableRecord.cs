@@ -139,7 +139,7 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
 
 
     [Serializable]
-    public class RecordCollection( int capacity = Buffers.DEFAULT_CAPACITY ) : RecordCollection<TSelf>(capacity)
+    public class RecordCollection( int capacity = DEFAULT_CAPACITY ) : RecordCollection<TSelf>(capacity)
     {
         public RecordCollection( params ReadOnlySpan<TSelf> values ) : this() => Add(values);
         public RecordCollection( IEnumerable<TSelf>         values ) : this() => Add(values);

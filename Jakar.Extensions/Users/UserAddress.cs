@@ -46,9 +46,9 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     private TID     __id;
 
 
-    [StringLength(UNICODE_CAPACITY)] public string? Address { get => __address ??= ToString(); set => SetProperty(ref __address, value); }
+    [Required] [StringLength(ADDRESS)] public string? Address { get => __address ??= ToString(); set => SetProperty(ref __address, value); }
 
-    [StringLength(UNICODE_CAPACITY)] public string City
+    [Required] [StringLength(CITY)] public string City
     {
         get => __city;
         set
@@ -57,8 +57,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)] public string Country
+    [Required] [StringLength(COUNTRY)] public string Country
     {
         get => __country;
         set
@@ -91,8 +90,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)] public string Line1
+    [Required] [StringLength(LINE1)] public string Line1
     {
         get => __line1;
         set
@@ -101,8 +99,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)] public string Line2
+    [StringLength(LINE2)] public string Line2
     {
         get => __line2;
         set
@@ -111,8 +108,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
         }
     }
 
-
-    [Required] [StringLength(UNICODE_CAPACITY)] public string PostalCode
+    [Required] [StringLength(POSTAL_CODE)] public string PostalCode
     {
         get => __postalCode;
         set
@@ -121,8 +117,7 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
         }
     }
 
-
-    [StringLength(UNICODE_CAPACITY)] public string StateOrProvince
+    [Required] [StringLength(STATE_OR_PROVINCE)] public string StateOrProvince
     {
         get => __stateOrProvince;
         set

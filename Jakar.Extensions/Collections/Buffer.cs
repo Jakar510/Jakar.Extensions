@@ -468,7 +468,7 @@ public ref struct Buffer<TValue>( int capacity ) : IMemoryOwner<TValue>, IBuffer
     {
         ThrowIfReadOnly();
         Guard.IsInRange(additionalRequestedCapacity, 1, int.MaxValue);
-        int capacity = GetLength((uint)Capacity, additionalRequestedCapacity);
+        int capacity = Buffers.GetLength((uint)Capacity, additionalRequestedCapacity);
 
         using ( Buffer<TValue> old = this )
         {

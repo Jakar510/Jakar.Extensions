@@ -65,14 +65,15 @@ public enum ColumnOptions
     Indexed         = 1 << 2,
     Unique          = 1 << 3,
     PrimaryKey      = 1 << 4,
-    Nullable        = 1 << 5
+    Nullable        = 1 << 5,
+    Fixed           = 1 << 6
 }
 
 
 
-public sealed record ColumnPrecisionMetaData( int Length, int Scope, int Precision )
+public sealed record ColumnPrecisionMetaData( int Value, int Scope, int Precision )
 {
-    public readonly                 int Length    = Length;
+    public readonly                 int Value     = Value;
     public readonly                 int Precision = Precision;
     public readonly                 int Scope     = Scope;
     public static implicit operator ColumnPrecisionMetaData( int                        value ) => new(value, -1, -1);
@@ -81,9 +82,9 @@ public sealed record ColumnPrecisionMetaData( int Length, int Scope, int Precisi
 
     public static ColumnPrecisionMetaData Create( int Scope, int Precision )
     {
-        if ( Precision > Constants.DECIMAL_MAX_PRECISION ) { throw new OutOfRangeException(Precision); }
+        if ( Precision > DECIMAL_MAX_PRECISION ) { throw new OutOfRangeException(Precision); }
 
-        if ( Scope > Constants.DECIMAL_MAX_SCALE ) { throw new OutOfRangeException(Scope); }
+        if ( Scope > DECIMAL_MAX_SCALE ) { throw new OutOfRangeException(Scope); }
 
         return new ColumnPrecisionMetaData(-1, Scope, Precision);
     }
@@ -120,68 +121,101 @@ public sealed record ColumnMetaData( string ColumnName, PostgresType DbType, Col
     public readonly        string?                  IndexColumnName = IndexColumnName?.SqlColumnName();
 
 
-    public bool IsValidLength() =>
-        Length?.Scope switch
-        {
-            0                                                               => false,
-            > Constants.ANSI_CAPACITY when DbType is PostgresType.String    => false,
-            > Constants.UNICODE_CAPACITY when DbType is PostgresType.String => false,
-            _                                                               => true
-        };
-
-
     public string GetDataType() =>
         DbType switch
         {
-            PostgresType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
-            PostgresType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
-
-            // DbPropertyType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()
-            // => throw new OutOfRangeException(Length, $"Max decimal scale is {Constants.DECIMAL_MAX_SCALE}. Max decimal precision is {Constants.DECIMAL_MAX_PRECISION}"),
-
-            _ => DbType switch
-                 {
-                     PostgresType.Binary => Length is not null
-                                                ? $"VARBINARY({Length.Scope})"
-                                                : "BLOB",
-                     PostgresType.SByte => "bytea",
-                     PostgresType.Byte  => "bytea",
-                     PostgresType.String => Length is not null
-                                                ? Length.Scope > Constants.ANSI_CAPACITY
-                                                      ? "text"
-                                                      : $"varchar({Length.Scope})"
-                                                : "varchar(MAX)",
-                     PostgresType.Guid           => "uuid",
-                     PostgresType.Int16          => "smallint",
-                     PostgresType.Int32          => "integer",
-                     PostgresType.Int64          => "bigint",
-                     PostgresType.UInt16         => "smallint",
-                     PostgresType.UInt32         => "integer",
-                     PostgresType.UInt64         => "bigint",
-                     PostgresType.Single         => "float4",
-                     PostgresType.Double         => "float8",
-                     PostgresType.Decimal        => "decimal(19, 5)",
-                     PostgresType.Boolean        => "bool",
-                     PostgresType.Date           => "date",
-                     PostgresType.Time           => "time",
-                     PostgresType.DateTime       => "timestamp",
-                     PostgresType.DateTimeOffset => @"timestamptz",
-                     PostgresType.Currency       => "money",
-                     PostgresType.Object         => "json",
-                     PostgresType.Json           => "json",
-                     PostgresType.Xml            => "xml",
-                     PostgresType.Enum           => "enum",
-                     PostgresType.Set            => "set",
-                     PostgresType.Polygon        => "polygon",
-                     PostgresType.Linestring     => "linestring",
-                     PostgresType.Point          => "point",
-                     PostgresType.Int128         => "decimal(19, 5)",
-                     PostgresType.UInt128        => "decimal(19, 5)",
-
-                     // DbPropertyType.VarNumeric when Length.IsT1 => $"decimal({Length.AsT1.Precision}, {Length.AsT1.Scope})",
-                     // DbPropertyType.VarNumeric                  => $"decimal({Constants.DECIMAL_MAX_PRECISION}, {Constants.DECIMAL_MAX_SCALE})",
-                     _ => throw new OutOfRangeException(DbType)
-                 }
+            // !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
+            PostgresType.Binary => Length is not null
+                                       ? @$"varbit({Length.Scope})"
+                                       : "bytea",
+            PostgresType.String => Length is null || Length.Scope > MAX_VARIABLE
+                                       ? "text"
+                                       : Length.Value < MAX_FIXED && Options.HasFlagValue(ColumnOptions.Fixed)
+                                           ? $"character({Length.Value})"
+                                           : $"varchar({Length.Value})",
+            PostgresType.Byte => Length is null
+                                     ? "bit(8)"
+                                     : $"bit({Length.Value})",
+            PostgresType.SByte => Length is null
+                                      ? "bit(8)"
+                                      : $"bit({Length.Value})",
+            PostgresType.Short                    => "smallint",
+            PostgresType.UShort                   => "smallint",
+            PostgresType.Int                      => "integer",
+            PostgresType.UInt                     => "integer",
+            PostgresType.Long                     => "bigint",
+            PostgresType.ULong                    => "bigint",
+            PostgresType.Single                   => "float4",
+            PostgresType.Double                   => "float8",
+            PostgresType.Decimal                  => "decimal(19, 5)",
+            PostgresType.Boolean                  => "bool",
+            PostgresType.Date                     => "date",
+            PostgresType.Time                     => "time",
+            PostgresType.DateTime                 => "timestamp",
+            PostgresType.DateTimeOffset           => @"timestamptz",
+            PostgresType.Money                    => "money",
+            PostgresType.Guid                     => "uuid",
+            PostgresType.Json                     => "json",
+            PostgresType.Xml                      => "xml",
+            PostgresType.Enum                     => "enum",
+            PostgresType.Polygon                  => "polygon",
+            PostgresType.LineSegment              => @"lseg",
+            PostgresType.Point                    => "point",
+            PostgresType.Int128                   => "decimal(19, 5)",
+            PostgresType.UInt128                  => "decimal(19, 5)",
+            PostgresType.Numeric                  => "numeric",
+            PostgresType.Box                      => "box",
+            PostgresType.Circle                   => "circle",
+            PostgresType.Line                     => "line",
+            PostgresType.Path                     => "path",
+            PostgresType.Char                     => "char",
+            PostgresType.CiText                   => @"citext",
+            PostgresType.TimeSpan                 => "interval",
+            PostgresType.TimeTz                   => "time with time zone",
+            PostgresType.Inet                     => "inet",
+            PostgresType.Cidr                     => "cidr",
+            PostgresType.MacAddr                  => @"macaddr",
+            PostgresType.MacAddr8                 => "macaddr8",
+            PostgresType.Bit                      => $"bit({Validate.ThrowIfNull(Length).Value})",
+            PostgresType.VarBit                   => $"bit varying({Validate.ThrowIfNull(Length).Value})",
+            PostgresType.TsVector                 => @"tsvector",
+            PostgresType.TsQuery                  => @"tsquery",
+            PostgresType.RegConfig                => @"regconfig",
+            PostgresType.Jsonb                    => "jsonb",
+            PostgresType.JsonPath                 => "jsonpath",
+            PostgresType.Hstore                   => "hstore",
+            PostgresType.RefCursor                => @"refcursor",
+            PostgresType.OidVector                => @"oidvector",
+            PostgresType.Oid                      => "oid",
+            PostgresType.Xid                      => "xid",
+            PostgresType.Xid8                     => "xid8",
+            PostgresType.Cid                      => "cit",
+            PostgresType.RegType                  => @"regtype",
+            PostgresType.Tid                      => "tid",
+            PostgresType.PgLsn                    => @"pglsn",
+            PostgresType.Geometry                 => "geometry",
+            PostgresType.Geography                => "geodetic",
+            PostgresType.LTree                    => @"ltree",
+            PostgresType.LQuery                   => @"lquery",
+            PostgresType.LTxtQuery                => @"ltxtquery",
+            PostgresType.IntVector                => "integer[]",
+            PostgresType.LongVector               => "bigint[]",
+            PostgresType.FloatVector              => "float[]",
+            PostgresType.DoubleVector             => "double[]",
+            PostgresType.IntegerRange             => "int4range",
+            PostgresType.BigIntRange              => "int8range",
+            PostgresType.NumericRange             => @"numrange",
+            PostgresType.TimestampRange           => @"tsrange",
+            PostgresType.DateTimeOffsetRange      => @"tstzrange",
+            PostgresType.DateRange                => @"daterange",
+            PostgresType.IntegerMultirange        => "int4multirange",
+            PostgresType.BigIntMultirange         => "int8multirange",
+            PostgresType.NumericMultirange        => @"nummultirange",
+            PostgresType.TimestampMultirange      => @"tsmultirange",
+            PostgresType.DateTimeOffsetMultirange => @"tstzmultirange",
+            PostgresType.DateMultirange           => @"datemultirange",
+            PostgresType.NotSet                   => throw new OutOfRangeException(DbType),
+            _                                     => throw new OutOfRangeException(DbType)
         };
 
 
@@ -288,7 +322,6 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
         isEnum     = type.IsEnum           || TryGetUnderlyingType(type, out Type? underlyingType) && underlyingType.IsEnum;
         isNullable = type.IsNullableType() || type.IsBuiltInNullableType();
 
-
         if ( type == typeof(byte[]) || type == typeof(Memory<byte>) || type == typeof(ReadOnlyMemory<byte>) || type == typeof(ImmutableArray<byte>) ) { return PostgresType.Binary; }
 
         if ( typeof(JsonNode).IsAssignableFrom(type) ) { return PostgresType.Json; }
@@ -333,60 +366,60 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
             return PostgresType.UInt128;
         }
 
-        if ( type == typeof(byte) ) { return PostgresType.Byte; }
+        if ( type == typeof(byte) ) { return PostgresType.Bit; }
 
         if ( type == typeof(byte?) )
         {
             isNullable = true;
-            return PostgresType.Byte;
+            return PostgresType.Bit;
         }
 
-        if ( type == typeof(short) ) { return PostgresType.Int16; }
+        if ( type == typeof(short) ) { return PostgresType.Short; }
 
         if ( type == typeof(short?) )
         {
             isNullable = true;
-            return PostgresType.Int16;
+            return PostgresType.Short;
         }
 
-        if ( type == typeof(ushort) ) { return PostgresType.UInt16; }
+        if ( type == typeof(ushort) ) { return PostgresType.Short; }
 
         if ( type == typeof(ushort?) )
         {
             isNullable = true;
-            return PostgresType.UInt16;
+            return PostgresType.Short;
         }
 
-        if ( type == typeof(int) ) { return PostgresType.Int32; }
+        if ( type == typeof(int) ) { return PostgresType.Int; }
 
         if ( type == typeof(int?) )
         {
             isNullable = true;
-            return PostgresType.Int32;
+            return PostgresType.Int;
         }
 
-        if ( type == typeof(uint) ) { return PostgresType.UInt32; }
+        if ( type == typeof(uint) ) { return PostgresType.Int; }
 
         if ( type == typeof(uint?) )
         {
             isNullable = true;
-            return PostgresType.UInt32;
+            return PostgresType.Int;
         }
 
-        if ( type == typeof(long) ) { return PostgresType.Int64; }
+        if ( type == typeof(long) ) { return PostgresType.Long; }
 
         if ( type == typeof(long?) )
         {
             isNullable = true;
-            return PostgresType.Int64;
+            return PostgresType.Long;
         }
 
-        if ( type == typeof(ulong) ) { return PostgresType.UInt64; }
+        if ( type == typeof(ulong) ) { return PostgresType.Long; }
 
         if ( type == typeof(ulong?) )
         {
             isNullable = true;
-            return PostgresType.UInt64;
+            return PostgresType.Long;
         }
 
         if ( type == typeof(float) ) { return PostgresType.Single; }
@@ -525,8 +558,8 @@ public readonly ref struct SqlTableBuilder<TSelf>( ImmutableDictionary<string, C
                 query.Append(" CHECK ( ");
 
                 query.AppendJoin(column.Checks.And
-                                     ? Constants.AND
-                                     : Constants.OR,
+                                     ? AND
+                                     : OR,
                                  column.Checks.Checks);
 
                 query.Append(" )");

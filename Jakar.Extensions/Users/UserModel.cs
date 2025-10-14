@@ -37,7 +37,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     public TID                            ID        { get => _id; init => _id = value; }
     public ObservableCollection<TAddress> Addresses { get;        init; } = [];
 
-    [StringLength(UNICODE_CAPACITY)] public string Company
+    [StringLength(COMPANY)] public string Company
     {
         get => __company;
         set
@@ -51,7 +51,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     public TID? CreatedBy { get => __createdBy; set => SetProperty(ref __createdBy, value); }
 
-    [StringLength(UNICODE_CAPACITY)] public string Department
+    [StringLength(DEPARTMENT)] public string Department
     {
         get => __department;
         set
@@ -63,10 +63,10 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [StringLength(               UNICODE_CAPACITY)] public string Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(UNICODE_CAPACITY)] public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
+    [StringLength(               DESCRIPTION)] public string Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
+    [EmailAddress] [StringLength(EMAIL)] public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
     public                                                 TID?   EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
-    [StringLength(UNICODE_CAPACITY)] public                string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [StringLength(PHONE_EXT)] public                string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
 
     [Required] [StringLength(2000)] public string FirstName
     {
@@ -80,8 +80,8 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [StringLength(UNICODE_CAPACITY)] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(UNICODE_CAPACITY)] public string                            Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    [StringLength(FULL_NAME)] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
+    [StringLength(GENDER)] public string                            Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
     public                                  ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
     public                                  TID?                              ImageID            { get => __imageID;                   set => SetProperty(ref __imageID, value); }
     [JsonIgnore] public virtual             bool                              IsValid            { get => IsValidEmail                      && IsValidName && IsValidUserName; }
@@ -103,13 +103,13 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [Phone] [StringLength(UNICODE_CAPACITY)]  public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
+    [Phone] [StringLength(PHONE)]  public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
     [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => __preferredLanguage; set => SetProperty(ref __preferredLanguage, value); }
-    [StringLength(IUserRights.MAX_SIZE)]      public string                           Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
+    [StringLength(RIGHTS)]      public string                           Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
     public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
     public                                           DateTimeOffset?                  SubscriptionExpires { get;                        init; }
 
-    [StringLength(UNICODE_CAPACITY)] public string Title
+    [StringLength(TITLE)] public string Title
     {
         get => __title;
         set
@@ -122,7 +122,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
     public Guid UserID { get; init; }
 
-    [StringLength(UNICODE_CAPACITY)] public virtual string UserName
+    [StringLength(USER_NAME)] public virtual string UserName
     {
         get => __userName;
         set
@@ -131,7 +131,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [Url] [StringLength(UNICODE_CAPACITY)] public string Website { get => __website; set => SetProperty(ref __website, value); }
+    [Url] [StringLength(WEBSITE)] public string Website { get => __website; set => SetProperty(ref __website, value); }
 
 
     protected UserModel() : base() { }

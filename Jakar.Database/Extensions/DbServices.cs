@@ -99,7 +99,7 @@ public static class DbServices
         if ( OperatingSystem.IsWindows() ) { builder.AddProvider(name.GetEventLogLoggerProvider()); }
         else if ( OperatingSystem.IsLinux() ) { builder.AddSystemdConsole(static options => options.UseUtcTimestamp = true); }
 
-        return builder.AddFluentMigratorLogger();
+        return builder;
     }
 
 
@@ -131,49 +131,14 @@ public static class DbServices
                                                                                                                                            .Add(registration);
 
 
-    public static FluentMigratorConsoleLoggerProvider GetFluentMigratorConsoleLoggerProvider( this FluentMigratorLoggerOptions options )                                       => new(new OptionsWrapper<FluentMigratorLoggerOptions>(options));
-    public static ILoggingBuilder                     AddFluentMigratorLogger( this                ILoggingBuilder             services, FluentMigratorLoggerOptions options ) => services.AddProvider(options.GetFluentMigratorConsoleLoggerProvider());
-    public static ILoggingBuilder AddFluentMigratorLogger( this ILoggingBuilder services, bool showSql = true, bool showElapsedTime = true ) =>
-        services.AddFluentMigratorLogger(new FluentMigratorLoggerOptions
-                                         {
-                                             ShowElapsedTime = showElapsedTime,
-                                             ShowSql         = showSql
-                                         });
-
-
-    public static void MigrationsMsSql( this IMigrationRunnerBuilder migration )
-    {
-        migration.AddSqlServer2016();
-        DbOptions.GetConnectionString(migration);
-
-        migration.ScanIn(typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly())
-                 .For.All();
-    }
-    public static void MigrationsMsSql<TApp>( this IMigrationRunnerBuilder migration )
+    public static Assembly[] GetAssemblies<TApp>( params ReadOnlySpan<Assembly> assemblies )
         where TApp : IAppName
     {
-        migration.AddSqlServer2016();
-        DbOptions.GetConnectionString(migration);
+        Assembly? entry = Assembly.GetEntryAssembly();
 
-        migration.ScanIn(typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly())
-                 .For.All();
-    }
-    public static void MigrationsPostgres( this IMigrationRunnerBuilder migration )
-    {
-        migration.AddPostgres();
-        DbOptions.GetConnectionString(migration);
-
-        migration.ScanIn(typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly())
-                 .For.All();
-    }
-    public static void MigrationsPostgres<TApp>( this IMigrationRunnerBuilder migration )
-        where TApp : IAppName
-    {
-        migration.AddPostgres();
-        DbOptions.GetConnectionString(migration);
-
-        migration.ScanIn(typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), Assembly.GetEntryAssembly())
-                 .For.All();
+        return entry is not null
+                   ? [typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), entry, ..assemblies]
+                   : [typeof(TApp).Assembly, typeof(Database).Assembly, Assembly.GetExecutingAssembly(), ..assemblies];
     }
 
 

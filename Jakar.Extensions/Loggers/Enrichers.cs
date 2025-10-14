@@ -78,7 +78,7 @@ public static class Enricher
 
 
     public static void             TryEnrich( this         LogEvent log, string sourceContext ) => log.AddPropertyIfAbsent(__sourceContexts.GetOrAdd(sourceContext, GetSourceProperty));
-    public static LogEventProperty GetSourceProperty( this string   sourceContext ) => new(Constants.SourceContextPropertyName, new ScalarValue(sourceContext));
+    public static LogEventProperty GetSourceProperty( this string   sourceContext ) => new(Serilog.Core.Constants.SourceContextPropertyName, new ScalarValue(sourceContext));
 
 
     public static LogEventProperty GetProperty( string?           value, string name ) => new(name, new ScalarValue(value));

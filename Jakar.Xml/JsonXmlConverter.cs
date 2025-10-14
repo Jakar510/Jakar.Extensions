@@ -14,7 +14,7 @@ namespace Jakar.Xml;
 
 public static class JsonXmlConverter
 {
-    public static XmlDocument JsonObjectToXml( this IEnumerable<JsonObject> values, string? objectName = null, [CallerArgumentExpression(nameof(values))] string rootName = BaseClass.EMPTY )
+    public static XmlDocument JsonObjectToXml( this IEnumerable<JsonObject> values, string? objectName = null, [CallerArgumentExpression(nameof(values))] string rootName = EMPTY )
     {
         XmlDocument doc  = new();
         XmlElement  root = doc.CreateElement(rootName);
@@ -24,13 +24,13 @@ public static class JsonXmlConverter
 
         return doc;
     }
-    public static XmlDocument JsonObjectToXml( this JsonObject value, [CallerArgumentExpression(nameof(value))] string rootName = BaseClass.EMPTY )
+    public static XmlDocument JsonObjectToXml( this JsonObject value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY )
     {
         XmlDocument doc = new();
         doc.JsonObjectToXml(value, rootName);
         return doc;
     }
-    public static XmlDocument JsonObjectToXml( this XmlDocument doc, JsonObject value, [CallerArgumentExpression(nameof(value))] string rootName = BaseClass.EMPTY )
+    public static XmlDocument JsonObjectToXml( this XmlDocument doc, JsonObject value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY )
     {
         XmlElement root = doc.CreateElement(rootName);
         doc.AppendChild(root);
@@ -80,7 +80,7 @@ public static class JsonXmlConverter
     }
 
 
-    public static JsonNode    ToJson( this XmlDocument           value, [CallerArgumentExpression(nameof(value))] string rootName = BaseClass.EMPTY ) { return null; }
-    public static XmlDocument ToXml( this  JsonNode              value, [CallerArgumentExpression(nameof(value))] string rootName = BaseClass.EMPTY ) { return null; }
-    public static XmlDocument ToXml( this  IEnumerable<JsonNode> values, [CallerArgumentExpression(nameof(values))] string rootName = BaseClass.EMPTY ) { return null; }
+    public static JsonNode    ToJson( this XmlDocument           value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY ) { return null; }
+    public static XmlDocument ToXml( this  JsonNode              value, [CallerArgumentExpression(nameof(value))] string rootName = EMPTY ) { return null; }
+    public static XmlDocument ToXml( this  IEnumerable<JsonNode> values, [CallerArgumentExpression(nameof(values))] string rootName = EMPTY ) { return null; }
 }

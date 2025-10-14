@@ -4,7 +4,7 @@
 namespace Jakar.Extensions;
 
 
-public enum ProgrammingLanguage
+public enum ProgrammingLanguage : ulong
 {
     Unknown,
     CSharp,

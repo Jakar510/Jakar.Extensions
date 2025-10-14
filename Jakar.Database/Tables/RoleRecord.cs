@@ -9,28 +9,28 @@ namespace Jakar.Database;
 
 [Serializable]
 [Table(TABLE_NAME)]
-public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRole,
-                                 [property: StringLength(1024)] string NormalizedName,
-                                 [property: StringLength(4096)] string ConcurrencyStamp,
-                                 string                                Rights,
-                                 RecordID<RoleRecord>                  ID,
-                                 RecordID<UserRecord>?                 CreatedBy,
-                                 DateTimeOffset                        DateCreated,
-                                 DateTimeOffset?                       LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
+public sealed record RoleRecord( [property: StringLength(NAME)]              string NameOfRole,
+                                 [property: StringLength(NORMALIZED_NAME)]   string NormalizedName,
+                                 [property: StringLength(CONCURRENCY_STAMP)] string ConcurrencyStamp,
+                                 string                                             Rights,
+                                 RecordID<RoleRecord>                               ID,
+                                 RecordID<UserRecord>?                              CreatedBy,
+                                 DateTimeOffset                                     DateCreated,
+                                 DateTimeOffset?                                    LastModified = null ) : OwnedTableRecord<RoleRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<RoleRecord>, IRoleModel<Guid>
 {
-    public const                                string                     TABLE_NAME = "roles";
-    public static                               string                     TableName     {  get => TABLE_NAME; }
-    public static                               JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
-    public static                               JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
-    public static                               JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
-    [StringLength(IUserRights.MAX_SIZE)] public string                     Rights        { get; set; } = Rights;
+    public const                  string                     TABLE_NAME = "roles";
+    public static                 string                     TableName     { get => TABLE_NAME; }
+    public static                 JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
+    public static                 JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
+    public static                 JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
+    [StringLength(RIGHTS)] public string                     Rights        { get; set; } = Rights;
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(NameOfRole),       length: 1024)
-                                                                                                              .WithColumn<string>(nameof(NormalizedName),   length: 1024)
-                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp), length: 4096)
-                                                                                                              .WithColumn<string>(nameof(Rights),           length: UNICODE_CAPACITY)
+                                                                                                              .WithColumn<string>(nameof(NameOfRole),       length: NAME)
+                                                                                                              .WithColumn<string>(nameof(NormalizedName),   length: NORMALIZED_NAME)
+                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp), length: CONCURRENCY_STAMP)
+                                                                                                              .WithColumn<string>(nameof(Rights),           length: RIGHTS)
                                                                                                               .With_CreatedBy()
                                                                                                               .Build();
 
@@ -88,12 +88,10 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create { TABLE_NAME} table",
+                                                  $"create {TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
+                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
                                                    (  
                                                    {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
                                                    {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
@@ -104,9 +102,9 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                                    {nameof(LastModified).SqlColumnName()}     timestamptz   NULL,
                                                    {nameof(AdditionalData).SqlColumnName()}   json          NULL
                                                    );
-                                                   
+
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);
