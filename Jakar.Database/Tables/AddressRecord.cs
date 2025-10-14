@@ -270,12 +270,12 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<AddressRecord>(migrationID,
-                                                     $"create {tableID} table",
+                                                     $"create { TABLE_NAME} table",
                                                      $"""
-                                                      CREATE TABLE IF NOT EXISTS {tableID}
+                                                      CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                       (
                                                       {nameof(Line1).SqlColumnName()}           varchar(512)   NOT NULL,
                                                       {nameof(Line2).SqlColumnName()}           varchar(512)   NOT NULL,
@@ -294,7 +294,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                       );
                                                       
                                                       CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON {tableID}
+                                                      BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                       FOR EACH ROW
                                                       EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                       """);

@@ -18,13 +18,14 @@ public ref struct PostgresParameters : IDisposable
                                                                                      {
                                                                                          [nameof(MimeType)]            = "mime_types",
                                                                                          [nameof(SupportedLanguage)]   = "languages",
-                                                                                         [nameof(ProgrammingLanguage)] = "programming_anguages",
+                                                                                         [nameof(ProgrammingLanguage)] = "programming_languages",
                                                                                          [nameof(SubscriptionStatus)]  = "subscription_status",
                                                                                          [nameof(DeviceCategory)]      = "device_categories",
                                                                                          [nameof(DevicePlatform)]      = "device_platforms",
                                                                                          [nameof(DeviceTypes)]         = "device_types",
                                                                                          [nameof(DistanceUnit)]        = "distance_units",
                                                                                          [nameof(Status)]              = "statuses",
+                                                                                         [nameof(NpgsqlDbType)]        = "db_types",
                                                                                      };
     private readonly DynamicParameters _parameters;
     private          string[]?         _array = null;

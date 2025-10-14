@@ -51,12 +51,12 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<UserLoginProviderRecord>(migrationID,
-                                                               $"create {tableID} table",
+                                                               $"create { TABLE_NAME} table",
                                                                $"""
-                                                                CREATE TABLE {tableID}
+                                                                CREATE TABLE { TABLE_NAME}
                                                                 (
                                                                 {nameof(LoginProvider).SqlColumnName()}       varchar({UNICODE_CAPACITY}) NOT NULL,
                                                                 {nameof(ProviderDisplayName).SqlColumnName()} varchar({UNICODE_CAPACITY}) NOT NULL,
@@ -68,7 +68,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                                                 );
 
                                                                 CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                                BEFORE INSERT OR UPDATE ON {tableID}
+                                                                BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                                 FOR EACH ROW
                                                                 EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                                 """);

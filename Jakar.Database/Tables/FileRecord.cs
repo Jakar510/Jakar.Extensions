@@ -223,12 +223,12 @@ public sealed record FileRecord( string?              FileName,
     public static bool operator <=( FileRecord left, FileRecord right ) => left.CompareTo(right) <= 0;
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<FileRecord>(5,
-                                                  $"create {tableID} table",
+                                                  $"create { TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                    (
                                                    {nameof(FileName).SqlColumnName()}        varchar(256)                NULL UNIQUE,
                                                    {nameof(FileDescription).SqlColumnName()} varchar({UNICODE_CAPACITY}) NULL,
@@ -245,7 +245,7 @@ public sealed record FileRecord( string?              FileName,
                                                    );
                                                    
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);

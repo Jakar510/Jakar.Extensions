@@ -57,42 +57,6 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-public enum DbPropType
-{
-    Guid,
-    Boolean,
-    Byte,
-    SByte,
-    Int16,
-    Int32,
-    Int64,
-    Int128,
-    UInt16,
-    UInt32,
-    UInt64,
-    UInt128,
-    Single,
-    Double,
-    Decimal,
-    Currency,
-    Time,
-    Date,
-    DateTime,
-    DateTimeOffset,
-    Binary,
-    String,
-    Xml,
-    Json,
-    Object,
-    Enum,
-    Set,
-    Polygon,
-    Linestring,
-    Point
-}
-
-
-
 [Flags]
 public enum ColumnOptions
 {
@@ -137,20 +101,20 @@ public sealed record ColumnCheckMetaData( bool And, params string[] Checks )
 
 
 
-public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, ColumnOptions Options = 0, string? ForeignKeyName = null, string? IndexColumnName = null, ColumnPrecisionMetaData? Length = null, ColumnCheckMetaData? Checks = null )
+public sealed record ColumnMetaData( string ColumnName, PostgresType DbType, ColumnOptions Options = 0, string? ForeignKeyName = null, string? IndexColumnName = null, ColumnPrecisionMetaData? Length = null, ColumnCheckMetaData? Checks = null )
 {
-    public static readonly ColumnMetaData           AdditionalData  = new(nameof(IJsonModel.AdditionalData), DbPropType.Json, ColumnOptions.Nullable);
-    public static readonly ColumnMetaData           CreatedBy       = new(nameof(ICreatedBy.CreatedBy), DbPropType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
-    public static readonly ColumnMetaData           DateCreated     = new(nameof(ICreatedBy.DateCreated), DbPropType.DateTimeOffset, ColumnOptions.Indexed);
-    public static readonly ColumnMetaData           ID              = new(nameof(ICreatedBy.ID), DbPropType.Guid, ColumnOptions.PrimaryKey                      | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
-    public static readonly ColumnMetaData           LastModified    = new(nameof(ILastModified.LastModified), DbPropType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
+    public static readonly ColumnMetaData           AdditionalData  = new(nameof(IJsonModel.AdditionalData), PostgresType.Json, ColumnOptions.Nullable);
+    public static readonly ColumnMetaData           CreatedBy       = new(nameof(ICreatedBy.CreatedBy), PostgresType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
+    public static readonly ColumnMetaData           DateCreated     = new(nameof(ICreatedBy.DateCreated), PostgresType.DateTimeOffset, ColumnOptions.Indexed);
+    public static readonly ColumnMetaData           ID              = new(nameof(ICreatedBy.ID), PostgresType.Guid, ColumnOptions.PrimaryKey                      | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
+    public static readonly ColumnMetaData           LastModified    = new(nameof(ILastModified.LastModified), PostgresType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
     public readonly        bool                     IsForeignKey    = !string.IsNullOrWhiteSpace(IndexColumnName);
     public readonly        bool                     IsNullable      = Options.HasFlagValue(ColumnOptions.Nullable);
     public readonly        bool                     IsPrimaryKey    = Options.HasFlagValue(ColumnOptions.PrimaryKey);
     public readonly        ColumnCheckMetaData?     Checks          = Checks;
     public readonly        ColumnOptions            Options         = Options;
     public readonly        ColumnPrecisionMetaData? Length          = Length;
-    public readonly        DbPropType               DbType          = DbType;
+    public readonly        PostgresType             DbType          = DbType;
     public readonly        string                   ColumnName      = ColumnName.SqlColumnName();
     public readonly        string?                  ForeignKeyName  = ForeignKeyName?.SqlColumnName();
     public readonly        string?                  IndexColumnName = IndexColumnName?.SqlColumnName();
@@ -159,59 +123,60 @@ public sealed record ColumnMetaData( string ColumnName, DbPropType DbType, Colum
     public bool IsValidLength() =>
         Length?.Scope switch
         {
-            0                                                             => false,
-            > Constants.ANSI_CAPACITY when DbType is DbPropType.String    => false,
-            > Constants.UNICODE_CAPACITY when DbType is DbPropType.String => false,
-            _                                                             => true
+            0                                                               => false,
+            > Constants.ANSI_CAPACITY when DbType is PostgresType.String    => false,
+            > Constants.UNICODE_CAPACITY when DbType is PostgresType.String => false,
+            _                                                               => true
         };
+
 
     public string GetDataType() =>
         DbType switch
         {
-            DbPropType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
-            DbPropType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
+            PostgresType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
+            PostgresType.String when !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for ANSI strings is {Constants.ANSI_CAPACITY}"),
 
             // DbPropertyType.VarNumeric when Length.IsT0 || !Length.IsT1 || IsInvalidScopedPrecision()
             // => throw new OutOfRangeException(Length, $"Max decimal scale is {Constants.DECIMAL_MAX_SCALE}. Max decimal precision is {Constants.DECIMAL_MAX_PRECISION}"),
 
             _ => DbType switch
                  {
-                     DbPropType.Binary => Length is not null
-                                              ? $"VARBINARY({Length.Scope})"
-                                              : "BLOB",
-                     DbPropType.SByte => "bytea",
-                     DbPropType.Byte  => "bytea",
-                     DbPropType.String => Length is not null
-                                              ? Length.Scope > Constants.ANSI_CAPACITY
-                                                    ? "text"
-                                                    : $"varchar({Length.Scope})"
-                                              : "varchar(MAX)",
-                     DbPropType.Guid           => "uuid",
-                     DbPropType.Int16          => "smallint",
-                     DbPropType.Int32          => "integer",
-                     DbPropType.Int64          => "bigint",
-                     DbPropType.UInt16         => "smallint",
-                     DbPropType.UInt32         => "integer",
-                     DbPropType.UInt64         => "bigint",
-                     DbPropType.Single         => "float4",
-                     DbPropType.Double         => "float8",
-                     DbPropType.Decimal        => "decimal(19, 5)",
-                     DbPropType.Boolean        => "bool",
-                     DbPropType.Date           => "date",
-                     DbPropType.Time           => "time",
-                     DbPropType.DateTime       => "timestamp",
-                     DbPropType.DateTimeOffset => @"timestamptz",
-                     DbPropType.Currency       => "money",
-                     DbPropType.Object         => "json",
-                     DbPropType.Json           => "json",
-                     DbPropType.Xml            => "xml",
-                     DbPropType.Enum           => "enum",
-                     DbPropType.Set            => "set",
-                     DbPropType.Polygon        => "polygon",
-                     DbPropType.Linestring     => "linestring",
-                     DbPropType.Point          => "point",
-                     DbPropType.Int128         => "decimal(19, 5)",
-                     DbPropType.UInt128        => "decimal(19, 5)",
+                     PostgresType.Binary => Length is not null
+                                                ? $"VARBINARY({Length.Scope})"
+                                                : "BLOB",
+                     PostgresType.SByte => "bytea",
+                     PostgresType.Byte  => "bytea",
+                     PostgresType.String => Length is not null
+                                                ? Length.Scope > Constants.ANSI_CAPACITY
+                                                      ? "text"
+                                                      : $"varchar({Length.Scope})"
+                                                : "varchar(MAX)",
+                     PostgresType.Guid           => "uuid",
+                     PostgresType.Int16          => "smallint",
+                     PostgresType.Int32          => "integer",
+                     PostgresType.Int64          => "bigint",
+                     PostgresType.UInt16         => "smallint",
+                     PostgresType.UInt32         => "integer",
+                     PostgresType.UInt64         => "bigint",
+                     PostgresType.Single         => "float4",
+                     PostgresType.Double         => "float8",
+                     PostgresType.Decimal        => "decimal(19, 5)",
+                     PostgresType.Boolean        => "bool",
+                     PostgresType.Date           => "date",
+                     PostgresType.Time           => "time",
+                     PostgresType.DateTime       => "timestamp",
+                     PostgresType.DateTimeOffset => @"timestamptz",
+                     PostgresType.Currency       => "money",
+                     PostgresType.Object         => "json",
+                     PostgresType.Json           => "json",
+                     PostgresType.Xml            => "xml",
+                     PostgresType.Enum           => "enum",
+                     PostgresType.Set            => "set",
+                     PostgresType.Polygon        => "polygon",
+                     PostgresType.Linestring     => "linestring",
+                     PostgresType.Point          => "point",
+                     PostgresType.Int128         => "decimal(19, 5)",
+                     PostgresType.UInt128        => "decimal(19, 5)",
 
                      // DbPropertyType.VarNumeric when Length.IsT1 => $"decimal({Length.AsT1.Precision}, {Length.AsT1.Scope})",
                      // DbPropertyType.VarNumeric                  => $"decimal({Constants.DECIMAL_MAX_PRECISION}, {Constants.DECIMAL_MAX_SCALE})",
@@ -253,9 +218,9 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
     public SqlTable() { }
     public static SqlTable<TSelf> Empty() => new();
     public static SqlTable<TSelf> Create() => Empty()
-                                              .WithColumn(ColumnMetaData.ID)
-                                              .WithColumn(ColumnMetaData.LastModified)
-                                              .WithColumn(ColumnMetaData.DateCreated);
+                                             .WithColumn(ColumnMetaData.ID)
+                                             .WithColumn(ColumnMetaData.LastModified)
+                                             .WithColumn(ColumnMetaData.DateCreated);
     public void Dispose() => Columns?.Clear();
 
 
@@ -268,12 +233,12 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
 
     public SqlTable<TSelf> WithColumn<TValue>( string columnName, ColumnOptions options = 0, ColumnPrecisionMetaData? length = null, ColumnCheckMetaData? checks = null, string? indexColumnName = null )
     {
-        bool       isEnum = false;
-        DbPropType dbType;
+        bool         isEnum = false;
+        PostgresType dbType;
 
         if ( ( typeof(TValue) ) == typeof(RecordID<TSelf>) || ( typeof(TValue) ) == typeof(RecordID<TSelf>?) )
         {
-            dbType  =  DbPropType.Guid;
+            dbType  =  PostgresType.Guid;
             options |= ColumnOptions.PrimaryKey;
         }
         else
@@ -293,7 +258,7 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
     public SqlTable<TSelf> WithForeignKey<TRecord>( string columnName, ColumnOptions options = 0, ColumnCheckMetaData? checks = null )
         where TRecord : ITableRecord<TRecord>
     {
-        ColumnMetaData column = new(columnName, DbPropType.Guid, options, TRecord.TableName, Checks: checks);
+        ColumnMetaData column = new(columnName, PostgresType.Guid, options, TRecord.TableName, Checks: checks);
         return WithColumn(column);
     }
     public SqlTable<TSelf> WithColumn( ColumnMetaData column )
@@ -317,26 +282,26 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
         result = null;
         return false;
     }
-    public static DbPropType GetDataType<TValue>( out bool isNullable, out bool isEnum, ref ColumnPrecisionMetaData? length )
+    public static PostgresType GetDataType<TValue>( out bool isNullable, out bool isEnum, ref ColumnPrecisionMetaData? length )
     {
         Type type = typeof(TValue);
         isEnum     = type.IsEnum           || TryGetUnderlyingType(type, out Type? underlyingType) && underlyingType.IsEnum;
         isNullable = type.IsNullableType() || type.IsBuiltInNullableType();
 
 
-        if ( type == typeof(byte[]) || type == typeof(Memory<byte>) || type == typeof(ReadOnlyMemory<byte>) || type == typeof(ImmutableArray<byte>) ) { return DbPropType.Binary; }
+        if ( type == typeof(byte[]) || type == typeof(Memory<byte>) || type == typeof(ReadOnlyMemory<byte>) || type == typeof(ImmutableArray<byte>) ) { return PostgresType.Binary; }
 
-        if ( typeof(JsonNode).IsAssignableFrom(type) ) { return DbPropType.Json; }
+        if ( typeof(JsonNode).IsAssignableFrom(type) ) { return PostgresType.Json; }
 
-        if ( typeof(XmlNode).IsAssignableFrom(type) ) { return DbPropType.Xml; }
+        if ( typeof(XmlNode).IsAssignableFrom(type) ) { return PostgresType.Xml; }
 
 
-        if ( type == typeof(Guid) ) { return DbPropType.Guid; }
+        if ( type == typeof(Guid) ) { return PostgresType.Guid; }
 
         if ( type == typeof(Guid?) )
         {
             isNullable = true;
-            return DbPropType.Guid;
+            return PostgresType.Guid;
         }
 
 
@@ -346,154 +311,154 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
                          .AsValueEnumerable()
                          .Max(static x => x.Length);
 
-            return DbPropType.String;
+            return PostgresType.String;
         }
 
-        if ( type == typeof(string) ) { return DbPropType.String; }
+        if ( type == typeof(string) ) { return PostgresType.String; }
 
 
-        if ( type == typeof(Int128) ) { return DbPropType.String; }
+        if ( type == typeof(Int128) ) { return PostgresType.String; }
 
         if ( type == typeof(Int128?) )
         {
             isNullable = true;
-            return DbPropType.Int128;
+            return PostgresType.Int128;
         }
 
-        if ( type == typeof(UInt128) ) { return DbPropType.String; }
+        if ( type == typeof(UInt128) ) { return PostgresType.String; }
 
         if ( type == typeof(UInt128?) )
         {
             isNullable = true;
-            return DbPropType.UInt128;
+            return PostgresType.UInt128;
         }
 
-        if ( type == typeof(byte) ) { return DbPropType.Byte; }
+        if ( type == typeof(byte) ) { return PostgresType.Byte; }
 
         if ( type == typeof(byte?) )
         {
             isNullable = true;
-            return DbPropType.Byte;
+            return PostgresType.Byte;
         }
 
-        if ( type == typeof(short) ) { return DbPropType.Int16; }
+        if ( type == typeof(short) ) { return PostgresType.Int16; }
 
         if ( type == typeof(short?) )
         {
             isNullable = true;
-            return DbPropType.Int16;
+            return PostgresType.Int16;
         }
 
-        if ( type == typeof(ushort) ) { return DbPropType.UInt16; }
+        if ( type == typeof(ushort) ) { return PostgresType.UInt16; }
 
         if ( type == typeof(ushort?) )
         {
             isNullable = true;
-            return DbPropType.UInt16;
+            return PostgresType.UInt16;
         }
 
-        if ( type == typeof(int) ) { return DbPropType.Int32; }
+        if ( type == typeof(int) ) { return PostgresType.Int32; }
 
         if ( type == typeof(int?) )
         {
             isNullable = true;
-            return DbPropType.Int32;
+            return PostgresType.Int32;
         }
 
-        if ( type == typeof(uint) ) { return DbPropType.UInt32; }
+        if ( type == typeof(uint) ) { return PostgresType.UInt32; }
 
         if ( type == typeof(uint?) )
         {
             isNullable = true;
-            return DbPropType.UInt32;
+            return PostgresType.UInt32;
         }
 
-        if ( type == typeof(long) ) { return DbPropType.Int64; }
+        if ( type == typeof(long) ) { return PostgresType.Int64; }
 
         if ( type == typeof(long?) )
         {
             isNullable = true;
-            return DbPropType.Int64;
+            return PostgresType.Int64;
         }
 
-        if ( type == typeof(ulong) ) { return DbPropType.UInt64; }
+        if ( type == typeof(ulong) ) { return PostgresType.UInt64; }
 
         if ( type == typeof(ulong?) )
         {
             isNullable = true;
-            return DbPropType.UInt64;
+            return PostgresType.UInt64;
         }
 
-        if ( type == typeof(float) ) { return DbPropType.Single; }
+        if ( type == typeof(float) ) { return PostgresType.Single; }
 
         if ( type == typeof(float?) )
         {
             isNullable = true;
-            return DbPropType.Single;
+            return PostgresType.Single;
         }
 
-        if ( type == typeof(double) ) { return DbPropType.Double; }
+        if ( type == typeof(double) ) { return PostgresType.Double; }
 
         if ( type == typeof(double?) )
         {
             isNullable = true;
-            return DbPropType.Double;
+            return PostgresType.Double;
         }
 
-        if ( type == typeof(decimal) ) { return DbPropType.Decimal; }
+        if ( type == typeof(decimal) ) { return PostgresType.Decimal; }
 
         if ( type == typeof(decimal?) )
         {
             isNullable = true;
-            return DbPropType.Decimal;
+            return PostgresType.Decimal;
         }
 
-        if ( type == typeof(bool) ) { return DbPropType.Boolean; }
+        if ( type == typeof(bool) ) { return PostgresType.Boolean; }
 
         if ( type == typeof(bool?) )
         {
             isNullable = true;
-            return DbPropType.Boolean;
+            return PostgresType.Boolean;
         }
 
-        if ( type == typeof(DateOnly) ) { return DbPropType.Date; }
+        if ( type == typeof(DateOnly) ) { return PostgresType.Date; }
 
         if ( type == typeof(DateOnly?) )
         {
             isNullable = true;
-            return DbPropType.Date;
+            return PostgresType.Date;
         }
 
-        if ( type == typeof(TimeOnly) ) { return DbPropType.Time; }
+        if ( type == typeof(TimeOnly) ) { return PostgresType.Time; }
 
         if ( type == typeof(TimeOnly?) )
         {
             isNullable = true;
-            return DbPropType.Time;
+            return PostgresType.Time;
         }
 
-        if ( type == typeof(TimeSpan) ) { return DbPropType.Time; }
+        if ( type == typeof(TimeSpan) ) { return PostgresType.Time; }
 
         if ( type == typeof(TimeSpan?) )
         {
             isNullable = true;
-            return DbPropType.Time;
+            return PostgresType.Time;
         }
 
-        if ( type == typeof(DateTime) ) { return DbPropType.DateTime; }
+        if ( type == typeof(DateTime) ) { return PostgresType.DateTime; }
 
         if ( type == typeof(DateTime?) )
         {
             isNullable = true;
-            return DbPropType.DateTime;
+            return PostgresType.DateTime;
         }
 
-        if ( type == typeof(DateTimeOffset) ) { return DbPropType.DateTimeOffset; }
+        if ( type == typeof(DateTimeOffset) ) { return PostgresType.DateTimeOffset; }
 
         if ( type == typeof(DateTimeOffset?) )
         {
             isNullable = true;
-            return DbPropType.DateTimeOffset;
+            return PostgresType.DateTimeOffset;
         }
 
         throw new ArgumentException($"Unsupported type: {type.Name}");
@@ -517,7 +482,7 @@ public readonly ref struct SqlTableBuilder<TSelf>( ImmutableDictionary<string, C
     where TSelf : class, ITableRecord<TSelf>
 {
     private readonly ImmutableDictionary<string, ColumnMetaData> __columns = columns;
-    public static    SqlTableBuilder<TSelf>                     Create()                                              => new(TSelf.PropertyMetaData);
+    public static    SqlTableBuilder<TSelf>                      Create()                                              => new(TSelf.PropertyMetaData);
     public static    bool                                        HasValue( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
 
 

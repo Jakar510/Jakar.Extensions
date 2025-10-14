@@ -96,17 +96,17 @@ public static partial class AsyncLinq
 
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
         return list.Last();
     }
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
         return list.Last(selector);
     }
     public static async ValueTask<TElement> Last<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
@@ -117,7 +117,7 @@ public static partial class AsyncLinq
     }
     public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
@@ -128,7 +128,7 @@ public static partial class AsyncLinq
     }
     public static async ValueTask<TElement> Last<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
@@ -141,17 +141,17 @@ public static partial class AsyncLinq
 
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
         return list.LastOrDefault();
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, bool> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
         return list.LastOrDefault(selector);
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement>( this IAsyncEnumerable<TElement> source, Func<TElement, ValueTask<bool>> selector, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
@@ -162,7 +162,7 @@ public static partial class AsyncLinq
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, bool> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {
@@ -173,7 +173,7 @@ public static partial class AsyncLinq
     }
     public static async ValueTask<TElement?> LastOrDefault<TElement, TValue>( this IAsyncEnumerable<TElement> source, Func<TElement, TValue, ValueTask<bool>> selector, TValue value, CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int i = list.Count; i < 0; i-- )
         {

@@ -38,15 +38,11 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
         app.UseTelemetry();
         app.MapGet("Ping", static () => DateTimeOffset.UtcNow);
 
-        try
-        {
-            await app.MigrateUpAsync();
-            await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-            TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
-            await TestUsers(db);
-            await app.RunAsync();
-        }
-        finally { await app.MigrateDownAsync(); }
+        await app.ApplyMigrations();
+        await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
+        TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
+        await TestUsers(db);
+        await app.RunAsync();
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {

@@ -107,10 +107,35 @@ public static partial class Validate
                                                                                                                                                                                                                                              ? caller
                                                                                                                                                                                                                                              : $"{caller}: '{message}'");
 
+
     [Pure] public static string ThrowIfNull( string? value, string? message = null, [CallerArgumentExpression(nameof(value))] string? name = null, [CallerMemberName] string? caller = null ) => string.IsNullOrWhiteSpace(value)
                                                                                                                                                                                                      ? throw new ArgumentNullException(name,
                                                                                                                                                                                                                                        message is null
                                                                                                                                                                                                                                            ? caller
                                                                                                                                                                                                                                            : $"{caller}: '{message}'")
                                                                                                                                                                                                      : value;
+
+
+    [Pure] public static string? AssertLength( [NotNullIfNotNull(nameof(value))] string? value, int maxLength, [CallerArgumentExpression(nameof(value))] string? name = null, [CallerMemberName] string? caller = null )
+    {
+        if ( IsValidLength(value, null, maxLength) ){ throw new ArgumentOutOfRangeException(name, $"{caller}.{name}: length '{value?.Length}' exceeds maximum length of '{maxLength}'"); }
+
+        return value;
+    }
+    [Pure] public static string? AssertLength( [NotNullIfNotNull(nameof(value))] string? value, int minLength, int maxLength, [CallerArgumentExpression(nameof(value))] string? name = null, [CallerMemberName] string? caller = null )
+    {
+        if ( IsValidLength(value, minLength, maxLength) ) { throw new ArgumentOutOfRangeException(name, $"{caller}.{name}: length '{value?.Length}' is not in the range of '{minLength}' to '{maxLength}'"); }
+
+        return value;
+    }
+    [Pure] public static bool IsValidLength( ReadOnlySpan<char> span, int? minLength, int? maxLength )
+    {
+        if ( minLength.HasValue && maxLength.HasValue ) { return span.Length >= minLength.Value && span.Length <= maxLength.Value; }
+
+        if ( minLength.HasValue ) { return span.Length >= minLength.Value; }
+
+        if ( maxLength.HasValue ) { return span.Length <= maxLength.Value; }
+
+        return true;
+    }
 }

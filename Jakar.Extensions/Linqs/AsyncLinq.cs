@@ -32,46 +32,32 @@ public static partial class AsyncLinq
 
     public static List<char>     ToList( this           string                        sequence ) => ToList(sequence, sequence.Length);
     public static List<TElement> ToList<TElement>( this IReadOnlyCollection<TElement> sequence ) => ToList(sequence, sequence.Count);
-    public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int count )
+    public static List<TElement> ToList<TElement>( this IEnumerable<TElement> sequence, int initialCapacity )
     {
-        List<TElement> array = new(count);
+        List<TElement> array = new(initialCapacity);
         foreach ( ( int i, TElement item ) in sequence.Enumerate(0) ) { array[i] = item; }
 
         return array;
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( int count ) => GC.AllocateUninitializedArray<TElement>(count);
-    public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int count )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( int length ) => GC.AllocateUninitializedArray<TElement>(length);
+    public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
     {
-        TElement[] array = GetArray<TElement>(count);
-        await foreach ( ( int index, TElement? value ) in sequence.Enumerate(0) ) { array[index] = value; }
-
-        return array;
+        List<TElement> array = await sequence.ToList(initialCapacity, token);
+        return array.ToArray();
     }
     public static TElement[] ToArray<TElement>( IEnumerable<TElement> sequence )
         where TElement : IEquatable<TElement>
     {
         switch ( sequence )
         {
-            case List<TElement> list:
-            {
-                TElement[] array = GetArray<TElement>(list.Count);
-                list.CopyTo(array, 0);
-                return array;
-            }
+            case List<TElement> list: { return list.ToArray(); }
 
             case Collection<TElement> list:
             {
                 TElement[] array = GetArray<TElement>(list.Count);
                 list.CopyTo(array, 0);
-                return array;
-            }
-
-            case TElement[] sourceArray:
-            {
-                TElement[] array = GetArray<TElement>(sourceArray.Length);
-                Array.Copy(sourceArray, 0, array, 0, sourceArray.Length);
                 return array;
             }
 
@@ -82,13 +68,9 @@ public static partial class AsyncLinq
                 return array;
             }
 
-            case IReadOnlyList<TElement> collection:
-            {
-                TElement[] array = GetArray<TElement>(collection.Count);
-                for ( int i = 0; i < collection.Count; i++ ) { array[i] = collection[i]; }
+            case TElement[] sourceArray: { return sourceArray.ToArray(); }
 
-                return array;
-            }
+            case IReadOnlyList<TElement> collection: { return collection.ToArray(); }
 
             case IReadOnlyCollection<TElement> collection:
             {
@@ -103,16 +85,16 @@ public static partial class AsyncLinq
                 using Buffer<TElement> builder = new();
                 foreach ( TElement equatable in sequence ) { builder.Add(equatable); }
 
-                return builder.Span.ToArray();
+                return builder.Values.ToArray();
             }
         }
     }
     public static char[]     ToArray( this           string                        sequence ) => ToArray(sequence, sequence.Length);
     public static TElement[] ToArray<TElement>( this IReadOnlyCollection<TElement> sequence ) => ToArray(sequence, sequence.Count);
     public static TElement[] ToArray<TElement>( ICollection<TElement>              sequence ) => ToArray(sequence, sequence.Count);
-    public static TElement[] ToArray<TElement>( this IEnumerable<TElement> sequence, int count )
+    public static TElement[] ToArray<TElement>( this IEnumerable<TElement> sequence, int capacity )
     {
-        TElement[] array = GetArray<TElement>(count);
+        TElement[] array = GetArray<TElement>(capacity);
         foreach ( ( int i, TElement item ) in sequence.Enumerate(0) ) { array[i] = item; }
 
         return array;
@@ -120,7 +102,6 @@ public static partial class AsyncLinq
     public static TElement[] ToArray<TElement>( this IReadOnlyList<TElement> source )
     {
         TElement[] array = GetArray<TElement>(source.Count);
-
         for ( int i = 0; i < array.Length; i++ ) { array[i] = source[i]; }
 
         return array;
@@ -149,7 +130,7 @@ public static partial class AsyncLinq
         Array.Sort(array);
         return array;
     }
-    public static TElement[] Sorted<TElement>( this TElement[] array, IComparer<TElement> comparer )
+    public static TElement[] Sorted<TElement>( this TElement[] array, Comparer<TElement> comparer )
         where TElement : IComparable<TElement>
     {
         Array.Sort(array, comparer);
@@ -163,18 +144,26 @@ public static partial class AsyncLinq
     }
 
 
-    public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<List<TElement>> ToList<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
     {
-        List<TElement> list = [];
+        List<TElement> list = new(initialCapacity);
         await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
 
         return list;
     }
-    public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, CancellationToken token = default )
+    public static async ValueTask<ObservableCollection<TElement>> ToObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
         where TElement : IEquatable<TElement>
     {
-        ObservableCollection<TElement> list = [];
-        await foreach ( TElement element in source.WithCancellation(token) ) { list.Add(element); }
+        ObservableCollection<TElement> list = new(initialCapacity);
+        await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
+
+        return list;
+    }
+    public static async ValueTask<ConcurrentObservableCollection<TElement>> ToConcurrentObservableCollection<TElement>( this IAsyncEnumerable<TElement> source, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
+        where TElement : IEquatable<TElement>
+    {
+        ConcurrentObservableCollection<TElement> list = new(initialCapacity);
+        await foreach ( TElement element in source.WithCancellation(token) ) { await list.AddAsync(element, token); }
 
         return list;
     }

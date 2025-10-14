@@ -745,12 +745,12 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<UserRecord>(migrationID,
-                                                  $"create {tableID} table",
+                                                  $"create { TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                    ( 
                                                    {nameof(UserName).SqlColumnName()}               VARCHAR(256)   NOT NULL UNIQUE,
                                                    {nameof(FirstName).SqlColumnName()}              VARCHAR(256)   NOT NULL,
@@ -793,13 +793,13 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                    {nameof(CreatedBy).SqlColumnName()}              uuid           NULL,
                                                    {nameof(DateCreated).SqlColumnName()}            timestamptz    NOT NULL,
                                                    {nameof(LastModified).SqlColumnName()}           timestamptz    NULL,
-                                                   FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {tableID}(id) ON DELETE SET NULL
-                                                   FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES {tableID}(id) ON DELETE SET NULL
+                                                   FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES { TABLE_NAME}(id) ON DELETE SET NULL
+                                                   FOREIGN KEY({nameof(EscalateTo).SqlColumnName()}) REFERENCES { TABLE_NAME}(id) ON DELETE SET NULL
                                                    FOREIGN KEY({nameof(ImageID).SqlColumnName()}) REFERENCES {FileRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
                                                    );
 
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);

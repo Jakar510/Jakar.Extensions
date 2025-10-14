@@ -110,12 +110,12 @@ public sealed record ResxRowRecord( long                    KeyID,
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<ResxRowRecord>(migrationID,
-                                                     $"create {tableID} table",
+                                                     $"create { TABLE_NAME} table",
                                                      $"""
-                                                      CREATE TABLE {tableID}
+                                                      CREATE TABLE { TABLE_NAME}
                                                       (
                                                       {nameof(ID).SqlColumnName()}           uuid                        PRIMARY KEY,
                                                       {nameof(KeyID).SqlColumnName()}        bigint                      NOT NULL,
@@ -140,7 +140,7 @@ public sealed record ResxRowRecord( long                    KeyID,
                                                       );
 
                                                       CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON {tableID}
+                                                      BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                       FOR EACH ROW
                                                       EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                       """);

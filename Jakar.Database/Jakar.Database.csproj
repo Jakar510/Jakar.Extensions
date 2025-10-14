@@ -61,11 +61,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Compile Remove="DbMigrations\CustomPostgresProcessor.cs" />
-		<Compile Remove="DbMigrations\CustomPostgresQuoter.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Dapper" />
 		<PackageReference Include="Dapper.Contrib" />
 		<PackageReference Include="dbup-postgresql" />
@@ -73,8 +68,7 @@
 		<PackageReference Include="FluentMigrator.Abstractions" />
 		<PackageReference Include="InterpolatedSql.Dapper" />
 		<PackageReference Include="Jakar.Extensions" />
-		<PackageReference Include="FluentMigrator" />
-		<PackageReference Include="FluentMigrator.Runner" />
+		<PackageReference Include="Jakar.Shapes" />
 		<PackageReference Include="MailKit" />
 		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Hybrid" />

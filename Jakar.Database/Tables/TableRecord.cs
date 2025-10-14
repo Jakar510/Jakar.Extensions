@@ -32,7 +32,7 @@ public interface ICreatedBy : IDateCreated
 public interface IRecordPair<TSelf> : IDateCreated
     where TSelf : IRecordPair<TSelf>, ITableRecord<TSelf>
 {
-    Guid IUniqueID<Guid>.       ID => ID.Value;
+    Guid IUniqueID<Guid>.      ID => ID.Value;
     public new RecordID<TSelf> ID { get; }
 
     [Pure] public UInt128 GetHash();
@@ -49,11 +49,8 @@ public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
     public abstract static string                                      TableName        { [Pure] get; }
 
 
-    static ITableRecord() => DbMigrations.Migrations.AddMigrations<TSelf>();
-
-
     [Pure] public abstract static MigrationRecord    CreateTable( ulong   migrationID );
-    [Pure] public abstract static TSelf             Create( DbDataReader reader );
+    [Pure] public abstract static TSelf              Create( DbDataReader reader );
     [Pure] public                 PostgresParameters ToDynamicParameters();
 
 
@@ -67,15 +64,15 @@ public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
 public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf>, ILastModified
     where TSelf : TableRecord<TSelf>, ITableRecord<TSelf>
 {
-    protected internal static readonly PropertyInfo[]   Properties = typeof(TSelf).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-    protected                          DateTimeOffset?  _lastModified;
+    protected internal static readonly PropertyInfo[]  Properties = typeof(TSelf).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    protected                          DateTimeOffset? _lastModified;
     private                            RecordID<TSelf> __id;
 
 
     public static ReadOnlyMemory<PropertyInfo> ClassProperties { [Pure] get => Properties; }
     public static int                          PropertyCount   => Properties.Length;
     public        DateTimeOffset               DateCreated     { get;                  init; }
-    [Key] public  RecordID<TSelf>             ID              { get => __id;          init => __id = value; }
+    [Key] public  RecordID<TSelf>              ID              { get => __id;          init => __id = value; }
     public        DateTimeOffset?              LastModified    { get => _lastModified; init => _lastModified = value; }
 
 
@@ -187,9 +184,9 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
     public async ValueTask<UserRecord?> GetUserWhoCreated( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
 
 
-     public TSelf WithOwner( UserRecord  user )   => (TSelf)( this with { CreatedBy = user.ID } );
-     public bool   Owns( UserRecord       record ) => CreatedBy == record.ID;
-     public bool   DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
+    public TSelf WithOwner( UserRecord  user )   => (TSelf)( this with { CreatedBy = user.ID } );
+    public bool  Owns( UserRecord       record ) => CreatedBy == record.ID;
+    public bool  DoesNotOwn( UserRecord record ) => CreatedBy != record.ID;
 
 
     public override int CompareTo( TSelf? other )

@@ -42,12 +42,12 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create {tableID} table",
+                                                  $"create { TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                    (  
                                                    {nameof(NameOfGroup).SqlColumnName()}    varchar(1024) NOT NULL, 
                                                    {nameof(CustomerID).SqlColumnName()}     varchar(1024) NOT NULL,  
@@ -59,7 +59,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
                                                    );
 
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);

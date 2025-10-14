@@ -103,7 +103,7 @@ public static partial class AsyncLinq
     }
     public static async IAsyncEnumerable<TElement> SkipLast<TElement>( this IAsyncEnumerable<TElement> source, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        List<TElement> list = await source.ToList(token);
+        List<TElement> list = await source.ToList(DEFAULT_CAPACITY, token);
 
         for ( int index = 0; index < list.Count; index++ )
         {

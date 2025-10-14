@@ -88,12 +88,12 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create {tableID} table",
+                                                  $"create { TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                    (  
                                                    {nameof(NameOfRole).SqlColumnName()}       varchar(1024) NOT NULL, 
                                                    {nameof(NormalizedName).SqlColumnName()}   varchar(1024) NOT NULL, 
@@ -106,7 +106,7 @@ public sealed record RoleRecord( [property: StringLength(1024)] string NameOfRol
                                                    );
                                                    
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);

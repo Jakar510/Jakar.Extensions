@@ -20,7 +20,7 @@ public class UserStore( Database dbContext ) : IUserStore
     public virtual async Task               AddClaimsAsync( UserRecord           user, IEnumerable<Claim> claims, CancellationToken token ) => await __dbContext.AddClaimsAsync(user, claims, token);
     public virtual async Task<IList<Claim>> GetClaimsAsync( UserRecord           user, CancellationToken  token ) => await __dbContext.GetClaimsAsync(user, ClaimType.All, token);
     public virtual async Task<IList<UserRecord>> GetUsersForClaimAsync( Claim claim, CancellationToken token ) => await __dbContext.GetUsersForClaimAsync(claim, token)
-                                                                                                                                   .ToList(token);
+                                                                                                                                   .ToList(Buffers.DEFAULT_CAPACITY, token);
     public virtual async Task                  RemoveClaimsAsync( UserRecord               user,          IEnumerable<Claim> claims, CancellationToken token )                             => await __dbContext.RemoveClaimsAsync(user, claims, token);
     public virtual async Task                  ReplaceClaimAsync( UserRecord               user,          Claim              claim,  Claim             newClaim, CancellationToken token ) => await __dbContext.ReplaceClaimAsync(user, claim, newClaim, token);
     public virtual async Task<UserRecord?>     FindByEmailAsync( string                    email,         CancellationToken  token )                                    => await __dbContext.FindByEmailAsync(email, token);
@@ -41,7 +41,7 @@ public class UserStore( Database dbContext ) : IUserStore
     public virtual async Task<UserRecord?>     FindByLoginAsync( string                    loginProvider, string             providerKey, CancellationToken token ) => await __dbContext.FindByLoginAsync(loginProvider, providerKey, token);
     public virtual async Task<IList<UserLoginInfo>> GetLoginsAsync( UserRecord user, CancellationToken token ) => await __dbContext.GetLoginsAsync(user, token)
                                                                                                                                    .Select(static x => x.ToUserLoginInfo())
-                                                                                                                                   .ToList(token);
+                                                                                                                                   .ToList(Buffers.DEFAULT_CAPACITY, token);
     public virtual async Task                 RemoveLoginAsync( UserRecord             user,               string            loginProvider, string providerKey, CancellationToken token ) => await __dbContext.RemoveLoginAsync(user, loginProvider, providerKey, token);
     public virtual async Task<IdentityResult> CreateAsync( UserRecord                  user,               CancellationToken token )                             => await __dbContext.CreateAsync(user, token);
     public virtual async Task<IdentityResult> DeleteAsync( UserRecord                  user,               CancellationToken token )                             => await __dbContext.DeleteAsync(user, token);
@@ -60,7 +60,7 @@ public class UserStore( Database dbContext ) : IUserStore
     public virtual async Task<string?>        GetSecurityStampAsync( UserRecord        user,               CancellationToken token )                          => await __dbContext.GetSecurityStampAsync(user, token);
     public virtual async Task                 SetSecurityStampAsync( UserRecord        user,               string            stamp, CancellationToken token ) => await __dbContext.SetSecurityStampAsync(user, stamp, token);
     public virtual async Task<int> CountCodesAsync( UserRecord user, CancellationToken token ) => ( await user.Codes(__dbContext, token)
-                                                                                                              .ToList(token) ).Count;
+                                                                                                              .ToList(Buffers.DEFAULT_CAPACITY, token) ).Count;
     public virtual async Task<bool>    RedeemCodeAsync( UserRecord          user, string              code,          CancellationToken token ) => await user.RedeemCode(__dbContext, code, token);
     public virtual async Task          ReplaceCodesAsync( UserRecord        user, IEnumerable<string> recoveryCodes, CancellationToken token ) => await user.ReplaceCodes(__dbContext, recoveryCodes, token);
     public virtual async Task<bool>    GetTwoFactorEnabledAsync( UserRecord user, CancellationToken   token )                                 => await __dbContext.GetTwoFactorEnabledAsync(user, token);

@@ -1,37 +1,63 @@
-﻿using ZXing;
-
-
-
-namespace Jakar.Database.DbMigrations;
+﻿namespace Jakar.Database;
 
 
 public static class Migrations
 {
-    private const            string                                       MIGRATIONS = "/_migrations";
-    internal static readonly ConcurrentDictionary<ulong, MigrationRecord> migrations = new();
+    private const            string       MIGRATIONS = "/_migrations";
+    public static readonly   IdGenerator  Ids        = new();
+    internal static readonly RecordValues Records    = new();
 
 
-    public static void AddMigrations<TSelf>()
-        where TSelf : ITableRecord<TSelf>
+    public static bool HasFlagValue( this ColumnOptions type, ColumnOptions flag ) => ( type & flag ) != 0;
+
+
+    public static string CreateTableSql<TSelf>()
+        where TSelf : class, ITableRecord<TSelf> => SqlTableBuilder<TSelf>.Create()
+                                                                          .Build();
+
+
+    public static IEnumerable<MigrationRecord> BuiltIns( IdGenerator ids )
     {
-        foreach ( MigrationRecord record in MigrationRecord.Migrations )
-        {
-            if ( migrations.TryGetValue(record.MigrationID, out _) ) { throw new InvalidOperationException($"Duplicate migration version {record.MigrationID} for {typeof(TSelf).Name}"); }
+        yield return MigrationRecord.CreateTable(ids.Current);
 
-            migrations[record.MigrationID] = record;
-        }
+        yield return MigrationRecord.SetLastModified(ids.Current);
+
+        yield return MigrationRecord.FromEnum<MimeType>(ids.Current);
+        yield return MigrationRecord.FromEnum<SupportedLanguage>(ids.Current);
+        yield return MigrationRecord.FromEnum<SubscriptionStatus>(ids.Current);
+        yield return MigrationRecord.FromEnum<DeviceCategory>(ids.Current);
+        yield return MigrationRecord.FromEnum<DevicePlatform>(ids.Current);
+        yield return MigrationRecord.FromEnum<DeviceTypes>(ids.Current);
+        yield return MigrationRecord.FromEnum<DistanceUnit>(ids.Current);
+        yield return MigrationRecord.FromEnum<ProgrammingLanguage>(ids.Current);
+        yield return MigrationRecord.FromEnum<Status>(ids.Current);
+
+        yield return FileRecord.CreateTable(ids.Current);
+
+        yield return UserRecord.CreateTable(ids.Current);
+
+        yield return RecoveryCodeRecord.CreateTable(ids.Current);
+        yield return UserRecoveryCodeRecord.CreateTable(ids.Current);
+
+        yield return RoleRecord.CreateTable(ids.Current);
+        yield return UserRoleRecord.CreateTable(ids.Current);
+
+        yield return GroupRecord.CreateTable(ids.Current);
+        yield return UserGroupRecord.CreateTable(ids.Current);
+
+        yield return AddressRecord.CreateTable(ids.Current);
+        yield return UserAddressRecord.CreateTable(ids.Current);
     }
+
 
     public static async ValueTask ApplyMigrations( this WebApplication app, CancellationToken token = default )
     {
-        await using AsyncServiceScope scope   = app.Services.CreateAsyncScope();
-        Database                      db      = scope.ServiceProvider.GetRequiredService<Database>();
-        MigrationRecord[]             applied = await MigrationRecord.All(db, token);
-
-
+        await using AsyncServiceScope scope       = app.Services.CreateAsyncScope();
+        Database                      db          = scope.ServiceProvider.GetRequiredService<Database>();
+        MigrationRecord[]             applied     = await Migrations.All(db, token);
         await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
         await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
-        HashSet<MigrationRecord>      pending     = [..MigrationRecord.Migrations];
+        HashSet<MigrationRecord>      pending     = [..Records.Values];
         pending.ExceptWith(applied);
 
 
@@ -44,44 +70,33 @@ public static class Migrations
         catch ( Exception e )
         {
             await transaction.RollbackAsync(token);
-            throw new SqlException("", e);
+            throw new InvalidOperationException("Failed to apply Records", e);
         }
     }
 
 
-    public static DbPropType ToDbPropertyType( this DbType type ) => type switch
-                                                                     {
-                                                                         DbType.AnsiString            => DbPropType.String,
-                                                                         DbType.Binary                => DbPropType.Binary,
-                                                                         DbType.Byte                  => DbPropType.Byte,
-                                                                         DbType.Boolean               => DbPropType.Boolean,
-                                                                         DbType.Currency              => DbPropType.Decimal,
-                                                                         DbType.Date                  => DbPropType.Date,
-                                                                         DbType.Decimal               => DbPropType.Decimal,
-                                                                         DbType.Double                => DbPropType.Double,
-                                                                         DbType.Guid                  => DbPropType.Guid,
-                                                                         DbType.Int16                 => DbPropType.Int16,
-                                                                         DbType.Int32                 => DbPropType.Int32,
-                                                                         DbType.Int64                 => DbPropType.Int64,
-                                                                         DbType.SByte                 => DbPropType.SByte,
-                                                                         DbType.Single                => DbPropType.Double,
-                                                                         DbType.String                => DbPropType.String,
-                                                                         DbType.StringFixedLength     => DbPropType.String,
-                                                                         DbType.Time                  => DbPropType.Time,
-                                                                         DbType.UInt16                => DbPropType.UInt16,
-                                                                         DbType.UInt32                => DbPropType.UInt32,
-                                                                         DbType.UInt64                => DbPropType.UInt64,
-                                                                         DbType.VarNumeric            => DbPropType.Decimal,
-                                                                         DbType.Xml                   => DbPropType.Xml,
-                                                                         DbType.AnsiStringFixedLength => DbPropType.String,
-                                                                         DbType.DateTime              => DbPropType.DateTime,
-                                                                         DbType.DateTime2             => DbPropType.DateTime,
-                                                                         DbType.DateTimeOffset        => DbPropType.DateTimeOffset,
-                                                                         _                            => throw new OutOfRangeException(type)
-                                                                     };
-    public static DbPropType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+    public static async Task RunWithMigrationsAsync( this WebApplication app, string[]? urls = null, string endpoint = MIGRATIONS, CancellationToken token = default )
+    {
+        app.TryUseMigrationsEndPoint(endpoint);
 
 
+        try
+        {
+            await app.ApplyMigrations(token);
+            if ( urls is not null ) { app.UseUrls(urls); }
+
+            await app.StartAsync(token)
+                     .ConfigureAwait(false);
+
+            await app.WaitForShutdownAsync(token)
+                     .ConfigureAwait(false);
+        }
+        finally
+        {
+            await app.DisposeAsync()
+                     .ConfigureAwait(false);
+        }
+    }
     public static void TryUseMigrationsEndPoint( this WebApplication app, string endpoint = MIGRATIONS )
     {
         if ( app.Environment.IsDevelopment() ) { app.UseMigrationsEndPoint(endpoint); }
@@ -89,7 +104,7 @@ public static class Migrations
     public static void UseMigrationsEndPoint( this WebApplication app, string endpoint = MIGRATIONS ) => app.MapGet(endpoint, GetMigrationsAndRenderHtml);
     private static async Task<ContentHttpResult> GetMigrationsAndRenderHtml( [FromServices] Database db, CancellationToken token )
     {
-        ReadOnlySpan<MigrationRecord> records = await MigrationRecord.All(db, token);
+        ReadOnlySpan<MigrationRecord> records = await Migrations.All(db, token);
         string                        html    = records.CreateHtml();
         return TypedResults.Content(html, "text/html", Encoding.UTF8);
     }
@@ -178,5 +193,127 @@ public static class Migrations
         }
 
         if ( start < span.Length ) writer.Write(span.Slice(start));
+    }
+
+
+    public static PostgresType ToDbPropertyType( this DbType type ) => type switch
+                                                                     {
+                                                                         DbType.AnsiString            => PostgresType.String,
+                                                                         DbType.Binary                => PostgresType.Binary,
+                                                                         DbType.Byte                  => PostgresType.Byte,
+                                                                         DbType.Boolean               => PostgresType.Boolean,
+                                                                         DbType.Currency              => PostgresType.Decimal,
+                                                                         DbType.Date                  => PostgresType.Date,
+                                                                         DbType.Decimal               => PostgresType.Decimal,
+                                                                         DbType.Double                => PostgresType.Double,
+                                                                         DbType.Guid                  => PostgresType.Guid,
+                                                                         DbType.Int16                 => PostgresType.Int16,
+                                                                         DbType.Int32                 => PostgresType.Int32,
+                                                                         DbType.Int64                 => PostgresType.Int64,
+                                                                         DbType.SByte                 => PostgresType.SByte,
+                                                                         DbType.Single                => PostgresType.Double,
+                                                                         DbType.String                => PostgresType.String,
+                                                                         DbType.StringFixedLength     => PostgresType.String,
+                                                                         DbType.Time                  => PostgresType.Time,
+                                                                         DbType.UInt16                => PostgresType.UInt16,
+                                                                         DbType.UInt32                => PostgresType.UInt32,
+                                                                         DbType.UInt64                => PostgresType.UInt64,
+                                                                         DbType.VarNumeric            => PostgresType.Decimal,
+                                                                         DbType.Xml                   => PostgresType.Xml,
+                                                                         DbType.AnsiStringFixedLength => PostgresType.String,
+                                                                         DbType.DateTime              => PostgresType.DateTime,
+                                                                         DbType.DateTime2             => PostgresType.DateTime,
+                                                                         DbType.DateTimeOffset        => PostgresType.DateTimeOffset,
+                                                                         DbType.Object                => PostgresType.Json,
+                                                                         _                            => throw new OutOfRangeException(type)
+                                                                     };
+    public static PostgresType? ToDbPropertyType( this DbType? type ) => type?.ToDbPropertyType();
+
+
+    public static async ValueTask<MigrationRecord[]> All( Database db, CancellationToken token )
+    {
+        await using NpgsqlConnection connection = await db.ConnectAsync(token);
+        CommandDefinition            command    = new(MigrationRecord.SelectSql, null, null, null, null, CommandFlags.Buffered, token);
+
+        // await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
+
+
+        await using NpgsqlCommand cmd = connection.CreateCommand();
+        cmd.CommandText = command.CommandText;
+        var parameter = cmd.CreateParameter();
+        parameter.NpgsqlDbType = NpgsqlDbType.Array;
+
+
+        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+
+
+        MigrationRecord[] records = await reader.CreateAsync<MigrationRecord>(Records.Count, token);
+        return records;
+    }
+    public static async ValueTask Apply( this MigrationRecord record, Database db, CancellationToken token )
+    {
+        await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
+        await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
+
+        try
+        {
+            await record.Apply(connection, transaction, token);
+            await transaction.CommitAsync(token);
+        }
+        catch ( Exception e )
+        {
+            await transaction.RollbackAsync(token);
+            throw new SqlException(MigrationRecord.ApplySql, e);
+        }
+    }
+    public static async ValueTask Apply( this MigrationRecord record, NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken token )
+    {
+        PostgresParameters parameters = new();
+        parameters.Add(nameof(MigrationRecord.MigrationID),    record.MigrationID);
+        parameters.Add(nameof(MigrationRecord.Description),    record.Description);
+        parameters.Add(nameof(MigrationRecord.TableID),        record.TableID);
+        parameters.Add(nameof(MigrationRecord.AppliedOn),      record.AppliedOn);
+        parameters.Add(nameof(MigrationRecord.AdditionalData), record.AdditionalData);
+
+        CommandDefinition command = new(MigrationRecord.ApplySql, parameters, transaction, null, null, CommandFlags.Buffered, token);
+        await connection.ExecuteAsync(command);
+    }
+
+
+
+    public sealed class IdGenerator
+    {
+        private ulong __value;
+        public  ulong Current => ++__value;
+        internal IdGenerator() { }
+    }
+
+
+
+    public sealed class RecordValues : IReadOnlyDictionary<ulong, MigrationRecord>
+    {
+        private readonly ConcurrentDictionary<ulong, MigrationRecord> _records = new();
+        public           int                                          Count => _records.Count;
+
+        public MigrationRecord this[ ulong key ] => _records[key];
+        public IEnumerable<ulong>           Keys   => _records.Keys;
+        public IEnumerable<MigrationRecord> Values => _records.Values;
+        public RecordValues()
+        {
+            foreach ( MigrationRecord record in Migrations.BuiltIns(Ids) ) { Add(record); }
+        }
+
+
+        public void Add( MigrationRecord record )
+        {
+            if ( record.MigrationID == 0 ) { throw new ArgumentOutOfRangeException(nameof(record), "MigrationID cannot be 0"); }
+
+            if ( !_records.TryAdd(record.MigrationID, record) ) { throw new InvalidOperationException($"A record with the MigrationID {record.MigrationID} already exists"); }
+        }
+
+        public IEnumerator<KeyValuePair<ulong, MigrationRecord>> GetEnumerator()                                                            => _records.GetEnumerator();
+        IEnumerator IEnumerable.                                 GetEnumerator()                                                            => ( (IEnumerable)_records ).GetEnumerator();
+        public bool                                              ContainsKey( ulong key )                                                   => _records.ContainsKey(key);
+        public bool                                              TryGetValue( ulong key, [MaybeNullWhen(false)] out MigrationRecord value ) => _records.TryGetValue(key, out value);
     }
 }

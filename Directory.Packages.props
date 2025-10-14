@@ -47,9 +47,10 @@
     <PackageVersion Include="Jakar.Extensions" Version="9.18.10" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
+    <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
     <PackageVersion Include="JetBrains.DotMemoryUnit" Version="3.2.20220510" />
-    <PackageVersion Include="MailKit" Version="4.14.0" />
+    <PackageVersion Include="MailKit" Version="4.14.1" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.9" />
     <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
@@ -129,7 +130,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.283" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.290" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />

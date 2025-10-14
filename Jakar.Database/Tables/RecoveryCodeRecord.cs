@@ -50,12 +50,12 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
+        
 
         return MigrationRecord.Create<UserRecord>(migrationID,
-                                                  $"create {tableID} table",
+                                                  $"create { TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS {tableID}
+                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
                                                    (  
                                                    {nameof(Code).SqlColumnName()}           VARCHAR(1024)  NOT NULL, 
                                                    {nameof(AdditionalData).SqlColumnName()} json           NULL,
@@ -67,7 +67,7 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
                                                    );
                                                    
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON {tableID}
+                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 09/30/2025  20:32
 
+using ZLinq.Linq;
+
+
+
 namespace Jakar.Database;
 
 
@@ -11,13 +15,33 @@ public sealed record MigrationRecord_( ulong MigrationID, string? TableID, strin
 [Serializable]
 public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord<MigrationRecord>
 {
-    public const             string                          TABLE_NAME = "migrations";
-    internal static readonly PropertyInfo[]                  Properties = typeof(MigrationRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public);
-    public static            ReadOnlyMemory<PropertyInfo>    ClassProperties => Properties;
-    public static            JsonTypeInfo<MigrationRecord[]> JsonArrayInfo   => JakarDatabaseContext.Default.MigrationRecordArray;
-    public static            JsonSerializerContext           JsonContext     => JakarDatabaseContext.Default;
-    public static            JsonTypeInfo<MigrationRecord>   JsonTypeInfo    => JakarDatabaseContext.Default.MigrationRecord;
-    public static            List<MigrationRecord>           Migrations      { [Pure] get; } = [..Jakar.Database.Migrations.BuiltIns()];
+    public const             string         TABLE_NAME = "migrations";
+    internal static readonly PropertyInfo[] Properties = typeof(MigrationRecord).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+    public static readonly   string         SelectSql  = $"SELECT * FROM {MigrationRecord.TABLE_NAME} ORDER BY {nameof(MigrationRecord.MigrationID).SqlColumnName()}";
+    public static readonly string ApplySql = $"""
+                                              INSERT INTO {TABLE_NAME} 
+                                              (
+                                              {nameof(MigrationID).SqlColumnName()},
+                                              {nameof(TableID).SqlColumnName()},
+                                              {nameof(Description).SqlColumnName()},
+                                              {nameof(AppliedOn).SqlColumnName()},
+                                              {nameof(AdditionalData).SqlColumnName()}
+                                              ) 
+                                              VALUES 
+                                              (
+                                              @{nameof(MigrationID).SqlColumnName()},
+                                              @{nameof(TableID).SqlColumnName()},
+                                              @{nameof(Description).SqlColumnName()},
+                                              @{nameof(AppliedOn).SqlColumnName()},
+                                              @{nameof(AdditionalData).SqlColumnName()}
+                                              )
+                                              """;
+
+
+    public static ReadOnlyMemory<PropertyInfo>    ClassProperties => Properties;
+    public static JsonTypeInfo<MigrationRecord[]> JsonArrayInfo   => JakarDatabaseContext.Default.MigrationRecordArray;
+    public static JsonSerializerContext           JsonContext     => JakarDatabaseContext.Default;
+    public static JsonTypeInfo<MigrationRecord>   JsonTypeInfo    => JakarDatabaseContext.Default.MigrationRecord;
 
 
     public static int PropertyCount => Properties.Length;
@@ -40,80 +64,18 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     [StringLength(256)] public string?                      TableID     { get; init; }
 
 
-    [SetsRequiredMembers] public MigrationRecord( ulong migrationID, string description, string? tableID = null ) : base()
+    [SetsRequiredMembers] public MigrationRecord( ulong migrationID, string description, string? TABLE_NAME = null ) : base()
     {
         this.Description = description;
         this.MigrationID = migrationID;
-        this.TableID     = tableID;
-    }
-
-
-    public static async ValueTask<MigrationRecord[]> All( Database db, CancellationToken token )
-    {
-        await using NpgsqlConnection connection = await db.ConnectAsync(token);
-        CommandDefinition            command    = new($"SELECT * FROM {TABLE_NAME} ORDER BY {nameof(TableID).SqlColumnName()}", null, null, null, null, CommandFlags.Buffered, token);
-        await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
-        List<MigrationRecord>        records    = new(Migrations.Count);
-        await foreach ( MigrationRecord record in reader.CreateAsync<MigrationRecord>(token) ) { records.Add(record); }
-
-        return records.ToArray();
-    }
-
-
-    private static readonly string ApplySql = $"""
-                                               INSERT INTO {TABLE_NAME} 
-                                               (
-                                               {nameof(MigrationID).SqlColumnName()},
-                                               {nameof(TableID).SqlColumnName()},
-                                               {nameof(Description).SqlColumnName()},
-                                               {nameof(AppliedOn).SqlColumnName()},
-                                               {nameof(AdditionalData).SqlColumnName()}
-                                               ) 
-                                               VALUES 
-                                               (
-                                               @{nameof(MigrationID).SqlColumnName()},
-                                               @{nameof(TableID).SqlColumnName()},
-                                               @{nameof(Description).SqlColumnName()},
-                                               @{nameof(AppliedOn).SqlColumnName()},
-                                               @{nameof(AdditionalData).SqlColumnName()}
-                                               )
-                                               """;
-    public async ValueTask Apply( Database db, CancellationToken token )
-    {
-        await using NpgsqlConnection  connection  = await db.ConnectAsync(token);
-        await using NpgsqlTransaction transaction = await connection.BeginTransactionAsync(token);
-
-        try
-        {
-            await Apply(connection, transaction, token);
-            await transaction.CommitAsync(token);
-        }
-        catch ( Exception e )
-        {
-            await transaction.RollbackAsync(token);
-            throw new SqlException(ApplySql, e);
-        }
-    }
-    public async ValueTask Apply( NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken token )
-    {
-        PostgresParameters parameters = new();
-        parameters.Add(nameof(MigrationID),    MigrationID);
-        parameters.Add(nameof(Description),    Description);
-        parameters.Add(nameof(TableID),        TableID);
-        parameters.Add(nameof(AppliedOn),      AppliedOn);
-        parameters.Add(nameof(AdditionalData), AdditionalData);
-
-        CommandDefinition command = new(ApplySql, parameters, transaction, null, null, CommandFlags.Buffered, token);
-        await connection.ExecuteAsync(command);
+        this.TableID     = TABLE_NAME;
     }
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string tableID = TABLE_NAME.SqlColumnName();
-
         return Create<MigrationRecord>(migrationID,
-                                       $"create {tableID} table",
+                                       $"create {TABLE_NAME} table",
                                        $"""
-                                        CREATE TABLE IF NOT EXISTS {tableID}
+                                        CREATE TABLE IF NOT EXISTS {TABLE_NAME}
                                         (
                                         {nameof(MigrationID).SqlColumnName()}    bigint        PRIMARY KEY,
                                         {nameof(TableID).SqlColumnName()}        varchar(256)  NOT NULL,
@@ -122,21 +84,21 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
                                         {nameof(AdditionalData).SqlColumnName()} json          NULL
                                         );
 
-                                        CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                        BEFORE INSERT OR UPDATE ON {tableID}
+                                        CREATE TRIGGER {nameof(SetLastModified).SqlColumnName()}
+                                        BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                         FOR EACH ROW
-                                        EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
+                                        EXECUTE FUNCTION {nameof(SetLastModified).SqlColumnName()}();
                                         """);
     }
     public static MigrationRecord SetLastModified( ulong migrationID )
     {
-        string tableID = nameof(SetLastModified)
+        string name = nameof(SetLastModified)
            .SqlColumnName();
 
-        return new MigrationRecord(migrationID, $"create {tableID} function")
+        return new MigrationRecord(migrationID, $"create {name} function")
                {
                    SQL = $"""
-                          CREATE OR REPLACE FUNCTION {tableID}()
+                          CREATE OR REPLACE FUNCTION {name}()
                           RETURNS TRIGGER AS $$
                           BEGIN
                               NEW.{nameof(ILastModified.LastModified).SqlColumnName()} = now();
@@ -149,28 +111,33 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     public static MigrationRecord FromEnum<TEnum>( ulong migrationID )
         where TEnum : struct, Enum
     {
-        string tableID = typeof(TEnum).Name.SqlColumnName();
+        string[]                                   values     = Enum.GetNames(typeof(TEnum));
+        string                                     tableName  = typeof(TEnum).Name.SqlColumnName();
+        ValueEnumerable<FromArray<string>, string> enumerable = values.AsValueEnumerable();
+        int                                        length     = enumerable.Max(static x => x.Length);
 
-        MigrationRecord record = new(migrationID, $"create {tableID} table")
+        MigrationRecord record = new(migrationID, $"create {tableName} table")
                                  {
-                                     TableID = tableID,
+                                     TableID = tableName,
                                      SQL = $"""
-                                            CREATE TABLE IF NOT EXISTS {tableID}
+                                            CREATE TABLE IF NOT EXISTS {tableName}
                                             (
-                                            id    bigint        PRIMARY KEY,
-                                            name  varchar(256)  UNIQUE NOT NULL,
+                                            id   bigint            PRIMARY KEY,
+                                            name varchar({length}) UNIQUE NOT NULL,
                                             );
 
+
                                             CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                            BEFORE INSERT OR UPDATE ON {tableID}
+                                            BEFORE INSERT OR UPDATE ON {tableName}
                                             FOR EACH ROW
                                             EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
 
+
                                             -- Insert values if they do not exist with explicit ids (enum order)
-                                            INSERT INTO {tableID} (id, name)
+                                            INSERT INTO {tableName} (id, name)
                                             SELECT v.id, v.name
                                             FROM (VALUES
-                                            {string.Join(",\n", Enum.GetValues<TEnum>().Select(( v, i ) => $"    ({i}, '{v}')"))}
+                                                {string.Join(",\n", values.Select(( v, i ) => $"    ({i}, '{v}')"))}
                                             ) AS v(id, name)
                                             WHERE NOT EXISTS (
                                             SELECT 1 FROM mime_types m WHERE m.id = v.id OR m.name = v.name
@@ -195,13 +162,13 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     public static MigrationRecord Create( DbDataReader reader )
     {
         string         description = reader.GetFieldValue<string>(nameof(Description));
-        string?        tableID     = reader.GetFieldValue<string?>(nameof(TableID));
+        string?        tableName   = reader.GetFieldValue<string?>(nameof(TableID));
         DateTimeOffset appliedOn   = reader.GetFieldValue<DateTimeOffset>(nameof(AppliedOn));
         ulong          id          = reader.GetFieldValue<ulong>(nameof(MigrationID));
 
         MigrationRecord record = new(id, description)
                                  {
-                                     TableID   = tableID,
+                                     TableID   = tableName,
                                      AppliedOn = appliedOn
 
                                      // SQL = sql
