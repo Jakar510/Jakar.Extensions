@@ -23,18 +23,18 @@ public interface IRoleModel<TSelf, TID> : IRoleModel<TID>, IJsonModel<TSelf>
 
 [Serializable]
 [method: JsonConstructor]
-public class RoleModel<TSelf, TID>( string nameOfRole, string rights, TID id ) : BaseClass<TSelf>(), IRoleModel<TID>
+public class RoleModel<TSelf, TID>( string nameOfRole, UserRights rights, TID id ) : BaseClass<TSelf>(), IRoleModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : RoleModel<TSelf, TID>, IRoleModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
-    private   string __name   = nameOfRole;
-    private   string __rights = rights;
-    protected TID    _id      = id;
+    private   string     __name   = nameOfRole;
+    private   UserRights __rights = rights;
+    protected TID        _id      = id;
 
 
-    public                        TID    ID         { get => _id;      init => _id = value; }
-    [StringLength(NAME)]   public string NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
-    [StringLength(RIGHTS)] public string Rights     { get => __rights; set => SetProperty(ref __rights, value); }
+    public                        TID        ID         { get => _id;      init => _id = value; }
+    [StringLength(NAME)]   public string     NameOfRole { get => __name;   set => SetProperty(ref __name,   value); }
+    [StringLength(RIGHTS)] public UserRights Rights     { get => __rights; set => SetProperty(ref __rights, value); }
 
 
     public RoleModel( IRoleModel<TID> model ) : this(model.NameOfRole, model.Rights, model.ID) { }

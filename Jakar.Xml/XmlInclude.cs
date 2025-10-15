@@ -6,7 +6,7 @@ namespace Jakar.Xml;
 
 
 [Flags]
-public enum XmlInclude : ulong
+public enum XmlInclude
 {
     None       = 0,
     Attributes = 1 << 0,

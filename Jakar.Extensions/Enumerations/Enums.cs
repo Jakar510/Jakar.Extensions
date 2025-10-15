@@ -13,7 +13,7 @@ public static partial class Enums
     /// <typeparam name="TValue"> </typeparam>
     /// <returns> </returns>
     [RequiresDynamicCode(nameof(GetEnumNamedValues))] public static FrozenDictionary<string, TValue> GetEnumNamedValues<TEnum, TValue>()
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         IEnumerable<TValue> values = Enum.GetValues<TEnum>()
                                          .Cast<TValue>();
@@ -32,7 +32,7 @@ public static partial class Enums
 
 
     [RequiresDynamicCode(nameof(GetEnumValue))] public static TValue GetEnumValue<TValue, TEnum>( this TEnum value )
-        where TEnum : struct, Enum => GetEnumNamedValues<TEnum, TValue>()
+        where TEnum : unmanaged, Enum => GetEnumNamedValues<TEnum, TValue>()
                                      .First(pair => pair.Key == value.ToString())
                                      .Value;
 }

@@ -680,7 +680,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
 
 
 
-    private enum Type : ulong
+    private enum Type
     {
         Object,
         SemaphoreSlim,

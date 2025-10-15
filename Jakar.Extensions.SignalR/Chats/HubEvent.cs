@@ -9,7 +9,7 @@ using System.Text.Json.Serialization.Metadata;
 namespace Jakar.Extensions.SignalR.Chats;
 
 
-public enum HubEventType : ulong
+public enum HubEventType
 {
     Login,
     Logout,

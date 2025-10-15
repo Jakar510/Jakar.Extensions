@@ -69,7 +69,7 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
 
 
 
-    public enum TestRight : ulong
+    public enum TestRight
     {
         Read,
         Write,

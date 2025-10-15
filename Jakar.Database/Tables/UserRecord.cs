@@ -329,10 +329,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : struct, Enum => Create(request, UserRights<TEnum>.Create(request.Data), caller);
+        where TEnum : unmanaged, Enum => Create(request, UserRights<TEnum>.Create(request.Data), caller);
     public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : struct, Enum => Create(request, rights.ToString(), caller);
+        where TEnum : unmanaged, Enum => Create(request, rights.ToString(), caller);
     public static UserRecord Create<TUser>( ILoginRequest<TUser> request, string rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
     {
@@ -387,7 +387,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                     DateTimeOffset.UtcNow);
 
     public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
-        where TEnum : struct, Enum => Create(userName, password, rights.ToString(), caller);
+        where TEnum : unmanaged, Enum => Create(userName, password, rights.ToString(), caller);
     public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = null ) =>
         new UserRecord(userName,
                        string.Empty,
@@ -546,7 +546,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         Rights = rights.ToString();
         return this;

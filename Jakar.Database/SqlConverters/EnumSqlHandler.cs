@@ -2,7 +2,7 @@
 
 
 public class EnumSqlHandler<TValue> : SqlConverter<EnumSqlHandler<TValue>, TValue>
-    where TValue : struct, Enum
+    where TValue : unmanaged, Enum
 {
     public static readonly FrozenDictionary<long, TValue>   Longs  = Enum.GetValues<TValue>().ToFrozenDictionary(GetLong,    SelectSelf);
     public static readonly FrozenDictionary<string, TValue> Names  = Enum.GetValues<TValue>().ToFrozenDictionary(GetString,  SelectSelf);

@@ -88,7 +88,7 @@ public readonly record struct SpanDuration( double Value, SpanDuration.Range Uni
 
 
 
-    public enum Range : ulong
+    public enum Range
     {
         Days,
         Hours,

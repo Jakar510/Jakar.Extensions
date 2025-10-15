@@ -46,7 +46,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
         where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create(this);
 
     public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         Rights = rights.ToString();
         return this;

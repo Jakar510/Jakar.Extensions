@@ -3,7 +3,7 @@
 
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 [Flags]
-public enum DevicePlatform : ulong
+public enum DevicePlatform
 {
     Unknown     = 0,
     Android     = 1 << 0,

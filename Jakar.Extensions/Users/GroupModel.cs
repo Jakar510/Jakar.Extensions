@@ -24,22 +24,22 @@ public interface IGroupModel<TSelf, TID> : IGroupModel<TID>, IJsonModel<TSelf>
 
 [Serializable]
 [method: JsonConstructor]
-public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, string rights ) : BaseClass<TSelf>, IGroupModel<TID>
+public class GroupModel<TSelf, TID>( string nameOfGroup, TID? ownerID, TID? createdBy, TID id, UserRights rights ) : BaseClass<TSelf>, IGroupModel<TID>
     where TID : struct, IComparable<TID>, IEquatable<TID>, IFormattable, ISpanFormattable, ISpanParsable<TID>, IParsable<TID>, IUtf8SpanFormattable
     where TSelf : GroupModel<TSelf, TID>, IGroupModel<TSelf, TID>, IEqualComparable<TSelf>, IJsonModel<TSelf>
 {
-    private   string __nameOfGroup = nameOfGroup;
-    private   string __permissions = rights;
-    private   TID?   __createdBy   = createdBy;
-    private   TID?   __ownerID     = ownerID;
-    protected TID    _id           = id;
+    private   string     __nameOfGroup = nameOfGroup;
+    private   UserRights __rights      = rights;
+    private   TID?       __createdBy   = createdBy;
+    private   TID?       __ownerID     = ownerID;
+    protected TID        _id           = id;
 
 
-    public                        TID    ID          { get => _id;           init => _id = value; }
-    public                        TID?   CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
-    [StringLength(NAME)] public   string NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
-    public                        TID?   OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
-    [StringLength(RIGHTS)] public string Rights      { get => __permissions; set => SetProperty(ref __permissions, value); }
+    public                        TID        ID          { get => _id;           init => _id = value; }
+    public                        TID?       CreatedBy   { get => __createdBy;   set => SetProperty(ref __createdBy,   value); }
+    [StringLength(NAME)] public   string     NameOfGroup { get => __nameOfGroup; set => SetProperty(ref __nameOfGroup, value); }
+    public                        TID?       OwnerID     { get => __ownerID;     set => SetProperty(ref __ownerID,     value); }
+    [StringLength(RIGHTS)] public UserRights Rights      { get => __rights;      set => SetProperty(ref __rights,      value); }
 
 
     public GroupModel( IGroupModel<TID> model ) : this(model.NameOfGroup, model.OwnerID, model.CreatedBy, model.ID, model.Rights) { }

@@ -4,7 +4,7 @@
 namespace Jakar.Database;
 
 
-public enum SubscriptionStatus : ulong
+public enum SubscriptionStatus
 {
     None,
     Invalid,

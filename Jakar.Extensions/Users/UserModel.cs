@@ -21,7 +21,7 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     private      string            __gender           = string.Empty;
     private      string            __lastName         = string.Empty;
     private      string            __phoneNumber      = string.Empty;
-    private      string            __rights           = string.Empty;
+    private      UserRights        __rights           = new();
     private      string            __title            = string.Empty;
     private      string            __userName         = string.Empty;
     private      string            __website          = string.Empty;
@@ -64,9 +64,9 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(               DESCRIPTION)] public string Description { get => _description ??= GetDescription(); set => SetProperty(ref _description, value); }
-    [EmailAddress] [StringLength(EMAIL)] public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
-    public                                                 TID?   EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
-    [StringLength(PHONE_EXT)] public                string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
+    [EmailAddress] [StringLength(EMAIL)]       public string Email       { get => __email;                           set => SetProperty(ref __email,      value); }
+    public                                            TID?   EscalateTo  { get => __escalateTo;                      set => SetProperty(ref __escalateTo, value); }
+    [StringLength(PHONE_EXT)] public                  string Ext         { get => __ext;                             set => SetProperty(ref __ext,        value); }
 
     [Required] [StringLength(2000)] public string FirstName
     {
@@ -81,15 +81,15 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     }
 
     [StringLength(FULL_NAME)] public string                            FullName           { get => _fullName ??= GetFullName(); set => SetProperty(ref _fullName, value); }
-    [StringLength(GENDER)] public string                            Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
-    public                                  ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
-    public                                  TID?                              ImageID            { get => __imageID;                   set => SetProperty(ref __imageID, value); }
-    [JsonIgnore] public virtual             bool                              IsValid            { get => IsValidEmail                      && IsValidName && IsValidUserName; }
-    [JsonIgnore] public virtual             bool                              IsValidEmail       { get => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress(); }
-    [JsonIgnore] public virtual             bool                              IsValidName        { get => !string.IsNullOrWhiteSpace(FullName); }
-    [JsonIgnore] public virtual             bool                              IsValidPhoneNumber { get => !string.IsNullOrWhiteSpace(PhoneNumber); }
-    [JsonIgnore] public virtual             bool                              IsValidUserName    { get => !string.IsNullOrWhiteSpace(UserName); }
-    [JsonIgnore] public virtual             bool                              IsValidWebsite     { get => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _); }
+    [StringLength(GENDER)]    public string                            Gender             { get => __gender;                    set => SetProperty(ref __gender,  value); }
+    public                           ObservableCollection<TGroupModel> Groups             { get;                                init; } = [];
+    public                           TID?                              ImageID            { get => __imageID;                   set => SetProperty(ref __imageID, value); }
+    [JsonIgnore] public virtual      bool                              IsValid            { get => IsValidEmail                      && IsValidName && IsValidUserName; }
+    [JsonIgnore] public virtual      bool                              IsValidEmail       { get => !string.IsNullOrWhiteSpace(Email) && Email.IsEmailAddress(); }
+    [JsonIgnore] public virtual      bool                              IsValidName        { get => !string.IsNullOrWhiteSpace(FullName); }
+    [JsonIgnore] public virtual      bool                              IsValidPhoneNumber { get => !string.IsNullOrWhiteSpace(PhoneNumber); }
+    [JsonIgnore] public virtual      bool                              IsValidUserName    { get => !string.IsNullOrWhiteSpace(UserName); }
+    [JsonIgnore] public virtual      bool                              IsValidWebsite     { get => Uri.TryCreate(Website, UriKind.RelativeOrAbsolute, out _); }
 
     [Required] [StringLength(2000)] public string LastName
     {
@@ -103,9 +103,9 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
         }
     }
 
-    [Phone] [StringLength(PHONE)]  public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
+    [Phone] [StringLength(PHONE)]             public string                           PhoneNumber         { get => __phoneNumber;       set => SetProperty(ref __phoneNumber,       value); }
     [EnumDataType(typeof(SupportedLanguage))] public SupportedLanguage                PreferredLanguage   { get => __preferredLanguage; set => SetProperty(ref __preferredLanguage, value); }
-    [StringLength(RIGHTS)]      public string                           Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
+    [StringLength(RIGHTS)]                    public UserRights                       Rights              { get => __rights;            set => SetProperty(ref __rights,            value); }
     public                                           ObservableCollection<TRoleModel> Roles               { get;                        init; } = [];
     public                                           DateTimeOffset?                  SubscriptionExpires { get;                        init; }
 
@@ -150,11 +150,6 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
 
     public virtual string GetFullName()    => IUserData.GetFullName(this);
     public virtual string GetDescription() => IUserData.GetDescription(this);
-
-
-    public virtual UserRights<TEnum> GetRights<TEnum>()
-        where TEnum : struct, Enum => UserRights<TEnum>.Create(this)
-                                                       .With(Groups);
 
 
     public TSelf With( IEnumerable<TAddress> addresses )

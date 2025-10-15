@@ -5,7 +5,7 @@
 ///     <summary> Distance Unit for use in conversion. </summary>
 ///     <remarks/>
 /// </Docs>
-public enum DistanceUnit : ulong
+public enum DistanceUnit
 {
     /// <Docs>
     ///     <summary> Kilometers </summary>

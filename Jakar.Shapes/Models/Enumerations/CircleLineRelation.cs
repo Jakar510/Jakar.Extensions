@@ -4,7 +4,7 @@
 namespace Jakar.Shapes;
 
 
-public enum CircleLineRelation : ulong
+public enum CircleLineRelation
 {
     Tangent,
     Secant,

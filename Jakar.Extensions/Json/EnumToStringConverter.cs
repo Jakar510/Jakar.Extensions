@@ -5,7 +5,7 @@ namespace Jakar.Extensions;
 
 
 public abstract class EnumToStringConverter<TSelf, TEnum>() : JsonConverter<TEnum>()
-    where TEnum : struct, Enum
+    where TEnum : unmanaged, Enum
     where TSelf : EnumToStringConverter<TSelf, TEnum>, new()
 {
     public static readonly TSelf Instance = new();

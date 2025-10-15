@@ -31,7 +31,7 @@ public enum ClaimType : ulong
     [Display(Description = ClaimTypes.Webpage)]         WebSite                = 1 << 17,
     [Display(Description = ClaimTypes.GroupSid)]        Group                  = 1 << 18,
     [Display(Description = ClaimTypes.Role)]            Role                   = 1 << 19,
-    All                                                                        = ~0ul
+    All                                                                        = ~0UL
 }
 
 
@@ -215,7 +215,7 @@ public static class Claims
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool HasFlag<TValue>( in TValue value, in TValue flag )
-        where TValue : struct, Enum => ( value.AsULong() & flag.AsULong() ) != 0;
+        where TValue : unmanaged, Enum => ( value.AsULong() & flag.AsULong() ) != 0;
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static bool HasFlag( in ClaimType value, in ClaimType flag ) => ( value & flag ) != 0;
 
 

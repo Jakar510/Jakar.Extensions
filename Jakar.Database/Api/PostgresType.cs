@@ -9,7 +9,7 @@ using Jakar.Shapes;
 namespace Jakar.Database.DbMigrations;
 
 
-public enum PostgresType : ulong
+public enum PostgresType
 {
     NotSet,
 

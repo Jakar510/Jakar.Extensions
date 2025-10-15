@@ -435,7 +435,7 @@ public sealed class AppVersion : IReadOnlyCollection<int>, ISpanFormattable, IJs
 
 
 
-public enum AppVersionFormat : ulong
+public enum AppVersionFormat
 {
     /// <summary> Major </summary>
     Singular = 1,

@@ -108,7 +108,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
 
     public async ValueTask<bool> HasAccess<TRight>( CancellationToken token, params TRight[] rights )
-        where TRight : struct, Enum
+        where TRight : unmanaged, Enum
     {
         await using NpgsqlConnection connection   = await ConnectAsync(token);
         UserRecord?                  loggedInUser = LoggedInUser.Value;
@@ -118,7 +118,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         return result;
     }
     public async ValueTask<bool> HasPermission<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token, params TRight[] rights )
-        where TRight : struct, Enum
+        where TRight : unmanaged, Enum
     {
         HashSet<TRight> permissions = await CurrentPermissions<TRight>(connection, transaction, user, token);
 
@@ -130,7 +130,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         return true;
     }
     public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
-        where TRight : struct, Enum
+        where TRight : unmanaged, Enum
     {
         HashSet<IUserRights> models = new(UserRights<TRight>.EnumValues.Length) { user };
         HashSet<TRight>      rights = new(UserRights<TRight>.EnumValues.Length);

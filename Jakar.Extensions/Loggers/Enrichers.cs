@@ -96,7 +96,7 @@ public static class Enricher
     public static LogEventProperty GetProperty( in Guid           value, string name ) => new(name, new ScalarValue(value));
     public static LogEventProperty GetProperty( AppVersion        value, string name ) => new(name, new ScalarValue(value.ToString()));
     public static LogEventProperty GetProperty<TEnum>( TEnum value, string name )
-        where TEnum : struct, Enum => new(name, new ScalarValue(value.ToString()));
+        where TEnum : unmanaged, Enum => new(name, new ScalarValue(value.ToString()));
 
 
     public static LogEventProperty GetProperty( in ReadOnlySpan<GcGenerationInformation> value, string name ) => new(name,
