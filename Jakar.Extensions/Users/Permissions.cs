@@ -21,11 +21,11 @@ public readonly ref struct Permissions<TEnum> : IDisposable
     private readonly        IMemoryOwner<ulong> _owner         = MemoryPool<ulong>.Shared.Rent(Blocks);
 
 
-    private       Span<ulong>                        _bits      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _owner.Memory.Span[..Blocks]; }
-    public static Permissions<TEnum>                 Default    { [MustDisposeResource] get => new(); }
-    public static int                                Length     => _enumValues.Length;
-    public static ReadOnlySpan<TEnum>                EnumValues => _enumValues;
-    public        ValueEnumerable<Enumerable, Right> Rights     => new(new Enumerable(this));
+    private       Span<ulong>         _bits      { [MethodImpl(MethodImplOptions.AggressiveInlining)] get => _owner.Memory.Span[..Blocks]; }
+    public static Permissions<TEnum>  Default    { [MustDisposeResource] get => new(); }
+    public static int                 Length     => _enumValues.Length;
+    public static ReadOnlySpan<TEnum> EnumValues => _enumValues;
+    public        Enumerable          Rights     => new(this);
 
 
     static Permissions()
@@ -251,50 +251,67 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 
 
 
-    public readonly record struct Right( TEnum Index, bool Value );
-
-
-
-    public ref struct Enumerable : IValueEnumerator<Right>
+    public ref struct Enumerable : IValueEnumerator<Right<TEnum>>
     {
         private readonly Permissions<TEnum>             __rights;
         private          ReadOnlySpan<TEnum>.Enumerator __enums = EnumValues.GetEnumerator();
+        private          Right<TEnum>                   __current;
         public Enumerable( Permissions<TEnum> permissions ) => __rights = permissions;
 
+        public ref readonly Right<TEnum> Current => ref Unsafe.AsRef(ref __current);
 
-        public void Dispose() => this = default;
-        public bool TryGetNext( out Right current )
+        public bool MoveNext()
         {
             if ( __enums.MoveNext() )
             {
                 TEnum e = __enums.Current;
-                current = new Right(e, __rights.Has(e));
+                __current = new Right<TEnum>(e, __rights.Has(e));
                 return true;
             }
 
-            current = default;
+            __current = default;
             return false;
+        }
+        public void       Dispose()       => this = default;
+        public Enumerable GetEnumerator() => this;
+
+
+        public bool TryGetNext( out Right<TEnum> current )
+        {
+            bool result = MoveNext();
+            current = __current;
+            return result;
         }
         public bool TryGetNonEnumeratedCount( out int count )
         {
             count = _enumValues.Length;
             return true;
         }
-        public bool TryGetSpan( out ReadOnlySpan<Right> span )
+        public bool TryGetSpan( out ReadOnlySpan<Right<TEnum>> span )
         {
-            Right[] permissions = GC.AllocateUninitializedArray<Right>(_enumValues.Length);
-            int     i           = 0;
-            foreach ( ref readonly TEnum e in EnumValues ) { permissions[i++] = new Right(e, __rights.Has(e)); }
+            Right<TEnum>[] permissions = GC.AllocateUninitializedArray<Right<TEnum>>(_enumValues.Length);
+            int            i           = 0;
+            foreach ( ref readonly TEnum e in EnumValues ) { permissions[i++] = new Right<TEnum>(e, __rights.Has(e)); }
 
             span = permissions;
+            ref readonly var x = ref span[1];
             return true;
         }
-        public bool TryCopyTo( scoped Span<Right> destination, Index offset )
+        public bool TryCopyTo( scoped Span<Right<TEnum>> destination, Index offset )
         {
-            if ( !TryGetSpan(out ReadOnlySpan<Right> span) ) { return false; }
+            if ( !TryGetSpan(out ReadOnlySpan<Right<TEnum>> span) ) { return false; }
 
             destination[offset] = span[offset];
             return true;
         }
     }
+}
+
+
+
+public readonly record struct Right<TEnum>( TEnum Index, bool Value )
+    where TEnum : unmanaged, Enum
+{
+    public readonly TEnum Index = Index;
+    public readonly bool  Value = Value;
 }
