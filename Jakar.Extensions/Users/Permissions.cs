@@ -1,6 +1,8 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 10/14/2025  22:34
 
+using System;
+using Org.BouncyCastle.Utilities.Encoders;
 using ZLinq;
 
 
@@ -48,47 +50,48 @@ public readonly ref struct Permissions<TEnum> : IDisposable
         __rights?.SetRights(in this);
         _owner.Dispose();
     }
+
+    /// <summary> Calls <see cref="Dispose"/> after use. </summary>
     public override string ToString()
     {
-        Span<char> chars = stackalloc char[Length];
-
-        for ( int i = 0; i < Length; i++ )
+        try
         {
-            chars[i] = Has(EnumValues[i])
-                           ? VALID
-                           : INVALID;
-        }
+            Span<char> chars = stackalloc char[Length];
 
-        return new string(chars);
+            for ( int i = 0; i < Length; i++ )
+            {
+                chars[i] = Has(EnumValues[i])
+                               ? VALID
+                               : INVALID;
+            }
+
+            return new string(chars);
+        }
+        finally { Dispose(); }
     }
+
+
+    /// <summary> Calls <see cref="Dispose"/> after use. </summary>
     public string ToHexString()
     {
-        const int   SIZE   = sizeof(ulong);
-        Span<ulong> buffer = _bits;
-        Span<byte>  span   = stackalloc byte[buffer.Length * SIZE];
-
-        for ( int i = 0; i < buffer.Length; i++ )
+        try
         {
-            ulong n = buffer[i];
-            if ( !BitConverter.TryWriteBytes(span.Slice(i * SIZE, SIZE), n) ) { throw new InvalidOperationException($"{nameof(BitConverter)}.{nameof(BitConverter.TryWriteBytes)} convert ulong to bytes failed"); }
+            const int   SIZE   = sizeof(ulong);
+            Span<ulong> buffer = _bits;
+            Span<byte>  span   = stackalloc byte[buffer.Length * SIZE];
+
+            for ( int i = 0; i < buffer.Length; i++ )
+            {
+                ulong n = buffer[i];
+                if ( !BitConverter.TryWriteBytes(span.Slice(i * SIZE, SIZE), n) ) { throw new InvalidOperationException($"{nameof(BitConverter)}.{nameof(BitConverter.TryWriteBytes)} convert ulong to bytes failed"); }
+            }
+
+            return Convert.ToHexString(span);
         }
-
-        return Convert.ToHexString(span);
+        finally { Dispose(); }
     }
 
 
-    [MustDisposeResource] public static Permissions<TEnum> FromHexString( UserRights? rights, params ReadOnlySpan<char> hexString )
-    {
-        const int          SIZE        = sizeof(ulong);
-        Permissions<TEnum> permissions = Create(rights);
-        if ( hexString.IsNullOrWhiteSpace() ) { return permissions; }
-
-        Span<ulong> buffer = permissions._bits;
-        if ( !hexString.TryHexToUInt64Span(buffer) ) { throw new FormatException("Invalid hex string format or incorrect length."); }
-
-        return permissions;
-    }
-    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights?  rights ) => new(rights);
     [MustDisposeResource] public static Permissions<TEnum> Create( IUserRights? rights ) => Create(rights?.Rights);
     [MustDisposeResource] public static Permissions<TEnum> Create( IEnumerable<IUserRights> values )
     {
@@ -114,13 +117,27 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 
         return permissions;
     }
-    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<char> values )
+    [MustDisposeResource] public static Permissions<TEnum> FromHexString( params ReadOnlySpan<char> hexString ) => FromHexString(null, hexString);
+    [MustDisposeResource] public static Permissions<TEnum> FromHexString( UserRights? rights, params ReadOnlySpan<char> hexString )
     {
-        Permissions<TEnum> permissions = Create(rights);
+        Permissions<TEnum> permissions = new(rights);
+        if ( !hexString.TryHexToUInt64Span(permissions._bits) ) { throw new FormatException("Invalid hex string format or incorrect length."); }
 
-        for ( int i = 0; i < values.Length && i < Length; i++ )
+        return permissions;
+    }
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights?               rights ) => Create(rights, rights?.Value);
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<char> span )   => Create(null,   span);
+    [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<char> span )
+    {
+        Permissions<TEnum> permissions = new(rights);
+        if ( span.IsNullOrWhiteSpace() ) { return permissions; }
+
+        if ( span.TryHexToUInt64Span(permissions._bits) ) { return permissions; }
+
+
+        for ( int i = 0; i < span.Length && i < Length; i++ )
         {
-            char v = values[i];
+            char v = span[i];
 
             switch ( v )
             {
@@ -139,22 +156,24 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 
         return permissions;
     }
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<bool> span ) => Create(null, span);
     [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<bool> masks )
     {
-        Permissions<TEnum>  permissions = Create(rights);
+        Permissions<TEnum>  permissions = new(rights);
         ReadOnlySpan<TEnum> span        = EnumValues;
         for ( int i = 0; i < masks.Length; i++ ) { permissions.Set(span[i], masks[i]); }
 
         return permissions;
     }
+    [MustDisposeResource] public static Permissions<TEnum> Create( params ReadOnlySpan<TEnum> values ) => Create(null, values);
     [MustDisposeResource] public static Permissions<TEnum> Create( UserRights? rights, params ReadOnlySpan<TEnum> values )
     {
-        Permissions<TEnum> permissions = Create(rights);
+        Permissions<TEnum> permissions = new(rights);
         foreach ( ref readonly TEnum t in values ) { permissions.Set(t, true); }
 
         return permissions;
     }
-    [MustDisposeResource] public static Permissions<TEnum> SA( UserRights? rights ) => Create(rights, EnumValues);
+    [MustDisposeResource] public static Permissions<TEnum> SA( UserRights? rights = null ) => Create(rights, EnumValues);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public Permissions<TEnum> Set( TEnum right, bool value )

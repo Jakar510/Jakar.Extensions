@@ -41,7 +41,9 @@ public static partial class AsyncLinq
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( int length ) => GC.AllocateUninitializedArray<TElement>(length);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static TElement[] GetArray<TElement>( this int length ) => GC.AllocateUninitializedArray<TElement>(length);
+
+
     public static async ValueTask<TElement[]> ToArray<TElement>( this IAsyncEnumerable<TElement> sequence, int initialCapacity = DEFAULT_CAPACITY, CancellationToken token = default )
     {
         List<TElement> array = await sequence.ToList(initialCapacity, token);

@@ -132,16 +132,16 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
         where TRight : unmanaged, Enum
     {
-        HashSet<IUserRights> models = new(UserRights<TRight>.EnumValues.Length) { user };
-        HashSet<TRight>      rights = new(UserRights<TRight>.EnumValues.Length);
+        HashSet<IUserRights> models = new(DEFAULT_CAPACITY) { user };
+        HashSet<TRight>      rights = new(Permissions<TRight>.EnumValues.Length);
 
         await foreach ( GroupRecord record in user.GetGroups(connection, transaction, this, token) ) { models.Add(record); }
 
         await foreach ( RoleRecord record in user.GetRoles(connection, transaction, this, token) ) { models.Add(record); }
 
-        using UserRights<TRight> results = UserRights<TRight>.Create(models);
+        using Permissions<TRight> results = Permissions<TRight>.Create(models);
 
-        foreach ( ( TRight permission, bool value ) in results.Permissions )
+        foreach ( ( TRight permission, bool value ) in results.Rights )
         {
             if ( value ) { rights.Add(permission); }
         }

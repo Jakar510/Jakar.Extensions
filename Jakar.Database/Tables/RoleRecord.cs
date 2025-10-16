@@ -12,7 +12,7 @@ namespace Jakar.Database;
 public sealed record RoleRecord( [property: StringLength(NAME)]              string NameOfRole,
                                  [property: StringLength(NORMALIZED_NAME)]   string NormalizedName,
                                  [property: StringLength(CONCURRENCY_STAMP)] string ConcurrencyStamp,
-                                 string                                             Rights,
+                                 UserRights                                         Rights,
                                  RecordID<RoleRecord>                               ID,
                                  RecordID<UserRecord>?                              CreatedBy,
                                  DateTimeOffset                                     DateCreated,
@@ -23,7 +23,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     public static                 JsonSerializerContext      JsonContext   => JakarDatabaseContext.Default;
     public static                 JsonTypeInfo<RoleRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RoleRecord;
     public static                 JsonTypeInfo<RoleRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RoleRecordArray;
-    [StringLength(RIGHTS)] public string                     Rights        { get; set; } = Rights;
+    [StringLength(RIGHTS)] public UserRights                 Rights        { get; set; } = Rights;
 
 
     public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
@@ -44,13 +44,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     public RoleModel ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create(this);
-
-    public RoleRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
-        where TEnum : unmanaged, Enum
-    {
-        Rights = rights.ToString();
-        return this;
-    }
+ 
 
     [Pure] public override PostgresParameters ToDynamicParameters()
     {

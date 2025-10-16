@@ -46,8 +46,8 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     }
     private static async ValueTask TestUsers( Database db, CancellationToken token = default )
     {
-        UserRecord       admin   = UserRecord.Create("Admin", "Admin", UserRights<TestRight>.SA);
-        UserRecord       user    = UserRecord.Create("User",  "User",  UserRights<TestRight>.Create(TestRight.Read));
+        UserRecord       admin   = UserRecord.Create("Admin", "Admin", Permissions<TestRight>.SA());
+        UserRecord       user    = UserRecord.Create("User",  "User",  Permissions<TestRight>.Create(TestRight.Read));
         UserRecord[]     users   = [admin, user];
         List<UserRecord> results = new(users.Length);
 

@@ -96,7 +96,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public                                                                     SupportedLanguage PreferredLanguage      { get;                  set; }
     [StringLength(REFRESH_TOKEN)] public                                       string            RefreshToken           { get;                  set; }
     public                                                                     DateTimeOffset?   RefreshTokenExpiryTime { get;                  set; }
-    [StringLength(RIGHTS)]         public                                      string            Rights                 { get;                  set; }
+    [StringLength(RIGHTS)]         public                                      UserRights        Rights                 { get;                  set; }
     [StringLength(SECURITY_STAMP)] public                                      string            SecurityStamp          { get;                  set; }
     public                                                                     Guid?             SessionID              { get;                  set; }
     public                                                                     DateTimeOffset?   SubscriptionExpires    { get;                  set; }
@@ -140,7 +140,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                          Guid?                 SessionID,
                                          string                SecurityStamp,
                                          string                ConcurrencyStamp,
-                                         string                Rights,
+                                         UserRights            Rights,
                                          RecordID<UserRecord>? EscalateTo,
                                          JsonObject?           AdditionalData,
                                          string                PasswordHash,
@@ -240,7 +240,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         string                firstName              = reader.GetFieldValue<string>(nameof(FirstName));
         string                lastName               = reader.GetFieldValue<string>(nameof(LastName));
         string                fullName               = reader.GetFieldValue<string>(nameof(FullName));
-        string                rights                 = reader.GetFieldValue<string>(nameof(Rights));
+        UserRights            rights                 = reader.GetFieldValue<string>(nameof(Rights));
         string                gender                 = reader.GetFieldValue<string>(nameof(Gender));
         string                company                = reader.GetFieldValue<string>(nameof(Company));
         string                description            = reader.GetFieldValue<string>(nameof(Description));
@@ -329,11 +329,11 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : unmanaged, Enum => Create(request, UserRights<TEnum>.Create(request.Data), caller);
-    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(request, request.Data.Rights, caller);
+    public static UserRecord Create<TUser, TEnum>( ILoginRequest<TUser> request, scoped in Permissions<TEnum> rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
-        where TEnum : unmanaged, Enum => Create(request, rights.ToString(), caller);
-    public static UserRecord Create<TUser>( ILoginRequest<TUser> request, string rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(request, UserRights.Create(in rights), caller);
+    public static UserRecord Create<TUser>( ILoginRequest<TUser> request, UserRights rights, UserRecord? caller = null )
         where TUser : class, IUserData<Guid>
     {
         ArgumentNullException.ThrowIfNull(request.Data);
@@ -343,7 +343,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
               .Enable();
     }
 
-    public static UserRecord Create<TUser>( string userName, string rights, TUser data, UserRecord? caller = null )
+    public static UserRecord Create<TUser>( string userName, UserRights rights, TUser data, UserRecord? caller = null )
         where TUser : class, IUserData<Guid> => new(userName,
                                                     data.FirstName,
                                                     data.LastName,
@@ -386,9 +386,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                     caller?.ID,
                                                     DateTimeOffset.UtcNow);
 
-    public static UserRecord Create<TEnum>( string userName, string password, scoped in UserRights<TEnum> rights, UserRecord? caller = null )
-        where TEnum : unmanaged, Enum => Create(userName, password, rights.ToString(), caller);
-    public static UserRecord Create( string userName, string password, string rights, UserRecord? caller = null ) =>
+    public static UserRecord Create<TEnum>( string userName, string password, scoped in Permissions<TEnum> rights, UserRecord? caller = null )
+        where TEnum : unmanaged, Enum => Create(userName, password, UserRights.Create(in rights), caller);
+    public static UserRecord Create( string userName, string password, UserRights rights, UserRecord? caller = null ) =>
         new UserRecord(userName,
                        string.Empty,
                        string.Empty,
@@ -545,18 +545,18 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( NpgsqlConnection connection, DbTransaction     transaction, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where(connection, transaction, db.RecoveryCodes, this, token);
 
 
-    public UserRecord WithRights<TEnum>( scoped in UserRights<TEnum> rights )
+    public UserRecord WithRights<TEnum>( scoped in UserRights rights )
         where TEnum : unmanaged, Enum
     {
-        Rights = rights.ToString();
+        Rights.Value = rights.Value;
         return this;
     }
     public async ValueTask<UserModel> GetRights( NpgsqlConnection connection, DbTransaction transaction, Database db, CancellationToken token )
     {
         UserModel model = new(this);
-        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { model.Groups.Add(record.ToGroupModel()); }
+        await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { await model.Groups.AddAsync(record.ToGroupModel(), token); }
 
-        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { model.Roles.Add(record.ToRoleModel()); }
+        await foreach ( RoleRecord record in GetRoles(connection, transaction, db, token) ) { await model.Roles.AddAsync(record.ToRoleModel(), token); }
 
         return model;
     }
@@ -688,7 +688,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                              out Guid?                 sessionID,
                              out string                securityStamp,
                              out string                concurrencyStamp,
-                             out string                rights,
+                             out UserRights            rights,
                              out RecordID<UserRecord>? escalateTo,
                              out JsonObject?           additionalData,
                              out string                passwordHash,

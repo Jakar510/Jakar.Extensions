@@ -106,7 +106,7 @@ public class Spans_Tests : Assert
     public void Count( string value, char c, int expected )
     {
         ReadOnlySpan<char> valueSpan = value;
-        int                results   = Spans.Count(in valueSpan, c);
+        int                results   = valueSpan.Count(c);
         this.AreEqual(expected, results);
     }
 

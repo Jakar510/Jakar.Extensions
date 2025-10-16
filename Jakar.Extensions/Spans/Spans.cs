@@ -271,7 +271,7 @@ public static partial class Spans
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<TValue> CreateSpan<TValue>( int size ) => AsyncLinq.GetArray<TValue>(size);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public static Span<TValue> CreateSpan<TValue>( int size ) => size.GetArray<TValue>();
 
     public static Span<TValue> Create<TValue>( int size )
         where TValue : unmanaged

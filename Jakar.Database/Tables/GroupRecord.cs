@@ -9,7 +9,7 @@ namespace Jakar.Database;
 [Serializable]
 [Table(TABLE_NAME)]
 [SuppressMessage("ReSharper", "InconsistentNaming")]
-public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, string Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
+public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)] string? CustomerID, [property: StringLength(GroupRecord.MAX_SIZE)] string NameOfGroup, UserRights Rights, RecordID<GroupRecord> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null )
     : OwnedTableRecord<GroupRecord>(in CreatedBy, in ID, in DateCreated, in LastModified), ITableRecord<GroupRecord>, IGroupModel<Guid>
 {
     public const  int                         MAX_SIZE   = 1024;
@@ -27,10 +27,10 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
                                                                                                                .Build();
 
 
-    public static string                               TableName {  get => TABLE_NAME; }
-    Guid? ICreatedByUser<Guid>.                        CreatedBy => CreatedBy?.Value;
-    Guid? IGroupModel<Guid>.                           OwnerID   => CreatedBy?.Value;
-    [StringLength(RIGHTS)] public string Rights    { get; set; } = Rights;
+    public static string                     TableName { get => TABLE_NAME; }
+    Guid? ICreatedByUser<Guid>.              CreatedBy => CreatedBy?.Value;
+    Guid? IGroupModel<Guid>.                 OwnerID   => CreatedBy?.Value;
+    [StringLength(RIGHTS)] public UserRights Rights    { get; set; } = Rights;
 
 
     public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
@@ -42,12 +42,10 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<RoleRecord>(migrationID,
-                                                  $"create { TABLE_NAME} table",
+                                                  $"create {TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
+                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
                                                    (  
                                                    {nameof(NameOfGroup).SqlColumnName()}    varchar(1024) NOT NULL, 
                                                    {nameof(CustomerID).SqlColumnName()}     varchar(1024) NOT NULL,  
@@ -59,7 +57,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
                                                    );
 
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);
@@ -74,9 +72,6 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
 
         int nameOfGroupComparison = string.Compare(NameOfGroup, other.NameOfGroup, StringComparison.Ordinal);
         if ( nameOfGroupComparison != 0 ) { return nameOfGroupComparison; }
-
-        int rightsComparison = string.Compare(Rights, other.Rights, StringComparison.Ordinal);
-        if ( rightsComparison != 0 ) { return rightsComparison; }
 
         int customerIDComparison = string.Compare(CustomerID, other.CustomerID, StringComparison.Ordinal);
         if ( customerIDComparison != 0 ) { return customerIDComparison; }

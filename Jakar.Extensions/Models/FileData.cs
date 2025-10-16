@@ -193,7 +193,7 @@ public abstract class FileData<TSelf, TID, TFileMetaData>( long fileSize, string
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();
         stream.Seek(0, SeekOrigin.Begin);
-        using MemoryStream memory = await stream.ToMemoryStream();
+        using MemoryStream memory = await Spans.ToMemoryStream(stream);
         return Create(metaData, memory);
     }
 
