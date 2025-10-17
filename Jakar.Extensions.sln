@@ -86,6 +86,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Extensions.Telemetry.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Shapes.Experiments", "Jakar.Shapes.Experiments\Jakar.Shapes.Experiments.csproj", "{60EA32AE-F5F9-474C-8F70-1909B18D947C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jakar.Permissions.Generator", "Jakar.Permissions.Generator\src\Jakar.Permissions.Generator.csproj", "{680F0607-3850-B846-69D7-2E70C64DDBAE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -407,6 +409,18 @@ Global
 		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhone.Build.0 = Release|Any CPU
 		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{60EA32AE-F5F9-474C-8F70-1909B18D947C}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|iPhone.Build.0 = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{680F0607-3850-B846-69D7-2E70C64DDBAE}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
