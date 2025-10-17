@@ -10,7 +10,7 @@ namespace Jakar.Extensions;
 
 
 public interface IUserRights<out TValue, TEnum> : IUserRights
-    where TEnum : struct, Enum
+    where TEnum : unmanaged, Enum
     where TValue : IUserRights<TValue, TEnum>
 {
     public TValue WithRights( Permissions<TEnum> rights );
@@ -39,13 +39,13 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
 
     public override string ToString() => Value;
     public static UserRights Create<TEnum>( string rights )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         using Permissions<TEnum> value = Permissions<TEnum>.Create(null, rights);
         return new UserRights { Value = value.ToString() };
     }
     public static UserRights Create<TEnum>( scoped Permissions<TEnum> rights )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         return new UserRights { Value = rights.ToString() };
     }
@@ -53,9 +53,9 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
 
     public virtual void SetRights( scoped Permissions permissions ) => Value = permissions.ToString();
     public virtual void SetRights<TEnum>( scoped Permissions<TEnum> permissions )
-        where TEnum : struct, Enum => Value = permissions.ToString();
+        where TEnum : unmanaged, Enum => Value = permissions.ToString();
     public void SetRights<TEnum>( params ReadOnlySpan<TEnum> values )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         using Permissions<TEnum> permissions = Edit<TEnum>();
         permissions.Grant(values);
@@ -65,7 +65,7 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
 
     [MustDisposeResource] public virtual Permissions Edit() => Permissions.Create(this);
     [MustDisposeResource] public virtual Permissions<TEnum> Edit<TEnum>()
-        where TEnum : struct, Enum => Permissions<TEnum>.Create(this);
+        where TEnum : unmanaged, Enum => Permissions<TEnum>.Create(this);
 
 
     public int CompareTo( object? other ) => other is UserRights rights

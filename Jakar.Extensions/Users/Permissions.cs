@@ -124,9 +124,9 @@ public readonly ref struct Permissions : IDisposable
         return permissions;
     }
     [MustDisposeResource] public static Permissions Create<TEnum>( params ReadOnlySpan<TEnum> values )
-        where TEnum : struct, Enum => Create(null, values);
+        where TEnum : unmanaged, Enum => Create(null, values);
     [MustDisposeResource] public static Permissions Create<TEnum>( UserRights? rights, params ReadOnlySpan<TEnum> span )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         Permissions permissions = new(rights);
         if ( span.IsEmpty ) { return permissions; }
@@ -148,10 +148,10 @@ public readonly ref struct Permissions : IDisposable
 
 
     public Permissions Grant<TEnum>( TEnum index )
-        where TEnum : struct, Enum => Set(index.AsInt(), true);
+        where TEnum : unmanaged, Enum => Set(index.AsInt(), true);
     public Permissions Grant( int index ) => Set(index, true);
     public Permissions Grant<TEnum>( params ReadOnlySpan<TEnum> permissions )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         foreach ( TEnum permission in permissions ) { Grant(permission.AsInt()); }
 
@@ -166,10 +166,10 @@ public readonly ref struct Permissions : IDisposable
 
 
     public Permissions Revoke<TEnum>( TEnum index )
-        where TEnum : struct, Enum => Set(index.AsInt(), false);
+        where TEnum : unmanaged, Enum => Set(index.AsInt(), false);
     public Permissions Revoke( int index ) => Set(index, false);
     public Permissions Revoke<TEnum>( params ReadOnlySpan<TEnum> permissions )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         foreach ( TEnum permission in permissions ) { Revoke(permission.AsInt()); }
 
@@ -290,7 +290,7 @@ public readonly record struct Right( int Index, bool Value )
 
 
 public readonly ref struct Permissions<TEnum> : IDisposable
-    where TEnum : struct, Enum
+    where TEnum : unmanaged, Enum
 {
     private readonly UserRights?         __rights;
     private static   TEnum[]?            __enumValues;
@@ -557,7 +557,7 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 
 
 public readonly record struct Right<TEnum>( TEnum Index, bool Value )
-    where TEnum : struct, Enum
+    where TEnum : unmanaged, Enum
 {
     public readonly TEnum Index = Index;
     public readonly bool  Value = Value;

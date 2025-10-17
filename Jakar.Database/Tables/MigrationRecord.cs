@@ -109,7 +109,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
                };
     }
     public static MigrationRecord FromEnum<TEnum>( ulong migrationID )
-        where TEnum : struct, Enum
+        where TEnum : unmanaged, Enum
     {
         string[]                                   values     = Enum.GetNames(typeof(TEnum));
         string                                     tableName  = typeof(TEnum).Name.SqlColumnName();

@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 04/15/2022  5:45 PM
 
+using System.Buffers.Text;
+
+
+
 namespace Jakar.Extensions;
 
 
@@ -29,6 +33,7 @@ public static class Guids
         result = new Buffer<byte>(16);
         if ( value.TryWriteBytes(result.Span) ) { return true; }
 
+        result.Dispose();
         result = default;
         return false;
     }
@@ -96,11 +101,11 @@ public static class Guids
 
         return NewBase64(in id);
     }
-    public static string NewBase64( in this Guid id )
+    public static string NewBase64( in this Guid value )
     {
         Span<char> result = stackalloc char[22];
-        id.AsSpan(ref result);
-        return new string(result);
+        value.AsSpan(ref result, out int bytesWritten);
+        return new string(result[..bytesWritten]);
     }
 
 
@@ -112,25 +117,27 @@ public static class Guids
     public static string ToBase64( in this Guid value )
     {
         Span<char> result = stackalloc char[22];
-        value.AsSpan(ref result);
-        return new string(result);
+        value.AsSpan(ref result, out int bytesWritten);
+        return new string(result[..bytesWritten]);
+    }
+    public static string ToHex( in this Guid value )
+    {
+        Span<byte> result = stackalloc byte[32];
+        value.AsSpan(ref result, out int bytesWritten);
+        return Convert.ToHexString(result[..bytesWritten]);
     }
 
 
-    /// <summary>
-    ///     <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see>
-    /// </summary>
-    /// <param name="value"> </param>
-    /// <param name="result"> </param>
-    /// <returns> </returns>
-    public static bool AsSpan( in this Guid value, scoped ref Span<char> result )
+    /// <summary> <see href="https://www.youtube.com/watch?v=B2yOjLyEZk0"> Writing C# without allocating ANY memory </see> </summary>
+    public static bool AsSpan( in this Guid value, scoped ref Span<char> result, out int bytesWritten )
     {
         Guard.IsGreaterThanOrEqualTo(result.Length, 22);
         Span<byte> base64Bytes = stackalloc byte[24];
         Span<byte> idBytes     = stackalloc byte[16];
-        if ( !value.TryWriteBytes(idBytes) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
+        if ( !value.TryWriteBytes(idBytes, BitConverter.IsLittleEndian, out bytesWritten) ) { throw new InvalidOperationException("Guid.TryWriteBytes failed"); }
 
-        System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out int bytesWritten);
+
+        System.Buffers.Text.Base64.EncodeToUtf8(idBytes, base64Bytes, out _, out bytesWritten);
         result = result[..bytesWritten];
 
         for ( int i = 0; i < bytesWritten; i++ )
@@ -144,6 +151,11 @@ public static class Guids
         }
 
         return true;
+    }
+    public static bool AsSpan( in this Guid value, scoped ref Span<byte> result, out int bytesWritten, StandardFormat format = default )
+    {
+        Guard.IsGreaterThanOrEqualTo(result.Length, 16);
+        return Utf8Formatter.TryFormat(value, result, out bytesWritten, format);
     }
 
 
@@ -237,7 +249,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
         if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid(span);
+        return new Guid(span[..bytesWritten]);
     }
     public static Guid AsGuid( in this UInt128 value )
     {
@@ -245,7 +257,7 @@ public static class Guids
         Span<byte> span = stackalloc byte[SIZE * 2];
         if ( !value.TryFormat(span, out int bytesWritten) ) { throw new InvalidOperationException("BitConverter.TryWriteBytes failed"); }
 
-        return new Guid(span);
+        return new Guid(span[..bytesWritten]);
     }
     public static Int128 AsInt128( in this Guid value )
     {
