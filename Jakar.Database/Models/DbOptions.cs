@@ -126,8 +126,8 @@ public sealed class DbOptions : IOptions<DbOptions>
 
     private void DefaultConfigureIdentityOptions( IdentityOptions options )
     {
-        AppInformation       info         = AppInformation;
-        PasswordRequirements requirements = PasswordValidator.Requirements;
+        AppInformation info         = AppInformation;
+        Requirements   requirements = Requirements.Default;
         options.Password.RequireDigit                 = requirements.RequireNumber;
         options.Password.RequireLowercase             = requirements.RequireLowerCase;
         options.Password.RequireUppercase             = requirements.RequireUpperCase;

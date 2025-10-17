@@ -116,7 +116,7 @@ public static class Migrations
         writer.CreateHtml(records);
         return writer.ToString();
     }
-    public static void CreateHtml( this TextWriter writer, ReadOnlySpan<MigrationRecord> records )
+    public static void CreateHtml( this TextWriter writer, params ReadOnlySpan<MigrationRecord> records )
     {
         writer.WriteLine("<!DOCTYPE html>");
         writer.WriteLine("<html lang=\"en\">");
@@ -238,16 +238,14 @@ public static class Migrations
         // await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
 
 
-        await using NpgsqlCommand cmd = connection.CreateCommand();
+        await using NpgsqlCommand cmd = new(null, connection);
+        cmd.Connection  = connection;
         cmd.CommandText = command.CommandText;
-        var parameter = cmd.CreateParameter();
-        parameter.NpgsqlDbType = NpgsqlDbType.Array;
-
+        NpgsqlParameter parameter = cmd.CreateParameter();
+        parameter.NpgsqlDbType = NpgsqlDbType.Text; 
 
         await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
-
-
-        MigrationRecord[] records = await reader.CreateAsync<MigrationRecord>(Records.Count, token);
+        MigrationRecord[]       records                             = await reader.CreateAsync<MigrationRecord>(Records.Count, token);
         return records;
     }
     public static async ValueTask Apply( this MigrationRecord record, Database db, CancellationToken token )

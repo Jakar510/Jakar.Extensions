@@ -3,14 +3,7 @@
 
 public static class Sizes
 {
-    public const  int ANSI_CAPACITY         = 8000;
-    public const  int ANSI_TEXT_CAPACITY    = 2_147_483_647;
-    public const  int BINARY_CAPACITY       = ANSI_TEXT_CAPACITY;
-    public const  int DECIMAL_MAX_CAPACITY  = 38;
-    public const  int DECIMAL_MAX_SCALE     = 28;
-    private const int DEFAULT_SIZE          = 500;
-    public const  int UNICODE_CAPACITY      = 4000;
-    public const  int UNICODE_TEXT_CAPACITY = 1_073_741_823;
+    private const int DEFAULT_SIZE = 500;
 
 
     private static readonly ConcurrentDictionary<Type, int> __sizes = new(Environment.ProcessorCount, DEFAULT_CAPACITY, TypeEqualityComparer.Instance)
@@ -47,13 +40,21 @@ public static class Sizes
                                                                           [typeof(DateTime?)]       = 50,
                                                                           [typeof(DateTimeOffset)]  = 75,
                                                                           [typeof(DateTimeOffset?)] = 75,
-                                                                          [typeof(AppVersion)]      = 200
+                                                                          [typeof(AppVersion)]      = 200,
+                                                                          [typeof(Int128)] = Int128.MaxValue.ToString()
+                                                                                                   .Length,
+                                                                          [typeof(UInt128)] = UInt128.MaxValue.ToString()
+                                                                                                     .Length,
+                                                                          [typeof(Int128?)] = Int128.MaxValue.ToString()
+                                                                                                    .Length,
+                                                                          [typeof(UInt128?)] = UInt128.MaxValue.ToString()
+                                                                                                      .Length,
                                                                       };
 
 
-    public static bool Register( Type                type, int size ) => __sizes.TryAdd(type, size);
-    public static bool Register<TValue>( int         size )        => Register(typeof(TValue), size);
-    public static bool Register<TValue>( this TValue _, int size ) => Register<TValue>(size);
+    public static bool Register( Type           type, int size ) => __sizes.TryAdd(type, size);
+    public static bool Register<TValue>( int    size )        => Register(typeof(TValue), size);
+    public static bool Register<TValue>( TValue _, int size ) => Register<TValue>(size);
 
 
     public static int GetBufferSize<TValue>( int         defaultSize           = DEFAULT_SIZE ) => __sizes.GetValueOrDefault(typeof(TValue), defaultSize);

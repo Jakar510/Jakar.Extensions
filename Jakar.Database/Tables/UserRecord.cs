@@ -1,4 +1,8 @@
-﻿namespace Jakar.Database;
+﻿using System.Reflection.Metadata;
+
+
+
+namespace Jakar.Database;
 
 
 [Serializable]
@@ -6,11 +10,8 @@
 [SuppressMessage("ReSharper", "InconsistentNaming")]
 public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<UserRecord>, IRefreshToken, IUserDataRecord, IUserID
 {
-    public const           int      DEFAULT_BAD_LOGIN_DISABLE_THRESHOLD = 5;
-    public const           int      ENCRYPTED_MAX_PASSWORD_SIZE         = 550;
-    public const           int      MAX_PASSWORD_SIZE                   = 250;
-    public const           string   TABLE_NAME                          = "users";
-    public static readonly TimeSpan DefaultLockoutTime                  = TimeSpan.FromHours(6);
+    public const           string   TABLE_NAME         = "users";
+    public static readonly TimeSpan DefaultLockoutTime = TimeSpan.FromHours(6);
 
 
     public static JsonTypeInfo<UserRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserRecordArray;
@@ -820,7 +821,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public UserRecord WithPassword( in string password, scoped in Requirements requirements ) => WithPassword(password, requirements, out _);
     public UserRecord WithPassword( in string password, scoped in Requirements requirements, out PasswordValidator.Results results )
     {
-        if ( requirements.maxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException($"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password)); }
+        if ( requirements.MaxLength > MAX_PASSWORD_SIZE ) { throw new ArgumentException($"Password Must be less than {MAX_PASSWORD_SIZE} chars", nameof(password)); }
 
         PasswordValidator validator = new(requirements);
         if ( !validator.Validate(password, out results) ) { return this; }
