@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public static class Constants

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Diagnostics.CodeAnalysis;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public static class NodeNames

@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public sealed class XmlNodeAttribute( string name, XmlInclude include = XmlInclude.All ) : Attribute

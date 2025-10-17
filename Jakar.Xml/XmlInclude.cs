@@ -1,8 +1,4 @@
-﻿using System;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 [Flags]

@@ -146,7 +146,7 @@ public sealed class DbOptions : IOptions<DbOptions>
         options.SignIn.RequireConfirmedEmail          = true;
         options.SignIn.RequireConfirmedAccount        = true;
         options.User.RequireUniqueEmail               = true;
-        options.User.AllowedUserNameCharacters        = Randoms.ALPHANUMERIC + Randoms.SPECIAL_CHARS;
+        options.User.AllowedUserNameCharacters        = ALPHANUMERIC + SPECIAL_CHARS;
         options.ClaimsIdentity.EmailClaimType         = ClaimType.Email.ToClaimTypes();
         options.ClaimsIdentity.UserIdClaimType        = ClaimType.UserID.ToClaimTypes();
         options.ClaimsIdentity.UserNameClaimType      = ClaimType.UserName.ToClaimTypes();

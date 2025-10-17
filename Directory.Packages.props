@@ -44,59 +44,59 @@
     <PackageVersion Include="Hashids.net" Version="1.7.0" />
     <PackageVersion Include="InterpolatedSql.Dapper" Version="2.4.0" />
     <PackageVersion Include="Jakar.Database" Version="9.0.0.3-beta" />
-    <PackageVersion Include="Jakar.Extensions" Version="9.18.10" />
+    <PackageVersion Include="Jakar.Extensions" Version="9.19.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor" Version="9.1.0" />
     <PackageVersion Include="Jakar.Extensions.Blazor.Syncfusion" Version="9.0.0" />
     <PackageVersion Include="Jakar.Shapes" Version="9.3.0" />
     <PackageVersion Include="JetBrains.Annotations" Version="2025.2.2" />
     <PackageVersion Include="JetBrains.DotMemoryUnit" Version="3.2.20220510" />
     <PackageVersion Include="MailKit" Version="4.14.1" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.Google" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.Web" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="9.0.110" />
-    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Common" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.Json" Version="9.0.10" />
     <PackageVersion Include="Microsoft.AspNetCore.SignalR.Protocols.NewtonsoftJson" Version="9.0.9" />
     <PackageVersion Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="4.14.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.9.0" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Hybrid" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Memory" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.9.0" />
-    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Systemd" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.WindowsServices" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="9.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="9.0.9" />
     <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.9" />
-    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.9" />
+    <PackageVersion Include="Microsoft.Extensions.Options" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.10" />
     <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="9.5.1" />
     <PackageVersion Include="Microsoft.Identity.Client" Version="4.77.1" />
-    <PackageVersion Include="Microsoft.Identity.Web" Version="3.14.1" />
+    <PackageVersion Include="Microsoft.Identity.Web" Version="4.0.0" />
     <PackageVersion Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.14.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.110" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.110" />
-    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.110" />
+    <PackageVersion Include="Microsoft.Maui.Controls" Version="9.0.120" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Compatibility" Version="9.0.120" />
+    <PackageVersion Include="Microsoft.Maui.Controls.Core" Version="9.0.120" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.0" />
     <PackageVersion Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
@@ -130,7 +130,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.12.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.12.0" />
     <PackageVersion Include="Otp.NET" Version="1.4.0" />
-    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.290" />
+    <PackageVersion Include="PanoramicData.Blazor" Version="9.0.316" />
     <PackageVersion Include="Plugin.Fingerprint" Version="3.0.0-beta.1" />
     <PackageVersion Include="Plugin.Maui.Audio" Version="4.0.0" />
     <PackageVersion Include="Portable.BouncyCastle" Version="1.9.0" />
@@ -159,7 +159,7 @@
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="9.0.6" />
     <PackageVersion Include="Swashbuckle.AspNetCore.Newtonsoft" Version="9.0.6" />
-    <PackageVersion Include="Syncfusion.Blazor" Version="31.1.23" />
+    <PackageVersion Include="Syncfusion.Blazor" Version="31.2.2" />
     <PackageVersion Include="Syncfusion.Maui.Backdrop" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Barcode" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.Buttons" Version="31.1.19" />
@@ -190,33 +190,33 @@
     <PackageVersion Include="Syncfusion.Maui.Toolkit" Version="1.0.7" />
     <PackageVersion Include="Syncfusion.Maui.TreeMap" Version="31.1.19" />
     <PackageVersion Include="Syncfusion.Maui.TreeView" Version="31.1.19" />
-    <PackageVersion Include="System.Collections.Immutable" Version="9.0.9" />
+    <PackageVersion Include="System.Collections.Immutable" Version="9.0.10" />
     <PackageVersion Include="System.ComponentModel.Annotations" Version="5.0.0" />
-    <PackageVersion Include="System.Formats.Asn1" Version="9.0.9" />
-    <PackageVersion Include="System.IO.Hashing" Version="9.0.9" />
+    <PackageVersion Include="System.Formats.Asn1" Version="9.0.10" />
+    <PackageVersion Include="System.IO.Hashing" Version="9.0.10" />
     <PackageVersion Include="System.Net.Http" Version="4.3.4" />
-    <PackageVersion Include="System.Net.Http.Json" Version="9.0.9" />
+    <PackageVersion Include="System.Net.Http.Json" Version="9.0.10" />
     <PackageVersion Include="System.Private.Uri" Version="4.3.2" />
-    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.9" />
-    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.9" />
-    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.9" />
-    <PackageVersion Include="System.Text.Json" Version="9.0.9" />
+    <PackageVersion Include="System.Security.Cryptography.Xml" Version="9.0.10" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="9.0.10" />
+    <PackageVersion Include="System.Text.Encodings.Web" Version="9.0.10" />
+    <PackageVersion Include="System.Text.Json" Version="9.0.10" />
     <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="System.Threading.Tasks" Version="4.3.0" />
-    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="9.0.9" />
+    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="9.0.10" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
     <PackageVersion Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
     <PackageVersion Include="System.Threading.ThreadPool" Version="4.3.0" />
-    <PackageVersion Include="UraniumUI" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Blurs" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Dialogs.Mopups" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Icons.FontAwesome" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Icons.MaterialIcons" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Icons.SegoeFluent" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Material" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.Validations.DataAnnotations" Version="2.12.1" />
-    <PackageVersion Include="UraniumUI.WebComponents" Version="2.12.1" />
+    <PackageVersion Include="UraniumUI" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Blurs" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Dialogs.CommunityToolkit" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Dialogs.Mopups" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Icons.FontAwesome" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Icons.MaterialIcons" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Icons.SegoeFluent" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Material" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.Validations.DataAnnotations" Version="2.13.0" />
+    <PackageVersion Include="UraniumUI.WebComponents" Version="2.13.0" />
     <PackageVersion Include="ValueOf" Version="2.0.31" />
     <PackageVersion Include="WifiManager.Maui" Version="9.0.5" />
     <PackageVersion Include="Xam.Plugin.Media" Version="6.0.2" />

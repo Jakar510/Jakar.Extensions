@@ -1,11 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/27/2022  11:38 AM
 
-using System;
-using System.Text;
-
-
-
 namespace Jakar.Xml.Serialization;
 
 

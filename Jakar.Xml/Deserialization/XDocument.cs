@@ -1,10 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/21/2022  6:24 PM
 
-using System;
-
-
-
 namespace Jakar.Xml.Deserialization;
 
 

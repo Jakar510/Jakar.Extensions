@@ -1,9 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public static class TableExtensions

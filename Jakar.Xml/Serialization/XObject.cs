@@ -1,14 +1,6 @@
 ﻿// Jakar.Extensions :: Jakar.Xml
 // 04/26/2022  9:59 AM
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-
-
-
 namespace Jakar.Xml.Serialization;
 
 

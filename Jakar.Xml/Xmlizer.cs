@@ -1,13 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Xml;
-using Jakar.Extensions;
-using Jakar.Xml.Serialization;
-
-
-
-namespace Jakar.Xml;
+﻿namespace Jakar.Xml;
 
 
 public interface IXmlizer
