@@ -21,12 +21,12 @@ namespace Jakar.Extensions;
 public sealed class ObservableCollection<TValue>( Comparer<TValue> comparer, int capacity = DEFAULT_CAPACITY ) : ObservableCollection<ObservableCollection<TValue>, TValue>(comparer, capacity), ICollectionAlerts<ObservableCollection<TValue>, TValue>
     where TValue : IEquatable<TValue>
 {
-    private static JsonTypeInfo<ObservableCollection<TValue>[]>? __JsonArrayInfo;
+    private static JsonTypeInfo<ObservableCollection<TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                        __jsonContext;
     private static JsonTypeInfo<ObservableCollection<TValue>>?   __jsonTypeInfo;
     public static  JsonSerializerContext                         JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
+    public static  JsonTypeInfo<ObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ObservableCollection() : this(Comparer<TValue>.Default) { }

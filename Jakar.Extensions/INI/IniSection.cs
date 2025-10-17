@@ -4,10 +4,7 @@
 [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
 public partial class IniConfig
 {
-    internal const         string CLOSE   = " ]";
-    internal const         string EQUALS  = " = ";
-    internal const         string OPEN    = "[ ";
-    public static readonly int    Padding = CLOSE.Length + OPEN.Length + EQUALS.Length;
+    public static readonly int    Padding = CLOSE.Length + OPEN.Length + EQUALS_SPACE.Length;
 
 
 
@@ -47,7 +44,7 @@ public partial class IniConfig
         {
             int count = __dictionary.Keys.Count;
             longest = Longest;
-            int keys   = ( longest + EQUALS.Length ) * count;
+            int keys   = ( longest + EQUALS_SPACE.Length ) * count;
             int values = __dictionary.Values.Sum(static x => x?.Length ?? 0);
             int result = Padding + keys + values + count;
             return result;
@@ -78,7 +75,7 @@ public partial class IniConfig
 
                 foreach ( char c in sKey.PadRight(longest) ) { destination[charsWritten++] = c; }
 
-                foreach ( char c in EQUALS ) { destination[charsWritten++] = c; }
+                foreach ( char c in EQUALS_SPACE ) { destination[charsWritten++] = c; }
 
                 foreach ( char c in sectionValue ) { destination[charsWritten++] = c; }
 

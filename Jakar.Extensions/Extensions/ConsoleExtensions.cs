@@ -3,14 +3,11 @@
 
 public static class ConsoleExtensions
 {
-    private const string ERROR       = nameof(ERROR);
-    private const string INFORMATION = nameof(INFORMATION);
-    private const string WARNING     = nameof(WARNING);
     public static bool   CanDebug => Debugger.IsAttached;
     public static string Header   { get; set; } = '='.Repeat(100);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static StringBuilder WrapException<TValue>( this TValue self, char c = '-', int padding = 40 )
         where TValue : Exception
     {

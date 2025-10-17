@@ -18,11 +18,7 @@ namespace Jakar.Extensions;
 
 public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposable, IAsyncDisposable, IOpenTelemetryActivityEnricher
 {
-    public const           string             CONSOLE_DEFAULT_OUTPUT_TEMPLATE     = "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public const           string             DEBUG_DEFAULT_DEBUG_OUTPUT_TEMPLATE = "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}";
-    public const           string             SEQ_API_KEY_NAME                    = "X-Seq-ApiKey";
-    public const           string             SEQ_BUFFER_DIRECTORY                = "SeqBuffer";
-    public static readonly LoggingLevelSwitch LoggingLevel                        = new(LogEventLevel.Verbose);
+    public static readonly LoggingLevelSwitch LoggingLevel = new(LogEventLevel.Verbose);
     private                FilePaths?         __paths;
     private                LocalDirectory?    __appDataDirectory;
     private                LocalDirectory?    __cacheDirectory;
@@ -105,8 +101,8 @@ public class AppLoggerOptions : BaseClass, IOptions<AppLoggerOptions>, IDisposab
     }
 
 
-    private LocalDirectory GetAppDataDirectory() => __appDataDirectory ??= Path.Join(Environment.CurrentDirectory, FilePaths.APP_DATA_DIRECTORY);
-    private LocalDirectory GetCacheDirectory()   => __cacheDirectory ??= Path.Join(Environment.CurrentDirectory,   FilePaths.CACHE_DIRECTORY);
+    private LocalDirectory GetAppDataDirectory() => __appDataDirectory ??= Path.Join(Environment.CurrentDirectory, APP_DATA_DIRECTORY);
+    private LocalDirectory GetCacheDirectory()   => __cacheDirectory ??= Path.Join(Environment.CurrentDirectory,   CACHE_DIRECTORY);
     private FilePaths      GetPaths()            => __paths ??= new FilePaths(AppDataDirectory, CacheDirectory);
     private LocalDirectory GetSeqBuffer()        => __seqBuffer ??= Path.Join(AppDataDirectory, SEQ_BUFFER_DIRECTORY);
 

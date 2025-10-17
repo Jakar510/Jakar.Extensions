@@ -16,7 +16,7 @@ public ref struct XWriter( bool shouldIndent )
     public const      string        NULL         = "null";
     private readonly  StringBuilder __sb          = new(); // TODO: System.Text.ValueStringBuilder
     internal readonly bool          shouldIndent = shouldIndent;
-    internal          int           indentLevel  = 0;
+    internal          int           IndentLevel  = 0;
 
 
     public XWriter() : this( true ) { }
@@ -71,7 +71,7 @@ public ref struct XWriter( bool shouldIndent )
         if ( shouldIndent )
         {
             __sb.Append( '\n' );
-            indentLevel += 1;
+            IndentLevel += 1;
         }
     }
     public void StartBlock( ReadOnlySpan<char> name, XAttributeBuilder builder )
@@ -81,7 +81,7 @@ public ref struct XWriter( bool shouldIndent )
         if ( shouldIndent )
         {
             __sb.Append( '\n' );
-            indentLevel += 1;
+            IndentLevel += 1;
         }
     }
     public void FinishBlock( ReadOnlySpan<char> name )
@@ -91,7 +91,7 @@ public ref struct XWriter( bool shouldIndent )
         if ( shouldIndent )
         {
             __sb.Append( '\n' );
-            indentLevel -= 1;
+            IndentLevel -= 1;
         }
     }
 
@@ -101,7 +101,7 @@ public ref struct XWriter( bool shouldIndent )
         if ( shouldIndent )
         {
             // throw new InvalidOperationException($"{nameof(Indent)} should not be used  this context"); 
-            __sb.Append( '\t', indentLevel );
+            __sb.Append( '\t', IndentLevel );
         }
 
         __sb.Append( '<' ).Append( key ).Append( '>' );

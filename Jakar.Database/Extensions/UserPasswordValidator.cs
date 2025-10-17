@@ -6,11 +6,11 @@ namespace Jakar.Database;
 
 public class UserPasswordValidator( IOptions<PasswordRequirements> options ) : IPasswordValidator<UserRecord>
 {
-    protected readonly PasswordRequirements __options = options.Value;
+    protected readonly PasswordRequirements _options = options.Value;
 
 
     public virtual IdentityResult Validate( in ReadOnlySpan<char> password ) =>
-        PasswordValidator.Check(password, __options)
+        PasswordValidator.Check(password, _options)
             ? IdentityResult.Success
             : IdentityResult.Failed();
 

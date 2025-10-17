@@ -6,15 +6,6 @@ namespace Jakar.Extensions;
 
 public static class Guids
 {
-    private const char EQUALS     = '=';
-    private const char HYPHEN     = '-';
-    private const char PLUS       = '+';
-    private const byte PLUS_BYTE  = (byte)'+';
-    private const char SLASH      = '/';
-    private const byte SLASH_BYTE = (byte)'/';
-    private const char UNDERSCORE = '_';
-
-
     public static bool TryAsGuid( in this Span<char> value, [NotNullWhen(true)] out Guid? result )
     {
         ReadOnlySpan<char> span = value;

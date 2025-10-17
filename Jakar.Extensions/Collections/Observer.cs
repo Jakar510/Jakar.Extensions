@@ -28,13 +28,13 @@ public class Observer<TValue> : IObservable<TValue>
 
     protected class ObserverWrapper( IObserver<TValue> observer, Observer<TValue> parent ) : IObserver<TValue>, IDisposable
     {
-        protected readonly Observer<TValue>  __parent   = parent;
-        protected readonly IObserver<TValue> __observer = observer;
+        protected readonly Observer<TValue>  _parent   = parent;
+        protected readonly IObserver<TValue> _observer = observer;
 
 
-        public virtual void Dispose()                  => __parent.Remove(this);
-        public virtual void OnCompleted()              => __observer.OnCompleted();
-        public virtual void OnError( Exception error ) => __observer.OnError(error);
-        public virtual void OnNext( TValue     value ) => __observer.OnNext(value);
+        public virtual void Dispose()                  => _parent.Remove(this);
+        public virtual void OnCompleted()              => _observer.OnCompleted();
+        public virtual void OnError( Exception error ) => _observer.OnError(error);
+        public virtual void OnNext( TValue     value ) => _observer.OnNext(value);
     }
 }

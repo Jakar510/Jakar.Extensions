@@ -83,6 +83,7 @@ namespace Jakar.Extensions;
 [JsonSerializable(typeof(LoginRequest[]))]
 [JsonSerializable(typeof(LoginRequestVersion[]))]
 [JsonSerializable(typeof(LoginRequestValue[]))]
+[JsonSerializable(typeof(IDictionary[]))]
 [JsonSerializable(typeof(AppInformation[]))]
 [JsonSerializable(typeof(GcInfo[]))]
 [JsonSerializable(typeof(GcMemoryInformation[]))]

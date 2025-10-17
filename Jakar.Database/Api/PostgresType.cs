@@ -689,7 +689,7 @@ public static class PostgresTypes
 
         if ( type == typeof(byte[]) || type == typeof(Memory<byte>) || type == typeof(ReadOnlyMemory<byte>) || type == typeof(ImmutableArray<byte>) ) { return PostgresType.Binary; }
 
-        if ( typeof(JsonNode).IsAssignableFrom(type) ) { return PostgresType.Json; }
+        if ( typeof(JsonNode).IsAssignableFrom(type) || type == typeof(JsonDocument) || type == typeof(JsonElement) ) { return PostgresType.Json; }
 
         if ( typeof(XmlNode).IsAssignableFrom(type) ) { return PostgresType.Xml; }
 
@@ -863,23 +863,23 @@ public static class PostgresTypes
     }
 
 
-    public static string GetPostgresDataType( this PostgresType DbType, ref readonly PrecisionInfo Length, in ColumnOptions Options = 0 ) =>
-        DbType switch
+    public static string GetPostgresDataType( this PostgresType dbType, ref readonly PrecisionInfo length, in ColumnOptions options = 0 ) =>
+        dbType switch
         {
             // !IsValidLength() => throw new OutOfRangeException(Length, $"Max length for Unicode strings is {Constants.UNICODE_CAPACITY}"),
-            PostgresType.Binary => Length.IsValid
-                                       ? @$"varbit({Length.Scope})"
+            PostgresType.Binary => length.IsValid
+                                       ? @$"varbit({length.Scope})"
                                        : "bytea",
-            PostgresType.String => Length is { IsValid: true, Scope: <= MAX_VARIABLE }
-                                       ? Length.Value < MAX_FIXED && Options.HasFlagValue(ColumnOptions.Fixed)
-                                             ? $"character({Length.Value})"
-                                             : $"varchar({Length.Value})"
+            PostgresType.String => length is { IsValid: true, Scope: <= MAX_VARIABLE }
+                                       ? length.Value < MAX_FIXED && options.HasFlagValue(ColumnOptions.Fixed)
+                                             ? $"character({length.Value})"
+                                             : $"varchar({length.Value})"
                                        : "text",
-            PostgresType.Byte => Length.IsValid
-                                     ? $"bit({Length.Value})"
+            PostgresType.Byte => length.IsValid
+                                     ? $"bit({length.Value})"
                                      : "bit(8)",
-            PostgresType.SByte => Length.IsValid
-                                      ? $"bit({Length.Value})"
+            PostgresType.SByte => length.IsValid
+                                      ? $"bit({length.Value})"
                                       : "bit(8)",
             PostgresType.Short                    => "smallint",
             PostgresType.UShort                   => "smallint",
@@ -918,8 +918,8 @@ public static class PostgresTypes
             PostgresType.Cidr                     => "cidr",
             PostgresType.MacAddr                  => @"macaddr",
             PostgresType.MacAddr8                 => "macaddr8",
-            PostgresType.Bit                      => $"bit({Length.Value})",
-            PostgresType.VarBit                   => $"bit varying({Length.Value})",
+            PostgresType.Bit                      => $"bit({length.Value})",
+            PostgresType.VarBit                   => $"bit varying({length.Value})",
             PostgresType.TsVector                 => @"tsvector",
             PostgresType.TsQuery                  => @"tsquery",
             PostgresType.RegConfig                => @"regconfig",
@@ -956,8 +956,8 @@ public static class PostgresTypes
             PostgresType.TimestampMultirange      => @"tsmultirange",
             PostgresType.DateTimeOffsetMultirange => @"tstzmultirange",
             PostgresType.DateMultirange           => @"datemultirange",
-            PostgresType.NotSet                   => throw new OutOfRangeException(DbType),
-            _                                     => throw new OutOfRangeException(DbType)
+            PostgresType.NotSet                   => throw new OutOfRangeException(dbType),
+            _                                     => throw new OutOfRangeException(dbType)
         };
 
 

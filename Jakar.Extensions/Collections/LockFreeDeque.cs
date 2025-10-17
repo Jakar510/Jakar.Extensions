@@ -20,11 +20,11 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
         while ( true )
         {
             Node  tail = __tail;
-            Node? next = tail.next;
+            Node? next = tail.Next;
 
             if ( next is null )
             {
-                if ( Interlocked.CompareExchange(ref tail.next, newNode, null) is null )
+                if ( Interlocked.CompareExchange(ref tail.Next, newNode, null) is null )
                 {
                     Interlocked.CompareExchange(ref __tail, newNode, tail);
                     Interlocked.Increment(ref __count);
@@ -46,7 +46,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
             Interlocked.Decrement(ref __count);
             Node  head = __head;
             Node  tail = __tail;
-            Node? next = head.next;
+            Node? next = head.Next;
 
             if ( head == tail )
             {
@@ -75,7 +75,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
         while ( current is not null )
         {
             yield return current.Value;
-            current = current.next;
+            current = current.Next;
         }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -86,7 +86,7 @@ public class LockFreeDeque<TValue> : IReadOnlyCollection<TValue>
     {
         public static readonly Node   Empty = new(null!);
         public readonly        TValue Value = value;
-        public                 Node?  next;
+        public                 Node?  Next;
 
 
         public          bool Equals( Node?   other )                => ReferenceEquals(this, other);

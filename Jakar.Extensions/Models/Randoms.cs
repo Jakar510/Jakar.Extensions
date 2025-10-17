@@ -15,11 +15,6 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "RedundantVerbatimStringPrefix")]
 public class Randoms : BaseClass
 {
-    public const           string ALPHANUMERIC  = @"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    public const           string LOWER_CASE    = @"abcdefghijklmnopqrstuvwxyz";
-    public const           string NUMERIC       = @"0123456789";
-    public const           string SPECIAL_CHARS = @"_-.!#@+/*^=>|/\";
-    public const           string UPPER_CASE    = @"ABCDEFGHJKLMNOPQRSTUVWXYZ";
     public static readonly char[] AlphaNumeric  = [.. ALPHANUMERIC];
     public static readonly char[] LowerCase     = [.. LOWER_CASE];
     public static readonly char[] Numeric       = [.. NUMERIC];

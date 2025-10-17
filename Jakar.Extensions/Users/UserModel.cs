@@ -12,7 +12,6 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    public const string            EMPTY_PHONE_NUMBER = "(000) 000-0000";
     private      string            __company          = string.Empty;
     private      string            __department       = string.Empty;
     private      string            __email            = string.Empty;

@@ -11,7 +11,7 @@ public readonly struct RecordPair<TSelf>( RecordID<TSelf> id, DateTimeOffset dat
 {
     public readonly  RecordID<TSelf> ID          = id;
     public readonly  DateTimeOffset   DateCreated = dateCreated;
-    private readonly int              _hash       = HashCode.Combine(id, dateCreated);
+    private readonly int              __hash       = HashCode.Combine(id, dateCreated);
 
 
     public static string       TableName   {  get => TSelf.TableName; }
@@ -25,7 +25,7 @@ public readonly struct RecordPair<TSelf>( RecordID<TSelf> id, DateTimeOffset dat
     public          int  CompareTo( RecordPair<TSelf> other ) => DateCreated.CompareTo(other.DateCreated);
     public          bool Equals( RecordPair<TSelf>    other ) => ID.Equals(other.ID)              && DateCreated.Equals(other.DateCreated);
     public override bool Equals( object?               other ) => other is RecordPair<TSelf> pair && Equals(pair);
-    public override int  GetHashCode()                         => _hash;
+    public override int  GetHashCode()                         => __hash;
 
 
     public static implicit operator RecordPair<TSelf>( (RecordID<TSelf> id, DateTimeOffset dateCreated) value ) => new(value.id, value.dateCreated);

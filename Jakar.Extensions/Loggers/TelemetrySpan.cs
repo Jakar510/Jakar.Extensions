@@ -8,13 +8,6 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Empty))]
 public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
 {
-    public const           string        APP           = nameof(APP);
-    public const           string        ON_SLEEP      = nameof(ON_SLEEP);
-    public const           string        ON_RESUME     = nameof(ON_RESUME);
-    public const           string        ON_START      = nameof(ON_START);
-    public const           string        CREATE_WINDOW = nameof(CREATE_WINDOW);
-    public const           string        ELAPSED_TIME  = nameof(ELAPSED_TIME);
-    public const           string        START_STOP_ID = nameof(START_STOP_ID);
     public static readonly TelemetrySpan Empty         = new(EMPTY, null);
     private readonly       Activity?     __parent;
     private readonly       Activity?     __activity;

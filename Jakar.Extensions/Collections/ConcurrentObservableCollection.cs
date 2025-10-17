@@ -14,12 +14,12 @@ namespace Jakar.Extensions;
 public sealed class ConcurrentObservableCollection<TValue> : ConcurrentObservableCollection<ConcurrentObservableCollection<TValue>, TValue>, ICollectionAlerts<ConcurrentObservableCollection<TValue>, TValue>, IEqualComparable<ConcurrentObservableCollection<TValue>>
     where TValue : IEquatable<TValue>
 {
-    private static JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>? __JsonArrayInfo;
+    private static JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                                  __jsonContext;
     private static JsonTypeInfo<ConcurrentObservableCollection<TValue>>?   __jsonTypeInfo;
     public static  JsonSerializerContext                                   JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
+    public static  JsonTypeInfo<ConcurrentObservableCollection<TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ConcurrentObservableCollection() : base() { }

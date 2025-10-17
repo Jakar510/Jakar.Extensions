@@ -249,20 +249,20 @@ public static class DbServices
         where TUserStore : UserStore
     {
         services.AddScoped<TUserStore>()
-                .AddTransient<IUserStore>(GetUserStore)
-                .AddTransient<IUserStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserLoginStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserClaimStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserPasswordStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserSecurityStampStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserTwoFactorStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserEmailStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserLockoutStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserAuthenticatorKeyStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserTwoFactorRecoveryCodeStore<UserRecord>>(GetUserStore)
-                .AddTransient<IUserPhoneNumberStore<UserRecord>>(GetUserStore);
+                .AddTransient<IUserStore>(getUserStore)
+                .AddTransient<IUserStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserLoginStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserClaimStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserPasswordStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserSecurityStampStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserTwoFactorStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserEmailStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserLockoutStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserAuthenticatorKeyStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserTwoFactorRecoveryCodeStore<UserRecord>>(getUserStore)
+                .AddTransient<IUserPhoneNumberStore<UserRecord>>(getUserStore);
 
-        static TUserStore GetUserStore( IServiceProvider provider ) => provider.GetRequiredService<TUserStore>();
+        static TUserStore getUserStore( IServiceProvider provider ) => provider.GetRequiredService<TUserStore>();
         return services;
     }
 

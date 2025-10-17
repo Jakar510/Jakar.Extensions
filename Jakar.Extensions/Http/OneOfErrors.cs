@@ -5,14 +5,12 @@ namespace Jakar.Extensions;
 
 
 [method: JsonConstructor]
-public readonly struct OneOfErrors( JsonNode? Json, string? Text, Errors? Errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
+public readonly struct OneOfErrors( JsonNode? json, string? text, Errors? errors ) : IParsable<OneOfErrors>, IJsonModel<OneOfErrors>
 {
-    public const           string      ERROR_MESSAGE = "Error Message: ";
-    public const           string      UNKNOWN_ERROR = "Unknown Error";
     public static readonly OneOfErrors Empty         = new(null, null, null);
-    public readonly        Errors?     Errors        = Errors;
-    public readonly        JsonNode?   Json          = Json;
-    public readonly        string?     Text          = Text;
+    public readonly        Errors?     Errors        = errors;
+    public readonly        JsonNode?   Json          = json;
+    public readonly        string?     Text          = text;
 
     public bool IsErrors { [MemberNotNullWhen(true, nameof(Errors))] get => Errors is not null; }
     public bool IsJson   { [MemberNotNullWhen(true, nameof(Json))] get => Json is not null; }

@@ -331,39 +331,39 @@ public interface IFusionCacheEntryOptions
 
 public class FusionCacheEntryOptionsWrapper : IFusionCacheEntryOptions
 {
-    private readonly FusionCacheEntryOptions options = new();
+    private readonly FusionCacheEntryOptions __options = new();
 
 
-    public TimeSpan          Duration                                  { get => options.Duration;                                  set => options.Duration = value; }
-    public float?            EagerRefreshThreshold                     { get => options.EagerRefreshThreshold;                     set => options.EagerRefreshThreshold = value; }
-    public TimeSpan          LockTimeout                               { get => options.LockTimeout;                               set => options.LockTimeout = value; }
-    public TimeSpan          JitterMaxDuration                         { get => options.JitterMaxDuration;                         set => options.JitterMaxDuration = value; }
-    public long?             Size                                      { get => options.Size;                                      set => options.Size = value; }
-    public CacheItemPriority Priority                                  { get => options.Priority;                                  set => options.Priority = value; }
-    public bool              AllowStaleOnReadOnly                      { get => options.AllowStaleOnReadOnly;                      set => options.AllowStaleOnReadOnly = value; }
-    public bool              IsFailSafeEnabled                         { get => options.IsFailSafeEnabled;                         set => options.IsFailSafeEnabled = value; }
-    public TimeSpan          FailSafeMaxDuration                       { get => options.FailSafeMaxDuration;                       set => options.FailSafeMaxDuration = value; }
-    public TimeSpan          FailSafeThrottleDuration                  { get => options.FailSafeThrottleDuration;                  set => options.FailSafeThrottleDuration = value; }
-    public TimeSpan          FactorySoftTimeout                        { get => options.FactorySoftTimeout;                        set => options.FactorySoftTimeout = value; }
-    public TimeSpan          FactoryHardTimeout                        { get => options.FactoryHardTimeout;                        set => options.FactoryHardTimeout = value; }
-    public bool              AllowTimedOutFactoryBackgroundCompletion  { get => options.AllowTimedOutFactoryBackgroundCompletion;  set => options.AllowTimedOutFactoryBackgroundCompletion = value; }
-    public TimeSpan?         DistributedCacheDuration                  { get => options.DistributedCacheDuration;                  set => options.DistributedCacheDuration = value; }
-    public TimeSpan?         DistributedCacheFailSafeMaxDuration       { get => options.DistributedCacheFailSafeMaxDuration;       set => options.DistributedCacheFailSafeMaxDuration = value; }
-    public TimeSpan          DistributedCacheSoftTimeout               { get => options.DistributedCacheSoftTimeout;               set => options.DistributedCacheSoftTimeout = value; }
-    public TimeSpan          DistributedCacheHardTimeout               { get => options.DistributedCacheHardTimeout;               set => options.DistributedCacheHardTimeout = value; }
-    public bool              AllowBackgroundDistributedCacheOperations { get => options.AllowBackgroundDistributedCacheOperations; set => options.AllowBackgroundDistributedCacheOperations = value; }
-    public bool              ReThrowDistributedCacheExceptions         { get => options.ReThrowDistributedCacheExceptions;         set => options.ReThrowDistributedCacheExceptions = value; }
-    public bool              ReThrowSerializationExceptions            { get => options.ReThrowSerializationExceptions;            set => options.ReThrowSerializationExceptions = value; }
-    public bool              SkipBackplaneNotifications                { get => options.SkipBackplaneNotifications;                set => options.SkipBackplaneNotifications = value; }
-    public bool              AllowBackgroundBackplaneOperations        { get => options.AllowBackgroundBackplaneOperations;        set => options.AllowBackgroundBackplaneOperations = value; }
-    public bool              ReThrowBackplaneExceptions                { get => options.ReThrowBackplaneExceptions;                set => options.ReThrowBackplaneExceptions = value; }
-    public bool              SkipDistributedCacheRead                  { get => options.SkipDistributedCacheRead;                  set => options.SkipDistributedCacheRead = value; }
-    public bool              SkipDistributedCacheWrite                 { get => options.SkipDistributedCacheWrite;                 set => options.SkipDistributedCacheWrite = value; }
-    public bool              SkipDistributedCacheReadWhenStale         { get => options.SkipDistributedCacheReadWhenStale;         set => options.SkipDistributedCacheReadWhenStale = value; }
-    public bool              SkipMemoryCacheRead                       { get => options.SkipMemoryCacheRead;                       set => options.SkipMemoryCacheRead = value; }
-    public bool              SkipMemoryCacheWrite                      { get => options.SkipMemoryCacheWrite;                      set => options.SkipMemoryCacheWrite = value; }
-    public bool              EnableAutoClone                           { get => options.EnableAutoClone;                           set => options.EnableAutoClone = value; }
+    public TimeSpan          Duration                                  { get => __options.Duration;                                  set => __options.Duration = value; }
+    public float?            EagerRefreshThreshold                     { get => __options.EagerRefreshThreshold;                     set => __options.EagerRefreshThreshold = value; }
+    public TimeSpan          LockTimeout                               { get => __options.LockTimeout;                               set => __options.LockTimeout = value; }
+    public TimeSpan          JitterMaxDuration                         { get => __options.JitterMaxDuration;                         set => __options.JitterMaxDuration = value; }
+    public long?             Size                                      { get => __options.Size;                                      set => __options.Size = value; }
+    public CacheItemPriority Priority                                  { get => __options.Priority;                                  set => __options.Priority = value; }
+    public bool              AllowStaleOnReadOnly                      { get => __options.AllowStaleOnReadOnly;                      set => __options.AllowStaleOnReadOnly = value; }
+    public bool              IsFailSafeEnabled                         { get => __options.IsFailSafeEnabled;                         set => __options.IsFailSafeEnabled = value; }
+    public TimeSpan          FailSafeMaxDuration                       { get => __options.FailSafeMaxDuration;                       set => __options.FailSafeMaxDuration = value; }
+    public TimeSpan          FailSafeThrottleDuration                  { get => __options.FailSafeThrottleDuration;                  set => __options.FailSafeThrottleDuration = value; }
+    public TimeSpan          FactorySoftTimeout                        { get => __options.FactorySoftTimeout;                        set => __options.FactorySoftTimeout = value; }
+    public TimeSpan          FactoryHardTimeout                        { get => __options.FactoryHardTimeout;                        set => __options.FactoryHardTimeout = value; }
+    public bool              AllowTimedOutFactoryBackgroundCompletion  { get => __options.AllowTimedOutFactoryBackgroundCompletion;  set => __options.AllowTimedOutFactoryBackgroundCompletion = value; }
+    public TimeSpan?         DistributedCacheDuration                  { get => __options.DistributedCacheDuration;                  set => __options.DistributedCacheDuration = value; }
+    public TimeSpan?         DistributedCacheFailSafeMaxDuration       { get => __options.DistributedCacheFailSafeMaxDuration;       set => __options.DistributedCacheFailSafeMaxDuration = value; }
+    public TimeSpan          DistributedCacheSoftTimeout               { get => __options.DistributedCacheSoftTimeout;               set => __options.DistributedCacheSoftTimeout = value; }
+    public TimeSpan          DistributedCacheHardTimeout               { get => __options.DistributedCacheHardTimeout;               set => __options.DistributedCacheHardTimeout = value; }
+    public bool              AllowBackgroundDistributedCacheOperations { get => __options.AllowBackgroundDistributedCacheOperations; set => __options.AllowBackgroundDistributedCacheOperations = value; }
+    public bool              ReThrowDistributedCacheExceptions         { get => __options.ReThrowDistributedCacheExceptions;         set => __options.ReThrowDistributedCacheExceptions = value; }
+    public bool              ReThrowSerializationExceptions            { get => __options.ReThrowSerializationExceptions;            set => __options.ReThrowSerializationExceptions = value; }
+    public bool              SkipBackplaneNotifications                { get => __options.SkipBackplaneNotifications;                set => __options.SkipBackplaneNotifications = value; }
+    public bool              AllowBackgroundBackplaneOperations        { get => __options.AllowBackgroundBackplaneOperations;        set => __options.AllowBackgroundBackplaneOperations = value; }
+    public bool              ReThrowBackplaneExceptions                { get => __options.ReThrowBackplaneExceptions;                set => __options.ReThrowBackplaneExceptions = value; }
+    public bool              SkipDistributedCacheRead                  { get => __options.SkipDistributedCacheRead;                  set => __options.SkipDistributedCacheRead = value; }
+    public bool              SkipDistributedCacheWrite                 { get => __options.SkipDistributedCacheWrite;                 set => __options.SkipDistributedCacheWrite = value; }
+    public bool              SkipDistributedCacheReadWhenStale         { get => __options.SkipDistributedCacheReadWhenStale;         set => __options.SkipDistributedCacheReadWhenStale = value; }
+    public bool              SkipMemoryCacheRead                       { get => __options.SkipMemoryCacheRead;                       set => __options.SkipMemoryCacheRead = value; }
+    public bool              SkipMemoryCacheWrite                      { get => __options.SkipMemoryCacheWrite;                      set => __options.SkipMemoryCacheWrite = value; }
+    public bool              EnableAutoClone                           { get => __options.EnableAutoClone;                           set => __options.EnableAutoClone = value; }
 
 
-    public static implicit operator FusionCacheEntryOptions( FusionCacheEntryOptionsWrapper wrapper ) => wrapper.options;
+    public static implicit operator FusionCacheEntryOptions( FusionCacheEntryOptionsWrapper wrapper ) => wrapper.__options;
 }

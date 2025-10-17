@@ -14,9 +14,6 @@ namespace Jakar.Extensions;
 
 public sealed class JwtParser( SigningCredentials credentials, TokenValidationParameters parameters, string appName, string issuer, AppVersion version )
 {
-    public const            string                                  SESSION       = "Session";
-    public const            string                                  VERIFY_DEVICE = "VerifyDevice";
-    public const            string                                  VERIFY_EMAIL  = "VerifyEmail";
     private static readonly ConcurrentDictionary<string, JwtParser> __parsers     = new(StringComparer.Ordinal);
     private readonly        AppVersion                              __version     = version;
     private readonly        JsonWebTokenHandler                     __handler     = new();
@@ -111,12 +108,6 @@ public sealed class JwtParser( SigningCredentials credentials, TokenValidationPa
 
 public static class JwtParserExtensions
 {
-    public const string JWT            = "JWT";
-    public const string JWT_KEY        = "JWT.key";
-    public const string VALID_AUDIENCE = "TokenValidationParameters:ValidAudience";
-    public const string VALID_ISSUER   = "TokenValidationParameters:ValidIssuer";
-
-
     private static async ValueTask<byte[]> GetJWTKey( this IConfiguration configuration, string jwt = JWT, string fileKey = JWT_KEY, CancellationToken token = default )
     {
         using TelemetrySpan telemetrySpan = TelemetrySpan.Create();

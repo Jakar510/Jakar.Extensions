@@ -11,8 +11,6 @@ namespace Jakar.Extensions;
 
 public static class Json
 {
-    public const            string                                   SERIALIZATION_REQUIRES_DYNAMIC_CODE = "SerializationRequiresDynamicCode";
-    public const            string                                   SERIALIZATION_UNREFERENCED_CODE     = "SerializationUnreferencedCode";
     private static          JsonDocumentOptions                      __documentOptions;
     private static          JsonNodeOptions                          __jsonNodeOptions = new() { PropertyNameCaseInsensitive = true };
     private static readonly ConcurrentDictionary<Type, JsonTypeInfo> __jsonTypeInfos   = new();

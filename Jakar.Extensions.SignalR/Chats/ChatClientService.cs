@@ -22,9 +22,9 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     where TChatRoom : ChatRooms<TChatRoom, TRoom>, ICollectionAlerts<TChatRoom, TRoom>
     where TRoom : IChatRoom<TRoom>
 {
-    protected readonly Disposables      __disposables      = [];
+    protected readonly Disposables      _disposables      = [];
     protected readonly WeakEventManager _onMessageReceived = new();
-    protected          bool             __isDisposed;
+    protected          bool             _isDisposed;
     protected          ChatUser         _user = ChatUser.Empty;
     protected          HubConnection?   _connection; // SignalR.Client
     protected          SessionToken?          _tokens;
@@ -87,7 +87,7 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     public override void Dispose()
     {
         base.Dispose();
-        __isDisposed = true;
+        _isDisposed = true;
         GC.SuppressFinalize(this);
     }
 
@@ -95,7 +95,7 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
     protected void OnPropertyChanged( [CallerMemberName] string? propertyName = null ) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     public HubEvent GetHubEvent( TRoom room, HubEventType type, InstantMessage? message = null )
     {
-        ObjectDisposedException.ThrowIf(__isDisposed, this);
+        ObjectDisposedException.ThrowIf(_isDisposed, this);
         string connectionID = _connection?.ConnectionId ?? throw new InvalidOperationException($"{nameof(_connection)} is null. Make sure to call {nameof(StartAsync)} first.");
         return new HubEvent(connectionID, room.Group, type, Sender, message);
     }
@@ -114,20 +114,20 @@ public abstract class ChatClientService<TChatRoom, TRoom> : BackgroundService, I
         await StopAsync(token);
         _connection = CreateConnection();
 
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Send),          SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.JoinRoom),      SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.LeaveRoom),     SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Disconnection), SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Reconnection),  SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Login),         SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Logout),        SendEvent));
-        __disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Typing),        SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Send),          SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.JoinRoom),      SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.LeaveRoom),     SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Disconnection), SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Reconnection),  SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Login),         SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Logout),        SendEvent));
+        _disposables.Add(_connection.On<HubEvent>(nameof(IChatHub.Typing),        SendEvent));
         await _connection.StartAsync(token);
     }
     public override async Task StopAsync( CancellationToken cancellationToken )
     {
         await base.StopAsync(cancellationToken);
-        __disposables.Dispose();
+        _disposables.Dispose();
         _connection = null;
     }
 

@@ -16,8 +16,8 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
     {
         Node node = new(value);
 
-        do { node.next = __head; }
-        while ( Interlocked.CompareExchange(ref __head, node, node.next) != node.next );
+        do { node.Next = __head; }
+        while ( Interlocked.CompareExchange(ref __head, node, node.Next) != node.Next );
 
         Interlocked.Increment(ref __count);
     }
@@ -36,7 +36,7 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
             result = default;
             return false;
         }
-        while ( Interlocked.CompareExchange(ref __head, oldHead.next, oldHead) != oldHead );
+        while ( Interlocked.CompareExchange(ref __head, oldHead.Next, oldHead) != oldHead );
 
         Interlocked.Decrement(ref __count);
         result = oldHead.Value;
@@ -48,7 +48,7 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
     protected sealed class Node( TValue value ) : IEqualityOperators<Node>
     {
         public readonly TValue Value = value;
-        public          Node?  next;
+        public          Node?  Next;
 
 
         public          bool Equals( Node?   other )                => ReferenceEquals(this, other);
@@ -67,7 +67,7 @@ public class LockFreeStack<TValue> : IReadOnlyCollection<TValue>
         while ( current is not null )
         {
             yield return current.Value;
-            current = current.next;
+            current = current.Next;
         }
     }
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

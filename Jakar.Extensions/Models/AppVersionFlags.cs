@@ -7,14 +7,9 @@ namespace Jakar.Extensions;
 [DefaultValue(nameof(Stable))]
 public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualityOperators<AppVersionFlags>, IComparisonOperators<AppVersionFlags>, ISpanParsable<AppVersionFlags>, IFormattable
 {
-    private const          string          ALPHA          = "alpha";
-    private const          string          BETA           = "beta";
-    private const          char            FLAG_SEPARATOR = '-';
-    private const          string          RC             = "rc";
-    private const          string          STABLE         = "";
-    public static readonly AppVersionFlags Stable         = new(STABLE, 0);
-    public readonly        string          Flag           = flag;
-    public readonly        uint            Iteration      = iteration;
+    public static readonly AppVersionFlags Stable    = new(EMPTY, 0);
+    public readonly        string          Flag      = flag;
+    public readonly        uint            Iteration = iteration;
 
 
     public bool IsEmpty    { get => string.IsNullOrWhiteSpace(Flag); }
@@ -175,37 +170,37 @@ public readonly struct AppVersionFlags( string flag, uint iteration ) : IEqualit
     {
         int flagComparison = Flag switch
                              {
-                                 STABLE => other.Flag switch
-                                           {
-                                               STABLE => 0,
-                                               RC     => 1,
-                                               ALPHA  => 1,
-                                               BETA   => 1,
-                                               _      => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
-                                           },
+                                 EMPTY => other.Flag switch
+                                          {
+                                              EMPTY => 0,
+                                              RC    => 1,
+                                              ALPHA => 1,
+                                              BETA  => 1,
+                                              _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
+                                          },
                                  RC => other.Flag switch
                                        {
-                                           STABLE => -1,
-                                           RC     => 0,
-                                           ALPHA  => 1,
-                                           BETA   => 1,
-                                           _      => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
+                                           EMPTY => -1,
+                                           RC    => 0,
+                                           ALPHA => 1,
+                                           BETA  => 1,
+                                           _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
                                        },
                                  ALPHA => other.Flag switch
                                           {
-                                              STABLE => -1,
-                                              RC     => -1,
-                                              ALPHA  => 0,
-                                              BETA   => 1,
-                                              _      => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
+                                              EMPTY => -1,
+                                              RC    => -1,
+                                              ALPHA => 0,
+                                              BETA  => 1,
+                                              _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
                                           },
                                  BETA => other.Flag switch
                                          {
-                                             STABLE => -1,
-                                             RC     => -1,
-                                             ALPHA  => -1,
-                                             BETA   => 0,
-                                             _      => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
+                                             EMPTY => -1,
+                                             RC    => -1,
+                                             ALPHA => -1,
+                                             BETA  => 0,
+                                             _     => string.Compare(Flag, other.Flag, StringComparison.OrdinalIgnoreCase)
                                          },
                                  _ => string.Compare(Flag, other.Flag, StringComparison.Ordinal)
                              };

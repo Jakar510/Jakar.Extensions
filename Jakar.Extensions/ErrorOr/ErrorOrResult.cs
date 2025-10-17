@@ -25,11 +25,11 @@ public interface IErrorOrResult<TValue>
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable]
 [DefaultValue(nameof(Empty))]
-public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrResult<bool?>
+public readonly struct ErrorOrResult( bool? value, Errors? error ) : IErrorOrResult<bool?>
 {
     public static readonly ErrorOrResult Empty = new(null, Errors.Empty);
-    public readonly        bool?         Value = Value;
-    public readonly        Errors?       Error = Error;
+    public readonly        bool?         Value = value;
+    public readonly        Errors?       Error = error;
 
 
     [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors { get => Error?.IsValid is true; }
@@ -129,11 +129,11 @@ public readonly struct ErrorOrResult( bool? Value, Errors? Error ) : IErrorOrRes
 /// <summary> Inspired by https://github.com/amantinband/error-or/tree/main </summary>
 [Serializable]
 [DefaultValue(nameof(Empty))]
-public readonly struct ErrorOrResult<TValue>( TValue? Value, Errors? Error ) : IErrorOrResult<TValue>
+public readonly struct ErrorOrResult<TValue>( TValue? value, Errors? error ) : IErrorOrResult<TValue>
 {
     public static readonly ErrorOrResult<TValue> Empty = new(default, Errors.Empty);
-    public readonly        Errors?               Error = Error;
-    public readonly        TValue?               Value = Value;
+    public readonly        Errors?               Error = error;
+    public readonly        TValue?               Value = value;
 
 
     [MemberNotNullWhen(false, nameof(Value))] [MemberNotNullWhen(true, nameof(Error))] public bool HasErrors => Error?.IsValid is true && Value is null;

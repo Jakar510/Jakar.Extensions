@@ -214,7 +214,7 @@ public sealed class WebResponse<TValue>
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = OneOfErrors.UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using StreamReader reader       = new(stream);
@@ -233,7 +233,7 @@ public sealed class WebResponse<TValue>
         string              error;
 
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if ( stream is null ) { error = OneOfErrors.UNKNOWN_ERROR; }
+        if ( stream is null ) { error = UNKNOWN_ERROR; }
         else
         {
             using StreamReader reader       = new(stream);

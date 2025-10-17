@@ -36,8 +36,8 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
         while ( enumerator.MoveNext() )
         {
-            __last.next = new Node(enumerator.Current);
-            __last      = __last.next;
+            __last.Next = new Node(enumerator.Current);
+            __last      = __last.Next;
         }
     }
 
@@ -90,7 +90,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
         Debug.Assert(First is not null);
         Debug.Assert(__last is not null);
 
-        __last.next = newNode;
+        __last.Next = newNode;
         __last      = newNode;
         __count++;
     }
@@ -108,7 +108,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
         lock ( __lock )
         {
-            newNode.next = First;
+            newNode.Next = First;
             First        = newNode;
             __count++;
         }
@@ -123,9 +123,9 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
             while ( current is not null )
             {
-                if ( EqualityComparer<T>.Default.Equals(value, current.value) ) { return false; }
+                if ( EqualityComparer<T>.Default.Equals(value, current.Value) ) { return false; }
 
-                current = current.next;
+                current = current.Next;
             }
 
             Node newNode = new(value);
@@ -142,9 +142,9 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
             while ( current is not null )
             {
-                if ( compare(value, current.value) ) { return false; }
+                if ( compare(value, current.Value) ) { return false; }
 
-                current = current.next;
+                current = current.Next;
             }
 
             Node newNode = new(value);
@@ -162,22 +162,22 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             Node? previous = First;
             if ( previous is null ) { return false; }
 
-            if ( EqualityComparer<T>.Default.Equals(previous.value, value) )
+            if ( EqualityComparer<T>.Default.Equals(previous.Value, value) )
             {
-                First = previous.next;
+                First = previous.Next;
                 if ( First is null ) { __last = null; }
 
                 __count--;
                 return true;
             }
 
-            Node? current = previous.next;
+            Node? current = previous.Next;
 
             while ( current is not null )
             {
-                if ( EqualityComparer<T>.Default.Equals(current.value, value) )
+                if ( EqualityComparer<T>.Default.Equals(current.Value, value) )
                 {
-                    previous.next = current.next;
+                    previous.Next = current.Next;
                     if ( ReferenceEquals(__last, current) ) { __last = previous; }
 
                     __count--;
@@ -185,7 +185,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
                 }
 
                 previous = current;
-                current  = current.next;
+                current  = current.Next;
             }
 
             return false;
@@ -198,22 +198,22 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             Node? previous = First;
             if ( previous is null ) { return false; }
 
-            if ( compare(previous.value, value) )
+            if ( compare(previous.Value, value) )
             {
-                First = previous.next;
+                First = previous.Next;
                 if ( First is null ) { __last = null; }
 
                 __count--;
                 return true;
             }
 
-            Node? current = previous.next;
+            Node? current = previous.Next;
 
             while ( current is not null )
             {
-                if ( compare(current.value, value) )
+                if ( compare(current.Value, value) )
                 {
-                    previous.next = current.next;
+                    previous.Next = current.Next;
                     if ( ReferenceEquals(__last, current) ) { __last = previous; }
 
                     __count--;
@@ -221,7 +221,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
                 }
 
                 previous = current;
-                current  = current.next;
+                current  = current.Next;
             }
 
             return false;
@@ -246,7 +246,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
         public ref T Current => ref __currentNode is null
                                         ? ref Unsafe.NullRef<T>()
-                                        : ref __currentNode.value;
+                                        : ref __currentNode.Value;
 
 
         T IEnumerator<T>.   Current => Current;
@@ -264,7 +264,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             }
 
             __currentNode = __nextNode;
-            __nextNode    = __nextNode.next;
+            __nextNode    = __nextNode.Next;
             return true;
         }
 
@@ -287,8 +287,8 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
     public sealed class Node( T value )
     {
-        public Node? next;
-        public T     value = value;
+        public Node? Next;
+        public T     Value = value;
     }
 
 
@@ -302,7 +302,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
 
         public readonly ref T Current => ref __currentNode is null
                                                  ? ref Unsafe.NullRef<T>()
-                                                 : ref __currentNode.value;
+                                                 : ref __currentNode.Value;
 
         public void Dispose()
         {
@@ -321,7 +321,7 @@ public sealed class ValueLinkedList<T> : IReadOnlyCollection<T>, IValueEnumerabl
             }
 
             __currentNode = __nextNode;
-            __nextNode    = __currentNode.next;
+            __nextNode    = __currentNode.Next;
             return true;
         }
 

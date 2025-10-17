@@ -12,13 +12,13 @@ namespace Jakar.Extensions;
 [Serializable]
 [DefaultValue(nameof(Invalid))]
 [method: JsonConstructor]
-public readonly struct AppInformation( AppVersion Version, Guid AppID, string AppName, string? PackageName ) : IJsonModel<AppInformation>
+public readonly struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName ) : IJsonModel<AppInformation>
 {
     public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
-    public readonly        AppVersion     Version     = Version;
-    public readonly        Guid           AppID       = AppID;
-    public readonly        string         AppName     = AppName;
-    public readonly        string?        PackageName = PackageName;
+    public readonly        AppVersion     Version     = version;
+    public readonly        Guid           AppID       = appID;
+    public readonly        string         AppName     = appName;
+    public readonly        string?        PackageName = packageName;
 
 
     public static JsonSerializerContext          JsonContext   => JakarExtensionsContext.Default;

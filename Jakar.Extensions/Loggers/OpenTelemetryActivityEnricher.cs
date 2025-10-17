@@ -13,12 +13,6 @@ namespace Jakar.Extensions;
 /// <summary> A log event enricher which adds span information from the current <see cref="Activity"/>. </summary>
 public class OpenTelemetryActivityEnricher( IOpenTelemetryActivityEnricher options, TelemetrySource source ) : ILogEventEnricher
 {
-    public const     string                         PARENT_ID     = "ParentId";
-    public const     string                         PARENT_ID_KEY = "Serilog.ParentId";
-    public const     string                         SPAN_ID_KEY   = "Serilog.SpanId";
-    public const     string                         SPAN_ID       = "SpanId";
-    public const     string                         TRACE_ID_KEY  = "Serilog.TraceId";
-    public const     string                         TRACE_ID      = "TraceId";
     private readonly LogEventProperty               __appInfo     = source.Info.GetProperty();
     private readonly IOpenTelemetryActivityEnricher __options     = options;
     private readonly TelemetrySource                __source      = source;

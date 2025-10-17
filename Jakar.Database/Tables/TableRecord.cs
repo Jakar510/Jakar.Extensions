@@ -197,12 +197,12 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
 
         return Nullable.Compare(CreatedBy, other.CreatedBy);
     }
-    public void Deconstruct( out RecordID<UserRecord>? createdBy, out RecordID<TSelf> ID, out DateTimeOffset DateCreated, out DateTimeOffset? LastModified, out JsonObject? AdditionalData )
+    public void Deconstruct( out RecordID<UserRecord>? createdBy, out RecordID<TSelf> id, out DateTimeOffset dateCreated, out DateTimeOffset? lastModified, out JsonObject? additionalData )
     {
         createdBy      = this.CreatedBy;
-        ID             = this.ID;
-        DateCreated    = this.DateCreated;
-        LastModified   = this.LastModified;
-        AdditionalData = this.AdditionalData;
+        id             = this.ID;
+        dateCreated    = this.DateCreated;
+        lastModified   = this.LastModified;
+        additionalData = this.AdditionalData;
     }
 }

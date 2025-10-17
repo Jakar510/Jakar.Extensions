@@ -6,11 +6,11 @@ namespace Jakar.Database;
 
 public sealed class ProtectedDataProvider : IDataProtectionProvider
 {
-    private readonly ConcurrentDictionary<string, ProtectedData> _data = new();
+    private readonly ConcurrentDictionary<string, ProtectedData> __data = new();
 
 
     public static void           Register( IServiceCollection builder ) => builder.TryAddSingleton<IDataProtectionProvider, ProtectedDataProvider>();
-    public        IProtectedData CreateProtector( string      purpose ) => _data.GetOrAdd(purpose, static ( _, protector ) => new ProtectedData(protector), Database.DataProtector);
+    public        IProtectedData CreateProtector( string      purpose ) => __data.GetOrAdd(purpose, static ( _, protector ) => new ProtectedData(protector), Database.DataProtector);
 }
 
 

@@ -157,28 +157,26 @@ public readonly ref struct Requirements( ReadOnlySpan<string> blockedPasswords,
 
 public sealed class PasswordRequirements : IOptions<PasswordRequirements>
 {
-    public const   int                   MAX_LENGTH = 255;
-    public const   int                   MIN_LENGTH = 10;
     private static PasswordRequirements? __current;
-    private        int                   __maxLength = MAX_LENGTH;
-    private        int                   __minLength = MIN_LENGTH;
+    private        int                   __maxLength = PASSWORDS_MAX_LENGTH;
+    private        int                   __minLength = PASSWORDS_MIN_LENGTH;
 
 
     public static PasswordRequirements                  Current                  { get => __current ??= new PasswordRequirements(); set => __current = value; }
     public        string[]                              BlockedPasswords         { get;                                             set; } = [];
     public        bool                                  CantStartWithNumber      { get;                                             set; } = true;
     public        bool                                  CantStartWithSpecialChar { get;                                             set; } = true;
-    public        string                                LowerCase                { get;                                             set; } = Randoms.LOWER_CASE;
-    public        int                                   MaxLength                { get => __maxLength;                              set => __maxLength = Math.Clamp(value, __minLength, MAX_LENGTH); }
-    public        int                                   MinLength                { get => __minLength;                              set => __minLength = Math.Clamp(value, MIN_LENGTH,  __maxLength); }
+    public        string                                LowerCase                { get;                                             set; } = LOWER_CASE;
+    public        int                                   MaxLength                { get => __maxLength;                              set => __maxLength = Math.Clamp(value, __minLength,          PASSWORDS_MAX_LENGTH); }
+    public        int                                   MinLength                { get => __minLength;                              set => __minLength = Math.Clamp(value, PASSWORDS_MIN_LENGTH, __maxLength); }
     public        bool                                  MustBeTrimmed            { get;                                             set; } = true;
-    public        string                                Numbers                  { get;                                             set; } = Randoms.NUMERIC;
+    public        string                                Numbers                  { get;                                             set; } = NUMERIC;
     public        bool                                  RequireLowerCase         { get;                                             set; } = true;
     public        bool                                  RequireNumber            { get;                                             set; } = true;
     public        bool                                  RequireSpecialChar       { get;                                             set; } = true;
     public        bool                                  RequireUpperCase         { get;                                             set; } = true;
-    public        string                                SpecialChars             { get;                                             set; } = Randoms.SPECIAL_CHARS;
-    public        string                                UpperCase                { get;                                             set; } = Randoms.UPPER_CASE;
+    public        string                                SpecialChars             { get;                                             set; } = SPECIAL_CHARS;
+    public        string                                UpperCase                { get;                                             set; } = UPPER_CASE;
     PasswordRequirements IOptions<PasswordRequirements>.Value                    => this;
 
 

@@ -4,8 +4,6 @@
 [SuppressMessage("ReSharper", "ConvertToAutoPropertyWhenPossible")]
 public static class AppPreference
 {
-    public const            string           FALSE  = "false";
-    public const            string           TRUE   = "true";
     private static readonly Lock             __lock = new();
     private static          IAppPreferences? __source;
 

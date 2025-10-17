@@ -85,13 +85,13 @@ public readonly record struct PrecisionInfo( int Value, int Scope, int Precision
     public static implicit operator PrecisionInfo( (int Precision, int Scope) value ) => Create(value.Precision, value.Scope);
 
 
-    public static PrecisionInfo Create( int Scope, int Precision )
+    public static PrecisionInfo Create( int scope, int precision )
     {
-        if ( Precision > DECIMAL_MAX_PRECISION ) { throw new OutOfRangeException(Precision); }
+        if ( precision > DECIMAL_MAX_PRECISION ) { throw new OutOfRangeException(precision); }
 
-        if ( Scope > DECIMAL_MAX_SCALE ) { throw new OutOfRangeException(Scope); }
+        if ( scope > DECIMAL_MAX_SCALE ) { throw new OutOfRangeException(scope); }
 
-        return new PrecisionInfo(-1, Scope, Precision);
+        return new PrecisionInfo(-1, scope, precision);
     }
 }
 

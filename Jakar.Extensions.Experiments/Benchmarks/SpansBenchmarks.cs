@@ -75,15 +75,14 @@ namespace Jakar.Extensions.Experiments.Benchmarks;
 [MemoryDiagnoser]
 public class SpansBenchmarks
 {
-    private const string ALPHABET        = Randoms.ALPHANUMERIC;
     private const string EMPTY           = "        ";
     private const string EMPTY_WITH_TABS = $"\t\t{EMPTY}";
     private const string NEW_VALUE       = "----NEW-VALUE";
     private const string OLD             = "0365BC9B";
-    private const string TEST            = $"{ALPHABET}_{EMPTY_WITH_TABS}_{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
+    private const string TEST            = $"{ALPHANUMERIC}_{EMPTY_WITH_TABS}_{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
-    [Params( "", ALPHABET, TEST )] public string Value { get; set; } = string.Empty;
+    [Params( "", ALPHANUMERIC, TEST )] public string Value { get; set; } = string.Empty;
 
     [Benchmark] public bool Contains_span()  => Value.Contains( '2' );
     [Benchmark] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );

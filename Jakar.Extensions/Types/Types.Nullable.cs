@@ -18,8 +18,6 @@ namespace Jakar.Extensions;
 [SuppressMessage("ReSharper", "NullableWarningSuppressionIsUsed")]
 public static partial class Types
 {
-    private const          string NULLABLE         = "System.Runtime.CompilerServices.NullableAttribute";
-    private const          string NULLABLE_CONTEXT = "System.Runtime.CompilerServices.NullableContextAttribute";
     public static readonly Type   NullableType     = typeof(Nullable<>);
 
 

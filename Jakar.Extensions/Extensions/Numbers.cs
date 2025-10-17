@@ -104,19 +104,19 @@ public static class Numbers
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static byte AsByte<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, byte>(ref value);
+        where TEnum : struct, Enum => Unsafe.As<TEnum, byte>(ref value);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static sbyte AsSByte<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, sbyte>(ref value);
+        where TEnum : struct, Enum => Unsafe.As<TEnum, sbyte>(ref value);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static ushort AsUShort<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, ushort>(ref value);
+        where TEnum : struct, Enum => Unsafe.As<TEnum, ushort>(ref value);
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static short AsShort<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum => Unsafe.As<TEnum, short>(ref value);
+        where TEnum : struct, Enum => Unsafe.As<TEnum, short>(ref value);
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe int AsInt<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
+        where TEnum : struct, Enum
     {
         // This handles all enum underlying types safely and efficiently.
         return sizeof(TEnum) switch
@@ -128,7 +128,7 @@ public static class Numbers
                };
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe uint AsUInt<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
+        where TEnum : struct, Enum
     {
         // This handles all enum underlying types safely and efficiently.
         return sizeof(TEnum) switch
@@ -142,7 +142,7 @@ public static class Numbers
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe long AsLong<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
+        where TEnum : struct, Enum
     {
         // This handles all enum underlying types safely and efficiently.
         return sizeof(TEnum) switch
@@ -155,7 +155,7 @@ public static class Numbers
                };
     }
     [MethodImpl(MethodImplOptions.AggressiveInlining)] public static unsafe ulong AsULong<TEnum>( this TEnum value )
-        where TEnum : unmanaged, Enum
+        where TEnum : struct, Enum
     {
         // This handles all enum underlying types safely and efficiently.
         return sizeof(TEnum) switch

@@ -290,12 +290,12 @@ public static class Migrations
 
     public sealed class RecordValues : IReadOnlyDictionary<ulong, MigrationRecord>
     {
-        private readonly ConcurrentDictionary<ulong, MigrationRecord> _records = new();
-        public           int                                          Count => _records.Count;
+        private readonly ConcurrentDictionary<ulong, MigrationRecord> __records = new();
+        public           int                                          Count => __records.Count;
 
-        public MigrationRecord this[ ulong key ] => _records[key];
-        public IEnumerable<ulong>           Keys   => _records.Keys;
-        public IEnumerable<MigrationRecord> Values => _records.Values;
+        public MigrationRecord this[ ulong key ] => __records[key];
+        public IEnumerable<ulong>           Keys   => __records.Keys;
+        public IEnumerable<MigrationRecord> Values => __records.Values;
         public RecordValues()
         {
             foreach ( MigrationRecord record in Migrations.BuiltIns(Ids) ) { Add(record); }
@@ -306,12 +306,12 @@ public static class Migrations
         {
             if ( record.MigrationID == 0 ) { throw new ArgumentOutOfRangeException(nameof(record), "MigrationID cannot be 0"); }
 
-            if ( !_records.TryAdd(record.MigrationID, record) ) { throw new InvalidOperationException($"A record with the MigrationID {record.MigrationID} already exists"); }
+            if ( !__records.TryAdd(record.MigrationID, record) ) { throw new InvalidOperationException($"A record with the MigrationID {record.MigrationID} already exists"); }
         }
 
-        public IEnumerator<KeyValuePair<ulong, MigrationRecord>> GetEnumerator()                                                            => _records.GetEnumerator();
-        IEnumerator IEnumerable.                                 GetEnumerator()                                                            => ( (IEnumerable)_records ).GetEnumerator();
-        public bool                                              ContainsKey( ulong key )                                                   => _records.ContainsKey(key);
-        public bool                                              TryGetValue( ulong key, [MaybeNullWhen(false)] out MigrationRecord value ) => _records.TryGetValue(key, out value);
+        public IEnumerator<KeyValuePair<ulong, MigrationRecord>> GetEnumerator()                                                            => __records.GetEnumerator();
+        IEnumerator IEnumerable.                                 GetEnumerator()                                                            => ( (IEnumerable)__records ).GetEnumerator();
+        public bool                                              ContainsKey( ulong key )                                                   => __records.ContainsKey(key);
+        public bool                                              TryGetValue( ulong key, [MaybeNullWhen(false)] out MigrationRecord value ) => __records.TryGetValue(key, out value);
     }
 }

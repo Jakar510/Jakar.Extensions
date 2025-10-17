@@ -33,27 +33,27 @@ public ref struct PostgresParameters : IDisposable
                                                                                          [nameof(Status)]              = "statuses",
                                                                                          [nameof(NpgsqlDbType)]        = "db_types",
                                                                                      };
-    private readonly DynamicParameters _parameters;
-    private          string[]?         _array = null;
+    private readonly DynamicParameters __parameters;
+    private          string[]?         __array = null;
 
 
     public int      Length         => ParameterNames.Length;
-    public string[] ParameterNames => _array ??= _parameters.ParameterNames.ToArray();
+    public string[] ParameterNames => __array ??= __parameters.ParameterNames.ToArray();
 
 
     public PostgresParameters() : this(new DynamicParameters()) { }
     public PostgresParameters( object?           template ) : this(new DynamicParameters(template)) { }
-    public PostgresParameters( DynamicParameters parameters ) => _parameters = parameters;
-    public void Dispose() => _array = null;
+    public PostgresParameters( DynamicParameters parameters ) => __parameters = parameters;
+    public void Dispose() => __array = null;
 
 
-    public static implicit operator DynamicParameters( PostgresParameters parameters ) => parameters._parameters;
+    public static implicit operator DynamicParameters( PostgresParameters parameters ) => parameters.__parameters;
 
 
     public void Add( string name, object? value = null, DbType? dbType = null, ParameterDirection? direction = null, int? size = null, byte? precision = null, byte? scale = null )
     {
-        _array = null;
-        _parameters.Add(name.SqlColumnName(), value, dbType, direction, size, precision, scale);
+        __array = null;
+        __parameters.Add(name.SqlColumnName(), value, dbType, direction, size, precision, scale);
     }
 
 
@@ -82,29 +82,29 @@ public ref struct PostgresParameters : IDisposable
 public ref struct PostgresParameters<TSelf>( int capacity = DEFAULT_CAPACITY ) : IDisposable
     where TSelf : class, ITableRecord<TSelf>
 {
-    private string[]?                     _array      = null;
-    private FilterBuffer<NpgsqlParameter> _parameters = new(capacity);
+    private string[]?                     __array      = null;
+    private FilterBuffer<NpgsqlParameter> __parameters = new(capacity);
 
 
-    public string[]                      ParameterNames => _array ??= GetNames();
-    public ReadOnlySpan<NpgsqlParameter> Values         => _parameters.Values;
-    public int                           Length         => _parameters.Length;
-    public int                           Capacity       => _parameters.Capacity;
+    public string[]                      ParameterNames => __array ??= GetNames();
+    public ReadOnlySpan<NpgsqlParameter> Values         => __parameters.Values;
+    public int                           Length         => __parameters.Length;
+    public int                           Capacity       => __parameters.Capacity;
 
 
     public void Dispose()
     {
-        _array = null;
-        _parameters.Dispose();
+        __array = null;
+        __parameters.Dispose();
     }
-    private string[] GetNames() => _parameters.Values.AsValueEnumerable()
+    private string[] GetNames() => __parameters.Values.AsValueEnumerable()
                                               .Select(x => x.ParameterName)
                                               .ToArray();
 
 
     public PostgresParameters<TSelf> Add( NpgsqlParameter parameter )
     {
-        _parameters.Add(parameter);
+        __parameters.Add(parameter);
         return this;
     }
     public PostgresParameters<TSelf> Add<TClass, T>( string propertyName, T value, [CallerArgumentExpression(nameof(value))] string parameterName = EMPTY, ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )

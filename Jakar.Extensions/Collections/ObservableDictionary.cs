@@ -8,12 +8,12 @@
 public sealed class ObservableDictionary<TKey, TValue> : ObservableDictionary<ObservableDictionary<TKey, TValue>, TKey, TValue>, ICollectionAlerts<ObservableDictionary<TKey, TValue>, KeyValuePair<TKey, TValue>>
     where TKey : notnull
 {
-    private static JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>? __JsonArrayInfo;
+    private static JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>? __jsonArrayInfo;
     private static JsonSerializerContext?                              __jsonContext;
     private static JsonTypeInfo<ObservableDictionary<TKey, TValue>>?   __jsonTypeInfo;
     public static  JsonSerializerContext                               JsonContext   { get => Validate.ThrowIfNull(__jsonContext);   set => __jsonContext = value; }
     public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>>    JsonTypeInfo  { get => Validate.ThrowIfNull(__jsonTypeInfo);  set => __jsonTypeInfo = value; }
-    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__JsonArrayInfo); set => __JsonArrayInfo = value; }
+    public static  JsonTypeInfo<ObservableDictionary<TKey, TValue>[]>  JsonArrayInfo { get => Validate.ThrowIfNull(__jsonArrayInfo); set => __jsonArrayInfo = value; }
 
 
     public ObservableDictionary() : this(DEFAULT_CAPACITY) { }

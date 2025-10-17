@@ -94,10 +94,10 @@ public sealed record Node : BaseRecord<Node>, IJsonModel<Node>
 [SuppressMessage("ReSharper", "ArrangeObjectCreationWhenTypeEvident")]
 public sealed class TestJson : BaseClass<TestJson>, IJsonModel<TestJson>
 {
-    public Email email         = new("bite@me.com");
-    public Error mutableError  = Error.InternalServerError();
-    public Error readOnlyError = Error.InternalServerError();
-    public Pair  pair          = new("date", DateTime.Now.ToLongDateString());
+    public Email Email         = new("bite@me.com");
+    public Error MutableError  = Error.InternalServerError();
+    public Error ReadOnlyError = Error.InternalServerError();
+    public Pair  Pair          = new("date", DateTime.Now.ToLongDateString());
 
     internal static readonly TestJson Debug = new()
                                               {

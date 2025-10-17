@@ -71,12 +71,12 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string  TABLE_NAME = TSelf.TableName.SqlColumnName();
+        string  tableName = TSelf.TableName.SqlColumnName();
 
         return MigrationRecord.Create<TSelf>(migrationID,
-                                             $"create { TABLE_NAME} table",
+                                             $"create { tableName} table",
                                              $"""
-                                              CREATE TABLE IF NOT EXISTS { TABLE_NAME}
+                                              CREATE TABLE IF NOT EXISTS { tableName}
                                               (  
                                               {nameof(KeyID).SqlColumnName()}          uuid        NOT NULL, 
                                               {nameof(DateCreated).SqlColumnName()}    timestamptz NOT NULL,
@@ -89,7 +89,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
                                               );
                                               
                                               CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                              BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                              BEFORE INSERT OR UPDATE ON { tableName}
                                               FOR EACH ROW
                                               EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                               """);

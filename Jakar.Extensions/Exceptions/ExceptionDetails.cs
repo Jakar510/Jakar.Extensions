@@ -23,7 +23,7 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
     public ExceptionDetails() { }
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public ExceptionDetails( Exception exception, bool includeMethodInfo = true )
     {
         Value   = exception ?? throw new ArgumentNullException(nameof(exception));
@@ -49,16 +49,16 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
                     ? null
                     : new ExceptionDetails(exception.InnerException);
     }
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     public static implicit operator ExceptionDetails?( Exception? e ) => TryCreate(e);
     public static implicit operator Exception?( ExceptionDetails? details ) => details?.Value;
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     private static ExceptionDetails Create( Exception exception ) => new(exception);
 
 
-    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + Json.SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(Json.SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
+    [RequiresUnreferencedCode("Metadata for the method might be incomplete or removed." + SERIALIZATION_UNREFERENCED_CODE)] [RequiresDynamicCode(SERIALIZATION_REQUIRES_DYNAMIC_CODE)]
     private static ExceptionDetails? TryCreate( [NotNullIfNotNull(nameof(exception))] Exception? exception ) => exception is not null
                                                                                                                     ? Create(exception)
                                                                                                                     : null;
