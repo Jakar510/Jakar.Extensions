@@ -7,19 +7,18 @@ namespace Jakar.Database;
 
 [SuppressMessage("ReSharper", "ClassWithVirtualMembersNeverInherited.Global")]
 public partial class DbTable<TSelf> : IConnectableDb
-    where TSelf : class, ITableRecord<TSelf> 
+    where TSelf : class, ITableRecord<TSelf>
 {
     protected readonly     FusionCache        _cache;
     protected readonly     IConnectableDbRoot _database;
-    public static readonly SqlCache<TSelf>   SQLCache = new();
 
 
-    public static TSelf[]                 Empty                     {  get => []; }
-    public static ImmutableArray<TSelf>   EmptyArray                {  get => []; }
-    public static FrozenSet<TSelf>        Set                       {  get => FrozenSet<TSelf>.Empty; }
+    public static TSelf[]                  Empty                     { get => []; }
+    public static ImmutableArray<TSelf>    EmptyArray                { get => []; }
+    public static FrozenSet<TSelf>         Set                       { get => FrozenSet<TSelf>.Empty; }
     public        FusionCacheEntryOptions? Options                   { get; set; }
-    public        RecordGenerator<TSelf>  Records                   {  get => new(this); }
-    public        IsolationLevel           TransactionIsolationLevel {  get => _database.TransactionIsolationLevel; }
+    public        RecordGenerator<TSelf>   Records                   { get => new(this); }
+    public        IsolationLevel           TransactionIsolationLevel { get => _database.TransactionIsolationLevel; }
 
 
     public DbTable( IConnectableDbRoot database, FusionCache cache )

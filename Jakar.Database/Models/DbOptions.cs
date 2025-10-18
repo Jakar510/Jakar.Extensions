@@ -54,7 +54,7 @@ public sealed class DbOptions : IOptions<DbOptions>
     public        string                                                  JWTAlgorithm                    { get;                                 set; } = JWT_ALGORITHM;
     public        string                                                  JWTKey                          { get;                                 set; } = JWT_KEY;
     public        AppLoggerOptions                                        LoggerOptions                   { get;                                 set; } = new();
-    public        SeqConfig                                               SeqConfig                       { get;                                 set; }
+    public        SeqConfig?                                              SeqConfig                       { get;                                 set; }
     public        Logger?                                                 Serilogger                      { get;                                 set; }
     public        string                                                  TokenAudience                   { get;                                 set; } = string.Empty;
     public        string                                                  TokenIssuer                     { get;                                 set; } = string.Empty;

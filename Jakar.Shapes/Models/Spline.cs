@@ -50,8 +50,8 @@ public readonly struct Spline( params ReadOnlyPoint[]? points ) : ISpline<Spline
 
     public static implicit operator Spline( ReadOnlyPoint[]?               points ) => Create(points);
     [Pure] public static            Spline Create( params ReadOnlyPoint[]? points ) => new(points);
-    [Pure] public                   Spline Round()                                  => new(AsValueEnumerable().Select(static x => x.Round<ReadOnlyPoint>()).ToArray());
-    [Pure] public                   Spline Floor()                                  => new(AsValueEnumerable().Select(static x => x.Floor<ReadOnlyPoint>()).ToArray());
+    [Pure] public                   Spline Round()                                  => new(AsValueEnumerable().Select(static x => x.Round()).ToArray());
+    [Pure] public                   Spline Floor()                                  => new(AsValueEnumerable().Select(static x => x.Floor()).ToArray());
 
 
     [Pure] public ValueEnumerable<FromArray<ReadOnlyPoint>, ReadOnlyPoint> AsValueEnumerable() => new(new FromArray<ReadOnlyPoint>(Points));

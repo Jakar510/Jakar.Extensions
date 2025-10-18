@@ -128,20 +128,8 @@ public sealed record ColumnMetaData( string ColumnName, PostgresType DbType, Col
 
     public string GetDataType() => DbType.GetPostgresDataType(in Length, in Options);
 
-
-    public NpgsqlParameter ToParameter<T>( T value, [CallerArgumentExpression(nameof(value))] string parameterName = EMPTY, ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
-    {
-        NpgsqlParameter parameter = new(parameterName, DbType.ToNpgsqlDbType())
-                                    {
-                                        SourceColumn  = ColumnName,
-                                        IsNullable    = IsNullable,
-                                        SourceVersion = sourceVersion,
-                                        Direction     = direction,
-                                        Value         = value,
-                                    };
-
-        return parameter;
-    }
+    
+     
 
 
     /*

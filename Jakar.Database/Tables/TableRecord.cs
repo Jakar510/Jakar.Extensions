@@ -111,6 +111,7 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
         return parameters;
     }
 
+
     public virtual PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = new();

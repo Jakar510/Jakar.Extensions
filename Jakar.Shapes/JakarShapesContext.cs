@@ -37,6 +37,7 @@ namespace Jakar.Shapes;
 [JsonSerializable(typeof(ReadOnlySizeF[]))]
 [JsonSerializable(typeof(MutableSize[]))]
 [JsonSerializable(typeof(Spline[]))]
+[JsonSerializable(typeof(Polygon[]))]
 public sealed partial class JakarShapesContext : JsonSerializerContext
 {
     static JakarShapesContext()

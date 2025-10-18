@@ -41,20 +41,20 @@ namespace Jakar.Database;
 /// </param>
 /// <returns> Logger configuration, allowing configuration to continue. </returns>
 /// <exception cref="ArgumentNullException"> A required parameter is null. </exception>
-public readonly record struct SeqConfig( string              ServerUrl,
-                                         LogEventLevel       RestrictedToMinimumLevel          = LevelAlias.Minimum,
-                                         int                 BatchPostingLimit                 = 1000,
-                                         TimeSpan?           Period                            = null,
-                                         string?             APIKey                            = null,
-                                         string?             BufferBaseFilename                = null,
-                                         long?               BufferSizeLimitBytes              = null,
-                                         long?               EventBodyLimitBytes               = 256 * 1024,
-                                         LoggingLevelSwitch? ControlLevelSwitch                = null,
-                                         HttpMessageHandler? MessageHandler                    = null,
-                                         long?               RetainedInvalidPayloadsLimitBytes = null,
-                                         int                 QueueSizeLimit                    = 100000,
-                                         ITextFormatter?     PayloadFormatter                  = null,
-                                         IFormatProvider?    FormatProvider                    = null )
+public sealed record SeqConfig( string              ServerUrl,
+                                LogEventLevel       RestrictedToMinimumLevel          = LevelAlias.Minimum,
+                                int                 BatchPostingLimit                 = 1000,
+                                TimeSpan?           Period                            = null,
+                                string?             APIKey                            = null,
+                                string?             BufferBaseFilename                = null,
+                                long?               BufferSizeLimitBytes              = null,
+                                long?               EventBodyLimitBytes               = 256 * 1024,
+                                LoggingLevelSwitch? ControlLevelSwitch                = null,
+                                HttpMessageHandler? MessageHandler                    = null,
+                                long?               RetainedInvalidPayloadsLimitBytes = null,
+                                int                 QueueSizeLimit                    = 100000,
+                                ITextFormatter?     PayloadFormatter                  = null,
+                                IFormatProvider?    FormatProvider                    = null )
 {
     public void Configure( LoggerSinkConfiguration sinkTo )
     {

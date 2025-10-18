@@ -8,10 +8,6 @@ using ZLinq.Linq;
 namespace Jakar.Database;
 
 
-public sealed record MigrationRecord_( ulong MigrationID, string? TableID, string Description, DateTimeOffset AppliedOn );
-
-
-
 [Serializable]
 public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord<MigrationRecord>
 {
@@ -70,6 +66,8 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
         this.MigrationID = migrationID;
         this.TableID     = TABLE_NAME;
     }
+
+
     public static MigrationRecord CreateTable( ulong migrationID )
     {
         return Create<MigrationRecord>(migrationID,

@@ -29,8 +29,8 @@ public static class Telemetry
     public static readonly ConcurrentDictionary<string, Meter>      Meters      = [];
 
 
-    public static Meter          Meter  {  get; set; } = DbMeter;
-    public static ActivitySource Source {  get; set; } = DbSource;
+    public static Meter          Meter  { get; set; } = DbMeter;
+    public static ActivitySource Source { get; set; } = DbSource;
 
 
     public static void ConfigureExporter( this OtlpExporterOptions exporter, Uri endpoint, ExportProcessorType type, OtlpExportProtocol protocol, string? headers = null, int timeout = 10000 )
@@ -62,7 +62,7 @@ public static class Telemetry
     }
 
 
-    public static WebApplicationBuilder AddSerilog( this WebApplicationBuilder builder, AppLoggerOptions options, TelemetrySource source, in SeqConfig seqConfig, out Logger logger )
+    public static WebApplicationBuilder AddSerilog( this WebApplicationBuilder builder, AppLoggerOptions options, TelemetrySource source, SeqConfig? seqConfig, out Logger logger )
     {
         LoggerConfiguration config = new();
         config.MinimumLevel.Verbose();
@@ -72,7 +72,7 @@ public static class Telemetry
         OpenTelemetryActivityEnricher.Create(config.Enrich, options, source);
         config.WriteTo.Console();
 
-        seqConfig.Configure(config.WriteTo);
+        seqConfig?.Configure(config.WriteTo);
 
         logger     = config.CreateLogger();
         Log.Logger = logger;
@@ -85,10 +85,18 @@ public static class Telemetry
     {
         KeyValuePair<string, object>[] attributes = [new(ATTRIBUTE_SERVICE_NAME, TApp.AppName), new(ATTRIBUTE_SERVICE_VERSION, TApp.AppVersion.ToString()), new(ATTRIBUTE_SERVICE_INSTANCE, TApp.AppID.ToString()), new(ATTRIBUTE_SERVICE_NAMESPACE, typeof(TApp).Namespace ?? string.Empty)];
 
-        ResourceBuilder resources = ResourceBuilder.CreateEmpty().AddAttributes(attributes).AddTelemetrySdk().AddEnvironmentVariableDetector().AddService(TApp.AppName, null, TApp.AppVersion.ToString()).AddService(METER_NAME);
+        ResourceBuilder resources = ResourceBuilder.CreateEmpty()
+                                                   .AddAttributes(attributes)
+                                                   .AddTelemetrySdk()
+                                                   .AddEnvironmentVariableDetector()
+                                                   .AddService(TApp.AppName, null, TApp.AppVersion.ToString())
+                                                   .AddService(METER_NAME);
 
 
-        builder.Services.AddOpenTelemetry().WithTracing(configureTracing).WithMetrics(configureMetrics).WithLogging(configureBuilder, configureOptions);
+        builder.Services.AddOpenTelemetry()
+               .WithTracing(configureTracing)
+               .WithMetrics(configureMetrics)
+               .WithLogging(configureBuilder, configureOptions);
 
         builder.Services.AddSingleton(static x =>
                                       {
@@ -138,28 +146,29 @@ public static class Telemetry
     }
 
 
-     public static ActivitySource CreateSource()                                           => CreateSource(GetAssembly());
-     public static ActivitySource CreateSource( Assembly     assembly )                    => CreateSource(assembly.GetName());
-     public static ActivitySource CreateSource( AssemblyName assembly )                    => CreateSource(assembly.Name ?? nameof(Database), assembly);
-     public static ActivitySource CreateSource( string       name )                        => CreateSource(name,                              GetAssembly());
-     public static ActivitySource CreateSource( string       name, Assembly     assembly ) => CreateSource(name,                              assembly.GetName());
-     public static ActivitySource CreateSource( string       name, AssemblyName assembly ) => CreateSource(name,                              assembly.GetVersion());
-     public static ActivitySource CreateSource( string       name, AppVersion   version )  => CreateSource(name,                              version.ToString());
-     public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
-     public static Meter          CreateMeter()                                                                                                                         => CreateMeter(GetAssembly());
-     public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter(assembly.GetName());
-     public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter(assembly.Name ?? nameof(Database), assembly);
-     public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter(name,                              GetAssembly());
-     public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter(name,                              assembly.GetName());
-     public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter(name,                              assembly.GetVersion());
-     public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter(name,                              version.ToString(), tags, scope);
-     public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
-     public static Assembly       GetAssembly()                            => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
-     public static AppVersion     GetVersion( this Assembly     assembly ) => assembly.GetName().GetVersion();
-     public static AppVersion     GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
+    public static ActivitySource CreateSource()                                           => CreateSource(GetAssembly());
+    public static ActivitySource CreateSource( Assembly     assembly )                    => CreateSource(assembly.GetName());
+    public static ActivitySource CreateSource( AssemblyName assembly )                    => CreateSource(assembly.Name ?? nameof(Database), assembly);
+    public static ActivitySource CreateSource( string       name )                        => CreateSource(name,                              GetAssembly());
+    public static ActivitySource CreateSource( string       name, Assembly     assembly ) => CreateSource(name,                              assembly.GetName());
+    public static ActivitySource CreateSource( string       name, AssemblyName assembly ) => CreateSource(name,                              assembly.GetVersion());
+    public static ActivitySource CreateSource( string       name, AppVersion   version )  => CreateSource(name,                              version.ToString());
+    public static ActivitySource CreateSource( string       name, string       version )  => new(name, version);
+    public static Meter          CreateMeter()                                                                                                                         => CreateMeter(GetAssembly());
+    public static Meter          CreateMeter( Assembly     assembly )                                                                                                  => CreateMeter(assembly.GetName());
+    public static Meter          CreateMeter( AssemblyName assembly )                                                                                                  => CreateMeter(assembly.Name ?? nameof(Database), assembly);
+    public static Meter          CreateMeter( string       name )                                                                                                      => CreateMeter(name,                              GetAssembly());
+    public static Meter          CreateMeter( string       name, Assembly     assembly )                                                                               => CreateMeter(name,                              assembly.GetName());
+    public static Meter          CreateMeter( string       name, AssemblyName assembly )                                                                               => CreateMeter(name,                              assembly.GetVersion());
+    public static Meter          CreateMeter( string       name, AppVersion   version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => CreateMeter(name,                              version.ToString(), tags, scope);
+    public static Meter          CreateMeter( string       name, string?      version, IEnumerable<KeyValuePair<string, object?>>? tags = null, object? scope = null ) => new(name, version, tags, scope);
+    public static Assembly       GetAssembly() => Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly();
+    public static AppVersion GetVersion( this Assembly assembly ) => assembly.GetName()
+                                                                             .GetVersion();
+    public static AppVersion GetVersion( this AssemblyName assembly ) => assembly.Version ?? DefaultVersion;
 
 
-     public static Meter GetOrAddMeter( [CallerMemberName] string meterName = EMPTY ) => Meters.GetOrAdd(meterName, CreateMeter);
+    public static Meter GetOrAddMeter( [CallerMemberName] string meterName = EMPTY ) => Meters.GetOrAdd(meterName, CreateMeter);
 
 
     public static Histogram<TValue> GetOrAdd<TValue>( string unit, string description, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -167,7 +176,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(description, out Instrument? value) && value is Histogram<TValue> instrument ) { return instrument; }
 
-        Instruments[description] = instrument = GetOrAddMeter(meterName).CreateHistogram<TValue>(meterName, unit, description, tags ?? Pairs);
+        Instruments[description] = instrument = GetOrAddMeter(meterName)
+                                      .CreateHistogram<TValue>(meterName, unit, description, tags ?? Pairs);
+
         return instrument;
     }
 
@@ -177,7 +188,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableGauge<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableGauge(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableGauge(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
     public static ObservableGauge<TValue> GetOrAddGauge<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -185,7 +198,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableGauge<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableGauge(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableGauge(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
 
@@ -195,7 +210,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is Counter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateCounter<TValue>(name, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateCounter<TValue>(name, unit, description, tags ?? Pairs);
+
         return instrument;
     }
     public static ObservableCounter<TValue> GetOrAddCounter<TValue>( string name, Func<Measurement<TValue>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -203,7 +220,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableCounter(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableCounter(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
     public static ObservableCounter<TValue> GetOrAddCounter<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -211,7 +230,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableCounter(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableCounter(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
 
@@ -221,7 +242,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is UpDownCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateUpDownCounter<TValue>(name, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateUpDownCounter<TValue>(name, unit, description, tags ?? Pairs);
+
         return instrument;
     }
     public static ObservableUpDownCounter<TValue> GetOrAddUpDownCounter<TValue>( string name, Func<Measurement<TValue>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -229,7 +252,9 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableUpDownCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableUpDownCounter(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableUpDownCounter(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
     public static ObservableUpDownCounter<TValue> GetOrAddUpDownCounter<TValue>( string name, Func<IEnumerable<Measurement<TValue>>> observeValue, string? unit, string? description = null, IEnumerable<KeyValuePair<string, object?>>? tags = null, [CallerMemberName] string meterName = EMPTY )
@@ -237,81 +262,83 @@ public static class Telemetry
     {
         if ( Instruments.TryGetValue(name, out Instrument? value) && value is ObservableUpDownCounter<TValue> instrument ) { return instrument; }
 
-        Instruments[name] = instrument = GetOrAddMeter(meterName).CreateObservableUpDownCounter(name, observeValue, unit, description, tags ?? Pairs);
+        Instruments[name] = instrument = GetOrAddMeter(meterName)
+                               .CreateObservableUpDownCounter(name, observeValue, unit, description, tags ?? Pairs);
+
         return instrument;
     }
 
 
-     public static void AddUserID( this              Activity activity, UserRecord  record )       => activity.AddTag(nameof(IUserID.UserID),      record.ID);
-     public static void AddSessionID( this           Activity activity, UserRecord  record )       => activity.AddTag(Tags.SessionID,              record.SessionID);
-     public static void AddRoleID( this              Activity activity, RoleRecord  record )       => activity.AddTag(Tags.RoleID,                 record.ID);
-     public static void AddGroupID( this             Activity activity, GroupRecord record )       => activity.AddTag(Tags.GroupID,                record.ID);
-     public static void AddGroup( this               Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
-     public static void AddGroup( this               Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
-     public static void AddGroupRights( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
-     public static void AddGroupRights( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
-     public static void AddRole( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRole,                value);
-     public static void AddRole( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRole,                value);
-     public static void AddRoleRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
-     public static void AddRoleRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
-     public static void AddUser( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUser,                value);
-     public static void AddUser( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUser,                value);
-     public static void AddUserAddress( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
-     public static void AddUserAddress( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
-     public static void AddUserLoginInfo( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
-     public static void AddUserLoginInfo( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
-     public static void AddUserRecoveryCode( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
-     public static void AddUserRecoveryCode( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
-     public static void AddUserRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
-     public static void AddUserRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
-     public static void AddUserSubscription( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
-     public static void AddUserSubscription( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
-     public static void AddUserToGroup( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
-     public static void AddUserToGroup( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
-     public static void AddUserToRole( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
-     public static void AddUserToRole( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
-     public static void ConnectDatabase( this        Activity activity, string?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
-     public static void ConnectDatabase( this        Activity activity, object?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
-     public static void LoginUser( this              Activity activity, string?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
-     public static void LoginUser( this              Activity activity, object?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
-     public static void RemoveGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
-     public static void RemoveGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
-     public static void RemoveGroupRights( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
-     public static void RemoveGroupRights( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
-     public static void RemoveRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
-     public static void RemoveRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
-     public static void RemoveRoleRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
-     public static void RemoveRoleRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
-     public static void RemoveUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
-     public static void RemoveUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
-     public static void RemoveUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
-     public static void RemoveUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
-     public static void RemoveUserFromGroup( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
-     public static void RemoveUserFromGroup( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
-     public static void RemoveUserFromRole( this     Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
-     public static void RemoveUserFromRole( this     Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
-     public static void RemoveUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
-     public static void RemoveUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
-     public static void RemoveUserRecoveryCode( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
-     public static void RemoveUserRecoveryCode( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
-     public static void RemoveUserRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
-     public static void RemoveUserRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
-     public static void RemoveUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
-     public static void RemoveUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
-     public static void UpdateGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
-     public static void UpdateGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
-     public static void UpdateRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
-     public static void UpdateRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
-     public static void UpdateUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
-     public static void UpdateUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
-     public static void UpdateUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
-     public static void UpdateUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
-     public static void UpdateUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
-     public static void UpdateUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
-     public static void UpdateUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
-     public static void UpdateUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
-     public static void VerifyLogin( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
-     public static void VerifyLogin( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
+    public static void AddUserID( this              Activity activity, UserRecord  record )       => activity.AddTag(nameof(IUserID.UserID),      record.ID);
+    public static void AddSessionID( this           Activity activity, UserRecord  record )       => activity.AddTag(Tags.SessionID,              record.SessionID);
+    public static void AddRoleID( this              Activity activity, RoleRecord  record )       => activity.AddTag(Tags.RoleID,                 record.ID);
+    public static void AddGroupID( this             Activity activity, GroupRecord record )       => activity.AddTag(Tags.GroupID,                record.ID);
+    public static void AddGroup( this               Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
+    public static void AddGroup( this               Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroup,               value);
+    public static void AddGroupRights( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
+    public static void AddGroupRights( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddGroupRights,         value);
+    public static void AddRole( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRole,                value);
+    public static void AddRole( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRole,                value);
+    public static void AddRoleRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
+    public static void AddRoleRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddRoleRights,          value);
+    public static void AddUser( this                Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUser,                value);
+    public static void AddUser( this                Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUser,                value);
+    public static void AddUserAddress( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
+    public static void AddUserAddress( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserAddress,         value);
+    public static void AddUserLoginInfo( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
+    public static void AddUserLoginInfo( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserLoginInfo,       value);
+    public static void AddUserRecoveryCode( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
+    public static void AddUserRecoveryCode( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRecoveryCode,    value);
+    public static void AddUserRights( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
+    public static void AddUserRights( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserRights,          value);
+    public static void AddUserSubscription( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
+    public static void AddUserSubscription( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserSubscription,    value);
+    public static void AddUserToGroup( this         Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
+    public static void AddUserToGroup( this         Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToGroup,         value);
+    public static void AddUserToRole( this          Activity activity, string?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
+    public static void AddUserToRole( this          Activity activity, object?     value = null ) => activity.AddTag(Tags.AddUserToRole,          value);
+    public static void ConnectDatabase( this        Activity activity, string?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
+    public static void ConnectDatabase( this        Activity activity, object?     value = null ) => activity.AddTag(Tags.ConnectDatabase,        value);
+    public static void LoginUser( this              Activity activity, string?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
+    public static void LoginUser( this              Activity activity, object?     value = null ) => activity.AddTag(Tags.LoginUser,              value);
+    public static void RemoveGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
+    public static void RemoveGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroup,            value);
+    public static void RemoveGroupRights( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
+    public static void RemoveGroupRights( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveGroupRights,      value);
+    public static void RemoveRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
+    public static void RemoveRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRole,             value);
+    public static void RemoveRoleRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
+    public static void RemoveRoleRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveRoleRights,       value);
+    public static void RemoveUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
+    public static void RemoveUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUser,             value);
+    public static void RemoveUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
+    public static void RemoveUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserAddress,      value);
+    public static void RemoveUserFromGroup( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
+    public static void RemoveUserFromGroup( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromGroup,    value);
+    public static void RemoveUserFromRole( this     Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
+    public static void RemoveUserFromRole( this     Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserFromRole,     value);
+    public static void RemoveUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
+    public static void RemoveUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserLoginInfo,    value);
+    public static void RemoveUserRecoveryCode( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
+    public static void RemoveUserRecoveryCode( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRecoveryCode, value);
+    public static void RemoveUserRights( this       Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
+    public static void RemoveUserRights( this       Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserRights,       value);
+    public static void RemoveUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
+    public static void RemoveUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.RemoveUserSubscription, value);
+    public static void UpdateGroup( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
+    public static void UpdateGroup( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateGroup,            value);
+    public static void UpdateRole( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
+    public static void UpdateRole( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateRole,             value);
+    public static void UpdateUser( this             Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
+    public static void UpdateUser( this             Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUser,             value);
+    public static void UpdateUserAddress( this      Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
+    public static void UpdateUserAddress( this      Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserAddress,      value);
+    public static void UpdateUserLoginInfo( this    Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
+    public static void UpdateUserLoginInfo( this    Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserLoginInfo,    value);
+    public static void UpdateUserSubscription( this Activity activity, string?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
+    public static void UpdateUserSubscription( this Activity activity, object?     value = null ) => activity.AddTag(Tags.UpdateUserSubscription, value);
+    public static void VerifyLogin( this            Activity activity, string?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
+    public static void VerifyLogin( this            Activity activity, object?     value = null ) => activity.AddTag(Tags.VerifyLogin,            value);
 
 
 
@@ -369,7 +396,9 @@ public static class Telemetry
 
         public static void Print( TextWriter writer )
         {
-            ReadOnlySpan<PropertyInfo> properties = typeof(Tags).GetProperties(BindingFlags.Static | BindingFlags.Public).Where(static x => x.Name != nameof(Prefix)).ToArray();
+            ReadOnlySpan<PropertyInfo> properties = typeof(Tags).GetProperties(BindingFlags.Static | BindingFlags.Public)
+                                                                .Where(static x => x.Name != nameof(Prefix))
+                                                                .ToArray();
 
             foreach ( PropertyInfo property in properties ) { writer.WriteLine(getPrefixLine(property.Name)); }
 

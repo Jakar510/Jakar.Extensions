@@ -237,6 +237,8 @@ public static class Migrations
 
         // await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
 
+        UserRecord record = new();
+        record.ToDynamicParameters();
 
         await using NpgsqlCommand cmd = new(null, connection);
         cmd.Connection  = connection;
