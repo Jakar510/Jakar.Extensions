@@ -32,7 +32,7 @@ public sealed record ResxRowRecord( long                    KeyID,
     public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
                                                                                                               .WithColumn<string>(nameof(KeyID),      length: NAME)
                                                                                                               .WithColumn<string>(nameof(Key),        length: MAX_SIZE)
                                                                                                               .WithColumn<string>(nameof(Neutral),    length: MAX_SIZE)

@@ -41,7 +41,7 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
 [JsonSerializable(typeof(MigrationRecord[]))]
 [JsonSerializable(typeof(FusionCacheEntryOptionsWrapper))]
-[JsonSerializable(typeof(ImmutableDictionary<string, ColumnMetaData>))]
+[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData>))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()
@@ -83,7 +83,7 @@ public sealed partial class JakarDatabaseContext : JsonSerializerContext
 
         Default.FusionCacheEntryOptionsWrapper.Register();
 
-        Default.ImmutableDictionaryStringColumnMetaData.Register();
+        Default.FrozenDictionaryStringColumnMetaData.Register();
     }
 }
 

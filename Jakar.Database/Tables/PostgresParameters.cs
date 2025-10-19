@@ -80,16 +80,50 @@ public ref struct PostgresParameters : IDisposable
 
 
 
+public readonly struct SqlCommand<TSelf>( string sql, PostgresParameters<TSelf> parameters = default, CommandType? commandType = null, CommandFlags flags = CommandFlags.None )
+    where TSelf : class, ITableRecord<TSelf>
+{
+    public readonly string                    sql         = sql;
+    public readonly PostgresParameters<TSelf> parameters  = parameters;
+    public readonly CommandType?              commandType = commandType;
+    public readonly CommandFlags              flags       = flags;
+
+
+    public static implicit operator SqlCommand<TSelf>( string sql ) => new(sql);
+
+
+    public NpgsqlCommand ToNpgsqlCommand( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
+    {
+        ArgumentNullException.ThrowIfNull(connection);
+
+        NpgsqlCommand command = new NpgsqlCommand
+                                {
+                                    Connection  = connection,
+                                    CommandText = sql,
+                                    CommandType = commandType ?? CommandType.Text,
+                                    Transaction = transaction,
+                                };
+
+        command.Parameters.Add(parameters.Values);
+        return command;
+    }
+}
+
+
+
+[DefaultMember(nameof(Empty))]
 public struct PostgresParameters<TSelf>( int capacity )
     where TSelf : class, ITableRecord<TSelf>
 {
-    private int               _count;
-    private NpgsqlParameter[] _buffer = ArrayPool<NpgsqlParameter>.Shared.Rent(capacity);
+    public static readonly PostgresParameters<TSelf> Empty = new(0);
+    private                int                       _count;
+    private                NpgsqlParameter[]         _buffer = ArrayPool<NpgsqlParameter>.Shared.Rent(capacity);
 
 
     public int                           Count    => _count;
     public int                           Capacity => _buffer.Length;
     public ReadOnlySpan<NpgsqlParameter> Values   => new(_buffer, 0, _count);
+
 
     public ValueEnumerable<Select<FromSpan<NpgsqlParameter>, NpgsqlParameter, string>, string> ParameterNames
     {

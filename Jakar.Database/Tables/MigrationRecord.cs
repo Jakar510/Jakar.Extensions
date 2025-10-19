@@ -42,7 +42,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 
     public static int PropertyCount => Properties.Length;
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Empty()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Empty()
                                                                                                                    .WithColumn<ulong>(nameof(MigrationID))
                                                                                                                    .WithColumn<string>(nameof(TableID),     length: 256)
                                                                                                                    .WithColumn<string>(nameof(Description), length: MAX_FIXED)

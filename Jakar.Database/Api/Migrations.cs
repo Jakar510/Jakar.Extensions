@@ -237,17 +237,14 @@ public static class Migrations
 
         // await using DbDataReader     reader     = await connection.ExecuteReaderAsync(command);
 
-        UserRecord record = new();
-        record.ToDynamicParameters();
-
         await using NpgsqlCommand cmd = new(null, connection);
         cmd.Connection  = connection;
         cmd.CommandText = command.CommandText;
         NpgsqlParameter parameter = cmd.CreateParameter();
-        parameter.NpgsqlDbType = NpgsqlDbType.Text; 
+        parameter.NpgsqlDbType = NpgsqlDbType.Text;
 
-        await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
-        MigrationRecord[]       records                             = await reader.CreateAsync<MigrationRecord>(Records.Count, token);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
+        MigrationRecord[]            records = await reader.CreateAsync<MigrationRecord>(Records.Count, token);
         return records;
     }
     public static async ValueTask Apply( this MigrationRecord record, Database db, CancellationToken token )

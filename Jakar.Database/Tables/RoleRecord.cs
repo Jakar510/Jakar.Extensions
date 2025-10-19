@@ -26,7 +26,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     [StringLength(RIGHTS)] public UserRights                 Rights        { get; set; } = Rights;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
                                                                                                               .WithColumn<string>(nameof(NameOfRole),       length: NAME)
                                                                                                               .WithColumn<string>(nameof(NormalizedName),   length: NORMALIZED_NAME)
                                                                                                               .WithColumn<string>(nameof(ConcurrencyStamp), length: CONCURRENCY_STAMP)

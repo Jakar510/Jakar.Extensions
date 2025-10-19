@@ -27,7 +27,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
                                                                                                               .WithColumn<string>(nameof(LoginProvider),       length: MAX_FIXED)
                                                                                                               .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: MAX_FIXED)
                                                                                                               .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)

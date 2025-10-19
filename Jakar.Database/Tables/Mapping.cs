@@ -22,7 +22,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     private WeakReference<TValue>? __value;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<TSelf>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<TSelf>.Create()
                                                                                                          .WithForeignKey<TKey>(nameof(KeyID))
                                                                                                          .WithForeignKey<TValue>(nameof(ValueID))
                                                                                                          .Build();

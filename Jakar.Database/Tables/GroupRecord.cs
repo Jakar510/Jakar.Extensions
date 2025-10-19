@@ -19,7 +19,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Create()
                                                                                                                .With_CreatedBy()
                                                                                                                .WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
                                                                                                                .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")

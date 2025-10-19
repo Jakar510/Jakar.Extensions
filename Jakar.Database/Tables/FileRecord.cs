@@ -30,7 +30,7 @@ public sealed record FileRecord( string?              FileName,
     public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create()
                                                                                                               .WithColumn<string?>(nameof(FileName),        ColumnOptions.Nullable, length: 256)
                                                                                                               .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
                                                                                                               .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)

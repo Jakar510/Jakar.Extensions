@@ -19,7 +19,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public static JsonTypeInfo<UserRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecord;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
                                                                                                               .WithColumn<string>(nameof(UserName),    ColumnOptions.Indexed, USER_NAME)
                                                                                                               .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
                                                                                                               .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)

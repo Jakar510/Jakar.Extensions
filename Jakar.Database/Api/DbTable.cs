@@ -9,8 +9,8 @@ namespace Jakar.Database;
 public partial class DbTable<TSelf> : IConnectableDb
     where TSelf : class, ITableRecord<TSelf>
 {
-    protected readonly     FusionCache        _cache;
-    protected readonly     IConnectableDbRoot _database;
+    protected readonly FusionCache        _cache;
+    protected readonly IConnectableDbRoot _database;
 
 
     public static TSelf[]                  Empty                     { get => []; }
@@ -23,6 +23,7 @@ public partial class DbTable<TSelf> : IConnectableDb
 
     public DbTable( IConnectableDbRoot database, FusionCache cache )
     {
+        SQLCache  = CreateSqlCommandCache();
         _database = database;
         _cache    = cache;
         if ( TSelf.TableName != typeof(TSelf).GetTableName() ) { throw new InvalidOperationException($"{TSelf.TableName} != {typeof(TSelf).GetTableName()}"); }
@@ -33,6 +34,8 @@ public partial class DbTable<TSelf> : IConnectableDb
         return default;
     }
 
+
+    protected virtual SqlCommands CreateSqlCommandCache() => new SqlCommands();
 
     public ValueTask<NpgsqlConnection> ConnectAsync( CancellationToken token = default ) => _database.ConnectAsync(token);
 

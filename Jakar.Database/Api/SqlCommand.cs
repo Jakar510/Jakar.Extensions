@@ -43,7 +43,7 @@ public static class SqlCommandExtensions
                                     Connection  = connection,
                                     CommandText = sqlCommand.sql,
                                     CommandType = sqlCommand.commandType ?? CommandType.Text,
-                                    Transaction = transaction
+                                    Transaction = transaction,
                                 };
 
         if ( sqlCommand.parameters is not null )

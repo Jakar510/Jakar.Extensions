@@ -26,7 +26,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Create()
                                                                                                                  .WithColumn<string>(nameof(Line1),           length: 256)
                                                                                                                  .WithColumn<string>(nameof(Line2),           length: 1024)
                                                                                                                  .WithColumn<string>(nameof(City),            length: 256)

@@ -21,7 +21,7 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
 
-    public static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Create()
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Create()
                                                                                                                       .WithColumn<string>(nameof(Code), length: 1024)
                                                                                                                       .With_CreatedBy()
                                                                                                                       .Build();

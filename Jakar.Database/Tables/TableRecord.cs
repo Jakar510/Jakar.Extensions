@@ -43,10 +43,10 @@ public interface IRecordPair<TSelf> : IDateCreated
 public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
     where TSelf : ITableRecord<TSelf>
 {
-    public abstract static ReadOnlyMemory<PropertyInfo>                ClassProperties  { [Pure] get; }
-    public abstract static int                                         PropertyCount    { get; }
-    public abstract static ImmutableDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
-    public abstract static string                                      TableName        { [Pure] get; }
+    public abstract static ReadOnlyMemory<PropertyInfo>             ClassProperties  { [Pure] get; }
+    public abstract static int                                      PropertyCount    { get; }
+    public abstract static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
+    public abstract static string                                   TableName        { [Pure] get; }
 
 
     [Pure] public abstract static MigrationRecord    CreateTable( ulong   migrationID );
@@ -112,7 +112,7 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
     }
 
 
-    public virtual PostgresParameters ToDynamicParameters()
+    [Pure] public virtual PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = new();
         parameters.Add(nameof(ID),           ID.Value);
