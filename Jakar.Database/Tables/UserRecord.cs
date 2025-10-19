@@ -19,46 +19,45 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public static JsonTypeInfo<UserRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecord;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(UserName),    ColumnOptions.Indexed, USER_NAME)
-                                                                                                              .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
-                                                                                                              .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)
-                                                                                                              .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, FULL_NAME)
-                                                                                                              .WithColumn<string>(nameof(Gender),      length: GENDER)
-                                                                                                              .WithColumn<string>(nameof(Description), length: DESCRIPTION)
-                                                                                                              .WithColumn<string>(nameof(Company),     length: COMPANY)
-                                                                                                              .WithColumn<string>(nameof(Department),  length: DEPARTMENT)
-                                                                                                              .WithColumn<string>(nameof(Title),       length: TITLE)
-                                                                                                              .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
-                                                                                                              .WithColumn<string>(nameof(Email), length: EMAIL)
-                                                                                                              .WithColumn<bool>(nameof(IsEmailConfirmed))
-                                                                                                              .WithColumn<string>(nameof(PhoneNumber), length: PHONE)
-                                                                                                              .WithColumn<string>(nameof(Ext),         length: PHONE_EXT)
-                                                                                                              .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
-                                                                                                              .WithColumn<string>(nameof(AuthenticatorKey), length: AUTHENTICATOR_KEY)
-                                                                                                              .WithColumn<bool>(nameof(IsTwoFactorEnabled))
-                                                                                                              .WithColumn<bool>(nameof(IsActive))
-                                                                                                              .WithColumn<bool>(nameof(IsDisabled))
-                                                                                                              .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
-                                                                                                              .WithColumn<int?>(nameof(BadLogins))
-                                                                                                              .WithColumn<bool>(nameof(IsLocked))
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
-                                                                                                              .WithColumn<string>(nameof(RefreshToken),                    length: REFRESH_TOKEN)
-                                                                                                              .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
-                                                                                                              .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
-                                                                                                              .WithColumn<string>(nameof(SecurityStamp),                   length: SECURITY_STAMP)
-                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp),                length: CONCURRENCY_STAMP)
-                                                                                                              .WithColumn<string>(nameof(Rights),                          length: RIGHTS)
-                                                                                                              .WithColumn<string>(nameof(PasswordHash),                    length: HASH)
-                                                                                                              .WithForeignKey<UserRecord>(nameof(EscalateTo))
-                                                                                                              .WithForeignKey<FileRecord>(nameof(ImageID))
-                                                                                                              .With_AdditionalData()
-                                                                                                              .With_CreatedBy()
-                                                                                                              .Build();
+    public static FrozenDictionary<string, ColumnMetaData<UserRecord>> PropertyMetaData { get; } = SqlTable<UserRecord>.Default.WithColumn<string>(nameof(UserName), ColumnOptions.Indexed, USER_NAME)
+                                                                                                                       .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
+                                                                                                                       .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)
+                                                                                                                       .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, FULL_NAME)
+                                                                                                                       .WithColumn<string>(nameof(Gender),      length: GENDER)
+                                                                                                                       .WithColumn<string>(nameof(Description), length: DESCRIPTION)
+                                                                                                                       .WithColumn<string>(nameof(Company),     length: COMPANY)
+                                                                                                                       .WithColumn<string>(nameof(Department),  length: DEPARTMENT)
+                                                                                                                       .WithColumn<string>(nameof(Title),       length: TITLE)
+                                                                                                                       .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
+                                                                                                                       .WithColumn<string>(nameof(Email), length: EMAIL)
+                                                                                                                       .WithColumn<bool>(nameof(IsEmailConfirmed))
+                                                                                                                       .WithColumn<string>(nameof(PhoneNumber), length: PHONE)
+                                                                                                                       .WithColumn<string>(nameof(Ext),         length: PHONE_EXT)
+                                                                                                                       .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
+                                                                                                                       .WithColumn<string>(nameof(AuthenticatorKey), length: AUTHENTICATOR_KEY)
+                                                                                                                       .WithColumn<bool>(nameof(IsTwoFactorEnabled))
+                                                                                                                       .WithColumn<bool>(nameof(IsActive))
+                                                                                                                       .WithColumn<bool>(nameof(IsDisabled))
+                                                                                                                       .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<int?>(nameof(BadLogins))
+                                                                                                                       .WithColumn<bool>(nameof(IsLocked))
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<string>(nameof(RefreshToken),                    length: REFRESH_TOKEN)
+                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<string>(nameof(SecurityStamp),                   length: SECURITY_STAMP)
+                                                                                                                       .WithColumn<string>(nameof(ConcurrencyStamp),                length: CONCURRENCY_STAMP)
+                                                                                                                       .WithColumn<string>(nameof(Rights),                          length: RIGHTS)
+                                                                                                                       .WithColumn<string>(nameof(PasswordHash),                    length: HASH)
+                                                                                                                       .WithForeignKey<UserRecord>(nameof(EscalateTo))
+                                                                                                                       .WithForeignKey<FileRecord>(nameof(ImageID))
+                                                                                                                       .With_AdditionalData()
+                                                                                                                       .With_CreatedBy()
+                                                                                                                       .Build();
 
     public static                                                             string             TableName              { get => TABLE_NAME; }
     [ProtectedPersonalData] [StringLength(MAX_SIZE)]          public override JsonObject?        AdditionalData         { get => _additionalData; set => _additionalData = value; }
@@ -193,9 +192,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
 
 
-    public override PostgresParameters ToDynamicParameters()
+    public override PostgresParameters<UserRecord> ToDynamicParameters()
     {
-        PostgresParameters parameters = base.ToDynamicParameters();
+        PostgresParameters<UserRecord> parameters = base.ToDynamicParameters();
         parameters.Add(nameof(UserName),               UserName);
         parameters.Add(nameof(FirstName),              FirstName);
         parameters.Add(nameof(LastName),               LastName);

@@ -20,24 +20,23 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                     DateTimeOffset?                           LastModified = null ) : OwnedTableRecord<AddressRecord>(in CreatedBy, in ID, in DateCreated, in LastModified, AdditionalData), IAddress<AddressRecord, Guid>, ITableRecord<AddressRecord>
 {
     public const  string                        TABLE_NAME = "addresses";
-    public static string                        TableName     {  get => TABLE_NAME; }
+    public static string                        TableName     { get => TABLE_NAME; }
     public static JsonSerializerContext         JsonContext   => JakarDatabaseContext.Default;
     public static JsonTypeInfo<AddressRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.AddressRecord;
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Create()
-                                                                                                                 .WithColumn<string>(nameof(Line1),           length: 256)
-                                                                                                                 .WithColumn<string>(nameof(Line2),           length: 1024)
-                                                                                                                 .WithColumn<string>(nameof(City),            length: 256)
-                                                                                                                 .WithColumn<string>(nameof(StateOrProvince), length: 256)
-                                                                                                                 .WithColumn<string>(nameof(Country),         length: 256)
-                                                                                                                 .WithColumn<string>(nameof(PostalCode),      length: 256)
-                                                                                                                 .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
-                                                                                                                 .WithColumn<bool>(nameof(IsPrimary),         length: 256)
-                                                                                                                 .With_AdditionalData()
-                                                                                                                 .With_CreatedBy()
-                                                                                                                 .Build();
+    public static FrozenDictionary<string, ColumnMetaData<AddressRecord>> PropertyMetaData { get; } = SqlTable<AddressRecord>.Default.WithColumn<string>(nameof(Line1), length: 256)
+                                                                                                                             .WithColumn<string>(nameof(Line2),           length: 1024)
+                                                                                                                             .WithColumn<string>(nameof(City),            length: 256)
+                                                                                                                             .WithColumn<string>(nameof(StateOrProvince), length: 256)
+                                                                                                                             .WithColumn<string>(nameof(Country),         length: 256)
+                                                                                                                             .WithColumn<string>(nameof(PostalCode),      length: 256)
+                                                                                                                             .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
+                                                                                                                             .WithColumn<bool>(nameof(IsPrimary),         length: 256)
+                                                                                                                             .With_AdditionalData()
+                                                                                                                             .With_CreatedBy()
+                                                                                                                             .Build();
 
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
@@ -67,7 +66,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                                                                        DateTimeOffset.UtcNow) { }
 
 
-    [Pure] public override PostgresParameters ToDynamicParameters()
+    [Pure] public override object ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Line1),           Line1);
@@ -183,7 +182,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         return await db.Addresses.Get(connection, transaction, true, parameters, token);
 
-        
+
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
     [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
@@ -231,7 +230,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         yield break;
 
-        
+
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
 
@@ -270,12 +269,10 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<AddressRecord>(migrationID,
-                                                     $"create { TABLE_NAME} table",
+                                                     $"create {TABLE_NAME} table",
                                                      $"""
-                                                      CREATE TABLE IF NOT EXISTS { TABLE_NAME}
+                                                      CREATE TABLE IF NOT EXISTS {TABLE_NAME}
                                                       (
                                                       {nameof(Line1).SqlColumnName()}           varchar(512)   NOT NULL,
                                                       {nameof(Line2).SqlColumnName()}           varchar(512)   NOT NULL,
@@ -292,9 +289,9 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                       {nameof(AdditionalData).SqlColumnName()}  json           NULL,
                                                       FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL
                                                       );
-                                                      
+
                                                       CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                      BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                      BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                       FOR EACH ROW
                                                       EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                       """);

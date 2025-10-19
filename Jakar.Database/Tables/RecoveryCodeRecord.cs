@@ -15,22 +15,21 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 {
     public const            string                             TABLE_NAME = "recovery_codes";
     private static readonly PasswordHasher<RecoveryCodeRecord> __hasher   = new();
-    public static           string                             TableName     {  get => TABLE_NAME; }
+    public static           string                             TableName     { get => TABLE_NAME; }
     public static           JsonSerializerContext              JsonContext   => JakarDatabaseContext.Default;
     public static           JsonTypeInfo<RecoveryCodeRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.RecoveryCodeRecord;
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Create()
-                                                                                                                      .WithColumn<string>(nameof(Code), length: 1024)
-                                                                                                                      .With_CreatedBy()
-                                                                                                                      .Build();
+    public static FrozenDictionary<string, ColumnMetaData<RecoveryCodeRecord>> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Default.WithColumn<string>(nameof(Code), length: 1024)
+                                                                                                                                       .With_CreatedBy()
+                                                                                                                                       .Build();
 
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this(code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
 
 
-    [Pure] public override PostgresParameters ToDynamicParameters()
+    [Pure] public override object ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Code), Code);
@@ -50,12 +49,10 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        
-
         return MigrationRecord.Create<UserRecord>(migrationID,
-                                                  $"create { TABLE_NAME} table",
+                                                  $"create {TABLE_NAME} table",
                                                   $"""
-                                                   CREATE TABLE IF NOT EXISTS { TABLE_NAME}
+                                                   CREATE TABLE IF NOT EXISTS {TABLE_NAME}
                                                    (  
                                                    {nameof(Code).SqlColumnName()}           VARCHAR(1024)  NOT NULL, 
                                                    {nameof(AdditionalData).SqlColumnName()} json           NULL,
@@ -65,18 +62,18 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
                                                    {nameof(LastModified).SqlColumnName()}   timestamptz    NULL,
                                                    FOREIGN KEY({nameof(CreatedBy).SqlColumnName()}) REFERENCES {UserRecord.TABLE_NAME.SqlColumnName()}(id) ON DELETE SET NULL 
                                                    );
-                                                   
+
                                                    CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                                   BEFORE INSERT OR UPDATE ON { TABLE_NAME}
+                                                   BEFORE INSERT OR UPDATE ON {TABLE_NAME}
                                                    FOR EACH ROW
                                                    EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                                    """);
     }
 
 
-    [Pure]  public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
-    [Pure]  public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
-    [Pure]  public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
+    [Pure] public static Codes Create( UserRecord user, IEnumerable<string>              recoveryCodes ) => Create(user, recoveryCodes.GetInternalArray());
+    [Pure] public static Codes Create( UserRecord user, List<string>                     recoveryCodes ) => Create(user, CollectionsMarshal.AsSpan(recoveryCodes));
+    [Pure] public static Codes Create( UserRecord user, scoped in ReadOnlyMemory<string> recoveryCodes ) => Create(user, recoveryCodes.Span);
 
     [Pure] public static Codes Create( UserRecord user, scoped in ReadOnlySpan<string> recoveryCodes )
     {
@@ -114,9 +111,9 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
 
         return codes;
     }
-     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create(user, Guid.CreateVersion7());
-     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create(user, code.ToBase64());
-     public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => ( code, new RecoveryCodeRecord(code, user) );
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user )              => Create(user, Guid.CreateVersion7());
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, Guid   code ) => Create(user, code.ToBase64());
+    public static (string Code, RecoveryCodeRecord Record) Create( UserRecord user, string code ) => ( code, new RecoveryCodeRecord(code, user) );
 
     [Pure] public static bool IsValid( string code, ref RecoveryCodeRecord record )
     {

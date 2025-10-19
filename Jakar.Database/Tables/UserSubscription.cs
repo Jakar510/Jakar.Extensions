@@ -18,10 +18,9 @@ public interface IUserSubscription : IUniqueID<Guid>
 public abstract record UserSubscription<TSelf>( DateTimeOffset? SubscriptionExpires, RecordID<TSelf> ID, RecordID<UserRecord>? CreatedBy, DateTimeOffset DateCreated, DateTimeOffset? LastModified = null ) : OwnedTableRecord<TSelf>(in CreatedBy, in ID, in DateCreated, in LastModified), IUserSubscription
     where TSelf : UserSubscription<TSelf>, ITableRecord<TSelf>
 {
-    [Pure]
-    public override PostgresParameters ToDynamicParameters()
+    [Pure] public override PostgresParameters<TSelf> ToDynamicParameters()
     {
-        PostgresParameters parameters = base.ToDynamicParameters();
+        PostgresParameters<TSelf> parameters = base.ToDynamicParameters();
         parameters.Add(nameof(SubscriptionExpires), SubscriptionExpires);
         return parameters;
     }

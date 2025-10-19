@@ -54,55 +54,139 @@ public sealed record ColumnCheckMetaData( bool And, params string[] Checks )
 
 
 
-public sealed class ColumnMetaData<TSelf>
-    where TSelf : class, ITableRecord<TSelf>
+[AttributeUsage(AttributeTargets.Property)]
+public sealed class ColumnMetaDataAttribute : Attribute
 {
-    public static readonly ColumnMetaData<TSelf>   AdditionalData = new(nameof(IJsonModel.AdditionalData), PostgresType.Json, ColumnOptions.Nullable);
-    public static readonly ColumnMetaData<TSelf>   CreatedBy      = new(nameof(ICreatedBy.CreatedBy), PostgresType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
-    public static readonly ColumnMetaData <TSelf>  DateCreated    = new(nameof(ICreatedBy.DateCreated), PostgresType.DateTimeOffset, ColumnOptions.Indexed);
-    public static readonly ColumnMetaData <TSelf>  ID             = new(nameof(ICreatedBy.ID), PostgresType.Guid, ColumnOptions.PrimaryKey                      | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
-    public static readonly ColumnMetaData  <TSelf> LastModified   = new(nameof(ILastModified.LastModified), PostgresType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
+    internal static readonly ColumnMetaDataAttribute Empty = new();
+    public                   ColumnOptions?          Options         { get; set; }
+    public                   PostgresType?           DbType          { get; set; }
+    public                   PrecisionInfo?          Length          { get; set; }
+    public                   string?                 ColumnName      { get; set; }
+    public                   string?                 IndexColumnName { get; set; }
+    public                   string?                 VariableName    { get; set; }
+    public                   string?                 Name            { get; set; }
+    public                   string?                 KeyValuePair    { get; set; }
+    public                   string?                 ForeignKey      { get; set; }
 
 
-    public readonly bool                 IsNullable;
-    public readonly bool                 IsPrimaryKey;
-    public readonly ColumnCheckMetaData? Checks;
-    public readonly ColumnOptions        Options;
-    public readonly PrecisionInfo        Length;
-    public readonly PostgresType         DbType;
-    public readonly string               PropertyName;
-    public readonly string               ColumnName;
-    public readonly string?              ForeignKeyName;
-    public readonly string?              IndexColumnName;
-    public readonly string               Name;
-    public readonly string               VariableName;
-    public readonly string               KeyValuePair;
+    public void Deconstruct( out string? columnName, out ColumnOptions options, out PrecisionInfo length, out PostgresType? dbType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name )
+    {
+        columnName      = ColumnName;
+        options         = Options ?? ColumnOptions.None;
+        length          = Length  ?? PrecisionInfo.Default;
+        dbType          = DbType;
+        foreignKeyName  = ForeignKey;
+        indexColumnName = IndexColumnName;
+        variableName    = VariableName;
+        keyValuePair    = KeyValuePair;
+        name            = Name;
+    }
+}
 
+
+
+public sealed class ColumnMetaData<TSelf>( string               propertyName,
+                                           string               columnName,
+                                           PostgresType         dbType,
+                                           ColumnOptions        options         = ColumnOptions.None,
+                                           string?              foreignKeyName  = null,
+                                           string?              indexColumnName = null,
+                                           PrecisionInfo        length          = default,
+                                           ColumnCheckMetaData? checks          = null,
+                                           string?              variableName    = null,
+                                           string?              name            = null,
+                                           string?              keyValuePair    = null )
+    where TSelf : ITableRecord<TSelf>
+{
+    public static readonly ColumnMetaData<TSelf> AdditionalData = new(nameof(IJsonModel.AdditionalData), PostgresType.Json, ColumnOptions.Nullable);
+    public static readonly ColumnMetaData<TSelf> CreatedBy      = new(nameof(ICreatedBy.CreatedBy), PostgresType.Guid, ColumnOptions.Nullable, UserRecord.TABLE_NAME);
+    public static readonly ColumnMetaData<TSelf> DateCreated    = new(nameof(ICreatedBy.DateCreated), PostgresType.DateTimeOffset, ColumnOptions.Indexed);
+    public static readonly ColumnMetaData<TSelf> ID             = new(nameof(ICreatedBy.ID), PostgresType.Guid, ColumnOptions.PrimaryKey                      | ColumnOptions.AlwaysIdentity | ColumnOptions.Unique);
+    public static readonly ColumnMetaData<TSelf> LastModified   = new(nameof(ILastModified.LastModified), PostgresType.DateTimeOffset, ColumnOptions.Nullable | ColumnOptions.Indexed);
+
+
+    public readonly bool                 IsNullable       = options.HasFlagValue(ColumnOptions.Nullable);
+    public readonly bool                 IsPrimaryKey     = options.HasFlagValue(ColumnOptions.PrimaryKey);
+    public readonly ColumnCheckMetaData? Checks           = checks;
+    public readonly ColumnOptions        Options          = options;
+    public readonly PrecisionInfo        Length           = length;
+    public readonly PostgresType         DbType           = dbType;
+    public readonly string               PropertyName     = Validate.ThrowIfNull(propertyName);
+    public readonly string               ColumnName       = Validate.ThrowIfNull(columnName);
+    public readonly string?              ForeignKeyName   = foreignKeyName?.SqlColumnName();
+    public readonly string?              IndexColumnName  = indexColumnName?.SqlColumnName();
+    public readonly string               Name             = name         ?? $" {columnName} ";
+    public readonly string               VariableName     = variableName ?? $" @{columnName} ";
+    public readonly string               KeyValuePair     = keyValuePair ?? $" {columnName} = @{columnName} ";
+    public readonly Func<TSelf, object?> GetValueAccessor = GetTablePropertyValueAccessor(propertyName);
+    public          string               DataType         = dbType.GetPostgresDataType(in length, in options);
 
     public bool IsForeignKey { [MemberNotNullWhen(true, nameof(IndexColumnName))] get => !string.IsNullOrWhiteSpace(IndexColumnName); }
 
 
-    public ColumnMetaData( string propertyName, PostgresType dbType, ColumnOptions options = ColumnOptions.None, string? foreignKeyName = null, string? indexColumnName = null, PrecisionInfo length = default, ColumnCheckMetaData? checks = null )
+    public ColumnMetaData( string propertyName, PostgresType dbType, ColumnOptions options = ColumnOptions.None, string? foreignKeyName = null, string? indexColumnName = null, PrecisionInfo length = default, ColumnCheckMetaData? checks = null, string? variableName = null, string? name = null, string? keyValuePair = null ) : this(propertyName,
+                                                                                                                                                                                                                                                                                                                                           propertyName.SqlColumnName(),
+                                                                                                                                                                                                                                                                                                                                           dbType,
+                                                                                                                                                                                                                                                                                                                                           options,
+                                                                                                                                                                                                                                                                                                                                           foreignKeyName,
+                                                                                                                                                                                                                                                                                                                                           indexColumnName,
+                                                                                                                                                                                                                                                                                                                                           length,
+                                                                                                                                                                                                                                                                                                                                           checks,
+                                                                                                                                                                                                                                                                                                                                           variableName,
+                                                                                                                                                                                                                                                                                                                                           name,
+                                                                                                                                                                                                                                                                                                                                           keyValuePair) { }
+
+
+    public static  string GetColumnName( ColumnMetaData<TSelf>   x )        => x.ColumnName;
+    public static  string GetVariableName( ColumnMetaData<TSelf> x )        => x.VariableName;
+    public static  string GetKeyValuePair( ColumnMetaData<TSelf> x )        => x.KeyValuePair;
+    private static bool   IsDbKey( MemberInfo                    property ) => property.GetCustomAttribute<System.ComponentModel.DataAnnotations.KeyAttribute>() is not null;
+
+
+    public static FrozenDictionary<string, ColumnMetaData<TSelf>> Create()
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(propertyName);
-        IsNullable      = options.HasFlagValue(ColumnOptions.Nullable);
-        IsPrimaryKey    = options.HasFlagValue(ColumnOptions.PrimaryKey);
-        Checks          = checks;
-        Options         = options;
-        Length          = length;
-        DbType          = dbType;
-        PropertyName    = propertyName;
-        ColumnName      = propertyName.SqlColumnName();
-        ForeignKeyName  = foreignKeyName?.SqlColumnName();
-        IndexColumnName = indexColumnName?.SqlColumnName();
-        Name            = $" {ColumnName} ";
-        VariableName    = $" @{ColumnName} ";
-        KeyValuePair    = $" {ColumnName} = @{ColumnName} ";
+        const BindingFlags ATTRIBUTES = BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty;
+
+        PropertyInfo[] properties = typeof(TSelf).GetProperties(ATTRIBUTES)
+                                                 .Where(static x => !x.HasAttribute<DbIgnoreAttribute>())
+                                                 .ToArray();
+
+        if ( properties.Length <= 0 ) { throw new InvalidOperationException($"Type '{typeof(TSelf)}' does not have any public instance properties that are not marked with the '{nameof(DbIgnoreAttribute)}' attribute."); }
+
+        if ( !properties.Any(IsDbKey) ) { throw new InvalidOperationException($"Type '{typeof(TSelf)}' does not have a property with the '{nameof(System.ComponentModel.DataAnnotations.KeyAttribute)}' attribute."); }
+
+        return properties.ToFrozenDictionary(static x => x.Name, Create);
     }
+    public static ColumnMetaData<TSelf> Create( PropertyInfo property ) => Create(property, property.GetCustomAttribute<ColumnMetaDataAttribute>());
+    internal static ColumnMetaData<TSelf> Create( PropertyInfo property, ColumnMetaDataAttribute? attribute )
+    {
+        attribute ??= ColumnMetaDataAttribute.Empty;
+        attribute.Deconstruct(out string? columnName, out ColumnOptions options, out PrecisionInfo length, out PostgresType? postgresType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name);
+        string propertyName = property.Name;
+        columnName ??= propertyName.ToSnakeCase();
+        PostgresType dbType = PostgresTypes.GetType(property.PropertyType, out bool isNullable, out bool isEnum, ref length);
+        name = attribute?.Name ?? columnName;
 
+        if ( postgresType.HasValue ) { dbType = postgresType.Value; }
 
-    public string GetDataType() => DbType.GetPostgresDataType(in Length, in Options);
-    private static Func<TSelf, object?> GetTablePropertyValue( PropertyInfo property )
+        if ( isNullable ) { options |= ColumnOptions.Nullable; }
+
+        if ( IsDbKey(property) ) { options |= ColumnOptions.PrimaryKey; }
+
+        return new ColumnMetaData<TSelf>(propertyName,
+                                         columnName,
+                                         dbType,
+                                         options,
+                                         foreignKeyName,
+                                         indexColumnName,
+                                         length,
+                                         null,
+                                         variableName,
+                                         name,
+                                         keyValuePair);
+    }
+    public static Func<TSelf, object?> GetTablePropertyValueAccessor( string propertyName ) => GetTablePropertyValueAccessor(typeof(TSelf).GetProperty(propertyName) ?? throw new InvalidOperationException($"Property '{propertyName}' not found on type '{typeof(TSelf).FullName}'"));
+    private static Func<TSelf, object?> GetTablePropertyValueAccessor( PropertyInfo property )
     {
         // Validate getter and declaring type once
         MethodInfo? getter = property.GetMethod;
@@ -145,14 +229,15 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
 
     public SqlTable() { }
     public static SqlTable<TSelf> Empty => new();
-    public static SqlTable<TSelf> Create() => Empty.WithColumn(ColumnMetaData<TSelf>.ID)
-                                                   .WithColumn(ColumnMetaData<TSelf>.LastModified)
-                                                   .WithColumn(ColumnMetaData<TSelf>.DateCreated);
+
+    public static SqlTable<TSelf> Default => Empty.WithColumn(ColumnMetaData<TSelf>.ID)
+                                                  .WithColumn(ColumnMetaData<TSelf>.LastModified)
+                                                  .WithColumn(ColumnMetaData<TSelf>.DateCreated);
+
     public void Dispose() => Columns?.Clear();
 
 
     // public SqlTableBuilder<TSelf> WithIndexColumn( string indexColumnName, string columnName ) => WithColumn(ColumnMetaData.Indexed(columnName, indexColumnName));
-
 
     public SqlTable<TSelf> With_CreatedBy()      => WithColumn(ColumnMetaData<TSelf>.CreatedBy);
     public SqlTable<TSelf> With_AdditionalData() => WithColumn(ColumnMetaData<TSelf>.AdditionalData);

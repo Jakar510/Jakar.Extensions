@@ -32,25 +32,24 @@ public sealed record ResxRowRecord( long                    KeyID,
     public static JsonTypeInfo<ResxRowRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.ResxRowRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(KeyID),      length: NAME)
-                                                                                                              .WithColumn<string>(nameof(Key),        length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Neutral),    length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Arabic),     length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Chinese),    length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Czech),      length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Dutch),      length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(English),    length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(French),     length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(German),     length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Japanese),   length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Korean),     length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Polish),     length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Portuguese), length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Spanish),    length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Swedish),    length: MAX_SIZE)
-                                                                                                              .WithColumn<string>(nameof(Thai),       length: MAX_SIZE)
-                                                                                                              .Build();
+    public static FrozenDictionary<string, ColumnMetaData<ResxRowRecord>> PropertyMetaData { get; } = SqlTable<ResxRowRecord>.Default.WithColumn<string>(nameof(KeyID), length: NAME)
+                                                                                                                             .WithColumn<string>(nameof(Key),        length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Neutral),    length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Arabic),     length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Chinese),    length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Czech),      length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Dutch),      length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(English),    length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(French),     length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(German),     length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Japanese),   length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Korean),     length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Polish),     length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Portuguese), length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Spanish),    length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Swedish),    length: MAX_SIZE)
+                                                                                                                             .WithColumn<string>(nameof(Thai),       length: MAX_SIZE)
+                                                                                                                             .Build();
 
 
     public ResxRowRecord( string key, long keyID ) : this(key, keyID, string.Empty) { }

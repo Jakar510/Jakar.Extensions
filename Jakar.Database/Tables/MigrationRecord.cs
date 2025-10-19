@@ -42,13 +42,12 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
 
     public static int PropertyCount => Properties.Length;
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Empty()
-                                                                                                                   .WithColumn<ulong>(nameof(MigrationID))
-                                                                                                                   .WithColumn<string>(nameof(TableID),     length: 256)
-                                                                                                                   .WithColumn<string>(nameof(Description), length: MAX_FIXED)
-                                                                                                                   .WithColumn(ColumnMetaData.DateCreated)
-                                                                                                                   .With_AdditionalData()
-                                                                                                                   .Build();
+    public static FrozenDictionary<string, ColumnMetaData<MigrationRecord>> PropertyMetaData { get; } = SqlTable<MigrationRecord>.Empty.WithColumn<ulong>(nameof(MigrationID))
+                                                                                                                                 .WithColumn<string>(nameof(TableID),     length: 256)
+                                                                                                                                 .WithColumn<string>(nameof(Description), length: MAX_FIXED)
+                                                                                                                                 .WithColumn(ColumnMetaData<MigrationRecord>.DateCreated)
+                                                                                                                                 .With_AdditionalData()
+                                                                                                                                 .Build();
 
     public static string                                   TableName   => TABLE_NAME;
     public        DateTimeOffset                           AppliedOn   { get; init; } = DateTimeOffset.UtcNow;
@@ -176,7 +175,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     }
 
 
-    public PostgresParameters ToDynamicParameters()
+    public object ToDynamicParameters()
     {
         PostgresParameters parameters = new();
         parameters.Add(nameof(MigrationID),    MigrationID);

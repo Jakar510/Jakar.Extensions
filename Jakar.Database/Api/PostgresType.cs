@@ -681,9 +681,9 @@ public static class PostgresTypes
         result = null;
         return false;
     }
-    public static PostgresType GetType<TValue>( out bool isNullable, out bool isEnum, ref PrecisionInfo length )
+    public static PostgresType GetType<TValue>( out bool isNullable, out bool isEnum, ref PrecisionInfo length ) => GetType(typeof(TValue), out isNullable, out isEnum, ref length);
+    public static PostgresType GetType( in Type type, out bool isNullable, out bool isEnum, ref PrecisionInfo length )
     {
-        Type type = typeof(TValue);
         isEnum     = type.IsEnum           || TryGetUnderlyingType(type, out Type? underlyingType) && underlyingType.IsEnum;
         isNullable = type.IsNullableType() || type.IsBuiltInNullableType();
 

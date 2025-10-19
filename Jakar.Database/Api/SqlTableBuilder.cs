@@ -57,12 +57,13 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, ColumnMetaData> columns )
+public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, ColumnMetaData<TSelf>> columns )
     where TSelf : class, ITableRecord<TSelf>
 {
-    private readonly FrozenDictionary<string, ColumnMetaData> __columns = columns;
-    public static    SqlTableBuilder<TSelf>                   Create()                                              => new(TSelf.PropertyMetaData);
-    public static    bool                                     HasValue( ColumnOptions options, ColumnOptions flag ) => ( options & flag ) != 0;
+    private readonly FrozenDictionary<string, ColumnMetaData<TSelf>> __columns = columns;
+
+
+    public static SqlTableBuilder<TSelf> Default => new(TSelf.PropertyMetaData);
 
 
     public string Build()
@@ -74,7 +75,7 @@ public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, Colu
         query.Append(tableName);
         query.Append(" (");
 
-        foreach ( ( string columnName, ColumnMetaData column ) in __columns )
+        foreach ( ( string columnName, ColumnMetaData<TSelf> column ) in __columns )
         {
             ColumnOptions options = column.Options;
 
@@ -89,7 +90,7 @@ public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, Colu
                 continue;
             }
 
-            string dataType = column.GetDataType();
+            string dataType = column.DataType;
 
             query.Append(query[^1] == '('
                              ? "\n    "

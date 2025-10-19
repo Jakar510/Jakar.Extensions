@@ -22,10 +22,9 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     private WeakReference<TValue>? __value;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<TSelf>.Create()
-                                                                                                         .WithForeignKey<TKey>(nameof(KeyID))
-                                                                                                         .WithForeignKey<TValue>(nameof(ValueID))
-                                                                                                         .Build();
+    public static FrozenDictionary<string, ColumnMetaData<TSelf>> PropertyMetaData { get; } = SqlTable<TSelf>.Default.WithForeignKey<TKey>(nameof(KeyID))
+                                                                                                             .WithForeignKey<TValue>(nameof(ValueID))
+                                                                                                             .Build();
 
 
     protected Mapping( RecordID<TKey> key, RecordID<TValue> value ) : this(key, value, RecordID<TSelf>.New(), DateTimeOffset.UtcNow) { }
@@ -36,7 +35,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    public override PostgresParameters ToDynamicParameters()
+    public override object ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(KeyID),   KeyID);
@@ -71,12 +70,12 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
     public static MigrationRecord CreateTable( ulong migrationID )
     {
-        string  tableName = TSelf.TableName.SqlColumnName();
+        string tableName = TSelf.TableName.SqlColumnName();
 
         return MigrationRecord.Create<TSelf>(migrationID,
-                                             $"create { tableName} table",
+                                             $"create {tableName} table",
                                              $"""
-                                              CREATE TABLE IF NOT EXISTS { tableName}
+                                              CREATE TABLE IF NOT EXISTS {tableName}
                                               (  
                                               {nameof(KeyID).SqlColumnName()}          uuid        NOT NULL, 
                                               {nameof(DateCreated).SqlColumnName()}    timestamptz NOT NULL,
@@ -87,9 +86,9 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
                                               FOREIGN KEY({nameof(KeyID).SqlColumnName()}) REFERENCES {TKey.TableName.SqlColumnName()}(id) ON DELETE SET NULL 
                                               FOREIGN KEY({nameof(ValueID).SqlColumnName()}) REFERENCES {TValue.TableName.SqlColumnName()}(id) ON DELETE SET NULL 
                                               );
-                                              
+
                                               CREATE TRIGGER {nameof(MigrationRecord.SetLastModified).SqlColumnName()}
-                                              BEFORE INSERT OR UPDATE ON { tableName}
+                                              BEFORE INSERT OR UPDATE ON {tableName}
                                               FOR EACH ROW
                                               EXECUTE FUNCTION {nameof(MigrationRecord.SetLastModified).SqlColumnName()}();
                                               """);

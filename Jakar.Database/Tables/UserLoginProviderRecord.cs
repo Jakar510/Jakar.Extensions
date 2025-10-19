@@ -27,20 +27,21 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
     public static JsonTypeInfo<UserLoginProviderRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.UserLoginProviderRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(LoginProvider),       length: MAX_FIXED)
-                                                                                                              .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: MAX_FIXED)
-                                                                                                              .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)
-                                                                                                              .WithColumn<string>(nameof(Value),               length: MAX_FIXED)
-                                                                                                              .With_CreatedBy()
-                                                                                                              .Build();
+    public static FrozenDictionary<string, ColumnMetaData<UserLoginProviderRecord>> PropertyMetaData { get; } = SqlTable<UserLoginProviderRecord>.Default.WithColumn<string>(nameof(LoginProvider), length: MAX_FIXED)
+                                                                                                                                                 .WithColumn<string>(nameof(ProviderDisplayName), ColumnOptions.Nullable, length: MAX_FIXED)
+                                                                                                                                                 .WithColumn<string>(nameof(ProviderKey),         length: MAX_FIXED)
+                                                                                                                                                 .WithColumn<string>(nameof(Value),               length: MAX_FIXED)
+                                                                                                                                                 .With_CreatedBy()
+                                                                                                                                                 .Build();
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
     public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
-    [Pure] public override PostgresParameters ToDynamicParameters()
+
+
+    public override PostgresParameters<UserLoginProviderRecord> ToDynamicParameters()
     {
-        PostgresParameters parameters = base.ToDynamicParameters();
+        PostgresParameters<UserLoginProviderRecord> parameters = base.ToDynamicParameters();
         parameters.Add(nameof(LoginProvider),       LoginProvider);
         parameters.Add(nameof(ProviderDisplayName), ProviderDisplayName);
         parameters.Add(nameof(ProviderKey),         ProviderKey);

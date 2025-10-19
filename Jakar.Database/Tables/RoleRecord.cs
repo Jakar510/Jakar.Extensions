@@ -26,13 +26,12 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     [StringLength(RIGHTS)] public UserRights                 Rights        { get; set; } = Rights;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RoleRecord>.Create()
-                                                                                                              .WithColumn<string>(nameof(NameOfRole),       length: NAME)
-                                                                                                              .WithColumn<string>(nameof(NormalizedName),   length: NORMALIZED_NAME)
-                                                                                                              .WithColumn<string>(nameof(ConcurrencyStamp), length: CONCURRENCY_STAMP)
-                                                                                                              .WithColumn<string>(nameof(Rights),           length: RIGHTS)
-                                                                                                              .With_CreatedBy()
-                                                                                                              .Build();
+    public static FrozenDictionary<string, ColumnMetaData<RoleRecord>> PropertyMetaData { get; } = SqlTable<RoleRecord>.Default.WithColumn<string>(nameof(NameOfRole), length: NAME)
+                                                                                                                       .WithColumn<string>(nameof(NormalizedName),   length: NORMALIZED_NAME)
+                                                                                                                       .WithColumn<string>(nameof(ConcurrencyStamp), length: CONCURRENCY_STAMP)
+                                                                                                                       .WithColumn<string>(nameof(Rights),           length: RIGHTS)
+                                                                                                                       .With_CreatedBy()
+                                                                                                                       .Build();
 
 
     public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller) { }
@@ -44,9 +43,9 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     public RoleModel ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create(this);
- 
 
-    [Pure] public override PostgresParameters ToDynamicParameters()
+
+    [Pure] public override object ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(NameOfRole),       NameOfRole);

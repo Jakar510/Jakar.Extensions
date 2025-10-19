@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:38 PM
 
+using Jakar.Database.Resx;
+
+
+
 namespace Jakar.Database;
 
 
@@ -43,15 +47,15 @@ public interface IRecordPair<TSelf> : IDateCreated
 public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
     where TSelf : ITableRecord<TSelf>
 {
-    public abstract static ReadOnlyMemory<PropertyInfo>             ClassProperties  { [Pure] get; }
-    public abstract static int                                      PropertyCount    { get; }
-    public abstract static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
-    public abstract static string                                   TableName        { [Pure] get; }
+    public abstract static ReadOnlyMemory<PropertyInfo>                    ClassProperties  { [Pure] get; }
+    public abstract static int                                             PropertyCount    { get; }
+    public abstract static FrozenDictionary<string, ColumnMetaData<TSelf>> PropertyMetaData { [Pure] get; }
+    public abstract static string                                          TableName        { [Pure] get; }
 
 
-    [Pure] public abstract static MigrationRecord    CreateTable( ulong   migrationID );
-    [Pure] public abstract static TSelf              Create( DbDataReader reader );
-    [Pure] public                 PostgresParameters ToDynamicParameters();
+    [Pure] public abstract static MigrationRecord           CreateTable( ulong   migrationID );
+    [Pure] public abstract static TSelf                     Create( DbDataReader reader );
+    [Pure] public                 PostgresParameters<TSelf> ToDynamicParameters();
 
 
     [Pure] public RecordPair<TSelf> ToPair();
@@ -112,9 +116,9 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
     }
 
 
-    [Pure] public virtual PostgresParameters ToDynamicParameters()
+    [Pure] public virtual PostgresParameters<TSelf> ToDynamicParameters()
     {
-        PostgresParameters parameters = new();
+        PostgresParameters<TSelf> parameters = new();
         parameters.Add(nameof(ID),           ID.Value);
         parameters.Add(nameof(DateCreated),  DateCreated);
         parameters.Add(nameof(LastModified), LastModified);
@@ -173,9 +177,9 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
     }
 
 
-    public override PostgresParameters ToDynamicParameters()
+    public override PostgresParameters<TSelf> ToDynamicParameters()
     {
-        PostgresParameters parameters = base.ToDynamicParameters();
+        PostgresParameters<TSelf> parameters = base.ToDynamicParameters();
         parameters.Add(nameof(CreatedBy), CreatedBy);
         return parameters;
     }

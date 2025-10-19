@@ -30,15 +30,14 @@ public sealed record FileRecord( string?              FileName,
     public static JsonTypeInfo<FileRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.FileRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<FileRecord>.Create()
-                                                                                                              .WithColumn<string?>(nameof(FileName),        ColumnOptions.Nullable, length: 256)
-                                                                                                              .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
-                                                                                                              .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
-                                                                                                              .WithColumn<long>(nameof(FileSize))
-                                                                                                              .WithColumn<string>(nameof(Hash),        length: MAX_FIXED)
-                                                                                                              .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
-                                                                                                              .WithColumn<string>(nameof(FullPath),    length: MAX_FIXED)
-                                                                                                              .Build();
+    public static FrozenDictionary<string, ColumnMetaData<FileRecord>> PropertyMetaData { get; } = SqlTable<FileRecord>.Default.WithColumn<string?>(nameof(FileName), ColumnOptions.Nullable, length: 256)
+                                                                                                                       .WithColumn<string?>(nameof(FileDescription), ColumnOptions.Nullable, length: 1024)
+                                                                                                                       .WithColumn<string?>(nameof(FileType),        ColumnOptions.Nullable, length: 256)
+                                                                                                                       .WithColumn<long>(nameof(FileSize))
+                                                                                                                       .WithColumn<string>(nameof(Hash),        length: MAX_FIXED)
+                                                                                                                       .WithColumn<MimeType?>(nameof(MimeType), ColumnOptions.Nullable)
+                                                                                                                       .WithColumn<string>(nameof(FullPath),    length: MAX_FIXED)
+                                                                                                                       .Build();
 
 
     public FileRecord( IFileData<Guid, FileMetaData>               data, LocalFile?    file                      = null ) : this(data, data.MetaData, file) { }
@@ -115,7 +114,7 @@ public sealed record FileRecord( string?              FileName,
     }
 
 
-    [Pure] public override PostgresParameters ToDynamicParameters()
+    [Pure] public override object ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(FileName),        FileName);

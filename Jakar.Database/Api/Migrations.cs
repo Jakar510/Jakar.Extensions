@@ -12,8 +12,7 @@ public static class Migrations
 
 
     public static string CreateTableSql<TSelf>()
-        where TSelf : class, ITableRecord<TSelf> => SqlTableBuilder<TSelf>.Create()
-                                                                          .Build();
+        where TSelf : class, ITableRecord<TSelf> => SqlTableBuilder<TSelf>.Default.Build();
 
 
     public static IEnumerable<MigrationRecord> BuiltIns( IdGenerator ids )
