@@ -116,8 +116,8 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     }
 
 
-    [Pure] public async ValueTask<UserRecord?>       GetOwner( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
-    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where(connection, transaction, db.Users, this, token);
+    [Pure] public async ValueTask<UserRecord?>       GetOwner( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
+    [Pure] public       IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => UserGroupRecord.Where(connection, transaction, db.Users, this, token);
 
 
     public static bool operator >( GroupRecord  left, GroupRecord right ) => left.CompareTo(right) > 0;

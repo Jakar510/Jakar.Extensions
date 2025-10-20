@@ -4,10 +4,11 @@
 namespace Jakar.Database;
 
 
-public readonly struct SqlCommand( string sql, DynamicParameters? parameters = null, CommandType? commandType = null, CommandFlags flags = CommandFlags.None )
+/*
+public readonly struct SqlCommand( string sql, PostgresParameters? parameters = null, CommandType? commandType = null, CommandFlags flags = CommandFlags.None )
 {
     public readonly string             sql         = sql;
-    public readonly DynamicParameters? parameters  = parameters;
+    public readonly PostgresParameters? parameters  = parameters;
     public readonly CommandType?       commandType = commandType;
     public readonly CommandFlags       flags       = flags;
 
@@ -15,8 +16,8 @@ public readonly struct SqlCommand( string sql, DynamicParameters? parameters = n
     public static implicit operator SqlCommand( string sql ) => new(sql);
 
 
-    [Pure] public Dapper.CommandDefinition ToCommandDefinition( DbTransaction?   transaction, CancellationToken token,       int?              timeout             = null ) => new(sql, parameters, transaction, timeout, commandType, flags, token);
-    [Pure] public Definition               ToCommandDefinition( NpgsqlConnection connection,  DbTransaction?    transaction, CancellationToken token, int? timeout = null ) => new(connection, ToCommandDefinition(transaction, token, timeout));
+    [Pure] public Dapper.CommandDefinition ToCommandDefinition( NpgsqlTransaction?   transaction, CancellationToken token,       int?              timeout             = null ) => new(sql, parameters, transaction, timeout, commandType, flags, token);
+    [Pure] public Definition               ToCommandDefinition( NpgsqlConnection connection,  NpgsqlTransaction?    transaction, CancellationToken token, int? timeout = null ) => new(connection, ToCommandDefinition(transaction, token, timeout));
 
 
 
@@ -34,7 +35,7 @@ public readonly struct SqlCommand( string sql, DynamicParameters? parameters = n
 
 public static class SqlCommandExtensions
 {
-    public static NpgsqlCommand ToNpgsqlCommand( this in SqlCommand sqlCommand, NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
+    public static NpgsqlCommand ToNpgsqlCommand( this in SqlCommand<TSelf> sqlCommand, NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
     {
         if ( connection is null ) { throw new ArgumentNullException(nameof(connection)); }
 
@@ -68,3 +69,4 @@ public static class SqlCommandExtensions
         return command;
     }
 }
+*/

@@ -140,7 +140,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
 
 
-    [Pure] public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
+    [Pure] public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
         PostgresParameters  parameters = new();
         ReadOnlySpan<Claim> span       = claims;
@@ -185,7 +185,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
         static bool hasFlag( ClaimType value, ClaimType flag ) => ( value & flag ) != 0;
     }
-    [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
+    [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
         PostgresParameters parameters = new();
 

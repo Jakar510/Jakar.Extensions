@@ -13,31 +13,31 @@ public partial class DbTable<TSelf>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TSelf>> Random( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetRandom();
+        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom();
 
         try
         {
             CommandDefinition command = _database.GetCommand(in sql, transaction, token);
             return await connection.QueryFirstAsync<TSelf>(command);
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetRandom(user, count);
+        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom(user, count);
         return Where(connection, transaction, sql, token);
     }
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, DbTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetRandom(count);
+        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom(count);
         return Where(connection, transaction, sql, token);
     }
 }

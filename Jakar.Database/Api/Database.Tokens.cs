@@ -39,7 +39,7 @@ public abstract partial class Database
     /// <summary> Only to be used for <see cref="IEmailTokenService"/> </summary>
     /// <exception cref="OutOfRangeException"> </exception>
     public ValueTask<ErrorOrResult<SessionToken>> Authenticate( ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Authenticate, request, types, token);
-    protected virtual async ValueTask<ErrorOrResult<SessionToken>> Authenticate( NpgsqlConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    protected virtual async ValueTask<ErrorOrResult<SessionToken>> Authenticate( NpgsqlConnection connection, NpgsqlTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get(connection, transaction, nameof(UserRecord.UserName), request.UserName, token);
         if ( record is null ) { return Error.Unauthorized(request.UserName); }
@@ -79,7 +79,7 @@ public abstract partial class Database
 
 
     public ValueTask<ErrorOrResult<UserModel>> TryGetUserModel( ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(TryGetUserModel, request, types, token);
-    protected virtual async ValueTask<ErrorOrResult<UserModel>> TryGetUserModel( NpgsqlConnection connection, DbTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    protected virtual async ValueTask<ErrorOrResult<UserModel>> TryGetUserModel( NpgsqlConnection connection, NpgsqlTransaction transaction, ILoginRequest request, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         UserRecord? record = await Users.Get(connection, transaction, nameof(UserRecord.UserName), request.UserName, token);
         if ( record is null ) { return Error.Unauthorized(request.UserName); }
@@ -136,7 +136,7 @@ public abstract partial class Database
 
 
     public ValueTask<SessionToken> GetToken( UserRecord user, ClaimType types = default, CancellationToken token = default ) => this.TryCall(GetToken, user, types, token);
-    public virtual async ValueTask<SessionToken> GetToken( NpgsqlConnection connection, DbTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public virtual async ValueTask<SessionToken> GetToken( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord record, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         Claim[]            claims         = await record.GetUserClaims(connection, transaction, this, types, token);
         DateTimeOffset?    expires        = await GetSubscriptionExpiration(connection, transaction, record, token);
@@ -178,7 +178,7 @@ public abstract partial class Database
 
 
     public ValueTask<ErrorOrResult<SessionToken>> Refresh( string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Refresh, refreshToken, types, token);
-    public virtual async ValueTask<ErrorOrResult<SessionToken>> Refresh( NpgsqlConnection connection, DbTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Refresh( NpgsqlConnection connection, NpgsqlTransaction transaction, string refreshToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin(connection, transaction, refreshToken, types, token);
         if ( !result.TryGetValue(out UserRecord? record, out Errors? error) ) { return error; }
@@ -220,7 +220,7 @@ public abstract partial class Database
 
 
     public ValueTask<ErrorOrResult<SessionToken>> Verify( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(Verify, jsonToken, types, token);
-    public virtual async ValueTask<ErrorOrResult<SessionToken>> Verify( NpgsqlConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Verify( NpgsqlConnection connection, NpgsqlTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         ErrorOrResult<UserRecord> result = await VerifyLogin(connection, transaction, jsonToken, types, token);
 
@@ -231,7 +231,7 @@ public abstract partial class Database
 
 
     public ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default ) => this.TryCall(VerifyLogin, jsonToken, types, token);
-    protected virtual async ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( NpgsqlConnection connection, DbTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
+    protected virtual async ValueTask<ErrorOrResult<UserRecord>> VerifyLogin( NpgsqlConnection connection, NpgsqlTransaction transaction, string jsonToken, ClaimType types = DEFAULT_CLAIM_TYPES, CancellationToken token = default )
     {
         JwtSecurityTokenHandler   handler              = new();
         TokenValidationParameters validationParameters = await GetTokenValidationParameters(token);

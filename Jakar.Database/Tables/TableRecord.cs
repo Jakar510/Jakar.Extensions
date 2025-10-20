@@ -49,13 +49,13 @@ public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
 {
     public abstract static ReadOnlyMemory<PropertyInfo>                    ClassProperties  { [Pure] get; }
     public abstract static int                                             PropertyCount    { get; }
-    public abstract static FrozenDictionary<string, ColumnMetaData<TSelf>> PropertyMetaData { [Pure] get; }
+    public abstract static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
     public abstract static string                                          TableName        { [Pure] get; }
 
 
     [Pure] public abstract static MigrationRecord           CreateTable( ulong   migrationID );
     [Pure] public abstract static TSelf                     Create( DbDataReader reader );
-    [Pure] public                 PostgresParameters<TSelf> ToDynamicParameters();
+    [Pure] public                 PostgresParameters ToDynamicParameters();
 
 
     [Pure] public RecordPair<TSelf> ToPair();
@@ -116,9 +116,9 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
     }
 
 
-    [Pure] public virtual PostgresParameters<TSelf> ToDynamicParameters()
+    [Pure] public virtual PostgresParameters ToDynamicParameters()
     {
-        PostgresParameters<TSelf> parameters = new();
+        PostgresParameters parameters = new();
         parameters.Add(nameof(ID),           ID.Value);
         parameters.Add(nameof(DateCreated),  DateCreated);
         parameters.Add(nameof(LastModified), LastModified);
@@ -177,16 +177,16 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
     }
 
 
-    public override PostgresParameters<TSelf> ToDynamicParameters()
+    public override PostgresParameters ToDynamicParameters()
     {
-        PostgresParameters<TSelf> parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(CreatedBy), CreatedBy);
         return parameters;
     }
 
 
-    public async ValueTask<UserRecord?> GetUser( NpgsqlConnection           connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, true,      GetDynamicParameters(this), token);
-    public async ValueTask<UserRecord?> GetUserWhoCreated( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
+    public async ValueTask<UserRecord?> GetUser( NpgsqlConnection           connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, true,      GetDynamicParameters(this), token);
+    public async ValueTask<UserRecord?> GetUserWhoCreated( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => await db.Users.Get(connection, transaction, CreatedBy, token);
 
 
     public TSelf WithOwner( UserRecord  user )   => (TSelf)( this with { CreatedBy = user.ID } );

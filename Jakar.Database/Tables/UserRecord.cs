@@ -19,45 +19,45 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     public static JsonTypeInfo<UserRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.UserRecord;
 
 
-    public static FrozenDictionary<string, ColumnMetaData<UserRecord>> PropertyMetaData { get; } = SqlTable<UserRecord>.Default.WithColumn<string>(nameof(UserName), ColumnOptions.Indexed, USER_NAME)
-                                                                                                                       .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
-                                                                                                                       .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)
-                                                                                                                       .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, FULL_NAME)
-                                                                                                                       .WithColumn<string>(nameof(Gender),      length: GENDER)
-                                                                                                                       .WithColumn<string>(nameof(Description), length: DESCRIPTION)
-                                                                                                                       .WithColumn<string>(nameof(Company),     length: COMPANY)
-                                                                                                                       .WithColumn<string>(nameof(Department),  length: DEPARTMENT)
-                                                                                                                       .WithColumn<string>(nameof(Title),       length: TITLE)
-                                                                                                                       .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
-                                                                                                                       .WithColumn<string>(nameof(Email), length: EMAIL)
-                                                                                                                       .WithColumn<bool>(nameof(IsEmailConfirmed))
-                                                                                                                       .WithColumn<string>(nameof(PhoneNumber), length: PHONE)
-                                                                                                                       .WithColumn<string>(nameof(Ext),         length: PHONE_EXT)
-                                                                                                                       .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
-                                                                                                                       .WithColumn<string>(nameof(AuthenticatorKey), length: AUTHENTICATOR_KEY)
-                                                                                                                       .WithColumn<bool>(nameof(IsTwoFactorEnabled))
-                                                                                                                       .WithColumn<bool>(nameof(IsActive))
-                                                                                                                       .WithColumn<bool>(nameof(IsDisabled))
-                                                                                                                       .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<int?>(nameof(BadLogins))
-                                                                                                                       .WithColumn<bool>(nameof(IsLocked))
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<string>(nameof(RefreshToken),                    length: REFRESH_TOKEN)
-                                                                                                                       .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
-                                                                                                                       .WithColumn<string>(nameof(SecurityStamp),                   length: SECURITY_STAMP)
-                                                                                                                       .WithColumn<string>(nameof(ConcurrencyStamp),                length: CONCURRENCY_STAMP)
-                                                                                                                       .WithColumn<string>(nameof(Rights),                          length: RIGHTS)
-                                                                                                                       .WithColumn<string>(nameof(PasswordHash),                    length: HASH)
-                                                                                                                       .WithForeignKey<UserRecord>(nameof(EscalateTo))
-                                                                                                                       .WithForeignKey<FileRecord>(nameof(ImageID))
-                                                                                                                       .With_AdditionalData()
-                                                                                                                       .With_CreatedBy()
-                                                                                                                       .Build();
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<UserRecord>.Default.WithColumn<string>(nameof(UserName), ColumnOptions.Indexed, USER_NAME)
+                                                                                                           .WithColumn<string>(nameof(FirstName),   ColumnOptions.Indexed, FIRST_NAME)
+                                                                                                           .WithColumn<string>(nameof(LastName),    ColumnOptions.Indexed, LAST_NAME)
+                                                                                                           .WithColumn<string>(nameof(FullName),    ColumnOptions.Indexed, FULL_NAME)
+                                                                                                           .WithColumn<string>(nameof(Gender),      length: GENDER)
+                                                                                                           .WithColumn<string>(nameof(Description), length: DESCRIPTION)
+                                                                                                           .WithColumn<string>(nameof(Company),     length: COMPANY)
+                                                                                                           .WithColumn<string>(nameof(Department),  length: DEPARTMENT)
+                                                                                                           .WithColumn<string>(nameof(Title),       length: TITLE)
+                                                                                                           .WithColumn<SupportedLanguage>(nameof(PreferredLanguage))
+                                                                                                           .WithColumn<string>(nameof(Email), length: EMAIL)
+                                                                                                           .WithColumn<bool>(nameof(IsEmailConfirmed))
+                                                                                                           .WithColumn<string>(nameof(PhoneNumber), length: PHONE)
+                                                                                                           .WithColumn<string>(nameof(Ext),         length: PHONE_EXT)
+                                                                                                           .WithColumn<bool>(nameof(IsPhoneNumberConfirmed))
+                                                                                                           .WithColumn<string>(nameof(AuthenticatorKey), length: AUTHENTICATOR_KEY)
+                                                                                                           .WithColumn<bool>(nameof(IsTwoFactorEnabled))
+                                                                                                           .WithColumn<bool>(nameof(IsActive))
+                                                                                                           .WithColumn<bool>(nameof(IsDisabled))
+                                                                                                           .WithColumn<Guid?>(nameof(SubscriptionID),                ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(SubscriptionExpires), ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LastBadAttempt),      ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LastLogin),           ColumnOptions.Nullable)
+                                                                                                           .WithColumn<int?>(nameof(BadLogins))
+                                                                                                           .WithColumn<bool>(nameof(IsLocked))
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LockDate),               ColumnOptions.Nullable)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(LockoutEnd),             ColumnOptions.Nullable)
+                                                                                                           .WithColumn<string>(nameof(RefreshToken),                    length: REFRESH_TOKEN)
+                                                                                                           .WithColumn<DateTimeOffset?>(nameof(RefreshTokenExpiryTime), ColumnOptions.Nullable)
+                                                                                                           .WithColumn<Guid?>(nameof(SessionID),                        ColumnOptions.Indexed | ColumnOptions.Nullable)
+                                                                                                           .WithColumn<string>(nameof(SecurityStamp),                   length: SECURITY_STAMP)
+                                                                                                           .WithColumn<string>(nameof(ConcurrencyStamp),                length: CONCURRENCY_STAMP)
+                                                                                                           .WithColumn<string>(nameof(Rights),                          length: RIGHTS)
+                                                                                                           .WithColumn<string>(nameof(PasswordHash),                    length: HASH)
+                                                                                                           .WithForeignKey<UserRecord>(nameof(EscalateTo))
+                                                                                                           .WithForeignKey<FileRecord>(nameof(ImageID))
+                                                                                                           .With_AdditionalData()
+                                                                                                           .With_CreatedBy()
+                                                                                                           .Build();
 
     public static                                                             string             TableName              { get => TABLE_NAME; }
     [ProtectedPersonalData] [StringLength(MAX_SIZE)]          public override JsonObject?        AdditionalData         { get => _additionalData; set => _additionalData = value; }
@@ -192,9 +192,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
 
 
-    public override PostgresParameters<UserRecord> ToDynamicParameters()
+    public override PostgresParameters ToDynamicParameters()
     {
-        PostgresParameters<UserRecord> parameters = base.ToDynamicParameters();
+        PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(UserName),               UserName);
         parameters.Add(nameof(FirstName),              FirstName);
         parameters.Add(nameof(LastName),               LastName);
@@ -434,7 +434,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     public static PostgresParameters GetDynamicParameters( IUserData data )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(Email),     data.Email);
         parameters.Add(nameof(FirstName), data.FirstName);
         parameters.Add(nameof(LastName),  data.LastName);
@@ -443,19 +443,19 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
     public static PostgresParameters GetDynamicParameters( ILoginRequest request )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(UserName), request.UserName);
         return parameters;
     }
     public static PostgresParameters GetDynamicParameters( string userName )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(UserName), userName);
         return parameters;
     }
     public static PostgresParameters GetDynamicParameters( RecordID<UserRecord> userID )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
         parameters.Add(nameof(ID), userID);
         return parameters;
     }
@@ -494,7 +494,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public ValueTask<bool> RedeemCode( Database db, string code, CancellationToken token ) => db.TryCall(RedeemCode, db, code, token);
-    public async ValueTask<bool> RedeemCode( NpgsqlConnection connection, DbTransaction transaction, Database db, string code, CancellationToken token )
+    public async ValueTask<bool> RedeemCode( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, string code, CancellationToken token )
     {
         await foreach ( UserRecoveryCodeRecord mapping in UserRecoveryCodeRecord.Where(connection, transaction, db.UserRecoveryCodes, this, token) )
         {
@@ -514,7 +514,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public ValueTask<string[]> ReplaceCodes( Database db, int count = 10, CancellationToken token = default ) => db.TryCall(ReplaceCodes, db, count, token);
-    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, DbTransaction transaction, Database db, int count = 10, CancellationToken token = default )
+    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, int count = 10, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord>            old        = Codes(connection, transaction, db, token);
         IReadOnlyDictionary<string, RecoveryCodeRecord> dictionary = RecoveryCodeRecord.Create(this, count);
@@ -528,7 +528,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public ValueTask<string[]> ReplaceCodes( Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default ) => db.TryCall(ReplaceCodes, db, recoveryCodes, token);
-    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, DbTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
+    public async ValueTask<string[]> ReplaceCodes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, IEnumerable<string> recoveryCodes, CancellationToken token = default )
     {
         IAsyncEnumerable<RecoveryCodeRecord> old        = Codes(connection, transaction, db, token);
         RecoveryCodeRecord.Codes             dictionary = RecoveryCodeRecord.Create(this, recoveryCodes);
@@ -542,7 +542,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
 
     public IAsyncEnumerable<RecoveryCodeRecord> Codes( Database         db,         CancellationToken token )                                             => db.TryCall(Codes, db, token);
-    public IAsyncEnumerable<RecoveryCodeRecord> Codes( NpgsqlConnection connection, DbTransaction     transaction, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where(connection, transaction, db.RecoveryCodes, this, token);
+    public IAsyncEnumerable<RecoveryCodeRecord> Codes( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, CancellationToken token ) => UserRecoveryCodeRecord.Where(connection, transaction, db.RecoveryCodes, this, token);
 
 
     public UserRecord WithRights<TEnum>( scoped in UserRights rights )
@@ -551,7 +551,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         Rights.Value = rights.Value;
         return this;
     }
-    public async ValueTask<UserModel> GetRights( NpgsqlConnection connection, DbTransaction transaction, Database db, CancellationToken token )
+    public async ValueTask<UserModel> GetRights( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, CancellationToken token )
     {
         UserModel model = new(this);
         await foreach ( GroupRecord record in GetGroups(connection, transaction, db, token) ) { await model.Groups.AddAsync(record.ToGroupModel(), token); }
@@ -634,10 +634,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         where TAddress : class, IAddress<TAddress, Guid>, IEquatable<TAddress> => TSelf.Create(this);
 
 
-    public ValueTask<UserModel> ToUserModel( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>(connection, transaction, db, token);
-    public ValueTask<TSelf> ToUserModel<TSelf>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    public ValueTask<UserModel> ToUserModel( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => ToUserModel<UserModel>(connection, transaction, db, token);
+    public ValueTask<TSelf> ToUserModel<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token )
         where TSelf : UserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, ICreateUserModel<TSelf, Guid, UserAddress, GroupModel, RoleModel>, IJsonModel<TSelf>, new() => ToUserModel<TSelf, UserAddress, GroupModel, RoleModel>(connection, transaction, db, token);
-    public async ValueTask<TSelf> ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token )
+    public async ValueTask<TSelf> ToUserModel<TSelf, TAddress, TGroupModel, TRoleModel>( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token )
         where TSelf : class, IUserData<Guid, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, Guid, TAddress, TGroupModel, TRoleModel>, new()
         where TGroupModel : class, IGroupModel<TGroupModel, Guid>, IEquatable<TGroupModel>
         where TRoleModel : class, IRoleModel<TRoleModel, Guid>, IEquatable<TRoleModel>
@@ -850,7 +850,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Owners
 
-    public async ValueTask<ErrorOrResult<UserRecord>> GetBoss( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) =>
+    public async ValueTask<ErrorOrResult<UserRecord>> GetBoss( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) =>
         EscalateTo.HasValue
             ? await db.Users.Get(connection, transaction, EscalateTo.Value, token)
             : Error.Create(Status.Gone, StringTags.Empty);
@@ -1046,10 +1046,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Roles
 
-    public async ValueTask<bool>                 TryAdd( NpgsqlConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd(connection, transaction, db.UserAddresses, this, value, token);
-    public       IAsyncEnumerable<AddressRecord> GetAddresses( NpgsqlConnection connection, DbTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where(connection, transaction, db.Addresses, this, token);
-    public async ValueTask<bool>                 HasAddress( NpgsqlConnection   connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists(connection, transaction, db.UserAddresses, this, value, token);
-    public async ValueTask                       Remove( NpgsqlConnection       connection, DbTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete(connection, transaction, db.UserAddresses, this, value, token);
+    public async ValueTask<bool>                 TryAdd( NpgsqlConnection       connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.TryAdd(connection, transaction, db.UserAddresses, this, value, token);
+    public       IAsyncEnumerable<AddressRecord> GetAddresses( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, [EnumeratorCancellation] CancellationToken token = default )                => UserAddressRecord.Where(connection, transaction, db.Addresses, this, token);
+    public async ValueTask<bool>                 HasAddress( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Exists(connection, transaction, db.UserAddresses, this, value, token);
+    public async ValueTask                       Remove( NpgsqlConnection       connection, NpgsqlTransaction  transaction, Database db, AddressRecord                              value, CancellationToken token ) => await UserAddressRecord.Delete(connection, transaction, db.UserAddresses, this, value, token);
 
     #endregion
 
@@ -1057,10 +1057,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Roles
 
-    public async ValueTask<bool>              TryAdd( NpgsqlConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd(connection, transaction, db.UserRoles, this, value, token);
-    public       IAsyncEnumerable<RoleRecord> GetRoles( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where(connection, transaction, db.Roles, this, token);
-    public async ValueTask<bool>              HasRole( NpgsqlConnection  connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists(connection, transaction, db.UserRoles, this, value, token);
-    public async ValueTask                    Remove( NpgsqlConnection   connection, DbTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete(connection, transaction, db.UserRoles, this, value, token);
+    public async ValueTask<bool>              TryAdd( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.TryAdd(connection, transaction, db.UserRoles, this, value, token);
+    public       IAsyncEnumerable<RoleRecord> GetRoles( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token = default )                => UserRoleRecord.Where(connection, transaction, db.Roles, this, token);
+    public async ValueTask<bool>              HasRole( NpgsqlConnection  connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Exists(connection, transaction, db.UserRoles, this, value, token);
+    public async ValueTask                    Remove( NpgsqlConnection   connection, NpgsqlTransaction  transaction, Database db, RoleRecord        value, CancellationToken token ) => await UserRoleRecord.Delete(connection, transaction, db.UserRoles, this, value, token);
 
     #endregion
 
@@ -1068,10 +1068,10 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Groups
 
-    public async ValueTask<bool>               TryAdd( NpgsqlConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd(connection, transaction, db.UserGroups, this, value, token);
-    public       IAsyncEnumerable<GroupRecord> GetGroups( NpgsqlConnection     connection, DbTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where(connection, transaction, db.Groups, this, token);
-    public async ValueTask<bool>               IsPartOfGroup( NpgsqlConnection connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists(connection, transaction, db.UserGroups, this, value, token);
-    public async ValueTask                     Remove( NpgsqlConnection        connection, DbTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete(connection, transaction, db.UserGroups, this, value, token);
+    public async ValueTask<bool>               TryAdd( NpgsqlConnection        connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.TryAdd(connection, transaction, db.UserGroups, this, value, token);
+    public       IAsyncEnumerable<GroupRecord> GetGroups( NpgsqlConnection     connection, NpgsqlTransaction? transaction, Database db, CancellationToken token = default )                => UserGroupRecord.Where(connection, transaction, db.Groups, this, token);
+    public async ValueTask<bool>               IsPartOfGroup( NpgsqlConnection connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Exists(connection, transaction, db.UserGroups, this, value, token);
+    public async ValueTask                     Remove( NpgsqlConnection        connection, NpgsqlTransaction  transaction, Database db, GroupRecord       value, CancellationToken token ) => await UserGroupRecord.Delete(connection, transaction, db.UserGroups, this, value, token);
 
     #endregion
 
@@ -1079,11 +1079,11 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     #region Claims
 
-    public async  ValueTask<Claim[]>                   GetUserClaims( NpgsqlConnection connection, DbTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => ( await ToUserModel(connection, transaction, db, token) ).GetClaims(types);
-    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, DbTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims(connection, transaction, db, principal.Claims.ToArray(), types, token);
-    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
+    public async  ValueTask<Claim[]>                   GetUserClaims( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, ClaimType       types,     CancellationToken token )                          => ( await ToUserModel(connection, transaction, db, token) ).GetClaims(types);
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction  transaction, Database db, ClaimsPrincipal principal, ClaimType         types, CancellationToken token ) => TryFromClaims(connection, transaction, db, principal.Claims.ToArray(), types, token);
+    public static ValueTask<ErrorOrResult<UserRecord>> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, scoped in ReadOnlySpan<Claim> claims, in ClaimType types, CancellationToken token )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
 
         parameters.Add(nameof(ID),
                        Guid.Parse(claims.Single(static ( ref readonly Claim x ) => x.IsUserID())
@@ -1140,9 +1140,9 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
         return db.Users.Get(connection, transaction, true, parameters, token);
     }
-    public static async IAsyncEnumerable<UserRecord> TryFromClaims( NpgsqlConnection connection, DbTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
+    public static async IAsyncEnumerable<UserRecord> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters<UserRecord> parameters = new();
 
         switch ( claim.Type )
         {

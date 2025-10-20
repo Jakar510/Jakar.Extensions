@@ -21,21 +21,15 @@ public interface IConnectableDb : IDbTable
 public interface IConnectableDbRoot : IConnectableDb
 {
     public ref readonly DbOptions Options { get; }
-    public IAsyncEnumerable<TValue> Where<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TValue : class, ITableRecord<TValue>, IDateCreated;
-    public IAsyncEnumerable<TValue> WhereValue<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TValue : struct;
+    public IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters? postgresParameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>, IDateCreated;
+    public IAsyncEnumerable<TValue> WhereValue<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TValue : struct
+        where TSelf : ITableRecord<TSelf>;
 
-
-    [Pure]
-    public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where TValue : class, IDapperSqlCommand;
-    [Pure] public CommandDefinition     GetCommand( ref readonly SqlCommand sql, DbTransaction?   transaction, CancellationToken token );
-    [Pure] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection,  DbTransaction?    transaction, CancellationToken token );
-
-
-    public ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( NpgsqlConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
-        where TValue : class, IDapperSqlCommand;
-    public ValueTask<DbDataReader> ExecuteReaderAsync( NpgsqlConnection      connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token );
-    public ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition );
+    
+    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( SqlCommand<TSelf> definition )
+        where TSelf : ITableRecord<TSelf>;
+    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> sql, CancellationToken token )
+        where TSelf : ITableRecord<TSelf>;
 }

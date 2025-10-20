@@ -57,10 +57,10 @@ namespace Jakar.Database.DbMigrations;
 
 
 
-public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, ColumnMetaData<TSelf>> columns )
+public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, ColumnMetaData> columns )
     where TSelf : class, ITableRecord<TSelf>
 {
-    private readonly FrozenDictionary<string, ColumnMetaData<TSelf>> __columns = columns;
+    private readonly FrozenDictionary<string, ColumnMetaData> __columns = columns;
 
 
     public static SqlTableBuilder<TSelf> Default => new(TSelf.PropertyMetaData);
@@ -75,7 +75,7 @@ public readonly ref struct SqlTableBuilder<TSelf>( FrozenDictionary<string, Colu
         query.Append(tableName);
         query.Append(" (");
 
-        foreach ( ( string columnName, ColumnMetaData<TSelf> column ) in __columns )
+        foreach ( ( string columnName, ColumnMetaData column ) in __columns )
         {
             ColumnOptions options = column.Options;
 

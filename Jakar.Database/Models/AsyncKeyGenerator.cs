@@ -26,7 +26,7 @@ public sealed class AsyncKeyGenerator<TSelf>( DbTable<TSelf> table, Cancellation
 
 
     public ValueTask<bool> MoveNextAsync() => __table.Call(MoveNextAsync, __token);
-    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
+    public async ValueTask<bool> MoveNextAsync( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token )
     {
         if ( token.IsCancellationRequested )
         {

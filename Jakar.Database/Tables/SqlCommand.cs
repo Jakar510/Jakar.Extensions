@@ -8,15 +8,36 @@ using ZLinq.Linq;
 namespace Jakar.Database;
 
 
-[DefaultMember(nameof(Empty))]
-public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<PostgresParameters<TSelf>>
-    where TSelf : ITableRecord<TSelf>
+public static class PostgresParams
 {
-    public static readonly PostgresParameters<TSelf>     Empty   = new(0);
-    private readonly       List<NpgsqlParameter>         _buffer = new(capacity);
-    public                 int                           Count    => _buffer.Count;
-    public                 int                           Capacity => _buffer.Capacity;
-    public                 ReadOnlySpan<NpgsqlParameter> Values   => CollectionsMarshal.AsSpan(_buffer);
+    public static readonly ConcurrentDictionary<string, string> NameSnakeCaseCache = new(StringComparer.InvariantCultureIgnoreCase)
+                                                                                     {
+                                                                                         [nameof(MimeType)]            = "mime_types",
+                                                                                         [nameof(SupportedLanguage)]   = "languages",
+                                                                                         [nameof(ProgrammingLanguage)] = "programming_languages",
+                                                                                         [nameof(SubscriptionStatus)]  = "subscription_status",
+                                                                                         [nameof(DeviceCategory)]      = "device_categories",
+                                                                                         [nameof(DevicePlatform)]      = "device_platforms",
+                                                                                         [nameof(DeviceTypes)]         = "device_types",
+                                                                                         [nameof(DistanceUnit)]        = "distance_units",
+                                                                                         [nameof(Status)]              = "statuses",
+                                                                                         [nameof(NpgsqlDbType)]        = "db_types",
+                                                                                     };
+    public static  string SqlColumnName( this string name ) => NameSnakeCaseCache.GetOrAdd(name, ToSnakeCase);
+    private static string ToSnakeCase( string        x )    => x.ToSnakeCase();
+}
+
+
+
+[DefaultMember(nameof(Empty))]
+public readonly struct PostgresParameters( FrozenDictionary<string, ColumnMetaData> dictionary ) : IEquatable<PostgresParameters>
+{
+    public static readonly PostgresParameters                       Empty        = new(FrozenDictionary<string, ColumnMetaData>.Empty);
+    private readonly       FrozenDictionary<string, ColumnMetaData> __dictionary = dictionary;
+    private readonly       List<NpgsqlParameter>                    _buffer      = new(dictionary.Count + 2);
+    public                 int                                      Count    => _buffer.Count;
+    public                 int                                      Capacity => _buffer.Capacity;
+    public                 ReadOnlySpan<NpgsqlParameter>            Values   => CollectionsMarshal.AsSpan(_buffer);
 
 
     public ValueEnumerable<Select<FromSpan<NpgsqlParameter>, NpgsqlParameter, string>, string> ParameterNames
@@ -27,9 +48,82 @@ public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<Po
             return values.Select(static x => x.ParameterName);
         }
     }
+    public StringBuilder Parameters
+    {
+        get
+        {
+            StringBuilder sb = new();
+
+            int count = Count;
+            int index = 0;
+
+            foreach ( string pair in ParameterNames.Select(GetColumnName) )
+            {
+                if ( index++ < count - 1 )
+                {
+                    sb.Append(pair)
+                      .Append(", ");
+                }
+                else { sb.Append(pair); }
+            }
+
+            return sb;
+        }
+    }
+    public StringBuilder ColumnNames
+    {
+        get
+        {
+            const string  SPACER = ",\n      \n";
+            int           length = __dictionary.Values.Sum(static x => x.ColumnName.Length) + ( __dictionary.Count - 1 ) * SPACER.Length;
+            StringBuilder sb     = new(length);
+            int           count  = Count;
+            int           index  = 0;
+
+            foreach ( string pair in ParameterNames.Select(GetColumnName) )
+            {
+                if ( index++ < count - 1 )
+                {
+                    sb.Append(pair)
+                      .Append(SPACER);
+                }
+                else { sb.Append(pair); }
+            }
+
+            return sb;
+        }
+    }
+    public StringBuilder VariableNames
+    {
+        get
+        {
+            const string  SPACER = ",\n      ";
+            int           length = __dictionary.Values.Sum(static x => x.VariableName.Length) + ( __dictionary.Count - 1 ) * SPACER.Length;
+            StringBuilder sb     = new(length);
+            int           count  = Count;
+            int           index  = 0;
+
+            foreach ( string pair in ParameterNames.Select(GetVariableName) )
+            {
+                if ( index++ < count - 1 )
+                {
+                    sb.Append(pair)
+                      .Append(SPACER);
+                }
+                else { sb.Append(pair); }
+            }
+
+            return sb;
+        }
+    }
 
 
-    public PostgresParameters<TSelf> With( PostgresParameters<TSelf> parameters )
+    [Obsolete("For serialization only", true)] public PostgresParameters() : this(FrozenDictionary<string, ColumnMetaData>.Empty) => throw new NotSupportedException();
+    public static PostgresParameters Create<TSelf>()
+        where TSelf : ITableRecord<TSelf> => new(TSelf.PropertyMetaData);
+
+
+    public PostgresParameters With( PostgresParameters parameters )
     {
         _buffer.Add(parameters.Values);
         return this;
@@ -37,7 +131,7 @@ public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<Po
 
 
     /*
-    public PostgresParameters<TSelf> Add<T>( T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
+    public PostgresParameters Add<T>( T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
     {
         PrecisionInfo precision = PrecisionInfo.Default;
         PostgresType  pgType    = PostgresTypes.GetType<T>(out bool isNullable, out bool isEnum, ref precision);
@@ -53,12 +147,12 @@ public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<Po
         return Add(parameter);
     }
     */
-    public PostgresParameters<TSelf> Add<T>( string propertyName, T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
+    public PostgresParameters Add<T>( string propertyName, T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
     {
-        ColumnMetaData<TSelf> meta = TSelf.PropertyMetaData[propertyName];
+        ColumnMetaData meta = __dictionary[propertyName];
         return Add(meta, value, parameterName, direction, sourceVersion);
     }
-    public PostgresParameters<TSelf> Add<T>( ColumnMetaData<TSelf> meta, T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
+    public PostgresParameters Add<T>( ColumnMetaData meta, T value, [CallerArgumentExpression(nameof(value))] string parameterName = "", ParameterDirection direction = ParameterDirection.Input, DataRowVersion sourceVersion = DataRowVersion.Default )
     {
         NpgsqlParameter parameter = new(parameterName, meta.DbType.ToNpgsqlDbType())
                                     {
@@ -71,37 +165,18 @@ public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<Po
 
         return Add(parameter);
     }
-    [MethodImpl(MethodImplOptions.AggressiveInlining)] public PostgresParameters<TSelf> Add( NpgsqlParameter parameter )
+    [MethodImpl(MethodImplOptions.AggressiveInlining)] public PostgresParameters Add( NpgsqlParameter parameter )
     {
         _buffer.Add(parameter);
         return this;
     }
 
 
-    public override int GetHashCode() => HashCode.Combine(_buffer);
-    public ulong GetHash64()
-    {
-        ReadOnlySpan<string> names = ParameterNames.ToArray();
-        return Hashes.Hash(in names);
-    }
-    public UInt128 GetHash128()
-    {
-        ReadOnlySpan<string> names = ParameterNames.ToArray();
-        return Hashes.Hash128(in names);
-    }
-
-
-    public          bool Equals( PostgresParameters<TSelf>      other )                                 => _buffer.Equals(other._buffer);
-    public override bool Equals( object?                        obj )                                   => obj is PostgresParameters<TSelf> other && Equals(other);
-    public static   bool operator ==( PostgresParameters<TSelf> left, PostgresParameters<TSelf> right ) => left.Equals(right);
-    public static   bool operator !=( PostgresParameters<TSelf> left, PostgresParameters<TSelf> right ) => !left.Equals(right);
-
-
     public StringBuilder KeyValuePairs( bool matchAll )
     {
         string        match  = matchAll.GetAndOr();
         int           count  = Count;
-        int           length = TSelf.PropertyMetaData.Values.Sum(static x => x.KeyValuePair.Length) + ( TSelf.PropertyMetaData.Count - 1 ) * match.Length;
+        int           length = __dictionary.Values.Sum(static x => x.KeyValuePair.Length) + ( __dictionary.Count - 1 ) * match.Length;
         StringBuilder sb     = new(length);
         int           index  = 0;
 
@@ -117,61 +192,42 @@ public readonly struct PostgresParameters<TSelf>( int capacity ) : IEquatable<Po
 
         return sb;
     }
-    public StringBuilder ColumnNames()
+
+
+    private string GetColumnName( string   propertyName ) => __dictionary[propertyName].ColumnName;
+    private string GetVariableName( string propertyName ) => __dictionary[propertyName].VariableName;
+    private string GetKeyValuePair( string propertyName ) => __dictionary[propertyName].KeyValuePair;
+
+
+    public override int GetHashCode() => HashCode.Combine(_buffer);
+    public ulong GetHash64()
     {
-        const string  SPACER = ",\n      \n";
-        int           length = TSelf.PropertyMetaData.Values.Sum(static x => x.ColumnName.Length) + ( TSelf.PropertyMetaData.Count - 1 ) * SPACER.Length;
-        StringBuilder sb     = new(length);
-        int           count  = Count;
-        int           index  = 0;
-
-        foreach ( string pair in ParameterNames.Select(GetColumnName) )
-        {
-            if ( index++ < count - 1 )
-            {
-                sb.Append(pair)
-                  .Append(SPACER);
-            }
-            else { sb.Append(pair); }
-        }
-
-        return sb;
+        ReadOnlySpan<string> names = ParameterNames.ToArray();
+        return Hashes.Hash(in names);
     }
-    public StringBuilder VariableNames()
+    public UInt128 GetHash128()
     {
-        const string  SPACER = ",\n      ";
-        int           length = TSelf.PropertyMetaData.Values.Sum(static x => x.VariableName.Length) + ( TSelf.PropertyMetaData.Count - 1 ) * SPACER.Length;
-        StringBuilder sb     = new(length);
-        int           count  = Count;
-        int           index  = 0;
-
-        foreach ( string pair in ParameterNames.Select(GetVariableName) )
-        {
-            if ( index++ < count - 1 )
-            {
-                sb.Append(pair)
-                  .Append(SPACER);
-            }
-            else { sb.Append(pair); }
-        }
-
-        return sb;
+        ReadOnlySpan<string> names = ParameterNames.ToArray();
+        return Hashes.Hash128(in names);
     }
-    private static string GetColumnName( string   propertyName ) => TSelf.PropertyMetaData[propertyName].ColumnName;
-    private static string GetVariableName( string propertyName ) => TSelf.PropertyMetaData[propertyName].VariableName;
-    private static string GetKeyValuePair( string propertyName ) => TSelf.PropertyMetaData[propertyName].KeyValuePair;
+
+
+    public          bool Equals( PostgresParameters      other )                          => _buffer.Equals(other._buffer);
+    public override bool Equals( object?                 obj )                            => obj is PostgresParameters other && Equals(other);
+    public static   bool operator ==( PostgresParameters left, PostgresParameters right ) => left.Equals(right);
+    public static   bool operator !=( PostgresParameters left, PostgresParameters right ) => !left.Equals(right);
 }
 
 
 
-public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSelf> parameters = default, CommandType? commandType = null, CommandFlags flags = CommandFlags.None ) : IEquatable<SqlCommand<TSelf>>
+public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters parameters = default, CommandType? commandType = null, CommandFlags flags = CommandFlags.None ) : IEquatable<SqlCommand<TSelf>>
     where TSelf : ITableRecord<TSelf>
 {
-    public readonly                 string                    sql         = sql;
-    public readonly                 PostgresParameters<TSelf> parameters  = parameters;
-    public readonly                 CommandType?              commandType = commandType;
-    public readonly                 CommandFlags              flags       = flags;
-    public static implicit operator SqlCommand<TSelf>( string sql ) => new(sql, in PostgresParameters<TSelf>.Empty);
+    public readonly                 string             SQL         = sql;
+    public readonly                 PostgresParameters Parameters  = parameters;
+    public readonly                 CommandType?       CommandType = commandType;
+    public readonly                 CommandFlags       Flags       = flags;
+    public static implicit operator SqlCommand<TSelf>( string sql ) => new(sql, in PostgresParameters.Empty);
 
 
     public NpgsqlCommand ToNpgsqlCommand( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
@@ -181,13 +237,13 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
         NpgsqlCommand command = new NpgsqlCommand
                                 {
                                     Connection     = connection,
-                                    CommandText    = sql,
-                                    CommandType    = commandType ?? CommandType.Text,
+                                    CommandText    = SQL,
+                                    CommandType    = CommandType ?? System.Data.CommandType.Text,
                                     Transaction    = transaction,
                                     CommandTimeout = 30
                                 };
 
-        command.Parameters.Add(parameters.Values);
+        command.Parameters.Add(Parameters.Values);
         return command;
     }
     public NpgsqlDataReader Execute( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
@@ -202,15 +258,15 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     }
 
 
-    public          bool Equals( SqlCommand<TSelf> other ) => string.Equals(sql, other.sql, StringComparison.InvariantCultureIgnoreCase) && parameters.Equals(other.parameters) && commandType == other.commandType && flags == other.flags;
+    public          bool Equals( SqlCommand<TSelf> other ) => string.Equals(SQL, other.SQL, StringComparison.InvariantCultureIgnoreCase) && Parameters.Equals(other.Parameters) && CommandType == other.CommandType && Flags == other.Flags;
     public override bool Equals( object?           obj )   => obj is SqlCommand<TSelf> other                                             && Equals(other);
     public override int GetHashCode()
     {
         HashCode hashCode = new HashCode();
-        hashCode.Add(sql, StringComparer.InvariantCultureIgnoreCase);
-        hashCode.Add(parameters);
-        hashCode.Add(commandType);
-        hashCode.Add((int)flags);
+        hashCode.Add(SQL, StringComparer.InvariantCultureIgnoreCase);
+        hashCode.Add(Parameters);
+        hashCode.Add(CommandType);
+        hashCode.Add((int)Flags);
         return hashCode.ToHashCode();
     }
     public static bool operator ==( SqlCommand<TSelf> left, SqlCommand<TSelf> right ) => left.Equals(right);
@@ -223,7 +279,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     public const string ID           = "id";
 
 
-    public static IEnumerable<string> KeyValuePairs => TSelf.PropertyMetaData.Values.Select(ColumnMetaData<TSelf>.GetKeyValuePair);
+    public static IEnumerable<string> KeyValuePairs => TSelf.PropertyMetaData.Values.Select(ColumnMetaData.GetKeyValuePair);
 
 
     public static SqlCommand<TSelf> GetRandom() => $"""
@@ -255,7 +311,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     }
 
 
-    public static SqlCommand<TSelf> WherePaged( bool matchAll, PostgresParameters<TSelf> parameters, int start, int count )
+    public static SqlCommand<TSelf> WherePaged( bool matchAll, PostgresParameters parameters, int start, int count )
     {
         string sql = $"""
                         SELECT * FROM {TSelf.TableName}
@@ -290,8 +346,8 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     public static SqlCommand<TSelf> Where<TValue>( string columnName, TValue? value )
     {
         string sql = $"SELECT * FROM {TSelf.TableName} WHERE {columnName} = @{nameof(value)};";
-
-        PostgresParameters<TSelf> parameters = new();
+        
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(value), value);
 
         return new SqlCommand<TSelf>(sql, parameters);
@@ -316,7 +372,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
 
         return new SqlCommand<TSelf>(sql);
     }
-    public static SqlCommand<TSelf> Get( bool matchAll, PostgresParameters<TSelf> parameters )
+    public static SqlCommand<TSelf> Get( bool matchAll, PostgresParameters parameters )
     {
         string sql = $"""
                       SELECT * FROM {TSelf.TableName}
@@ -343,7 +399,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
                                                       SELECT {ID}, {DATE_CREATED} FROM {TSelf.TableName} 
                                                       ORDER BY {DATE_CREATED} DESC;
                                                       """;
-    public static SqlCommand<TSelf> GetExists( bool matchAll, PostgresParameters<TSelf> parameters )
+    public static SqlCommand<TSelf> GetExists( bool matchAll, PostgresParameters parameters )
     {
         string sql = $"""
                       EXISTS( 
@@ -355,7 +411,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     }
 
 
-    public static SqlCommand<TSelf> GetDelete( bool matchAll, PostgresParameters<TSelf> parameters )
+    public static SqlCommand<TSelf> GetDelete( bool matchAll, PostgresParameters parameters )
     {
         string sql = $"""
                       DELETE FROM {TSelf.TableName} 
@@ -405,16 +461,16 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
     }
     public static SqlCommand<TSelf> GetInsert( TSelf record )
     {
-        PostgresParameters<TSelf> parameters = record.ToDynamicParameters();
+        PostgresParameters parameters = record.ToDynamicParameters();
 
         string sql = $"""
                       INSERT INTO {TSelf.TableName} 
                       (
-                        {parameters.ColumnNames()}
+                        {parameters.ColumnNames}
                       )
                       values
                       (
-                        {parameters.VariableNames()}
+                        {parameters.VariableNames}
                       ) 
                       RETURNING {ID};
                       """;
@@ -427,21 +483,21 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
                                                                       WHERE {ID} = @{ID};
                                                                       """,
                                                                      record.ToDynamicParameters());
-    public static SqlCommand<TSelf> GetTryInsert( TSelf record, bool matchAll, PostgresParameters<TSelf> parameters )
+    public static SqlCommand<TSelf> GetTryInsert( TSelf record, bool matchAll, PostgresParameters parameters )
     {
-        PostgresParameters<TSelf> param = record.ToDynamicParameters()
-                                                .With(parameters);
+        PostgresParameters param = record.ToDynamicParameters()
+                                         .With(parameters);
 
         string sql = $"""
                       IF NOT EXISTS(SELECT * FROM {TSelf.TableName} WHERE {parameters.KeyValuePairs(matchAll)})
                       BEGIN
                       INSERT INTO {TSelf.TableName}
                       (
-                        {parameters.ColumnNames()}
+                        {parameters.ColumnNames}
                       )
                       values
                       (
-                        {parameters.VariableNames()}
+                        {parameters.VariableNames}
                       ) 
                       RETURNING {ID};
                       END
@@ -454,21 +510,21 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters<TSel
 
         return new SqlCommand<TSelf>(sql, param);
     }
-    public static SqlCommand<TSelf> InsertOrUpdate( TSelf record, bool matchAll, PostgresParameters<TSelf> parameters )
+    public static SqlCommand<TSelf> InsertOrUpdate( TSelf record, bool matchAll, PostgresParameters parameters )
     {
-        PostgresParameters<TSelf> param = record.ToDynamicParameters()
-                                                .With(parameters);
+        PostgresParameters param = record.ToDynamicParameters()
+                                         .With(parameters);
 
         string sql = $"""
                       IF NOT EXISTS(SELECT * FROM {TSelf.TableName} WHERE {parameters.KeyValuePairs(matchAll)})
                       BEGIN
                       INSERT INTO {TSelf.TableName}
                       (
-                      {param.ColumnNames()}
+                      {param.ColumnNames}
                       ) 
                       values 
                       (
-                      {param.VariableNames()}
+                      {param.VariableNames}
                       ) 
                       RETURNING {ID};
                       END

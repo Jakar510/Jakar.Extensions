@@ -68,7 +68,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
         return record.Validate();
     }
 
-    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, DbTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
+    [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
 
 
     [Pure] public IdentityRole ToIdentityRole() => new()

@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 08/14/2022  8:39 PM
 
+using Microsoft.Data.SqlClient;
 using IsolationLevel = System.Data.IsolationLevel;
 
 
@@ -117,7 +118,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
         bool result = await HasPermission(connection, null, loggedInUser, token, rights);
         return result;
     }
-    public async ValueTask<bool> HasPermission<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token, params TRight[] rights )
+    public async ValueTask<bool> HasPermission<TRight>( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, CancellationToken token, params TRight[] rights )
         where TRight : unmanaged, Enum
     {
         HashSet<TRight> permissions = await CurrentPermissions<TRight>(connection, transaction, user, token);
@@ -129,7 +130,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
         return true;
     }
-    public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, DbTransaction? transaction, UserRecord user, CancellationToken token )
+    public async ValueTask<HashSet<TRight>> CurrentPermissions<TRight>( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, CancellationToken token )
         where TRight : unmanaged, Enum
     {
         HashSet<IUserRights> models = new(DEFAULT_CAPACITY) { user };
@@ -187,48 +188,14 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    [Pure] public CommandDefinition GetCommand<TValue>( TValue command, DbTransaction? transaction, CancellationToken token, CommandType? commandType = null )
-        where TValue : class, IDapperSqlCommand
+    public async ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> command, CancellationToken token )
+        where TSelf : ITableRecord<TSelf>
     {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return new CommandDefinition(command.Sql, ParametersDictionary.LoadFrom(command), transaction, Options.CommandTimeout, commandType, CommandFlags.Buffered, token);
+        try { return await command.ExecuteAsync(connection, transaction, token); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command.SQL, e); }
     }
-    [Pure] public CommandDefinition GetCommand( ref readonly SqlCommand sql, DbTransaction? transaction, CancellationToken token )
-    {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(transaction, token, Options.CommandTimeout);
-    }
-    [Pure] public SqlCommand.Definition GetCommand( ref readonly SqlCommand sql, NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token )
-    {
-        Activity.Current?.AddEvent(new ActivityEvent(nameof(GetCommand)));
-        return sql.ToCommandDefinition(connection, transaction, token, Options.CommandTimeout);
-    }
-
-
-    public async ValueTask<DbDataReader> ExecuteReaderAsync<TValue>( NpgsqlConnection connection, DbTransaction? transaction, TValue command, CancellationToken token )
-        where TValue : class, IDapperSqlCommand
-    {
-        try
-        {
-            CommandDefinition definition = GetCommand(command, transaction, token);
-            return await connection.ExecuteReaderAsync(definition);
-        }
-        catch ( Exception e ) { throw new SqlException(command.Sql, e); }
-    }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( NpgsqlConnection connection, DbTransaction? transaction, SqlCommand sql, CancellationToken token )
-    {
-        try
-        {
-            CommandDefinition command = GetCommand(in sql, transaction, token);
-            return await connection.ExecuteReaderAsync(command);
-        }
-        catch ( Exception e ) { throw new SqlException(sql.sql, e); }
-    }
-    public async ValueTask<DbDataReader> ExecuteReaderAsync( SqlCommand.Definition definition )
-    {
-        try { return await definition.connection.ExecuteReaderAsync(definition); }
-        catch ( Exception e ) { throw new SqlException(definition.command.CommandText, definition.command.Parameters as DynamicParameters, e); }
-    }
+    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( SqlCommand<TSelf> command, CancellationToken token )
+        where TSelf : ITableRecord<TSelf> => this.TryCall(ExecuteReaderAsync, command, token);
 
 
     public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
@@ -254,7 +221,7 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
 
     public ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
         where TRequest : ILoginRequest<UserModel> => this.TryCall(Register, request, rights, types, token);
-    public virtual async ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( NpgsqlConnection connection, DbTransaction transaction, TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<SessionToken>> Register<TRequest>( NpgsqlConnection connection, NpgsqlTransaction transaction, TRequest request, string rights, ClaimType types = default, CancellationToken token = default )
         where TRequest : ILoginRequest<UserModel>
     {
         UserRecord? record = await Users.Get(connection, transaction, true, UserRecord.GetDynamicParameters(request), token);
@@ -268,44 +235,32 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public static PostgresParameters GetParameters( object? value, object? template = null, [CallerArgumentExpression(nameof(value))] string? variableName = null )
-    {
-        ArgumentNullException.ThrowIfNull(variableName);
-        PostgresParameters parameters = new(template);
-        parameters.Add(variableName, value);
-        return parameters;
-    }
-
-
-    public virtual async IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
-        where TSelf : class, ITableRecord<TSelf>, IDateCreated
+    public virtual async IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>, IDateCreated
     {
         DbDataReader reader;
 
         try
         {
-            SqlCommand        sqlCommand = new(sql, parameters);
-            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
-            reader = await connection.ExecuteReaderAsync(command);
+            SqlCommand<TSelf> command = new(sql, parameters);
+            reader = await command.ExecuteAsync(connection, transaction, token);
         }
-        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(sql, parameters, e); }
 
         await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<TValue> WhereValue<TValue>( NpgsqlConnection connection, DbTransaction? transaction, string sql, DynamicParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TValue> WhereValue<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
+        where TSelf : ITableRecord<TSelf>
     {
         DbDataReader reader;
 
         try
         {
-            SqlCommand        sqlCommand = new(sql, parameters);
-            CommandDefinition command    = GetCommand(in sqlCommand, transaction, token);
-            await connection.QueryAsync<TValue>(command);
-
-            reader = await connection.ExecuteReaderAsync(command);
+            SqlCommand<TSelf> command = new(sql, parameters);
+            reader = await command.ExecuteAsync(connection, transaction, token);
         }
-        catch ( Exception e ) { throw new SqlException(sql, parameters, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(sql, parameters, e); }
 
         while ( await reader.ReadAsync(token) ) { yield return reader.GetFieldValue<TValue>(0); }
     }

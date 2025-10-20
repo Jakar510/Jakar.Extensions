@@ -259,12 +259,12 @@ public static class Migrations
         catch ( Exception e )
         {
             await transaction.RollbackAsync(token);
-            throw new SqlException(MigrationRecord.ApplySql, e);
+            throw new SqlException<MigrationRecord>(MigrationRecord.ApplySql, e);
         }
     }
     public static async ValueTask Apply( this MigrationRecord record, NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken token )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<MigrationRecord>();
         parameters.Add(nameof(MigrationRecord.MigrationID),    record.MigrationID);
         parameters.Add(nameof(MigrationRecord.Description),    record.Description);
         parameters.Add(nameof(MigrationRecord.TableID),        record.TableID);

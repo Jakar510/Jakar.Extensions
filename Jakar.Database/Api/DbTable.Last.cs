@@ -11,16 +11,16 @@ public partial class DbTable<TSelf>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TSelf>> Last( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> Last( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetLast();
+        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetLast();
 
         try
         {
             CommandDefinition command = _database.GetCommand(in sql, transaction, token);
             return await connection.QueryFirstAsync<TSelf>(command);
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
     }
 
 
@@ -28,9 +28,9 @@ public partial class DbTable<TSelf>
 
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TSelf>> LastOrDefault( NpgsqlConnection connection, DbTransaction? transaction, CancellationToken token = default )
+    public virtual async ValueTask<ErrorOrResult<TSelf>> LastOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand sql = SQLCache.GetLast();
+        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetLast();
 
         try
         {
@@ -41,6 +41,6 @@ public partial class DbTable<TSelf>
                        ? Error.NotFound()
                        : record;
         }
-        catch ( Exception e ) { throw new SqlException(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
     }
 }
