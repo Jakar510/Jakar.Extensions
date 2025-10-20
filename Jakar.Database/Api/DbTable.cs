@@ -40,14 +40,15 @@ public partial class DbTable<TSelf> : IConnectableDb
     public IAsyncEnumerable<TSelf> All( CancellationToken token = default ) => this.Call(All, token);
     public virtual async IAsyncEnumerable<TSelf> All( NpgsqlConnection connection, NpgsqlTransaction? transaction, [EnumeratorCancellation] CancellationToken token = default )
     {
-        SqlCommand<TSelf>        command = SqlCommand<TSelf>.GetAll();
-        await using DbDataReader reader  = await _database.ExecuteReaderAsync(connection, (NpgsqlTransaction?)transaction, command, token);
+        SqlCommand<TSelf>            command = SqlCommand<TSelf>.GetAll();
+        await using NpgsqlCommand    cmd     = command.ToCommand(connection, transaction);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
         await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
 
 
-    public ValueTask<TResult> Call<TResult>( string sql, PostgresParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall(Call, sql, parameters, func, token);
-    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, NpgsqlTransaction transaction, string sql, PostgresParameters? parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public ValueTask<TResult> Call<TResult>( string sql, PostgresParameters parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall(Call, sql, parameters, func, token);
+    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, NpgsqlTransaction transaction, string sql, PostgresParameters parameters, Func<SqlMapper.GridReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
@@ -59,14 +60,15 @@ public partial class DbTable<TSelf> : IConnectableDb
 
 
     public ValueTask<TResult> Call<TResult>( SqlCommand<TSelf> sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default ) => this.TryCall(Call, sql, func, token);
-    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, NpgsqlTransaction transaction, SqlCommand<TSelf> sql, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
+    public virtual async ValueTask<TResult> Call<TResult>( NpgsqlConnection connection, NpgsqlTransaction transaction, SqlCommand<TSelf> command, Func<DbDataReader, CancellationToken, ValueTask<TResult>> func, CancellationToken token = default )
     {
         try
         {
-            await using DbDataReader reader = await _database.ExecuteReaderAsync(connection, transaction, sql, token);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
             return await func(reader, token);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql.SQL, sql.Parameters, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command.SQL, command.Parameters, e); }
     }
 
 

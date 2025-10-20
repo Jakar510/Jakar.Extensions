@@ -89,7 +89,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
     public static PostgresParameters GetDynamicParameters( UserRecord user, string value )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserLoginProviderRecord>();
         parameters.Add(nameof(CreatedBy), user.ID.Value);
         parameters.Add(nameof(Value),     value);
         return parameters;

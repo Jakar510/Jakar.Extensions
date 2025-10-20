@@ -12,30 +12,28 @@ public partial class DbTable<TSelf>
     public IAsyncEnumerable<TSelf>         Random( UserRecord        user,  int                                        count, [EnumeratorCancellation] CancellationToken token = default ) => this.Call(Random, user,  count, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask<ErrorOrResult<TSelf>> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public virtual async ValueTask<ErrorOrResult<TSelf>> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetRandom();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QueryFirstAsync<TSelf>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            return await reader.FirstAsync<TSelf>(token);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, UserRecord user, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom(user, count);
         return Where(connection, transaction, sql, token);
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public virtual IAsyncEnumerable<TSelf> Random( NpgsqlConnection connection, NpgsqlTransaction? transaction, int count, [EnumeratorCancellation] CancellationToken token = default )
     {
         SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetRandom(count);
         return Where(connection, transaction, sql, token);

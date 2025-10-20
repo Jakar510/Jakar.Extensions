@@ -5,10 +5,10 @@ namespace Jakar.Database;
 
 
 /*
-public readonly struct SqlCommand( string sql, PostgresParameters? parameters = null, CommandType? commandType = null, CommandFlags flags = CommandFlags.None )
+public readonly struct SqlCommand( string sql, PostgresParameters parameters = null, CommandType? commandType = null, CommandFlags flags = CommandFlags.None )
 {
     public readonly string             sql         = sql;
-    public readonly PostgresParameters? parameters  = parameters;
+    public readonly PostgresParameters parameters  = parameters;
     public readonly CommandType?       commandType = commandType;
     public readonly CommandFlags       flags       = flags;
 

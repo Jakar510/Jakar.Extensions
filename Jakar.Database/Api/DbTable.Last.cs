@@ -10,37 +10,33 @@ public partial class DbTable<TSelf>
     public ValueTask<ErrorOrResult<TSelf>> Last( CancellationToken token = default ) => this.Call(Last, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TSelf>> Last( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetLast();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetLast();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QueryFirstAsync<TSelf>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            return await reader.LastAsync<TSelf>(token);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
     public ValueTask<ErrorOrResult<TSelf>> LastOrDefault( CancellationToken token = default ) => this.Call(LastOrDefault, token);
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TSelf>> LastOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetLast();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetLast();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TSelf?           record  = await connection.QueryFirstOrDefaultAsync<TSelf>(command);
-
-            return record is null
-                       ? Error.NotFound()
-                       : record;
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            return await reader.LastOrDefaultAsync<TSelf>(token);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

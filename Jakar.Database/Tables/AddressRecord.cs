@@ -26,17 +26,17 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static JsonTypeInfo<AddressRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.AddressRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData<AddressRecord>> PropertyMetaData { get; } = SqlTable<AddressRecord>.Default.WithColumn<string>(nameof(Line1), length: 256)
-                                                                                                                             .WithColumn<string>(nameof(Line2),           length: 1024)
-                                                                                                                             .WithColumn<string>(nameof(City),            length: 256)
-                                                                                                                             .WithColumn<string>(nameof(StateOrProvince), length: 256)
-                                                                                                                             .WithColumn<string>(nameof(Country),         length: 256)
-                                                                                                                             .WithColumn<string>(nameof(PostalCode),      length: 256)
-                                                                                                                             .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
-                                                                                                                             .WithColumn<bool>(nameof(IsPrimary),         length: 256)
-                                                                                                                             .With_AdditionalData()
-                                                                                                                             .With_CreatedBy()
-                                                                                                                             .Build();
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<AddressRecord>.Default.WithColumn<string>(nameof(Line1), length: 256)
+                                                                                                              .WithColumn<string>(nameof(Line2),           length: 1024)
+                                                                                                              .WithColumn<string>(nameof(City),            length: 256)
+                                                                                                              .WithColumn<string>(nameof(StateOrProvince), length: 256)
+                                                                                                              .WithColumn<string>(nameof(Country),         length: 256)
+                                                                                                              .WithColumn<string>(nameof(PostalCode),      length: 256)
+                                                                                                              .WithColumn<string>(nameof(Address),         ColumnOptions.Nullable, length: 256)
+                                                                                                              .WithColumn<bool>(nameof(IsPrimary),         length: 256)
+                                                                                                              .With_AdditionalData()
+                                                                                                              .With_CreatedBy()
+                                                                                                              .Build();
 
 
     public AddressRecord( IAddress<Guid> address ) : this(address.Line1,
@@ -66,7 +66,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                                                                        DateTimeOffset.UtcNow) { }
 
 
-    [Pure] public override object ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Line1),           Line1);
@@ -142,7 +142,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
 
     [Pure] public static async ValueTask<AddressRecord?> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim[] claims, ClaimType types, CancellationToken token )
     {
-        PostgresParameters  parameters = new();
+        PostgresParameters  parameters = PostgresParameters.Create<AddressRecord>();
         ReadOnlySpan<Claim> span       = claims;
 
         if ( hasFlag(types, ClaimType.StreetAddressLine1) )
@@ -187,7 +187,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     }
     [Pure] public static async IAsyncEnumerable<AddressRecord> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<AddressRecord>();
 
         switch ( claim.Type )
         {

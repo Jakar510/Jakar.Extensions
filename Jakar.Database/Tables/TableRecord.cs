@@ -39,7 +39,8 @@ public interface IRecordPair<TSelf> : IDateCreated
     Guid IUniqueID<Guid>.      ID => ID.Value;
     public new RecordID<TSelf> ID { get; }
 
-    [Pure] public UInt128 GetHash();
+    [Pure] public UInt128            GetHash();
+    [Pure] public PostgresParameters ToDynamicParameters();
 }
 
 
@@ -47,19 +48,18 @@ public interface IRecordPair<TSelf> : IDateCreated
 public interface ITableRecord<TSelf> : IRecordPair<TSelf>, IJsonModel<TSelf>
     where TSelf : ITableRecord<TSelf>
 {
-    public abstract static ReadOnlyMemory<PropertyInfo>                    ClassProperties  { [Pure] get; }
-    public abstract static int                                             PropertyCount    { get; }
+    public abstract static ReadOnlyMemory<PropertyInfo>             ClassProperties  { [Pure] get; }
+    public abstract static int                                      PropertyCount    { get; }
     public abstract static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { [Pure] get; }
-    public abstract static string                                          TableName        { [Pure] get; }
+    public abstract static string                                   TableName        { [Pure] get; }
 
 
-    [Pure] public abstract static MigrationRecord           CreateTable( ulong   migrationID );
-    [Pure] public abstract static TSelf                     Create( DbDataReader reader );
-    [Pure] public                 PostgresParameters ToDynamicParameters();
+    [Pure] public abstract static MigrationRecord CreateTable( ulong migrationID );
 
 
-    [Pure] public RecordPair<TSelf> ToPair();
-    public        TSelf             NewID( RecordID<TSelf> id );
+    [Pure] public                 RecordPair<TSelf> ToPair();
+    [Pure] public abstract static TSelf             Create( DbDataReader   reader );
+    public                        TSelf             NewID( RecordID<TSelf> id );
 }
 
 
@@ -110,7 +110,7 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
     public static PostgresParameters GetDynamicParameters( TSelf record ) => GetDynamicParameters(in record.__id);
     public static PostgresParameters GetDynamicParameters( ref readonly RecordID<TSelf> id )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(ID), id.Value);
         return parameters;
     }
@@ -118,7 +118,7 @@ public abstract record TableRecord<TSelf> : BaseRecord<TSelf>, IRecordPair<TSelf
 
     [Pure] public virtual PostgresParameters ToDynamicParameters()
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(ID),           ID.Value);
         parameters.Add(nameof(DateCreated),  DateCreated);
         parameters.Add(nameof(LastModified), LastModified);
@@ -165,13 +165,13 @@ public abstract record OwnedTableRecord<TSelf> : TableRecord<TSelf>, ICreatedBy
 
     public static PostgresParameters GetDynamicParameters( UserRecord user )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(CreatedBy), user.ID.Value);
         return parameters;
     }
     protected static PostgresParameters GetDynamicParameters( OwnedTableRecord<TSelf> record )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(CreatedBy), record.CreatedBy);
         return parameters;
     }

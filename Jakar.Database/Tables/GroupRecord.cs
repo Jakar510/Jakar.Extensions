@@ -19,11 +19,11 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public static JsonTypeInfo<GroupRecord>   JsonTypeInfo  => JakarDatabaseContext.Default.GroupRecord;
 
 
-    public static FrozenDictionary<string, ColumnMetaData<GroupRecord>> PropertyMetaData { get; } = SqlTable<GroupRecord>.Default.WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
-                                                                                                                         .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")
-                                                                                                                         .WithColumn<string>(nameof(Rights),      checks: $"{nameof(Rights)} > 0")
-                                                                                                                         .With_CreatedBy()
-                                                                                                                         .Build();
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<GroupRecord>.Default.WithColumn<string?>(nameof(CustomerID), length: MAX_SIZE)
+                                                                                                            .WithColumn<string>(nameof(NameOfGroup), length: MAX_SIZE, checks: $"{nameof(NameOfGroup)} > 0")
+                                                                                                            .WithColumn<string>(nameof(Rights),      checks: $"{nameof(Rights)} > 0")
+                                                                                                            .With_CreatedBy()
+                                                                                                            .Build();
 
 
     public static string                     TableName { get => TABLE_NAME; }
@@ -91,7 +91,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     public override int GetHashCode() => HashCode.Combine(base.GetHashCode(), NameOfGroup, Rights, CustomerID);
 
 
-    [Pure] public override object ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(CustomerID),  CustomerID);

@@ -1142,7 +1142,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
     public static async IAsyncEnumerable<UserRecord> TryFromClaims( NpgsqlConnection connection, NpgsqlTransaction transaction, Database db, Claim claim, [EnumeratorCancellation] CancellationToken token = default )
     {
-        PostgresParameters<UserRecord> parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserRecord>();
 
         switch ( claim.Type )
         {

@@ -6,6 +6,82 @@ namespace Jakar.Database;
 
 public static class TableLinq
 {
+    public static async ValueTask<ErrorOrResult<TSelf>> FirstAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) ) { return self; }
+
+        throw new InvalidOperationException("Sequence contains no elements");
+    }
+    public static async ValueTask<ErrorOrResult<TSelf>> FirstOrDefaultAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) ) { return self; }
+
+        return Error.NotFound();
+    }
+
+
+    public static async ValueTask<ErrorOrResult<TSelf>> SingleAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        TSelf? record = default;
+
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) )
+        {
+            if ( record is not null ) { throw new InvalidOperationException("Sequence contains more than one element"); }
+
+            record = self;
+        }
+
+        return record is null
+                   ? Error.NotFound()
+                   : record;
+    }
+    public static async ValueTask<ErrorOrResult<TSelf>> SingleOrDefaultAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        TSelf? record = default;
+
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) )
+        {
+            if ( record is not null )
+            {
+                record = default;
+                break;
+            }
+
+            record = self;
+        }
+
+        return record is null
+                   ? Error.NotFound()
+                   : record;
+    }
+
+
+    public static async ValueTask<ErrorOrResult<TSelf>> LastAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        TSelf? record = default;
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) ) { record = self; }
+
+        return record is null
+                   ? Error.NotFound()
+                   : record;
+    }
+    public static async ValueTask<ErrorOrResult<TSelf>> LastOrDefaultAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
+        where TSelf : ITableRecord<TSelf>
+    {
+        TSelf? record = default;
+        await foreach ( TSelf self in reader.CreateAsync<TSelf>(token) ) { record = self; }
+
+        return record is null
+                   ? Error.NotFound()
+                   : record;
+    }
+
+
     public static async IAsyncEnumerable<TSelf> CreateAsync<TSelf>( this DbDataReader reader, [EnumeratorCancellation] CancellationToken token = default )
         where TSelf : ITableRecord<TSelf>
     {

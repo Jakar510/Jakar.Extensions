@@ -7,24 +7,24 @@ namespace Jakar.Database;
 public sealed class SqlException<TSelf> : Exception
     where TSelf : ITableRecord<TSelf>
 {
-    public PostgresParameters? Parameters { get; init; }
-    public string                     SQL        { get; init; }
+    public PostgresParameters Parameters { get; init; }
+    public string             SQL        { get; init; }
 
     // [JsonProperty] public string Value => base.ToString();
 
 
-    public SqlException( string sql, string message ) : this(sql, null, message) { }
-    public SqlException( string sql, PostgresParameters? parameters, string? message = null ) : base(message ?? GetMessage(sql, parameters))
+    public SqlException( string sql, string message ) : this(sql, PostgresParameters.Empty, message) { }
+    public SqlException( string sql, PostgresParameters parameters, string? message = null ) : base(message ?? GetMessage(sql, parameters))
     {
         SQL        = sql;
         Parameters = parameters;
     }
-    public SqlException( string               sql, Exception? inner ) : this(sql, null, GetMessage(sql), inner) => SQL = sql;
-    public SqlException( string               sql, string     message, Exception? inner ) : this(sql, null, message, inner) { }
-    public SqlException( in SqlCommand<TSelf> sql ) : this(sql.SQL, sql.Parameters, GetMessage(sql.SQL,                                              sql.Parameters)) { }
-    public SqlException( in SqlCommand<TSelf> sql, Exception?                 inner ) : this(sql.SQL, sql.Parameters, GetMessage(sql.SQL,            sql.Parameters), inner) { }
-    public SqlException( string               sql, PostgresParameters? parameters, Exception? inner ) : this(sql, parameters, GetMessage(sql, parameters), inner) { }
-    public SqlException( string sql, PostgresParameters? parameters, string message, Exception? inner ) : base(message, inner)
+    public SqlException( string               sql, Exception? inner ) : this(sql, PostgresParameters.Empty, GetMessage(sql), inner) => SQL = sql;
+    public SqlException( string               sql, string     message, Exception? inner ) : this(sql, PostgresParameters.Empty, message, inner) { }
+    public SqlException( in SqlCommand<TSelf> sql ) : this(sql.SQL, sql.Parameters, GetMessage(sql.SQL,                                      sql.Parameters)) { }
+    public SqlException( in SqlCommand<TSelf> sql, Exception?         inner ) : this(sql.SQL, sql.Parameters, GetMessage(sql.SQL,            sql.Parameters), inner) { }
+    public SqlException( string               sql, PostgresParameters parameters, Exception? inner ) : this(sql, parameters, GetMessage(sql, parameters), inner) { }
+    public SqlException( string sql, PostgresParameters parameters, string message, Exception? inner ) : base(message, inner)
     {
         SQL        = sql;
         Parameters = parameters;

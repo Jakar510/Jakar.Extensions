@@ -230,7 +230,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
     public static implicit operator SqlCommand<TSelf>( string sql ) => new(sql, in PostgresParameters.Empty);
 
 
-    public NpgsqlCommand ToNpgsqlCommand( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
+    [Pure] [MustDisposeResource] public NpgsqlCommand ToCommand( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
     {
         ArgumentNullException.ThrowIfNull(connection);
 
@@ -245,16 +245,6 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
 
         command.Parameters.Add(Parameters.Values);
         return command;
-    }
-    public NpgsqlDataReader Execute( NpgsqlConnection connection, NpgsqlTransaction? transaction = null )
-    {
-        NpgsqlCommand command = ToNpgsqlCommand(connection, transaction);
-        return command.ExecuteReader();
-    }
-    public Task<NpgsqlDataReader> ExecuteAsync( NpgsqlConnection connection, NpgsqlTransaction? transaction = null, CancellationToken token = default )
-    {
-        NpgsqlCommand command = ToNpgsqlCommand(connection, transaction);
-        return command.ExecuteReaderAsync(token);
     }
 
 
@@ -280,6 +270,9 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
 
 
     public static IEnumerable<string> KeyValuePairs => TSelf.PropertyMetaData.Values.Select(ColumnMetaData.GetKeyValuePair);
+
+
+    public static SqlCommand<TSelf> Create( string sql, PostgresParameters parameters ) => new(sql, parameters);
 
 
     public static SqlCommand<TSelf> GetRandom() => $"""
@@ -346,7 +339,7 @@ public readonly struct SqlCommand<TSelf>( string sql, in PostgresParameters para
     public static SqlCommand<TSelf> Where<TValue>( string columnName, TValue? value )
     {
         string sql = $"SELECT * FROM {TSelf.TableName} WHERE {columnName} = @{nameof(value)};";
-        
+
         PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(value), value);
 

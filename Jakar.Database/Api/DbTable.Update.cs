@@ -29,16 +29,15 @@ public partial class DbTable<TSelf>
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
-    public virtual async ValueTask Update( NpgsqlConnection connection, NpgsqlTransaction? transaction, TSelf record, CancellationToken token = default )
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)] public virtual async ValueTask Update( NpgsqlConnection connection, NpgsqlTransaction? transaction, TSelf record, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetUpdate(record);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetUpdate(record);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            await connection.ExecuteScalarAsync(command);
+            await using NpgsqlCommand cmd = command.ToCommand(connection, transaction);
+            await cmd.ExecuteNonQueryAsync(token);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

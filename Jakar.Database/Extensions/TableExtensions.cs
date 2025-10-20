@@ -11,7 +11,7 @@ public static class TableExtensions
         if ( !string.Equals(TSelf.TableName, TSelf.TableName.ToSnakeCase()) ) { throw new InvalidOperationException($"{typeof(TSelf).Name}: {nameof(TSelf.TableName)} is not snake_case: '{TSelf.TableName}'"); }
 
         PostgresParameters parameters     = self.ToDynamicParameters();
-        string[]           parameterNames = parameters.ParameterNames;
+        string[]           parameterNames = parameters.ParameterNames.ToArray();
         int                length         = parameterNames.Length;
 
 

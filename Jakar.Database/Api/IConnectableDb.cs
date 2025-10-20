@@ -21,15 +21,9 @@ public interface IConnectableDb : IDbTable
 public interface IConnectableDbRoot : IConnectableDb
 {
     public ref readonly DbOptions Options { get; }
-    public IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters? postgresParameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TSelf : ITableRecord<TSelf>, IDateCreated;
-    public IAsyncEnumerable<TValue> WhereValue<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters? parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public IAsyncEnumerable<TValue> Where<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
-        where TSelf : ITableRecord<TSelf>;
-
-    
-    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( SqlCommand<TSelf> definition )
-        where TSelf : ITableRecord<TSelf>;
-    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> sql, CancellationToken token )
         where TSelf : ITableRecord<TSelf>;
 }

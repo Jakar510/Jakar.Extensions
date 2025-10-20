@@ -13,28 +13,28 @@ public partial class DbTable<TSelf>
 
     public virtual async ValueTask<ErrorOrResult<TSelf>> First( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetFirst();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            return await connection.QueryFirstAsync<TSelf>(command);
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.FirstAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
     public virtual async ValueTask<ErrorOrResult<TSelf>> FirstOrDefault( NpgsqlConnection connection, NpgsqlTransaction? transaction, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetFirst();
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetFirst();
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            TSelf?           record  = await connection.QueryFirstOrDefaultAsync<TSelf>(command);
-
-            return record is null
-                       ? Error.NotFound()
-                       : record;
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            ErrorOrResult<TSelf>         record = await reader.FirstOrDefaultAsync<TSelf>(token);
+            return record;
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

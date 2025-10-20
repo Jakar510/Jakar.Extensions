@@ -31,50 +31,58 @@ public partial class DbTable<TSelf>
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<TSelf> Insert( NpgsqlConnection connection, NpgsqlTransaction transaction, TSelf record, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetInsert(record);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetInsert(record);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            RecordID<TSelf>  id      = RecordID<TSelf>.Create(await connection.ExecuteScalarAsync<Guid>(command));
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            RecordID<TSelf>              id;
+
+            if ( await reader.ReadAsync(token) ) { id = RecordID<TSelf>.Create(reader.GetGuid(0)); }
+            else { throw new InvalidOperationException($"Insert command did not return the new ID for type {typeof(TSelf).FullName}"); }
+
             return record.NewID(id);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TSelf>> TryInsert( NpgsqlConnection connection, NpgsqlTransaction transaction, TSelf record, bool matchAll, PostgresParameters parameters, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.GetTryInsert(record, matchAll, parameters);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.GetTryInsert(record, matchAll, parameters);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            RecordID<TSelf>? id      = RecordID<TSelf>.TryCreate(await connection.ExecuteScalarAsync<Guid?>(command));
-            if ( id is null ) { return Error.NotFound(); }
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            RecordID<TSelf>              id;
 
-            return record.NewID(id.Value);
+            if ( await reader.ReadAsync(token) ) { id = RecordID<TSelf>.Create(reader.GetGuid(0)); }
+            else { throw new InvalidOperationException($"Insert command did not return the new ID for type {typeof(TSelf).FullName}"); }
+
+            return record.NewID(id);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 
 
-    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public virtual async ValueTask<ErrorOrResult<TSelf>> InsertOrUpdate( NpgsqlConnection connection, NpgsqlTransaction transaction, TSelf record, bool matchAll, PostgresParameters parameters, CancellationToken token = default )
     {
-        SqlCommand<TSelf> sql = SqlCommand<TSelf>.InsertOrUpdate(record, matchAll, parameters);
+        SqlCommand<TSelf> command = SqlCommand<TSelf>.InsertOrUpdate(record, matchAll, parameters);
 
         try
         {
-            CommandDefinition command = _database.GetCommand(in sql, transaction, token);
-            RecordID<TSelf>? id      = RecordID<TSelf>.TryCreate(await connection.ExecuteScalarAsync<Guid?>(command));
-            if ( id is null ) { return Error.NotFound(); }
+            await using NpgsqlCommand    cmd    = command.ToCommand(connection, transaction);
+            await using NpgsqlDataReader reader = await cmd.ExecuteReaderAsync(token);
+            RecordID<TSelf>              id;
 
-            return record.NewID(id.Value);
+            if ( await reader.ReadAsync(token) ) { id = RecordID<TSelf>.Create(reader.GetGuid(0)); }
+            else { throw new InvalidOperationException($"Insert command did not return the new ID for type {typeof(TSelf).FullName}"); }
+
+            return record.NewID(id);
         }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, e); }
+        catch ( Exception e ) { throw new SqlException<TSelf>(command, e); }
     }
 }

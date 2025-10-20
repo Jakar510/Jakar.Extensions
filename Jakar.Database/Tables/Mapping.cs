@@ -35,7 +35,7 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     }
 
 
-    public override object ToDynamicParameters()
+    public override PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(KeyID),   KeyID);
@@ -47,21 +47,21 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
     public static PostgresParameters GetDynamicParameters( TValue record ) => GetDynamicParameters(record.ID);
     public static PostgresParameters GetDynamicParameters( RecordID<TValue> value )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(ValueID), value);
         return parameters;
     }
     public static PostgresParameters GetDynamicParameters( TKey key ) => GetDynamicParameters(key.ID);
     public static PostgresParameters GetDynamicParameters( RecordID<TKey> key )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(KeyID), key);
         return parameters;
     }
     public static PostgresParameters GetDynamicParameters( TKey key, TValue value ) => GetDynamicParameters(key.ID, value.ID);
     public static PostgresParameters GetDynamicParameters( RecordID<TKey> key, RecordID<TValue> value )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(KeyID),   key);
         parameters.Add(nameof(ValueID), value);
         return parameters;

@@ -61,7 +61,7 @@ public partial class Database
     public ValueTask<UserRecord?> FindByLoginAsync( string loginProvider, string providerKey, CancellationToken token ) => this.TryCall(FindByLoginAsync, loginProvider, providerKey, token);
     public virtual async ValueTask<UserRecord?> FindByLoginAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, string loginProvider, string providerKey, CancellationToken token )
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<UserLoginProviderRecord>();
         parameters.Add(nameof(UserLoginProviderRecord.LoginProvider), loginProvider);
         parameters.Add(nameof(UserLoginProviderRecord.ProviderKey),   providerKey);
         return await Users.Get(connection, transaction, true, parameters, token);

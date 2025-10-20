@@ -10,8 +10,8 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     where TSelf : ITableRecord<TSelf>
 {
     public static readonly RecordID<TSelf> Empty = new(Guid.Empty);
-    public readonly        string           key;
-    public readonly        Guid             Value;
+    public readonly        string          key;
+    public readonly        Guid            Value;
 
 
     public RecordID( Guid id )
@@ -31,8 +31,8 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     [Pure] public static RecordID<TSelf>  Create( DbDataReader             reader, string columnName ) => Create(reader.GetFieldValue<Guid>(columnName));
     [Pure] public static RecordID<TSelf>  Create( Guid                     id ) => new(id);
     [Pure] public static RecordID<TSelf> Create( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                                   ? new RecordID<TSelf>(id.Value)
-                                                                                                   : New();
+                                                                                                  ? new RecordID<TSelf>(id.Value)
+                                                                                                  : New();
     [Pure] public static RecordID<TSelf> Create<TValue>( TValue id )
         where TValue : IUniqueID<Guid> => Create(id.ID);
     [Pure] public static IEnumerable<RecordID<TSelf>> Create<TValue>( IEnumerable<TValue> ids )
@@ -40,13 +40,13 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     [Pure] public static IAsyncEnumerable<RecordID<TSelf>> Create<TValue>( IAsyncEnumerable<TValue> ids )
         where TValue : IUniqueID<Guid> => ids.Select(Create);
     [Pure] public static RecordID<TSelf>? TryCreate( [NotNullIfNotNull(nameof(id))] Guid? id ) => id.HasValue
-                                                                                                       ? new RecordID<TSelf>(id.Value)
-                                                                                                       : default;
+                                                                                                      ? new RecordID<TSelf>(id.Value)
+                                                                                                      : default;
 
 
-    public static RecordID<TSelf> Parse( string                         value, IFormatProvider?     provider ) => new(Guid.Parse(value, provider));
-    public static bool             TryParse( [NotNullWhen(true)] string? value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
-    public static bool TryParse( [NotNullWhen(            true)] string? value, IFormatProvider? provider, out RecordID<TSelf> result )
+    public static RecordID<TSelf> Parse( string                         value, IFormatProvider?    provider ) => new(Guid.Parse(value, provider));
+    public static bool            TryParse( [NotNullWhen(true)] string? value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
+    public static bool TryParse( [NotNullWhen(           true)] string? value, IFormatProvider? provider, out RecordID<TSelf> result )
     {
         if ( Guid.TryParse(value, provider, out Guid guid) )
         {
@@ -59,8 +59,8 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     }
 
 
-    public static RecordID<TSelf> Parse( ReadOnlySpan<char>    value, IFormatProvider?     provider ) => new(Guid.Parse(value, provider));
-    public static bool             TryParse( ReadOnlySpan<char> value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
+    public static RecordID<TSelf> Parse( ReadOnlySpan<char>    value, IFormatProvider?    provider ) => new(Guid.Parse(value, provider));
+    public static bool            TryParse( ReadOnlySpan<char> value, out RecordID<TSelf> result )   => TryParse(value, null, out result);
     public static bool TryParse( ReadOnlySpan<char> value, IFormatProvider? provider, out RecordID<TSelf> result )
     {
         if ( Guid.TryParse(value, provider, out Guid guid) )
@@ -77,9 +77,10 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     public static implicit operator RecordID<TSelf>( TSelf record ) => new(record.ID.Value);
 
 
+    public UInt128 GetHash() => key.Hash128();
     [Pure] public PostgresParameters ToDynamicParameters()
     {
-        PostgresParameters parameters = new();
+        PostgresParameters parameters = PostgresParameters.Create<TSelf>();
         parameters.Add(nameof(IDateCreated.ID), Value);
         return parameters;
     }
@@ -104,14 +105,14 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     }
 
 
-    public          bool Equals( RecordID<TSelf>    other )         => Value.Equals(other.Value);
-    public          int  CompareTo( RecordID<TSelf> other )         => Value.CompareTo(other.Value);
+    public          bool Equals( RecordID<TSelf>    other )          => Value.Equals(other.Value);
+    public          int  CompareTo( RecordID<TSelf> other )          => Value.CompareTo(other.Value);
     public override int  GetHashCode()                               => Value.GetHashCode();
     public override bool Equals( [NotNullWhen(true)] object? other ) => other is RecordID<TSelf> id && Equals(id);
 
 
-    public static bool operator true( RecordID<TSelf>  recordID )                      => recordID.IsValid();
-    public static bool operator false( RecordID<TSelf> recordID )                      => recordID.IsNotValid();
+    public static bool operator true( RecordID<TSelf>  recordID )                     => recordID.IsValid();
+    public static bool operator false( RecordID<TSelf> recordID )                     => recordID.IsNotValid();
     public static bool operator ==( RecordID<TSelf>?   left, RecordID<TSelf>? right ) => Nullable.Equals(left, right);
     public static bool operator !=( RecordID<TSelf>?   left, RecordID<TSelf>? right ) => !Nullable.Equals(left, right);
     public static bool operator ==( RecordID<TSelf>    left, RecordID<TSelf>  right ) => EqualityComparer<RecordID<TSelf>>.Default.Equals(left, right);

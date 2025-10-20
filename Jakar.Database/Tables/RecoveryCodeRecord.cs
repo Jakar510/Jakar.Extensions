@@ -21,15 +21,15 @@ public sealed record RecoveryCodeRecord( [property: StringLength(1024)] string C
     public static           JsonTypeInfo<RecoveryCodeRecord[]> JsonArrayInfo => JakarDatabaseContext.Default.RecoveryCodeRecordArray;
 
 
-    public static FrozenDictionary<string, ColumnMetaData<RecoveryCodeRecord>> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Default.WithColumn<string>(nameof(Code), length: 1024)
-                                                                                                                                       .With_CreatedBy()
-                                                                                                                                       .Build();
+    public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<RecoveryCodeRecord>.Default.WithColumn<string>(nameof(Code), length: 1024)
+                                                                                                                   .With_CreatedBy()
+                                                                                                                   .Build();
 
 
     public RecoveryCodeRecord( string code, UserRecord user ) : this(code, RecordID<RecoveryCodeRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
 
 
-    [Pure] public override object ToDynamicParameters()
+    [Pure] public override PostgresParameters ToDynamicParameters()
     {
         PostgresParameters parameters = base.ToDynamicParameters();
         parameters.Add(nameof(Code), Code);

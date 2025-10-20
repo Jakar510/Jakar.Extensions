@@ -41,19 +41,7 @@ namespace Jakar.Database;
 [JsonSerializable(typeof(UserRecoveryCodeRecord[]))]
 [JsonSerializable(typeof(MigrationRecord[]))]
 [JsonSerializable(typeof(FusionCacheEntryOptionsWrapper))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<MigrationRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<FileRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<RoleRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserRoleRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<GroupRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserGroupRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<RecoveryCodeRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserRecoveryCodeRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserLoginProviderRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<AddressRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<UserAddressRecord>>))]
-[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData<ResxRowRecord>>))]
+[JsonSerializable(typeof(FrozenDictionary<string, ColumnMetaData>))]
 public sealed partial class JakarDatabaseContext : JsonSerializerContext
 {
     static JakarDatabaseContext()

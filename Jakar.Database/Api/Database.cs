@@ -2,6 +2,7 @@
 // 08/14/2022  8:39 PM
 
 using Microsoft.Data.SqlClient;
+using ZXing.Aztec.Internal;
 using IsolationLevel = System.Data.IsolationLevel;
 
 
@@ -188,16 +189,6 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
 
 
-    public async ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, SqlCommand<TSelf> command, CancellationToken token )
-        where TSelf : ITableRecord<TSelf>
-    {
-        try { return await command.ExecuteAsync(connection, transaction, token); }
-        catch ( Exception e ) { throw new SqlException<TSelf>(command.SQL, e); }
-    }
-    public ValueTask<DbDataReader> ExecuteReaderAsync<TSelf>( SqlCommand<TSelf> command, CancellationToken token )
-        where TSelf : ITableRecord<TSelf> => this.TryCall(ExecuteReaderAsync, command, token);
-
-
     public virtual async Task<HealthCheckResult> CheckHealthAsync( HealthCheckContext context, CancellationToken token = default )
     {
         try
@@ -238,30 +229,18 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public virtual async IAsyncEnumerable<TSelf> Where<TSelf>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TSelf : ITableRecord<TSelf>, IDateCreated
     {
-        DbDataReader reader;
-
-        try
-        {
-            SqlCommand<TSelf> command = new(sql, parameters);
-            reader = await command.ExecuteAsync(connection, transaction, token);
-        }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, parameters, e); }
-
+        SqlCommand<TSelf>            command = new(sql, parameters);
+        await using NpgsqlCommand    cmd     = command.ToCommand(connection, transaction);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
         await foreach ( TSelf record in reader.CreateAsync<TSelf>(token) ) { yield return record; }
     }
-    public virtual async IAsyncEnumerable<TValue> WhereValue<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
+    public virtual async IAsyncEnumerable<TValue> Where<TSelf, TValue>( NpgsqlConnection connection, NpgsqlTransaction? transaction, string sql, PostgresParameters parameters, [EnumeratorCancellation] CancellationToken token = default )
         where TValue : struct
         where TSelf : ITableRecord<TSelf>
     {
-        DbDataReader reader;
-
-        try
-        {
-            SqlCommand<TSelf> command = new(sql, parameters);
-            reader = await command.ExecuteAsync(connection, transaction, token);
-        }
-        catch ( Exception e ) { throw new SqlException<TSelf>(sql, parameters, e); }
-
+        SqlCommand<TSelf>            command = SqlCommand<TSelf>.Create(sql, parameters);
+        await using NpgsqlCommand    cmd     = command.ToCommand(connection, transaction);
+        await using NpgsqlDataReader reader  = await cmd.ExecuteReaderAsync(token);
         while ( await reader.ReadAsync(token) ) { yield return reader.GetFieldValue<TValue>(0); }
     }
 }
