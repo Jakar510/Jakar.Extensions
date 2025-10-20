@@ -1,6 +1,10 @@
 ﻿// Jakar.Extensions :: Jakar.Database
 // 10/18/2025  23:29
 
+using Org.BouncyCastle.Asn1.Tsp;
+
+
+
 namespace Jakar.Database.DbMigrations;
 
 
@@ -20,26 +24,66 @@ public enum ColumnOptions : ulong
 
 
 
+/// <summary>
+/// <para>
+/// <see cref="Scope"/>:  Order of magnitude of representable range (the exponent range).
+/// </para>
+/// <para>
+/// <see cref="Precision"/>: Reliable decimal digits of accuracy.
+/// </para>
+/// </summary>
+/// <param name="Scope"> Order of magnitude of representable range (the exponent range). </param>
+/// <param name="Precision"> Reliable decimal digits of accuracy. </param>
 [DefaultValue(nameof(Default))]
-public readonly record struct PrecisionInfo( int Value, int Scope, int Precision )
+public readonly record struct PrecisionInfo( int Scope, int Precision )
 {
-    public static readonly          PrecisionInfo Default   = new(-1, -1, -1);
-    public readonly                 int           Value     = Value;
-    public readonly                 int           Precision = Precision;
+    public static readonly          PrecisionInfo Default   = new(-1, -1);
+    public static readonly          PrecisionInfo Float     = new(38, 7);
+    public static readonly          PrecisionInfo Double    = new(308, 15);
+    public static readonly          PrecisionInfo Decimal   = new(28, 28);
+    public static readonly          PrecisionInfo Int128    = new(128, 0);
     public readonly                 int           Scope     = Scope;
-    public readonly                 bool          IsValid   = Value >= 0 || Scope >= 0 && Precision >= 0;
-    public static implicit operator PrecisionInfo( int                        value ) => new(value, -1, -1);
+    public readonly                 int           Precision = Precision;
+    public readonly                 bool          IsValid   = Scope >= 0 && Precision >= 0;
     public static implicit operator PrecisionInfo( (int Precision, int Scope) value ) => Create(value.Precision, value.Scope);
 
-
+    public override string ToString() => $"{Scope}, {Precision}";
     public static PrecisionInfo Create( int scope, int precision )
     {
         if ( precision > DECIMAL_MAX_PRECISION ) { throw new OutOfRangeException(precision); }
 
         if ( scope > DECIMAL_MAX_SCALE ) { throw new OutOfRangeException(scope); }
 
-        return new PrecisionInfo(-1, scope, precision);
+        return new PrecisionInfo(scope, precision);
     }
+}
+
+
+
+[DefaultValue(nameof(Default))]
+public readonly record struct LengthInfo( int Value )
+{
+    public static readonly          LengthInfo Default = new(-1);
+    public readonly                 int        Value   = Value;
+    public readonly                 bool       IsValid = Value >= 0;
+    public static implicit operator LengthInfo( int value ) => new(value);
+}
+
+
+
+[DefaultValue(nameof(Default))]
+public readonly record struct SizeInfo( LengthInfo Length, PrecisionInfo Precision )
+{
+    public static readonly SizeInfo      Default   = new(LengthInfo.Default, PrecisionInfo.Default);
+    public readonly        LengthInfo    Length    = Length;
+    public readonly        PrecisionInfo Precision = Precision;
+    public readonly        bool          IsValid   = Length.IsValid || Precision.IsValid;
+
+
+    public static implicit operator SizeInfo( int                        value ) => new(value, PrecisionInfo.Default);
+    public static implicit operator SizeInfo( LengthInfo                 value ) => new(value, PrecisionInfo.Default);
+    public static implicit operator SizeInfo( (int Precision, int Scope) value ) => new(LengthInfo.Default, value);
+    public static implicit operator SizeInfo( PrecisionInfo              value ) => new(LengthInfo.Default, value);
 }
 
 
@@ -60,7 +104,7 @@ public sealed class ColumnMetaDataAttribute : Attribute
     internal static readonly ColumnMetaDataAttribute Empty = new();
     public                   ColumnOptions?          Options         { get; set; }
     public                   PostgresType?           DbType          { get; set; }
-    public                   PrecisionInfo?          Length          { get; set; }
+    public                   SizeInfo?               Length          { get; set; }
     public                   string?                 ColumnName      { get; set; }
     public                   string?                 IndexColumnName { get; set; }
     public                   string?                 VariableName    { get; set; }
@@ -69,11 +113,11 @@ public sealed class ColumnMetaDataAttribute : Attribute
     public                   string?                 ForeignKey      { get; set; }
 
 
-    public void Deconstruct( out string? columnName, out ColumnOptions options, out PrecisionInfo length, out PostgresType? dbType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name )
+    public void Deconstruct( out string? columnName, out ColumnOptions options, out SizeInfo length, out PostgresType? dbType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name )
     {
         columnName      = ColumnName;
         options         = Options ?? ColumnOptions.None;
-        length          = Length  ?? PrecisionInfo.Default;
+        length          = Length  ?? SizeInfo.Default;
         dbType          = DbType;
         foreignKeyName  = ForeignKey;
         indexColumnName = IndexColumnName;
@@ -91,7 +135,7 @@ public sealed class ColumnMetaData( string               propertyName,
                                     ColumnOptions        options         = ColumnOptions.None,
                                     string?              foreignKeyName  = null,
                                     string?              indexColumnName = null,
-                                    PrecisionInfo        length          = default,
+                                    SizeInfo             length          = default,
                                     ColumnCheckMetaData? checks          = null,
                                     string?              variableName    = null,
                                     string?              name            = null,
@@ -108,7 +152,7 @@ public sealed class ColumnMetaData( string               propertyName,
     public readonly bool                 IsPrimaryKey    = options.HasFlagValue(ColumnOptions.PrimaryKey);
     public readonly ColumnCheckMetaData? Checks          = checks;
     public readonly ColumnOptions        Options         = options;
-    public readonly PrecisionInfo        Length          = length;
+    public readonly SizeInfo             Length          = length;
     public readonly PostgresType         DbType          = dbType;
     public readonly string               PropertyName    = Validate.ThrowIfNull(propertyName);
     public readonly string               ColumnName      = Validate.ThrowIfNull(columnName);
@@ -123,17 +167,17 @@ public sealed class ColumnMetaData( string               propertyName,
     public bool IsForeignKey { [MemberNotNullWhen(true, nameof(IndexColumnName))] get => !string.IsNullOrWhiteSpace(IndexColumnName); }
 
 
-    public ColumnMetaData( string propertyName, PostgresType dbType, ColumnOptions options = ColumnOptions.None, string? foreignKeyName = null, string? indexColumnName = null, PrecisionInfo length = default, ColumnCheckMetaData? checks = null, string? variableName = null, string? name = null, string? keyValuePair = null ) : this(propertyName,
-                                                                                                                                                                                                                                                                                                                                           propertyName.SqlColumnName(),
-                                                                                                                                                                                                                                                                                                                                           dbType,
-                                                                                                                                                                                                                                                                                                                                           options,
-                                                                                                                                                                                                                                                                                                                                           foreignKeyName,
-                                                                                                                                                                                                                                                                                                                                           indexColumnName,
-                                                                                                                                                                                                                                                                                                                                           length,
-                                                                                                                                                                                                                                                                                                                                           checks,
-                                                                                                                                                                                                                                                                                                                                           variableName,
-                                                                                                                                                                                                                                                                                                                                           name,
-                                                                                                                                                                                                                                                                                                                                           keyValuePair) { }
+    public ColumnMetaData( string propertyName, PostgresType dbType, ColumnOptions options = ColumnOptions.None, string? foreignKeyName = null, string? indexColumnName = null, SizeInfo length = default, ColumnCheckMetaData? checks = null, string? variableName = null, string? name = null, string? keyValuePair = null ) : this(propertyName,
+                                                                                                                                                                                                                                                                                                                                      propertyName.SqlColumnName(),
+                                                                                                                                                                                                                                                                                                                                      dbType,
+                                                                                                                                                                                                                                                                                                                                      options,
+                                                                                                                                                                                                                                                                                                                                      foreignKeyName,
+                                                                                                                                                                                                                                                                                                                                      indexColumnName,
+                                                                                                                                                                                                                                                                                                                                      length,
+                                                                                                                                                                                                                                                                                                                                      checks,
+                                                                                                                                                                                                                                                                                                                                      variableName,
+                                                                                                                                                                                                                                                                                                                                      name,
+                                                                                                                                                                                                                                                                                                                                      keyValuePair) { }
 
 
     public static  string GetColumnName( ColumnMetaData   x )        => x.ColumnName;
@@ -157,15 +201,16 @@ public sealed class ColumnMetaData( string               propertyName,
 
         return properties.ToFrozenDictionary(static x => x.Name, Create);
     }
-    public static ColumnMetaData Create( PropertyInfo property ) => Create(property, property.GetCustomAttribute<ColumnMetaDataAttribute>());
-    internal static ColumnMetaData Create( PropertyInfo property, ColumnMetaDataAttribute? attribute )
+    public static ColumnMetaData Create( PropertyInfo property ) => Create(property, property.GetCustomAttribute<ColumnMetaDataAttribute>(), property.GetCustomAttribute<MaxLengthAttribute>(), property.GetCustomAttribute<LengthAttribute>());
+    internal static ColumnMetaData Create( PropertyInfo property, ColumnMetaDataAttribute? attribute, MaxLengthAttribute? stringLength, LengthAttribute? maxLength )
     {
         attribute ??= ColumnMetaDataAttribute.Empty;
-        attribute.Deconstruct(out string? columnName, out ColumnOptions options, out PrecisionInfo length, out PostgresType? postgresType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name);
+        attribute.Deconstruct(out string? columnName, out ColumnOptions options, out SizeInfo length, out PostgresType? postgresType, out string? foreignKeyName, out string? indexColumnName, out string? variableName, out string? keyValuePair, out string? name);
         string propertyName = property.Name;
         columnName ??= propertyName.ToSnakeCase();
         PostgresType dbType = PostgresTypes.GetType(property.PropertyType, out bool isNullable, out bool isEnum, ref length);
         name = attribute?.Name ?? columnName;
+
 
         if ( postgresType.HasValue ) { dbType = postgresType.Value; }
 
@@ -245,7 +290,7 @@ public readonly ref struct SqlTable<TSelf> : IDisposable
     public SqlTable<TSelf> With_AdditionalData() => WithColumn(ColumnMetaData.AdditionalData);
 
 
-    public SqlTable<TSelf> WithColumn<TValue>( string propertyName, ColumnOptions options = ColumnOptions.None, PrecisionInfo length = default, ColumnCheckMetaData? checks = null, string? indexColumnName = null )
+    public SqlTable<TSelf> WithColumn<TValue>( string propertyName, ColumnOptions options = ColumnOptions.None, SizeInfo length = default, ColumnCheckMetaData? checks = null, string? indexColumnName = null )
     {
         bool         isEnum = false;
         PostgresType dbType;
