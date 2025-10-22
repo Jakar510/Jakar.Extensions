@@ -13,8 +13,8 @@ public abstract class CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleMo
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : CreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, IEqualComparable<TSelf>, IJsonModel<TSelf>, new()
 {
-    private string __confirmPassword = string.Empty;
-    private string __userPassword    = string.Empty;
+    private string __confirmPassword = EMPTY;
+    private string __userPassword    = EMPTY;
 
 
     [Required] [StringLength(PASSWORD)] public virtual string ConfirmPassword

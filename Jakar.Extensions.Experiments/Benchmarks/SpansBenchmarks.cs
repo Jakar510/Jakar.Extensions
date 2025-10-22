@@ -82,7 +82,7 @@ public class SpansBenchmarks
     private const string TEST            = $"{ALPHANUMERIC}_{EMPTY_WITH_TABS}_{OLD}-3DE3-4B75-9F7E-2A0F23EFA5A2";
 
 
-    [Params( "", ALPHANUMERIC, TEST )] public string Value { get; set; } = string.Empty;
+    [Params( "", ALPHANUMERIC, TEST )] public string Value { get; set; } = EMPTY;
 
     [Benchmark] public bool Contains_span()  => Value.Contains( '2' );
     [Benchmark] public bool Contains_value() => Spans.Contains( Value, NEW_VALUE );

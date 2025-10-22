@@ -8,15 +8,15 @@ public static partial class Validate
 
 
     public static string FormatNumber( this float value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this float value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty);
+    public static string FormatNumber( this float value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
 
 
     public static string FormatNumber( this double value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this double value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty);
+    public static string FormatNumber( this double value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
 
 
     public static string FormatNumber( this decimal value, int         maxDecimals           = 4 ) => value.FormatNumber(CultureInfo.CurrentCulture, maxDecimals);
-    public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", string.Empty);
+    public static string FormatNumber( this decimal value, CultureInfo info, int maxDecimals = 4 ) => Regex.Replace(string.Format(info, $"{{0:n{maxDecimals}}}", value), $"[{info.NumberFormat.NumberDecimalSeparator}]?0+$", EMPTY);
 
 
     public static bool IsDemo( this string value, params ReadOnlySpan<string> options )

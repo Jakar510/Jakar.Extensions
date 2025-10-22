@@ -34,8 +34,8 @@ public readonly struct TelemetrySpan : IDisposable, IEquatable<TelemetrySpan>
         {
             __parent    = null;
             __activity  = null;
-            DisplayName = string.Empty;
-            __id        = string.Empty;
+            DisplayName = EMPTY;
+            __id        = EMPTY;
             return;
         }
 

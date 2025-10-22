@@ -57,7 +57,7 @@ public static class XmlExtensions
 
             if ( node.Name != Constants.KEY_VALUE_PAIR ) { throw new SerializationException(nameof(node.Name)); }
 
-            string  key   = string.Empty;
+            string  key   = EMPTY;
             object? value = null;
 
             for ( int c = 0; c < node.ChildNodes.Count; c++ )

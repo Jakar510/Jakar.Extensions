@@ -24,9 +24,9 @@ public sealed class MethodDetails : BaseClass<MethodDetails>, IEqualComparable<M
     public        bool                          IsSpecialName       { get; init; }
     public        bool                          IsStatic            { get; init; }
     public        bool                          IsVirtual           { get; init; }
-    public        string                        Name                { get; init; } = string.Empty;
+    public        string                        Name                { get; init; } = EMPTY;
     public        ParameterDetails[]            Parameters          { get; init; } = [];
-    public        string                        Signature           { get; init; } = string.Empty;
+    public        string                        Signature           { get; init; } = EMPTY;
 
 
     public MethodDetails() { }

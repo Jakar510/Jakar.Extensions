@@ -33,7 +33,7 @@ public static class Enricher
                              _                             => null,
                          };
 
-        return spanId ?? string.Empty;
+        return spanId ?? EMPTY;
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ public static class Enricher
                               _                             => null,
                           };
 
-        return traceId ?? string.Empty;
+        return traceId ?? EMPTY;
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public static class Enricher
                                _                             => null,
                            };
 
-        return parentId ?? string.Empty;
+        return parentId ?? EMPTY;
     }
 
 

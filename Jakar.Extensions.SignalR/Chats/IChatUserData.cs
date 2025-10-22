@@ -22,7 +22,7 @@ public interface IChatUser : IUserID
 
 public sealed class ChatUser( string fullName, string userName, Guid userID ) : BaseClass<ChatUser>, IChatUser, IJsonModel<ChatUser>
 {
-    public static readonly           ChatUser                 Empty = new(string.Empty, string.Empty, Guid.Empty);
+    public static readonly           ChatUser                 Empty = new(EMPTY, EMPTY, Guid.Empty);
     public static                    JsonTypeInfo<ChatUser[]> JsonArrayInfo => JakarSignalRContext.Default.ChatUserArray;
     public static                    JsonSerializerContext    JsonContext   => JakarSignalRContext.Default;
     public static                    JsonTypeInfo<ChatUser>   JsonTypeInfo  => JakarSignalRContext.Default.ChatUser;

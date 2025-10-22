@@ -61,8 +61,8 @@
 //     private readonly MailboxAddress[]     _senders;
 //     private readonly List<MailboxAddress> _recipients  = new();
 //     private readonly List<Attachment>     _attachments = new();
-//     private          string               _subject     = string.Empty;
-//     private          string               _body        = string.Empty;
+//     private          string               _subject     = EMPTY;
+//     private          string               _body        = EMPTY;
 //
 //
 // #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.

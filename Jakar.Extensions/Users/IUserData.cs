@@ -34,7 +34,7 @@ public interface IUserData : IUserName, IUserID, IUserRights, IValidator, IJsonM
     public static string GetDescription( IUserData data ) => GetDescription(data.Department, data.Title, data.Company);
     public static string GetDescription( scoped in ReadOnlySpan<char> department, scoped in ReadOnlySpan<char> title, scoped in ReadOnlySpan<char> company )
     {
-        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return string.Empty; }
+        if ( department.IsNullOrWhiteSpace() && title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return EMPTY; }
 
         if ( !department.IsNullOrWhiteSpace() && !title.IsNullOrWhiteSpace() && company.IsNullOrWhiteSpace() ) { return $"{department}, {title}"; }
 

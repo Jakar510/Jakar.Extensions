@@ -525,10 +525,10 @@ public sealed class SessionToken : BaseClass<SessionToken>, IValidator, ISession
     public        Guid                         UserID        { get; set; }
     public        string?                      FullName      { get; set; }
     public        AppVersion                   Version       { get; set; } = AppVersion.Default;
-    public        string                       AccessToken   { get; set; } = string.Empty;
+    public        string                       AccessToken   { get; set; } = EMPTY;
     public        string?                      RefreshToken  { get; set; }
     public        Guid                         SessionID     { get; set; }
-    public        string                       DeviceName    { get; set; } = string.Empty;
+    public        string                       DeviceName    { get; set; } = EMPTY;
     public        bool                         IsValid       => SessionID.IsValidID();
     public        string                       DeviceID      { get; set; } = EMPTY;
 

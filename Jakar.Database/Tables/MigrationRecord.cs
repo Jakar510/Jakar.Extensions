@@ -55,7 +55,7 @@ public sealed record MigrationRecord : BaseRecord<MigrationRecord>, ITableRecord
     [StringLength(MAX_FIXED)] public required string       Description { get; init; }
     RecordID<MigrationRecord> IRecordPair<MigrationRecord>.ID          => RecordID<MigrationRecord>.Create(MigrationID.AsGuid());
     [Key] public required      ulong                       MigrationID { get; init; }
-    internal                   string                      SQL         { get; init; } = string.Empty;
+    internal                   string                      SQL         { get; init; } = EMPTY;
     [StringLength(256)] public string?                     TableID     { get; init; }
 
 

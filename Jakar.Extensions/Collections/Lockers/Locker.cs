@@ -621,7 +621,7 @@ public sealed class Locker : ILocker, IEquatable<Locker>, IAsyncDisposable, IDis
         #endif
             _ => throw new OutOfRangeException(__index)
         } ??
-        string.Empty;
+        EMPTY;
     public override int GetHashCode()
     {
         int? nullable = __index switch

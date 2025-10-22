@@ -90,7 +90,7 @@
 //         var test = new Test( "Root", children );
 //         return test;
 //     }
-//     public static Test GetObject() => new(string.Empty);
+//     public static Test GetObject() => new(EMPTY);
 //     public static Test GetObjects()
 //     {
 //         var first  = new Test( "First",  new Test( "1.1" ), new Test( "1.2" ) );

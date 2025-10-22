@@ -31,16 +31,16 @@ public static class DbLog // TODO: Jakar.Extensions.SelfLogger
     {
         if ( logger.IsEnabled(LogLevel.Information) ) { __senderCallback(logger, remoteIP, className, caller, null); }
     }
-    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) { Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, className, caller); }
+    public static void Sender( ILogger logger, HttpContext context, string className, [CallerMemberName] string caller = EMPTY ) { Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? EMPTY, className, caller); }
     public static void Sender<TValue>( ILogger logger, HttpContext context, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
     {
-        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, typeof(TValue).Name, caller);
+        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? EMPTY, typeof(TValue).Name, caller);
     }
     public static void Sender<TValue>( ILogger logger, HttpContext context, TValue cls, [CallerMemberName] string caller = EMPTY )
         where TValue : notnull
     {
-        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? string.Empty, cls.GetType().Name, caller);
+        Sender(logger, context.Connection.RemoteIpAddress?.ToString() ?? EMPTY, cls.GetType().Name, caller);
     }
 
 

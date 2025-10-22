@@ -8,7 +8,7 @@ namespace Jakar.Extensions;
 [JsonConverter(typeof(EmailJsonConverter))]
 public readonly record struct Email( string Value ) : IParsable<Email>
 {
-    public static readonly          Email Empty = new(string.Empty);
+    public static readonly          Email Empty = new(EMPTY);
     public static implicit operator string( Email email ) => email.Value;
     public static implicit operator Email( string value ) => new(value);
 

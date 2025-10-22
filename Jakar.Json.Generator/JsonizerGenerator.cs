@@ -32,7 +32,7 @@ public class JsonizerGenerator : ISourceGenerator
 
         fieldName = fieldName.TrimStart( '_' );
 
-        if ( fieldName.Length == 0 ) { return string.Empty; }
+        if ( fieldName.Length == 0 ) { return EMPTY; }
 
         Span<char> span = stackalloc char[fieldName.Length];
         span[0] = char.ToUpper( fieldName[0] );
@@ -186,7 +186,7 @@ public class JsonSerializationGenerator : ISourceGenerator
         {
             string namespaceName = classDeclaration.Parent is NamespaceDeclarationSyntax namespaceDeclaration
                                        ? namespaceDeclaration.Name.ToString()
-                                       : string.Empty;
+                                       : EMPTY;
 
             string className = classDeclaration.Identifier.ToString();
             string source    = GenerateSerializationSource( namespaceName, className, classDeclaration.Members );

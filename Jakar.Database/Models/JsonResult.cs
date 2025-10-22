@@ -85,7 +85,7 @@ public sealed class JsonResult<TValue> : ActionResult, IResult, IEndpointMetadat
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         httpContext.Response.StatusCode = StatusCode;
-        string json = Value.ToJson(TypeInfo) ?? string.Empty;
+        string json = Value.ToJson(TypeInfo) ?? EMPTY;
         await httpContext.Response.WriteAsync(json, Encoding.Default, CancellationToken.None);
     }
     static void IEndpointMetadataProvider.PopulateMetadata( MethodInfo method, EndpointBuilder builder )

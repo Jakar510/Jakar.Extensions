@@ -11,11 +11,11 @@ public sealed class ExceptionDetails : BaseClass<ExceptionDetails>, IEqualCompar
     public                       string?                          HelpLink        { get; init; }
     public                       int                              HResult         { get; init; }
     public                       ExceptionDetails?                Inner           { get; init; }
-    public                       string                           Message         { get; init; } = string.Empty;
+    public                       string                           Message         { get; init; } = EMPTY;
     public                       string?                          MethodSignature { get; init; }
     public                       string?                          Source          { get; init; }
     public                       string[]                         StackTrace      { get; init; } = [];
-    public                       string                           Str             { get; init; } = string.Empty;
+    public                       string                           Str             { get; init; } = EMPTY;
     public                       MethodDetails?                   TargetSite      { get; init; }
     public                       string?                          Type            { get; init; }
 

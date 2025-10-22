@@ -16,7 +16,7 @@ public class EnumSqlHandler<TValue> : SqlConverter<EnumSqlHandler<TValue>, TValu
     private static TValue SelectSelf( TValue v ) => v;
 
 
-    public static TValue Parse( string? value ) => Names.TryGetValue(value ?? string.Empty, out TValue result)
+    public static TValue Parse( string? value ) => Names.TryGetValue(value ?? EMPTY, out TValue result)
                                                        ? result
                                                        : Enum.TryParse(value, true, out result)
                                                            ? result

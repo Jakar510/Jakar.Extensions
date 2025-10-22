@@ -8,14 +8,14 @@ public class HeaderCollection : Dictionary<string, object>
         get => TryGetValue(nameof(HttpRequestHeader.ContentEncoding), out object? value)
                    ? value.ToString()
                    : null;
-        set => this[nameof(HttpRequestHeader.ContentEncoding)] = value ?? string.Empty;
+        set => this[nameof(HttpRequestHeader.ContentEncoding)] = value ?? EMPTY;
     }
     public string? ContentType
     {
         get => TryGetValue(nameof(HttpRequestHeader.ContentType), out object? value)
                    ? value.ToString()
                    : null;
-        set => this[nameof(HttpRequestHeader.ContentType)] = value ?? string.Empty;
+        set => this[nameof(HttpRequestHeader.ContentType)] = value ?? EMPTY;
     }
     public Encoding Encoding
     {

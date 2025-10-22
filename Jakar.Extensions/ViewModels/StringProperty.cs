@@ -22,7 +22,7 @@ public class EmailProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<string
     protected override string CoerceValue( string? value )
     {
         return string.IsNullOrWhiteSpace(value)
-                   ? string.Empty
+                   ? EMPTY
                    : value;
     }
 }
@@ -45,7 +45,7 @@ public class PhoneNumberProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<
 
     protected override string CoerceValue( string? value )
     {
-        if ( string.IsNullOrWhiteSpace(value) ) { return string.Empty; }
+        if ( string.IsNullOrWhiteSpace(value) ) { return EMPTY; }
 
         string result = Mask.Set(value)
                             ? Mask.ToString()
@@ -73,7 +73,7 @@ public class PasswordProperty<TCommand>( OneOf<Handler<string>, HandlerAsync<str
 
     protected override string CoerceValue( string? value )
     {
-        if ( string.IsNullOrWhiteSpace(value) ) { return string.Empty; }
+        if ( string.IsNullOrWhiteSpace(value) ) { return EMPTY; }
 
         string result = Mask.Set(value)
                             ? Mask.ToString()

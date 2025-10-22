@@ -32,7 +32,7 @@ public sealed record GroupRecord( [property: StringLength(GroupRecord.MAX_SIZE)]
     [StringLength(RIGHTS)] public UserRights Rights    { get; set; } = Rights;
 
 
-    public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, string.Empty, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
+    public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID ) : this(customerID, nameOfGroup, EMPTY, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
     public GroupRecord( UserRecord? owner, string nameOfGroup, string? customerID, string rights ) : this(customerID, nameOfGroup, rights, RecordID<GroupRecord>.New(), owner?.ID, DateTimeOffset.UtcNow) { }
     public GroupModel ToGroupModel() => new(this);
     public TGroupModel ToGroupModel<TGroupModel>()

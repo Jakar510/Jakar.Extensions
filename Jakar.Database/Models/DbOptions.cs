@@ -56,8 +56,8 @@ public sealed class DbOptions : IOptions<DbOptions>
     public        AppLoggerOptions                                        LoggerOptions                   { get;                                 set; } = new();
     public        SeqConfig?                                              SeqConfig                       { get;                                 set; }
     public        Logger?                                                 Serilogger                      { get;                                 set; }
-    public        string                                                  TokenAudience                   { get;                                 set; } = string.Empty;
-    public        string                                                  TokenIssuer                     { get;                                 set; } = string.Empty;
+    public        string                                                  TokenAudience                   { get;                                 set; } = EMPTY;
+    public        string                                                  TokenIssuer                     { get;                                 set; } = EMPTY;
     public        string                                                  UserExists                      { get;                                 set; } = USER_EXISTS;
     DbOptions IOptions<DbOptions>.                                        Value                           => this;
 

@@ -360,7 +360,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                     data.PhoneNumber,
                                                     data.Ext,
                                                     false,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     true,
                                                     false,
                                                     false,
@@ -372,15 +372,15 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                                                     false,
                                                     null,
                                                     null,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     null,
                                                     null,
-                                                    string.Empty,
-                                                    string.Empty,
+                                                    EMPTY,
+                                                    EMPTY,
                                                     rights,
                                                     RecordID<UserRecord>.TryCreate(data.EscalateTo),
                                                     data.AdditionalData,
-                                                    string.Empty,
+                                                    EMPTY,
                                                     RecordID<FileRecord>.TryCreate(data.ImageID),
                                                     RecordID<UserRecord>.New(),
                                                     caller?.ID,
@@ -390,22 +390,22 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
         where TEnum : unmanaged, Enum => Create(userName, password, rights.ToString(), caller);
     public static UserRecord Create( string userName, string password, UserRights rights, UserRecord? caller = null ) =>
         new UserRecord(userName,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
+                       EMPTY,
                        SupportedLanguage.English,
-                       string.Empty,
+                       EMPTY,
                        false,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
                        false,
-                       string.Empty,
+                       EMPTY,
                        true,
                        false,
                        false,
@@ -417,15 +417,15 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
                        false,
                        null,
                        null,
-                       string.Empty,
+                       EMPTY,
                        null,
                        null,
-                       string.Empty,
-                       string.Empty,
+                       EMPTY,
+                       EMPTY,
                        rights,
                        RecordID<UserRecord>.Empty,
                        null,
-                       string.Empty,
+                       EMPTY,
                        RecordID<FileRecord>.Empty,
                        RecordID<UserRecord>.New(),
                        caller?.ID,
@@ -463,7 +463,7 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
 
     public UserRecord ClearRefreshToken( string securityStamp )
     {
-        RefreshToken           = string.Empty;
+        RefreshToken           = EMPTY;
         RefreshTokenExpiryTime = null;
         SecurityStamp          = securityStamp;
         return this;
@@ -1016,15 +1016,15 @@ public sealed record UserRecord : OwnedTableRecord<UserRecord>, ITableRecord<Use
     }
 
 
-    public UserRecord WithNoRefreshToken()                                                                       => WithRefreshToken(string.Empty);
+    public UserRecord WithNoRefreshToken()                                                                       => WithRefreshToken(EMPTY);
     public UserRecord WithRefreshToken( SessionToken token, DateTimeOffset? date, string? securityStamp = null ) => WithRefreshToken(token.RefreshToken, date, securityStamp);
     public UserRecord WithRefreshToken( string? refreshToken, DateTimeOffset? date = null, string? securityStamp = null, bool hashed = true )
     {
         if ( string.IsNullOrEmpty(refreshToken) )
         {
-            RefreshToken           = string.Empty;
+            RefreshToken           = EMPTY;
             RefreshTokenExpiryTime = null;
-            SecurityStamp          = securityStamp ?? string.Empty;
+            SecurityStamp          = securityStamp ?? EMPTY;
             return Modified();
         }
 

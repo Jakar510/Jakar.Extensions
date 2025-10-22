@@ -15,10 +15,10 @@ public sealed class EmailSettings : BaseClass<EmailSettings>, ILoginRequest, IJs
     public static JsonTypeInfo<EmailSettings>   JsonTypeInfo  => JakarDatabaseContext.Default.EmailSettings;
     public static JsonTypeInfo<EmailSettings[]> JsonArrayInfo => JakarDatabaseContext.Default.EmailSettingsArray;
     public        SecureSocketOptions           Options       { get; init; } = SecureSocketOptions.Auto;
-    public        string                        Password      { get; init; } = string.Empty;
+    public        string                        Password      { get; init; } = EMPTY;
     public        int                           Port          { get; init; }
-    public        string                        Site          { get; init; } = string.Empty;
-    public        string                        UserName      { get; init; } = string.Empty;
+    public        string                        Site          { get; init; } = EMPTY;
+    public        string                        UserName      { get; init; } = EMPTY;
     public        AppVersion                    Version       { get; init; } = AppVersion.Default;
     public        bool                          IsValid       => !string.IsNullOrWhiteSpace(UserName) && !string.IsNullOrWhiteSpace(Password) && !string.IsNullOrWhiteSpace(Site) && Port.IsValidPort();
     public EmailSettings() { }

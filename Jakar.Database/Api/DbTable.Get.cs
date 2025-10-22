@@ -81,7 +81,7 @@ public partial class DbTable<TSelf>
                            ? Error.NotFound(command.SQL)
                            : result;
             }
-            catch ( Exception e ) { throw new SqlException<TSelf>(command.SQL, command.Parameters, string.Empty, e); }
+            catch ( Exception e ) { throw new SqlException<TSelf>(command.SQL, command.Parameters, EMPTY, e); }
         }
     }
 

@@ -10,6 +10,7 @@ using ZLinq;
 namespace Jakar.Extensions;
 
 
+/*
 public readonly ref struct Permissions : IDisposable
 {
     private readonly UserRights? __rights;
@@ -278,6 +279,7 @@ public readonly ref struct Permissions : IDisposable
         }
     }
 }
+*/
 
 
 
@@ -296,11 +298,11 @@ public readonly ref struct Permissions<TEnum> : IDisposable
     private static   TEnum[]?            __enumValues;
     private readonly bool[]              __array;
     private readonly Span<bool>          __span;
+    public static    char                ValidChar   { get; set; } = '+';
+    public static    char                InvalidChar { get; set; } = '.';
     public static    Permissions<TEnum>  Default     { [MustDisposeResource] get => new(); }
     public static    int                 Count       => EnumValues.Length;
     public static    ReadOnlySpan<TEnum> EnumValues  => __enumValues ??= Enum.GetValues<TEnum>();
-    public static    char                ValidChar   { get => Permissions.ValidChar;   set => Permissions.ValidChar = value; }
-    public static    char                InvalidChar { get => Permissions.InvalidChar; set => Permissions.InvalidChar = value; }
     public           Enumerable          Rights      => new(this);
 
 
@@ -328,6 +330,16 @@ public readonly ref struct Permissions<TEnum> : IDisposable
     }
 
 
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( UserRights?         rights ) => Create(rights);
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( ReadOnlySpan<TEnum> rights ) => Create(rights);
+    [MustDisposeResource] public static implicit operator Permissions<TEnum>( TEnum               rights ) => Create(rights);
+
+
+    [HandlesResourceDisposal] public string ToStringAndDispose()
+    {
+        try { return ToString(); }
+        finally { Dispose(); }
+    }
     public override string ToString()
     {
         using IMemoryOwner<char> owner = MemoryPool<char>.Shared.Rent(Count);
@@ -498,12 +510,11 @@ public readonly ref struct Permissions<TEnum> : IDisposable
 
 
 
-    public ref struct Enumerable : IValueEnumerator<Right<TEnum>>
+    public ref struct Enumerable( Permissions<TEnum> permissions ) : IValueEnumerator<Right<TEnum>>
     {
-        private readonly Permissions<TEnum>             __rights;
-        private          ReadOnlySpan<TEnum>.Enumerator __enums = EnumValues.GetEnumerator();
+        private readonly Permissions<TEnum>             __rights = permissions;
+        private          ReadOnlySpan<TEnum>.Enumerator __enums  = EnumValues.GetEnumerator();
         private          Right<TEnum>                   __current;
-        public Enumerable( Permissions<TEnum> permissions ) => __rights = permissions;
 
         public ref readonly Right<TEnum> Current => ref Unsafe.AsRef(ref __current);
 

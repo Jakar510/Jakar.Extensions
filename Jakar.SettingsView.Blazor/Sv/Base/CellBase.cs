@@ -45,7 +45,7 @@ public abstract class CellBase : ComponentBase, ISvCellTitle, IDisposable // , I
 
     protected                                           ElementReference                     _control;
     [CascadingParameter] public                         EditContext?                         CascadedEditContext  { get; set; }
-    [Parameter]          public                         string                               Class                { get; set; } = string.Empty;
+    [Parameter]          public                         string                               Class                { get; set; } = EMPTY;
     [Parameter]          public                         EventCallback<string>                ClassChanged         { get; set; }
     [Parameter]          public                         Expression<Func<string?>>?           ClassExpression      { get; set; }
     [Parameter]          public                         CultureInfo?                         Culture              { get; set; }
@@ -113,7 +113,7 @@ public abstract class CellBase : ComponentBase, ISvCellTitle, IDisposable // , I
 
         await SetClass( value
                             ? Class + $" {SV_DISABLED}"
-                            : Class.Replace( $" {SV_DISABLED}", string.Empty, StringComparison.Ordinal ) );
+                            : Class.Replace( $" {SV_DISABLED}", EMPTY, StringComparison.Ordinal ) );
     }
     public async ValueTask SetIsVisible( bool value )
     {

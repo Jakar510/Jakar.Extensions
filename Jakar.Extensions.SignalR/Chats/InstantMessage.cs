@@ -28,8 +28,8 @@ public sealed class InstantMessage : BaseClass<InstantMessage>, IInstantMessage,
     public static readonly InstantMessage[] Empty = [];
     private                bool             __hasBeenRead;
     private                FileData[]?      __data;
-    private                string           __groupName = string.Empty;
-    private                string           __message   = string.Empty;
+    private                string           __groupName = EMPTY;
+    private                string           __message   = EMPTY;
 
 
     public static                             JsonSerializerContext          JsonContext   => JakarSignalRContext.Default;

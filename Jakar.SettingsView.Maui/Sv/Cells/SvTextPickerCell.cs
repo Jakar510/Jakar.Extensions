@@ -4,5 +4,5 @@
 public class SvTextPickerCell : SvPickerCell<string>
 {
     public sealed override WidgetType            Type   => WidgetType.TextPicker;
-    public override        ErrorOrResult<string> Save() => Value ?? string.Empty;
+    public override        ErrorOrResult<string> Save() => Value ?? EMPTY;
 }

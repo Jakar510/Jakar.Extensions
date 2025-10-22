@@ -186,7 +186,7 @@ public sealed class EmailerOptions : IOptions<EmailerOptions>
     private EmailSettings? __settings;
 
 
-    public string                           DefaultSubject { get; set; } = string.Empty;
+    public string                           DefaultSubject { get; set; } = EMPTY;
     public MailboxAddress?                  Sender         { get; set; }
     public EmailSettings?                   Settings       { get; set; }
     EmailerOptions IOptions<EmailerOptions>.Value          => this;

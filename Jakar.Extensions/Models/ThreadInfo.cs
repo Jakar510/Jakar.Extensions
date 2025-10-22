@@ -14,7 +14,7 @@ namespace Jakar.Extensions;
 public readonly struct ThreadInformation( string name, int managedThreadID, Language currentCulture, Language currentUICulture ) : IJsonModel<ThreadInformation>
 {
     public ThreadInformation() : this(Thread.CurrentThread) { }
-    public ThreadInformation( Thread                          thread ) : this(thread.Name ?? string.Empty, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }
+    public ThreadInformation( Thread                          thread ) : this(thread.Name ?? EMPTY, thread.ManagedThreadId, thread.CurrentCulture, thread.CurrentUICulture) { }
     public static implicit operator ThreadInformation( Thread thread ) => new(thread);
     public readonly                 string                            Name             = name;
     public readonly                 int                               ManagedThreadID  = managedThreadID;

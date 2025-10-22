@@ -23,7 +23,7 @@ public partial class Database
     public async Task          SetPasswordHashAsync( UserRecord  user, string?           passwordHash, CancellationToken token ) => await this.TryCall(SetPasswordHashAsync, user, passwordHash, token);
     public async ValueTask SetPasswordHashAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? passwordHash, CancellationToken token )
     {
-        user.PasswordHash = passwordHash ?? string.Empty;
+        user.PasswordHash = passwordHash ?? EMPTY;
         await Users.Update(user, token);
     }
 
@@ -111,7 +111,7 @@ public partial class Database
     public ValueTask SetEmailAsync( UserRecord user, string? email, CancellationToken token ) => this.TryCall(SetEmailAsync, user, email, token);
     public async ValueTask SetEmailAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? email, CancellationToken token )
     {
-        user.Email = email ?? string.Empty;
+        user.Email = email ?? EMPTY;
         await Users.Update(connection, transaction, user, token);
     }
 
@@ -127,7 +127,7 @@ public partial class Database
     public ValueTask SetNormalizedEmailAsync( UserRecord user, string? normalizedEmail, CancellationToken token ) => this.TryCall(SetNormalizedEmailAsync, user, normalizedEmail, token);
     public async ValueTask SetNormalizedEmailAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? normalizedEmail, CancellationToken token )
     {
-        user.Email = normalizedEmail ?? string.Empty;
+        user.Email = normalizedEmail ?? EMPTY;
         await Users.Update(connection, transaction, user, token);
     }
 
@@ -149,7 +149,7 @@ public partial class Database
     public ValueTask SetPhoneNumberAsync( UserRecord user, string? phoneNumber, CancellationToken token ) => this.TryCall(SetPhoneNumberAsync, user, phoneNumber, token);
     public virtual async ValueTask SetPhoneNumberAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? phoneNumber, CancellationToken token )
     {
-        user.PhoneNumber = phoneNumber ?? string.Empty;
+        user.PhoneNumber = phoneNumber ?? EMPTY;
         await Users.Update(connection, transaction, user, token);
     }
 
@@ -286,7 +286,7 @@ public partial class Database
     public ValueTask SetNormalizedUserNameAsync( UserRecord user, string? fullName, CancellationToken token ) => this.TryCall(SetNormalizedUserNameAsync, user, fullName, token);
     public virtual async ValueTask SetNormalizedUserNameAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? fullName, CancellationToken token )
     {
-        user.FullName = fullName ?? string.Empty;
+        user.FullName = fullName ?? EMPTY;
         await Users.Update(connection, transaction, user, token);
     }
 
@@ -294,7 +294,7 @@ public partial class Database
     public ValueTask SetUserNameAsync( UserRecord user, string? userName, CancellationToken token ) => this.TryCall(SetUserNameAsync, user, userName, token);
     public virtual async ValueTask SetUserNameAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string? userName, CancellationToken token )
     {
-        user = user with { UserName = userName ?? string.Empty };
+        user = user with { UserName = userName ?? EMPTY };
         await Users.Update(connection, transaction, user, token);
     }
 

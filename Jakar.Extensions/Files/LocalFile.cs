@@ -895,7 +895,7 @@ public class LocalFile( FileInfo info, Encoding? encoding = null ) : BaseClass<L
         await using FileStream file          = OpenRead();
         using StreamReader     stream        = new(file, FileEncoding);
 
-        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? string.Empty; }
+        while ( token.ShouldContinue() && !stream.EndOfStream ) { yield return await stream.ReadLineAsync(token) ?? EMPTY; }
     }
 
 

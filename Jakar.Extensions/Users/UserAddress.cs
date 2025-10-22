@@ -36,12 +36,12 @@ public abstract class UserAddress<TSelf, TID> : BaseClass<TSelf>, IAddress<TID>
     where TSelf : UserAddress<TSelf, TID>, IAddress<TSelf, TID>, IJsonModel<TSelf>, IEqualComparable<TSelf>
 {
     private bool    __isPrimary;
-    private string  __city            = string.Empty;
-    private string  __country         = string.Empty;
-    private string  __line1           = string.Empty;
-    private string  __line2           = string.Empty;
-    private string  __postalCode      = string.Empty;
-    private string  __stateOrProvince = string.Empty;
+    private string  __city            = EMPTY;
+    private string  __country         = EMPTY;
+    private string  __line1           = EMPTY;
+    private string  __line2           = EMPTY;
+    private string  __postalCode      = EMPTY;
+    private string  __stateOrProvince = EMPTY;
     private string? __address;
     private TID     __id;
 

@@ -163,7 +163,7 @@ internal static class PermissionGenUtilities
         sb.AppendLine("    }");
         sb.AppendLine();
         sb.AppendLine("    public static int Count => _names.Length;");
-        sb.AppendLine("    public static string GetName(int id) => id >= 1 && id <= _names.Length ? _names[id - 1] : string.Empty;");
+        sb.AppendLine("    public static string GetName(int id) => id >= 1 && id <= _names.Length ? _names[id - 1] : EMPTY;");
         sb.AppendLine("    public static bool TryGetId(string name, out int id) => _lookup.TryGetValue(name, out id);");
         sb.AppendLine("}");
         ctx.AddSource("PermissionRegistry.g.cs", SourceText.From(sb.ToString(), Encoding.UTF8));

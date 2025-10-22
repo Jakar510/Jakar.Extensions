@@ -4,6 +4,7 @@
 using System.Security.Cryptography.X509Certificates;
 using OpenTelemetry;
 using OpenTelemetry.Resources;
+using Seq.Apps;
 
 
 
@@ -45,6 +46,18 @@ public static class Telemetry
     public static void ConfigureExporter( this OtlpExporterOptions exporter, Func<HttpClient>                      factory )   => exporter.HttpClientFactory = factory;
 
 
+    public static WebApplication UseDefaults( this WebApplication app ) => UseDefaults(app, "/_metrics");
+    public static WebApplication UseDefaults( this WebApplication app, OneOf<string, Func<HttpContext, bool>, (MeterProvider meterProvider, Func<HttpContext, bool> predicate, Action<IApplicationBuilder> configureBranchedPipeline, string optionsName, string path)> telemetry )
+    {
+        app.UseStaticFiles();
+        app.UseRouting();
+        app.UseHttpMetrics();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        telemetry.Switch(path => app.UseTelemetry(path), predicate => app.UseTelemetry(predicate), t => app.UseTelemetry(t.meterProvider, t.predicate, t.configureBranchedPipeline, t.optionsName, t.path));
+        return app;
+    }
+
     public static WebApplication UseTelemetry( this WebApplication application, string path = "/metrics" )
     {
         application.UseOpenTelemetryPrometheusScrapingEndpoint(path);
@@ -83,7 +96,7 @@ public static class Telemetry
     public static WebApplicationBuilder AddOpenTelemetry<TApp>( this WebApplicationBuilder builder, Action<OtlpExporterOptions> tracerOtlpExporter, Action<OtlpExporterOptions> meterOtlpExporter, Action<LoggerProviderBuilder>? configureBuilder = null, Action<OpenTelemetryLoggerOptions>? configureOptions = null )
         where TApp : IAppID
     {
-        KeyValuePair<string, object>[] attributes = [new(ATTRIBUTE_SERVICE_NAME, TApp.AppName), new(ATTRIBUTE_SERVICE_VERSION, TApp.AppVersion.ToString()), new(ATTRIBUTE_SERVICE_INSTANCE, TApp.AppID.ToString()), new(ATTRIBUTE_SERVICE_NAMESPACE, typeof(TApp).Namespace ?? string.Empty)];
+        KeyValuePair<string, object>[] attributes = [new(ATTRIBUTE_SERVICE_NAME, TApp.AppName), new(ATTRIBUTE_SERVICE_VERSION, TApp.AppVersion.ToString()), new(ATTRIBUTE_SERVICE_INSTANCE, TApp.AppID.ToString()), new(ATTRIBUTE_SERVICE_NAMESPACE, typeof(TApp).Namespace ?? EMPTY)];
 
         ResourceBuilder resources = ResourceBuilder.CreateEmpty()
                                                    .AddAttributes(attributes)

@@ -59,15 +59,15 @@ public static class ErrorExtensions
     public static string GetMessage( this Error error ) => GetMessage(error.Title, in error.errors);
     public static string GetMessage( this string? title, ref readonly StringTags? tags )
     {
-        if ( tags is null ) { return title ?? string.Empty; }
+        if ( tags is null ) { return title ?? EMPTY; }
 
         StringTags values = tags.Value;
-        if ( values.Values.Length == 0 || values.Tags.Length == 0 ) { return title ?? string.Empty; }
+        if ( values.Values.Length == 0 || values.Tags.Length == 0 ) { return title ?? EMPTY; }
 
         using ValueStringBuilder builder = new(4096);
 
         builder.Append(BULLET)
-               .Append(title ?? string.Empty);
+               .Append(title ?? EMPTY);
 
         foreach ( string value in values.Values.AsSpan() )
         {

@@ -219,8 +219,8 @@ public static class Strings
     public static string ConvertToString( this ReadOnlyMemory<byte> value, Encoding encoding ) => value.Span.ConvertToString(encoding);
 
 
-    public static string RemoveAll( this string source, string old ) => source.Replace(old,           string.Empty, StringComparison.Ordinal);
-    public static string RemoveAll( this string source, char   old ) => source.Replace(old.Repeat(1), string.Empty);
+    public static string RemoveAll( this string source, string old ) => source.Replace(old,           EMPTY, StringComparison.Ordinal);
+    public static string RemoveAll( this string source, char   old ) => source.Replace(old.Repeat(1), EMPTY);
 
 
     /// <summary>
@@ -261,7 +261,7 @@ public static class Strings
 
     public static string ToSnakeCase( this scoped in ReadOnlySpan<char> span, CultureInfo cultureInfo )
     {
-        if ( span.IsNullOrWhiteSpace() ) { return string.Empty; }
+        if ( span.IsNullOrWhiteSpace() ) { return EMPTY; }
 
         StringBuilder    builder          = new(span.Length + span.Count(' '));
         UnicodeCategory? previousCategory = null;

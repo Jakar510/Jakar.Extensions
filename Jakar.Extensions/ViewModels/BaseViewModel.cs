@@ -7,7 +7,7 @@ namespace Jakar.Extensions;
 public abstract class BaseViewModel : BaseClass, IChangeable
 {
     private bool    __isBusy;
-    private string? __title = string.Empty;
+    private string? __title = EMPTY;
 
 
     public virtual bool IsBusy

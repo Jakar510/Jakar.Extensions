@@ -85,7 +85,7 @@ public static class AppPreference
     public static void SetPreference( this string sharedName, string key, bool?   value ) => sharedName.SetPreference(key, value.GetString());
     public static void SetPreference( this string sharedName, string key, bool    value ) => sharedName.SetPreference(key, value.GetString());
     public static void SetPreference( this string sharedName, string key, Uri     value ) => sharedName.SetPreference(key, value.ToString());
-    public static void SetPreference( this string sharedName, string key, string? value ) => Source.Set(key, value ?? string.Empty, sharedName);
+    public static void SetPreference( this string sharedName, string key, string? value ) => Source.Set(key, value ?? EMPTY, sharedName);
 
 
     public static void SetPreference<TValue>( this string sharedName, string key, TValue value )

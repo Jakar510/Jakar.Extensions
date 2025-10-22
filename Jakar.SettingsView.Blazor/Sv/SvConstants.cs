@@ -50,7 +50,7 @@ public static class SvConstants
 
         return !classValue.Contains( SV_ACTIVE, StringComparison.Ordinal )
                    ? classValue + ACTIVE
-                   : classValue.Replace( ACTIVE, string.Empty, StringComparison.Ordinal );
+                   : classValue.Replace( ACTIVE, EMPTY, StringComparison.Ordinal );
     }
 
 

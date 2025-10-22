@@ -100,7 +100,7 @@ public sealed class WebResponse<TValue>
     }
     public  Errors GetError()                => Errors.Match<Errors>(x => GetError(x.ToString()), GetError, static x => x) ?? Extensions.Errors.Empty;
     private Errors GetError( string detail ) => Error.Create(Exception?.Value, ErrorMessage(), URL?.OriginalString, StringTags.Empty, StatusCode);
-    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? string.Empty;
+    public  string ErrorMessage()            => Errors.Match<string>(static x => x.ToString(), static x => x, static x => x.GetMessage()) ?? EMPTY;
 
 
     public void EnsureSuccessStatusCode()

@@ -583,7 +583,7 @@ public ref struct ValueStringBuilder : IDisposable
             }
 
             // Append it to the final output of the Format String.
-            s ??= string.Empty;
+            s ??= EMPTY;
             int pad = width - s.Length;
             if ( !leftJustify && pad > 0 ) { Append(' ', pad); }
 

@@ -28,7 +28,7 @@ public class SvSection : ContentView, ISvSection<CellBase>, IEquatable<SvSection
 
 
     public SvSection() : base() { }
-    public SvSection( string? title ) : this() => Header.Title = title ?? string.Empty;
+    public SvSection( string? title ) : this() => Header.Title = title ?? EMPTY;
     public virtual void Dispose()
     {
         Header.Dispose();

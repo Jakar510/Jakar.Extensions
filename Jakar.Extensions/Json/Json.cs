@@ -1,6 +1,7 @@
 ﻿// Jakar.Extensions :: Jakar.Extensions
 // 11/29/2023  1:49 PM
 
+using System.IO.Pipelines;
 using Jakar.Extensions.UserGuid;
 using Jakar.Extensions.UserLong;
 
@@ -329,7 +330,7 @@ public static class Json
 
     public static TValue? ToObject<TValue>( this JsonElement element, JsonTypeInfo<TValue> options )
     {
-        ArrayBufferWriter<byte> bufferWriter = new(); 
+        ArrayBufferWriter<byte> bufferWriter = new();
         using ( Utf8JsonWriter writer = new(bufferWriter) ) { element.WriteTo(writer); }
 
         return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, options);

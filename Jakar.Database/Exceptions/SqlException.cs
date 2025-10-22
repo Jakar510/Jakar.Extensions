@@ -60,7 +60,7 @@ public sealed class SqlException<TSelf> : Exception
            .ToString();
 
         string? message              = Message;
-        string  innerExceptionString = _innerException?.ToString() ?? string.Empty;
+        string  innerExceptionString = _innerException?.ToString() ?? EMPTY;
         string? stackTrace           = StackTrace;
 
         // Calculate result string length

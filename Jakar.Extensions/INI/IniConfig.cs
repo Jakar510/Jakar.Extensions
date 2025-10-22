@@ -62,7 +62,7 @@ public sealed partial class IniConfig : IReadOnlyDictionary<string, IniConfig.Se
         if ( span.IsEmpty ) { return config; }
 
 
-        string section = string.Empty;
+        string section = EMPTY;
 
         foreach ( ReadOnlySpan<char> rawLine in span.SplitOn() )
         {

@@ -36,7 +36,7 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
 
 
     public UserLoginProviderRecord( UserRecord user, UserLoginInfo info ) : this(user, info.LoginProvider, info.ProviderKey, info.ProviderDisplayName) { }
-    public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, string.Empty, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
+    public UserLoginProviderRecord( UserRecord user, string        loginProvider, string providerKey, string? providerDisplayName ) : this(loginProvider, providerDisplayName, providerKey, EMPTY, RecordID<UserLoginProviderRecord>.New(), user.ID, DateTimeOffset.UtcNow) { }
 
 
     public override PostgresParameters ToDynamicParameters()
@@ -139,14 +139,14 @@ public sealed record UserLoginProviderRecord( [property: StringLength(          
                                                                                                   {
                                                                                                       UserId        = value.CreatedBy?.ToString() ?? throw new NullReferenceException(nameof(value.CreatedBy)),
                                                                                                       LoginProvider = value.LoginProvider,
-                                                                                                      Name          = value.ProviderDisplayName ?? string.Empty,
+                                                                                                      Name          = value.ProviderDisplayName ?? EMPTY,
                                                                                                       Value         = value.ProviderKey
                                                                                                   };
     public static implicit operator IdentityUserToken<Guid>( UserLoginProviderRecord value ) => new()
                                                                                                 {
                                                                                                     UserId        = value.CreatedBy?.Value ?? Guid.Empty,
                                                                                                     LoginProvider = value.LoginProvider,
-                                                                                                    Name          = value.ProviderDisplayName ?? string.Empty,
+                                                                                                    Name          = value.ProviderDisplayName ?? EMPTY,
                                                                                                     Value         = value.ProviderKey
                                                                                                 };
 }

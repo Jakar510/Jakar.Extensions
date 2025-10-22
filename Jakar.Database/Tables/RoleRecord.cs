@@ -34,11 +34,11 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
                                                                                                            .Build();
 
 
-    public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, caller) { }
-    public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = null ) : this(role.Name ?? string.Empty, role.NormalizedName ?? string.Empty, role.ConcurrencyStamp ?? string.Empty, rights, caller) { }
+    public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, caller) { }
+    public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, rights, caller) { }
     public RoleRecord( string       name, UserRecord? caller                                                                               = null ) : this(name, name, caller) { }
-    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = null ) : this(name, normalizedName, string.Empty, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = null ) : this(name, normalizedName, concurrencyStamp, string.Empty, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = null ) : this(name, normalizedName, name.GetHash(), EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = null ) : this(name, normalizedName, concurrencyStamp, EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
     public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = null ) : this(name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
     public RoleModel ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
@@ -54,6 +54,10 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
         parameters.Add(nameof(Rights),           Rights);
         return parameters;
     }
+
+
+    [Pure] public static RoleRecord Create<TEnum>( string name, [HandlesResourceDisposal] scoped Permissions<TEnum> rights, string? normalizedName = null, UserRecord? caller = null, string? concurrencyStamp = null )
+        where TEnum : unmanaged, Enum => new(name, normalizedName ?? name, concurrencyStamp ?? name.GetHash(), rights.ToStringAndDispose(), caller);
     [Pure] public static RoleRecord Create( DbDataReader reader )
     {
         string                rights           = reader.GetFieldValue<string>(nameof(Rights));
@@ -67,6 +71,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
         RoleRecord            record           = new(name, normalizedName, concurrencyStamp, rights, id, ownerUserID, dateCreated, lastModified);
         return record.Validate();
     }
+
 
     [Pure] public IAsyncEnumerable<UserRecord> GetUsers( NpgsqlConnection connection, NpgsqlTransaction? transaction, Database db, CancellationToken token ) => UserRoleRecord.Where(connection, transaction, db.Users, this, token);
 

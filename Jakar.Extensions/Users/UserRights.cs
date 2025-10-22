@@ -27,7 +27,7 @@ public interface IUserRights
 
 public class UserRights : BaseClass, IEqualComparable<UserRights>
 {
-    protected string _rights = string.Empty;
+    protected string _rights = EMPTY;
 
 
     [StringLength(RIGHTS)] public virtual string Value { get => _rights; set => SetProperty(ref _rights, value); }

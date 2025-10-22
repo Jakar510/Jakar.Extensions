@@ -57,8 +57,8 @@ public class RoleStore( Database dbContext ) : IRoleStore<RoleRecord>
     public async Task<string?> GetNormalizedRoleNameAsync( RoleRecord role, CancellationToken token )                         => await ValueTask.FromResult(role.NameOfRole);
     public async Task<string>  GetRoleIdAsync( RoleRecord             role, CancellationToken token )                         => await ValueTask.FromResult(role.ID.ToString());
     public async Task<string?> GetRoleNameAsync( RoleRecord           role, CancellationToken token )                         => await ValueTask.FromResult(role.NameOfRole);
-    public async Task          SetNormalizedRoleNameAsync( RoleRecord role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NormalizedName = name ?? string.Empty }, token);
-    public async Task          SetRoleNameAsync( RoleRecord           role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NameOfRole = name     ?? string.Empty }, token);
+    public async Task          SetNormalizedRoleNameAsync( RoleRecord role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NormalizedName = name ?? EMPTY }, token);
+    public async Task          SetRoleNameAsync( RoleRecord           role, string?           name, CancellationToken token ) => await __dbContext.Roles.Update(role with { NameOfRole = name     ?? EMPTY }, token);
 
 
     public async Task<IdentityResult> UpdateAsync( RoleRecord role, CancellationToken token )

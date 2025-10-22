@@ -25,7 +25,7 @@ public static class JwtExtensions
     public static IConfigurationSection TokenValidation( this IConfiguration configuration ) => configuration.GetSection(nameof(TokenValidation));
 
 
-    public static byte[]               GetJWTKey( this               IConfiguration configuration, DbOptions options ) => Encoding.UTF8.GetBytes(configuration[options.JWTKey] ?? string.Empty);
+    public static byte[]               GetJWTKey( this               IConfiguration configuration, DbOptions options ) => Encoding.UTF8.GetBytes(configuration[options.JWTKey] ?? EMPTY);
     public static SymmetricSecurityKey GetSymmetricSecurityKey( this IConfiguration configuration, DbOptions options ) => new(configuration.GetJWTKey(options));
     public static SigningCredentials   GetSigningCredentials( this   IConfiguration configuration, DbOptions options ) => new(configuration.GetSymmetricSecurityKey(options), options.JWTAlgorithm);
 

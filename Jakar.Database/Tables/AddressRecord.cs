@@ -83,7 +83,7 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
     public static AddressRecord Parse( string s, IFormatProvider? provider ) => Create(Extensions.Validate.Re.Address.Match(s));
     public static bool TryParse( [NotNullWhen(true)] string? s, IFormatProvider? provider, [MaybeNullWhen(false)] out AddressRecord result )
     {
-        Match match = Extensions.Validate.Re.Address.Match(s ?? string.Empty);
+        Match match = Extensions.Validate.Re.Address.Match(s ?? EMPTY);
 
         if ( !match.Success )
         {

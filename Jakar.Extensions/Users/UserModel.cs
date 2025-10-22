@@ -12,18 +12,18 @@ public abstract class UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel> :
     where TAddress : IAddress<TID>, IEquatable<TAddress>
     where TSelf : UserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, ICreateUserModel<TSelf, TID, TAddress, TGroupModel, TRoleModel>, new()
 {
-    private      string            __company          = string.Empty;
-    private      string            __department       = string.Empty;
-    private      string            __email            = string.Empty;
-    private      string            __ext              = string.Empty;
-    private      string            __firstName        = string.Empty;
-    private      string            __gender           = string.Empty;
-    private      string            __lastName         = string.Empty;
-    private      string            __phoneNumber      = string.Empty;
+    private      string            __company          = EMPTY;
+    private      string            __department       = EMPTY;
+    private      string            __email            = EMPTY;
+    private      string            __ext              = EMPTY;
+    private      string            __firstName        = EMPTY;
+    private      string            __gender           = EMPTY;
+    private      string            __lastName         = EMPTY;
+    private      string            __phoneNumber      = EMPTY;
     private      UserRights        __rights           = new();
-    private      string            __title            = string.Empty;
-    private      string            __userName         = string.Empty;
-    private      string            __website          = string.Empty;
+    private      string            __title            = EMPTY;
+    private      string            __userName         = EMPTY;
+    private      string            __website          = EMPTY;
     protected    string?           _description;
     protected    string?           _fullName;
     private      SupportedLanguage __preferredLanguage = SupportedLanguage.English;

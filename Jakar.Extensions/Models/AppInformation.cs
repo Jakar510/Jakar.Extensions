@@ -14,7 +14,7 @@ namespace Jakar.Extensions;
 [method: JsonConstructor]
 public readonly struct AppInformation( AppVersion version, Guid appID, string appName, string? packageName ) : IJsonModel<AppInformation>
 {
-    public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, string.Empty, null);
+    public static readonly AppInformation Invalid     = new(AppVersion.Default, Guid.Empty, EMPTY, null);
     public readonly        AppVersion     Version     = version;
     public readonly        Guid           AppID       = appID;
     public readonly        string         AppName     = appName;
