@@ -74,7 +74,7 @@ public readonly struct RecordID<TSelf> : IEquatable<RecordID<TSelf>>, IComparabl
     }
 
 
-    public static implicit operator RecordID<TSelf>( TSelf record ) => new(record.ID.Value);
+    public static implicit operator RecordID<TSelf>( TSelf record ) => record.ID;
 
 
     public UInt128 GetHash() => key.Hash128();

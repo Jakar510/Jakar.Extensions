@@ -52,14 +52,21 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     {
         await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
         TestDatabase                  db    = scope.ServiceProvider.GetRequiredService<TestDatabase>();
-        ( UserRecord admin, UserRecord user ) = await Add_Users(db, token);
-        ( RoleRecord Admin, RoleRecord User ) = await Add_Roles(db, admin, token);
+        ( UserRecord admin, UserRecord user )             = await Add_Users(db, token);
+        ( RoleRecord AdminRole, RoleRecord UserRole )     = await Add_Roles(db, admin, token);
+        ( GroupRecord AdminGroup, GroupRecord UserGroup ) = await Add_Group(db, admin, token);
     }
     private static async ValueTask<(RoleRecord Admin, RoleRecord User)> Add_Roles( Database db, UserRecord adminUser, CancellationToken token = default )
     {
         RoleRecord admin = RoleRecord.Create("Admin", Permissions<TestRight>.SA(),                   "Admins", adminUser);
         RoleRecord user  = RoleRecord.Create("User",  Permissions<TestRight>.Create(TestRight.Read), "Users",  adminUser);
         return ( await db.Roles.Insert(admin, token), await db.Roles.Insert(user, token) );
+    }
+    private static async ValueTask<(GroupRecord Admin, GroupRecord User)> Add_Group( Database db, UserRecord adminUser, CancellationToken token = default )
+    {
+        GroupRecord admin = GroupRecord.Create("Admin", Permissions<TestRight>.SA(),                   "Admin", adminUser);
+        GroupRecord user  = GroupRecord.Create("User",  Permissions<TestRight>.Create(TestRight.Read), "User",  adminUser);
+        return ( await db.Groups.Insert(admin, token), await db.Groups.Insert(user, token) );
     }
     private static async ValueTask<(UserRecord Admin, UserRecord User)> Add_Users( Database db, CancellationToken token = default )
     {

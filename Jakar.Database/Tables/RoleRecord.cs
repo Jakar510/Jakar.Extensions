@@ -34,12 +34,12 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
                                                                                                            .Build();
 
 
-    public RoleRecord( IdentityRole role, UserRecord? caller                     = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, caller) { }
-    public RoleRecord( IdentityRole role, string      rights, UserRecord? caller = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, rights, caller) { }
-    public RoleRecord( string       name, UserRecord? caller                                                                               = null ) : this(name, name, caller) { }
-    public RoleRecord( string       name, string      normalizedName, UserRecord? caller                                                   = null ) : this(name, normalizedName, name.GetHash(), EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, UserRecord? caller                     = null ) : this(name, normalizedName, concurrencyStamp, EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
-    public RoleRecord( string       name, string      normalizedName, string      concurrencyStamp, string      rights, UserRecord? caller = null ) : this(name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public RoleRecord( IdentityRole role, RecordID<UserRecord>? caller                               = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, caller) { }
+    public RoleRecord( IdentityRole role, string                rights, RecordID<UserRecord>? caller = null ) : this(role.Name ?? EMPTY, role.NormalizedName ?? EMPTY, role.ConcurrencyStamp ?? EMPTY, rights, caller) { }
+    public RoleRecord( string       name, RecordID<UserRecord>? caller                                                                                                             = null ) : this(name, name, caller) { }
+    public RoleRecord( string       name, string                normalizedName, RecordID<UserRecord>? caller                                                                       = null ) : this(name, normalizedName, name.GetHash(), EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string                normalizedName, string                concurrencyStamp, RecordID<UserRecord>? caller                               = null ) : this(name, normalizedName, concurrencyStamp, EMPTY, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
+    public RoleRecord( string       name, string                normalizedName, string                concurrencyStamp, string                rights, RecordID<UserRecord>? caller = null ) : this(name, normalizedName, concurrencyStamp, rights, RecordID<RoleRecord>.New(), caller?.ID, DateTimeOffset.UtcNow) { }
     public RoleModel ToRoleModel() => new(this);
     public TRoleModel ToRoleModel<TRoleModel>()
         where TRoleModel : class, IRoleModel<TRoleModel, Guid> => TRoleModel.Create(this);
@@ -56,7 +56,7 @@ public sealed record RoleRecord( [property: StringLength(NAME)]              str
     }
 
 
-    [Pure] public static RoleRecord Create<TEnum>( string name, [HandlesResourceDisposal] scoped Permissions<TEnum> rights, string? normalizedName = null, UserRecord? caller = null, string? concurrencyStamp = null )
+    [Pure] public static RoleRecord Create<TEnum>( string name, [HandlesResourceDisposal] scoped Permissions<TEnum> rights, string? normalizedName = null, RecordID<UserRecord>? caller = null, string? concurrencyStamp = null )
         where TEnum : unmanaged, Enum => new(name, normalizedName ?? name, concurrencyStamp ?? name.GetHash(), rights.ToStringAndDispose(), caller);
     [Pure] public static RoleRecord Create( DbDataReader reader )
     {
