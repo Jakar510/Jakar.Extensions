@@ -24,10 +24,10 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     public readonly             DbTable<RoleRecord>              Roles;
     public readonly             DbTable<UserAddressRecord>       UserAddresses;
     public readonly             DbTable<UserGroupRecord>         UserGroups;
-    public readonly             DbTable<UserLoginProviderRecord> UserLogins;
     public readonly             DbTable<UserRecord>              Users;
     public readonly             DbTable<UserRecoveryCodeRecord>  UserRecoveryCodes;
     public readonly             DbTable<UserRoleRecord>          UserRoles;
+    public readonly             DbTable<UserLoginProviderRecord> UserLoginProviders;
     protected internal readonly DbTable<MigrationRecord>         Migrations;
     protected readonly          FusionCache                      _cache;
     public readonly             IConfiguration                   Configuration;
@@ -75,22 +75,22 @@ public abstract partial class Database : Randoms, IConnectableDbRoot, IHealthChe
     }
     protected Database( IConfiguration configuration, IOptions<DbOptions> options, FusionCache cache ) : base()
     {
-        _cache            = cache;
-        Configuration     = configuration;
-        Options           = options.Value;
-        Users             = Create<UserRecord>();
-        Roles             = Create<RoleRecord>();
-        UserRoles         = Create<UserRoleRecord>();
-        UserGroups        = Create<UserGroupRecord>();
-        Groups            = Create<GroupRecord>();
-        RecoveryCodes     = Create<RecoveryCodeRecord>();
-        UserLogins        = Create<UserLoginProviderRecord>();
-        UserRecoveryCodes = Create<UserRecoveryCodeRecord>();
-        Addresses         = Create<AddressRecord>();
-        UserAddresses     = Create<UserAddressRecord>();
-        Files             = Create<FileRecord>();
-        Migrations        = Create<MigrationRecord>();
-        Current           = this;
+        _cache             = cache;
+        Configuration      = configuration;
+        Options            = options.Value;
+        Users              = Create<UserRecord>();
+        Roles              = Create<RoleRecord>();
+        UserRoles          = Create<UserRoleRecord>();
+        UserGroups         = Create<UserGroupRecord>();
+        Groups             = Create<GroupRecord>();
+        RecoveryCodes      = Create<RecoveryCodeRecord>();
+        UserRecoveryCodes  = Create<UserRecoveryCodeRecord>();
+        UserLoginProviders = Create<UserLoginProviderRecord>();
+        Addresses          = Create<AddressRecord>();
+        UserAddresses      = Create<UserAddressRecord>();
+        Files              = Create<FileRecord>();
+        Migrations         = Create<MigrationRecord>();
+        Current            = this;
         Task.Run(InitDataProtector);
     }
     public virtual async ValueTask DisposeAsync()

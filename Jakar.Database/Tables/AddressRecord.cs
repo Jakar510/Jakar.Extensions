@@ -94,6 +94,8 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
         result = Create(match);
         return true;
     }
+ 
+
     [Pure] public static AddressRecord Create( Match          match )   => new(match);
     [Pure] public static AddressRecord Create( IAddress<Guid> address ) => new(address);
     [Pure] public static AddressRecord Create( string line1, string line2, string city, string stateOrProvince, string postalCode, string country, Guid id = default ) => new(line1,
@@ -105,7 +107,6 @@ public sealed record AddressRecord( [property: ProtectedPersonalData] string  Li
                                                                                                                                                                               id.IsValidID()
                                                                                                                                                                                   ? id
                                                                                                                                                                                   : Guid.NewGuid());
-
     [Pure] public static AddressRecord Create( DbDataReader reader )
     {
         string                  line1           = reader.GetFieldValue<string>(nameof(Line1));

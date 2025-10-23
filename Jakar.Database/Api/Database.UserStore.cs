@@ -34,13 +34,13 @@ public partial class Database
     public IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TSelf>( TSelf record, [EnumeratorCancellation] CancellationToken token )
         where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => this.TryCall(GetLoginsAsync, record, token);
     public virtual IAsyncEnumerable<UserLoginProviderRecord> GetLoginsAsync<TSelf>( NpgsqlConnection connection, NpgsqlTransaction transaction, TSelf record, [EnumeratorCancellation] CancellationToken token )
-        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => UserLogins.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
+        where TSelf : OwnedTableRecord<TSelf>, ITableRecord<TSelf> => UserLoginProviders.Where(connection, transaction, nameof(record.CreatedBy), record.CreatedBy, token);
 
 
     public ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( UserRecord user, UserLoginInfo login, CancellationToken token ) => this.TryCall(AddLoginAsync, user, login, token);
     public virtual async ValueTask<ErrorOrResult<UserLoginProviderRecord>> AddLoginAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, UserLoginInfo login, CancellationToken token )
     {
-        UserLoginProviderRecord? record = await UserLogins.Get(connection, transaction, true, UserLoginProviderRecord.GetDynamicParameters(user, login), token);
+        UserLoginProviderRecord? record = await UserLoginProviders.Get(connection, transaction, true, UserLoginProviderRecord.GetDynamicParameters(user, login), token);
 
         if ( record is not null )
         {
@@ -52,7 +52,7 @@ public partial class Database
         }
 
         record = new UserLoginProviderRecord(user, login);
-        record = await UserLogins.Insert(connection, transaction, record, token);
+        record = await UserLoginProviders.Insert(connection, transaction, record, token);
         await SetAuthenticatorKeyAsync(connection, transaction, user, record.ProviderKey, token);
         return record;
     }
@@ -72,8 +72,8 @@ public partial class Database
     public virtual async ValueTask RemoveLoginAsync( NpgsqlConnection connection, NpgsqlTransaction transaction, UserRecord user, string loginProvider, string providerKey, CancellationToken token )
     {
         PostgresParameters                        parameters = UserLoginProviderRecord.GetDynamicParameters(user, loginProvider, providerKey);
-        IAsyncEnumerable<UserLoginProviderRecord> records    = UserLogins.Where(connection, transaction, true, parameters, token);
-        await foreach ( UserLoginProviderRecord record in records ) { await UserLogins.Delete(connection, transaction, record, token); }
+        IAsyncEnumerable<UserLoginProviderRecord> records    = UserLoginProviders.Where(connection, transaction, true, parameters, token);
+        await foreach ( UserLoginProviderRecord record in records ) { await UserLoginProviders.Delete(connection, transaction, record, token); }
     }
 
 

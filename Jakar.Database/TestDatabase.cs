@@ -55,6 +55,65 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
         ( UserRecord admin, UserRecord user )             = await Add_Users(db, token);
         ( RoleRecord AdminRole, RoleRecord UserRole )     = await Add_Roles(db, admin, token);
         ( GroupRecord AdminGroup, GroupRecord UserGroup ) = await Add_Group(db, admin, token);
+        UserRoleRecord[]  userRoles  = await Add_Roles(db, user, [AdminRole, UserRole],   token);
+        UserGroupRecord[] userGroups = await Add_Roles(db, user, [AdminGroup, UserGroup], token);
+        ( AddressRecord address, UserAddressRecord userAddress ) = await Add_Address(db, user, token);
+        FileRecord              file          = await Add_File(db, user, token);
+        UserLoginProviderRecord loginProvider = await Add_UserLoginProvider(db, user, token);
+        ( RecoveryCodeRecord[] recoveryCodes, UserRecoveryCodeRecord[] userRecoveryCodes ) = await Add_RecoveryCodes(db, user, token);
+    }
+    private static async ValueTask<(RecoveryCodeRecord[] records, UserRecoveryCodeRecord[] results)> Add_RecoveryCodes( Database db, UserRecord user, CancellationToken token = default )
+    {
+        RecoveryCodeRecord.Codes codes = RecoveryCodeRecord.Create(user, 10);
+
+        RecoveryCodeRecord[] records = await db.RecoveryCodes.Insert(codes.Values, token)
+                                               .ToArray(codes.Count, token);
+
+        UserRecoveryCodeRecord[] memory = UserRecoveryCodeRecord.Create(user, records.AsSpan());
+
+        UserRecoveryCodeRecord[] results = await db.UserRecoveryCodes.Insert(memory.AsMemory(), token)
+                                                   .ToArray(records.Length, token);
+
+        return ( records, results );
+    }
+    private static async ValueTask<UserLoginProviderRecord> Add_UserLoginProvider( Database db, UserRecord user, CancellationToken token = default )
+    {
+        UserLoginProviderRecord record = new("login provider", "provider display name", "provider key", "value", RecordID<UserLoginProviderRecord>.New(), user, DateTimeOffset.UtcNow);
+        record = await db.UserLoginProviders.Insert(record, token);
+        return record;
+    }
+    private static async ValueTask<FileRecord> Add_File( Database db, UserRecord user, CancellationToken token = default )
+    {
+        FileRecord record = new("file name", "file description", "file type", 0, "hash", MimeType.Unknown, "payload", "full file system path", RecordID<FileRecord>.New(), DateTimeOffset.UtcNow);
+        record       = await db.Files.Insert(record, token);
+        user.ImageID = record;
+        await db.Users.Update(user, token);
+        return record;
+    }
+    private static async ValueTask<(AddressRecord result, UserAddressRecord userAddress)> Add_Address( Database db, UserRecord user, CancellationToken token = default )
+    {
+        AddressRecord     record      = AddressRecord.Create("address line one", "", "city", "state or province", "postal code with optional extension", "country");
+        AddressRecord     result      = await db.Addresses.Insert(record, token);
+        UserAddressRecord userAddress = await db.UserAddresses.Insert(UserAddressRecord.Create(user, result), token);
+        return ( result, userAddress );
+    }
+    private static async ValueTask<UserGroupRecord[]> Add_Roles( Database db, UserRecord user, GroupRecord[] roles, CancellationToken token = default )
+    {
+        UserGroupRecord[] records = UserGroupRecord.Create(user, roles.AsSpan());
+
+        UserGroupRecord[] results = await db.UserGroups.Insert(records.AsMemory(), token)
+                                            .ToArray(records.Length, token);
+
+        return results;
+    }
+    private static async ValueTask<UserRoleRecord[]> Add_Roles( Database db, UserRecord user, RoleRecord[] roles, CancellationToken token = default )
+    {
+        UserRoleRecord[] records = UserRoleRecord.Create(user, roles.AsSpan());
+
+        UserRoleRecord[] results = await db.UserRoles.Insert(records, token)
+                                           .ToArray(records.Length, token);
+
+        return results;
     }
     private static async ValueTask<(RoleRecord Admin, RoleRecord User)> Add_Roles( Database db, UserRecord adminUser, CancellationToken token = default )
     {

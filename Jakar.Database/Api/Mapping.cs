@@ -6,8 +6,10 @@ public interface ICreateMapping<TSelf, TKey, TValue> : ITableRecord<TSelf>
     where TKey : class, ITableRecord<TKey>
     where TSelf : class, ITableRecord<TSelf>, ICreateMapping<TSelf, TKey, TValue>
 {
-    public abstract static TSelf Create( TKey           key, TValue           value );
-    public abstract static TSelf Create( RecordID<TKey> key, RecordID<TValue> value );
+    [Pure] public abstract static TSelf              Create( TKey           key, TValue                                value );
+    [Pure] public abstract static TSelf              Create( RecordID<TKey> key, RecordID<TValue>                      value );
+    [Pure] public abstract static TSelf[]            Create( RecordID<TKey> key, params ReadOnlySpan<RecordID<TValue>> values );
+    [Pure] public abstract static IEnumerable<TSelf> Create( RecordID<TKey> key, IEnumerable<RecordID<TValue>>         values );
 }
 
 
@@ -23,8 +25,8 @@ public abstract record Mapping<TSelf, TKey, TValue>( RecordID<TKey> KeyID, Recor
 
 
     public static FrozenDictionary<string, ColumnMetaData> PropertyMetaData { get; } = SqlTable<TSelf>.Default.WithForeignKey<TKey>(nameof(KeyID))
-                                                                                                             .WithForeignKey<TValue>(nameof(ValueID))
-                                                                                                             .Build();
+                                                                                                      .WithForeignKey<TValue>(nameof(ValueID))
+                                                                                                      .Build();
 
 
     protected Mapping( RecordID<TKey> key, RecordID<TValue> value ) : this(key, value, RecordID<TSelf>.New(), DateTimeOffset.UtcNow) { }
