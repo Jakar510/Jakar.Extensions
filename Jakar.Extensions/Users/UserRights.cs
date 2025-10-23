@@ -34,7 +34,8 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
 
 
     public UserRights() { }
-    public static implicit operator UserRights( string rights ) => new() { Value = rights };
+    public UserRights( string                          value ) => Value = value;
+    public static implicit operator UserRights( string rights ) => new(rights);
 
 
     public override string ToString() => Value;
@@ -42,16 +43,12 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
         where TEnum : unmanaged, Enum
     {
         using Permissions<TEnum> value = Permissions<TEnum>.Create(null, rights);
-        return new UserRights { Value = value.ToString() };
+        return new UserRights(value.ToString());
     }
     public static UserRights Create<TEnum>( scoped Permissions<TEnum> rights )
-        where TEnum : unmanaged, Enum
-    {
-        return new UserRights { Value = rights.ToString() };
-    }
+        where TEnum : unmanaged, Enum => new(rights.ToString());
 
 
-    public virtual void SetRights( scoped Permissions permissions ) => Value = permissions.ToString();
     public virtual void SetRights<TEnum>( scoped Permissions<TEnum> permissions )
         where TEnum : unmanaged, Enum => Value = permissions.ToString();
     public void SetRights<TEnum>( params ReadOnlySpan<TEnum> values )
@@ -63,7 +60,6 @@ public class UserRights : BaseClass, IEqualComparable<UserRights>
     }
 
 
-    [MustDisposeResource] public virtual Permissions Edit() => Permissions.Create(this);
     [MustDisposeResource] public virtual Permissions<TEnum> Edit<TEnum>()
         where TEnum : unmanaged, Enum => Permissions<TEnum>.Create(this);
 

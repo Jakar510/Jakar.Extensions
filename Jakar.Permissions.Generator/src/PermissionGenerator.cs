@@ -65,7 +65,7 @@ public sealed class PermissionGenerator : IIncrementalGenerator
     {
         return ( file.Path, Text: file.GetText(token)
                                      ?.ToString() ??
-                                  EMPTY );
+                                  string.Empty );
     }
     private static ImmutableArray<AdditionalText> ConsolidateText( ImmutableArray<AdditionalText> files, CancellationToken token )
     {

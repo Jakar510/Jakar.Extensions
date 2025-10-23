@@ -99,16 +99,16 @@ internal sealed class TestDatabase( IConfiguration configuration, IOptions<DbOpt
     }
     private static async ValueTask<UserGroupRecord[]> Add_Roles( Database db, UserRecord user, GroupRecord[] roles, CancellationToken token = default )
     {
-        UserGroupRecord[] records = UserGroupRecord.Create(user, roles.AsSpan());
+        ReadOnlyMemory<UserGroupRecord> records = UserGroupRecord.Create(user, roles.AsSpan());
 
-        UserGroupRecord[] results = await db.UserGroups.Insert(records.AsMemory(), token)
+        UserGroupRecord[] results = await db.UserGroups.Insert(records, token)
                                             .ToArray(records.Length, token);
 
         return results;
     }
     private static async ValueTask<UserRoleRecord[]> Add_Roles( Database db, UserRecord user, RoleRecord[] roles, CancellationToken token = default )
     {
-        UserRoleRecord[] records = UserRoleRecord.Create(user, roles.AsSpan());
+        ReadOnlyMemory<UserRoleRecord> records = UserRoleRecord.Create(user, roles.AsSpan());
 
         UserRoleRecord[] results = await db.UserRoles.Insert(records, token)
                                            .ToArray(records.Length, token);
